@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+# Root files and plots.
+*.root
+*.png
+*.pdf
