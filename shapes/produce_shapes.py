@@ -5,26 +5,26 @@ import logging
 from ntuple_processor import Histogram
 from ntuple_processor import dataset_from_artusoutput, Unit, UnitManager, GraphManager, RunManager
 
-from shapes.channel_selection import channel_selection
-from shapes.file_names import files
-from shapes.process_selection import DY_process_selection, TT_process_selection, VV_process_selection, W_process_selection, ZTT_process_selection, ZL_process_selection, ZJ_process_selection, TTT_process_selection, TTL_process_selection, TTJ_process_selection, VVT_process_selection, VVJ_process_selection, VVL_process_selection, ggH125_process_selection, qqH125_process_selection, ZTT_embedded_process_selection, ZH_process_selection, WH_process_selection, ggHWW_process_selection, qqHWW_process_selection, ZHWW_process_selection, WHWW_process_selection, ttH_process_selection
-from shapes.process_selection import SUSYbbH_process_selection, SUSYggH_process_selection, SUSYggH_Ai_contribution_selection, SUSYggH_At_contribution_selection, SUSYggH_Ab_contribution_selection, SUSYggH_Hi_contribution_selection, SUSYggH_Ht_contribution_selection, SUSYggH_Hb_contribution_selection, SUSYggH_hi_contribution_selection, SUSYggH_ht_contribution_selection, SUSYggH_hb_contribution_selection
-from shapes.category_selection import categorization
+from config.shapes.channel_selection import channel_selection
+from config.shapes.file_names import files
+from config.shapes.process_selection import DY_process_selection, TT_process_selection, VV_process_selection, W_process_selection, ZTT_process_selection, ZL_process_selection, ZJ_process_selection, TTT_process_selection, TTL_process_selection, TTJ_process_selection, VVT_process_selection, VVJ_process_selection, VVL_process_selection, ggH125_process_selection, qqH125_process_selection, ZTT_embedded_process_selection, ZH_process_selection, WH_process_selection, ggHWW_process_selection, qqHWW_process_selection, ZHWW_process_selection, WHWW_process_selection, ttH_process_selection
+from config.shapes.process_selection import SUSYbbH_process_selection, SUSYggH_process_selection, SUSYggH_Ai_contribution_selection, SUSYggH_At_contribution_selection, SUSYggH_Ab_contribution_selection, SUSYggH_Hi_contribution_selection, SUSYggH_Ht_contribution_selection, SUSYggH_Hb_contribution_selection, SUSYggH_hi_contribution_selection, SUSYggH_ht_contribution_selection, SUSYggH_hb_contribution_selection
+from config.shapes.category_selection import categorization
 # Variations for estimation of fake processes
-from shapes.variations import same_sign, same_sign_em, anti_iso_lt, anti_iso_tt
+from config.shapes.variations import same_sign, same_sign_em, anti_iso_lt, anti_iso_tt
 # Energy scale uncertainties
-from shapes.variations import tau_es_3prong, tau_es_3prong1pizero, tau_es_1prong, tau_es_1prong1pizero, emb_tau_es_3prong, emb_tau_es_3prong1pizero, emb_tau_es_1prong, emb_tau_es_1prong1pizero, jet_es, mu_fake_es_1prong, mu_fake_es_1prong1pizero, ele_es, ele_res, emb_e_es, ele_fake_es_1prong, ele_fake_es_1prong1pizero
+from config.shapes.variations import tau_es_3prong, tau_es_3prong1pizero, tau_es_1prong, tau_es_1prong1pizero, emb_tau_es_3prong, emb_tau_es_3prong1pizero, emb_tau_es_1prong, emb_tau_es_1prong1pizero, jet_es, mu_fake_es_1prong, mu_fake_es_1prong1pizero, ele_es, ele_res, emb_e_es, ele_fake_es_1prong, ele_fake_es_1prong1pizero
 # MET related uncertainties.
-from shapes.variations import met_unclustered, recoil_resolution, recoil_response
+from config.shapes.variations import met_unclustered, recoil_resolution, recoil_response
 # efficiency uncertainties
-from shapes.variations import tau_id_eff_lt, tau_id_eff_tt, emb_tau_id_eff_lt, emb_tau_id_eff_tt
+from config.shapes.variations import tau_id_eff_lt, tau_id_eff_tt, emb_tau_id_eff_lt, emb_tau_id_eff_tt
 # fake rate uncertainties
-from shapes.variations import jet_to_tau_fake, zll_et_fake_rate_2016, zll_et_fake_rate_2017, zll_et_fake_rate_2018, zll_mt_fake_rate_2016, zll_mt_fake_rate_2017, zll_mt_fake_rate_2018
+from config.shapes.variations import jet_to_tau_fake, zll_et_fake_rate_2016, zll_et_fake_rate_2017, zll_et_fake_rate_2018, zll_mt_fake_rate_2016, zll_mt_fake_rate_2017, zll_mt_fake_rate_2018
 # trigger efficiencies
-from shapes.variations import tau_trigger_eff_tt, tau_trigger_eff_emb_tt, lep_trigger_eff_mt_2016, lep_trigger_eff_et_2016, lep_trigger_eff_et_emb_2016, lep_trigger_eff_mt_emb_2016, tau_trigger_eff_et_2016, tau_trigger_eff_mt_2016, tau_trigger_eff_et_emb_2016, tau_trigger_eff_mt_emb_2016, lep_trigger_eff_et_2017, lep_trigger_eff_mt_2017, lep_trigger_eff_et_emb_2017, lep_trigger_eff_mt_emb_2017, tau_trigger_eff_et_2017, tau_trigger_eff_mt_2017, tau_trigger_eff_et_emb_2017, tau_trigger_eff_mt_emb_2017, lep_trigger_eff_mt_2018, lep_trigger_eff_et_2018, lep_trigger_eff_et_emb_2018, lep_trigger_eff_mt_emb_2018, tau_trigger_eff_et_2018, tau_trigger_eff_mt_2018, tau_trigger_eff_et_emb_2018, tau_trigger_eff_mt_emb_2018
-from shapes.variations import prefiring, btag_eff, mistag_eff, ggh_acceptance, qqh_acceptance, zpt, top_pt, emb_decay_mode_eff
-from shapes.variations import ff_variations_lt, ff_variations_tt, qcd_variations_em
-from shapes.control_binning import control_binning, minimal_control_plot_set
+from config.shapes.variations import tau_trigger_eff_tt, tau_trigger_eff_emb_tt, lep_trigger_eff_mt_2016, lep_trigger_eff_et_2016, lep_trigger_eff_et_emb_2016, lep_trigger_eff_mt_emb_2016, tau_trigger_eff_et_2016, tau_trigger_eff_mt_2016, tau_trigger_eff_et_emb_2016, tau_trigger_eff_mt_emb_2016, lep_trigger_eff_et_2017, lep_trigger_eff_mt_2017, lep_trigger_eff_et_emb_2017, lep_trigger_eff_mt_emb_2017, tau_trigger_eff_et_2017, tau_trigger_eff_mt_2017, tau_trigger_eff_et_emb_2017, tau_trigger_eff_mt_emb_2017, lep_trigger_eff_mt_2018, lep_trigger_eff_et_2018, lep_trigger_eff_et_emb_2018, lep_trigger_eff_mt_emb_2018, tau_trigger_eff_et_2018, tau_trigger_eff_mt_2018, tau_trigger_eff_et_emb_2018, tau_trigger_eff_mt_emb_2018
+from config.shapes.variations import prefiring, btag_eff, mistag_eff, ggh_acceptance, qqh_acceptance, zpt, top_pt, emb_decay_mode_eff
+from config.shapes.variations import ff_variations_lt, ff_variations_tt, qcd_variations_em
+from config.shapes.control_binning import control_binning, minimal_control_plot_set
 
 logger = logging.getLogger("")
 
@@ -454,7 +454,6 @@ def main(args):
             if args.skip_systematic_variations:
                 pass
             else:
-                print([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]])
                 um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_es, *met_unclustered, *btag_eff, *mistag_eff])
                 um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero])
                 um.book([unit for d in {'ztt', 'zj', 'zl', 'w'} | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*recoil_resolution, *recoil_response])
