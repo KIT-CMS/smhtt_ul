@@ -685,7 +685,7 @@ for unc in ["THU_qqH_25", "THU_qqH_JET01", "THU_qqH_Mjj1000", "THU_qqH_Mjj120",
             "THU_qqH_Mjj1500", "THU_qqH_Mjj350", "THU_qqH_Mjj60", "THU_qqH_Mjj700",
             "THU_qqH_PTH200", "THU_qqH_TOT"]:
     qqh_acceptance.append(AddWeight(unc + "Up", Weight("({})".format(unc), "{}_weight".format(unc))))
-    ggh_acceptance.append(AddWeight(unc + "Down", Weight("(2.0-{})".format(unc), "{}_weight".format(unc))))
+    qqh_acceptance.append(AddWeight(unc + "Down", Weight("(2.0-{})".format(unc), "{}_weight".format(unc))))
 
 
 prefiring = [
@@ -751,18 +751,18 @@ ff_variations_tt = [
 
 # TODO: To be updated with the correct weight names once the friend trees are ready.
 qcd_variations_em = [
-        ReplaceCutAndAddWeight("CMS_htt_qcd_0jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_0jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_0jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_0jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_1jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_1jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_1jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_1jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_2jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_2jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_2jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_2jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_isoUp",               "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
-        ReplaceCutAndAddWeight("CMS_htt_qcd_isoDown",             "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_isoUp",               "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_isoDown",             "os", Cut("q_1*q_2>0", "ss"), Weight("1.0", "qcd_weight")),
         ]
