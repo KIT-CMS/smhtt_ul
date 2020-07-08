@@ -54,43 +54,43 @@ anti_iso_tt = ReplaceCutAndAddWeight("anti_iso", "tau_iso",
 
 # Previously defined with 2017 in name.
 tau_es_3prong = [
-        ChangeDataset("CMS_scale_t_3prong_EraUp", "tauEsThreeProngEraUp"),
-        ChangeDataset("CMS_scale_t_3prong_EraDown", "tauEsThreeProngEraDown")
+        ChangeDataset("CMS_scale_t_3prong_EraUp", "tauEsThreeProngUp"),
+        ChangeDataset("CMS_scale_t_3prong_EraDown", "tauEsThreeProngDown")
         ]
 
 tau_es_3prong1pizero = [
-        ChangeDataset("CMS_scale_t_3prong1pizero_EraUp", "tauEsThreeProngOnePiZeroEraUp"),
-        ChangeDataset("CMS_scale_t_3prong1pizero_EraDown", "tauEsThreeProngOnePiZeroEraDown")
+        ChangeDataset("CMS_scale_t_3prong1pizero_EraUp", "tauEsThreeProngOnePiZeroUp"),
+        ChangeDataset("CMS_scale_t_3prong1pizero_EraDown", "tauEsThreeProngOnePiZeroDown")
         ]
 
 tau_es_1prong = [
-        ChangeDataset("CMS_scale_t_1prong_EraUp", "tauEsOneProngEraUp"),
-        ChangeDataset("CMS_scale_t_1prong_EraDown", "tauEsOneProngEraDown")
+        ChangeDataset("CMS_scale_t_1prong_EraUp", "tauEsOneProngUp"),
+        ChangeDataset("CMS_scale_t_1prong_EraDown", "tauEsOneProngDown")
         ]
 
 tau_es_1prong1pizero = [
-        ChangeDataset("CMS_scale_t_1prong1pizero_EraUp", "tauEsOneProngOnePiZeroEraUp"),
-        ChangeDataset("CMS_scale_t_1prong1pizero_EraDown", "tauEsOneProngOnePiZeroEraDown")
+        ChangeDataset("CMS_scale_t_1prong1pizero_EraUp", "tauEsOneProngOnePiZeroUp"),
+        ChangeDataset("CMS_scale_t_1prong1pizero_EraDown", "tauEsOneProngOnePiZeroDown")
         ]
 
 emb_tau_es_3prong = [
-        ChangeDataset("CMS_scale_t_emb_3prong_EraUp", "tauEsThreeProngEraUp"),
-        ChangeDataset("CMS_scale_t_emb_3prong_EraDown", "tauEsThreeProngEraDown")
+        ChangeDataset("CMS_scale_t_emb_3prong_EraUp", "tauEsThreeProngUp"),
+        ChangeDataset("CMS_scale_t_emb_3prong_EraDown", "tauEsThreeProngDown")
         ]
 
 emb_tau_es_3prong1pizero = [
-        ChangeDataset("CMS_scale_t_emb_3prong1pizero_EraUp", "tauEsThreeProngOnePiZeroEraUp"),
-        ChangeDataset("CMS_scale_t_emb_3prong1pizero_EraDown", "tauEsThreeProngOnePiZeroEraDown")
+        ChangeDataset("CMS_scale_t_emb_3prong1pizero_EraUp", "tauEsThreeProngOnePiZeroUp"),
+        ChangeDataset("CMS_scale_t_emb_3prong1pizero_EraDown", "tauEsThreeProngOnePiZeroDown")
         ]
 
 emb_tau_es_1prong = [
-        ChangeDataset("CMS_scale_t_emb_1prong_EraUp", "tauEsOneProngEraUp"),
-        ChangeDataset("CMS_scale_t_emb_1prong_EraDown", "tauEsOneProngEraDown")
+        ChangeDataset("CMS_scale_t_emb_1prong_EraUp", "tauEsOneProngUp"),
+        ChangeDataset("CMS_scale_t_emb_1prong_EraDown", "tauEsOneProngDown")
         ]
 
 emb_tau_es_1prong1pizero = [
-        ChangeDataset("CMS_scale_t_emb_1prong1pizero_EraUp", "tauEsOneProngOnePiZeroEraUp"),
-        ChangeDataset("CMS_scale_t_emb_1prong1pizero_EraDown", "tauEsOneProngOnePiZeroEraDown")
+        ChangeDataset("CMS_scale_t_emb_1prong1pizero_EraUp", "tauEsOneProngOnePiZeroUp"),
+        ChangeDataset("CMS_scale_t_emb_1prong1pizero_EraDown", "tauEsOneProngOnePiZeroDown")
         ]
 
 
@@ -109,29 +109,30 @@ ele_res = [
 jet_es = [
         ChangeDataset("CMS_scale_j_AbsoluteUp", "jecUncAbsoluteUp"),
         ChangeDataset("CMS_scale_j_AbsoluteDown", "jecUncAbsoluteDown"),
-        ChangeDataset("CMS_scale_j_Absolute_EraUp", "jecUncAbsolute_EraUp"),
-        ChangeDataset("CMS_scale_j_Absolute_EraDown", "jecUncAbsolute_EraDown"),
+        ChangeDataset("CMS_scale_j_AbsoluteEraUp", "jecUncAbsoluteYearUp"),
+        ChangeDataset("CMS_scale_j_AbsoluteEraDown", "jecUncAbsoluteYearDown"),
         ChangeDataset("CMS_scale_j_BBEC1Up", "jecUncBBEC1Up"),
         ChangeDataset("CMS_scale_j_BBEC1Down", "jecUncBBEC1Down"),
-        ChangeDataset("CMS_scale_j_BBEC1_EraUp", "jecUncBBEC1_EraUp"),
-        ChangeDataset("CMS_scale_j_BBEC1_EraDown", "jecUncBBEC1_EraDown"),
+        ChangeDataset("CMS_scale_j_BBEC1_EraUp", "jecUncBBEC1YearUp"),
+        ChangeDataset("CMS_scale_j_BBEC1_EraDown", "jecUncBBEC1YearDown"),
         ChangeDataset("CMS_scale_j_EC2Up", "jecUncEC2Up"),
         ChangeDataset("CMS_scale_j_EC2Down", "jecUncEC2Down"),
-        ChangeDataset("CMS_scale_j_EC2_EraUp", "jecUncEC2_EraUp"),
-        ChangeDataset("CMS_scale_j_EC2_EraDown", "jecUncEC2_EraDown"),
+        ChangeDataset("CMS_scale_j_EC2_EraUp", "jecUncEC2YearUp"),
+        ChangeDataset("CMS_scale_j_EC2_EraDown", "jecUncEC2YearDown"),
         ChangeDataset("CMS_scale_j_HFUp", "jecUncHFUp"),
         ChangeDataset("CMS_scale_j_HFDown", "jecUncHFDown"),
-        ChangeDataset("CMS_scale_j_HF_EraUp", "jecUncHF_EraUp"),
-        ChangeDataset("CMS_scale_j_HF_EraDown", "jecUncHF_EraDown"),
+        ChangeDataset("CMS_scale_j_HF_EraUp", "jecUncHFYearUp"),
+        ChangeDataset("CMS_scale_j_HF_EraDown", "jecUncHFYearDown"),
         ChangeDataset("CMS_scale_j_FlavorQCDUp", "jecUncFlavorQCDUp"),
         ChangeDataset("CMS_scale_j_FlavorQCDDown", "jecUncFlavorQCDDown"),
         ChangeDataset("CMS_scale_j_RelativeBalUp", "jecUncRelativeBalUp"),
         ChangeDataset("CMS_scale_j_RelativeBalDown", "jecUncRelativeBalDown"),
-        ChangeDataset("CMS_scale_j_RelativeSample_EraUp", "jecUncRelativeSample_EraUp"),
-        ChangeDataset("CMS_scale_j_RelativeSample_EraDown", "jecUncRelativeSample_EraDown"),
+        ChangeDataset("CMS_scale_j_RelativeSample_EraUp", "jecUncRelativeSampleYearUp"),
+        ChangeDataset("CMS_scale_j_RelativeSample_EraDown", "jecUncRelativeSampleYearDown"),
         ChangeDataset("CMS_res_j_EraUp", "jerUncUp"),
         ChangeDataset("CMS_res_j_EraDown", "jerUncDown"),
         ]
+
 
 # MET variations.
 met_unclustered = [
@@ -702,37 +703,39 @@ top_pt = [
         RemoveWeight("CMS_htt_ttbarShapeDown", "topPtReweightWeight")
         ]
 
+_ff_variations_lt = ["ff_tt_morphed{era}{shift}",
+                     "ff_tt_sf{era}{shift}",
+                     "ff_corr_tt_syst{era}{shift}",
+                     "ff_frac_w{era}{shift}",
+                     "ff_qcd_dr0_njet0_morphed_stat{era}{shift}", "ff_qcd_dr0_njet1_morphed_stat{era}{shift}", "ff_qcd_dr0_njet2_morphed_stat{era}{shift}",
+                     "ff_w_dr0_njet0_morphed_stat{era}{shift}", "ff_w_dr0_njet1_morphed_stat{era}{shift}", "ff_w_dr0_njet2_morphed_stat{era}{shift}",
+                     "ff_w_dr1_njet0_morphed_stat{era}{shift}", "ff_w_dr1_njet1_morphed_stat{era}{shift}", "ff_w_dr1_njet2_morphed_stat{era}{shift}",
+                     "ff_tt_dr0_njet0_morphed_stat{era}{shift}", "ff_tt_dr0_njet1_morphed_stat{era}{shift}",
+                     "ff_w_lepPt{era}{shift}",
+                     "ff_corr_w_lepPt{era}{shift}",
+                     "ff_w_mc{era}{shift}",
+                     "ff_corr_w_mt{era}{shift}",
+                     "ff_w_mt{era}{shift}",
+                     "ff_qcd_mvis{era}{shift}",
+                     "ff_qcd_mvis_osss{era}{shift}",
+                     "ff_corr_qcd_mvis{era}{shift}",
+                     "ff_corr_qcd_mvis_osss{era}{shift}",
+                     "ff_qcd_muiso{era}{shift}",
+                     "ff_corr_qcd_muiso{era}{shift}",
+                     "ff_qcd_mc{era}{shift}"
+]
 #  Variations on the jet backgrounds estimated with the fake factor method.
 ff_variations_lt = [
         ReplaceCutAndAddWeight("anti_iso_{syst}".format(syst=syst.format(shift="_"+shift, era="Era")), "tau_iso",
                                Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
-                               Weight("ff2_{syst}".format(syst=syst.format(shift="_"+shift, era="Era")), "fake_factor")
-                               ) for shift in ["up", "down"] for syst in ["ff_tt_morphed{era}{shift}",
-                                                                          "ff_tt_sf{era}{shift}",
-                                                                          "ff_corr_tt_syst{era}{shift}",
-                                                                          "ff_frac_w{era}{shift}",
-                                                                          "ff_qcd_dr0_njet0_morphed_stat{era}{shift}", "ff_qcd_dr0_njet1_morphed_stat{era}{shift}", "ff_qcd_dr0_njet2_morphed_stat{era}{shift}",
-                                                                          "ff_w_dr0_njet0_morphed_stat{era}{shift}", "ff_w_dr0_njet1_morphed_stat{era}{shift}", "ff_w_dr0_njet2_morphed_stat{era}{shift}",
-                                                                          "ff_w_dr1_njet0_morphed_stat{era}{shift}", "ff_w_dr1_njet1_morphed_stat{era}{shift}", "ff_w_dr1_njet2_morphed_stat{era}{shift}",
-                                                                          "ff_tt_dr0_njet0_morphed_stat{era}{shift}", "ff_tt_dr0_njet1_morphed_stat{era}{shift}",
-                                                                          "ff_w_lepPt{era}{shift}",
-                                                                          "ff_corr_w_lepPt{era}{shift}",
-                                                                          "ff_w_mc{era}{shift}",
-                                                                          "ff_corr_w_mt{era}{shift}",
-                                                                          "ff_w_mt{era}{shift}",
-                                                                          "ff_qcd_mvis{era}{shift}",
-                                                                          "ff_qcd_mvis_osss{era}{shift}",
-                                                                          "ff_corr_qcd_mvis{era}{shift}",
-                                                                          "ff_corr_qcd_mvis_osss{era}{shift}",
-                                                                          "ff_qcd_muiso{era}{shift}",
-                                                                          "ff_corr_qcd_muiso{era}{shift}",
-                                                                          "ff_qcd_mc{era}{shift}"]
+                               Weight("ff2_{syst}".format(syst=syst.format(shift="_"+shift, era="")), "fake_factor")
+                               ) for shift in ["up", "down"] for syst in _ff_variations_lt
         ]
 
 ff_variations_tt = [
-        ReplaceCutAndAddWeight("anti_iso_{syst}".format(syst=syst.format(shift="_"+shift, era="Era")), "tau_iso",
+        ReplaceCutAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift="_"+shift, era="Era")), "tau_iso",
                                Cut("(byTightDeepTau2017v2p1VSjet_2>0.5&&byTightDeepTau2017v2p1VSjet_1<0.5&&byVLooseDeepTau2017v2p1VSjet_1>0.5)||(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso"),
-                               Weight("ff2_{syst}".format(syst=syst.format(shift="_"+shift, era="Era")), "fake_factor")
+                               Weight("ff2_{syst}".format(syst=syst.format(shift="_"+shift, era="")), "fake_factor")
                                ) for shift in ["up", "down"] for syst in ["ff_qcd_dm0_njet0_morphed_stat{era}{shift}", "ff_qcd_dm0_njet1_morphed_stat{era}{shift}", "ff_qcd_dm0_njet2_morphed_stat{era}{shift}", #change dm0 to dr0 if fake factor friends are produced with new inputs also for tt (no difference for tt)
                                                                           "ff_w_syst{era}{shift}",
                                                                           "ff_tt_syst{era}{shift}",
