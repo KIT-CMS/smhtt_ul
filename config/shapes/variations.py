@@ -28,6 +28,19 @@ anti_iso_tt = ReplaceCutAndAddWeight("anti_iso", "tau_iso",
                                      Cut("(byTightDeepTau2017v2p1VSjet_2>0.5&&byTightDeepTau2017v2p1VSjet_1<0.5&&byVLooseDeepTau2017v2p1VSjet_1>0.5)||(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso"),
                                      Weight("(0.5*ff1_nom*(byTightDeepTau2017v2p1VSjet_1<0.5)+0.5*ff2_nom*(byTightDeepTau2017v2p1VSjet_2<0.5))", "fake_factor")
                                      )
+anti_iso_split_lt = [ReplaceCutAndAddWeight("anti_iso_w", "tau_iso",
+                                     Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                     Weight("ff2_onlyw*ff2_fracw", "fake_factor")
+                                     ),
+                     ReplaceCutAndAddWeight("anti_iso_qcd", "tau_iso",
+                                     Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                     Weight("ff2_onlyqcd*ff2_fracqcd", "fake_factor")
+                                     ),
+                     ReplaceCutAndAddWeight("anti_iso_tt", "tau_iso",
+                                     Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                     Weight("ff2_onlytt*ff2_fractt", "fake_factor")
+                                     ),
+                    ]
 
 # Energy scales.
 # Tau energy scale.
@@ -736,7 +749,7 @@ ff_variations_tt = [
         ReplaceCutAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift="_"+shift, era="Era")), "tau_iso",
                                Cut("(byTightDeepTau2017v2p1VSjet_2>0.5&&byTightDeepTau2017v2p1VSjet_1<0.5&&byVLooseDeepTau2017v2p1VSjet_1>0.5)||(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso"),
                                Weight("ff2_{syst}".format(syst=syst.format(shift="_"+shift, era="")), "fake_factor")
-                               ) for shift in ["up", "down"] for syst in ["ff_qcd_dm0_njet0_morphed_stat{era}{shift}", "ff_qcd_dm0_njet1_morphed_stat{era}{shift}", "ff_qcd_dm0_njet2_morphed_stat{era}{shift}", #change dm0 to dr0 if fake factor friends are produced with new inputs also for tt (no difference for tt)
+                               ) for shift in ["up", "down"] for syst in ["ff_qcd_dr0_njet0_morphed_stat{era}{shift}", "ff_qcd_dr0_njet1_morphed_stat{era}{shift}", "ff_qcd_dr0_njet2_morphed_stat{era}{shift}", #change dm0 to dr0 if fake factor friends are produced with new inputs also for tt (no difference for tt)
                                                                           "ff_w_syst{era}{shift}",
                                                                           "ff_tt_syst{era}{shift}",
                                                                           "ff_qcd_mvis{era}{shift}",
