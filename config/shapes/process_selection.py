@@ -40,7 +40,7 @@ def triggerweight(channel, era):
 
             # MuTauMC = "*".join([trig_sL, singleMC]) + "+" + "*".join([trig_X, crossMCL, MCTau_2])
             # MuTauData = MuTauMC.replace("MC", "Data")
-            sL_weight = "(" + singleMC + "/" + singleMC.replace("MC", "Data") + ")"
+            sL_weight = "(" + singleMC.replace("MC", "Data") + "/" + singleMC + ")"
             crossweightMC = "*".join([crossMCL, MCTau_2])
             crossweightData = crossweightMC.replace("MC", "Data")
             # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
@@ -58,7 +58,7 @@ def triggerweight(channel, era):
 
             # MuTauMC = "*".join([trig_sL, singleMC]) + "+" + "*".join([trig_X, crossMCL, MCTau_2])
             # MuTauData = MuTauMC.replace("MC","Data")
-            sL_weight = "(" + singleMC + "/" + singleMC.replace("MC", "Data") + ")"
+            sL_weight = "(" + singleMC.replace("MC", "Data") + "/" + singleMC + ")"
             crossweightMC = "*".join([crossMCL, MCTau_2])
             crossweightData = crossweightMC.replace("MC", "Data")
             # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
@@ -95,7 +95,7 @@ def triggerweight(channel, era):
             # # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
             # ElTauMC = "*".join([trig_sL, singleMC]) + "+(" + "*".join([trig_X, crossMCL, MCTau_2]) + "+" + "*".join(["(0.00001)", "(!"+trig_X+")"]) + ")"
 
-            sL_weight = "(" + singleMC + "/" + singleMC.replace("MC", "Data") + ")"
+            sL_weight = "(" + singleMC.replace("MC", "Data") + "/" + singleMC + ")"
             crossweightMC = "*".join([crossMCL, MCTau_2])
             crossweightData = crossweightMC.replace("MC", "Data")
             # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
@@ -114,7 +114,7 @@ def triggerweight(channel, era):
             # # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
             # ElTauMC = "*".join([trig_sL, singleMC]) + "+(" + "*".join([trig_X, crossMCL, MCTau_2]) + "+" + "*".join(["(1.0)", "(!"+trig_X+")"]) + ")"
 
-            sL_weight = "(" + singleMC + "/" + singleMC.replace("MC", "Data") + ")"
+            sL_weight = "(" + singleMC.replace("MC", "Data") + "/" + singleMC + ")"
             crossweightMC = "*".join([crossMCL, MCTau_2])
             crossweightData = crossweightMC.replace("MC", "Data")
             # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
