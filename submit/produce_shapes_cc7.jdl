@@ -1,0 +1,17 @@
+universe = docker
+docker_image = mschnepf/slc7-condocker
+executable = submit/single_graph_job.sh
+
+Requirements = ( (Target.ProvidesCPU == True) && (Target.ProvidesIO == True) && (TARGET.ProvidesEKPResources == True ) )
++RequestWalltime = 7200
++ExperimentalJob = True
+RequestMemory = 4096
+request_disk = 204800
+RequestCpus = 1
+accounting_group = cms.higgs
+
+arguments = $(a1) $(a2) $(a3)
+output = log/condorShapes/$(a1)-$(a2).$(cluster).$(Process).out
+error = log/condorShapes/$(a1)-$(a2).$(cluster).$(Process).err
+log = log/condorShapes/$(a1)-$(a2).$(cluster).$(Process).log
+
