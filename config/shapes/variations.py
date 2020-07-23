@@ -10,6 +10,7 @@ from ntuple_processor.variations import AddCut
 from ntuple_processor.variations import AddWeight
 from ntuple_processor.variations import SquareWeight
 from ntuple_processor.variations import ReplaceCutAndAddWeight
+from ntuple_processor.variations import ReplaceMultipleCuts
 
 #  Variations needed for the various jet background estimations.
 same_sign = ReplaceCut("same_sign", "os", Cut("q_1*q_2>0", "ss"))
@@ -17,8 +18,15 @@ same_sign = ReplaceCut("same_sign", "os", Cut("q_1*q_2>0", "ss"))
 # TODO: In order to properly use this variation friend trees with the correct weights need to be created.
 same_sign_em = ReplaceCutAndAddWeight("same_sign", "os",
                                       Cut("q_1*q_2>0", "ss"),
-                                      Weight("qcd_weight", "qcd_weight")
+                                      Weight("em_qcd_osss_binned_Weight", "qcd_weight")
                                       )
+abcd_method = [ReplaceCut("abcd_same_sign", "os", Cut("q_1*q_2>0", "ss")),
+               ReplaceCut("abcd_anti_iso", "tau_iso",
+                          Cut("(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byMediumDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso")),
+               ReplaceMultipleCuts("abcd_same_sign_anti_iso", ["os", "tau_iso"],
+                           [Cut("q_1*q_2>0", "ss"),
+                            Cut("(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byMediumDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso")])
+]
 
 anti_iso_lt = ReplaceCutAndAddWeight("anti_iso", "tau_iso",
                                      Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),

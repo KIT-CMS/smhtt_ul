@@ -170,6 +170,109 @@ def qcd_estimation(rootfile, channel, selection, variable, variation="Nominal", 
     return base_hist
 
 
+def abcd_estimation(rootfile, channel, selection, variable,
+                    variation="Nominal", is_embedding=True, transposed=False):
+    if is_embedding:
+        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
+        if "em" in channel:
+            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
+    else:
+        procs_to_subtract = ["ZTT", "ZL", "ZJ", "TTT", "TTL", "TTJ", "VVT", "VVL", "VVJ", "W"]
+        if "em" in channel:
+            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
+
+    # Get the shapes from region B.
+    logger.debug("Trying to get object {}".format(
+                                    _name_string.format(dataset="data",
+                                                        channel=channel,
+                                                        process="",
+                                                        selection="-" + selection if selection != "" else "",
+                                                        variation=variation.replace("same_sign_anti_iso", "same_sign") if transposed else variation.replace("same_sign_anti_iso", "anti_iso"),
+                                                        variable=variable)))
+    base_hist = rootfile.Get(_name_string.format(
+                                dataset="data",
+                                channel=channel,
+                                process="",
+                                selection="-" + selection if selection != "" else "",
+                                variation=variation.replace("same_sign_anti_iso", "same_sign") if transposed else variation.replace("same_sign_anti_iso", "anti_iso"),
+                                variable=variable
+        )).Clone()
+    for proc in procs_to_subtract:
+        logger.debug("Trying to get object {}".format(
+                                    _name_string.format(dataset=_dataset_map[proc],
+                                                        channel=channel,
+                                                        process="-" + _process_map[proc],
+                                                        selection="-" + selection if selection != "" else "",
+                                                        variation=variation.replace("same_sign_anti_iso", "same_sign") if transposed else variation.replace("same_sign_anti_iso", "anti_iso"),
+                                                        variable=variable)))
+        base_hist.Add(rootfile.Get(_name_string.format(
+                                        dataset=_dataset_map[proc],
+                                        channel=channel,
+                                        process="-" + _process_map[proc],
+                                        selection="-" + selection if selection != "" else "",
+                                        variation=variation.replace("same_sign_anti_iso", "same_sign") if transposed else variation.replace("same_sign_anti_iso", "anti_iso"),
+                                        variable=variable)), -1.0)
+    # Calculate extrapolation_factor from regions C and D.
+    data_yield_C = rootfile.Get(_name_string.format(
+                                dataset="data",
+                                channel=channel,
+                                process="",
+                                selection="-" + selection if selection != "" else "",
+                                variation=variation.replace("same_sign_anti_iso", "anti_iso") if transposed else variation.replace("same_sign_anti_iso", "same_sign"),
+                                variable=variable
+        )).Integral()
+    bkg_yield_C = sum(rootfile.Get(_name_string.format(
+                                dataset=_dataset_map[proc],
+                                channel=channel,
+                                process="-" + _process_map[proc],
+                                selection="-" + selection if selection != "" else "",
+                                variation=variation.replace("same_sign_anti_iso", "anti_iso") if transposed else variation.replace("same_sign_anti_iso", "same_sign"),
+                                variable=variable
+        )).Integral() for proc in procs_to_subtract)
+    data_yield_D = rootfile.Get(_name_string.format(
+                                dataset="data",
+                                channel=channel,
+                                process="",
+                                selection="-" + selection if selection != "" else "",
+                                variation=variation,
+                                variable=variable
+        )).Integral()
+    bkg_yield_D = sum(rootfile.Get(_name_string.format(
+                                dataset=_dataset_map[proc],
+                                channel=channel,
+                                process="-" + _process_map[proc],
+                                selection="-" + selection if selection != "" else "",
+                                variation=variation,
+                                variable=variable
+        )).Integral() for proc in procs_to_subtract)
+    if data_yield_C == 0 or data_yield_D == 0:
+        logger.warning("No data in region C or region D for shape of variable %s in category %s. Setting extrapolation_factor to zero.",
+                       variable, "-" + selection if selection != "" else "")
+        extrapolation_factor = 0.0
+    elif not data_yield_D - bkg_yield_D > 0:
+        logger.warning("Event content in region D for shape of variable %s in category %s is %f.",
+                       variable, selection if selection != "" else "inclusive", data_yield_D - bkg_yield_D)
+        extrapolation_factor = 0.0
+    else:
+        extrapolation_factor = (data_yield_C - bkg_yield_C) / (data_yield_D - bkg_yield_D)
+
+    proc_name = "QCD" if is_embedding else "QCDMC"
+    if variation in ["abcd_same_sign_anti_iso"]:
+        qcd_variation = "Nominal"
+    else:
+        qcd_variation = variation.replace("abcd_same_sign_anti_iso_", "")
+    logger.debug("Use extrapolation_factor factor with value %.2f to scale from region B to region A.",
+                  extrapolation_factor)
+    base_hist.Scale(extrapolation_factor)
+    variation = variation.replace("same_sign_anti_iso", "same_sign") if transposed else variation.replace("same_sign_anti_iso", "anti_iso")
+    variation_name = base_hist.GetName().replace("data", proc_name) \
+                                        .replace(variation, qcd_variation) \
+                                        .replace(channel, "-".join([channel, proc_name]), 1)
+    base_hist.SetName(variation_name)
+    base_hist.SetTitle(variation_name)
+    return base_hist
+
+
 def emb_ttbar_contamination_estimation(rootfile, channel, category, variable, sub_scale=0.1):
     procs_to_subtract = ["TTT"]
     logger.debug("Trying to get object {}".format(
@@ -239,7 +342,7 @@ def main(args):
                 else:
                     # Set only process if no categorization applied.
                     process = sel_split[1]
-            if "anti_iso" in variation:
+            if "anti_iso" in variation and not variation.startswith("abcd"):
                 if channel in ff_inputs:
                     if category in ff_inputs[channel]:
                         if variable in ff_inputs[channel][category]:
@@ -255,16 +358,17 @@ def main(args):
                     ff_inputs[channel] = {}
             if "same_sign" in variation:
                 if channel in qcd_inputs:
-                    if category in qcd_inputs[channel]:
-                        if variable in qcd_inputs[channel][category]:
-                            if variation in qcd_inputs[channel][category][variable]:
-                                qcd_inputs[channel][category][variable][variation].append(process)
+                    if channel in ["et", "mt", "em"] or "abcd_same_sign_anti_iso" in variation:
+                        if category in qcd_inputs[channel]:
+                            if variable in qcd_inputs[channel][category]:
+                                if variation in qcd_inputs[channel][category][variable]:
+                                    qcd_inputs[channel][category][variable][variation].append(process)
+                                else:
+                                    qcd_inputs[channel][category][variable][variation] = []
                             else:
-                                qcd_inputs[channel][category][variable][variation] = []
+                                qcd_inputs[channel][category][variable] = {}
                         else:
-                            qcd_inputs[channel][category][variable] = {}
-                    else:
-                        qcd_inputs[channel][category] = {}
+                            qcd_inputs[channel][category] = {}
                 else:
                     qcd_inputs[channel] = {}
         #  Booking of necessary categories for embedded tt bar variation.
@@ -297,14 +401,28 @@ def main(args):
         for cat in qcd_inputs[ch]:
             for var in qcd_inputs[ch][cat]:
                 for variation in qcd_inputs[ch][cat][var]:
-                    if args.era == "2016":
-                        extrapolation_factor = 1.17
+                    if ch in ["et", "mt", "em"]:
+                        if args.era == "2016":
+                            extrapolation_factor = 1.17
+                        else:
+                            extrapolation_factor = 1.0
+                        estimated_hist = qcd_estimation(input_file, ch, cat, var,
+                                                        variation=variation,
+                                                        extrapolation_factor=extrapolation_factor)
+                        estimated_hist.Write()
+                        estimated_hist = qcd_estimation(input_file, ch, cat, var,
+                                                        variation=variation,
+                                                        is_embedding=False,
+                                                        extrapolation_factor=extrapolation_factor)
+                        estimated_hist.Write()
                     else:
-                        extrapolation_factor = 1.0
-                    estimated_hist = qcd_estimation(input_file, ch, cat, var, variation=variation)
-                    estimated_hist.Write()
-                    estimated_hist = qcd_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
-                    estimated_hist.Write()
+                        estimated_hist = abcd_estimation(input_file, ch, cat, var,
+                                                         variation=variation)
+                        estimated_hist.Write()
+                        estimated_hist = abcd_estimation(input_file, ch, cat, var,
+                                                         variation=variation,
+                                                         is_embedding=False)
+                        estimated_hist.Write()
     if args.emb_tt:
         logger.info("Producing embedding ttbar variations.")
         for ch in emb_categories:
