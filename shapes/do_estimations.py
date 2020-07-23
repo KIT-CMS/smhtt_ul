@@ -103,7 +103,7 @@ def fake_factor_estimation(rootfile, channel, selection, variable, variation="No
     if variation in ["anti_iso"]:
         ff_variation = "Nominal"
     else:
-        ff_variation = variation.replace("anti_iso", "CMS")
+        ff_variation = variation.replace("anti_iso_", "")
     variation_name = base_hist.GetName().replace("data", proc_name) \
                                         .replace(variation, ff_variation) \
                                         .replace(channel, "-".join([channel, proc_name]), 1)
@@ -158,7 +158,7 @@ def qcd_estimation(rootfile, channel, selection, variable, variation="Nominal", 
     if variation in ["same_sign"]:
         qcd_variation = "Nominal"
     else:
-        qcd_variation = variation.replace("same_sign", "CMS")
+        qcd_variation = variation.replace("same_sign_", "")
     logger.debug("Use extrapolation_factor factor with value %.2f to scale from ss to os region.",
                   extrapolation_factor)
     base_hist.Scale(extrapolation_factor)
@@ -202,16 +202,16 @@ def emb_ttbar_contamination_estimation(rootfile, channel, category, variable, su
                                         variation="Nominal",
                                         variable=variable)), -sub_scale)
         if sub_scale > 0:
-            variation_name = base_hist.GetName().replace("Nominal", "CMS_htt_emb_ttbarDown")
+            variation_name = base_hist.GetName().replace("Nominal", "CMS_htt_emb_ttbar_EraDown")
         else:
-            variation_name = base_hist.GetName().replace("Nominal", "CMS_htt_emb_ttbarUp")
+            variation_name = base_hist.GetName().replace("Nominal", "CMS_htt_emb_ttbar_EraUp")
         base_hist.SetName(variation_name)
         base_hist.SetTitle(variation_name)
     return base_hist
 
 
 def main(args):
-    input_file = ROOT.TFile(args.input, "read")
+    input_file = ROOT.TFile(args.input, "update")
     # Loop over histograms in root file to find available FF inputs.
     ff_inputs = {}
     qcd_inputs = {}
@@ -282,7 +282,6 @@ def main(args):
                 else:
                     emb_categories[channel] = {}
 
-    output_file = ROOT.TFile(args.input.replace(".root", "-estimations.root"), "recreate")
     # Loop over available ff inputs and do the estimations
     logger.info("Starting estimations for fake factors and their variations")
     for ch in ff_inputs:
@@ -318,7 +317,6 @@ def main(args):
     logger.info("Successfully finished estimations.")
 
     # Clean-up.
-    output_file.Close()
     input_file.Close()
     return
 
