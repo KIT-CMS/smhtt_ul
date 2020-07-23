@@ -380,7 +380,7 @@ def HTT_base_process_selection(channel, era):
 
 def HTT_process_selection(channel, era):
     HTT_weights = HTT_base_process_selection(channel, era).weights + [
-        ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight")
+        ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         ]
     return Selection(name = "HTT", weights = HTT_weights)
@@ -403,7 +403,7 @@ def HWW_process_selection(channel, era):
     )
 
 def HWW_base_process_selection(channel, era):
-    HWW_base_process_weights = MC_base_process_weights(channel, era).weights + [
+    HWW_base_process_weights = MC_base_process_selection(channel, era).weights + [
                 ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
                 ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         ]
@@ -676,25 +676,25 @@ def VVL_process_selection(channel):
                      cuts = [("{} && {}".format(emb_veto,ff_veto), "tt_emb_and_ff_veto")])
 
 
-def VH_process_selection(channel):
+def VH_process_selection(channel, era):
     return Selection(name = "VH125",
                      weights = HTT_process_selection(channel, era).weights,
                      cuts = [("(htxs_stage1p1cat>=300)&&(htxs_stage1p1cat<=505)", "htxs_match")])
 
 
-def WH_process_selection(channel):
+def WH_process_selection(channel, era):
     return Selection(name = "WH125",
                      weights = HTT_process_selection(channel, era).weights,
                      cuts = [("(htxs_stage1p1cat>=300)&&(htxs_stage1p1cat<=305)", "htxs_match")])
 
 
-def ZH_process_selection(channel):
+def ZH_process_selection(channel, era):
     return Selection(name = "ZH125",
                      weights = HTT_process_selection(channel, era).weights,
                      cuts = [("(htxs_stage1p1cat>=400)&&(htxs_stage1p1cat<=405)", "htxs_match")])
 
 
-def ttH_process_selection(channel):
+def ttH_process_selection(channel, era):
     return Selection(name = "ttH125",
                      weights = HTT_process_selection(channel, era).weights)
 
@@ -723,12 +723,12 @@ def qqHWW_process_selection(channel, era):
 
 def WHWW_process_selection(channel, era):
     WHWW_weights = HWW_base_process_selection(channel, era).weights
-    return Selection(name="WHWW125", weights=HWW_weights)
+    return Selection(name="WHWW125", weights=WHWW_weights)
 
 
 def ZHWW_process_selection(channel, era):
-    WHWW_weights = HWW_base_process_selection(channel, era).weights
-    return Selection(name="ZHWW125", weights=HWW_weights)
+    ZHWW_weights = HWW_base_process_selection(channel, era).weights
+    return Selection(name="ZHWW125", weights=ZHWW_weights)
 
 
 def ggh_stitching_weight(era):
@@ -789,14 +789,14 @@ def qqH125_process_selection(channel, era):
 
 
 def SUSYggH_process_selection(channel, era):
-    SUSYggH_weights = HTT_base_process_selection(channel).weights + [
+    SUSYggH_weights = HTT_base_process_selection(channel, era).weights + [
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         ]
     return Selection(name="SUSYggH", weights=SUSYggH_weights)
 
 
 def SUSYbbH_process_selection(channel, era):
-    SUSYbbH_weights = HTT_base_process_selection(channel).weights + [
+    SUSYbbH_weights = HTT_base_process_selection(channel, era).weights + [
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         ]
     return Selection(name="SUSYbbH", weights=SUSYbbH_weights)
