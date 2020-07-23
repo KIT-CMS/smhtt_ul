@@ -160,48 +160,14 @@ def main(info):
     # get background histograms
     total_bkg = None
     for index,process in enumerate(bkg_processes):
-        if not "QCD" in process and not "Fakes" in process:
-            if index == 0:
-                total_bkg = rootfile.get(channel, process).Clone()
-            else:
-                total_bkg.Add(rootfile.get(channel, process))
-            plot.add_hist(
-                rootfile.get(channel, process), process, "bkg")
-            plot.setGraphStyle(
-                process, "hist", fillcolor=styles.color_dict[process])
+        if index == 0:
+            total_bkg = rootfile.get(channel, process).Clone()
         else:
-            if "Fakes" in process:
-                if "EMB" in process:
-                    procs_to_subtract = ["EMB", "ZL", "TTL", "VVL"]
-                else:
-                    procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
-                fake_estimate = rootfile.get(channel, "data", shape_type="anti_iso").Clone()
-                for proc in procs_to_subtract:
-                    fake_estimate.Add(
-                            rootfile.get(channel, proc, shape_type="anti_iso"), -1.0)
-            elif "QCD" in process:
-                if "EMB" in process:
-                    procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
-                else:
-                    procs_to_subtract = ["ZTT", "ZL", "ZJ", "TTT", "TTL", "TTJ", "VVT", "VVL", "VVJ", "W"]
-                fake_estimate = rootfile.get(channel, "data", shape_type="same_sign").Clone()
-                for proc in procs_to_subtract:
-                    fake_estimate.Add(
-                            rootfile.get(channel, proc, shape_type="same_sign"), -1.0)
-                # TODO: Add possibility to scale QCD yield with extrapolation factor.
-                if args.era == "Run2016":
-                    fake_estimate.Scale(1.17)
-            else:
-                logger.fatal("Problem occured while adding process %s. This should not happen! Aborting...",
-                             process)
-                raise Exception
-            if index == 0:
-                total_bkg = fake_estimate.Clone()
-            else:
-                total_bkg.Add(fake_estimate)
-            plot.add_hist(fake_estimate, process, "bkg")
-            plot.setGraphStyle(
-                process, "hist", fillcolor=styles.color_dict[process])
+            total_bkg.Add(rootfile.get(channel, process))
+        plot.add_hist(
+            rootfile.get(channel, process), process, "bkg")
+        plot.setGraphStyle(
+            process, "hist", fillcolor=styles.color_dict[process])
 
 
     # if "mm" not in channel:
