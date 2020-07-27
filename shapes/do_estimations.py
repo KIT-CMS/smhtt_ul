@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import logging
+import json
 
 import ROOT
 
@@ -103,7 +104,7 @@ def fake_factor_estimation(rootfile, channel, selection, variable, variation="No
     if variation in ["anti_iso"]:
         ff_variation = "Nominal"
     else:
-        ff_variation = variation.replace("anti_iso_", "")
+        ff_variation = variation.replace("anti_iso_", "CMS_")
     variation_name = base_hist.GetName().replace("data", proc_name) \
                                         .replace(variation, ff_variation) \
                                         .replace(channel, "-".join([channel, proc_name]), 1)
@@ -286,7 +287,7 @@ def emb_ttbar_contamination_estimation(rootfile, channel, category, variable, su
                             dataset=_dataset_map["EMB"],
                             channel=channel,
                             process="-" + _process_map["EMB"],
-                            selection=category,
+                            selection="-" + category if category != "" else "",
                             variation="Nominal",
                             variable=variable)).Clone()
     for proc in procs_to_subtract:
@@ -301,7 +302,7 @@ def emb_ttbar_contamination_estimation(rootfile, channel, category, variable, su
                                         dataset=_dataset_map[proc],
                                         channel=channel,
                                         process="-" + _process_map[proc],
-                                        selection=category,
+                                        selection="-" + category if category != "" else "",
                                         variation="Nominal",
                                         variable=variable)), -sub_scale)
         if sub_scale > 0:
@@ -336,7 +337,9 @@ def main(args):
             else:
                 channel = sel_split[0]
                 #  Check if analysis category present in root file.
-                if len(sel_split) > 2:
+                if (len(sel_split[1].split("-")) > 2
+                    or ("Embedded" in sel_split[1] and len(sel_split[1].split("-")) > 1)
+                    or ("W" in sel_split[1] and len(sel_split[1].split("-")) > 1)):
                     process = "-".join(sel_split[1].split("-")[:-1])
                     category = sel_split[1].split("-")[-1]
                 else:
@@ -349,13 +352,23 @@ def main(args):
                             if variation in ff_inputs[channel][category][variable]:
                                 ff_inputs[channel][category][variable][variation].append(process)
                             else:
-                                ff_inputs[channel][category][variable][variation] = []
+                                ff_inputs[channel][category][variable][variation] = [process]
                         else:
-                            ff_inputs[channel][category][variable] = {}
+                            ff_inputs[channel][category][variable] = {variation: [process]}
                     else:
-                        ff_inputs[channel][category] = {}
+                        ff_inputs[channel][category] = {
+                                                        variable: {
+                                                            variation: [process]
+                                                            }
+                                                        }
                 else:
-                    ff_inputs[channel] = {}
+                    ff_inputs[channel] = {
+                                            category: {
+                                                variable: {
+                                                    variation: [process]
+                                                }
+                                            }
+                                        }
             if "same_sign" in variation:
                 if channel in qcd_inputs:
                     if channel in ["et", "mt", "em"] or "abcd_same_sign_anti_iso" in variation:
@@ -364,13 +377,23 @@ def main(args):
                                 if variation in qcd_inputs[channel][category][variable]:
                                     qcd_inputs[channel][category][variable][variation].append(process)
                                 else:
-                                    qcd_inputs[channel][category][variable][variation] = []
+                                    qcd_inputs[channel][category][variable][variation] = [process]
                             else:
-                                qcd_inputs[channel][category][variable] = {}
+                                qcd_inputs[channel][category][variable] = {variation: [process]}
                         else:
-                            qcd_inputs[channel][category] = {}
+                            qcd_inputs[channel][category] = {
+                                                        variable: {
+                                                            variation: [process]
+                                                            }
+                                                        }
                 else:
-                    qcd_inputs[channel] = {}
+                    qcd_inputs[channel] = {
+                                            category: {
+                                                variable: {
+                                                    variation: [process]
+                                                }
+                                            }
+                                        }
         #  Booking of necessary categories for embedded tt bar variation.
         if "Nominal" in variation:
             sel_split = selection.split("-", maxsplit=1)
@@ -382,12 +405,13 @@ def main(args):
                     if category in emb_categories[channel]:
                         emb_categories[channel][category].append(variable)
                     else:
-                        emb_categories[channel][category] = []
+                        emb_categories[channel][category] = [variable]
                 else:
-                    emb_categories[channel] = {}
+                    emb_categories[channel] = {category: [variable]}
 
     # Loop over available ff inputs and do the estimations
     logger.info("Starting estimations for fake factors and their variations")
+    logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
     for ch in ff_inputs:
         for cat in ff_inputs[ch]:
             for var in ff_inputs[ch][cat]:
@@ -397,6 +421,7 @@ def main(args):
                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
                    estimated_hist.Write()
     logger.info("Starting estimations for the QCD mulitjet process.")
+    logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
     for ch in qcd_inputs:
         for cat in qcd_inputs[ch]:
             for var in qcd_inputs[ch][cat]:
@@ -425,6 +450,7 @@ def main(args):
                         estimated_hist.Write()
     if args.emb_tt:
         logger.info("Producing embedding ttbar variations.")
+        logger.debug("%s", json.dumps(emb_categories, sort_keys=True, indent=4))
         for ch in emb_categories:
             for cat in emb_categories[ch]:
                 for var in emb_categories[ch][cat]:
