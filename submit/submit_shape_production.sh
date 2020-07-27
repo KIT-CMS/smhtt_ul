@@ -80,6 +80,8 @@ then
     exit 1
 elif [[ "$SUBMIT_MODE" == "singlegraph" ]]
 then
+    OUTPUT=output/submit_files/${ERA}-${CHANNEL}-${PROCESSES}-${CONTROL}-$(date +%Y_%m_%d)
+    [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
     python shapes/produce_shapes.py --channels $CHANNEL \
         			    --output-file dummy.root \
         			    --directory $ARTUS_OUTPUTS \
@@ -91,17 +93,40 @@ then
                                     --optimization-level 1 \
                                     --process-selection $PROCESSES \
                                     --only-create-graphs \
+                                    --graph-dir $OUTPUT \
                                     $CONTROL_ARG
-    OUTPUT=output/submit_files/${ERA}-${CHANNEL}-${PROCESSES}-${CONTROL}-$(date +%Y_%m_%d)
-    [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
-    cp submit/produce_shapes_cc7.jdl $OUTPUT
-    echo "queue a3,a2,a1 from $OUTPUT/arguments.txt" >> $OUTPUT/produce_shapes_cc7.jdl
     # Set output graph file name produced during graph creation.
-    GRAPH_FILE=analysis_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
-    [[ $CONTROL == 1 ]] && GRAPH_FILE=control_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
+    GRAPH_FILE=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
+    [[ $CONTROL == 1 ]] && GRAPH_FILE=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
+    # Prepare the jdl file for single core jobs.
+    cp submit/produce_shapes_cc7.jdl $OUTPUT
+    GF_NAME=$(basename $GRAPH_FILE)
+    if [[ ! -d log/condorShapes/${GF_NAME%.pkl}/ ]]
+    then
+        mkdir -p log/condorShapes/${GF_NAME%.pkl}/
+    fi
+    echo "output = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).out" >> $OUTPUT/produce_shapes_cc7.jdl
+    echo "error = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).err" >> $OUTPUT/produce_shapes_cc7.jdl
+    echo "log = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).log" >> $OUTPUT/produce_shapes_cc7.jdl
+    echo "queue a3,a2,a1 from $OUTPUT/arguments.txt" >> $OUTPUT/produce_shapes_cc7.jdl
+    
+    # Prepare the multicore jdl.
+    cp submit/produce_shapes_cc7.jdl $OUTPUT/produce_shapes_cc7_multicore.jdl
+    # Replace the values in the config which differ for multicore jobs.
+    sed -i '/^RequestMemory/c\RequestMemory = 10000' $OUTPUT/produce_shapes_cc7_multicore.jdl
+    sed -i '/^RequestCpus/c\RequestCpus = 8' $OUTPUT/produce_shapes_cc7_multicore.jdl
+    sed -i '/^arguments/c\arguments = $(a1) $(a2) $(a3) $(a4)' ${OUTPUT}/produce_shapes_cc7_multicore.jdl
+    # Add log file locations to output file.
+    echo "output = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).out" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
+    echo "error = log/condorShapes/${GF_NAME%.pkl}/mulitcore.\$(cluster).\$(Process).err" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
+    echo "log = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).log" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
+    echo "queue a3,a2,a4,a1 from $OUTPUT/arguments_multicore.txt" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
+
     # Assemble the arguments.txt file used in the submission
     python submit/prepare_args_file.py --graph-file $GRAPH_FILE --output-dir $OUTPUT
-    echo "[INFO] Submit shape production with 'condor_submit $OUTPUT/produce_shapes_cc7.jdl'"
+    echo "[INFO] Submit shape production with 'condor_submit $OUTPUT/produce_shapes_cc7.jdl' and 'condor_submit $OUTPUT/produce_shapes_cc7_multicore.jdl'"
+    condor_submit $OUTPUT/produce_shapes_cc7.jdl
+    condor_submit $OUTPUT/produce_shapes_cc7_multicore.jdl
 else
     echo "[ERROR] Given mode $SUBMIT_MODE is not supported. Aborting..."
     exit 1

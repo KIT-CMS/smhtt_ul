@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import logging
+import os
 import pickle
 import re
 
@@ -147,6 +148,12 @@ def parse_arguments():
         default=None,
         type=lambda proclist: set([process.lower() for process in proclist.split(',')]),
         help="Subset of processes to be processed."
+    )
+    parser.add_argument(
+        "--graph-dir",
+        default=None,
+        type=str,
+        help="Directory the graph file is written to."
     )
     return parser.parse_args()
 
@@ -561,8 +568,12 @@ def main(args):
             graph_file_name = "control_unit_graphs-{}-{}-{}.pkl".format(args.era, ",".join(args.channels), ",".join(sorted(procS)))
         else:
             graph_file_name = "analysis_unit_graphs-{}-{}-{}.pkl".format(args.era, ",".join(args.channels), ",".join(sorted(procS)))
-        logger.info("Writing created graphs to file %s.", graph_file_name)
-        with open(graph_file_name, 'wb') as f:
+        if args.graph_dir is not None:
+            graph_file = os.path.join(args.graph_dir, graph_file_name)
+        else:
+            graph_file = graph_file_name
+        logger.info("Writing created graphs to file %s.", graph_file)
+        with open(graph_file, 'wb') as f:
             pickle.dump(graphs, f)
     else:
         # Step 3: convert to RDataFrame and run the event loop
