@@ -16,7 +16,6 @@ def channel_selection(channel, era):
             ("byVVLooseDeepTau2017v2p1VSe_2>0.5", "againstElectronDiscriminator"),
             ("byTightDeepTau2017v2p1VSjet_2>0.5", "tau_iso"),
             ("iso_1<0.15", "muon_iso"),
-            ("mt_1_puppi<70", "mt_cut"),
         ])
         #  Add era specific cuts. This is basically restricted to trigger selections.
         if era == "2016":
@@ -41,7 +40,6 @@ def channel_selection(channel, era):
             ("byTightDeepTau2017v2p1VSe_2>0.5", "againstElectronDiscriminator"),
             ("byTightDeepTau2017v2p1VSjet_2>0.5", "tau_iso"),
             ("iso_1<0.15", "muon_iso"),
-            ("mt_1_puppi<70", "mt_cut"),
         ])
         if era == "2016":
             cuts.append(
