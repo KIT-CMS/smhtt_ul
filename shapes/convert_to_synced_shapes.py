@@ -3,6 +3,7 @@
 import os
 import argparse
 import logging
+import multiprocessing
 
 import ROOT
 
@@ -46,6 +47,8 @@ def parse_args():
                         help="Use jet fake estimation based on mc shapes.")
     parser.add_argument("--variable-selection", default=None, type=str, nargs=1,
                         help="Select final discriminator for shape creation.")
+    parser.add_argument("-n", "--num-processes", default=1, type=int,
+                        help="Number of processes used.")
     return parser.parse_args()
 
 
@@ -60,6 +63,39 @@ def setup_logging(output_file, level=logging.INFO):
     file_handler = logging.FileHandler(output_file, "w")
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
+    return
+
+
+def write_hists_per_category(cat_hists : tuple):
+    category, keys, channel, ofname, ifname = cat_hists
+    infile = ROOT.TFile(ifname, "READ")
+    outfile = ROOT.TFile(ofname.replace(".root", category + ".root"), "RECREATE")
+    outfile.cd()
+    dir_name = "{CHANNEL}_{CATEGORY}".format(
+            CHANNEL=channel, CATEGORY=category)
+    outfile.mkdir(dir_name)
+    outfile.cd(dir_name)
+    for name in sorted(keys):
+        hist = infile.Get(name)
+        name_output = keys[name]
+        # Write shapes with partial correlations across eras.
+        if "Era" in name_output:
+            if ("_1ProngPi0Eff_" in name_output
+                    or "_qcd_iso" in name_output
+                    or "_3ProngEff_" in name_output
+                    or "_dyShape_" in name_output):
+                hist.SetTitle(name_output.replace("_Era", ""))
+                hist.SetName(name_output.replace("_Era", ""))
+                hist.Write()
+        if "Era" in name_output:
+            name_output = name_output.replace("Era", args.era)
+        if "Channel" in name_output:
+            name_output = name_output.replace("Channel", channel)
+        hist.SetTitle(name_output)
+        hist.SetName(name_output)
+        hist.Write()
+    outfile.Close()
+    infile.Close()
     return
 
 
@@ -126,49 +162,29 @@ def main(args):
         logging.debug("Adding histogram with name %s as %s to category %s.",
                       key.GetName(), name_output, channel + "_" + category)
         hist_map[channel][category][key.GetName()] = name_output
+    # Clean up
+    input_file.Close()
 
     # Loop over map and create the output file.
     for channel in hist_map:
-        logging.info("Writing histograms to file %s",
+        logging.info("Writing histograms to file %s with %s processes",
                      os.path.join(
                             args.output,
                             "{ERA}-{CHANNELS}-synced-MSSM.root".format(
                                                                     CHANNELS=channel,
-                                                                    ERA=args.era)))
-        filename_output = os.path.join(
-                args.output, "{ERA}-{CHANNELS}-synced-MSSM.root".format(CHANNELS=channel, ERA=args.era))
+                                                                    ERA=args.era)),
+                     args.num_processes)
         if not os.path.exists(args.output):
             os.mkdir(args.output)
-        output_file = ROOT.TFile(filename_output, "RECREATE")
-        for category in sorted(hist_map[channel]):
-            output_file.cd()
-            dir_name = "{CHANNEL}_{CATEGORY}".format(
-                    CHANNEL=channel, CATEGORY=category)
-            output_file.mkdir(dir_name)
-            output_file.cd(dir_name)
-            for name in sorted(hist_map[channel][category]):
-                hist = input_file.Get(name)
-                name_output = hist_map[channel][category][name]
-                if "Era" in name_output:
-                    hist.SetTitle(name_output.replace("Era", args.era))
-                    hist.SetName(name_output.replace("Era", args.era))
-                else:
-                    hist.SetTitle(name_output)
-                    hist.SetName(name_output)
-                hist.Write()
-
-                if "Era" in name_output:
-                    if ("_1ProngPi0Eff_" in name_output
-                            or "_3ProngEff_" in name_output
-                            or "_dyShape_" in name_output):
-                        hist.SetTitle(name_output.replace("_Era", ""))
-                        hist.SetName(name_output.replace("_Era", ""))
-                        hist.Write()
-        output_file.Close()
+        ofname = os.path.join(args.output,
+                              "{ERA}-{CHANNELS}-synced-MSSM.root".format(
+                                  CHANNELS=channel,
+                                  ERA=args.era))
+        with multiprocessing.Pool(args.num_processes) as pool:
+            pool.map(write_hists_per_category,
+                     [(*item, channel, ofname, args.input) for item in sorted(hist_map[channel].items())])
 
     logging.info("Successfully written all histograms to file.")
-    # Clean up
-    input_file.Close()
 
 if __name__ == "__main__":
     args = parse_args()
