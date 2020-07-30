@@ -28,8 +28,8 @@ def main(args):
     logger.info("Processing graph number {} out of {} graphs.".format(args.graph_number, len(graphs)))
 
     logger.info(graphs[args.graph_number])
-    output_file = os.path.join("output/shapes", "output-single_graph_job-{}-{}.root".format(
-                            args.input.replace(".pkl", ""),
+    output_file = os.path.join("output/shapes", os.path.basename(args.input).replace(".pkl", ""), "output-single_graph_job-{}-{}.root".format(
+                            os.path.basename(args.input.replace(".pkl", "")),
                             args.graph_number))
 
     # Step 3: convert to RDataFrame and run the event loop
@@ -40,8 +40,10 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    setup_logging("log/condorShapes/single_graph_job-{}-{}.log".format(
-                                        args.input.replace(".pkl", ""),
-                                        args.graph_number),
-                  level=logging.DEBUG)
+    pathname = "log/{id}/".format(
+        id=os.path.basename(args.input).replace(".pkl", ""))
+    setup_logging(os.path.join(pathname, "single_graph_job-{id}-{num}.log".format(
+                                        id=pathname,
+                                        num=args.graph_number)),
+                  level=logging.INFO)
     main(args)
