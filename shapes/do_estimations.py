@@ -104,10 +104,10 @@ def fake_factor_estimation(rootfile, channel, selection, variable, variation="No
     if variation in ["anti_iso"]:
         ff_variation = "Nominal"
     else:
-        ff_variation = variation.replace("anti_iso_", "CMS_")
+        ff_variation = variation.replace("anti_iso_", "")
     variation_name = base_hist.GetName().replace("data", proc_name) \
                                         .replace(variation, ff_variation) \
-                                        .replace(channel, "-".join([channel, proc_name]), 1)
+                                        .replace("#" + channel, "#" + "-".join([channel, proc_name]), 1)
     base_hist.SetName(variation_name)
     base_hist.SetTitle(variation_name)
     return base_hist
