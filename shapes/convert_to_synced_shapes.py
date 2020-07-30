@@ -21,9 +21,17 @@ _process_map = {
     "EMB": "Embedded",
     "W": "W",
     "jetFakes": "jetFakes",
-    "jetFakesMC": "jetFakes",
     "QCD": "QCD",
-    "QCD": "QCDMC",
+    "bbh": "SUSYbbH",
+    "ggh_i": "SUSYggH-ggh_i",
+    "ggh_t": "SUSYggH-ggh_t",
+    "ggh_b": "SUSYggH-ggh_b",
+    "ggH_i": "SUSYggH-ggH_i",
+    "ggH_t": "SUSYggH-ggH_t",
+    "ggH_b": "SUSYggH-ggH_b",
+    "ggA_i": "SUSYggH-ggA_i",
+    "ggA_t": "SUSYggH-ggA_t",
+    "ggA_b": "SUSYggH-ggA_b",
 }
 
 def parse_args():
@@ -91,19 +99,27 @@ def main(args):
         if not category in hist_map[channel]:
             hist_map[channel][category] = {}
 
-        _rev_process_map = {val: key for key, val in _process_map.items()}
         # Skip copying of jetFakes estimations based on underlying shapes to be able
         # to use one name in the synced file.
         # TODO: Should this be kept or do we want to put both version in the synced file and
         #       perform the switch on combine level.
         if args.mc:
+            _process_map["jetFakes"] = "jetFakesMC"
+            _process_map["QCD"] = "QCDMC"
             if process in ["jetFakes", "QCD"]:
                 continue
         else:
             if "MC" in process:
                 continue
+        _rev_process_map = {val: key for key, val in _process_map.items()}
         if process in _rev_process_map.keys():
-            process = _rev_process_map[process]
+            # Check if MSSM sample.
+            if "SUSY" in process:
+                # Read mass from dataset name in case of SUSY samples.
+                mass = split_name[0].split("_")[-1]
+                process = _rev_process_map[process] + mass
+            else:
+                process = _rev_process_map[process]
         name_output = "{process}".format(process=process)
         if "Nominal" not in variation:
             name_output += "_" + variation
