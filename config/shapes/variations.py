@@ -762,6 +762,12 @@ tau_trigger_eff_emb_tt = [
         *[ReplaceWeight("CMS_eff_trigger_emb_tt_dm{dm}_EraDown".format(dm=dm),
                         "triggerweight",
                         Weight(_tau_tt_wstring.replace("MC", "EMB").format(operator="-", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        *[ReplaceWeight("CMS_eff_trigger_tt_dm{dm}_EraUp".format(dm=dm),
+                        "triggerweight",
+                        Weight(_tau_tt_wstring.replace("MC", "EMB").format(operator="+", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        *[ReplaceWeight("CMS_eff_trigger_tt_dm{dm}_EraDown".format(dm=dm),
+                        "triggerweight",
+                        Weight(_tau_tt_wstring.replace("MC", "EMB").format(operator="-", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
         ]
 
 # Embedding specific variations.
