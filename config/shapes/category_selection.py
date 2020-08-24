@@ -27,7 +27,7 @@ lt_categorization = [
     Selection(name="Nbtag0_MTLt40_MHGt250",     cuts = [("nbtag==0&&mt_1_puppi<40&&m_sv_puppi>=250", "category_selection")]),
     Selection(name="Nbtag0_MT40To70_MHGt250",   cuts = [("nbtag==0&&mt_1_puppi>=40&&mt_1_puppi<70&&m_sv_puppi", "category_selection")]),
     Selection(name="NbtagGt1_MTLt40",           cuts = [("nbtag>=1&&mt_1_puppi<40", "category_selection")]),
-    Selection(name="NbtagGt1_MT40To70",         cuts = [("nbtag=1&&mt_1_puppi>=40&&mt_1_puppi<70", "category_selection")]),
+    Selection(name="NbtagGt1_MT40To70",         cuts = [("nbtag>=1&&mt_1_puppi>=40&&mt_1_puppi<70", "category_selection")]),
     # Control region.
     Selection(name="MTGt70",                    cuts = [("mt_1_puppi>=70", "category_selection")]),
 ]
