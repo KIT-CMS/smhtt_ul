@@ -520,7 +520,7 @@ def main(args):
             if ch_ == "tt":
                 um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_tt])
                 um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*tau_trigger_eff_tt])
-                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_tt, *tau_id_eff_tt])
+                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_tt, *tau_id_eff_tt, *tau_trigger_eff_emb_tt])
                 um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tt])
             if ch_ == "em":
                 um.book([unit for d in dataS | embS | simulatedProcsDS[ch_] - signalsS for unit in nominals[args.era]['units'][ch_][d]], [*qcd_variations_em])
@@ -542,7 +542,7 @@ def main(args):
                     um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_mt_fake_rate_2017])
                     um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*lep_trigger_eff_mt_emb_2017, *tau_trigger_eff_mt_emb_2017])
                 elif ch_ == "et":
-                    #um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*lep_trigger_eff_et_2017, *tau_trigger_eff_et_2017])
+                    um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*lep_trigger_eff_et_2017, *tau_trigger_eff_et_2017])
                     um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_et_fake_rate_2017])
                     um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*lep_trigger_eff_et_emb_2017, *tau_trigger_eff_et_emb_2017])
             elif "2018" in args.era:
