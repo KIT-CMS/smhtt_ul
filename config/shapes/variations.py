@@ -815,26 +815,61 @@ top_pt = [
         RemoveWeight("CMS_htt_ttbarShapeDown", "topPtReweightWeight")
         ]
 
-_ff_variations_lt = ["ff_tt_morphed_{ch}{era}{shift}",
-                     "ff_tt_sf_{ch}{era}{shift}",
-                     "ff_corr_tt_syst_{ch}{era}{shift}",
-                     "ff_frac_w_{ch}{era}{shift}",
-                     "ff_qcd_dr0_njet0_morphed_stat_{ch}{era}{shift}", "ff_qcd_dr0_njet1_morphed_stat_{ch}{era}{shift}", "ff_qcd_dr0_njet2_morphed_stat_{ch}{era}{shift}",
-                     "ff_w_dr0_njet0_morphed_stat_{ch}{era}{shift}", "ff_w_dr0_njet1_morphed_stat_{ch}{era}{shift}", "ff_w_dr0_njet2_morphed_stat_{ch}{era}{shift}",
-                     "ff_w_dr1_njet0_morphed_stat_{ch}{era}{shift}", "ff_w_dr1_njet1_morphed_stat_{ch}{era}{shift}", "ff_w_dr1_njet2_morphed_stat_{ch}{era}{shift}",
-                     "ff_tt_dr0_njet0_morphed_stat_{ch}{era}{shift}", "ff_tt_dr0_njet1_morphed_stat_{ch}{era}{shift}",
-                     "ff_w_lepPt_{ch}{era}{shift}",
-                     "ff_corr_w_lepPt_{ch}{era}{shift}",
-                     "ff_w_mc_{ch}{era}{shift}",
-                     "ff_corr_w_mt_{ch}{era}{shift}",
-                     "ff_w_mt_{ch}{era}{shift}",
+_ff_variations_lt = [
                      "ff_qcd_mvis_{ch}{era}{shift}",
                      "ff_qcd_mvis_osss_{ch}{era}{shift}",
                      "ff_corr_qcd_mvis_{ch}{era}{shift}",
                      "ff_corr_qcd_mvis_osss_{ch}{era}{shift}",
+
                      "ff_qcd_muiso_{ch}{era}{shift}",
                      "ff_corr_qcd_muiso_{ch}{era}{shift}",
-                     "ff_qcd_mc_{ch}{era}{shift}"
+
+                     "ff_qcd_dr0_njet0_morphed_stat_{ch}{era}{shift}",
+                     "ff_qcd_dr0_njet1_morphed_stat_{ch}{era}{shift}",
+                     "ff_qcd_dr0_njet2_morphed_stat_{ch}{era}{shift}",
+
+                     "ff_qcd_dr0_njet0_stat_{ch}{era}{shift}",
+                     "ff_qcd_dr0_njet1_stat_{ch}{era}{shift}",
+                     "ff_qcd_dr0_njet2_stat_{ch}{era}{shift}",
+
+                     "ff_qcd_mc_{ch}{era}{shift}",
+
+                     "ff_qcd_syst_{ch}{era}{shift}",
+
+                     "ff_w_lepPt_{ch}{era}{shift}",
+                     "ff_corr_w_lepPt_{ch}{era}{shift}",
+
+                     "ff_corr_w_mt_{ch}{era}{shift}",
+                     "ff_w_mt_{ch}{era}{shift}",
+
+                     "ff_w_syst_{ch}{era}{shift}",
+
+                     "ff_w_dr0_njet0_morphed_stat_{ch}{era}{shift}",
+                     "ff_w_dr0_njet1_morphed_stat_{ch}{era}{shift}",
+                     "ff_w_dr0_njet2_morphed_stat_{ch}{era}{shift}",
+                     "ff_w_dr1_njet0_morphed_stat_{ch}{era}{shift}",
+                     "ff_w_dr1_njet1_morphed_stat_{ch}{era}{shift}",
+                     "ff_w_dr1_njet2_morphed_stat_{ch}{era}{shift}",
+
+                     "ff_w_dr0_njet0_stat_{ch}{era}{shift}",
+                     "ff_w_dr0_njet1_stat_{ch}{era}{shift}",
+                     "ff_w_dr0_njet2_stat_{ch}{era}{shift}",
+                     "ff_w_dr1_njet0_stat_{ch}{era}{shift}",
+                     "ff_w_dr1_njet1_stat_{ch}{era}{shift}",
+                     "ff_w_dr1_njet2_stat_{ch}{era}{shift}",
+
+                     "ff_w_mc_{ch}{era}{shift}",
+
+                     "ff_frac_w_{ch}{era}{shift}",
+
+                     "ff_corr_tt_syst_{ch}{era}{shift}",
+                     "ff_tt_morphed_{ch}{era}{shift}",
+                     "ff_tt_sf_{ch}{era}{shift}",
+
+                     "ff_tt_dr0_njet0_morphed_stat_{ch}{era}{shift}",
+                     "ff_tt_dr0_njet1_morphed_stat_{ch}{era}{shift}",
+
+                     "ff_tt_stat_{ch}{era}{shift}",
 ]
 #  Variations on the jet backgrounds estimated with the fake factor method.
 ff_variations_lt = [
@@ -847,17 +882,29 @@ ff_variations_lt = [
 ff_variations_tt = [
         ReplaceCutAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift=shift.capitalize(), era="_Era", ch="_tt").replace("dr0_", "")), "tau_iso",
                                Cut("(byTightDeepTau2017v2p1VSjet_2>0.5&&byTightDeepTau2017v2p1VSjet_1<0.5&&byVLooseDeepTau2017v2p1VSjet_1>0.5)||(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso"),
-                               Weight("ff2_{syst}".format(syst=syst.format(shift="_"+shift, era="", ch="")), "fake_factor")
-                               ) for shift in ["up", "down"] for syst in ["ff_qcd_dr0_njet0_morphed_stat{ch}{era}{shift}", "ff_qcd_dr0_njet1_morphed_stat{ch}{era}{shift}", "ff_qcd_dr0_njet2_morphed_stat{ch}{era}{shift}", #change dm0 to dr0 if fake factor friends are produced with new inputs also for tt (no difference for tt)
-                                                                          "ff_w_syst{ch}{era}{shift}",
-                                                                          "ff_tt_syst{ch}{era}{shift}",
+                               Weight("(0.5*ff1_{syst}*(byTightDeepTau2017v2p1VSjet_1<0.5)+0.5*ff2_{syst}*(byTightDeepTau2017v2p1VSjet_2<0.5))".format(syst=syst.format(shift="_"+shift, era="", ch="")), "fake_factor")
+                               ) for shift in ["up", "down"] for syst in ["ff_qcd_dr0_njet0_morphed_stat{ch}{era}{shift}",
+                                                                          "ff_qcd_dr0_njet1_morphed_stat{ch}{era}{shift}",
+                                                                          "ff_qcd_dr0_njet2_morphed_stat{ch}{era}{shift}",
+
+                                                                          "ff_qcd_dr0_njet0_stat{ch}{era}{shift}",
+                                                                          "ff_qcd_dr0_njet1_stat{ch}{era}{shift}",
+                                                                          "ff_qcd_dr0_njet2_stat{ch}{era}{shift}",
+
+                                                                          "ff_qcd_syst{ch}{era}{shift}",
+
                                                                           "ff_qcd_mvis{ch}{era}{shift}",
                                                                           "ff_qcd_mvis_osss{ch}{era}{shift}",
                                                                           "ff_corr_qcd_mvis{ch}{era}{shift}",
                                                                           "ff_corr_qcd_mvis_osss{ch}{era}{shift}",
+
                                                                           "ff_qcd_tau2_pt{ch}{era}{shift}",
                                                                           "ff_corr_qcd_tau2_pt{ch}{era}{shift}",
+
                                                                           "ff_qcd_mc{ch}{era}{shift}",
+
+                                                                          "ff_w_syst{ch}{era}{shift}",
+                                                                          "ff_tt_syst{ch}{era}{shift}",
                                                                           ]
         ]
 
