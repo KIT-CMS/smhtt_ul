@@ -23,7 +23,7 @@ _process_map = {
     "W": "W",
     "jetFakes": "jetFakes",
     "QCD": "QCD",
-    "bbh": "SUSYbbH",
+    "bbH": "SUSYbbH",
     "ggh_i": "SUSYggH-ggh_i",
     "ggh_t": "SUSYggH-ggh_t",
     "ggh_b": "SUSYggH-ggh_b",
@@ -153,7 +153,7 @@ def main(args):
             if "SUSY" in process:
                 # Read mass from dataset name in case of SUSY samples.
                 mass = split_name[0].split("_")[-1]
-                process = _rev_process_map[process] + mass
+                process = "_".join([_rev_process_map[process], mass])
             else:
                 process = _rev_process_map[process]
         name_output = "{process}".format(process=process)
