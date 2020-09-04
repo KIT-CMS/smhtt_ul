@@ -131,3 +131,4 @@ dmypy.json
 *.root
 *.png
 *.pdf
+*.html
