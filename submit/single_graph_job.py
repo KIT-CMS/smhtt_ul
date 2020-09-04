@@ -17,6 +17,8 @@ def parse_args():
     parser.add_argument("-g", "--graph-number", type=int, help="Number of the graph to be processed.")
     parser.add_argument("-n", "--num-threads", type=int, default=1,
                         help="Number of threads to run on.")
+    parser.add_argument("--output", type=str, default=None,
+                        help="Alternative output root file for test purposes.")
     return parser.parse_args()
 
 
@@ -28,9 +30,12 @@ def main(args):
     logger.info("Processing graph number {} out of {} graphs.".format(args.graph_number, len(graphs)))
 
     logger.info(graphs[args.graph_number])
-    output_file = os.path.join("output/shapes", os.path.basename(args.input).replace(".pkl", ""), "output-single_graph_job-{}-{}.root".format(
-                            os.path.basename(args.input.replace(".pkl", "")),
-                            args.graph_number))
+    if args.output is None:
+        output_file = os.path.join("output/shapes", os.path.basename(args.input).replace(".pkl", ""), "output-single_graph_job-{}-{}.root".format(
+                                os.path.basename(args.input.replace(".pkl", "")),
+                                args.graph_number))
+    else:
+        output_file = args.output
 
     # Step 3: convert to RDataFrame and run the event loop
     r_manager = RunManager([graph_to_process])
@@ -43,7 +48,7 @@ if __name__ == "__main__":
     pathname = "log/{id}/".format(
         id=os.path.basename(args.input).replace(".pkl", ""))
     setup_logging(os.path.join(pathname, "single_graph_job-{id}-{num}.log".format(
-                                        id=pathname,
+                                        id=os.path.basename(args.input).replace(".pkl", ""),
                                         num=args.graph_number)),
                   level=logging.INFO)
     main(args)
