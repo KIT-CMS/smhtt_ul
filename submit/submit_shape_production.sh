@@ -4,7 +4,8 @@ ERA=$1
 CHANNEL=$2
 PROCESSES=$3
 SUBMIT_MODE=$4
-CONTROL=$5
+TAG=$5
+CONTROL=$6
 
 sort_string () {
     IFS="," read -a TEMP_ARR <<< $1
@@ -18,8 +19,8 @@ sort_string () {
     echo $SORT_STRING
 }
 
-[[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4 ]] || ( echo "[ERROR] Number of given parameters is to small."; exit 1 )
-[[ ! -z $5 ]] || CONTROL=0
+[[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4  && ! -z $5 ]] || ( echo "[ERROR] Number of given parameters is to small."; exit 1 )
+[[ ! -z $6 ]] || CONTROL=0
 CONTROL_ARG=""
 if [[ $CONTROL == 1 ]]
 then
@@ -81,7 +82,7 @@ then
 elif [[ "$SUBMIT_MODE" == "singlegraph" ]]
 then
     echo "[INFO] Preparing graph for processes $PROCESSES for submission..."
-    OUTPUT=output/submit_files/${ERA}-${CHANNEL}-${PROCESSES}-${CONTROL}-$(date +%Y_%m_%d)
+    OUTPUT=output/submit_files/${ERA}-${CHANNEL}-${PROCESSES}-${CONTROL}-${TAG}
     [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
     python shapes/produce_shapes.py --channels $CHANNEL \
         			    --output-file dummy.root \
