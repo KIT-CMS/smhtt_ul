@@ -17,7 +17,7 @@ BASE="output/shapes"
 
 for CH in ${CHANNELS[@]}
 do
-    DIRNAME=${BASE}/${ERA}-${CH}-${PREFIX}-shapes-$(date +%Y_%m_%d)
+    DIRNAME=${BASE}/${ERA}-${CH}-${PREFIX}-shapes-${TAG}
     echo "[INFO] Creating output dir $DIRNAME..."
     mkdir $DIRNAME
     echo "[INFO] Adding outputs of background jobs..."
