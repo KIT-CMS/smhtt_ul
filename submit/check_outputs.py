@@ -62,7 +62,7 @@ def main(args):
                                                      args.era,
                                                      ch,
                                                      proc_str))))
-                    print("Missing outputs are {}".format(set(map(str, range(num_graphs))) - output_nums))
+                    print("Missing outputs are {}".format(sorted(set(map(str, range(num_graphs))) - output_nums)))
     return
 
 
