@@ -7,18 +7,6 @@ SUBMIT_MODE=$4
 TAG=$5
 CONTROL=$6
 
-sort_string () {
-    IFS="," read -a TEMP_ARR <<< $1
-    # Sort command taken from https://stackoverflow.com/questions/7442417/how-to-sort-an-array-in-bash
-    IFS=$'\n' SORT_ARR=($(sort <<< "${TEMP_ARR[*]}"))
-    local SORT_STRING=$SORT_ARR
-    for SUBSTRING in "${SORT_ARR[@]:1}"
-    do
-        SORT_STRING="$SORT_STRING,$SUBSTRING"
-    done
-    echo $SORT_STRING
-}
-
 [[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4  && ! -z $5 ]] || ( echo "[ERROR] Number of given parameters is to small."; exit 1 )
 [[ ! -z $6 ]] || CONTROL=0
 CONTROL_ARG=""
@@ -30,6 +18,7 @@ fi
 source utils/setup_susy_samples.sh $ERA
 source utils/setup_samples.sh $ERA
 source utils/setup_root.sh
+source utils/bashFunctionCollection.sh
 
 IFS="," read -a PROCS_ARR <<< $PROCESSES
 PROCESSES=""

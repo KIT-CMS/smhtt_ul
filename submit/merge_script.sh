@@ -12,6 +12,7 @@ fi
 
 # Load submit splits of susy samples.
 source utils/setup_susy_samples.sh $ERA
+source utils/bashFunctionCollection.sh
 
 BASE="output/shapes"
 
@@ -27,11 +28,11 @@ do
     echo "[INFO] Adding outputs of mssm bbh signal jobs..."
     hadd -j 12 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_bbh.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-bbh*/*.root
     echo "[INFO] Adding outputs of mssm ggh signal jobs..."
-    hadd -j 12 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_ggh.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-${GGH_SAMPLES_SPLIT1}/*.root \
-                                                                             output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-${GGH_SAMPLES_SPLIT2}/*.root \
-                                                                             output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-${GGH_SAMPLES_SPLIT3}/*.root \
-                                                                             output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-${GGH_SAMPLES_SPLIT4}/*.root \
-                                                                             output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-${GGH_SAMPLES_SPLIT5}/*.root
+    hadd -j 12 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_ggh.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT1})/*.root \
+                                                                             output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT2})/*.root \
+                                                                             output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT3})/*.root \
+                                                                             output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT4})/*.root \
+                                                                             output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT5})/*.root
     echo "[INFO] Adding intermediate merge files to final merged file..."
     hadd ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}.root ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-bkg.root \
                                                        ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-sm_signals.root \
