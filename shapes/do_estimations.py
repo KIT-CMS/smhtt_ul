@@ -369,6 +369,7 @@ def main(args):
     emb_categories = {}
     logger.info("Reading inputs from file {}".format(args.input))
     for key in input_file.GetListOfKeys():
+        logger.debug("Processing histogram %s",key.GetName())
         dataset, selection, variation, variable = key.GetName().split("#")
         if "anti_iso" in variation or "same_sign" in variation:
             sel_split = selection.split("-", maxsplit=1)
@@ -461,6 +462,7 @@ def main(args):
     logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
     for ch in ff_inputs:
         for cat in ff_inputs[ch]:
+            logger.info("Do estimation for category %s", cat)
             for var in ff_inputs[ch][cat]:
                 for variation in ff_inputs[ch][cat][var]:
                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation)
@@ -471,6 +473,7 @@ def main(args):
     logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
     for ch in qcd_inputs:
         for cat in qcd_inputs[ch]:
+            logger.info("Do estimation for category %s", cat)
             for var in qcd_inputs[ch][cat]:
                 for variation in qcd_inputs[ch][cat][var]:
                     if ch in ["et", "mt", "em"]:
@@ -500,6 +503,7 @@ def main(args):
         logger.debug("%s", json.dumps(emb_categories, sort_keys=True, indent=4))
         for ch in emb_categories:
             for cat in emb_categories[ch]:
+                logger.info("Do estimation for category %s", cat)
                 for var in emb_categories[ch][cat]:
                     estimated_hist = emb_ttbar_contamination_estimation(input_file, ch, cat, var, sub_scale=0.1)
                     estimated_hist.Write()
@@ -514,5 +518,5 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    setup_logging("do_estimations.log", level=logging.DEBUG)
+    setup_logging("do_estimations.log", level=logging.INFO)
     main(args)
