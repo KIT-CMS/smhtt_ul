@@ -22,6 +22,19 @@ def parse_args():
     return parser.parse_args()
 
 
+def setup_logging(output_file, level=logging.DEBUG):
+    logger.setLevel(level)
+    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    file_handler = logging.FileHandler(output_file, "w")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+
 def main(args):
 
     with open(args.input, "rb") as f:
