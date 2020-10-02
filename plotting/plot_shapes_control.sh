@@ -5,7 +5,7 @@ ERA=$1
 INPUT=$2
 
 v="pt_1,pt_2,eta_1,eta_2,m_vis,m_sv_puppi,pt_tt_puppi,ptvis,jpt_1,jpt_2,jeta_1,jeta_2,bpt_1,bpt_2,puppimet,DiTauDeltaR,pZetaPuppiMissVis,mt_1_puppi,mt_2_puppi,mTdileptonMET_puppi,njets,nbtag,jdeta,dijetpt,mjj"
-for ch in "mt" "et" "tt"
+for ch in "mt" "et" "tt" "em"
 do
     plotting/plot_shapes_control.py -l --era Run${ERA} --input $INPUT --variables ${v} --channels ${ch} --embedding --fake-factor
     plotting/plot_shapes_control.py -l --era Run${ERA} --input $INPUT --variables ${v} --channels ${ch} --fake-factor
