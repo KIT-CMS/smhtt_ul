@@ -57,6 +57,11 @@ def parse_arguments():
         "--embedding",
         action="store_true",
         help="Fake factor estimation method used")
+    parser.add_argument(
+        "--draw-jet-fake-variation",
+        type=str,
+        default=None,
+        help="Draw variation of jetFakes or QCD in derivation region.")
 
     return parser.parse_args()
 
@@ -111,6 +116,22 @@ def main(info):
         bkg_processes = [
             "QCD", "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
         ]
+    if args.draw_jet_fake_variation is not None:
+        bkg_processes = [
+            "VVL", "TTL", "ZL", "EMB"
+        ]
+        if not args.fake_factor and args.embedding:
+            bkg_processes = [
+                "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
+            ]
+        if not args.embedding and args.fake_factor:
+            bkg_processes = [
+                "VVT", "VVL", "TTT", "TTL", "ZL", "ZTT"
+            ]
+        if not args.embedding and not args.fake_factor:
+            bkg_processes = [
+                "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
+            ]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -139,6 +160,15 @@ def main(info):
             bkg_processes = [
                 "QCDEMB", "VVL", "W", "TTL", "ZL", "EMB"
             ]
+        if args.draw_jet_fake_variation is not None:
+            if not args.embedding:
+                bkg_processes = [
+                    "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"
+                ]
+            if args.embedding:
+                bkg_processes = [
+                    "VVL", "W", "TTL", "ZL", "EMB"
+                ]
 
     if "mm" in channel:
         bkg_processes = [
@@ -159,13 +189,17 @@ def main(info):
 
     # get background histograms
     total_bkg = None
+    if args.draw_jet_fake_variation is None:
+        stype = "Nominal"
+    else:
+        stype = args.draw_jet_fake_variation
     for index,process in enumerate(bkg_processes):
         if index == 0:
-            total_bkg = rootfile.get(channel, process).Clone()
+            total_bkg = rootfile.get(channel, process, shape_type=stype).Clone()
         else:
-            total_bkg.Add(rootfile.get(channel, process))
+            total_bkg.Add(rootfile.get(channel, process, shape_type=stype))
         plot.add_hist(
-            rootfile.get(channel, process), process, "bkg")
+            rootfile.get(channel, process, shape_type=stype), process, "bkg")
         plot.setGraphStyle(
             process, "hist", fillcolor=styles.color_dict[process])
 
@@ -184,7 +218,7 @@ def main(info):
         fillcolor=styles.color_dict["unc"],
         linecolor=0)
 
-    plot.add_hist(rootfile.get(channel, "data"), "data_obs")
+    plot.add_hist(rootfile.get(channel, "data", shape_type=stype), "data_obs")
     data_norm = plot.subplot(0).get_hist("data_obs").Integral()
     plot.subplot(0).get_hist("data_obs").GetXaxis().SetMaxDigits(4)
     plot.subplot(0).setGraphStyle("data_obs", "e0")
@@ -347,6 +381,8 @@ def main(info):
     if "mm" not in channel:
         # procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "VH", "VH_top", "ttH", "ttH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
         procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+        if args.draw_jet_fake_variation is not None:
+            procs_to_draw = ["stack", "total_bkg", "data_obs"]
         plot.subplot(0).Draw(procs_to_draw)
         if args.linear != True:
             # plot.subplot(1).Draw([
@@ -357,10 +393,15 @@ def main(info):
                 "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
                 "data_obs"
             ])
-        plot.subplot(2).Draw([
-            "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH",
-            "bkg_qqH_top", "data_obs"
-        ])
+        if args.draw_jet_fake_variation is None:
+            plot.subplot(2).Draw([
+                "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH",
+                "bkg_qqH_top", "data_obs"
+            ])
+        else:
+            plot.subplot(2).Draw([
+                "total_bkg", "data_obs"
+            ])
     else:
         procs_to_draw = ["stack", "total_bkg", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
         plot.subplot(0).Draw(procs_to_draw)
@@ -382,7 +423,7 @@ def main(info):
             plot.legend(i).add_entry(
                 0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
-        if "mm" not in channel:
+        if "mm" not in channel and args.draw_jet_fake_variation is None:
             plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s #times gg#rightarrowH"%str(int(ggH_scale)), 'l')
             plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s #times qq#rightarrowH"%str(int(qqH_scale)), 'l')
             # plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
@@ -398,7 +439,7 @@ def main(info):
         plot.add_legend(
             reference_subplot=2, pos=1, width=0.6, height=0.03)
         plot.legend(i + 2).add_entry(0, "data_obs", "Observed", 'PE2L')
-        if "mm" not in channel:
+        if "mm" not in channel and args.draw_jet_fake_variation is None:
             plot.legend(i + 2).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i],
                                          "ggH+bkg.", 'l')
             plot.legend(i + 2).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i],
@@ -435,6 +476,8 @@ def main(info):
         postfix = "classic_ff"
     if args.embedding and args.fake_factor:
         postfix = "emb_ff"
+    if args.draw_jet_fake_variation is not None:
+        postfix = postfix + "_" + args.draw_jet_fake_variation
 
     if not os.path.exists("%s_plots_%s"%(args.era,postfix)):
         os.mkdir("%s_plots_%s"%(args.era,postfix))
