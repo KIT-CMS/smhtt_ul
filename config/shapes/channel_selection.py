@@ -39,7 +39,7 @@ def channel_selection(channel, era):
             ("byVLooseDeepTau2017v2p1VSmu_2>0.5", "againstMuonDiscriminator"),
             ("byTightDeepTau2017v2p1VSe_2>0.5", "againstElectronDiscriminator"),
             ("byTightDeepTau2017v2p1VSjet_2>0.5", "tau_iso"),
-            ("iso_1<0.15", "muon_iso"),
+            ("iso_1<0.15", "ele_iso"),
         ])
         if era == "2016":
             cuts.append(
