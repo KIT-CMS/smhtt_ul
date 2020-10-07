@@ -6,7 +6,6 @@ import pickle
 import logging
 
 from ntuple_processor import RunManager
-from shapes.produce_shapes import setup_logging
 
 logger = logging.getLogger("")
 
