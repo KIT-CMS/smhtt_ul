@@ -47,7 +47,7 @@ def channel_selection(channel, era):
             )
         elif era == "2017":
             cuts.append(
-                ("pt_2>30 && pt_1 > 25 && (((trg_singleelectron_35 == 1) || (trg_singleelectron_32 == 1) || ((trg_singleelectron_27 == 1))) || (abs(eta_1)>1.5 && pt_1 >= 28 && pt_1 < 40 && isEmbedded)) || (pt_1>25 && pt_1<28 && pt_2>35 && ((isEmbedded && (abs(eta_1)>1.5)) || (trg_crossele_ele24tau30 == 1)))", "trg_selection"),
+                ("pt_2>30 && pt_1 > 25 && ((((trg_singleelectron_35 == 1) || (trg_singleelectron_32 == 1) || ((trg_singleelectron_27 == 1))) || (abs(eta_1)>1.5 && pt_1 >= 28 && pt_1 < 40 && isEmbedded)) || (pt_1>25 && pt_1<28 && pt_2>35 && ((isEmbedded && (abs(eta_1)>1.5)) || (trg_crossele_ele24tau30 == 1))))", "trg_selection"),
             )
         elif era == "2018":
             cuts.append(
@@ -69,7 +69,7 @@ def channel_selection(channel, era):
             )
         elif era == "2017":
             cuts.append(
-                ("(trg_doubletau_35_tightiso_tightid == 1) || (trg_doubletau_40_mediso_tightid == 1) || (trg_doubletau_40_tightiso == 1)", "trg_selection"),
+                ("((trg_doubletau_35_tightiso_tightid == 1) || (trg_doubletau_40_mediso_tightid == 1) || (trg_doubletau_40_tightiso == 1))", "trg_selection"),
             )
         elif era == "2018":
             cuts.append(
