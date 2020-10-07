@@ -5,7 +5,7 @@ ERA=$1
 
 #### ERA specific part. If a sample is not available comment it out here.
 # Samples Run2016
-basedir="/ceph/mburkart/Run2Legacy/ntuples_mssm_04_27"
+basedir="/ceph/mburkart/Run2Legacy/ntuples/MSSM_Legacy/MSSM_2020_04_27_UseOfSMLegacy"
 ARTUS_OUTPUTS_2016="$basedir/2016/ntuples/"
 SVFit_Friends_2016="$basedir/2016/friends/SVFit/"
 FF_Friends_2016="$basedir/2016/friends/FakeFactors/"
