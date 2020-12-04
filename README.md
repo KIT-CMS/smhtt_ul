@@ -16,7 +16,7 @@ The top-level script allows the creation of shapes for the analysis, control plo
 ```bash
 source utils/setup_root.sh
 
-python shapes/produce_shapes.py --channels tt --output-file control_shapes-2017-tt --directory /ceph/mburkart/Run2Legacy/ntuples/MSSM_Legacy/MSSM_2020_04_27_UseOfSMLegacy/2017/ntuples/ --tt-friend-directory /ceph/mburkart/Run2Legacy/ntuples/MSSM_Legacy/MSSM_2020_04_27_UseOfSMLegacy/2017/friends/{SVFit,FakeFactors}/ --era 2017 --num-processes 4 --num-threads 3 --optimization-level 1 --control-plots --skip-systematic-variaitons
+python shapes/produce_shapes.py --channels tt --output-file control_shapes-2017-tt --directory /ceph/mburkart/Run2Legacy/ntuples/MSSM_Legacy/MSSM_2020_04_27_UseOfSMLegacy/2017/ntuples/ --tt-friend-directory /ceph/mburkart/Run2Legacy/ntuples/MSSM_Legacy/MSSM_2020_04_27_UseOfSMLegacy/2017/friends/{SVFit,FakeFactors}/ --era 2017 --num-processes 4 --num-threads 3 --optimization-level 1 --control-plots --skip-systematic-variations
 ```
 
 ### Analysis shapes
@@ -32,7 +32,7 @@ To submit the shapes for the 2017 data-taking period the recommended way to invo
 ```bash
 for CHANNEL in et mt tt em
 do
-  for PROCESSES in backgrounds sm_signals mssm_ggh_split[1-5] mssm_bbh_split{1,2}
+  for PROCESSES in backgrounds sm_signals mssm_ggh_split{1..5} mssm_bbh_split{1,2}
   do
     bash submit/submit_shape_production.sh 2017 $CHANNEL $PROCESSES singlegraph $(date +%Y_%m_%d)
   done
