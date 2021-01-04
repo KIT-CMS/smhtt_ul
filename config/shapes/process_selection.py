@@ -26,124 +26,12 @@ def triggerweight(channel, era):
     weight = ("1.0", "triggerweight")
 
     # General definitions of weights valid for all eras and channels
-    singleMC = "singleTriggerMCEfficiencyWeightKIT_1"
-    crossMCL = "crossTriggerMCEfficiencyWeightKIT_1" if "2016" in era else "crossTriggerMCEfficiencyWeight_1"
-    MCTau_1 = "((byTightDeepTau2017v2p1VSjet_1<0.5 && byVLooseDeepTau2017v2p1VSjet_1>0.5)*crossTriggerMCEfficiencyWeight_vloose_DeepTau_1 + (byTightDeepTau2017v2p1VSjet_1>0.5)*crossTriggerMCEfficiencyWeight_tight_DeepTau_1)"
-    if "2016" in era:
-        MCTau_1 = "((abs(eta_2)<2.1)*" + MCTau_1 + ")"
-    MCTau_2 = MCTau_1.replace("_1","_2")
-
     if "mt" in channel:
-        if "2016" in era:
-            trig_sL = "(pt_1 >= 23 && trg_singlemuon)"
-            trig_X = "(pt_1 < 23 && trg_mutaucross && abs(eta_2)<2.1)"
-
-            # MuTauMC = "*".join([trig_sL, singleMC]) + "+" + "*".join([trig_X, crossMCL, MCTau_2])
-            # MuTauData = MuTauMC.replace("MC", "Data")
-            sL_weight = "(" + singleMC.replace("MC", "Data") + "/" + singleMC + ")"
-            crossweightMC = "*".join([crossMCL, MCTau_2])
-            crossweightData = crossweightMC.replace("MC", "Data")
-            # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            crossweightMC = "(" + "*".join([crossMCL, MCTau_2]) + "+" + "*".join(["(1.0)", "(!"+trig_X+")"]) + ")"
-            crossweight = "(" + crossweightData + "/" + crossweightMC + ")"
-
-            # # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            # MuTauMC = "*".join([trig_sL, singleMC]) + "+(" + "*".join([trig_X, crossMCL, MCTau_2]) + "+" + "*".join(["(0.00001)", "(!"+trig_X+")"]) + ")"
-            # MuTau = "(" + MuTauData + ")/(" + MuTauMC + ")"
-            MuTau = "({trig_sL}*{singleweight}+{trig_X}*{crossweight})".format(trig_sL=trig_sL, singleweight=sL_weight,
-                                                                               trig_X=trig_X, crossweight=crossweight)
-        elif "2017" in era:
-            trig_sL = "(trg_singlemuon_27 || trg_singlemuon_24)"
-            trig_X = "(pt_1 > 21 && pt_1 < 25 && trg_crossmuon_mu20tau27)"
-
-            # MuTauMC = "*".join([trig_sL, singleMC]) + "+" + "*".join([trig_X, crossMCL, MCTau_2])
-            # MuTauData = MuTauMC.replace("MC","Data")
-            sL_weight = "(" + singleMC.replace("MC", "Data") + "/" + singleMC + ")"
-            crossweightMC = "*".join([crossMCL, MCTau_2])
-            crossweightData = crossweightMC.replace("MC", "Data")
-            # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            crossweightMC = "(" + "*".join([crossMCL, MCTau_2]) + "+" + "*".join(["(1.0)", "(!"+trig_X+")"]) + ")"
-            crossweight = "(" + crossweightData + "/" + crossweightMC + ")"
-
-            # # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            # MuTauMC = "*".join([trig_sL, singleMC]) + "+(" + "*".join([trig_X, crossMCL, MCTau_2]) + "+" + "*".join(["(1.0)", "(!"+trig_X+")"]) + ")"
-            # MuTau = "("+MuTauData+")/("+MuTauMC+")"
-            MuTau = "({trig_sL}*{singleweight}+{trig_X}*{crossweight})".format(trig_sL=trig_sL, singleweight=sL_weight,
-                                                                               trig_X=trig_X, crossweight=crossweight)
-        elif "2018" in era:
-            singleMC = "((((pt_1>=25)&&(pt_1<28))*trigger_24_Weight_1)+((pt_1>=28)*(trigger_24_27_Weight_1)))"
-            trig_sL = "(trg_singlemuon_27 || trg_singlemuon_24)"
-            trig_X = "(pt_1 > 21 && pt_1 < 25 && trg_crossmuon_mu20tau27_hps)"
-
-            crossWeightMC = "*".join([crossMCL, MCTau_2])
-            crossWeightData = crossWeightMC.replace("MC","Data")
-            # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            crossWeightMC = "({crossweight}*{trig_X}+(1.0)*(!{trig_X}))".format(crossweight=crossWeightMC, trig_X=trig_X)
-            crossWeight = "("+crossWeightData+")/("+crossWeightMC+")"
-
-            MuTau = "("+"*".join([trig_sL, singleMC]) + "+" + "*".join([trig_X, crossWeight])+")"
-        weight = (MuTau, "triggerweight")
-        # weight = ("1.0", "triggerweight")
-
+        weight = ("mtau_triggerweight_ic", "triggerweight")
     elif "et" in channel:
-        if "2016" in era:
-            trig_sL = "(trg_singleelectron)"
-            trig_X = "(pt_1 > 25 && pt_1 < 26 && trg_eletaucross)"
-
-            # ElTauMC = "*".join([trig_sL, singleMC]) + "+" + "*".join([trig_X, crossMCL, MCTau_2])
-            # ElTauData = ElTauMC.replace("MC", "Data")
-            # # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            # ElTauMC = "*".join([trig_sL, singleMC]) + "+(" + "*".join([trig_X, crossMCL, MCTau_2]) + "+" + "*".join(["(0.00001)", "(!"+trig_X+")"]) + ")"
-
-            sL_weight = "(" + singleMC.replace("MC", "Data") + "/" + singleMC + ")"
-            crossweightMC = "*".join([crossMCL, MCTau_2])
-            crossweightData = crossweightMC.replace("MC", "Data")
-            # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            crossweightMC = "(" + "*".join([crossMCL, MCTau_2]) + "+" + "*".join(["(1.0)", "(!"+trig_X+")"]) + ")"
-            crossweight = "(" + crossweightData + "/" + crossweightMC + ")"
-
-            # ElTau = "(" + ElTauData + ")/(" + ElTauMC + ")"
-            ElTau = "({trig_sL}*{singleweight}+{trig_X}*{crossweight})".format(trig_sL=trig_sL, singleweight=sL_weight,
-                                                                               trig_X=trig_X, crossweight=crossweight)
-        elif "2017" in era:
-            trig_sL = "(trg_singleelectron_35 || trg_singleelectron_32 || trg_singleelectron_27)"
-            trig_X = "(pt_1>25 && pt_1<28 && trg_crossele_ele24tau30)"
-
-            # ElTauMC = "*".join([trig_sL, singleMC]) + "+" + "*".join([trig_X, crossMCL, MCTau_2])
-            # ElTauData = ElTauMC.replace("MC","Data")
-            # # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            # ElTauMC = "*".join([trig_sL, singleMC]) + "+(" + "*".join([trig_X, crossMCL, MCTau_2]) + "+" + "*".join(["(1.0)", "(!"+trig_X+")"]) + ")"
-
-            sL_weight = "(" + singleMC.replace("MC", "Data") + "/" + singleMC + ")"
-            crossweightMC = "*".join([crossMCL, MCTau_2])
-            crossweightData = crossweightMC.replace("MC", "Data")
-            # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            crossweightMC = "(" + "*".join([crossMCL, MCTau_2]) + "+" + "*".join(["(1.0)", "(!"+trig_X+")"]) + ")"
-            crossweight = "(" + crossweightData + "/" + crossweightMC + ")"
-
-            ElTau = "({trig_sL}*{singleweight}+{trig_X}*{crossweight})".format(trig_sL=trig_sL, singleweight=sL_weight,
-                                                                               trig_X=trig_X, crossweight=crossweight)
-            # ElTau = "("+ElTauData+")/("+ElTauMC+")"
-        elif "2018" in era:
-            singleMC = "(((pt_1>=33)&&(pt_1<36)*(trigger_32_Weight_1))+((pt_1>=36)*(trigger_32_35_Weight_1)))"
-            trig_sL = "(trg_singleelectron_35 || trg_singleelectron_32)"
-            trig_X = "(pt_1>25 && pt_1<33 && pt_2>35 && trg_crossele_ele24tau30_hps)"
-
-            crossWeightMC = "*".join([crossMCL, MCTau_2])
-            crossWeightData = crossWeightMC.replace("MC","Data")
-            # Add 1 in  denominator if both numerator and denominator are zero to omit nans.
-            crossWeightMC = "({crossweight}*{trig_X}+(1.0)*(!{trig_X}))".format(crossweight=crossWeightMC, trig_X=trig_X)
-            crossWeight = "("+crossWeightData+")/("+crossWeightMC+")"
-            ElTau = "("+"*".join([trig_sL, singleMC]) + "+" + "*".join([trig_X, crossWeight])+")"
-        weight = (ElTau, "triggerweight")
-        # weight = ("1.0", "triggerweight")
-
+        weight = ("etau_triggerweight_ic", "triggerweight")
     elif "tt" in channel:
-        DiTauMC = "*".join([MCTau_1,MCTau_2])
-        DiTauData = DiTauMC.replace("MC","Data")
-        DiTau = "("+DiTauData+")/("+DiTauMC+")"
-        weight = (DiTau, "triggerweight")
-
+        weight = ("tautau_triggerweight_ic", "triggerweight")
     elif "em" in channel:
         ElMuData = "(trigger_23_data_Weight_2*trigger_12_data_Weight_1*(trg_muonelectron_mu23ele12==1)+trigger_23_data_Weight_1*trigger_8_data_Weight_2*(trg_muonelectron_mu8ele23==1) - trigger_23_data_Weight_2*trigger_23_data_Weight_1*(trg_muonelectron_mu8ele23==1 && trg_muonelectron_mu23ele12==1))"
         ElMuEmb = ElMuData.replace('data', 'mc')
@@ -161,54 +49,12 @@ def triggerweight(channel, era):
 
 def triggerweight_emb(channel, era):
     weight = ("1.0", "triggerweight")
-
-    singleEMB = "singleTriggerEmbeddedEfficiencyWeightKIT_1"
-    crossEMBL = "crossTriggerEmbeddedEfficiencyWeightKIT_1"
-    EMBTau_1 = "((byTightDeepTau2017v2p1VSjet_1<0.5 && byVLooseDeepTau2017v2p1VSjet_1>0.5)*crossTriggerEMBEfficiencyWeight_vloose_DeepTau_1 + (byTightDeepTau2017v2p1VSjet_1>0.5)*crossTriggerEMBEfficiencyWeight_tight_DeepTau_1)"
-    EMBTau_2 = EMBTau_1.replace("_1", "_2")
-
     if "mt" in channel:
-        if "2016" in era:
-            trig_sL = "(pt_1 >= 23 && trg_singlemuon)"
-            trig_X = "(pt_1 < 23 && trg_mutaucross)"
-
-            MuTauEMB = "{singletrigger} + {crosstrigger}".format(
-                singletrigger="*".join([trig_sL, singleEMB]),
-                crosstrigger="*".join([trig_X, crossEMBL, EMBTau_2]))
-            MuTauData = MuTauEMB.replace("EMB", "Data").replace("Embedded", "Data")
-            MuTau = "(" + MuTauData + ")/(" + MuTauEMB + ")"
-            weight = (MuTau, "triggerweight")
-        elif "2017" in era:
-            weight = ("((pt_1>=25 && pt_1<28)*(trigger_24_Weight_1)+(pt_1>=28)*(trigger_24_27_Weight_1)+(pt_1<25)*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/((pt_1<25)*crossTriggerEMBEfficiencyWeight_tight_DeepTau_2+(pt_1>=25))*crossTriggerEmbeddedWeight_1))", "triggerweight")
-        elif "2018" in era:
-            weight = ("((pt_1>=25)*(pt_1<28)*(trigger_24_Weight_1)+(pt_1>=28)*(trigger_24_27_Weight_1)+(pt_1<25)*(abs(eta_2)<2.1)*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/((pt_1<25)*(abs(eta_2)<2.1)*crossTriggerEMBEfficiencyWeight_tight_DeepTau_2+(abs(eta_2)>=2.1)+(pt_1>=25)))*crossTriggerEmbeddedWeight_1)", "triggerweight")
-
+        weight = ("mtau_triggerweight_ic", "triggerweight")
     elif "et" in channel:
-        if "2016" in era:
-            trig_sL = "(trg_singleelectron)"
-            trig_X = "(pt_1 > 25 && pt_1 < 26 && trg_eletaucross)"
-
-            ElTauEMB = "{singletrigger} + {crosstrigger}".format(
-                singletrigger="*".join([trig_sL, singleEMB]),
-                crosstrigger="*".join([trig_X, crossEMBL, EMBTau_2])
-            )
-            ElTauData = ElTauEMB.replace("EMB", "Data").replace("Embedded", "Data")
-            ElTau = "(" + ElTauData + ")/(" + ElTauEMB + ")"
-            weight = (ElTau, "triggerweight")
-        elif "2017" in era:
-            # trig_sL = "(pt_1>=28)&&(abs(eta_1) < 1.5 || pt_1 >= 40)"
-            weight = ("((pt_1>=28)*(((pt_1<33)*trigger_27_Weight_1+(pt_1>=33)*(pt_1<36)*trigger_27_32_Weight_1+(pt_1>=36)*trigger_27_32_35_Weight_1)*(abs(eta_1) < 1.5||pt_1>=40) + singleTriggerDataEfficiencyWeightKIT_1*(abs(eta_1)>=1.5)*(pt_1<40)))+(pt_1<28)*((abs(eta_1)>=1.5)*crossTriggerDataEfficiencyWeight_1*crossTriggerDataEfficiencyWeight_tight_DeepTau_2+(abs(eta_1)<1.5)*crossTriggerEmbeddedWeight_1*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/((pt_1<28)*(abs(eta_1)<1.5)*crossTriggerEMBEfficiencyWeight_tight_DeepTau_2+(pt_1>=28)+(abs(eta_1)>=1.5))))", "triggerweight")
-           # ("((pt_1>=28)+(pt_1<28)*((abs(eta_1)>=1.5)*crossTriggerDataEfficiencyWeight_1*crossTriggerDataEfficiencyWeight_tight_DeepTau_2+(abs(eta_1)<1.5)*crossTriggerEmbeddedWeight_1*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/((pt_1<28)*(abs(eta_1)<1.5)*crossTriggerEMBEfficiencyWeight_tight_DeepTau_2+(pt_1>=28)+(abs(eta_1)>=1.5)))))<10.0","cross_trg_cut"),
-
-        elif "2018" in era:
-            weight = ("(crossTriggerEmbeddedWeight_1*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/((pt_1<33)*crossTriggerEMBEfficiencyWeight_tight_DeepTau_2+(pt_1>=33)))*(pt_1<33)+(pt_1>=36)*trigger_32_35_Weight_1+(pt_1>=33)*(pt_1<36)*(trigger_32_Weight_1))", "triggerweight")
-
+        weight = ("etau_triggerweight_ic", "triggerweight")
     elif "tt" in channel:
-        DiTauEMB = "*".join([EMBTau_1, EMBTau_2])
-        DiTauData = DiTauEMB.replace("EMB", "Data").replace("Embedded", "Data")
-        DiTau = "("+DiTauData+")/("+DiTauEMB+")"
-        weight = (DiTau, "triggerweight")
-
+        weight = ("tautau_triggerweight_ic", "triggerweight")
     elif "em" in channel:
         ElMuData = "(trigger_23_data_Weight_2*trigger_12_data_Weight_1*(trg_muonelectron_mu23ele12==1)+trigger_23_data_Weight_1*trigger_8_data_Weight_2*(trg_muonelectron_mu8ele23==1) - trigger_23_data_Weight_2*trigger_23_data_Weight_1*(trg_muonelectron_mu8ele23==1 && trg_muonelectron_mu23ele12==1))"
         ElMuEmb = ElMuData.replace('data', 'embed')
@@ -503,11 +349,6 @@ def ZTT_embedded_process_selection(channel, era):
             ("idWeight_1*isoWeight_1", "lepton_sf"),
             tau_by_iso_id_weight(channel),
             triggerweight_emb(channel, era),
-            ])
-        if "2017" in era:
-            ztt_embedded_weights.extend([
-                ("(pt_1<28)*((abs(eta_1)<=1.5)*0.852469262576+(abs(eta_1)>1.5)*0.689309270861)+(pt_1>=28)", "low_crossele_nonclosure_weight"),
-                ("(pt_1>=28)*(pt_1<40)*((abs(eta_1)<=1.5)*0.950127109065+(abs(eta_1)>1.5)*0.870372483259)+(pt_1<28)+(pt_1>=40)", "low_singleelectron_nonclosure_weight"),
             ])
     elif "tt" in channel:
         ztt_embedded_weights.extend([
