@@ -181,18 +181,15 @@ def main(args):
 
     susy_masses = {
         "2016": {
-            "bbH": [ 80, 90, 100, 110, 120, 130, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
-            "bbH_nlo": [ 80, 90, 110, 120, 130, 140, 160, 180, 200, 250, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
+            "bbH": [ 80, 90, 110, 120, 130, 140, 160, 180, 200, 250, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
             "ggH": [ 80, 90, 100, 110, 120, 130, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
         },
         "2017": {
-            "bbH": [  80,   90,  100,  110,  120,  130,  140,  160,  180,  200, 250,  300,  350,  400,  600,  700,  800,  900, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
-            "bbH_nlo": [  80,   90,  110,  120,  125,  130,  140,  160,  180,  200, 250,  300,  350,  400,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
+            "bbH": [  80,   90,  110,  120,  125,  130,  140,  160,  180,  200, 250,  300,  350,  400,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
             "ggH": [  80,   90,  100,  110,  120,  130,  140,  180,  200, 250,  300,  350,  400,  450,  600,  700,  800,  900, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
         },
         "2018": {
-            "bbH": [  80,   90,  100,  110,  120,  130,  140,  160,  180,  200, 250,  300,  350,  400,  450,  600,  700,  800,  900, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
-            "bbH_nlo": [  80,   90,  100,  110,  120,  125,  130,  140,  160,  180,  200, 250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500],
+            "bbH": [  80,   90,  100,  110,  120,  125,  130,  140,  160,  180,  200, 250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500],
             "ggH": [  80,   90,  100,  110,  120,  130,  140,  160,  180,  200, 250,  300,  350,  400,  450,  600,  700,  800,  900, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
         },
     }
@@ -343,17 +340,11 @@ def main(args):
                                                                                                                               SUSYggH_hb_contribution_selection]]
                                             for mass in susy_masses[era]["ggH"]},
                 **{"bbh{}".format(mass): [Unit(
-                                            datasets["susybbH_{}".format(mass)], [
-                                                channel_selection(channel, era),
-                                                SUSYbbH_process_selection(channel, era),
-                                                category_selection], actions) for category_selection, actions in categorization[channel]]
-                                            for mass in susy_masses[era]["bbH"]},
-                **{"bbh{}_nlo".format(mass): [Unit(
-                                                datasets["susybbH_nlo_{}".format(mass)], [
+                                                datasets["susybbH_{}".format(mass)], [
                                                     channel_selection(channel, era),
                                                     SUSYbbH_process_selection(channel, era),
                                                     category_selection], actions) for category_selection, actions in categorization[channel]]
-                                            for mass in susy_masses[era]["bbH_nlo"]},
+                                            for mass in susy_masses[era]["bbH"]},
         }
 
     def get_control_units(channel, era, datasets):
@@ -451,7 +442,7 @@ def main(args):
         procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
                  "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
                 | set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) \
-                | set("bbh{}_nlo".format(mass) for mass in susy_masses[args.era]["bbH_nlo"])
+                | set("bbh{}".format(mass) for mass in susy_masses[args.era]["bbH"])
     else:
         procS = args.process_selection
 
@@ -468,7 +459,7 @@ def main(args):
     trueTauBkgS = {"ztt", "ttt", "vvt"} & procS
     sm_signalsS = {"ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} & procS
     mssm_signalsS = (set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) \
-                    | set("bbh{}_nlo".format(mass) for mass in susy_masses[args.era]["bbH_nlo"]) ) & procS
+                    | set("bbh{}".format(mass) for mass in susy_masses[args.era]["bbH"]) ) & procS
     signalsS = sm_signalsS | mssm_signalsS
     if args.control_plots:
         signalsS = signalsS & {"ggh", "qqh"}
