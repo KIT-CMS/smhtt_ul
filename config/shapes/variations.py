@@ -22,31 +22,31 @@ same_sign_em = ReplaceCutAndAddWeight("same_sign", "os",
                                       )
 abcd_method = [ReplaceCut("abcd_same_sign", "os", Cut("q_1*q_2>0", "ss")),
                ReplaceCut("abcd_anti_iso", "tau_iso",
-                          Cut("(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byMediumDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso")),
+                          Cut("(byMediumDeepTau2017v2p1VSjet_1>0.5&&byMediumDeepTau2017v2p1VSjet_2<0.5&&byLooseDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso")),
                ReplaceMultipleCuts("abcd_same_sign_anti_iso", ["os", "tau_iso"],
                            [Cut("q_1*q_2>0", "ss"),
-                            Cut("(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byMediumDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso")])
+                            Cut("(byMediumDeepTau2017v2p1VSjet_1>0.5&&byMediumDeepTau2017v2p1VSjet_2<0.5&&byLooseDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso")])
 ]
 
 anti_iso_lt = ReplaceCutAndAddWeight("anti_iso", "tau_iso",
-                                     Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
-                                     Weight("ff2_nom", "fake_factor")
+                                     Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
                                      )
 anti_iso_tt = ReplaceCutAndAddWeight("anti_iso", "tau_iso",
-                                     Cut("(byTightDeepTau2017v2p1VSjet_2>0.5&&byTightDeepTau2017v2p1VSjet_1<0.5&&byVLooseDeepTau2017v2p1VSjet_1>0.5)||(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso"),
-                                     Weight("(0.5*ff1_nom*(byTightDeepTau2017v2p1VSjet_1<0.5)+0.5*ff2_nom*(byTightDeepTau2017v2p1VSjet_2<0.5))", "fake_factor")
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
                                      )
 anti_iso_split_lt = [ReplaceCutAndAddWeight("anti_iso_w", "tau_iso",
-                                     Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
-                                     Weight("ff2_onlyw*ff2_fracw", "fake_factor")
+                                     Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                     Weight("ff_lt_wjets", "fake_factor")
                                      ),
                      ReplaceCutAndAddWeight("anti_iso_qcd", "tau_iso",
-                                     Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
-                                     Weight("ff2_onlyqcd*ff2_fracqcd", "fake_factor")
+                                     Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                     Weight("ff_lt_qcd", "fake_factor")
                                      ),
                      ReplaceCutAndAddWeight("anti_iso_tt", "tau_iso",
-                                     Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
-                                     Weight("ff2_onlytt*ff2_fractt", "fake_factor")
+                                     Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                     Weight("ff_lt_ttbar", "fake_factor")
                                      ),
                     ]
 
