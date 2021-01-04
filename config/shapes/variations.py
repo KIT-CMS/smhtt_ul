@@ -18,7 +18,7 @@ same_sign = ReplaceCut("same_sign", "os", Cut("q_1*q_2>0", "ss"))
 # TODO: In order to properly use this variation friend trees with the correct weights need to be created.
 same_sign_em = ReplaceCutAndAddWeight("same_sign", "os",
                                       Cut("q_1*q_2>0", "ss"),
-                                      Weight("EMQCDWeights.em_qcd_osss_binned_Weight", "qcd_weight")
+                                      Weight("em_qcd_osss_binned_Weight", "qcd_weight")
                                       )
 abcd_method = [ReplaceCut("abcd_same_sign", "os", Cut("q_1*q_2>0", "ss")),
                ReplaceCut("abcd_anti_iso", "tau_iso",
@@ -908,26 +908,25 @@ ff_variations_tt = [
                                                                           ]
         ]
 
-# TODO: To be updated with the correct weight names once the friend trees are ready.
 qcd_variations_em = [
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_0jet_rateup_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_0jet_ratedown_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_0jet_shapeup_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_0jet_shapedown_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape2_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_0jet_shape2up_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape2_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_0jet_shape2down_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_1jet_rateup_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_1jet_ratedown_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_1jet_shapeup_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_1jet_shapedown_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape2_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_1jet_shape2up_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape2_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_1jet_shape2down_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_2jet_rateup_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_2jet_ratedown_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_2jet_shapeup_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_2jet_shapedown_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape2_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_2jet_shape2up_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape2_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_osss_stat_2jet_shape2down_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_iso_EraUp",               "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_extrap_up_Weight", "qcd_weight")),
-        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_iso_EraDown",             "os", Cut("q_1*q_2>0", "ss"), Weight("EMQCDWeights.em_qcd_extrap_down_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_0jet_rateup_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_0jet_ratedown_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_0jet_shapeup_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_0jet_shapedown_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape2_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_0jet_shape2up_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_shape2_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_0jet_shape2down_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_1jet_rateup_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_1jet_ratedown_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_1jet_shapeup_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_1jet_shapedown_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape2_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_1jet_shape2up_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_1jet_shape2_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_1jet_shape2down_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_2jet_rateup_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_rate_EraDown",  "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_2jet_ratedown_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_2jet_shapeup_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_2jet_shapedown_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape2_EraUp",   "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_2jet_shape2up_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_2jet_shape2_EraDown", "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_2jet_shape2down_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_iso_EraUp",               "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_extrap_up_Weight", "qcd_weight")),
+        ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_iso_EraDown",             "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_extrap_down_Weight", "qcd_weight")),
         ]
