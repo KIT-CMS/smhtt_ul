@@ -7,7 +7,7 @@ SUBMIT_MODE=$4
 TAG=$5
 CONTROL=$6
 
-[[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4  && ! -z $5 ]] || ( echo "[ERROR] Number of given parameters is to small."; exit 1 )
+[[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4  && ! -z $5 ]] || ( echo "[ERROR] Number of given parameters is too small."; exit 1 )
 [[ ! -z $6 ]] || CONTROL=0
 CONTROL_ARG=""
 if [[ $CONTROL == 1 ]]
