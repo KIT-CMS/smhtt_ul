@@ -66,9 +66,12 @@ def triggerweight_emb(channel, era):
 def tau_by_iso_id_weight(channel):
     weight = ("1.0","taubyIsoIdWeight")
     if "mt" in channel or "et" in channel:
-        weight = ("((gen_match_2==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+        weight = ("((pt_2<100)*((gen_match_2==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_2 + (gen_match_2!=5))"
+                  "+ (pt_2>=100)*((gen_match_2==5)*tauIDScaleFactorWeight_highpt_deeptauid_2 + (gen_match_2!=5)))", "taubyIsoIdWeight")
     elif "tt" in channel:
-        weight = ("(((gen_match_1==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_1 + (gen_match_1!=5))*((gen_match_2==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_2 + (gen_match_2!=5)))", "taubyIsoIdWeight")
+        weight = ("((pt_1<100)*(((gen_match_1==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_1 + (gen_match_1!=5))*((gen_match_2==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_2 + (gen_match_2!=5)))"
+                  "+ (pt_1>=100)*(pt_2<100)*(((gen_match_1==5)*tauIDScaleFactorWeight_highpt_deeptauid_1 + (gen_match_1!=5))*((gen_match_2==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_2 + (gen_match_2!=5)))"
+                  "+ (pt_2>=100)*(((gen_match_1==5)*tauIDScaleFactorWeight_highpt_deeptauid_1 + (gen_match_1!=5))*((gen_match_2==5)*tauIDScaleFactorWeight_highpt_deeptauid_2 + (gen_match_2!=5))))", "taubyIsoIdWeight")
     return weight
 
 
@@ -337,7 +340,7 @@ def ZTT_embedded_process_selection(channel, era):
     if "mt" in channel:
         ztt_embedded_weights.extend([
             ("gen_match_1==4 && gen_match_2==5","emb_veto"),
-            ("embeddedDecayModeWeight", "decayMode_SF"),
+            ("(pt_2<100)*embeddedDecayModeWeight+(pt_2>=100)", "decayMode_SF"),
             ("idWeight_1*isoWeight_1", "lepton_sf"),
             tau_by_iso_id_weight(channel),
             triggerweight_emb(channel, era),
@@ -345,14 +348,14 @@ def ZTT_embedded_process_selection(channel, era):
     elif "et" in channel:
         ztt_embedded_weights.extend([
             ("gen_match_1==3 && gen_match_2==5","emb_veto"),
-            ("embeddedDecayModeWeight", "decayMode_SF"),
+            ("(pt_2<100)*embeddedDecayModeWeight+(pt_2>=100)", "decayMode_SF"),
             ("idWeight_1*isoWeight_1", "lepton_sf"),
             tau_by_iso_id_weight(channel),
             triggerweight_emb(channel, era),
             ])
     elif "tt" in channel:
         ztt_embedded_weights.extend([
-            ("embeddedDecayModeWeight", "decayMode_SF"),
+            ("(pt_1<100)*embeddedDecayModeWeight+(pt_1>=100)*(pt_2<100)*((decayMode_2==0)*0.975+(decayMode_2==1)*0.975*1.051+(decayMode_2==10)*0.975*0.975*0.975+(decayMode_2==11)*0.975*0.975*0.975*1.051)+(pt_2>=100)", "decayMode_SF"),
             ("gen_match_1==5 && gen_match_2==5","emb_veto"),
             tau_by_iso_id_weight(channel),
             triggerweight_emb(channel, era),
