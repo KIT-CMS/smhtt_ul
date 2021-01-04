@@ -486,8 +486,8 @@ def main(args):
             um.book([unit for d in {"qqh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*qqh_acceptance])
             um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_es, *met_unclustered, *btag_eff, *mistag_eff])
             um.book([unit for d in {'ztt', 'zj', 'zl', 'w'} & procS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*recoil_resolution, *recoil_response])
-            um.book([unit for d in {'ztt', 'zl'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zpt])
-            um.book([unit for d in {'ttt', 'ttl'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*top_pt])
+            um.book([unit for d in {'ztt', 'zl', 'zj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zpt])
+            um.book([unit for d in {'ttt', 'ttl', 'ttj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*top_pt])
             # Book variations common to multiple channels.
             if ch_ in ["et", "mt", "tt"]:
                 um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero])
