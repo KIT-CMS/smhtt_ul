@@ -2,7 +2,7 @@ from ntuple_processor import Histogram
 from ntuple_processor.utils import Selection
 
 m_sv_hist = Histogram("m_sv_puppi", "m_sv_puppi", [i for i in range(0, 255, 5)])
-mt_tot_hist = Histogram("mt_tot_puppi", "mt_tot_puppi", [i for i in range(0, 3900, 10)])
+mt_tot_hist = Histogram("mt_tot_puppi", "mt_tot_puppi", [i for i in list(range(0, 100, 50)) + list(range(50, 510, 10)) + list(range(500, 1025, 25)) + list(range(1000, 2050, 50)) + list(range(2000, 5100, 100))])
 
 
 lt_categorization = [
