@@ -51,28 +51,6 @@ anti_iso_split_lt = [ReplaceCutAndAddWeight("anti_iso_w", "tau_iso",
                     ]
 
 # Energy scales.
-# Tau energy scale.
-# mc_tau_es_3prong = [
-#         ChangeDataset("CMS_scale_t_mc_3prong_2017Up", "tauEsThreeProngUp"),
-#         ChangeDataset("CMS_scale_t_mc_3prong_2017Down", "tauEsThreeProngDown")
-#         ]
-#
-# mc_tau_es_3prong1pizero = [
-#         ChangeDataset("CMS_scale_t_mc_3prong1pizero_2017Up", "tauEsThreeProngOnePiZeroUp"),
-#         ChangeDataset("CMS_scale_t_mc_3prong1pizero_2017Down", "tauEsThreeProngOnePiZeroDown")
-#         ]
-#
-# mc_tau_es_1prong = [
-#         ChangeDataset("CMS_scale_t_mc_1prong_2017Up", "tauEsOneProngUp"),
-#         ChangeDataset("CMS_scale_t_mc_1prong_2017Down", "tauEsOneProngDown")
-#         ]
-#
-# mc_tau_es_1prong1pizero = [
-#         ChangeDataset("CMS_scale_t_mc_1prong1pizero_2017Up", "tauEsOneProngOnePiZeroUp"),
-#         ChangeDataset("CMS_scale_t_mc_1prong1pizero_2017Down", "tauEsOneProngOnePiZeroDown")
-#         ]
-#
-
 # Previously defined with 2017 in name.
 tau_es_3prong = [
         ChangeDataset("CMS_scale_t_3prong_EraUp", "tauEsThreeProngUp"),
