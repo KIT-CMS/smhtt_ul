@@ -324,444 +324,68 @@ zll_mt_fake_rate_2018 = [*[AddWeight("CMS_fake_m_{}_2018Up".format(region), Weig
                          *[AddWeight("CMS_fake_m_{}_2018Down".format(region), Weight("(1.0+{})".format(_mfake_dict["2018"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2018"].keys()],
                          ]
 
-_lteffCutDEra = {
-    "2016": {
-        "mt": "23",
-        "et": "26"},
-    "2017": {
-        "mt": "25",
-        "et": "28"},
-    "2018": {
-        "mt": "25",
-        "et": "33"},
-}
-
 # Trigger efficiency uncertainties.
-lep_trigger_eff_mt_2016 = [
-        AddWeight("CMS_eff_trigger_mt_2016Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_trigger_mt_2016Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_mt_2016Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["mt"]), "xtrg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_mt_2016Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["mt"]), "xtrg_mt_eff_weight"))
-        ]
-lep_trigger_eff_mt_2017 = [
-        AddWeight("CMS_eff_trigger_mt_2017Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_trigger_mt_2017Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_mt_2017Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["mt"]), "xtrg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_mt_2017Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["mt"]), "xtrg_mt_eff_weight"))
-        ]
-lep_trigger_eff_mt_2018 = [
-        AddWeight("CMS_eff_trigger_mt_2018Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_trigger_mt_2018Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_mt_2018Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["mt"]), "xtrg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_mt_2018Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["mt"]), "xtrg_mt_eff_weight"))
+trigger_eff_mt = [
+        ReplaceWeight("CMS_eff_trigger_mt_EraUp", "triggerweight", Weight("mtau_triggerweight_ic_singlelep_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_trigger_mt_EraDown", "triggerweight", Weight("mtau_triggerweight_ic_singlelep_down", "triggerweight")),
+        ReplaceWeight("CMS_eff_xtrigger_l_mt_EraUp", "triggerweight", Weight("mtau_triggerweight_ic_crosslep_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_xtrigger_l_mt_EraDown", "triggerweight", Weight("mtau_triggerweight_ic_crosslep_down", "triggerweight")),
+        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_EraUp".format(dm=dm), "triggerweight", Weight("mtau_triggerweight_ic_dm{dm}_up".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_EraDown".format(dm=dm), "triggerweight", Weight("mtau_triggerweight_ic_dm{dm}_down".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        ReplaceWeight("CMS_eff_trigger_single_t_EraUp", "triggerweight", Weight("mtau_triggerweight_ic_singletau_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_trigger_single_t_EraDown", "triggerweight", Weight("mtau_triggerweight_ic_singletau_down", "triggerweight")),
         ]
 
-lep_trigger_eff_mt_emb_2016 = [
-        AddWeight("CMS_eff_trigger_emb_mt_2016Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_trigger_emb_mt_2016Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_mt_2016Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["mt"]), "xtrg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_mt_2016Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["mt"]), "xtrg_mt_eff_weight"))
-        ]
-lep_trigger_eff_mt_emb_2017 = [
-        AddWeight("CMS_eff_trigger_emb_mt_2017Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_trigger_emb_mt_2017Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_mt_2017Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["mt"]), "xtrg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_mt_2017Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["mt"]), "xtrg_mt_eff_weight"))
-        ]
-lep_trigger_eff_mt_emb_2018 = [
-        AddWeight("CMS_eff_trigger_emb_mt_2018Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_trigger_emb_mt_2018Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["mt"]), "trg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_mt_2018Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["mt"]), "xtrg_mt_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_mt_2018Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["mt"]), "xtrg_mt_eff_weight"))
+trigger_eff_mt_emb = [
+        ReplaceWeight("CMS_eff_trigger_emb_mt_EraUp", "triggerweight", Weight("mtau_triggerweight_ic_singlelep_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_trigger_emb_mt_EraDown", "triggerweight", Weight("mtau_triggerweight_ic_singlelep_down", "triggerweight")),
+        ReplaceWeight("CMS_eff_xtrigger_l_emb_mt_EraUp", "triggerweight", Weight("mtau_triggerweight_ic_crosslep_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_xtrigger_l_emb_mt_EraDown", "triggerweight", Weight("mtau_triggerweight_ic_crosslep_down", "triggerweight")),
+        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_mt_dm{dm}_EraUp".format(dm=dm), "triggerweight", Weight("mtau_triggerweight_ic_dm{dm}_up".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_mt_dm{dm}_EraDown".format(dm=dm), "triggerweight", Weight("mtau_triggerweight_ic_dm{dm}_down".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        ReplaceWeight("CMS_eff_trigger_single_t_emb_EraUp", "triggerweight", Weight("mtau_triggerweight_ic_singletau_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_trigger_single_t_emb_EraDown", "triggerweight", Weight("mtau_triggerweight_ic_singletau_down", "triggerweight")),
         ]
 
-lep_trigger_eff_et_2016 = [
-        AddWeight("CMS_eff_trigger_et_2016Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_trigger_et_2016Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_et_2016Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["et"]), "xtrg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_et_2016Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["et"]), "xtrg_et_eff_weight"))
-        ]
-lep_trigger_eff_et_2017 = [
-        AddWeight("CMS_eff_trigger_et_2017Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_trigger_et_2017Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_et_2017Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["et"]), "xtrg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_et_2017Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["et"]), "xtrg_et_eff_weight"))
-        ]
-lep_trigger_eff_et_2018 = [
-        AddWeight("CMS_eff_trigger_et_2018Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_trigger_et_2018Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_et_2018Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["et"]), "xtrg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_et_2018Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["et"]), "xtrg_et_eff_weight"))
+trigger_eff_et = [
+        ReplaceWeight("CMS_eff_trigger_et_EraUp", "triggerweight", Weight("etau_triggerweight_ic_singlelep_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_trigger_et_EraDown", "triggerweight", Weight("etau_triggerweight_ic_singlelep_down", "triggerweight")),
+        ReplaceWeight("CMS_eff_xtrigger_l_et_EraUp", "triggerweight", Weight("etau_triggerweight_ic_crosslep_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_xtrigger_l_et_EraDown", "triggerweight", Weight("etau_triggerweight_ic_crosslep_down", "triggerweight")),
+        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_EraUp".format(dm=dm), "triggerweight", Weight("etau_triggerweight_ic_dm{dm}_up".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_EraDown".format(dm=dm), "triggerweight", Weight("etau_triggerweight_ic_dm{dm}_down".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        ReplaceWeight("CMS_eff_trigger_single_t_EraUp", "triggerweight", Weight("etau_triggerweight_ic_singletau_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_trigger_single_t_EraDown", "triggerweight", Weight("etau_triggerweight_ic_singletau_down", "triggerweight")),
         ]
 
-lep_trigger_eff_et_emb_2016 = [
-        AddWeight("CMS_eff_trigger_emb_et_2016Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_trigger_emb_et_2016Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_et_2016Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["et"]), "xtrg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_et_2016Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2016"]["et"]), "xtrg_et_eff_weight"))
-        ]
-lep_trigger_eff_et_emb_2017 = [
-        AddWeight("CMS_eff_trigger_emb_et_2017Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_trigger_emb_et_2017Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_et_2017Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["et"]), "xtrg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_et_2017Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2017"]["et"]), "xtrg_et_eff_weight"))
-        ]
-lep_trigger_eff_et_emb_2018 = [
-        AddWeight("CMS_eff_trigger_emb_et_2018Up", Weight("(1.0*(pt_1<={pt})+1.02*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_trigger_emb_et_2018Down", Weight("(1.0*(pt_1<={pt})+0.98*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["et"]), "trg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_et_2018Up", Weight("(1.02*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["et"]), "xtrg_et_eff_weight")),
-        AddWeight("CMS_eff_xtrigger_l_emb_et_2018Down", Weight("(0.98*(pt_1<={pt})+1.0*(pt_1>{pt}))".format(pt=_lteffCutDEra["2018"]["et"]), "xtrg_et_eff_weight"))
+trigger_eff_et_emb = [
+        ReplaceWeight("CMS_eff_trigger_emb_et_EraUp", "triggerweight", Weight("etau_triggerweight_ic_singlelep_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_trigger_emb_et_EraDown", "triggerweight", Weight("etau_triggerweight_ic_singlelep_down", "triggerweight")),
+        ReplaceWeight("CMS_eff_xtrigger_l_emb_et_EraUp", "triggerweight", Weight("etau_triggerweight_ic_crosslep_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_xtrigger_l_emb_et_EraDown", "triggerweight", Weight("etau_triggerweight_ic_crosslep_down", "triggerweight")),
+        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_et_dm{dm}_EraUp".format(dm=dm), "triggerweight", Weight("etau_triggerweight_ic_dm{dm}_up".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_et_dm{dm}_EraDown".format(dm=dm), "triggerweight", Weight("etau_triggerweight_ic_dm{dm}_down".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+        ReplaceWeight("CMS_eff_trigger_single_t_emb_EraUp", "triggerweight", Weight("etau_triggerweight_ic_singletau_up", "triggerweight")),
+        ReplaceWeight("CMS_eff_trigger_single_t_emb_EraDown", "triggerweight", Weight("etau_triggerweight_ic_singletau_down", "triggerweight")),
         ]
 
-_lteff_exp = {
-    "2016": {
-        "et": "(pt_1>=26)*(singleTriggerDataEfficiencyWeightKIT_1/singleTriggerMCEfficiencyWeightKIT_1)",
-        "mt": "(pt_1>=23)*(singleTriggerDataEfficiencyWeightKIT_1/singleTriggerMCEfficiencyWeightKIT_1)"},
-    "2017": {
-        "et": "(pt_1>=28)*(singleTriggerDataEfficiencyWeightKIT_1/singleTriggerMCEfficiencyWeightKIT_1)",
-        "mt": "(pt_1>=25)*(singleTriggerDataEfficiencyWeightKIT_1/singleTriggerMCEfficiencyWeightKIT_1)"},
-    "2018": {
-        "et": "(pt_1>=36)*trigger_32_35_Weight_1+(pt_1>=33)*(pt_1<36)*(trigger_32_Weight_1)",
-        "mt": "(pt_1>=25)*(pt_1<28)*(trigger_24_Weight_1)+(pt_1>=28)*(trigger_24_27_Weight_1)"},
-}
-_xtrg_lep_weight = {
-    "2016": {
-        "et": "(crossTriggerDataEfficiencyWeightKIT_1/crossTriggerMCEfficiencyWeightKIT_1)",
-        "mt": "(crossTriggerDataEfficiencyWeightKIT_1/crossTriggerMCEfficiencyWeightKIT_1)"},
-    "2017": {
-        "et": "(crossTriggerDataEfficiencyWeight_1/crossTriggerMCEfficiencyWeight_1)",
-        "mt": "(crossTriggerDataEfficiencyWeight_1/crossTriggerMCEfficiencyWeight_1)"},
-    "2018": {
-        "et": "(crossTriggerDataEfficiencyWeight_1/crossTriggerMCEfficiencyWeight_1)",
-        "mt": "(crossTriggerDataEfficiencyWeight_1/crossTriggerMCEfficiencyWeight_1)"}
-}
-_tau_trigger_wstring = "({lt_eff}+(pt_1<{ptcut})*(abs(eta_2)<2.1)*{xtrigger_leptonweight}*(((decayMode_2=={dm})*((crossTriggerDataEfficiencyWeight_tight_DeepTau_2/(crossTriggerMCEfficiencyWeight_tight_DeepTau_2*((pt_1<{ptcut})*(abs(eta_2)<2.1))+1.0*((pt_1>={ptcut})+(abs(eta_2)>=2.1))))*(1{operator}TMath::Sqrt(TMath::Power((crossTriggerDataEfficiencyWeight_tight_DeepTau_2-crossTriggerDataEfficiencyWeightDown_tight_DeepTau_2)/(crossTriggerDataEfficiencyWeight_tight_DeepTau_2*((pt_1<{ptcut})*(abs(eta_2)<2.1))+1.0*((pt_1>={ptcut})+(abs(eta_2)>=2.1))),2)+TMath::Power((crossTriggerMCEfficiencyWeight_tight_DeepTau_2-crossTriggerMCEfficiencyWeightDown_tight_DeepTau_2)/(crossTriggerMCEfficiencyWeight_tight_DeepTau_2*((pt_1<{ptcut})*(abs(eta_2)<2.1))+1.0*((pt_1>={ptcut})+(abs(eta_2)>=2.1))),2)))))+((decayMode_2!={dm})*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/(crossTriggerMCEfficiencyWeight_tight_DeepTau_2*((pt_1<{ptcut})*(abs(eta_2)<2.1))+1.0*((pt_1>={ptcut})+(abs(eta_2)>=2.1)))))))"
-tau_trigger_eff_et_2016 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2016Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["et"],
-                                                           ptcut=_lteffCutDEra["2016"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["et"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2016Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["et"],
-                                                           ptcut=_lteffCutDEra["2016"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["et"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-]
-tau_trigger_eff_et_2017 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2017Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2017"]["et"],
-                                                           ptcut=_lteffCutDEra["2017"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2017"]["et"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2017Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2017"]["et"],
-                                                           ptcut=_lteffCutDEra["2017"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2017"]["et"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-]
-tau_trigger_eff_et_2018 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2018Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["et"],
-                                                           ptcut=_lteffCutDEra["2018"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["et"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2018Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["et"],
-                                                           ptcut=_lteffCutDEra["2018"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["et"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-]
-tau_trigger_eff_mt_2016 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2016Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["mt"],
-                                                           ptcut=_lteffCutDEra["2016"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2016Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["mt"],
-                                                           ptcut=_lteffCutDEra["2016"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-]
-tau_trigger_eff_mt_2017 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2017Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2017"]["mt"],
-                                                           ptcut=_lteffCutDEra["2017"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2017"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2017Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2017"]["mt"],
-                                                           ptcut=_lteffCutDEra["2017"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2017"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-]
-tau_trigger_eff_mt_2018 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2018Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["mt"],
-                                                           ptcut=_lteffCutDEra["2018"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2018Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["mt"],
-                                                           ptcut=_lteffCutDEra["2018"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-]
-
-_lteff_exp = {
-    "2016": {
-        "et": "(pt_1>=26)*(singleTriggerDataEfficiencyWeightKIT_1/singleTriggerEmbeddedEfficiencyWeightKIT_1)",
-        "mt": "(pt_1>=23)*(singleTriggerDataEfficiencyWeightKIT_1/singleTriggerEmbeddedEfficiencyWeightKIT_1)"},
-    "2017": {
-        "et": "((pt_1>=28)*(((pt_1<33)*trigger_27_Weight_1+(pt_1>=33)*(pt_1<36)*trigger_27_32_Weight_1+(pt_1>=36)*trigger_27_32_35_Weight_1)*(abs(eta_1) < 1.5||pt_1>=40) + singleTriggerDataEfficiencyWeightKIT_1*(abs(eta_1)>=1.5)*(pt_1<40)))",
-        "mt": "(pt_1>=25 && pt_1<28)*(trigger_24_Weight_1)+(pt_1>=28)*(trigger_24_27_Weight_1)"},
-    "2018": {
-        "et": "(pt_1>=36)*trigger_32_35_Weight_1+(pt_1>=33)*(pt_1<36)*(trigger_32_Weight_1)",
-        "mt": "(pt_1>=25)*(pt_1<28)*(trigger_24_Weight_1)+(pt_1>=28)*(trigger_24_27_Weight_1)"},
-}
-_xtrg_lep_weight = {
-    "2016": {
-        "et": "(crossTriggerDataEfficiencyWeightKIT_1/crossTriggerEmbeddedEfficiencyWeightKIT_1)",
-        "mt": "(crossTriggerDataEfficiencyWeightKIT_1/crossTriggerEmbeddedEfficiencyWeightKIT_1)"},
-    "2017": {
-        "et": "crossTriggerEmbeddedWeight_1",
-        "mt": "crossTriggerEmbeddedWeight_1"},
-    "2018": {
-        "et": "crossTriggerEmbeddedWeight_1",
-        "mt": "crossTriggerEmbeddedWeight_1"}
-}
-_tau_trigger_wstring = "({lt_eff}+(pt_1<{ptcut})*(abs(eta_2)<2.1)*{xtrigger_leptonweight}*(((decayMode_2=={dm})*((crossTriggerDataEfficiencyWeight_tight_DeepTau_2/(crossTriggerEMBEfficiencyWeight_tight_DeepTau_2*((pt_1<{ptcut})*(abs(eta_2)<2.1))+1.0*((pt_1>={ptcut})+(abs(eta_2)>=2.1)))*(1{operator}TMath::Sqrt(TMath::Power((crossTriggerDataEfficiencyWeight_tight_DeepTau_2-crossTriggerDataEfficiencyWeightDown_tight_DeepTau_2)/(crossTriggerDataEfficiencyWeight_tight_DeepTau_2*(pt_1<{ptcut})*(abs(eta_2)<2.1)+1.0*((pt_1>={ptcut})+(abs(eta_2)>=2.1))),2)+TMath::Power((crossTriggerEMBEfficiencyWeight_tight_DeepTau_2-crossTriggerEMBEfficiencyWeightDown_tight_DeepTau_2)/(crossTriggerEMBEfficiencyWeight_tight_DeepTau_2*(pt_1<{ptcut})*(abs(eta_2)<2.1)+1.0*((pt_1>{ptcut})+(abs(eta_2)>=2.1))),2)))))+((decayMode_2!={dm})*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/(crossTriggerEMBEfficiencyWeight_tight_DeepTau_2*(pt_1<{ptcut})*(abs(eta_2)<2.1)+1.0*((pt_1>{ptcut})+(abs(eta_2)>=2.1))))))))"
-_tau_trigger_wstring_2017et = "{lt_eff}+(pt_1<{ptcut})*((abs(eta_1)>=1.5)*crossTriggerDataEfficiencyWeight_1*(((decayMode_2=={dm})*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2{operator}(crossTriggerDataEfficiencyWeight_tight_DeepTau_2-crossTriggerDataEfficiencyWeightDown_tight_DeepTau_2)))+((decayMode_2!={dm})*crossTriggerDataEfficiencyWeight_tight_DeepTau_2))+(abs(eta_1)<1.5)*{xtrigger_leptonweight}*(((decayMode_2=={dm})*((crossTriggerDataEfficiencyWeight_tight_DeepTau_2/(crossTriggerEMBEfficiencyWeight_tight_DeepTau_2*(pt_1<{ptcut})*(abs(eta_1)<1.5)+1.0*((pt_1>={ptcut})+(abs(eta_1)>=1.5))))*(1{operator}TMath::Sqrt(TMath::Power((crossTriggerDataEfficiencyWeight_tight_DeepTau_2-crossTriggerDataEfficiencyWeightDown_tight_DeepTau_2)/(crossTriggerDataEfficiencyWeight_tight_DeepTau_2*(pt_1<{ptcut})*(abs(eta_1)<1.5)+1.0*((pt_1>={ptcut})+(abs(eta_1)>=1.5))),2)+TMath::Power((crossTriggerEMBEfficiencyWeight_tight_DeepTau_2-crossTriggerEMBEfficiencyWeightDown_tight_DeepTau_2)/(crossTriggerEMBEfficiencyWeight_tight_DeepTau_2*(pt_1<{ptcut})*(abs(eta_1)<1.5)+1.0*((pt_1>={ptcut})+(abs(eta_1)>=1.5))),2)))))+((decayMode_2!={dm})*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/(crossTriggerEMBEfficiencyWeight_tight_DeepTau_2*(pt_1<{ptcut})*(abs(eta_1)<1.5)+1.0*((pt_1>={ptcut})+(abs(eta_1)>=1.5)))))))"
-
-tau_trigger_eff_et_emb_2016 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2016Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["et"],
-                                                           ptcut=_lteffCutDEra["2016"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["et"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2016Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["et"],
-                                                           ptcut=_lteffCutDEra["2016"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["et"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_et_dm{dm}_2016Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["et"],
-                                                           ptcut=_lteffCutDEra["2016"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["et"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_et_dm{dm}_2016Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["et"],
-                                                           ptcut=_lteffCutDEra["2016"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["et"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        ]
-tau_trigger_eff_et_emb_2017 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2017Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring_2017et.format(dm=dm,
-                                                                  lt_eff=_lteff_exp["2017"]["et"],
-                                                                  ptcut=_lteffCutDEra["2017"]["et"],
-                                                                  xtrigger_leptonweight=_xtrg_lep_weight["2017"]["et"],
-                                                                  operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2017Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring_2017et.format(dm=dm,
-                                                                  lt_eff=_lteff_exp["2017"]["et"],
-                                                                  ptcut=_lteffCutDEra["2017"]["et"],
-                                                                  xtrigger_leptonweight=_xtrg_lep_weight["2017"]["et"],
-                                                                  operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_et_dm{dm}_2017Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring_2017et.format(dm=dm,
-                                                                  lt_eff=_lteff_exp["2017"]["et"],
-                                                                  ptcut=_lteffCutDEra["2017"]["et"],
-                                                                  xtrigger_leptonweight=_xtrg_lep_weight["2017"]["et"],
-                                                                  operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_et_dm{dm}_2017Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring_2017et.format(dm=dm,
-                                                                  lt_eff=_lteff_exp["2017"]["et"],
-                                                                  ptcut=_lteffCutDEra["2017"]["et"],
-                                                                  xtrigger_leptonweight=_xtrg_lep_weight["2017"]["et"],
-                                                                  operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        ]
-tau_trigger_eff_et_emb_2018 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2018Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["et"],
-                                                           ptcut=_lteffCutDEra["2018"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["et"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_et_dm{dm}_2018Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["et"],
-                                                           ptcut=_lteffCutDEra["2018"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["et"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_et_dm{dm}_2018Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["et"],
-                                                           ptcut=_lteffCutDEra["2018"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["et"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_et_dm{dm}_2018Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["et"],
-                                                           ptcut=_lteffCutDEra["2018"]["et"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["et"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        ]
-tau_trigger_eff_mt_emb_2016 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2016Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["mt"],
-                                                           ptcut=_lteffCutDEra["2016"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2016Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["mt"],
-                                                           ptcut=_lteffCutDEra["2016"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_mt_dm{dm}_2016Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["mt"],
-                                                           ptcut=_lteffCutDEra["2016"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_mt_dm{dm}_2016Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2016"]["mt"],
-                                                           ptcut=_lteffCutDEra["2016"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2016"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        ]
-tau_trigger_eff_mt_emb_2017 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2017Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2017"]["mt"],
-                                                           ptcut=_lteffCutDEra["2017"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2017"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2017Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2017"]["mt"],
-                                                           ptcut=_lteffCutDEra["2017"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2017"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_mt_dm{dm}_2017Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2017"]["mt"],
-                                                           ptcut=_lteffCutDEra["2017"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2017"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_mt_dm{dm}_2017Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2017"]["mt"],
-                                                           ptcut=_lteffCutDEra["2017"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2017"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        ]
-tau_trigger_eff_mt_emb_2018 = [
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2018Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["mt"],
-                                                           ptcut=_lteffCutDEra["2018"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_mt_dm{dm}_2018Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["mt"],
-                                                           ptcut=_lteffCutDEra["2018"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_mt_dm{dm}_2018Up".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["mt"],
-                                                           ptcut=_lteffCutDEra["2018"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["mt"],
-                                                           operator="+"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_xtrigger_t_emb_mt_dm{dm}_2018Down".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_trigger_wstring.format(dm=dm,
-                                                           lt_eff=_lteff_exp["2018"]["mt"],
-                                                           ptcut=_lteffCutDEra["2018"]["mt"],
-                                                           xtrigger_leptonweight=_xtrg_lep_weight["2018"]["mt"],
-                                                           operator="-"), "triggerweight")) for dm in [0, 1, 10, 11]],
-        ]
-
-_tau_tt_wstring = "(((decayMode_1=={dm})*((crossTriggerDataEfficiencyWeight_tight_DeepTau_1/crossTriggerMCEfficiencyWeight_tight_DeepTau_1)*(1{operator}TMath::Sqrt(TMath::Power((crossTriggerDataEfficiencyWeight_tight_DeepTau_1-crossTriggerDataEfficiencyWeightDown_tight_DeepTau_1)/crossTriggerDataEfficiencyWeight_tight_DeepTau_1,2)+TMath::Power((crossTriggerMCEfficiencyWeight_tight_DeepTau_1-crossTriggerMCEfficiencyWeightDown_tight_DeepTau_1)/crossTriggerMCEfficiencyWeight_tight_DeepTau_1,2))))+((decayMode_1!={dm})*(crossTriggerDataEfficiencyWeight_tight_DeepTau_1/crossTriggerMCEfficiencyWeight_tight_DeepTau_1)))*(((decayMode_2=={dm})*((crossTriggerDataEfficiencyWeight_tight_DeepTau_2/crossTriggerMCEfficiencyWeight_tight_DeepTau_2)*(1{operator}TMath::Sqrt(TMath::Power((crossTriggerDataEfficiencyWeight_tight_DeepTau_2-crossTriggerDataEfficiencyWeightDown_tight_DeepTau_2)/crossTriggerDataEfficiencyWeight_tight_DeepTau_2,2)+TMath::Power((crossTriggerMCEfficiencyWeight_tight_DeepTau_2-crossTriggerMCEfficiencyWeightDown_tight_DeepTau_2)/crossTriggerMCEfficiencyWeight_tight_DeepTau_2,2)))))+((decayMode_2!={dm})*(crossTriggerDataEfficiencyWeight_tight_DeepTau_2/crossTriggerMCEfficiencyWeight_tight_DeepTau_2))))"
 tau_trigger_eff_tt = [
-        *[ReplaceWeight("CMS_eff_trigger_tt_dm{dm}_EraUp".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_tt_wstring.format(operator="+", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_trigger_tt_dm{dm}_EraDown".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_tt_wstring.format(operator="-", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
-        ]
-tau_trigger_eff_emb_tt = [
-        *[ReplaceWeight("CMS_eff_trigger_emb_tt_dm{dm}_EraUp".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_tt_wstring.replace("MC", "EMB").format(operator="+", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_trigger_emb_tt_dm{dm}_EraDown".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_tt_wstring.replace("MC", "EMB").format(operator="-", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_trigger_tt_dm{dm}_EraUp".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_tt_wstring.replace("MC", "EMB").format(operator="+", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
-        *[ReplaceWeight("CMS_eff_trigger_tt_dm{dm}_EraDown".format(dm=dm),
-                        "triggerweight",
-                        Weight(_tau_tt_wstring.replace("MC", "EMB").format(operator="-", dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
-        ]
+    *[ReplaceWeight("CMS_eff_xtrigger_t_tt_dm{dm}_EraUp".format(dm=dm), "triggerweight", Weight("tautau_triggerweight_ic_lowpt_dm{dm}_up".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+    *[ReplaceWeight("CMS_eff_xtrigger_t_tt_dm{dm}_EraDown".format(dm=dm), "triggerweight", Weight("tautau_triggerweight_ic_lowpt_dm{dm}_down".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+    *[ReplaceWeight("CMS_eff_xtrigger_t_tt_dm{dm}_highpT_EraUp".format(dm=dm), "triggerweight", Weight("tautau_triggerweight_ic_highpt_dm{dm}_up".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+    *[ReplaceWeight("CMS_eff_xtrigger_t_tt_dm{dm}_highpT_EraDown".format(dm=dm), "triggerweight", Weight("tautau_triggerweight_ic_highpt_dm{dm}_down".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+    ReplaceWeight("CMS_eff_trigger_single_t_EraUp", "triggerweight", Weight("tautau_triggerweight_ic_singletau_up", "triggerweight")),
+    ReplaceWeight("CMS_eff_trigger_single_t_EraDown", "triggerweight", Weight("tautau_triggerweight_ic_singletau_down", "triggerweight")),
+    ]
+
+tau_trigger_eff_tt_emb = [
+    *[ReplaceWeight("CMS_eff_xtrigger_t_emb_tt_dm{dm}_EraUp".format(dm=dm), "triggerweight", Weight("tautau_triggerweight_ic_lowpt_dm{dm}_up".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+    *[ReplaceWeight("CMS_eff_xtrigger_t_emb_tt_dm{dm}_EraDown".format(dm=dm), "triggerweight", Weight("tautau_triggerweight_ic_lowpt_dm{dm}_down".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+    *[ReplaceWeight("CMS_eff_xtrigger_t_emb_tt_dm{dm}_highpT_EraUp".format(dm=dm), "triggerweight", Weight("tautau_triggerweight_ic_highpt_dm{dm}_up".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+    *[ReplaceWeight("CMS_eff_xtrigger_t_emb_tt_dm{dm}_highpT_EraDown".format(dm=dm), "triggerweight", Weight("tautau_triggerweight_ic_highpt_dm{dm}_down".format(dm=dm), "triggerweight")) for dm in [0, 1, 10, 11]],
+    ReplaceWeight("CMS_eff_trigger_single_t_emb_EraUp", "triggerweight", Weight("tautau_triggerweight_ic_singletau_up", "triggerweight")),
+    ReplaceWeight("CMS_eff_trigger_single_t_emb_EraDown", "triggerweight", Weight("tautau_triggerweight_ic_singletau_down", "triggerweight")),
+    ]
 
 # Embedding specific variations.
 emb_e_es = [
