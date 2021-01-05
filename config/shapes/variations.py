@@ -439,96 +439,124 @@ top_pt = [
         ]
 
 _ff_variations_lt = [
-                     "ff_qcd_mvis_{ch}{era}{shift}",
-                     "ff_qcd_mvis_osss_{ch}{era}{shift}",
-                     "ff_corr_qcd_mvis_{ch}{era}{shift}",
-                     "ff_corr_qcd_mvis_osss_{ch}{era}{shift}",
-
-                     "ff_qcd_muiso_{ch}{era}{shift}",
-                     "ff_corr_qcd_muiso_{ch}{era}{shift}",
-
-                     "ff_qcd_dr0_njet0_morphed_stat_{ch}{era}{shift}",
-                     "ff_qcd_dr0_njet1_morphed_stat_{ch}{era}{shift}",
-                     "ff_qcd_dr0_njet2_morphed_stat_{ch}{era}{shift}",
-
-                     "ff_qcd_dr0_njet0_stat_{ch}{era}{shift}",
-                     "ff_qcd_dr0_njet1_stat_{ch}{era}{shift}",
-                     "ff_qcd_dr0_njet2_stat_{ch}{era}{shift}",
-
-                     "ff_qcd_mc_{ch}{era}{shift}",
-
-                     "ff_qcd_syst_{ch}{era}{shift}",
-
-                     "ff_w_lepPt_{ch}{era}{shift}",
-                     "ff_corr_w_lepPt_{ch}{era}{shift}",
-
-                     "ff_corr_w_mt_{ch}{era}{shift}",
-                     "ff_w_mt_{ch}{era}{shift}",
-
-                     "ff_w_syst_{ch}{era}{shift}",
-
-                     "ff_w_dr0_njet0_morphed_stat_{ch}{era}{shift}",
-                     "ff_w_dr0_njet1_morphed_stat_{ch}{era}{shift}",
-                     "ff_w_dr0_njet2_morphed_stat_{ch}{era}{shift}",
-                     "ff_w_dr1_njet0_morphed_stat_{ch}{era}{shift}",
-                     "ff_w_dr1_njet1_morphed_stat_{ch}{era}{shift}",
-                     "ff_w_dr1_njet2_morphed_stat_{ch}{era}{shift}",
-
-                     "ff_w_dr0_njet0_stat_{ch}{era}{shift}",
-                     "ff_w_dr0_njet1_stat_{ch}{era}{shift}",
-                     "ff_w_dr0_njet2_stat_{ch}{era}{shift}",
-                     "ff_w_dr1_njet0_stat_{ch}{era}{shift}",
-                     "ff_w_dr1_njet1_stat_{ch}{era}{shift}",
-                     "ff_w_dr1_njet2_stat_{ch}{era}{shift}",
-
-                     "ff_w_mc_{ch}{era}{shift}",
-
-                     "ff_frac_w_{ch}{era}{shift}",
-
-                     "ff_corr_tt_syst_{ch}{era}{shift}",
-                     "ff_tt_morphed_{ch}{era}{shift}",
-                     "ff_tt_sf_{ch}{era}{shift}",
-
-                     "ff_tt_dr0_njet0_morphed_stat_{ch}{era}{shift}",
-                     "ff_tt_dr0_njet1_morphed_stat_{ch}{era}{shift}",
-
-                     "ff_tt_stat_{ch}{era}{shift}",
+        "ff_total_qcd_stat_njet0_jet_pt_low_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_low_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_low_unc3_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_med_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_med_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_med_unc3_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_high_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_high_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_high_unc3_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_low_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_low_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_low_unc3_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_med_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_med_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_med_unc3_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_high_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_high_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_high_unc3_{ch}{era}{shift}",
+	"ff_total_qcd_stat_ss_njets0_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_ss_njets0_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_ss_njets1_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_ss_njets1_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_l_pt_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_l_pt_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_stat_iso_unc1_{ch}{era}{shift}",
+	"ff_total_qcd_stat_iso_unc2_{ch}{era}{shift}",
+	"ff_total_qcd_syst_{ch}{era}{shift}",
+	"ff_total_qcd_syst_iso_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_low_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_low_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_low_unc3_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_low_unc4_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_med_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_med_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_med_unc3_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_med_unc4_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_high_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_high_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_high_unc3_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet0_jet_pt_high_unc4_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_low_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_low_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_low_unc3_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_low_unc4_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_med_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_med_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_med_unc3_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_med_unc4_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_high_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_high_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_high_unc3_{ch}{era}{shift}",
+	"ff_total_wjets_stat_njet1_jet_pt_high_unc4_{ch}{era}{shift}",
+	"ff_total_wjets_stat_met_njets0_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_met_njets0_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_met_njets1_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_met_njets1_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_l_pt_njets0_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_l_pt_njets0_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_l_pt_njets1_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_l_pt_njets1_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_stat_extrap_unc1_{ch}{era}{shift}",
+	"ff_total_wjets_stat_extrap_unc2_{ch}{era}{shift}",
+	"ff_total_wjets_syst_{ch}{era}{shift}",
+	"ff_total_wjets_frac_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_low_unc1_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_low_unc2_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_low_unc3_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_med_unc1_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_med_unc2_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_med_unc3_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_high_unc1_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_high_unc2_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_jet_pt_high_unc3_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_met_unc1_{ch}{era}{shift}",
+	"ff_total_ttbar_stat_met_unc2_{ch}{era}{shift}",
+	"ff_total_ttbar_syst_{ch}{era}{shift}",
+	"ff_total_ttbar_frac_{ch}{era}{shift}",
+	"ff_total_low_pt_{ch}{era}{shift}",
 ]
 #  Variations on the jet backgrounds estimated with the fake factor method.
 ff_variations_lt = [
-        ReplaceCutAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift=shift.capitalize(), era="Era", ch="Channel_").replace("w_dr0", "w_lowdR").replace("w_dr1", "w_highdR").replace("_dr0", "")), "tau_iso",
-                               Cut("byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
-                               Weight("ff2_{syst}".format(syst=syst.format(shift=shift, era="", ch="")), "fake_factor")
+        ReplaceCutAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift=shift.capitalize(), era="Era", ch="Channel_")), "tau_iso",
+                               Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                               Weight("{syst}".format(syst=syst.format(shift=shift, era="", ch="")), "fake_factor")
                                ) for shift in ["up", "down"] for syst in _ff_variations_lt
         ]
 
+_ff_variations_tt = [
+        "ff_total_qcd_stat_njet0_jet_pt_low_unc1{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_low_unc2{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_low_unc3{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_med_unc1{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_med_unc2{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_med_unc3{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_high_unc1{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_high_unc2{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet0_jet_pt_high_unc3{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_low_unc1{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_low_unc2{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_low_unc3{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_med_unc1{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_med_unc2{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_med_unc3{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_high_unc1{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_high_unc2{ch}{era}{shift}",
+	"ff_total_qcd_stat_njet1_jet_pt_high_unc3{ch}{era}{shift}",
+	"ff_total_qcd_stat_dR_unc1{ch}{era}{shift}",
+	"ff_total_qcd_stat_dR_unc2{ch}{era}{shift}",
+	"ff_total_qcd_stat_pt_unc1{ch}{era}{shift}",
+	"ff_total_qcd_stat_pt_unc2{ch}{era}{shift}",
+	"ff_total_qcd_syst{ch}{era}{shift}",
+	"ff_total_ttbar_syst{ch}{era}{shift}",
+]
 ff_variations_tt = [
-        ReplaceCutAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift=shift.capitalize(), era="_Era", ch="_tt").replace("dr0_", "")), "tau_iso",
-                               Cut("(byTightDeepTau2017v2p1VSjet_2>0.5&&byTightDeepTau2017v2p1VSjet_1<0.5&&byVLooseDeepTau2017v2p1VSjet_1>0.5)||(byTightDeepTau2017v2p1VSjet_1>0.5&&byTightDeepTau2017v2p1VSjet_2<0.5&&byVLooseDeepTau2017v2p1VSjet_2>0.5)", "tau_anti_iso"),
-                               Weight("(0.5*ff1_{syst}*(byTightDeepTau2017v2p1VSjet_1<0.5)+0.5*ff2_{syst}*(byTightDeepTau2017v2p1VSjet_2<0.5))".format(syst=syst.format(shift="_"+shift, era="", ch="")), "fake_factor")
-                               ) for shift in ["up", "down"] for syst in ["ff_qcd_dr0_njet0_morphed_stat{ch}{era}{shift}",
-                                                                          "ff_qcd_dr0_njet1_morphed_stat{ch}{era}{shift}",
-                                                                          "ff_qcd_dr0_njet2_morphed_stat{ch}{era}{shift}",
-
-                                                                          "ff_qcd_dr0_njet0_stat{ch}{era}{shift}",
-                                                                          "ff_qcd_dr0_njet1_stat{ch}{era}{shift}",
-                                                                          "ff_qcd_dr0_njet2_stat{ch}{era}{shift}",
-
-                                                                          "ff_qcd_syst{ch}{era}{shift}",
-
-                                                                          "ff_qcd_mvis{ch}{era}{shift}",
-                                                                          "ff_qcd_mvis_osss{ch}{era}{shift}",
-                                                                          "ff_corr_qcd_mvis{ch}{era}{shift}",
-                                                                          "ff_corr_qcd_mvis_osss{ch}{era}{shift}",
-
-                                                                          "ff_qcd_tau2_pt{ch}{era}{shift}",
-                                                                          "ff_corr_qcd_tau2_pt{ch}{era}{shift}",
-
-                                                                          "ff_qcd_mc{ch}{era}{shift}",
-
-                                                                          "ff_w_syst{ch}{era}{shift}",
-                                                                          "ff_tt_syst{ch}{era}{shift}",
-                                                                          ]
+        ReplaceCutAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift=shift.capitalize(), era="_Era", ch="_tt")), "tau_iso",
+                               Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                               Weight("{syst}".format(syst=syst.format(shift="_"+shift, era="", ch="")), "fake_factor")
+                               ) for shift in ["up", "down"] for syst in _ff_variations_tt
         ]
 
 qcd_variations_em = [
