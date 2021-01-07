@@ -32,7 +32,7 @@ def main(args):
                 # Sort proc string for correct matching
                 proc_str = ",".join(sorted(proc_str.split(",")))
                 with open(os.path.join("output/submit_files",
-                                       "{}-{}-{}-0-{}".format(args.era, ch, proc_str, args.tag),
+                                       "{}-{}-{}-{}".format(args.era, ch, proc_str, args.tag),
                                        "{}_unit_graphs-{}-{}-{}.pkl".format(c_arg, args.era, ch, proc_str)),
                           "rb") as f:
                     num_graphs = len(pickle.load(f))
