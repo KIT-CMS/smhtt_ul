@@ -156,6 +156,11 @@ def parse_arguments():
         type=str,
         help="Directory the graph file is written to."
     )
+    parser.add_argument(
+        "--enable-booking-check",
+        action="store_true",
+        help="Enables check for double actions during booking. Takes long for all variations."
+    )
     return parser.parse_args()
 
 
@@ -469,72 +474,73 @@ def main(args):
     }
 
     for ch_ in args.channels:
-        um.book([unit for d in signalsS for unit in nominals[args.era]['units'][ch_][d]])
+        um.book([unit for d in signalsS for unit in nominals[args.era]['units'][ch_][d]], enable_check=args.enable_booking_check)
         if ch_ in ['mt', 'et']:
-            um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [same_sign, anti_iso_lt])
-            um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [same_sign])
+            um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [same_sign, anti_iso_lt], enable_check=args.enable_booking_check)
+            um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [same_sign], enable_check=args.enable_booking_check)
         elif ch_ == 'tt':
-            um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [anti_iso_tt, *abcd_method])
-            um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*abcd_method])
+            um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [anti_iso_tt, *abcd_method], enable_check=args.enable_booking_check)
+            um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*abcd_method], enable_check=args.enable_booking_check)
         elif ch_ == 'em':
-            um.book([unit for d in dataS | embS | simulatedProcsDS[ch_] - signalsS for unit in nominals[args.era]['units'][ch_][d]], [same_sign_em])
+            um.book([unit for d in dataS | embS | simulatedProcsDS[ch_] - signalsS for unit in nominals[args.era]['units'][ch_][d]], [same_sign_em], enable_check=args.enable_booking_check)
         if args.skip_systematic_variations:
             pass
         else:
             # Book variations common to all channels.
-            um.book([unit for d in {"ggh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ggh_acceptance])
-            um.book([unit for d in {"qqh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*qqh_acceptance])
-            um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_es, *met_unclustered, *btag_eff, *mistag_eff])
-            um.book([unit for d in {'ztt', 'zj', 'zl', 'w'} & procS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*recoil_resolution, *recoil_response])
-            um.book([unit for d in {'ztt', 'zl', 'zj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zpt])
-            um.book([unit for d in {'ttt', 'ttl', 'ttj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*top_pt])
+            um.book([unit for d in {"ggh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
+            um.book([unit for d in {"qqh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
+            um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_es, *met_unclustered, *btag_eff, *mistag_eff], enable_check=args.enable_booking_check)
+            um.book([unit for d in {'ztt', 'zj', 'zl', 'w'} & procS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*recoil_resolution, *recoil_response], enable_check=args.enable_booking_check)
+            um.book([unit for d in {'ztt', 'zl', 'zj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zpt], enable_check=args.enable_booking_check)
+            um.book([unit for d in {'ttt', 'ttl', 'ttj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*top_pt], enable_check=args.enable_booking_check)
             # Book variations common to multiple channels.
             if ch_ in ["et", "mt", "tt"]:
-                um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero])
-                um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_to_tau_fake])
+                um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero], enable_check=args.enable_booking_check)
+                um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_to_tau_fake], enable_check=args.enable_booking_check)
                 um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_es_3prong, *emb_tau_es_3prong1pizero, *emb_tau_es_1prong, *emb_tau_es_1prong1pizero,
-                                                                                               *tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero])
+                                                                                               *tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero],
+                                                                                            enable_check=args.enable_booking_check)
             if ch_ in ["et", "mt"]:
-                um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_lt])
-                um.book([unit for d in dataS | embS | leptonFakesS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_lt])
-                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_lt, *tau_id_eff_lt, *emb_decay_mode_eff_lt])
+                um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_lt], enable_check=args.enable_booking_check)
+                um.book([unit for d in dataS | embS | leptonFakesS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_lt], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_lt, *tau_id_eff_lt, *emb_decay_mode_eff_lt], enable_check=args.enable_booking_check)
             if ch_ in ["et", "em"]:
-                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*ele_es, *ele_res])
-                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_e_es])
+                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*ele_es, *ele_res], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_e_es], enable_check=args.enable_booking_check)
             # Book channel independent variables.
             if ch_ == "mt":
-                um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*mu_fake_es_1prong, *mu_fake_es_1prong1pizero])
-                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_mt])
-                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_mt_emb])
+                um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*mu_fake_es_1prong, *mu_fake_es_1prong1pizero], enable_check=args.enable_booking_check)
+                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_mt], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_mt_emb], enable_check=args.enable_booking_check)
             if ch_ == "et":
-                um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ele_fake_es_1prong, *ele_fake_es_1prong1pizero])
-                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_et])
-                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_et_emb])
+                um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ele_fake_es_1prong, *ele_fake_es_1prong1pizero], enable_check=args.enable_booking_check)
+                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_et], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_et_emb], enable_check=args.enable_booking_check)
             if ch_ == "tt":
-                um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_tt])
-                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*tau_trigger_eff_tt])
-                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_tt, *tau_id_eff_tt, *tau_trigger_eff_tt_emb, *tau_trigger_eff_tt, *emb_decay_mode_eff_tt])
-                um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tt])
+                um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_tt], enable_check=args.enable_booking_check)
+                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*tau_trigger_eff_tt], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_tt, *tau_id_eff_tt, *tau_trigger_eff_tt_emb, *tau_trigger_eff_tt, *emb_decay_mode_eff_tt], enable_check=args.enable_booking_check)
+                um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tt], enable_check=args.enable_booking_check)
             if ch_ == "em":
-                um.book([unit for d in dataS | embS | simulatedProcsDS[ch_] - signalsS for unit in nominals[args.era]['units'][ch_][d]], [*qcd_variations_em])
+                um.book([unit for d in dataS | embS | simulatedProcsDS[ch_] - signalsS for unit in nominals[args.era]['units'][ch_][d]], [*qcd_variations_em], enable_check=args.enable_booking_check)
             # Book era dependent uncertainty shapes
             if "2016" in args.era:
-                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*prefiring])
+                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*prefiring], enable_check=args.enable_booking_check)
                 if ch_ == "mt":
-                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_mt_fake_rate_2016])
+                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_mt_fake_rate_2016], enable_check=args.enable_booking_check)
                 elif ch_ == "et":
-                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_et_fake_rate_2016])
+                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_et_fake_rate_2016], enable_check=args.enable_booking_check)
             elif "2017" in args.era:
-                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*prefiring])
+                um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*prefiring], enable_check=args.enable_booking_check)
                 if ch_ == "mt":
-                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_mt_fake_rate_2017])
+                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_mt_fake_rate_2017], enable_check=args.enable_booking_check)
                 elif ch_ == "et":
-                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_et_fake_rate_2017])
+                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_et_fake_rate_2017], enable_check=args.enable_booking_check)
             elif "2018" in args.era:
                 if ch_ == "mt":
-                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_mt_fake_rate_2018])
+                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_mt_fake_rate_2018], enable_check=args.enable_booking_check)
                 elif ch_ == "et":
-                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_et_fake_rate_2018])
+                    um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_et_fake_rate_2018], enable_check=args.enable_booking_check)
 
 
     # Step 2: convert units to graphs and merge them
