@@ -69,10 +69,13 @@ def setup_logging(output_file, level=logging.INFO):
 def write_hists_per_category(cat_hists : tuple):
     category, keys, channel, ofname, ifname = cat_hists
     infile = ROOT.TFile(ifname, "READ")
-    outfile = ROOT.TFile(ofname.replace(".root", category + ".root"), "RECREATE")
-    outfile.cd()
     dir_name = "{CHANNEL}_{CATEGORY}".format(
             CHANNEL=channel, CATEGORY=category)
+    if "{category}" in ofname:
+        outfile = ROOT.TFile(ofname.format(category=dir_name), "RECREATE")
+    else:
+        outfile = ROOT.TFile(ofname.replace(".root", "-" + category + ".root"), "RECREATE")
+    outfile.cd()
     outfile.mkdir(dir_name)
     outfile.cd(dir_name)
     for name in sorted(keys):
@@ -167,19 +170,20 @@ def main(args):
 
     # Loop over map and create the output file.
     for channel in hist_map:
-        logging.info("Writing histograms to file %s with %s processes",
-                     os.path.join(
-                            args.output,
-                            "{ERA}-{CHANNELS}-synced-MSSM.root".format(
-                                                                    CHANNELS=channel,
-                                                                    ERA=args.era)),
-                     args.num_processes)
-        if not os.path.exists(args.output):
-            os.mkdir(args.output)
         ofname = os.path.join(args.output,
                               "{ERA}-{CHANNELS}-synced-MSSM.root".format(
                                   CHANNELS=channel,
                                   ERA=args.era))
+        if args.gof:
+            ofname = os.path.join(args.output,
+                                  "htt_{{category}}.inputs-mssm-vs-sm-Run{ERA}.root".format(
+                                      ERA=args.era))
+
+        logging.info("Writing histograms to file %s with %s processes",
+                     ofname, args.num_processes)
+
+        if not os.path.exists(args.output):
+            os.mkdir(args.output)
         with multiprocessing.Pool(args.num_processes) as pool:
             pool.map(write_hists_per_category,
                      [(*item, channel, ofname, args.input) for item in sorted(hist_map[channel].items())])
