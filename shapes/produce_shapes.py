@@ -490,13 +490,13 @@ def main(args):
             um.book([unit for d in {'ttt', 'ttl', 'ttj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*top_pt])
             # Book variations common to multiple channels.
             if ch_ in ["et", "mt", "tt"]:
-                um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero])
+                um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero])
                 um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_to_tau_fake])
                 um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_es_3prong, *emb_tau_es_3prong1pizero, *emb_tau_es_1prong, *emb_tau_es_1prong1pizero,
                                                                                                *tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero,
                                                                                                *emb_decay_mode_eff])
             if ch_ in ["et", "mt"]:
-                um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_lt])
+                um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_lt])
                 um.book([unit for d in dataS | embS | leptonFakesS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_lt])
                 um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_lt, *tau_id_eff_lt])
             if ch_ in ["et", "em"]:
@@ -573,8 +573,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # from multiprocessing import set_start_method
-    # set_start_method("spawn")
     args = parse_arguments()
     if ".root" in args.output_file:
         log_file = args.output_file.replace(".root", ".log")
