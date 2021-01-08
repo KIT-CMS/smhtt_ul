@@ -315,13 +315,13 @@ zll_et_fake_rate_2018 = [
         ]
 
 zll_mt_fake_rate_2016 = [*[AddWeight("CMS_fake_m_{}_2016Up".format(region), Weight("(1.0+{})".format(_mfake_dict["2016"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2016"].keys()],
-                         *[AddWeight("CMS_fake_m_{}_2016Down".format(region), Weight("(1.0+{})".format(_mfake_dict["2016"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2016"].keys()],
+                         *[AddWeight("CMS_fake_m_{}_2016Down".format(region), Weight("(1.0-{})".format(_mfake_dict["2016"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2016"].keys()],
                          ]
 zll_mt_fake_rate_2017 = [*[AddWeight("CMS_fake_m_{}_2017Up".format(region), Weight("(1.0+{})".format(_mfake_dict["2017"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2017"].keys()],
-                         *[AddWeight("CMS_fake_m_{}_2017Down".format(region), Weight("(1.0+{})".format(_mfake_dict["2017"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2017"].keys()],
+                         *[AddWeight("CMS_fake_m_{}_2017Down".format(region), Weight("(1.0-{})".format(_mfake_dict["2017"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2017"].keys()],
                          ]
 zll_mt_fake_rate_2018 = [*[AddWeight("CMS_fake_m_{}_2018Up".format(region), Weight("(1.0+{})".format(_mfake_dict["2018"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2018"].keys()],
-                         *[AddWeight("CMS_fake_m_{}_2018Down".format(region), Weight("(1.0+{})".format(_mfake_dict["2018"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2018"].keys()],
+                         *[AddWeight("CMS_fake_m_{}_2018Down".format(region), Weight("(1.0-{})".format(_mfake_dict["2018"][region]), "mFakeTau_reweight")) for region in _mfake_dict["2018"].keys()],
                          ]
 
 # Trigger efficiency uncertainties.
