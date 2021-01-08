@@ -30,7 +30,7 @@ if [[ ! -d $OUTPUT_DIR ]]
 then
     mkdir -p $OUTPUT_DIR
 fi
-for FILE in "output/shapes/${ERA}-${CHANNEL}-${VARIABLE}-control-datacard-shapes-prefit.root" # "${ERA}_datacard_shapes_postfit_sb.root"
+for FILE in "output/shapes/${ERA}-${CHANNEL}-control-datacard-shapes-prefit/${ERA}-${CHANNEL}-${VARIABLE}-control-datacard-shapes-prefit.root" # "${ERA}_datacard_shapes_postfit_sb.root"
 do
     for OPTION in "" "--png"
     do
