@@ -511,11 +511,11 @@ def main(args):
             if ch_ == "mt":
                 um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*mu_fake_es_1prong, *mu_fake_es_1prong1pizero], enable_check=args.enable_booking_check)
                 um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_mt], enable_check=args.enable_booking_check)
-                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_mt_emb], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_mt_emb, *trigger_eff_mt], enable_check=args.enable_booking_check)
             if ch_ == "et":
                 um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ele_fake_es_1prong, *ele_fake_es_1prong1pizero], enable_check=args.enable_booking_check)
                 um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_et], enable_check=args.enable_booking_check)
-                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_et_emb], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*trigger_eff_et_emb, *trigger_eff_et], enable_check=args.enable_booking_check)
             if ch_ == "tt":
                 um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_tt], enable_check=args.enable_booking_check)
                 um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*tau_trigger_eff_tt], enable_check=args.enable_booking_check)
