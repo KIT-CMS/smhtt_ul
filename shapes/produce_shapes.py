@@ -575,5 +575,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.DEBUG)
+    setup_logging(log_file, logging.INFO)
     main(args)
