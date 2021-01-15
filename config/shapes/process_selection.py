@@ -379,12 +379,14 @@ def ZTT_embedded_process_selection(channel, era):
 def ZL_process_selection(channel):
     veto = __get_ZL_cut(channel)
     return Selection(name = "ZL",
-                     cuts = [("{} && {}".format(*veto), "dy_emb_and_ff_veto")])
+                     cuts = [("{}".format(veto[0]), "dy_emb_veto"),
+                             ("{}".format(veto[1]), "ff_veto")])
 
 def ZL_nlo_process_selection(channel):
     veto = __get_ZL_cut(channel)
     return Selection(name = "ZL_nlo",
-                     cuts = [("{} && {}".format(*veto), "dy_emb_and_ff_veto")])
+                     cuts = [("{}".format(veto[0]), "dy_emb_veto"),
+                             ("{}".format(veto[1]), "ff_veto")])
 
 def __get_ZL_cut(channel):
     if "mt" in channel:
@@ -458,7 +460,8 @@ def TTL_process_selection(channel):
         emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
         ff_veto = "(1.0)"
     return Selection(name = "TTL",
-                     cuts = [("{} && {}".format(emb_veto,ff_veto), "tt_emb_and_ff_veto")])
+                     cuts = [("{}".format(emb_veto), "tt_emb_veto"),
+                             ("{}".format(ff_veto), "ff_veto")])
 
 
 def TTJ_process_selection(channel):
@@ -517,7 +520,8 @@ def VVL_process_selection(channel):
         emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
         ff_veto = "(1.0)"
     return Selection(name = "VVL",
-                     cuts = [("{} && {}".format(emb_veto,ff_veto), "tt_emb_and_ff_veto")])
+                     cuts = [("{}".format(emb_veto), "tt_emb_veto"),
+                             ("{}".format(ff_veto), "ff_veto")])
 
 
 def VH_process_selection(channel, era):

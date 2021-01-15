@@ -198,8 +198,16 @@ def main(info):
             total_bkg = rootfile.get(channel, process, shape_type=stype).Clone()
         else:
             total_bkg.Add(rootfile.get(channel, process, shape_type=stype))
-        plot.add_hist(
-            rootfile.get(channel, process, shape_type=stype), process, "bkg")
+        if process in ["jetFakesEMB", "jetFakes"]:
+            total_bkg.Add(rootfile.get(channel, "wFakes", shape_type=stype))
+            jetfakes_hist = rootfile.get(channel, process, shape_type=stype)
+            jetfakes_hist.Add(
+                rootfile.get(channel, "wFakes", shape_type=stype))
+            plot.add_hist(
+                jetfakes_hist, process, "bkg")
+        else:
+            plot.add_hist(
+                rootfile.get(channel, process, shape_type=stype), process, "bkg")
         plot.setGraphStyle(
             process, "hist", fillcolor=styles.color_dict[process])
 

@@ -11,6 +11,7 @@ from ntuple_processor.variations import AddWeight
 from ntuple_processor.variations import SquareWeight
 from ntuple_processor.variations import ReplaceCutAndAddWeight
 from ntuple_processor.variations import ReplaceMultipleCuts
+from ntuple_processor.variations import ReplaceMultipleCutsAndAddWeight
 
 #  Variations needed for the various jet background estimations.
 same_sign = ReplaceCut("same_sign", "os", Cut("q_1*q_2>0", "ss"))
@@ -32,10 +33,21 @@ anti_iso_lt = ReplaceCutAndAddWeight("anti_iso", "tau_iso",
                                      Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
                                      Weight("ff_total", "fake_factor")
                                      )
+anti_iso_tt_mcl = ReplaceMultipleCutsAndAddWeight("anti_iso", ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     )
 anti_iso_tt = ReplaceCutAndAddWeight("anti_iso", "tau_iso",
                                      Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
                                      Weight("ff_total", "fake_factor")
                                      )
+
+wfakes_tt = ReplaceCut("wfakes", "ff_veto",
+                       Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut"))
+wfakes_w_tt = AddCut("wfakes",
+                       Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut"))
+
 anti_iso_split_lt = [ReplaceCutAndAddWeight("anti_iso_w", "tau_iso",
                                      Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
                                      Weight("ff_lt_wjets", "fake_factor")

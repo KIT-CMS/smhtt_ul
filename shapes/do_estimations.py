@@ -365,17 +365,64 @@ def emb_ttbar_contamination_estimation(rootfile, channel, category, variable, su
     return base_hist
 
 
+def wfakes_estimation(rootfile, channel, selection, variable, variation="Nominal", is_embedding=True):
+    procs_to_add = ["ZL", "TTL", "VVL", "W"]
+    logger.debug("Trying to get object {}".format(
+                        _name_string.format(dataset=_dataset_map[procs_to_add[0]],
+                                            channel=channel,
+                                            process="-" + _process_map[procs_to_add[0]],
+                                            selection="-" + selection if selection != "" else "",
+                                            variation=variation,
+                                            variable=variable)))
+    base_hist = (rootfile.Get(_name_string.format(
+                                    dataset=_dataset_map[procs_to_add[0]],
+                                    channel=channel,
+                                    process="-" + _process_map[procs_to_add[0]],
+                                    selection="-" + selection if selection !="" else "",
+                                    variation=variation,
+                                    variable=variable)
+        )).Clone()
+    for proc in procs_to_add[1:]:
+        logger.debug("Trying to get object {}".format(
+                            _name_string.format(dataset=_dataset_map[proc],
+                                                channel=channel,
+                                                process="-" + _process_map[proc],
+                                                selection="-" + selection if selection != "" else "",
+                                                variation=variation,
+                                                variable=variable)))
+        base_hist.Add(rootfile.Get(_name_string.format(
+                                        dataset=_dataset_map[proc],
+                                        channel=channel,
+                                        process="-" + _process_map[proc],
+                                        selection="-" + selection if selection !="" else "",
+                                        variation=variation,
+                                        variable=variable)))
+    proc_name = "wFakes"
+    if variation in ["wfakes"]:
+        wf_variation = "Nominal"
+    else:
+        wf_variation = variation.replace("wFakes_", "")
+    variation_name = base_hist.GetName().replace(_process_map[procs_to_add[0]], proc_name) \
+                                        .replace(_dataset_map[procs_to_add[0]], proc_name) \
+                                        .replace(variation, wf_variation)
+    base_hist.SetName(variation_name)
+    base_hist.SetTitle(variation_name)
+    return base_hist
+
+
 def main(args):
     input_file = ROOT.TFile(args.input, "update")
     # Loop over histograms in root file to find available FF inputs.
     ff_inputs = {}
     qcd_inputs = {}
+    wfakes_inputs = {}
     emb_categories = {}
     logger.info("Reading inputs from file {}".format(args.input))
     for key in input_file.GetListOfKeys():
         logger.debug("Processing histogram %s",key.GetName())
         dataset, selection, variation, variable = key.GetName().split("#")
-        if "anti_iso" in variation or "same_sign" in variation:
+        if "anti_iso" in variation or "same_sign" in variation \
+                                   or "wfakes" in variation:
             sel_split = selection.split("-", maxsplit=1)
             # Set category to default since not present in control plots.
             category = ""
@@ -446,6 +493,30 @@ def main(args):
                                                 }
                                             }
                                         }
+            if "wfakes" in variation:
+                if channel in wfakes_inputs:
+                    if category in wfakes_inputs[channel]:
+                        if variable in wfakes_inputs[channel][category]:
+                            if variation in wfakes_inputs[channel][category][variable]:
+                                wfakes_inputs[channel][category][variable][variation].append(process)
+                            else:
+                                wfakes_inputs[channel][category][variable][variation] = [process]
+                        else:
+                            wfakes_inputs[channel][category][variable] = {variation: [process]}
+                    else:
+                        wfakes_inputs[channel][category] = {
+                                                    variable: {
+                                                        variation: [process]
+                                                        }
+                                                    }
+                else:
+                    wfakes_inputs[channel] = {
+                                            category: {
+                                                variable: {
+                                                    variation: [process]
+                                                }
+                                            }
+                                        }
         #  Booking of necessary categories for embedded tt bar variation.
         if "Nominal" in variation:
             sel_split = selection.split("-", maxsplit=1)
@@ -502,6 +573,15 @@ def main(args):
                                                          variation=variation,
                                                          is_embedding=False)
                         estimated_hist.Write()
+    logger.info("Starting estimations for wfakes")
+    logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
+    for ch in wfakes_inputs:
+        for cat in wfakes_inputs[ch]:
+            logger.info("Do estimation for category %s", cat)
+            for var in wfakes_inputs[ch][cat]:
+                for variation in wfakes_inputs[ch][cat][var]:
+                   estimated_hist = wfakes_estimation(input_file, ch, cat, var, variation=variation)
+                   estimated_hist.Write()
     if args.emb_tt:
         logger.info("Producing embedding ttbar variations.")
         logger.debug("%s", json.dumps(emb_categories, sort_keys=True, indent=4))

@@ -15,7 +15,7 @@ from config.shapes.process_selection import SUSYbbH_process_selection, SUSYggH_p
 # from config.shapes.category_selection import categorization
 from config.shapes.category_selection import categorization
 # Variations for estimation of fake processes
-from config.shapes.variations import same_sign, same_sign_em, anti_iso_lt, anti_iso_tt, abcd_method
+from config.shapes.variations import same_sign, same_sign_em, anti_iso_lt, anti_iso_tt, anti_iso_tt_mcl, abcd_method
 # Energy scale uncertainties
 from config.shapes.variations import tau_es_3prong, tau_es_3prong1pizero, tau_es_1prong, tau_es_1prong1pizero, emb_tau_es_3prong, emb_tau_es_3prong1pizero, emb_tau_es_1prong, emb_tau_es_1prong1pizero, jet_es, mu_fake_es_1prong, mu_fake_es_1prong1pizero, ele_es, ele_res, emb_e_es, ele_fake_es_1prong, ele_fake_es_1prong1pizero
 # MET related uncertainties.
@@ -27,7 +27,7 @@ from config.shapes.variations import jet_to_tau_fake, zll_et_fake_rate_2016, zll
 # trigger efficiencies
 from config.shapes.variations import tau_trigger_eff_tt, tau_trigger_eff_tt_emb, trigger_eff_mt, trigger_eff_et, trigger_eff_et_emb, trigger_eff_mt_emb
 from config.shapes.variations import prefiring, btag_eff, mistag_eff, ggh_acceptance, qqh_acceptance, zpt, top_pt, emb_decay_mode_eff_lt, emb_decay_mode_eff_tt
-from config.shapes.variations import ff_variations_lt, ff_variations_tt, qcd_variations_em
+from config.shapes.variations import ff_variations_lt, ff_variations_tt, qcd_variations_em, wfakes_tt, wfakes_w_tt
 from config.shapes.control_binning import control_binning, minimal_control_plot_set
 
 logger = logging.getLogger("")
@@ -479,8 +479,10 @@ def main(args):
             um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [same_sign, anti_iso_lt], enable_check=args.enable_booking_check)
             um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [same_sign], enable_check=args.enable_booking_check)
         elif ch_ == 'tt':
-            um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [anti_iso_tt, *abcd_method], enable_check=args.enable_booking_check)
+            um.book([unit for d in dataS | embS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [anti_iso_tt, *abcd_method], enable_check=args.enable_booking_check)
             um.book([unit for d in jetFakesDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*abcd_method], enable_check=args.enable_booking_check)
+            um.book([unit for d in leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [wfakes_tt, anti_iso_tt_mcl, *abcd_method], enable_check=args.enable_booking_check)
+            um.book([unit for d in {'w'} & procS for unit in nominals[args.era]['units'][ch_][d]], [wfakes_w_tt], enable_check=args.enable_booking_check)
         elif ch_ == 'em':
             um.book([unit for d in dataS | embS | simulatedProcsDS[ch_] - signalsS for unit in nominals[args.era]['units'][ch_][d]], [same_sign_em], enable_check=args.enable_booking_check)
         if args.skip_systematic_variations:
