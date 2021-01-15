@@ -119,7 +119,7 @@ then
     echo "queue a3,a2,a4,a1 from $OUTPUT/arguments_multicore.txt" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
 
     # Assemble the arguments.txt file used in the submission
-    python submit/prepare_args_file.py --graph-file $GRAPH_FILE --output-dir $OUTPUT --pack-multiple-pipelines 20
+    python submit/prepare_args_file.py --graph-file $GRAPH_FILE --output-dir $OUTPUT --pack-multiple-pipelines 10
     echo "[INFO] Submit shape production with 'condor_submit $OUTPUT/produce_shapes_cc7.jdl' and 'condor_submit $OUTPUT/produce_shapes_cc7_multicore.jdl'"
     condor_submit $OUTPUT/produce_shapes_cc7.jdl
     condor_submit $OUTPUT/produce_shapes_cc7_multicore.jdl
