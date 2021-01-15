@@ -16,6 +16,3 @@ fi
 source utils/setup_root.sh
 
 python shapes/do_estimations.py -e $ERA -i $INPUT $EMB_ARG
-
-# Renormalize the fake factor shapes
-python fake-factor-application/normalize_shifts.py $INPUT
