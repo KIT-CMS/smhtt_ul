@@ -134,6 +134,11 @@ def parse_arguments():
         help="Produce shapes for control plots. Default is production of analysis shapes."
     )
     parser.add_argument(
+        "--control-plots-full-samples",
+        action="store_true",
+        help="Produce shapes for control plots. Default is production of analysis shapes."
+    )
+    parser.add_argument(
         "--control-plot-set",
         default=minimal_control_plot_set,
         type=lambda varlist: [variable for variable in varlist.split(',')],
@@ -202,8 +207,15 @@ def main(args):
     def get_nominal_datasets(era, channel):
         datasets = dict()
         def filter_friends(dataset, friend):
+            # Add fake factor friends only for backgrounds.
             if re.match("(gg|qq|susybb|susygg|tt|w|z|v)h", dataset.lower()):
                 if "FakeFactors" in friend or "EMQCDWeights" in friend:
+                    return False
+            # Add NLOReweighting friends only for ggh signals.
+            if "NLOReweighting" in friend:
+                if re.match("(susygg)h", dataset.lower()):
+                    pass
+                else:
                     return False
             return True
         for key, names in files[era][channel].items():
@@ -432,6 +444,23 @@ def main(args):
                        channel_selection(channel, era),
                        qqH125_process_selection(channel, era)],
                        [control_binning[channel][v] for v in set(control_binning[channel].keys()) & set(args.control_plot_set)])],
+                **{"ggh{}".format(mass): [Unit(
+                                            datasets["susyggH_{}".format(mass)], [
+                                                channel_selection(channel, era),
+                                                SUSYggH_process_selection(channel, era),
+                                                contribution_selection(channel),
+                                                ], [control_binning[channel][v] for v in set(control_binning[channel].keys()) & set(args.control_plot_set)])
+                                                                                               for contribution_selection in [
+                                                                                                                              SUSYggH_Ai_contribution_selection,
+                                                                                                                              SUSYggH_At_contribution_selection,
+                                                                                                                              SUSYggH_Ab_contribution_selection,
+                                                                                                                              SUSYggH_Hi_contribution_selection,
+                                                                                                                              SUSYggH_Ht_contribution_selection,
+                                                                                                                              SUSYggH_Hb_contribution_selection,
+                                                                                                                              SUSYggH_hi_contribution_selection,
+                                                                                                                              SUSYggH_ht_contribution_selection,
+                                                                                                                              SUSYggH_hb_contribution_selection]]
+                                            for mass in susy_masses[era]["ggH"]},
                 }
     # Step 1: create units and book actions
     for channel in args.channels:
@@ -466,7 +495,7 @@ def main(args):
     mssm_signalsS = (set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) \
                     | set("bbh{}".format(mass) for mass in susy_masses[args.era]["bbH"]) ) & procS
     signalsS = sm_signalsS | mssm_signalsS
-    if args.control_plots:
+    if args.control_plots and not args.control_plots_full_samples:
         signalsS = signalsS & {"ggh", "qqh"}
 
     simulatedProcsDS = {
