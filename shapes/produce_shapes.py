@@ -7,6 +7,7 @@ import re
 
 from ntuple_processor import Histogram
 from ntuple_processor import dataset_from_artusoutput, Unit, UnitManager, GraphManager, RunManager
+from ntuple_processor.utils import Selection
 
 from config.shapes.channel_selection import channel_selection
 from config.shapes.file_names import files
@@ -26,8 +27,12 @@ from config.shapes.variations import tau_id_eff_lt, tau_id_eff_tt, emb_tau_id_ef
 from config.shapes.variations import jet_to_tau_fake, zll_et_fake_rate_2016, zll_et_fake_rate_2017, zll_et_fake_rate_2018, zll_mt_fake_rate_2016, zll_mt_fake_rate_2017, zll_mt_fake_rate_2018
 # trigger efficiencies
 from config.shapes.variations import tau_trigger_eff_tt, tau_trigger_eff_tt_emb, trigger_eff_mt, trigger_eff_et, trigger_eff_et_emb, trigger_eff_mt_emb
+# Additional uncertainties
 from config.shapes.variations import prefiring, btag_eff, mistag_eff, ggh_acceptance, qqh_acceptance, zpt, top_pt, emb_decay_mode_eff_lt, emb_decay_mode_eff_tt
+# jet fake uncertainties
 from config.shapes.variations import ff_variations_lt, ff_variations_tt, qcd_variations_em, wfakes_tt, wfakes_w_tt
+# ggH reweighting variations
+from config.shapes.variations import ggh_scale_ggA_t,ggh_scale_ggA_b,ggh_scale_ggA_i,ggh_scale_ggh_t,ggh_scale_ggh_b,ggh_scale_ggh_i
 from config.shapes.control_binning import control_binning, minimal_control_plot_set
 
 logger = logging.getLogger("")
@@ -524,6 +529,23 @@ def main(args):
             um.book([unit for d in {'ztt', 'zj', 'zl', 'w'} & procS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*recoil_resolution, *recoil_response], enable_check=args.enable_booking_check)
             um.book([unit for d in {'ztt', 'zl', 'zj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zpt], enable_check=args.enable_booking_check)
             um.book([unit for d in {'ttt', 'ttl', 'ttj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*top_pt], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggA_t" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*ggh_scale_ggA_t], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggA_b" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*ggh_scale_ggA_b], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggA_i" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*ggh_scale_ggA_i], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggh_i" in map(getattr, unit.selections, ["name"]*len(unit.selections)) or "ggH_i" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*ggh_scale_ggh_i], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggh_b" in map(getattr, unit.selections, ["name"]*len(unit.selections)) or "ggH_b" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*ggh_scale_ggh_b], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggh_t" in map(getattr, unit.selections, ["name"]*len(unit.selections)) or "ggH_t" in map(getattr, unit.selections, ["name"]*len(unit.selections))], [*ggh_scale_ggh_t], enable_check=args.enable_booking_check)
             # Book variations common to multiple channels.
             if ch_ in ["et", "mt", "tt"]:
                 um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero], enable_check=args.enable_booking_check)
