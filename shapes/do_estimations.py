@@ -212,6 +212,7 @@ def qcd_estimation(rootfile, channel, selection, variable, variation="Nominal", 
     else:
         logger.warning("No data in same-sign region for histogram %s. Setting extrapolation factor to 0.0",
                        base_hist.GetName())
+        base_hist.Scale(0.0)
     variation_name = base_hist.GetName().replace("data", proc_name) \
                                         .replace(variation, qcd_variation) \
                                         .replace(channel, "-".join([channel, proc_name]), 1)
