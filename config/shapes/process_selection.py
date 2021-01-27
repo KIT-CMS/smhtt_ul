@@ -666,36 +666,36 @@ List of SUSY contribution processes meant to be put on top of SUSYggH process:
 
 
 def SUSYggH_Ai_contribution_selection(channel):
-    return Selection(name="ggA_i", weights=[("ggA_i_weight", "contributionWeight")])
+    return Selection(name="ggA_i", weights=[("NLOReweighting.ggA_i_weight", "contributionWeight")])
 
 
 def SUSYggH_At_contribution_selection(channel):
-    return Selection(name="ggA_t", weights=[("ggA_t_weight", "contributionWeight")])
+    return Selection(name="ggA_t", weights=[("NLOReweighting.ggA_t_weight", "contributionWeight")])
 
 
 def SUSYggH_Ab_contribution_selection(channel):
-    return Selection(name="ggA_b", weights=[("ggA_b_weight", "contributionWeight")])
+    return Selection(name="ggA_b", weights=[("NLOReweighting.ggA_b_weight", "contributionWeight")])
 
 
 def SUSYggH_Hi_contribution_selection(channel):
-    return Selection(name="ggH_i", weights=[("ggH_i_weight", "contributionWeight")])
+    return Selection(name="ggH_i", weights=[("NLOReweighting.ggh_i_weight", "contributionWeight")])
 
 
 def SUSYggH_Ht_contribution_selection(channel):
-    return Selection(name="ggH_t", weights=[("ggH_t_weight", "contributionWeight")])
+    return Selection(name="ggH_t", weights=[("NLOReweighting.ggh_t_weight", "contributionWeight")])
 
 
 def SUSYggH_Hb_contribution_selection(channel):
-    return Selection(name="ggH_b", weights=[("ggH_b_weight", "contributionWeight")])
+    return Selection(name="ggH_b", weights=[("NLOReweighting.ggh_b_weight", "contributionWeight")])
 
 
 def SUSYggH_hi_contribution_selection(channel):
-    return Selection(name="ggh_i", weights=[("ggh_i_weight", "contributionWeight")])
+    return Selection(name="ggh_i", weights=[("NLOReweighting.ggh_i_weight", "contributionWeight")])
 
 
 def SUSYggH_ht_contribution_selection(channel):
-    return Selection(name="ggh_t", weights=[("ggh_t_weight", "contributionWeight")])
+    return Selection(name="ggh_t", weights=[("NLOReweighting.ggh_t_weight", "contributionWeight")])
 
 
 def SUSYggH_hb_contribution_selection(channel):
-    return Selection(name="ggh_b", weights=[("ggh_b_weight", "contributionWeight")])
+    return Selection(name="ggh_b", weights=[("NLOReweighting.ggh_b_weight", "contributionWeight")])
