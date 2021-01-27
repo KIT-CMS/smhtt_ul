@@ -23,7 +23,7 @@ def channel_selection(channel, era):
                 ("pt_2>30"
                  "&& (((isSingleMuon||isMC||isEmbedded) && ((pt_2<120 && fabs(eta_2)<2.1 && pt_1 < 23 &&  (trg_mutaucross==1)) || (pt_1 >= 23 && (trg_singlemuon==1))))"
                      "|| ((isMC||isEmbedded) && ((trg_singletau120_trailing==1) || (trg_singletau140_trailing==1)) && pt_2>=120 && fabs(eta_2)<2.1)"
-                     "|| ((isTau) && !(pt_1 >= 23 && (trg_singlemuon==1)) && ((trg_singletau120_trailing==1) || (trg_singletau140_trailing==1)) && pt_2>=120 && fabs(eta_2)<2.1)", "trg_selection")
+                     "|| ((isTau) && !(pt_1 >= 23 && (trg_singlemuon==1)) && ((trg_singletau120_trailing==1) || (trg_singletau140_trailing==1)) && pt_2>=120 && fabs(eta_2)<2.1))", "trg_selection")
             )
         elif era == "2017":
             cuts.append(
