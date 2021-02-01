@@ -62,7 +62,9 @@ def prepare_multigraph_jobs(graph_inds, group_size):
                                            graph_inds[i*group_size+group_size-1]
                                            ))
     # Check if only one graph remains. If more than one job remains
-    if (len(graph_inds) % group_size) == 1:
+    if (len(graph_inds) % group_size) == 0:
+        pass
+    elif (len(graph_inds) % group_size) == 1:
         grouped_inds.append("{}".format(graph_inds[-1]))
     else:
         grouped_inds.append("{}-{}".format(graph_inds[(num_jobs)*group_size],
