@@ -41,12 +41,6 @@ do
     elif [[ "$PROC" =~ "mssm_ggh_split3" ]]
     then
         PROCESSES="$PROCESSES,$GGH_SAMPLES_SPLIT3"
-    elif [[ "$PROC" =~ "mssm_ggh_split4" ]]
-    then
-        PROCESSES="$PROCESSES,$GGH_SAMPLES_SPLIT4"
-    elif [[ "$PROC" =~ "mssm_ggh_split5" ]]
-    then
-        PROCESSES="$PROCESSES,$GGH_SAMPLES_SPLIT5"
     elif [[ "$PROC" =~ "mssm_bbh_split1" ]]
     then
         PROCESSES="$PROCESSES,$BBH_SAMPLES_SPLIT1"
