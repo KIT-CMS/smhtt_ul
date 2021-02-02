@@ -25,6 +25,6 @@ for FILE in ${DIR}/${ERA}/cmb/prefit_shapes.root
 do
     for OPTION in "" "--png"
     do
-        ./plotting/plot_shapes_mssm.py -i $FILE -c $CHANNELS -e $ERA $OPTION $JETFAKES_ARG $EMBEDDING_ARG  --normalize-by-bin-width -o ${DIR}/${ERA}/cmb # --linear
+        ./plotting/plot_shapes_mssm.py -i $FILE -c $CHANNELS -e $ERA $OPTION $JETFAKES_ARG $EMBEDDING_ARG  --normalize-by-bin-width -o ${DIR}/${ERA}/cmb --blinded # --linear
     done
 done

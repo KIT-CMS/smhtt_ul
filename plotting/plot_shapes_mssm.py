@@ -65,7 +65,9 @@ def parse_arguments():
                         help="Skip signal categories")
     parser.add_argument("--model-independent", action="store_true",
                         help="Plot shapes from model independent analysis.")
-
+    parser.add_argument("--blinded",
+                        action="store_true",
+                        help="Do not draw data.")
     return parser.parse_args()
 
 
@@ -96,9 +98,9 @@ def main(args):
         if args.model_independent:
             channel_categories = {
                 #"et": ["nobtag_tight", "btag_tight", "nobtag_loosemt", "nobtag_tight"]
-                "et": ["1", "32", "33",  "35", "36"],
+                "et": ["32", "33",  "35", "36"],
                 #"mt": ["nobtag_tight", "btag_tight", "nobtag_loosemt", "nobtag_tight"]
-                "mt": ["1", "32", "33",  "35", "36"],
+                "mt": ["32", "33",  "35", "36"],
                 #"tt": ["nobtag", "btag"]
                 "tt": ["32", "35"],
                 "em": ["1", "32", "33", "34", "35", "36", "37"]
@@ -255,8 +257,13 @@ def main(args):
 
             # get background histograms
             for process in bkg_processes:
-                plot.add_hist(
-                    rootfile.get(era, channel, category, process), process, "bkg")
+                if process in ["jetFakes", "jetFakesEMB"] and channel == "tt":
+                    jetfakes_hist = rootfile.get(era, channel, category, process)
+                    jetfakes_hist.Add(rootfile.get(era, channel, category, "wFakes"))
+                    plot.add_hist(jetfakes_hist, process, "bkg")
+                else:
+                    plot.add_hist(
+                        rootfile.get(era, channel, category, process), process, "bkg")
                 plot.setGraphStyle(
                     process, "hist", fillcolor=styles.color_dict[process])
 
@@ -431,9 +438,11 @@ def main(args):
                 procs_to_draw = ["stack", "total_bkg", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
             else:
                 if args.model_independent:
-                    procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "bbH", "bbH_top"] if args.linear else ["stack", "total_bkg"]
+                    procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "bbH", "bbH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
                 else:
-                    procs_to_draw = ["stack", "total_bkg", "mssm_sig", "mssm_sig_top"] if args.linear else ["stack", "total_bkg"]
+                    procs_to_draw = ["stack", "total_bkg", "mssm_sig", "mssm_sig_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+                if args.blinded:
+                    procs_to_draw.remove("data_obs")
             plot.subplot(0).Draw(procs_to_draw)
             if args.linear != True:
                 # plot.subplot(1).Draw([
@@ -448,16 +457,12 @@ def main(args):
                     ])
                 else:
                     if args.model_independent:
-                        plot.subplot(1).Draw([
-                            "stack", "total_bkg", "ggH", "bbH",
-                            "ggH_top", "bbH_top",
-                            # "data_obs"
-                        ])
+                        procs_to_draw = ["stack", "total_bkg", "ggH", "bbH", "ggH_top", "bbH_top", "data_obs"]
                     else:
-                        plot.subplot(1).Draw([
-                            "stack", "total_bkg", "mssm_sig", "mssm_sig_top",
-                            # "data_obs"
-                        ])
+                        procs_to_draw = ["stack", "total_bkg", "mssm_sig", "mssm_sig_top", "data_obs"]
+                    if args.blinded:
+                        procs_to_draw.remove("data_obs")
+                    plot.subplot(1).Draw(procs_to_draw)
             if category == "1" and args.control_region:
                 plot.subplot(2).Draw([
                     "total_bkg",
@@ -465,25 +470,21 @@ def main(args):
                 ])
             else:
                 if args.model_independent:
-                    plot.subplot(2).Draw([
-                        "total_bkg", "bkg_ggH", "bkg_bbH",
-                        "bkg_ggH_top", "bkg_bbH_top",
-                        # "data_obs"
-                    ])
+                    procs_to_draw = ["total_bkg", "bkg_ggH", "bkg_bbH", "bkg_ggH_top", "bkg_bbH_top", "data_obs"]
                 else:
-                    plot.subplot(2).Draw([
-                        "total_bkg", "bkg_mssm_sig", "bkg_mssm_sig_top",
-                        # "data_obs"
-                    ])
+                    procs_to_draw = ["total_bkg", "bkg_mssm_sig", "bkg_mssm_sig_top", "data_obs"]
+                if args.blinded:
+                    procs_to_draw.remove("data_obs")
+                plot.subplot(2).Draw(procs_to_draw)
 
             # create legends
             suffix = ["", "_top"]
             for i in range(2):
 
-                if int(category) < 30:
+                if int(category) < 30 and int(category) > 1:
                     plot.add_legend(width=0.38, height=0.30)
                 else:
-                    plot.add_legend(width=0.34, height=0.30)
+                    plot.add_legend(width=0.40, height=0.30)
                 # plot.add_legend(width=0.6, height=0.15)
                 for process in legend_bkg_processes:
                     plot.legend(i).add_entry(
@@ -498,7 +499,8 @@ def main(args):
                         plot.legend(i).add_entry(0 if args.linear else 1, "bbH%s" % suffix[i], "#splitline{bbH}{(m_{H} = 2600 GeV)}", 'l')
                     else:
                         plot.legend(i).add_entry(0 if args.linear else 1, "mssm_sig%s" % suffix[i], "#splitline{H #rightarrow #tau#tau}{#splitline{(m_{A}=1200 GeV,}{ tan #beta = 10)}}", 'l')
-                plot.legend(i).add_entry(0, "data_obs", "Data", 'PE')
+                if not args.blinded:
+                    plot.legend(i).add_entry(0, "data_obs", "Data", 'PE')
                 plot.legend(i).setNColumns(2)
             plot.legend(0).Draw()
             plot.legend(1).setAlpha(0.0)
@@ -520,7 +522,8 @@ def main(args):
             for i in range(2):
                 plot.add_legend(
                     reference_subplot=2, pos=1, width=0.5, height=0.06)
-                plot.legend(i + 2).add_entry(0, "data_obs", "Data", 'PE')
+                if not args.blinded:
+                    plot.legend(i + 2).add_entry(0, "data_obs", "Data", 'PE')
                 if args.control_region and category == "1":
                     pass
                 else:

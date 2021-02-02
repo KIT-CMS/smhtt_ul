@@ -31,7 +31,7 @@ for FILE in $INPUT
 do
     for OPTION in "" "--png"
     do
-        ./plotting/plot_shapes_mssm.py -i $FILE -c $CHANNELS -e $ERA $OPTION $JETFAKES_ARG $EMBEDDING_ARG  --normalize-by-bin-width -o $OUTPUT --model-independent # --linear
+        ./plotting/plot_shapes_mssm.py -i $FILE -c $CHANNELS -e $ERA $OPTION $JETFAKES_ARG $EMBEDDING_ARG  --normalize-by-bin-width -o $OUTPUT --model-independent --blinded # --linear
         # ./plotting/plot_shapes_mssm.py -i $FILE -c $CHANNELS -e $ERA $OPTION $JETFAKES_ARG $EMBEDDING_ARG  --normalize-by-bin-width -o plots_from_naf_control # --linear
     done
 done
