@@ -553,6 +553,7 @@ def main(args):
             for var in qcd_inputs[ch][cat]:
                 for variation in qcd_inputs[ch][cat][var]:
                     if ch in ["et", "mt", "em"]:
+                        extrapolation_factor = 1.0
                         if ch in ["et", "mt"] and  args.era == "2016":
                             extrapolation_factor = 1.17
                         elif ch in ["em"]:
@@ -568,8 +569,6 @@ def main(args):
                                                    "Setting extrapolation factor to 1.0",
                                                    args.era)
                                     extrapolation_factor = 1.0
-                        else:
-                            extrapolation_factor = 1.0
                         estimated_hist = qcd_estimation(input_file, ch, cat, var,
                                                         variation=variation,
                                                         extrapolation_factor=extrapolation_factor)
