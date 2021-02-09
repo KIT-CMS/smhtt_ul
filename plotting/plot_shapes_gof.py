@@ -79,6 +79,11 @@ def parse_arguments():
         "--chi2test",
         action="store_true",
         help="Print chi2/ndf result in upper-right of subplot")
+    parser.add_argument(
+        "--plot-restricted-signals",
+        action="store_true",
+        help="Plot only qqH and ggH signals"
+    )
 
     return parser.parse_args()
 
@@ -255,8 +260,13 @@ def main(args):
             # get background histograms
             for process in bkg_processes:
                 try:
-                    plot.add_hist(
-                        rootfile.get(era, channel, category, process), process, "bkg")
+                    if channel == "tt" and process == "jetFakes":
+                        jetfakes = rootfile.get(era, channel, category, process).Clone()
+                        jetfakes.Add(rootfile.get(era, channel, category, "wFakes"))
+                        plot.add_hist(jetfakes, process, "bkg")
+                    else:
+                        plot.add_hist(
+                            rootfile.get(era, channel, category, process), process, "bkg")
                     plot.setGraphStyle(
                         process, "hist", fillcolor=styles.color_dict[process])
                 except:
@@ -267,37 +277,38 @@ def main(args):
             for i in plot_idx_to_add_signal:
                 try:
                     plot.subplot(i).add_hist(check_for_zero_bins(
-                        rootfile.get(era, channel, category, "ggH")), "ggH")
+                        rootfile.get(era, channel, category, "ggH125")), "ggH")
                     plot.subplot(i).add_hist(check_for_zero_bins(
-                        rootfile.get(era, channel, category, "ggH")), "ggH_top")
+                        rootfile.get(era, channel, category, "ggH125")), "ggH_top")
                     plot.subplot(i).add_hist(check_for_zero_bins(
-                        rootfile.get(era, channel, category, "qqH")), "qqH")
+                        rootfile.get(era, channel, category, "qqH125")), "qqH")
                     plot.subplot(i).add_hist(check_for_zero_bins(
-                        rootfile.get(era, channel, category, "qqH")), "qqH_top")
-                    if isinstance(rootfile.get(era, channel, category, "ZH125"), ROOT.TH1):
-                        VHhist = rootfile.get(era, channel, category, "ZH125").Clone("VH")
-                    WHhist = rootfile.get(era, channel, category, "WH125")
-                    if isinstance(WHhist,ROOT.TH1) and VHhist:
-                        VHhist.Add(WHhist)
-                    elif WHhist:
-                        VHhist = WHhist
-                    plot.subplot(i).add_hist(VHhist, "VH")
-                    plot.subplot(i).add_hist(VHhist, "VH_top")
+                        rootfile.get(era, channel, category, "qqH125")), "qqH_top")
+                    if not args.plot_restricted_signals:
+                        if isinstance(rootfile.get(era, channel, category, "ZH125"), ROOT.TH1):
+                            VHhist = rootfile.get(era, channel, category, "ZH125").Clone("VH")
+                        WHhist = rootfile.get(era, channel, category, "WH125")
+                        if isinstance(WHhist,ROOT.TH1) and VHhist:
+                            VHhist.Add(WHhist)
+                        elif WHhist:
+                            VHhist = WHhist
+                        plot.subplot(i).add_hist(VHhist, "VH")
+                        plot.subplot(i).add_hist(VHhist, "VH_top")
 
-                    if isinstance(rootfile.get(era, channel, category, "ttH125"), ROOT.TH1):
-                        plot.subplot(i).add_hist(rootfile.get(era, channel, category, "ttH125"), "ttH")
-                        plot.subplot(i).add_hist(rootfile.get(era, channel, category, "ttH125"), "ttH_top")
+                        if isinstance(rootfile.get(era, channel, category, "ttH125"), ROOT.TH1):
+                            plot.subplot(i).add_hist(rootfile.get(era, channel, category, "ttH125"), "ttH")
+                            plot.subplot(i).add_hist(rootfile.get(era, channel, category, "ttH125"), "ttH_top")
 
-                    HWWhist = rootfile.get(era, channel, category, "ggHWW125")
-                    if isinstance(rootfile.get(era, channel, category, "ggHWW125"), ROOT.TH1):
-                        HWWhist = rootfile.get(era, channel, category, "ggHWW125").Clone("ggHWW125")
-                    qqHWWhist = rootfile.get(era, channel, category, "qqHWW125")
-                    if isinstance(qqHWWhist,ROOT.TH1) and HWWhist:
-                        HWWhist.Add(qqHWWhist)
-                    elif qqHWWhist:
-                        HWWhist = qqHWWhist
-                    plot.subplot(i).add_hist(HWWhist, "HWW")
-                    plot.subplot(i).add_hist(HWWhist, "HWW_top")
+                        HWWhist = rootfile.get(era, channel, category, "ggHWW125")
+                        if isinstance(rootfile.get(era, channel, category, "ggHWW125"), ROOT.TH1):
+                            HWWhist = rootfile.get(era, channel, category, "ggHWW125").Clone("ggHWW125")
+                        qqHWWhist = rootfile.get(era, channel, category, "qqHWW125")
+                        if isinstance(qqHWWhist,ROOT.TH1) and HWWhist:
+                            HWWhist.Add(qqHWWhist)
+                        elif qqHWWhist:
+                            HWWhist = qqHWWhist
+                        plot.subplot(i).add_hist(HWWhist, "HWW")
+                        plot.subplot(i).add_hist(HWWhist, "HWW_top")
                 except:
                     pass
 
@@ -321,15 +332,16 @@ def main(args):
             plot.subplot(0 if args.linear else 1).setGraphStyle(
                 "qqH", "hist", linecolor=styles.color_dict["qqH"], linewidth=3)
             plot.subplot(0 if args.linear else 1).setGraphStyle("qqH_top", "hist", linecolor=0)
-            plot.subplot(0 if args.linear else 1).setGraphStyle(
-                "VH", "hist", linecolor=styles.color_dict["VH"], linewidth=3)
-            plot.subplot(0 if args.linear else 1).setGraphStyle("VH_top", "hist", linecolor=0)
-            plot.subplot(0 if args.linear else 1).setGraphStyle(
-                "ttH", "hist", linecolor=styles.color_dict["ttH"], linewidth=3)
-            plot.subplot(0 if args.linear else 1).setGraphStyle("ttH_top", "hist", linecolor=0)
-            plot.subplot(0 if args.linear else 1).setGraphStyle(
-                "HWW", "hist", linecolor=styles.color_dict["HWW"], linewidth=3)
-            plot.subplot(0 if args.linear else 1).setGraphStyle("HWW_top", "hist", linecolor=0)
+            if not args.plot_restricted_signals:
+                plot.subplot(0 if args.linear else 1).setGraphStyle(
+                    "VH", "hist", linecolor=styles.color_dict["VH"], linewidth=3)
+                plot.subplot(0 if args.linear else 1).setGraphStyle("VH_top", "hist", linecolor=0)
+                plot.subplot(0 if args.linear else 1).setGraphStyle(
+                    "ttH", "hist", linecolor=styles.color_dict["ttH"], linewidth=3)
+                plot.subplot(0 if args.linear else 1).setGraphStyle("ttH_top", "hist", linecolor=0)
+                plot.subplot(0 if args.linear else 1).setGraphStyle(
+                    "HWW", "hist", linecolor=styles.color_dict["HWW"], linewidth=3)
+                plot.subplot(0 if args.linear else 1).setGraphStyle("HWW_top", "hist", linecolor=0)
             plot.setGraphStyle(
                 "total_bkg",
                 "e2",
@@ -389,14 +401,14 @@ def main(args):
                 if channel == "em":
                     plot.subplot(0).setYlims(1, 150000000)
 
-            if args.linear != True:
+            if not args.linear:
                 plot.subplot(1).setYlims(0.1, split_dict[channel])
                 plot.subplot(1).setLogY()
                 plot.subplot(1).setYlabel(
                     "")  # otherwise number labels are not drawn on axis
-            if args.gof_variable != None and not args.linear:
-                gof_linear_vars = ["njets", "nbtag", "DiTauDeltaR", "jdeta"]
-                if args.gof_variable not in gof_linear_vars:
+            if args.gof_variable != None:
+                gof_log_vars = []
+                if args.gof_variable in gof_log_vars:
                     plot.subplot(0).setLogX()
                     plot.subplot(1).setLogX()
                     plot.subplot(2).setLogX()
@@ -435,13 +447,22 @@ def main(args):
             #    plot.subplot(2).changeXLabels(["0.2", "0.4", "0.6", "0.8", "1.0"])
 
             # draw subplots. Argument contains names of objects to be drawn in corresponding order.
-            procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "VH", "VH_top", "ttH", "ttH_top", "HWW", "HWW_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+            if args.plot_restricted_signals:
+                procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+            else:
+                procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "VH", "VH_top", "ttH", "ttH_top", "HWW", "HWW_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
             plot.subplot(0).Draw(procs_to_draw)
             if args.linear != True:
-                plot.subplot(1).Draw([
-                    "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
-                    "VH", "VH_top", "ttH", "ttH_top", "HWW", "HWW_top", "data_obs"
-                ])
+                if args.plot_restricted_signals:
+                    plot.subplot(1).Draw([
+                        "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
+                        "data_obs"
+                    ])
+                else:
+                    plot.subplot(1).Draw([
+                        "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
+                        "VH", "VH_top", "ttH", "ttH_top", "HWW", "HWW_top", "data_obs"
+                    ])
             plot.subplot(2).Draw([
                 "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH",
                 "bkg_qqH_top", "data_obs"
@@ -461,12 +482,13 @@ def main(args):
                 plot.legend(i).add_entry(0, "total_bkg", "Bkg. unc.", 'f')
                 plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "gg#rightarrowH", 'l')
                 plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "qq#rightarrowH", 'l')
-                plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "qq#rightarrowVH", 'l')
-                try:
-                    plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "ttH", 'l')
-                    plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "H#rightarrowWW", 'l')
-                except:
-                    pass
+                if not args.plot_restricted_signals:
+                    plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "qq#rightarrowVH", 'l')
+                    try:
+                        plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "ttH", 'l')
+                        plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "H#rightarrowWW", 'l')
+                    except:
+                        pass
                 plot.legend(i).add_entry(0, "data_obs", "Data", 'PE')
                 plot.legend(i).setNColumns(3)
             plot.legend(0).Draw()
