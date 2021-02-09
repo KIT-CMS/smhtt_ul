@@ -62,7 +62,7 @@ then
 elif [[ "$SUBMIT_MODE" == "singlegraph" ]]
 then
     echo "[INFO] Preparing graph for processes $PROCESSES for submission..."
-    OUTPUT=output/submit_files/${ERA}-${CHANNEL}-${PROCESSES}-${TAG}
+    OUTPUT=output/submit_files/${ERA}-${CHANNEL}-${PROCESSES}-${CONTROL}-${TAG}
     [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
     python shapes/produce_shapes.py --channels $CHANNEL \
         			    --output-file dummy.root \
