@@ -32,7 +32,7 @@ To submit the shapes for the 2017 data-taking period the recommended way to invo
 ```bash
 for CHANNEL in et mt tt em
 do
-  for PROCESSES in backgrounds sm_signals mssm_ggh_split{1..5} mssm_bbh_split{1,2}
+  for PROCESSES in backgrounds,sm_signals mssm_ggh_split{1..3} mssm_bbh_split{1..2}
   do
     bash submit/submit_shape_production.sh 2017 $CHANNEL $PROCESSES singlegraph $(date +%Y_%m_%d)
   done
