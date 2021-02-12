@@ -9,6 +9,7 @@ basedir="/ceph/htautau/Run2Legacy_MSSM"
 ARTUS_OUTPUTS_2016="$basedir/2016/ntuples/"
 SVFit_Friends_2016="$basedir/2016/friends/SVFit/"
 FF_Friends_2016="$basedir/2016/friends/FakeFactors/"
+NLOReweighting_Friends_2016="$basedir/2016/friends/NLOReweighting/"
 
 # Samples Run2017
 ARTUS_OUTPUTS_2017="$basedir/2017/ntuples/"
@@ -20,6 +21,7 @@ NLOReweighting_Friends_2017="$basedir/2017/friends/NLOReweighting/"
 ARTUS_OUTPUTS_2018="$basedir/2018/ntuples/"
 SVFit_Friends_2018="$basedir/2018/friends/SVFit/"
 FF_Friends_2018="$basedir/2018/friends/FakeFactors/"
+NLOReweighting_Friends_2018="$basedir/2018/friends/NLOReweighting/"
 
 
 # ERA handling
@@ -28,6 +30,7 @@ then
     ARTUS_OUTPUTS=$ARTUS_OUTPUTS_2016
     SVFit_Friends=$SVFit_Friends_2016
     FF_Friends=$FF_Friends_2016
+    NLOReweighting_Friends=$NLOReweighting_Friends_2016
 elif [[ $ERA == *"2017"* ]]
 then
     ARTUS_OUTPUTS=$ARTUS_OUTPUTS_2017
@@ -39,6 +42,7 @@ then
     ARTUS_OUTPUTS=$ARTUS_OUTPUTS_2018
     SVFit_Friends=$SVFit_Friends_2018
     FF_Friends=$FF_Friends_2018
+    NLOReweighting_Friends=$NLOReweighting_Friends_2018
 fi
 
 ### channels specific friend tree.
