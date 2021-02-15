@@ -46,10 +46,9 @@ def check_output_files(era, channel, process_string, control_arg):
 
 def main(args):
     proc_dict = {
-            "bkg": ["data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt"],
-            "sm_signals": ["ggh,gghww,qqh,qqhww,tth,wh,whww,zh,zhww"],
+            "bkg": ["data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt,ggh,gghww,qqh,qqhww,tth,wh,whww,zh,zhww"],
             "mssm_bbh": [os.environ["BBH_SAMPLES_SPLIT{}".format(i)] for i in range(1,3)],
-            "mssm_ggh": [os.environ["GGH_SAMPLES_SPLIT{}".format(i)] for i in range(1,6)],
+            "mssm_ggh": [os.environ["GGH_SAMPLES_SPLIT{}".format(i)] for i in range(1,4)],
     }
     for ch in args.channels:
         for proc, proc_splits in proc_dict.items():
@@ -61,7 +60,7 @@ def main(args):
                 # Sort proc string for correct matching
                 proc_str = ",".join(sorted(proc_str.split(",")))
                 with open(os.path.join("output/submit_files",
-                                       "{}-{}-{}-{}".format(args.era, ch, proc_str, args.tag),
+                                       "{}-{}-{}-{}-{}".format(args.era, ch, proc_str, 1 if args.control else 0, args.tag),
                                        "{}_unit_graphs-{}-{}-{}.pkl".format(c_arg, args.era, ch, proc_str)),
                           "rb") as f:
                     num_graphs = len(pickle.load(f))
