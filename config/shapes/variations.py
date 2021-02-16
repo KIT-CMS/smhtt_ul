@@ -147,8 +147,8 @@ jet_es = [
 
 # MET variations.
 met_unclustered = [
-        ChangeDataset("CMS_scale_met_unclusteredUp", "metUnclusteredEnUp"),
-        ChangeDataset("CMS_scale_met_unclusteredDown", "metUnclusteredEnDown")
+        ChangeDataset("CMS_scale_met_unclustered_EraUp", "metUnclusteredEnUp"),
+        ChangeDataset("CMS_scale_met_unclustered_EraDown", "metUnclusteredEnDown")
         ]
 
 # Recoil correction uncertainties
