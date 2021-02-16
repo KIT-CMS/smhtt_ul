@@ -30,7 +30,7 @@ from config.shapes.variations import tau_trigger_eff_tt, tau_trigger_eff_tt_emb,
 # Additional uncertainties
 from config.shapes.variations import prefiring, btag_eff, mistag_eff, ggh_acceptance, qqh_acceptance, zpt, top_pt, emb_decay_mode_eff_lt, emb_decay_mode_eff_tt
 # jet fake uncertainties
-from config.shapes.variations import ff_variations_lt, ff_variations_tt, qcd_variations_em, wfakes_tt, wfakes_w_tt
+from config.shapes.variations import ff_variations_lt, ff_variations_tt, ff_variations_tt_mcl, qcd_variations_em, wfakes_tt, wfakes_w_tt, ff_variations_tau_es_lt, ff_variations_tau_es_tt, ff_variations_tau_es_tt_mcl
 # ggH reweighting variations
 from config.shapes.variations import ggh_scale_ggA_t,ggh_scale_ggA_b,ggh_scale_ggA_i,ggh_scale_ggh_t,ggh_scale_ggh_b,ggh_scale_ggh_i
 from config.shapes.control_binning import control_binning, minimal_control_plot_set
@@ -555,7 +555,8 @@ def main(args):
                                                                                             enable_check=args.enable_booking_check)
             if ch_ in ["et", "mt"]:
                 um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_lt], enable_check=args.enable_booking_check)
-                um.book([unit for d in dataS | embS | leptonFakesS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_lt], enable_check=args.enable_booking_check)
+                um.book([unit for d in dataS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_lt], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS | leptonFakesS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_lt, *ff_variations_tau_es_lt], enable_check=args.enable_booking_check)
                 um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_lt, *tau_id_eff_lt, *emb_decay_mode_eff_lt], enable_check=args.enable_booking_check)
             if ch_ in ["et", "em"]:
                 um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*ele_es, *ele_res], enable_check=args.enable_booking_check)
@@ -573,7 +574,8 @@ def main(args):
                 um.book([unit for d in trueTauBkgS | leptonFakesS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_tt], enable_check=args.enable_booking_check)
                 um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*tau_trigger_eff_tt], enable_check=args.enable_booking_check)
                 um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_tt, *tau_id_eff_tt, *tau_trigger_eff_tt_emb, *tau_trigger_eff_tt, *emb_decay_mode_eff_tt], enable_check=args.enable_booking_check)
-                um.book([unit for d in dataS | embS | trueTauBkgS | leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tt], enable_check=args.enable_booking_check)
+                um.book([unit for d in dataS | embS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tt], enable_check=args.enable_booking_check)
+                um.book([unit for d in embS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tau_es_tt], enable_check=args.enable_booking_check)
             if ch_ == "em":
                 um.book([unit for d in dataS | embS | simulatedProcsDS[ch_] - signalsS for unit in nominals[args.era]['units'][ch_][d]], [*qcd_variations_em], enable_check=args.enable_booking_check)
             # Book era dependent uncertainty shapes

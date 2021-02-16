@@ -12,6 +12,8 @@ from ntuple_processor.variations import SquareWeight
 from ntuple_processor.variations import ReplaceCutAndAddWeight
 from ntuple_processor.variations import ReplaceMultipleCuts
 from ntuple_processor.variations import ReplaceMultipleCutsAndAddWeight
+from ntuple_processor.variations import ChangeDatasetReplaceCutAndAddWeight
+from ntuple_processor.variations import ChangeDatasetReplaceMultipleCutsAndAddWeight
 
 #  Variations needed for the various jet background estimations.
 same_sign = ReplaceCut("same_sign", "os", Cut("q_1*q_2>0", "ss"))
@@ -538,6 +540,57 @@ ff_variations_lt = [
                                ) for shift in ["up", "down"] for syst in _ff_variations_lt
         ]
 
+# Propagation of tau ES systematics on jetFakes process
+ff_variations_tau_es_lt = [ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong_EraDown",
+                                    "tauEsOneProngDown",
+                                    "tau_iso",
+                                    Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                    Weight("ff_total", "fake_factor")
+                                    ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong_EraUp",
+                                    "tauEsOneProngUp",
+                                    "tau_iso",
+                                    Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                    Weight("ff_total", "fake_factor")
+                                    ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong1pizero_EraDown",
+                                    "tauEsOneProngOnePiZeroDown",
+                                    "tau_iso",
+                                    Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                    Weight("ff_total", "fake_factor")
+                                    ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong1pizero_EraUp",
+                                    "tauEsOneProngOnePiZeroUp",
+                                    "tau_iso",
+                                    Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                    Weight("ff_total", "fake_factor")
+                                    ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_3prong_EraDown",
+                                    "tauEsThreeProngDown",
+                                    "tau_iso",
+                                    Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                    Weight("ff_total", "fake_factor")
+                                    ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_3prong_EraUp",
+                                    "tauEsThreeProngUp",
+                                    "tau_iso",
+                                    Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                    Weight("ff_total", "fake_factor")
+                                    ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_3prong1pizero_EraDown",
+                                    "tauEsThreeProngOnePiZeroDown",
+                                    "tau_iso",
+                                    Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                    Weight("ff_total", "fake_factor")
+                                    ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_3prong1pizero_EraUp",
+                                    "tauEsThreeProngOnePiZeroUp",
+                                    "tau_iso",
+                                    Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
+                                    Weight("ff_total", "fake_factor")
+                                    ),
+                           ]
+
 _ff_variations_tt = [
         "ff_total_qcd_stat_njet0_jet_pt_low_unc1{ch}{era}{shift}",
 	"ff_total_qcd_stat_njet0_jet_pt_low_unc2{ch}{era}{shift}",
@@ -570,6 +623,116 @@ ff_variations_tt = [
                                Weight("{syst}".format(syst=syst.format(shift="_"+shift, era="", ch="")), "fake_factor")
                                ) for shift in ["up", "down"] for syst in _ff_variations_tt
         ]
+
+# tt channel for embedded processes
+ff_variations_tau_es_tt = [ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong_EraDown",
+                                    "tauEsOneProngDown",
+                                    "tau_iso",
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong_EraUp",
+                                    "tauEsOneProngUp",
+                                    "tau_iso",
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong1pizero_EraDown",
+                                    "tauEsOneProngOnePiZeroDown",
+                                    "tau_iso",
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong1pizero_EraUp",
+                                    "tauEsOneProngOnePiZeroUp",
+                                    "tau_iso",
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_3prong_EraDown",
+                                    "tauEsThreeProngDown",
+                                    "tau_iso",
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_3prong_EraUp",
+                                    "tauEsThreeProngUp",
+                                    "tau_iso",
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_3prong1pizero_EraDown",
+                                    "tauEsThreeProngOnePiZeroDown",
+                                    "tau_iso",
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_3prong1pizero_EraUp",
+                                    "tauEsThreeProngOnePiZeroUp",
+                                    "tau_iso",
+                                     Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ]
+
+# tt channel for mcl processes
+ff_variations_tau_es_tt_mcl = [ChangeDatasetReplaceMultipleCutsAndAddWeight("anti_iso_CMS_scale_t_1prong_EraDown",
+                                    "tauEsOneProngDown",
+                                    ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceMultipleCutsAndAddWeight("anti_iso_CMS_scale_t_1prong_EraUp",
+                                    "tauEsOneProngUp",
+                                    ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceMultipleCutsAndAddWeight("anti_iso_CMS_scale_t_1prong1pizero_EraDown",
+                                    "tauEsOneProngOnePiZeroDown",
+                                    ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceMultipleCutsAndAddWeight("anti_iso_CMS_scale_t_1prong1pizero_EraUp",
+                                    "tauEsOneProngOnePiZeroUp",
+                                    ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceMultipleCutsAndAddWeight("anti_iso_CMS_scale_t_3prong_EraDown",
+                                    "tauEsThreeProngDown",
+                                    ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceMultipleCutsAndAddWeight("anti_iso_CMS_scale_t_3prong_EraUp",
+                                    "tauEsThreeProngUp",
+                                    ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceMultipleCutsAndAddWeight("anti_iso_CMS_scale_t_3prong1pizero_EraDown",
+                                    "tauEsThreeProngOnePiZeroDown",
+                                    ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ChangeDatasetReplaceMultipleCutsAndAddWeight("anti_iso_CMS_scale_t_3prong1pizero_EraUp",
+                                    "tauEsThreeProngOnePiZeroUp",
+                                    ["tau_iso", "ff_veto"],
+                                     [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                      Cut("gen_match_1 != 6", "tau_anti_iso")],
+                                     Weight("ff_total", "fake_factor")
+                                     ),
+                           ]
 
 qcd_variations_em = [
         ReplaceCutAndAddWeight("same_sign_CMS_htt_qcd_0jet_rate_EraUp",    "os", Cut("q_1*q_2>0", "ss"), Weight("em_qcd_osss_stat_0jet_rateup_Weight", "qcd_weight")),
