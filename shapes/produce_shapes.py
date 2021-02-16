@@ -576,6 +576,7 @@ def main(args):
                 um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_id_eff_tt, *tau_id_eff_tt, *tau_trigger_eff_tt_emb, *tau_trigger_eff_tt, *emb_decay_mode_eff_tt], enable_check=args.enable_booking_check)
                 um.book([unit for d in dataS | embS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tt], enable_check=args.enable_booking_check)
                 um.book([unit for d in embS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tau_es_tt], enable_check=args.enable_booking_check)
+                um.book([unit for d in leptonFakesS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_tt_mcl, *ff_variations_tau_es_tt_mcl], enable_check=args.enable_booking_check)
             if ch_ == "em":
                 um.book([unit for d in dataS | embS | simulatedProcsDS[ch_] - signalsS for unit in nominals[args.era]['units'][ch_][d]], [*qcd_variations_em], enable_check=args.enable_booking_check)
             # Book era dependent uncertainty shapes

@@ -623,6 +623,13 @@ ff_variations_tt = [
                                Weight("{syst}".format(syst=syst.format(shift="_"+shift, era="", ch="")), "fake_factor")
                                ) for shift in ["up", "down"] for syst in _ff_variations_tt
         ]
+ff_variations_tt_mcl = [
+        ReplaceMultipleCutsAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift=shift.capitalize(), era="_Era", ch="_tt")), ["tau_iso", "ff_veto"],
+                               [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
+                                Cut("gen_match_1 != 6", "tau_anti_iso")],
+                               Weight("{syst}".format(syst=syst.format(shift="_"+shift, era="", ch="")), "fake_factor")
+                               ) for shift in ["up", "down"] for syst in _ff_variations_tt
+        ]
 
 # tt channel for embedded processes
 ff_variations_tau_es_tt = [ChangeDatasetReplaceCutAndAddWeight("anti_iso_CMS_scale_t_1prong_EraDown",
