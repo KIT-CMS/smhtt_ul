@@ -547,10 +547,10 @@ def ttH_process_selection(channel, era):
         ttH_weights = HTT_process_selection(channel, era).weights
     else:
         ttH_weights = HTT_base_process_selection(channel, era).weights + [
-                ("numberGeneratedEventsWeight", "4.569757345884934e-08"),
+                ("4.569757345884934e-08", "numberGeneratedEventsWeight"),
                 ("crossSectionPerEventWeight", "crossSectionPerEventWeight")]
     return Selection(name = "ttH125",
-                     weights = ttH_weights).weights)
+                     weights = ttH_weights)
 
 
 def ggHWW_process_selection(channel, era):
