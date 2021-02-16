@@ -177,16 +177,10 @@ def TT_process_selection(channel, era):
 
 def VV_process_selection(channel, era):
     VV_process_weights = MC_base_process_selection(channel, era).weights
-    if era in ["2017", "2018"]:
-        VV_process_weights.extend([
-                    ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-                    ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
-                ])
-    else:
-        VV_process_weights.extend([
-                    ("1.252790591041545e-07*(abs(crossSectionPerEventWeight - 118.7) < 0.01) + 5.029933132068942e-07*(abs(crossSectionPerEventWeight - 12.14) < 0.01) + 2.501519047441559e-07*(abs(crossSectionPerEventWeight - 22.82) < 0.01) + numberGeneratedEventsWeight*(abs(crossSectionPerEventWeight - 118.7) > 0.01 && abs(crossSectionPerEventWeight - 12.14) > 0.01 && abs(crossSectionPerEventWeight - 22.82) > 0.01)","numberGeneratedEventsWeight"),
-                    ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
-                ])
+    VV_process_weights.extend([
+                ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+                ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            ])
     return Selection(
             name = "VV",
             weights = VV_process_weights
