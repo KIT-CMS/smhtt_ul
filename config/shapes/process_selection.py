@@ -543,8 +543,14 @@ def ZH_process_selection(channel, era):
 
 
 def ttH_process_selection(channel, era):
+    if era in ["2016", "2017"]:
+        ttH_weights = HTT_process_selection(channel, era).weights
+    else:
+        ttH_weights = HTT_base_process_selection(channel, era).weights + [
+                ("numberGeneratedEventsWeight", "4.570e-08"),
+                ("crossSectionPerEventWeight", "crossSectionPerEventWeight")]
     return Selection(name = "ttH125",
-                     weights = HTT_process_selection(channel, era).weights)
+                     weights = ttH_weights).weights)
 
 
 def ggHWW_process_selection(channel, era):
