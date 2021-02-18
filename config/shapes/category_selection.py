@@ -170,6 +170,10 @@ em_categorization = [
             # Control regions.
             (Selection(name="DZetaLtm35",                    cuts=[("pZetaPuppiMissVis<-35", "category_selection")]),
                     [mt_tot_hist]),
+            (Selection(name="Nbtag0_DZetaLtm35",             cuts=[("nbtag==0&&pZetaPuppiMissVis<-35", "category_selection")]),
+                    [mt_tot_hist]),
+            (Selection(name="NbtagGt1_DZetaLtm35",           cuts=[("nbtag>=1&&pZetaPuppiMissVis<-35", "category_selection")]),
+                    [mt_tot_hist]),
 ]
 
 categorization = {
