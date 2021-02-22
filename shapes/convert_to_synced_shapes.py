@@ -65,6 +65,27 @@ def setup_logging(output_file, level=logging.INFO):
     logger.addHandler(file_handler)
     return
 
+def correct_nominal_shape(hist, name, integral):
+    if integral >= 0:
+         # if integral is larger than 0, everything is fine
+        sf = 1.0
+    elif integral == 0.0:
+        logger.info("Nominal histogram is empty: {}".format(name))
+        # if integral of nominal is 0, we make sure to scale the histogram with 0.0
+        sf = 0
+    else:
+        logger.info("Nominal histogram is negative : {} {} --> fixing it now...".format(integral, name))
+        # if the histogram is negative, the make all negative bins positive,
+        # and scale the histogram to a small positive value
+        for i in range(hist.GetNbinsX()):
+            if hist.GetBinContent(i+1)<0.0:
+                logger.info("Negative Bin {} - {}".format(i, hist.GetBinContent(i+1)))
+                hist.SetBinContent(i+1, 0.001)
+                logger.info("After fixing: {} - {}".format(i, hist.GetBinContent(i+1)))
+        sf = 0.001 / integral
+    hist.Scale(sf)
+    return hist
+
 
 def write_hists_per_category(cat_hists : tuple):
     category, keys, channel, ofname, ifname = cat_hists
@@ -81,6 +102,43 @@ def write_hists_per_category(cat_hists : tuple):
     for name in sorted(keys):
         hist = infile.Get(name)
         name_output = keys[name]
+        pos = 0.0
+        neg = 0.0
+        if "bbH" in name_output or "gg" in name_output:
+            integral = hist.Integral()
+            if ("bbH" in name_output and len(name_output.split("_"))==2) or ("gg" in name_output and len(name_output.split("_"))==3):
+                nominal = correct_nominal_shape(hist, "{} {}".format(name_output,category), integral)
+            # if the integral of the shape is negative, set it to the corrected nominal shape
+            elif integral <= 0.0:
+                    hist = nominal
+            else:
+                for i in range(hist.GetNbinsX()):
+                    cont = hist.GetBinContent(i+1)
+                    if cont<0.0:
+                        neg += cont
+                        hist.SetBinContent(i+1, 0.0)
+                    else:
+                        pos += cont
+                if neg<0:
+                    if (neg+pos)>0.0:
+                        hist.Scale((neg+pos)/pos)
+
+        else:
+            for i in range(hist.GetNbinsX()):
+                cont = hist.GetBinContent(i+1)
+                if cont<0.0:
+                    neg += cont
+                    hist.SetBinContent(i+1, 0.0)
+                else:
+                    pos += cont
+            if neg<0:
+                if neg+pos>0.0:
+                    hist.Scale((neg+pos)/pos)
+                else:
+                    hist.Scale(0.0)
+                if neg<-5.0:
+                        logger.fatal("Found histogram with a yield of negative bins larger than 5.0!")
+                        raise Exception
         # Write shapes with partial correlations across eras.
         if "Era" in name_output:
             if ("_1ProngPi0Eff_" in name_output
