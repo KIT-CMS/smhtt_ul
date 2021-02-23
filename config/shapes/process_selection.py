@@ -62,6 +62,28 @@ def triggerweight_emb(channel, era):
         weight = (ElMu, "triggerweight")
     return weight
 
+def fakemetweight_emb(channel, era):
+    weightmap = {
+        "2016": {
+            "et": "1.005",
+            "mt": "1.005",
+            "tt": "1.008",
+        },
+        "2017": {
+            "et": "1.005",
+            "mt": "1.005",
+            "tt": "1.010",
+        },
+        "2018": {
+            "et": "1.005",
+            "mt": "1.005",
+            "tt": "1.010",
+        },
+    }
+    weight = (weightmap[era][channel], "fakemetweight")
+    return weight
+
+
 
 def tau_by_iso_id_weight(channel):
     weight = ("1.0","taubyIsoIdWeight")
@@ -334,25 +356,31 @@ def ZTT_embedded_process_selection(channel, era):
     if "mt" in channel:
         ztt_embedded_weights.extend([
             ("gen_match_1==4 && gen_match_2==5","emb_veto"),
+            ("pt_2/genMatchedLep2Pt < 1.5","high_fakemet_veto"),
             ("(pt_2<100)*embeddedDecayModeWeight+(pt_2>=100)", "decayMode_SF"),
             ("idWeight_1*isoWeight_1", "lepton_sf"),
             tau_by_iso_id_weight(channel),
             triggerweight_emb(channel, era),
+            fakemetweight_emb(channel, era),
             ])
     elif "et" in channel:
         ztt_embedded_weights.extend([
             ("gen_match_1==3 && gen_match_2==5","emb_veto"),
+            ("pt_2/genMatchedLep2Pt < 1.5","high_fakemet_veto"),
             ("(pt_2<100)*embeddedDecayModeWeight+(pt_2>=100)", "decayMode_SF"),
             ("idWeight_1*isoWeight_1", "lepton_sf"),
             tau_by_iso_id_weight(channel),
             triggerweight_emb(channel, era),
+            fakemetweight_emb(channel, era),
             ])
     elif "tt" in channel:
         ztt_embedded_weights.extend([
             ("(pt_1<100)*embeddedDecayModeWeight+(pt_1>=100)*(pt_2<100)*((decayMode_2==0)*0.975+(decayMode_2==1)*0.975*1.051+(decayMode_2==10)*0.975*0.975*0.975+(decayMode_2==11)*0.975*0.975*0.975*1.051)+(pt_2>=100)", "decayMode_SF"),
+            ("pt_1/genMatchedLep1Pt < 1.5 && pt_2/genMatchedLep2Pt < 1.5","high_fakemet_veto"),
             ("gen_match_1==5 && gen_match_2==5","emb_veto"),
             tau_by_iso_id_weight(channel),
             triggerweight_emb(channel, era),
+            fakemetweight_emb(channel, era),
             ])
     elif "em" in channel:
         ztt_embedded_weights.extend([
