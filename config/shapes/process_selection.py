@@ -621,7 +621,7 @@ def ggh_stitching_weight(era):
                   "(htxs_stage1p1cat==106)*1.19e-8+"
                   "(htxs_stage1p1cat>=107&&htxs_stage1p1cat<=109)*4.91e-8+"
                   "(htxs_stage1p1cat>=110&&htxs_stage1p1cat<=113)*7.90e-9"
-                  ")","ggh_stitching_weight")
+                  ")*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*crossSectionPerEventWeight*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5))","ggh_stitching_weight")
     elif era == "2018":
         weight = ("(((htxs_stage1p1cat==100||htxs_stage1p1cat==102||htxs_stage1p1cat==103)*crossSectionPerEventWeight*numberGeneratedEventsWeight+"
                   "(htxs_stage1p1cat==101)*2.09e-8+"
