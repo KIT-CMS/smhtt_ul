@@ -141,11 +141,15 @@ def lumi_weight(era):
 
 
 def MC_base_process_selection(channel, era):
+    if channel == "em":
+        isoweight = ("isoWeight_1*(isoWeight_2*(isoWeight_2<1000)+1.0*(isoWeight_2>=1000))","isoweight")
+    else:
+        isoweight = ("isoWeight_1*isoWeight_2","isoweight")
     MC_base_process_weights = [
         ("generatorWeight", "generatorWeight"),
         ("puweight", "puweight"),
         ("idWeight_1*idWeight_2","idweight"),
-        ("isoWeight_1*isoWeight_2","isoweight"),
+        isoweight,
         ("trackWeight_1*trackWeight_2","trackweight"),
         ("eleTauFakeRateWeight*muTauFakeRateWeight", "leptonTauFakeRateWeight"),
         triggerweight(channel, era),
