@@ -434,7 +434,7 @@ def main(args):
             else:
                 plot.subplot(2).setXlabel("NN output")
             if args.normalize_by_bin_width:
-                plot.subplot(0).setYlabel("dN/d(NN output)")
+                plot.subplot(0).setYlabel("dN/d(%s)"%args.gof_variable)
             else:
                 plot.subplot(0).setYlabel("N_{events}")
 
