@@ -164,6 +164,12 @@ recoil_response = [
         ChangeDataset("CMS_htt_boson_scale_met_EraDown", "metRecoilResponseDown")
         ]
 
+# fake met scaling in embedded samples
+emb_met_scale = [
+        ChangeDataset("CMS_scale_embed_metUp", "scale_metUp"),
+        ChangeDataset("CMS_scale_embed_metDown", "scale_metDown")
+        ]
+
 # Energy scales of leptons faking tau leptons.
 ele_fake_es_1prong = [
         ChangeDataset("CMS_ZLShape_et_1prong_barrel_EraUp", "tauEleFakeEsOneProngBarrelUp"),
