@@ -412,6 +412,12 @@ def main(args):
                     plot.subplot(0).setLogX()
                     plot.subplot(1).setLogX()
                     plot.subplot(2).setLogX()
+                elif args.gof_variable in ["njets_red", "nbtag_red"]:
+                    bins = plot.subplot(2).get_hist("data_obs").GetNbinsX()
+                    bin_labels = map(str,range(bins-1))
+                    bin_labels.append("#geq%i" % (bins-1) )
+                    plot.subplot(2).setNXdivisions(bins, 0, 2)
+                    plot.subplot(2).changeXLabels(bin_labels)
                 if args.gof_variable in styles.x_label_dict[args.channels[0]]:
                     x_label = styles.x_label_dict[args.channels[0]][
                         args.gof_variable]
