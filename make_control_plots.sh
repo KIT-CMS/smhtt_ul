@@ -12,7 +12,7 @@ else
 fi
 
 # Merge the shapes.
-# bash submit/merge_outputs.sh $ERA $CHANNEL $TAG 1
+bash submit/merge_outputs.sh $ERA $CHANNEL $TAG 1
 
 # Produce the different estimations.
 bash shapes/do_estimations.sh $ERA output/shapes/${ERA}-${CHANNEL}-control-shapes-${TAG}/shapes-control-${ERA}-${CHANNEL}.root 1
