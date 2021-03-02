@@ -130,9 +130,6 @@ lt_categorization = [
             [mt_tot_hist]),
     (Selection(name="NbtagGt1_MT40To70",         cuts = [("nbtag>=1&&mt_1_puppi>=40&&mt_1_puppi<70", "category_selection")]),
             [mt_tot_hist]),
-    # Control region.
-    (Selection(name="MTGt70",                    cuts = [("mt_1_puppi>=70", "category_selection")]),
-            [mt_tot_hist]),
 ]
 
 tt_categorization = [
