@@ -166,9 +166,9 @@ recoil_response = [
 
 # fake met scaling in embedded samples
 emb_met_scale = [
-        ChangeDataset("CMS_scale_embed_metUp", "scale_metUp"),
-        ChangeDataset("CMS_scale_embed_metDown", "scale_metDown")
-        ]
+        ChangeDataset("CMS_scale_embed_metUp", "scale_metDown"),  # Interchange necessary here since bug
+        ChangeDataset("CMS_scale_embed_metDown", "scale_metUp")   # was introduced at ntuple production level
+        ]                                                         # ToDo: revert if new ntuples are produced
 
 # Energy scales of leptons faking tau leptons.
 ele_fake_es_1prong = [
