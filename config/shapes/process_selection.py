@@ -731,3 +731,39 @@ def SUSYggH_ht_contribution_selection(channel):
 
 def SUSYggH_hb_contribution_selection(channel):
     return Selection(name="ggh_b", weights=[("NLOReweighting.ggh_b_weight", "contributionWeight")])
+
+# Temorary for powheg samples
+def SUSYggHpowheg_Ai_contribution_selection(channel):
+    return Selection(name="ggA_i", weights=[("ggA_i_weight", "contributionWeight")])
+
+
+def SUSYggHpowheg_At_contribution_selection(channel):
+    return Selection(name="ggA_t", weights=[("ggA_t_weight", "contributionWeight")])
+
+
+def SUSYggHpowheg_Ab_contribution_selection(channel):
+    return Selection(name="ggA_b", weights=[("ggA_b_weight", "contributionWeight")])
+
+
+def SUSYggHpowheg_Hi_contribution_selection(channel):
+    return Selection(name="ggH_i", weights=[("ggh_i_weight", "contributionWeight")])
+
+
+def SUSYggHpowheg_Ht_contribution_selection(channel):
+    return Selection(name="ggH_t", weights=[("ggh_t_weight", "contributionWeight")])
+
+
+def SUSYggHpowheg_Hb_contribution_selection(channel):
+    return Selection(name="ggH_b", weights=[("ggh_b_weight", "contributionWeight")])
+
+
+def SUSYggHpowheg_hi_contribution_selection(channel):
+    return Selection(name="ggh_i", weights=[("ggh_i_weight", "contributionWeight")])
+
+
+def SUSYggHpowheg_ht_contribution_selection(channel):
+    return Selection(name="ggh_t", weights=[("ggh_t_weight", "contributionWeight")])
+
+
+def SUSYggHpowheg_hb_contribution_selection(channel):
+    return Selection(name="ggh_b", weights=[("ggh_b_weight", "contributionWeight")])

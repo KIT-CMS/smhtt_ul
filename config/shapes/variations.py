@@ -811,3 +811,45 @@ ggh_scale_ggh_b = [
         ReplaceWeight("QCDscale_ggH_REWEIGHTUp", "contributionWeight", Weight("NLOReweighting.ggh_b_weight_scale_up", "contributionWeight")),
         ReplaceWeight("QCDscale_ggH_REWEIGHTDown", "contributionWeight", Weight("NLOReweighting.ggh_b_weight_scale_down", "contributionWeight")),
         ]
+
+gghpowheg_scale_ggA_i = [
+        ReplaceWeight("Hdamp_ggH_i_REWEIGHTUp", "contributionWeight", Weight("ggA_i_weight_hdamp_up", "contributionWeight")),
+        ReplaceWeight("Hdamp_ggH_i_REWEIGHTDown", "contributionWeight", Weight("ggA_i_weight_hdamp_down", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTUp", "contributionWeight", Weight("ggA_i_weight_scale_up", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTDown", "contributionWeight", Weight("ggA_i_weight_scale_down", "contributionWeight")),
+        ]
+
+gghpowheg_scale_ggA_t = [
+        ReplaceWeight("Hdamp_ggH_t_REWEIGHTUp", "contributionWeight", Weight("ggA_t_weight_hdamp_up", "contributionWeight")),
+        ReplaceWeight("Hdamp_ggH_t_REWEIGHTDown", "contributionWeight", Weight("ggA_t_weight_hdamp_down", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTUp", "contributionWeight", Weight("ggA_t_weight_scale_up", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTDown", "contributionWeight", Weight("ggA_t_weight_scale_down", "contributionWeight")),
+        ]
+
+gghpowheg_scale_ggA_b = [
+        ReplaceWeight("Hdamp_ggH_b_REWEIGHTUp", "contributionWeight", Weight("ggA_b_weight_hdamp_up", "contributionWeight")),
+        ReplaceWeight("Hdamp_ggH_b_REWEIGHTDown", "contributionWeight", Weight("ggA_b_weight_hdamp_down", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTUp", "contributionWeight", Weight("ggA_b_weight_scale_up", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTDown", "contributionWeight", Weight("ggA_b_weight_scale_down", "contributionWeight")),
+        ]
+
+gghpowheg_scale_ggh_i = [
+        ReplaceWeight("Hdamp_ggH_i_REWEIGHTUp", "contributionWeight", Weight("ggh_i_weight_hdamp_up", "contributionWeight")),
+        ReplaceWeight("Hdamp_ggH_i_REWEIGHTDown", "contributionWeight", Weight("ggh_i_weight_hdamp_down", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTUp", "contributionWeight", Weight("ggh_i_weight_scale_up", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTDown", "contributionWeight", Weight("ggh_i_weight_scale_down", "contributionWeight")),
+        ]
+
+gghpowheg_scale_ggh_t = [
+        ReplaceWeight("Hdamp_ggH_t_REWEIGHTUp", "contributionWeight", Weight("ggh_t_weight_hdamp_up", "contributionWeight")),
+        ReplaceWeight("Hdamp_ggH_t_REWEIGHTDown", "contributionWeight", Weight("ggh_t_weight_hdamp_down", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTUp", "contributionWeight", Weight("ggh_t_weight_scale_up", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTDown", "contributionWeight", Weight("ggh_t_weight_scale_down", "contributionWeight")),
+        ]
+
+gghpowheg_scale_ggh_b = [
+        ReplaceWeight("Hdamp_ggH_b_REWEIGHTUp", "contributionWeight", Weight("ggh_b_weight_hdamp_up", "contributionWeight")),
+        ReplaceWeight("Hdamp_ggH_b_REWEIGHTDown", "contributionWeight", Weight("ggh_b_weight_hdamp_down", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTUp", "contributionWeight", Weight("ggh_b_weight_scale_up", "contributionWeight")),
+        ReplaceWeight("QCDscale_ggH_REWEIGHTDown", "contributionWeight", Weight("ggh_b_weight_scale_down", "contributionWeight")),
+        ]

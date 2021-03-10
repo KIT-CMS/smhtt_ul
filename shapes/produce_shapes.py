@@ -13,6 +13,7 @@ from config.shapes.channel_selection import channel_selection
 from config.shapes.file_names import files
 from config.shapes.process_selection import DY_process_selection, TT_process_selection, VV_process_selection, W_process_selection, ZTT_process_selection, ZL_process_selection, ZJ_process_selection, TTT_process_selection, TTL_process_selection, TTJ_process_selection, VVT_process_selection, VVJ_process_selection, VVL_process_selection, ggH125_process_selection, qqH125_process_selection, ZTT_embedded_process_selection, ZH_process_selection, WH_process_selection, ggHWW_process_selection, qqHWW_process_selection, ZHWW_process_selection, WHWW_process_selection, ttH_process_selection
 from config.shapes.process_selection import SUSYbbH_process_selection, SUSYggH_process_selection, SUSYggH_Ai_contribution_selection, SUSYggH_At_contribution_selection, SUSYggH_Ab_contribution_selection, SUSYggH_Hi_contribution_selection, SUSYggH_Ht_contribution_selection, SUSYggH_Hb_contribution_selection, SUSYggH_hi_contribution_selection, SUSYggH_ht_contribution_selection, SUSYggH_hb_contribution_selection
+from config.shapes.process_selection import SUSYggHpowheg_Ai_contribution_selection, SUSYggHpowheg_At_contribution_selection, SUSYggHpowheg_Ab_contribution_selection, SUSYggHpowheg_Hi_contribution_selection, SUSYggHpowheg_Ht_contribution_selection, SUSYggHpowheg_Hb_contribution_selection, SUSYggHpowheg_hi_contribution_selection, SUSYggHpowheg_ht_contribution_selection, SUSYggHpowheg_hb_contribution_selection
 # from config.shapes.category_selection import categorization
 from config.shapes.category_selection import categorization
 # Variations for estimation of fake processes
@@ -33,6 +34,7 @@ from config.shapes.variations import prefiring, btag_eff, mistag_eff, ggh_accept
 from config.shapes.variations import ff_variations_lt, ff_variations_tt, ff_variations_tt_mcl, qcd_variations_em, wfakes_tt, wfakes_w_tt, ff_variations_tau_es_lt, ff_variations_tau_es_tt, ff_variations_tau_es_tt_mcl
 # ggH reweighting variations
 from config.shapes.variations import ggh_scale_ggA_t,ggh_scale_ggA_b,ggh_scale_ggA_i,ggh_scale_ggh_t,ggh_scale_ggh_b,ggh_scale_ggh_i
+from config.shapes.variations import gghpowheg_scale_ggA_t,gghpowheg_scale_ggA_b,gghpowheg_scale_ggA_i,gghpowheg_scale_ggh_t,gghpowheg_scale_ggh_b,gghpowheg_scale_ggh_i
 from config.shapes.control_binning import control_binning, minimal_control_plot_set
 
 logger = logging.getLogger("")
@@ -198,14 +200,20 @@ def main(args):
         "2016": {
             "bbH": [ 80, 90, 110, 120, 130, 140, 160, 180, 200, 250, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
             "ggH": [ 80, 90, 100, 110, 120, 130, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
+            "ggHpowheg": [  60,   80,  100,  120,  125,  130,  140,  160,  180,  200,  250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500],
+            "bbHpowheg": [  60,   80,  100,  120,  125,  130,  140,  160,  180,  200,  250,  350,  400,  450,  500,  600,  800,  900, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500], # 300, 700, 1000 missing
         },
         "2017": {
-            "bbH": [  80,   90,  110,  120,  125,  130,  140,  160,  180,  200, 250,  300,  350,  400,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
-            "ggH": [  80,   90,  100,  110,  120,  130,  140,  180,  200, 250,  300,  350,  400,  450,  600,  700,  800,  900, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
+            "bbH": [  90,  110,  120,  125,  130,  140,  160,  180,  200,  250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
+            "ggH": [  80,   90,  100,  110,  120,  130,  140,  180,  200,  250,  300,  350,  400,  450,  600,  700,  800,  900, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
+            "ggHpowheg": [  60,   80,  100,  120,  125,  130,  140,  160,  180,  200,  250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500],
+            "bbHpowheg": [  60,   80,  100,  120,  125,  130,  140,  160,  180,  200,  250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500],
         },
         "2018": {
-            "bbH": [  80,   90,  100,  110,  120,  125,  130,  140,  160,  180,  200, 250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500],
-            "ggH": [  80,   90,  100,  110,  120,  130,  140,  160,  180,  200, 250,  300,  350,  400,  450,  600,  700,  800,  900, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
+            "bbH": [  80,   90,  100,  110,  120,  125,  130,  140,  160,  180,  200,  250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500],
+            "ggH": [  80,   90,  100,  110,  120,  130,  140,  160,  180,  200,  250,  300,  350,  400,  450,  600,  700,  800,  900, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200],
+            "ggHpowheg": [  60,   80,  100,  120,  125,  130,  140,  160,  180,  200,  250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500],
+            "bbHpowheg": [  60,   80,  100,  120,  125,  130,  140,  160,  180,  200,  250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500], # 1000 missing
         },
     }
 
@@ -218,7 +226,7 @@ def main(args):
                     return False
             # Add NLOReweighting friends only for ggh signals.
             if "NLOReweighting" in friend:
-                if re.match("(susygg)h", dataset.lower()):
+                if re.match("(susygg)h", dataset.lower()) and not "powheg" in dataset.lower():
                     pass
                 else:
                     return False
@@ -361,12 +369,35 @@ def main(args):
                                                                                                                               SUSYggH_ht_contribution_selection,
                                                                                                                               SUSYggH_hb_contribution_selection]]
                                             for mass in susy_masses[era]["ggH"]},
+                **{"gghpowheg{}".format(mass): [Unit(
+                                            datasets["susyggHpowheg_{}".format(mass)], [
+                                                channel_selection(channel, era),
+                                                SUSYggH_process_selection(channel, era),
+                                                contribution_selection(channel),
+                                                category_selection], actions) for category_selection, actions in categorization[channel]
+                                                                                               for contribution_selection in [
+                                                                                                                              SUSYggHpowheg_Ai_contribution_selection,
+                                                                                                                              SUSYggHpowheg_At_contribution_selection,
+                                                                                                                              SUSYggHpowheg_Ab_contribution_selection,
+                                                                                                                              SUSYggHpowheg_Hi_contribution_selection,
+                                                                                                                              SUSYggHpowheg_Ht_contribution_selection,
+                                                                                                                              SUSYggHpowheg_Hb_contribution_selection,
+                                                                                                                              SUSYggHpowheg_hi_contribution_selection,
+                                                                                                                              SUSYggHpowheg_ht_contribution_selection,
+                                                                                                                              SUSYggHpowheg_hb_contribution_selection]]
+                                            for mass in susy_masses[era]["ggHpowheg"]},
                 **{"bbh{}".format(mass): [Unit(
                                                 datasets["susybbH_{}".format(mass)], [
                                                     channel_selection(channel, era),
                                                     SUSYbbH_process_selection(channel, era),
                                                     category_selection], actions) for category_selection, actions in categorization[channel]]
                                             for mass in susy_masses[era]["bbH"]},
+                **{"bbhpowheg{}".format(mass): [Unit(
+                                                datasets["susybbHpowheg_{}".format(mass)], [
+                                                    channel_selection(channel, era),
+                                                    SUSYbbH_process_selection(channel, era),
+                                                    category_selection], actions) for category_selection, actions in categorization[channel]]
+                                            for mass in susy_masses[era]["bbHpowheg"]},
         }
 
     def get_control_units(channel, era, datasets):
@@ -499,7 +530,9 @@ def main(args):
     sm_signalsS = {"ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} & procS
     mssm_signalsS = (set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) \
                     | set("bbh{}".format(mass) for mass in susy_masses[args.era]["bbH"]) ) & procS
-    signalsS = sm_signalsS | mssm_signalsS
+    mssm_powheg_signalsS = (set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggHpowheg"]) & procS  \
+                           | set("bbhpowheg{}".format(mass) for mass in susy_masses[args.era]["bbHpowheg"]) ) & procS
+    signalsS = sm_signalsS | mssm_signalsS | mssm_powheg_signalsS
     if args.control_plots and not args.control_plots_full_samples:
         signalsS = signalsS & {"ggh", "qqh"}
 
@@ -547,6 +580,23 @@ def main(args):
                           [*ggh_scale_ggh_b], enable_check=args.enable_booking_check)
             um.book([unit for d in set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) & procS \
                           for unit in nominals[args.era]['units'][ch_][d] if "ggh_t" in map(getattr, unit.selections, ["name"]*len(unit.selections)) or "ggH_t" in map(getattr, unit.selections, ["name"]*len(unit.selections))], [*ggh_scale_ggh_t], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggHpowheg"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggA_t" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*gghpowheg_scale_ggA_t], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggHpowheg"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggA_b" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*gghpowheg_scale_ggA_b], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggHpowheg"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggA_i" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*gghpowheg_scale_ggA_i], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggHpowheg"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggh_i" in map(getattr, unit.selections, ["name"]*len(unit.selections)) or "ggH_i" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*gghpowheg_scale_ggh_i], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggHpowheg"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggh_b" in map(getattr, unit.selections, ["name"]*len(unit.selections)) or "ggH_b" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
+                          [*gghpowheg_scale_ggh_b], enable_check=args.enable_booking_check)
+            um.book([unit for d in set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggHpowheg"]) & procS \
+                          for unit in nominals[args.era]['units'][ch_][d] if "ggh_t" in map(getattr, unit.selections, ["name"]*len(unit.selections)) or "ggH_t" in map(getattr, unit.selections, ["name"]*len(unit.selections))], [*gghpowheg_scale_ggh_t], enable_check=args.enable_booking_check)
             # Book variations common to multiple channels.
             if ch_ in ["et", "mt", "tt"]:
                 um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero], enable_check=args.enable_booking_check)

@@ -41,12 +41,27 @@ do
     elif [[ "$PROC" =~ "mssm_ggh_split3" ]]
     then
         PROCESSES="$PROCESSES,$GGH_SAMPLES_SPLIT3"
+    elif [[ "$PROC" =~ "powheg_ggh_split1" ]]
+    then
+        PROCESSES="$PROCESSES,$GGH_POWHEG_SPLIT1"
+    elif [[ "$PROC" =~ "powheg_ggh_split2" ]]
+    then
+        PROCESSES="$PROCESSES,$GGH_POWHEG_SPLIT2"
+    elif [[ "$PROC" =~ "powheg_ggh_split3" ]]
+    then
+        PROCESSES="$PROCESSES,$GGH_POWHEG_SPLIT3"
     elif [[ "$PROC" =~ "mssm_bbh_split1" ]]
     then
         PROCESSES="$PROCESSES,$BBH_SAMPLES_SPLIT1"
     elif [[ "$PROC" =~ "mssm_bbh_split2" ]]
     then
         PROCESSES="$PROCESSES,$BBH_SAMPLES_SPLIT2"
+    elif [[ "$PROC" =~ "powheg_bbh_split1" ]]
+    then
+        PROCESSES="$PROCESSES,$BBH_POWHEG_SPLIT1"
+    elif [[ "$PROC" =~ "powheg_bbh_split2" ]]
+    then
+        PROCESSES="$PROCESSES,$BBH_POWHEG_SPLIT2"
     else
         echo "[INFO] Add selection of single process $PROC"
         PROCESSES="$PROCESSES,$PROC"
