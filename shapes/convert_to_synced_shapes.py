@@ -147,6 +147,17 @@ def write_hists_per_category(cat_hists : tuple):
                 hist.SetTitle(name_output.replace("_Era", ""))
                 hist.SetName(name_output.replace("_Era", ""))
                 hist.Write()
+        if "Hdamp_ggH_REWEIGHT" in name_output:
+            contrib = name_output.split("_")[1]
+            hist.SetTitle(name_output.replace("Hdamp_ggH_REWEIGHT", "Hdamp_ggH_{}_REWEIGHT".format(contrib)))
+            hist.SetName(name_output.replace("Hdamp_ggH_REWEIGHT", "Hdamp_ggH_{}_REWEIGHT".format(contrib)))
+            hist.Write()
+            continue
+        if "scale_embed_met" in name_output:
+            for syst in ["stat", "syst", "frac"]:
+                hist.SetTitle(name_output.replace("met", "_".join(["met", syst, channel, args.era])))
+                hist.SetName(name_output.replace("met", "_".join(["met", syst, channel, args.era])))
+                hist.Write()
         if "Era" in name_output:
             name_output = name_output.replace("Era", args.era)
         if "Channel" in name_output:
