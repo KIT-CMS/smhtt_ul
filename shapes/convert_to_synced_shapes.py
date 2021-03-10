@@ -99,9 +99,8 @@ def write_hists_per_category(cat_hists : tuple):
     outfile.cd()
     outfile.mkdir(dir_name)
     outfile.cd(dir_name)
-    for name in sorted(keys):
+    for name, name_output in sorted(keys.items(), key=lambda x: x[1]):
         hist = infile.Get(name)
-        name_output = keys[name]
         pos = 0.0
         neg = 0.0
         if "bbH" in name_output or "gg" in name_output:
@@ -110,7 +109,7 @@ def write_hists_per_category(cat_hists : tuple):
                 nominal = correct_nominal_shape(hist, "{} {}".format(name_output,category), integral)
             # if the integral of the shape is negative, set it to the corrected nominal shape
             elif integral <= 0.0:
-                    hist = nominal
+                hist = nominal
             else:
                 for i in range(hist.GetNbinsX()):
                     cont = hist.GetBinContent(i+1)
