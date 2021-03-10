@@ -362,6 +362,12 @@ def main(info):
         plot.subplot(1).setYlabel(
             "")  # otherwise number labels are not drawn on axis
         plot.subplot(1).setLogY()
+    # Check if variables should be plotted with log x axis
+    log_x_variables = ["puppimet"]
+    if variable in log_x_variables:
+        plot.subplot(0).setLogX()
+        plot.subplot(1).setLogX()
+        plot.subplot(2).setLogX()
     if variable != None:
         if variable in styles.x_label_dict[channel]:
             x_label = styles.x_label_dict[channel][
