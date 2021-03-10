@@ -215,7 +215,7 @@ common_files_2017 = {
     ],
     **{"susybbH_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_amcatnlo-pythia8_v1".format(mass)]
             for mass in [  80,   90,  110,  120,  125,  130,  140,  160,  180,  200,
-                          250,  300,  350,  400,  500,  600,  700,  800,  900, 1000,
+                          250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000,
                          1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200]},
     **{"susybbHpowheg_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2".format(mass)]
             for mass in [  60,   80,  100,  120,  125,  130,  140,  160,  180,  200,
