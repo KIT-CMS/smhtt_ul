@@ -22,12 +22,20 @@ bash shapes/convert_to_synced_shapes.sh $ERA $CHANNEL dummy $TAG 1
 
 for VAR in ${VARIABLES[@]}
 do
-    # Produce the datacards.
-    bash datacards/produce_gof_datacard.sh $ERA $CHANNEL $VAR $TAG
-    # Produce the workspaces.
-    bash datacards/produce_gof_workspace.sh $ERA $CHANNEL $VAR
-    # Produce the prefit shapes.
-    bash shapes/extract_postfit_shapes.sh $ERA $CHANNEL $VAR
-    # Produce the plots.
-    bash plotting/plot_shapes_control_systematics.sh $ERA $CHANNEL $VAR 1 1
+    for USEMC in 1 0
+    do
+        # Produce the datacards.
+        bash datacards/produce_gof_datacard.sh $ERA $CHANNEL $VAR $TAG $USEMC
+        # Produce the workspaces.
+        bash datacards/produce_gof_workspace.sh $ERA $CHANNEL $VAR
+        # Produce the prefit shapes.
+        bash shapes/extract_postfit_shapes.sh $ERA $CHANNEL $VAR
+        # Produce the plots.
+        if [[ $USEMC == 1 ]]
+        then
+            bash plotting/plot_shapes_control_systematics.sh $ERA $CHANNEL $VAR 1 0
+        else
+            bash plotting/plot_shapes_control_systematics.sh $ERA $CHANNEL $VAR 1 1
+        fi
+    done
 done
