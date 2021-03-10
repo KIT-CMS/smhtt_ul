@@ -88,12 +88,12 @@ def main(args):
     if args.control_variable is None:
         channel_categories = {
             #"et": ["nobtag_tight", "btag_tight", "nobtag_loosemt", "nobtag_tight"]
-            "et": ["1", "10", "11", "12", "13", "14", "15", "16", "17", "18", "32", "33",  "35", "36"],
+            "et": ["10", "11", "12", "13", "14", "15", "16", "17", "18", "32", "33",  "35", "36"],
             #"mt": ["nobtag_tight", "btag_tight", "nobtag_loosemt", "nobtag_tight"]
-            "mt": ["1", "10", "11", "12", "13", "14", "15", "16", "17", "18", "32", "33",  "35", "36"],
+            "mt": ["10", "11", "12", "13", "14", "15", "16", "17", "18", "32", "33",  "35", "36"],
             #"tt": ["nobtag", "btag"]
             "tt": ["10", "11", "12", "13", "14", "15", "16", "17", "32", "35"],
-            "em": ["1", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "32", "33", "34", "35", "36", "37"]
+            "em": ["2", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "32", "33", "34", "35", "36", "37"]
         }
         if args.model_independent:
             channel_categories = {
@@ -103,7 +103,7 @@ def main(args):
                 "mt": ["32", "33",  "35", "36"],
                 #"tt": ["nobtag", "btag"]
                 "tt": ["32", "35"],
-                "em": ["1", "32", "33", "34", "35", "36", "37"]
+                "em": ["2", "32", "33", "34", "35", "36", "37"]
             }
     else:
         channel_categories = {
@@ -125,7 +125,6 @@ def main(args):
     else:
         category_dict = {
             "et": {
-                "1": "m_{T} (e) > 70 GeV",
                 "10": "N_{jets} = 0, m_{T} (e) < 40 GeV",
                 "11": "N_{jets} = 0, 40 GeV < m_{T} (e) < 70 GeV",
                 "12": "N_{jets} = 0, #Delta R #geq 2.5",
@@ -141,7 +140,6 @@ def main(args):
                 "36": "B-tag Loose-m_{T}",
                 },
             "mt": {
-                "1": "m_{T} (#mu) > 70 GeV",
                 "10": "N_{jets} = 0, m_{T} (e) < 40 GeV",
                 "11": "N_{jets} = 0, 40 GeV < m_{T} (e) < 70 GeV",
                 "12": "N_{jets} = 0, #Delta R #geq 2.5",
@@ -169,7 +167,7 @@ def main(args):
                 "35": "B-tag",
                 },
             "em": {
-                "1": "d_{#zeta} < -35 GeV",
+                "2": "d_{#zeta} < -35 GeV",
                 "10": "10",
                 "11": "11",
                 "12": "12",
@@ -242,7 +240,7 @@ def main(args):
                 ]
 
         for category in channel_categories[channel]:
-            if args.control_region and category != "1":
+            if args.control_region and category != "2":
                 continue
             rootfile = rootfile_parser.Rootfile_parser(args.input)
             legend_bkg_processes = copy.deepcopy(bkg_processes)
