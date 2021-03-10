@@ -556,8 +556,8 @@ def main(args):
             pass
         else:
             # Book variations common to all channels.
-            um.book([unit for d in {"ggh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
-            um.book([unit for d in {"qqh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
+            # um.book([unit for d in {"ggh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
+            # um.book([unit for d in {"qqh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
             um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_es, *met_unclustered, *btag_eff, *mistag_eff], enable_check=args.enable_booking_check)
             um.book([unit for d in {'ztt', 'zj', 'zl', 'w'} & procS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*recoil_resolution, *recoil_response], enable_check=args.enable_booking_check)
             um.book([unit for d in {'ztt', 'zl', 'zj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zpt], enable_check=args.enable_booking_check)
