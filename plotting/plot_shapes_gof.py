@@ -215,7 +215,7 @@ def main(args):
         ]
     if not args.embedding and args.fake_factor:
         bkg_processes = [
-            "VVT", "VVJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"
+            "VVT", "VVL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
         ]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
