@@ -51,7 +51,7 @@ def main(args):
         logger.info(graphs[int(args.graph_number)])
     if args.output is None:
         output_file = os.path.join("output/shapes", os.path.basename(args.input).replace(".pkl", ""), "output-single_graph_job-{}-{}.root".format(
-                                os.path.basename(args.input.replace(".pkl", "")),
+                                os.path.basename(args.input.replace(".pkl", "")).replace("bbhpowheg", "bbhphg"),
                                 args.graph_number.replace("-", "_")))
     else:
         output_file = args.output
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     pathname = "log/{id}/".format(
         id=os.path.basename(args.input).replace(".pkl", ""))
     setup_logging(os.path.join(pathname, "single_graph_job-{id}-{num}.log".format(
-                                        id=os.path.basename(args.input).replace(".pkl", ""),
+                                        id=os.path.basename(args.input).replace(".pkl", "").replace("bbhpowheg", "bbhphg"),
                                         num=args.graph_number)),
                   level=logging.INFO)
     main(args)
