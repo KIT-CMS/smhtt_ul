@@ -112,6 +112,19 @@ common_files_2016 = {
                          1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500]},
     **{"susyggH_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_pythia8_v2".format(mass)]
             for mass in [ 80, 90, 100, 110, 120, 130, 140, 160, 180, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200]},
+    **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v3".format(mass)]
+            for mass in [ 800 ]},
+    **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v4".format(mass)]
+            # for mass in [  60,   80,  100,  120,  125,  140,  160,  180,
+            for mass in [  80,  100,  120,  125,  140,  160,  180,  250,
+                          300,  400,  450,  500,  600,  700,  900, 1000,
+                         1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3500]},
+    **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v5".format(mass)]
+            for mass in [ 200 ]},
+    **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v6".format(mass)]
+            for mass in [ 350, 3200 ]},
+    **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v7".format(mass)]
+            for mass in [ 130 ]},
 }
 # Input files used accross all channels in 2017.
 common_files_2017 = {

@@ -4,7 +4,8 @@ ERA=$1
 
 if [[ "$ERA" =~ "2016" ]]
 then
-    export GGH_POWHEG_SPLIT1="gghpowheg60,gghpowheg80,gghpowheg100,gghpowheg120,gghpowheg125,gghpowheg130,gghpowheg140,gghpowheg160,gghpowheg180,gghpowheg200,gghpowheg250"
+    # export GGH_POWHEG_SPLIT1="gghpowheg60,gghpowheg80,gghpowheg100,gghpowheg120,gghpowheg125,gghpowheg130,gghpowheg140,gghpowheg160,gghpowheg180,gghpowheg200,gghpowheg250"
+    export GGH_POWHEG_SPLIT1="gghpowheg80,gghpowheg100,gghpowheg120,gghpowheg125,gghpowheg130,gghpowheg140,gghpowheg160,gghpowheg180,gghpowheg200,gghpowheg250"  # 60 missing
     export GGH_POWHEG_SPLIT2="gghpowheg300,gghpowheg350,gghpowheg400,gghpowheg450,gghpowheg500,gghpowheg600,gghpowheg700,gghpowheg800,gghpowheg900,gghpowheg1000"
     export GGH_POWHEG_SPLIT3="gghpowheg1200,gghpowheg1400,gghpowheg1600,gghpowheg1800,gghpowheg2000,gghpowheg2300,gghpowheg2600,gghpowheg2900,gghpowheg3200,gghpowheg3500"
     export GGH_SAMPLES_SPLIT1="ggh80,ggh90,ggh100,ggh110,ggh120,ggh130,ggh140,ggh160,ggh180,ggh200"
