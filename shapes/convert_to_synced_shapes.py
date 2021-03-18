@@ -82,7 +82,7 @@ def correct_nominal_shape(hist, name, integral):
                 logger.info("Negative Bin {} - {}".format(i, hist.GetBinContent(i+1)))
                 hist.SetBinContent(i+1, 0.001)
                 logger.info("After fixing: {} - {}".format(i, hist.GetBinContent(i+1)))
-        sf = 0.001 / integral
+        sf = 0.001 / hist.Integral()
     hist.Scale(sf)
     return hist
 
