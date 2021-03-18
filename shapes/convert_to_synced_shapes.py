@@ -207,6 +207,10 @@ def main(args):
         # Skip variations necessary for estimations which are of no further use.
         if "same_sign" in variation or "anti_iso" in variation:
             continue
+        if process in ["qqH125", "ZH125", "WH125"]:
+            continue
+        elif "qqHComb125" in process:
+            process = process.replace("qqHComb125", "qqH125")
 
         # Check if channel and category are already in the map
         if not channel in hist_map:
