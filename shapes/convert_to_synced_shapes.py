@@ -191,6 +191,10 @@ def main(args):
         else:
             category = split_name[1].split("-")[-1]
             process = "-".join(split_name[1].split("-")[1:-1]) if not "data" in split_name[0] else "data_obs"
+            # Check if process is from hotfixed powheg signal samples. If so,
+            # remove the hot fix part from the process.
+            if "corrGenWeight" in process:
+                process = process.replace("-corrGenWeight", "")
             # Skip discriminant variables we do not want in the sync file.
             # This is necessary because the sync file only allows for one type of histogram.
             # A combination of the runs for different variables can then be used in separate files.
