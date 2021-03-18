@@ -103,14 +103,19 @@ def write_hists_per_category(cat_hists : tuple):
         hist = infile.Get(name)
         pos = 0.0
         neg = 0.0
-        if "bbH" in name_output or "gg" in name_output:
+        if "bbH" in name_output or ("gg" in name_output and not "_i_" in name_output):
             integral = hist.Integral()
-            if ("bbH" in name_output and len(name_output.split("_"))==2) or ("gg" in name_output and len(name_output.split("_"))==3):
+            if ("bbH" in name_output and len(name_output.split("_"))==2) \
+                or ("bbH" in name_output and len(name_output.split("_"))==3 and name_output.split("_")[2] == "powheg") \
+                or ("gg" in name_output and len(name_output.split("_"))==3) \
+                or ("gg" in name_output and len(name_output.split("_"))==4 and name_output.split("_")[3] == "powheg") \
+                or (name_output == "ggHWW125" or name_output == "qqHWW125"):
                 nominal = correct_nominal_shape(hist, "{} {}".format(name_output,category), integral)
             # if the integral of the shape is negative, set it to the corrected nominal shape
             elif integral <= 0.0:
                 hist = nominal
-            else:
+            # skip interference terms as the negative bins there could be physical
+            elif not (name_output.startswith("gg") and "_i_" in name_output):
                 for i in range(hist.GetNbinsX()):
                     cont = hist.GetBinContent(i+1)
                     if cont<0.0:
@@ -121,8 +126,7 @@ def write_hists_per_category(cat_hists : tuple):
                 if neg<0:
                     if (neg+pos)>0.0:
                         hist.Scale((neg+pos)/pos)
-
-        else:
+        elif not ("gg" in name_output and "_i_" in name_output):
             for i in range(hist.GetNbinsX()):
                 cont = hist.GetBinContent(i+1)
                 if cont<0.0:
