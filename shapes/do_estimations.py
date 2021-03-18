@@ -21,6 +21,9 @@ _dataset_map = {
     "VVJ": "VV",
     "EMB": "EMB",
     "W": "W",
+    "qqH125": "qqH",
+    "ZH125": "ZH",
+    "WH125": "WH",
 }
 
 _process_map = {
@@ -36,6 +39,9 @@ _process_map = {
     "VVJ": "VV-VVJ",
     "EMB": "Embedded",
     "W": "W",
+    "qqH125": "qqH125",
+    "ZH125": "ZH125",
+    "WH125": "WH125",
 }
 
 _name_string = "{dataset}#{channel}{process}{selection}#{variation}#{variable}"
@@ -412,6 +418,45 @@ def wfakes_estimation(rootfile, channel, selection, variable, variation="Nominal
     return base_hist
 
 
+def qqH_merge_estimation(rootfile, channel, selection, variable, variation="Nominal"):
+    procs_to_add = ["qqH125", "ZH125", "WH125"]
+    logger.debug("Trying to get object {}".format(
+                        _name_string.format(dataset=_dataset_map[procs_to_add[0]],
+                                            channel=channel,
+                                            process="-" + _process_map[procs_to_add[0]],
+                                            selection="-" + selection if selection != "" else "",
+                                            variation=variation,
+                                            variable=variable)))
+    base_hist = (rootfile.Get(_name_string.format(
+                                    dataset=_dataset_map[procs_to_add[0]],
+                                    channel=channel,
+                                    process="-" + _process_map[procs_to_add[0]],
+                                    selection="-" + selection if selection !="" else "",
+                                    variation=variation,
+                                    variable=variable)
+        )).Clone()
+    for proc in procs_to_add[1:]:
+        logger.debug("Trying to get object {}".format(
+                            _name_string.format(dataset=_dataset_map[proc],
+                                                channel=channel,
+                                                process="-" + _process_map[proc],
+                                                selection="-" + selection if selection != "" else "",
+                                                variation=variation,
+                                                variable=variable)))
+        base_hist.Add(rootfile.Get(_name_string.format(
+                                        dataset=_dataset_map[proc],
+                                        channel=channel,
+                                        process="-" + _process_map[proc],
+                                        selection="-" + selection if selection !="" else "",
+                                        variation=variation,
+                                        variable=variable)))
+    proc_name = "qqHComb125"
+    variation_name = base_hist.GetName().replace(_process_map[procs_to_add[0]], proc_name)
+    base_hist.SetName(variation_name)
+    base_hist.SetTitle(variation_name)
+    return base_hist
+
+
 def main(args):
     input_file = ROOT.TFile(args.input, "update")
     # Loop over histograms in root file to find available FF inputs.
@@ -419,6 +464,7 @@ def main(args):
     qcd_inputs = {}
     wfakes_inputs = {}
     emb_categories = {}
+    qqh_procs = {}
     logger.info("Reading inputs from file {}".format(args.input))
     for key in input_file.GetListOfKeys():
         logger.debug("Processing histogram %s",key.GetName())
@@ -533,6 +579,52 @@ def main(args):
                         emb_categories[channel][category] = [variable]
                 else:
                     emb_categories[channel] = {category: [variable]}
+        if dataset in ["qqH", "ZH", "WH"] and not variation.startswith("THU"):
+            sel_split = selection.split("-", maxsplit=1)
+            # Set category to default since not present in control plots.
+            category = ""
+            # Treat data hists seperately because only channel selection is applied to data.
+            if "data" in dataset:
+                channel = sel_split[0]
+                # Set category label for analysis categories.
+                if len(sel_split) > 1:
+                    category = sel_split[1]
+                process = "data"
+            else:
+                channel = sel_split[0]
+                #  Check if analysis category present in root file.
+                if (len(sel_split[1].split("-")) > 2
+                    or ("Embedded" in sel_split[1] and len(sel_split[1].split("-")) > 1)
+                    or ("W" in sel_split[1] and len(sel_split[1].split("-")) > 1)
+                    or ("H125" in sel_split[1] and len(sel_split[1].split("-")) > 1)):
+                    process = "-".join(sel_split[1].split("-")[:-1])
+                    category = sel_split[1].split("-")[-1]
+                else:
+                    # Set only process if no categorization applied.
+                    process = sel_split[1]
+            if channel in qqh_procs:
+                if category in qqh_procs[channel]:
+                    if variable in qqh_procs[channel][category]:
+                        if variation in qqh_procs[channel][category][variable]:
+                            qqh_procs[channel][category][variable][variation].append(process)
+                        else:
+                            qqh_procs[channel][category][variable][variation] = [process]
+                    else:
+                        qqh_procs[channel][category][variable] = {variation: [process]}
+                else:
+                    qqh_procs[channel][category] = {
+                                                variable: {
+                                                    variation: [process]
+                                                    }
+                                                }
+            else:
+                qqh_procs[channel] = {
+                                        category: {
+                                            variable: {
+                                                variation: [process]
+                                            }
+                                        }
+                                    }
 
     # Loop over available ff inputs and do the estimations
     logger.info("Starting estimations for fake factors and their variations")
@@ -588,7 +680,7 @@ def main(args):
                                                          is_embedding=False)
                         estimated_hist.Write()
     logger.info("Starting estimations for wfakes")
-    logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
+    logger.debug("%s", json.dumps(wfakes_inputs, sort_keys=True, indent=4))
     for ch in wfakes_inputs:
         for cat in wfakes_inputs[ch]:
             logger.info("Do estimation for category %s", cat)
@@ -607,6 +699,18 @@ def main(args):
                     estimated_hist.Write()
                     estimated_hist = emb_ttbar_contamination_estimation(input_file, ch, cat, var, sub_scale=-0.1)
                     estimated_hist.Write()
+    logger.info("Starting adding for qqH and VH processes.")
+    logger.debug("%s", json.dumps(qqh_procs, sort_keys=True, indent=4))
+    for ch in qqh_procs:
+        for cat in qqh_procs[ch]:
+            if "MTGt70" in cat:
+                continue
+            logger.info("Do estimation for category %s", cat)
+            for var in qqh_procs[ch][cat]:
+                for variation in qqh_procs[ch][cat][var]:
+                    estimated_hist = qqH_merge_estimation(input_file, ch, cat, var, variation=variation)
+                    estimated_hist.Write()
+
     logger.info("Successfully finished estimations.")
 
     # Clean-up.
