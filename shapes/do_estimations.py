@@ -116,7 +116,8 @@ def replace_negative_entries_and_renormalize(histogram, tolerance):
     return histogram
 
 
-def fake_factor_estimation(rootfile, channel, selection, variable, variation="Nominal", is_embedding=True):
+def fake_factor_estimation(rootfile, channel, selection, variable, variation="Nominal", is_embedding=True,
+                           sub_scale=1.0):
     if is_embedding:
         procs_to_subtract = ["EMB", "ZL", "TTL", "VVL"]
     else:
@@ -126,14 +127,14 @@ def fake_factor_estimation(rootfile, channel, selection, variable, variation="No
                                                 channel=channel,
                                                 process="",
                                                 selection="-" + selection if selection != "" else "",
-                                                variation="anti_iso" if "scale_t" in variation else variation,
+                                                variation="anti_iso" if "scale_t" in variation or "sub_syst" in variation else variation,
                                                 variable=variable)))
     base_hist = rootfile.Get(_name_string.format(
                                 dataset="data",
                                 channel=channel,
                                 process="",
                                 selection="-" + selection if selection != "" else "",
-                                variation="anti_iso" if "scale_t" in variation else variation,
+                                variation="anti_iso" if "scale_t" in variation or "sub_syst" in variation else variation,
                                 variable=variable
         )).Clone()
     for proc in procs_to_subtract:
@@ -142,22 +143,22 @@ def fake_factor_estimation(rootfile, channel, selection, variable, variation="No
                                                 channel=channel,
                                                 process="-" + _process_map[proc],
                                                 selection="-" + selection if selection != "" else "",
-                                                variation=variation,
+                                                variation=variation if not "sub_syst" in variation else "anti_iso",
                                                 variable=variable)))
         base_hist.Add(rootfile.Get(_name_string.format(
                                         dataset=_dataset_map[proc],
                                         channel=channel,
                                         process="-" + _process_map[proc],
                                         selection="-" + selection if selection !="" else "",
-                                        variation=variation,
-                                        variable=variable)), -1.0)
+                                        variation=variation if not "sub_syst" in variation else "anti_iso",
+                                        variable=variable)), -sub_scale)
     proc_name = "jetFakes" if is_embedding else "jetFakesMC"
     if variation in ["anti_iso"]:
         ff_variation = "Nominal"
     else:
         ff_variation = variation.replace("anti_iso_", "")
     variation_name = base_hist.GetName().replace("data", proc_name) \
-                                        .replace(variation if "scale_t" not in variation else "anti_iso", ff_variation) \
+                                        .replace(variation if "scale_t" not in variation and "sub_syst" not in variation else "anti_iso", ff_variation) \
                                         .replace("#" + channel, "#" + "-".join([channel, proc_name]), 1)
     base_hist.SetName(variation_name)
     base_hist.SetTitle(variation_name)
@@ -638,6 +639,15 @@ def main(args):
                    estimated_hist.Write()
                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
                    estimated_hist.Write()
+                for variation, scale in zip(["CMS_ff_total_sub_syst_Channel_EraUp",
+                                             "CMS_ff_total_sub_syst_Channel_EraDown"], [0.9, 1.1]):
+                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
+                                                            variation=variation, sub_scale=scale)
+                    estimated_hist.Write()
+                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
+                                                            variation=variation, is_embedding=False,
+                                                            sub_scale=scale)
+                    estimated_hist.Write()
     logger.info("Starting estimations for the QCD mulitjet process.")
     logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
     for ch in qcd_inputs:
