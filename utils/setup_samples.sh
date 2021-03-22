@@ -8,19 +8,19 @@ E=$1
 basedir="/ceph/htautau/Run2Legacy_MSSM"
 ARTUS_OUTPUTS_2016="$basedir/2016/ntuples/"
 SVFit_Friends_2016="$basedir/2016/friends/SVFit/"
-FF_Friends_2016="$basedir/2016/friends/FakeFactors_v3/"
+FF_Friends_2016="$basedir/2016/friends/FakeFactors_v5/"
 NLOReweighting_Friends_2016="$basedir/2016/friends/NLOReweighting/"
 
 # Samples Run2017
 ARTUS_OUTPUTS_2017="$basedir/2017/ntuples/"
 SVFit_Friends_2017="$basedir/2017/friends/SVFit/"
-FF_Friends_2017="$basedir/2017/friends/FakeFactors_v3/"
+FF_Friends_2017="$basedir/2017/friends/FakeFactors_v5/"
 NLOReweighting_Friends_2017="$basedir/2017/friends/NLOReweighting/"
 
 # Samples Run2018
 ARTUS_OUTPUTS_2018="$basedir/2018/ntuples/"
 SVFit_Friends_2018="$basedir/2018/friends/SVFit/"
-FF_Friends_2018="$basedir/2018/friends/FakeFactors_v3/"
+FF_Friends_2018="$basedir/2018/friends/FakeFactors_v5/"
 NLOReweighting_Friends_2018="$basedir/2018/friends/NLOReweighting/"
 
 

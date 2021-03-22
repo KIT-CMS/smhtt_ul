@@ -546,6 +546,14 @@ _ff_variations_lt = [
 	"ff_total_ttbar_syst_{ch}{era}{shift}",
 	"ff_total_ttbar_frac_{ch}{era}{shift}",
 	"ff_total_low_pt_{ch}{era}{shift}",
+	"ff_total_qcd_syst_met_closure_{ch}{era}{shift}",
+	"ff_total_wjets_syst_met_closure_{ch}{era}{shift}",
+	"ff_total_ttbar_syst_met_closure_{ch}{era}{shift}",
+	"ff_total_wjets_l_pt_closure_{ch}{era}{shift}",
+	"ff_total_ttbar_l_pt_closure_{ch}{era}{shift}",
+	"ff_total_sys_alt_func_{ch}{era}{shift}",
+	"ff_total_qcd_syst_bkg_{ch}{era}{shift}",
+	"ff_total_wjets_syst_bkg_{ch}{era}{shift}",
 ]
 #  Variations on the jet backgrounds estimated with the fake factor method.
 ff_variations_lt = [
@@ -631,6 +639,11 @@ _ff_variations_tt = [
 	"ff_total_qcd_stat_pt_unc2{ch}{era}{shift}",
 	"ff_total_qcd_syst{ch}{era}{shift}",
 	"ff_total_ttbar_syst{ch}{era}{shift}",
+	"ff_total_wjets_syst{ch}{era}{shift}",
+	"ff_total_qcd_syst_dr_closure{ch}{era}{shift}",
+	"ff_total_qcd_syst_pt2_closure{ch}{era}{shift}",
+	"ff_total_qcd_syst_met_closure{ch}{era}{shift}",
+	"ff_total_syst_alt_func{ch}{era}{shift}",
 ]
 ff_variations_tt = [
         ReplaceCutAndAddWeight("anti_iso_CMS_{syst}".format(syst=syst.format(shift=shift.capitalize(), era="_Era", ch="_tt")), "tau_iso",
