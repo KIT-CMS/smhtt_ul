@@ -597,7 +597,8 @@ def main(args):
                 if (len(sel_split[1].split("-")) > 2
                     or ("Embedded" in sel_split[1] and len(sel_split[1].split("-")) > 1)
                     or ("W" in sel_split[1] and len(sel_split[1].split("-")) > 1)
-                    or ("H125" in sel_split[1] and len(sel_split[1].split("-")) > 1)):
+                    or ("H125" in sel_split[1] and len(sel_split[1].split("-")) > 1)
+                    or ("qqHComb125" in sel_split[1])):
                     process = "-".join(sel_split[1].split("-")[:-1])
                     category = sel_split[1].split("-")[-1]
                 else:
