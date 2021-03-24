@@ -549,9 +549,9 @@ _ff_variations_lt = [
 	"ff_total_qcd_syst_met_closure_{ch}{era}{shift}",
 	"ff_total_wjets_syst_met_closure_{ch}{era}{shift}",
 	"ff_total_ttbar_syst_met_closure_{ch}{era}{shift}",
-	"ff_total_wjets_l_pt_closure_{ch}{era}{shift}",
-	"ff_total_ttbar_l_pt_closure_{ch}{era}{shift}",
-	"ff_total_sys_alt_func_{ch}{era}{shift}",
+	"ff_total_wjets_syst_l_pt_closure_{ch}{era}{shift}",
+	"ff_total_ttbar_syst_l_pt_closure_{ch}{era}{shift}",
+	"ff_total_syst_alt_func_{ch}{era}{shift}",
 	"ff_total_qcd_syst_bkg_{ch}{era}{shift}",
 	"ff_total_wjets_syst_bkg_{ch}{era}{shift}",
 ]
@@ -641,7 +641,7 @@ _ff_variations_tt = [
 	"ff_total_ttbar_syst{ch}{era}{shift}",
 	"ff_total_wjets_syst{ch}{era}{shift}",
 	"ff_total_qcd_syst_dr_closure{ch}{era}{shift}",
-	"ff_total_qcd_syst_pt2_closure{ch}{era}{shift}",
+	"ff_total_qcd_syst_pt_2_closure{ch}{era}{shift}",
 	"ff_total_qcd_syst_met_closure{ch}{era}{shift}",
 	"ff_total_syst_alt_func{ch}{era}{shift}",
 ]
