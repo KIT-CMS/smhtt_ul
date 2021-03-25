@@ -563,11 +563,11 @@ def main(args):
             # Book variations common to all channels.
             # um.book([unit for d in {"ggh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
             # um.book([unit for d in {"qqh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
+
             um.book([unit for d in simulatedProcsDS[ch_] for unit in nominals[args.era]['units'][ch_][d]], [*jet_es, *met_unclustered, *btag_eff, *mistag_eff], enable_check=args.enable_booking_check)
             um.book([unit for d in {'ztt', 'zj', 'zl', 'w'} & procS | signalsS for unit in nominals[args.era]['units'][ch_][d]], [*recoil_resolution, *recoil_response], enable_check=args.enable_booking_check)
             um.book([unit for d in {'ztt', 'zl', 'zj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zpt], enable_check=args.enable_booking_check)
             um.book([unit for d in {'ttt', 'ttl', 'ttj'} & procS for unit in nominals[args.era]['units'][ch_][d]], [*top_pt], enable_check=args.enable_booking_check)
-            um.book([unit for d in embS & procS for unit in nominals[args.era]['units'][ch_][d]], [*emb_met_scale], enable_check=args.enable_booking_check)
             um.book([unit for d in set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) & procS \
                           for unit in nominals[args.era]['units'][ch_][d] if "ggA_t" in map(getattr, unit.selections, ["name"]*len(unit.selections))],
                           [*ggh_scale_ggA_t], enable_check=args.enable_booking_check)
@@ -609,6 +609,7 @@ def main(args):
                 um.book([unit for d in embS for unit in nominals[args.era]['units'][ch_][d]], [*emb_tau_es_3prong, *emb_tau_es_3prong1pizero, *emb_tau_es_1prong, *emb_tau_es_1prong1pizero,
                                                                                                *tau_es_3prong, *tau_es_3prong1pizero, *tau_es_1prong, *tau_es_1prong1pizero],
                                                                                             enable_check=args.enable_booking_check)
+                um.book([unit for d in embS & procS for unit in nominals[args.era]['units'][ch_][d]], [*emb_met_scale], enable_check=args.enable_booking_check)
             if ch_ in ["et", "mt"]:
                 um.book([unit for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"} for unit in nominals[args.era]['units'][ch_][d]], [*tau_id_eff_lt], enable_check=args.enable_booking_check)
                 um.book([unit for d in dataS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_lt], enable_check=args.enable_booking_check)
