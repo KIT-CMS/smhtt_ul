@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 import re
+import yaml
 
 from ntuple_processor import Histogram
 from ntuple_processor import dataset_from_artusoutput, Unit, UnitManager, GraphManager, RunManager
@@ -238,6 +239,8 @@ def main(args):
         return datasets
 
     def get_analysis_units(channel, era, datasets, nn_shapes=False):
+        with open("generatorWeights.yaml", "r") as fi:
+            gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
         return {
                 "data" : [Unit(
                             datasets["data"], [
@@ -374,6 +377,7 @@ def main(args):
                                                 channel_selection(channel, era),
                                                 SUSYggH_process_selection(channel, era),
                                                 contribution_selection(channel),
+                                                Selection(name="corrGenWeight", weights=[("1./{}".format(gen_weights["ggH"][mass]), "generatorWeight_new")]),
                                                 category_selection], actions) for category_selection, actions in categorization[channel]
                                                                                                for contribution_selection in [
                                                                                                                               SUSYggHpowheg_Ai_contribution_selection,
@@ -396,6 +400,7 @@ def main(args):
                                                 datasets["susybbHpowheg_{}".format(mass)], [
                                                     channel_selection(channel, era),
                                                     SUSYbbH_process_selection(channel, era),
+                                                    Selection(name="corrGenWeight", weights=[("1./{}".format(gen_weights["bbH"][mass]), "generatorWeight_new")]),
                                                     category_selection], actions) for category_selection, actions in categorization[channel]]
                                             for mass in susy_masses[era]["bbHpowheg"]},
         }
