@@ -604,6 +604,8 @@ def main(args):
                 else:
                     # Set only process if no categorization applied.
                     process = sel_split[1]
+            if category == "":
+                continue
             if channel in qqh_procs:
                 if category in qqh_procs[channel]:
                     if variable in qqh_procs[channel][category]:
