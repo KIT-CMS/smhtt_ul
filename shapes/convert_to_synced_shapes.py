@@ -158,10 +158,12 @@ def write_hists_per_category(cat_hists : tuple):
             hist.Write()
             continue
         if "scale_embed_met" in name_output:
-            for syst in ["stat", "syst", "frac"]:
-                hist.SetTitle(name_output.replace("met", "_".join(["met", syst, channel, args.era])))
-                hist.SetName(name_output.replace("met", "_".join(["met", syst, channel, args.era])))
-                hist.Write()
+            hist.SetTitle(name_output.replace("met", "_".join(["met", args.era])))
+            hist.SetName(name_output.replace("met", "_".join(["met", args.era])))
+            hist.Write()
+            hist.SetTitle(name_output.replace("met", "_".join(["met", channel, args.era])))
+            hist.SetName(name_output.replace("met", "_".join(["met", channel, args.era])))
+            hist.Write()
         if "Era" in name_output:
             name_output = name_output.replace("Era", args.era)
         if "Channel" in name_output:
