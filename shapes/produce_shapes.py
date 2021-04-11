@@ -406,6 +406,8 @@ def main(args):
         }
 
     def get_control_units(channel, era, datasets):
+        with open("generatorWeights.yaml", "r") as fi:
+            gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
         return {
                'data' : [Unit(
                    datasets['data'],[
