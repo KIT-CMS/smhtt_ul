@@ -209,7 +209,7 @@ def main(args):
         # Skip variations necessary for estimations which are of no further use.
         if "same_sign" in variation or "anti_iso" in variation:
             continue
-        if process in ["qqH125", "ZH125", "WH125"]:
+        if process in ["qqH125", "ZH125", "WH125"] and not args.gof:
             continue
         elif "qqHComb125" in process:
             process = process.replace("qqHComb125", "qqH125")
