@@ -3,6 +3,9 @@ from ntuple_processor.utils import Selection
 
 m_sv_hist = Histogram("m_sv_puppi", "m_sv_puppi", [i for i in range(0, 255, 5)])
 mt_tot_hist = Histogram("mt_tot_puppi", "mt_tot_puppi", [i for i in list(range(0, 50, 50)) + list(range(50, 500, 10)) + list(range(500, 1000, 25)) + list(range(1000, 2000, 50)) + list(range(2000, 5100, 100))])
+histogram_nobtag = Histogram("mt_tot_puppi", "mt_tot_puppi", [0,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,225,250,275,300,325,350,400,450,500,600,700,800,900,1100,1300,1500,1700,1900,2100,2300,2500,2700,2900,3100,3300,3500,3700,3900,4100,4300,4500,4700,5000])
+histogram_btag = Histogram("mt_tot_puppi", "mt_tot_puppi", [0,60,80,100,120,140,160,180,200,250,300,350,400,500,600,700,800,900,1100,1300,1500,1700,1900,2100,2300,2500,2700,2900,3100,3300,3500,3700,3900,4100,4300,4500,4700,5000])
+
 
 lt_categorization_sm = [
     # Categorization targetting standard model processes.
@@ -118,72 +121,72 @@ em_categorization_sm = [
 
 lt_categorization = [
     (Selection(name="Nbtag0_MTLt40",             cuts = [("nbtag==0&&mt_1_puppi<40", "category_selection")]),
-            [mt_tot_hist]),
+            [histogram_nobtag]),
     (Selection(name="Nbtag0_MT40To70",           cuts = [("nbtag==0&&mt_1_puppi>=40&&mt_1_puppi<70", "category_selection")]),
-            [mt_tot_hist]),
+            [histogram_nobtag]),
     # MSSM and SM analysis categories
     (Selection(name="Nbtag0_MTLt40_MHGt250",     cuts = [("nbtag==0&&mt_1_puppi<40&&m_sv_puppi>=250", "category_selection")]),
-            [mt_tot_hist]),
+            [histogram_nobtag]),
     (Selection(name="Nbtag0_MT40To70_MHGt250",   cuts = [("nbtag==0&&mt_1_puppi>=40&&mt_1_puppi<70&&m_sv_puppi>=250", "category_selection")]),
-            [mt_tot_hist]),
+            [histogram_nobtag]),
     (Selection(name="NbtagGt1_MTLt40",           cuts = [("nbtag>=1&&mt_1_puppi<40", "category_selection")]),
-            [mt_tot_hist]),
+            [histogram_btag]),
     (Selection(name="NbtagGt1_MT40To70",         cuts = [("nbtag>=1&&mt_1_puppi>=40&&mt_1_puppi<70", "category_selection")]),
-            [mt_tot_hist]),
+            [histogram_btag]),
 ]
 
 tt_categorization = [
             # Pure MSSM analysis categories.
             (Selection(name="Nbtag0",                                    cuts=[("nbtag==0", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             # MSSM and SM analysis categories.
             (Selection(name="Nbtag0_MHGt250",                            cuts=[("nbtag==0&&m_sv_puppi>=250", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="NbtagGt1",                                  cuts=[("nbtag>=1", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
 ]
 
 em_categorization = [
             # Pure MSSM analysis categories.
             (Selection(name="Nbtag0_DZetam35Tom10",          cuts=[("nbtag==0&&pZetaPuppiMissVis>=-35&&pZetaPuppiMissVis<-10", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="Nbtag0_DZetam10To30",           cuts=[("nbtag==0&&pZetaPuppiMissVis>=-10&&pZetaPuppiMissVis<30", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="Nbtag0_DZetaGt30",              cuts=[("nbtag==0&&pZetaPuppiMissVis>=30", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             # MSSM and SM analysis categories.
             (Selection(name="Nbtag0_DZetam35Tom10_MHGt250",  cuts=[("nbtag==0&&pZetaPuppiMissVis>=-35&&pZetaPuppiMissVis<-10&&m_sv_puppi>=250", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="Nbtag0_DZetam10To30_MHGt250",   cuts=[("nbtag==0&&pZetaPuppiMissVis>=-10&&pZetaPuppiMissVis<30&&m_sv_puppi>=250", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="Nbtag0_DZetaGt30_MHGt250",      cuts=[("nbtag==0&&pZetaPuppiMissVis>=30&&m_sv_puppi>=250", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="NbtagGt1_DZetam35Tom10",        cuts=[("nbtag>=1&&pZetaPuppiMissVis>=-35&&pZetaPuppiMissVis<-10", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
             (Selection(name="NbtagGt1_DZetam10To30",         cuts=[("nbtag>=1&&pZetaPuppiMissVis>=-10&&pZetaPuppiMissVis<30", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
             (Selection(name="NbtagGt1_DZetaGt30",            cuts=[("nbtag>=1&&pZetaPuppiMissVis>=30", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
             # Additional MSSM analsis categories to test.
             (Selection(name="Nbtag1_DZetam35Tom10",          cuts=[("nbtag==1&&pZetaPuppiMissVis>=-35&&pZetaPuppiMissVis<-10", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
             (Selection(name="Nbtag1_DZetam10To30",           cuts=[("nbtag==1&&pZetaPuppiMissVis>=-10&&pZetaPuppiMissVis<30", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
             (Selection(name="Nbtag1_DZetaGt30",              cuts=[("nbtag==1&&pZetaPuppiMissVis>=30", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
             # Control regions.
             (Selection(name="inclusive",                     cuts=[("1==1", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="DZetaLtm35",                    cuts=[("pZetaPuppiMissVis<-35", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="Nbtag0_DZetaLtm35",             cuts=[("nbtag==0&&pZetaPuppiMissVis<-35", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="NbtagGt1_DZetaLtm35",           cuts=[("nbtag>=1&&pZetaPuppiMissVis<-35", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
             (Selection(name="Nbtag0",                        cuts=[("nbtag==0", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_nobtag]),
             (Selection(name="NbtagGt1",                      cuts=[("nbtag>=1", "category_selection")]),
-                    [mt_tot_hist]),
+                    [histogram_btag]),
 ]
 
 categorization = {
