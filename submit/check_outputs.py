@@ -47,12 +47,15 @@ def check_output_files(era, channel, process_string, control_arg):
 def main(args):
     proc_dict = {
             "bkg": ["data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt,ggh,gghww,qqh,qqhww,tth,wh,whww,zh,zhww"],
-            "mssm_bbh": [os.environ["BBH_SAMPLES_SPLIT{}".format(i)] for i in range(1,3)],
-            "mssm_ggh": [os.environ["GGH_SAMPLES_SPLIT{}".format(i)] for i in range(1,4)],
+            "mssm_bbhpowheg": [os.environ["BBH_POWHEG_SPLIT{}".format(i)] for i in range(1,3)],
+            "mssm_gghpowheg": [os.environ["GGH_POWHEG_SPLIT{}".format(i)] for i in range(1,4)],
+            # "mssm_bbh": [os.environ["BBH_SAMPLES_SPLIT{}".format(i)] for i in range(1,3)],
+            # "mssm_ggh": [os.environ["GGH_SAMPLES_SPLIT{}".format(i)] for i in range(1,4)],
     }
     for ch in args.channels:
         for proc, proc_splits in proc_dict.items():
-            if args.control and proc in ["mssm_bbh", "mssm_ggh"]:
+            if args.control and proc in ["mssm_bbh", "mssm_ggh",
+                                         "mssm_bbhpowheg", "mssm_gghpowheg"]:
                 continue
             # Read number of graphs that should have been processed from pickled graph list.
             c_arg = "control" if args.control else "analysis"
