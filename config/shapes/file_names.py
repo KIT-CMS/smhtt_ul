@@ -115,14 +115,13 @@ common_files_2016 = {
     **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v3".format(mass)]
             for mass in [ 800 ]},
     **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v4".format(mass)]
-            # for mass in [  60,   80,  100,  120,  125,  140,  160,  180,
             for mass in [  80,  100,  120,  125,  140,  160,  180,  250,
                           300,  400,  450,  500,  600,  700,  900, 1000,
                          1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3500]},
     **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v5".format(mass)]
             for mass in [ 200 ]},
     **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v6".format(mass)]
-            for mass in [ 350, 3200 ]},
+            for mass in [  60,  350, 3200 ]},
     **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v7".format(mass)]
             for mass in [ 130 ]},
 }
@@ -342,8 +341,8 @@ common_files_2018 = {
                           250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000,
                          1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500]},
     **{"susybbHpowheg_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v2".format(mass)]
-            for mass in [  60,   80,  120,  125,  130,  160,  400,  600,  800,
-                          900, 1200, 1600, 1800, 2300, 2600, 2900, 3200, 3500]},
+            for mass in [  60,   80,  120,  125,  130,  160,  400,  600,  800, 900,
+                         1000, 1200, 1600, 1800, 2300, 2600, 2900, 3200, 3500]},
     **{"susybbHpowheg_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v3".format(mass)]
             for mass in [ 140,  180,  250,  450,  500]},
     **{"susybbHpowheg_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v4".format(mass)]
