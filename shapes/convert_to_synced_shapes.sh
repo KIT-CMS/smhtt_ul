@@ -14,7 +14,7 @@ source utils/setup_root.sh
 
 if [[ $CONTROL == 0 ]]
 then
-    for PROC in bkg_sm mssm_ggh mssm_bbh
+    for PROC in bkg_sm mssm_gghpowheg mssm_bbhpowheg
     do 
         logandrun python shapes/convert_to_synced_shapes.py -e $ERA \
                                                             -i output/shapes/${ERA}-${CHANNEL}-analysis-shapes-${TAG}/shapes-analysis-${ERA}-${CHANNEL}-${PROC}.root \
