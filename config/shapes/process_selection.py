@@ -130,11 +130,11 @@ def prefiring_weight(era):
 
 def lumi_weight(era):
     if era == "2016":
-        lumi = "35.87"
+        lumi = "36.33"  # "36.326450080"
     elif era == "2017":
         lumi = "41.529"
     elif era == "2018":
-        lumi = "59.7"
+        lumi = "59.74"
     else:
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
