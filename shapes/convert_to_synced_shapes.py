@@ -101,47 +101,65 @@ def write_hists_per_category(cat_hists : tuple):
     outfile.cd(dir_name)
     for name, name_output in sorted(keys.items(), key=lambda x: x[1]):
         hist = infile.Get(name)
-        pos = 0.0
-        neg = 0.0
-        if "bbH" in name_output or ("gg" in name_output and not "_i_" in name_output):
-            integral = hist.Integral()
-            if ("bbH" in name_output and len(name_output.split("_"))==2) \
-                or ("bbH" in name_output and len(name_output.split("_"))==3 and name_output.split("_")[2] == "powheg") \
-                or ("gg" in name_output and len(name_output.split("_"))==3) \
-                or ("gg" in name_output and len(name_output.split("_"))==4 and name_output.split("_")[3] == "powheg") \
-                or (name_output == "ggHWW125" or name_output == "qqHWW125"):
-                nominal = correct_nominal_shape(hist, "{} {}".format(name_output,category), integral)
-            # if the integral of the shape is negative, set it to the corrected nominal shape
-            elif integral <= 0.0:
-                hist = nominal
-            # skip interference terms as the negative bins there could be physical
-            elif not (name_output.startswith("gg") and "_i_" in name_output):
-                for i in range(hist.GetNbinsX()):
-                    cont = hist.GetBinContent(i+1)
-                    if cont<0.0:
-                        neg += cont
-                        hist.SetBinContent(i+1, 0.0)
-                    else:
-                        pos += cont
-                if neg<0:
-                    if (neg+pos)>0.0:
-                        hist.Scale((neg+pos)/pos)
-        elif not ("gg" in name_output and "_i_" in name_output):
-            for i in range(hist.GetNbinsX()):
-                cont = hist.GetBinContent(i+1)
-                if cont<0.0:
-                    neg += cont
-                    hist.SetBinContent(i+1, 0.0)
-                else:
-                    pos += cont
-            if neg<0:
-                if neg+pos>0.0:
-                    hist.Scale((neg+pos)/pos)
-                else:
-                    hist.Scale(0.0)
-                if neg<-5.0:
-                        logger.fatal("Found histogram with a yield of negative bins larger than 5.0!")
-                        raise Exception
+        # pos = 0.0
+        # neg = 0.0
+        # if "bbH" in name_output or ("gg" in name_output and not "_i_" in name_output):
+        #     integral = hist.Integral()
+        #     if ("bbH" in name_output and len(name_output.split("_"))==2) \
+        #         or ("bbH" in name_output and len(name_output.split("_"))==3 and name_output.split("_")[2] == "powheg") \
+        #         or ("gg" in name_output and len(name_output.split("_"))==3) \
+        #         or ("gg" in name_output and len(name_output.split("_"))==4 and name_output.split("_")[3] == "powheg") \
+        #         or (name_output == "ggHWW125" or name_output == "qqHWW125"):
+        #         nominal = correct_nominal_shape(hist, "{} {}".format(name_output,category), integral)
+        #     # if the integral of the shape is negative, set it to the corrected nominal shape
+        #     elif integral <= 0.0:
+        #         hist = nominal
+        #     # skip interference terms as the negative bins there could be physical
+        #     elif not (name_output.startswith("gg") and "_i_" in name_output):
+        #         for i in range(hist.GetNbinsX()):
+        #             cont = hist.GetBinContent(i+1)
+        #             if cont<0.0:
+        #                 neg += cont
+        #                 hist.SetBinContent(i+1, 0.0)
+        #             else:
+        #                 pos += cont
+        #         if neg<0:
+        #             if (neg+pos)>0.0:
+        #                 hist.Scale((neg+pos)/pos)
+        # elif not ("gg" in name_output and "_i_" in name_output):
+        #     for i in range(hist.GetNbinsX()):
+        #         cont = hist.GetBinContent(i+1)
+        #         if cont<0.0:
+        #             neg += cont
+        #             hist.SetBinContent(i+1, 0.0)
+        #         else:
+        #             pos += cont
+        #     if neg<0:
+        #         if neg+pos>0.0:
+        #             hist.Scale((neg+pos)/pos)
+        #         else:
+        #             hist.Scale(0.0)
+        #         if neg<-5.0:
+        #                 logger.fatal("Found histogram with a yield of negative bins larger than 5.0!")
+        #                 raise Exception
+        # # Special treatment for gg interference terms since negative
+        # # integrals could be physical.
+        # elif ("gg" in name_output and "_i_" in name_output):
+        #     integral = hist.Integral()
+        #     # print(name_output, integral)
+        #     if ("gg" in name_output and len(name_output.split("_"))==3) \
+        #        or ("gg" in name_output and len(name_output.split("_"))==4 and name_output.split("_")[3] == "powheg"):
+        #         pass
+        #     elif integral <= 0.:
+        #         print("Integral smaller than zero")
+        #         # Check if uncertainty is negative when nominal is not.
+        #         split_name = name.split("#")
+        #         nom_name = "#".join(split_name[0:2] + ["Nominal"] + split_name[3:])
+        #         nominal = infile.Get(nom_name)
+        #         if nominal.Integral() > 0.:
+        #             print("Nominal integral greater than zero. Setting to nominal...")
+        #             hist = nominal
+        #             print("Integrals now: %f (nominal), %f (variation)" % (nominal.Integral(), hist.Integral()))
         # Write shapes with partial correlations across eras.
         if "Era" in name_output:
             if ("_1ProngPi0Eff_" in name_output
