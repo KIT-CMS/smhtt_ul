@@ -167,7 +167,7 @@ def fake_factor_estimation(rootfile, channel, selection, variable, variation="No
 
 
 def qcd_estimation(rootfile, channel, selection, variable, variation="Nominal", is_embedding=True,
-                   extrapolation_factor=1.):
+                   extrapolation_factor=1., sub_scale=1.):
     if is_embedding:
         procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
         if "em" in channel:
@@ -182,14 +182,14 @@ def qcd_estimation(rootfile, channel, selection, variable, variation="Nominal", 
                                                         channel=channel,
                                                         process="",
                                                         selection="-" + selection if selection != "" else "",
-                                                        variation=variation,
+                                                        variation="same_sign" if "subtrMC" in variation else variation,
                                                         variable=variable)))
     base_hist = rootfile.Get(_name_string.format(
                                 dataset="data",
                                 channel=channel,
                                 process="",
                                 selection="-" + selection if selection != "" else "",
-                                variation=variation,
+                                variation="same_sign" if "subtrMC" in variation else variation,
                                 variable=variable
         )).Clone()
     for proc in procs_to_subtract:
@@ -198,15 +198,15 @@ def qcd_estimation(rootfile, channel, selection, variable, variation="Nominal", 
                                                         channel=channel,
                                                         process="-" + _process_map[proc],
                                                         selection="-" + selection if selection != "" else "",
-                                                        variation=variation,
+                                                        variation="same_sign" if "subtrMC" in variation else variation,
                                                         variable=variable)))
         base_hist.Add(rootfile.Get(_name_string.format(
                                         dataset=_dataset_map[proc],
                                         channel=channel,
                                         process="-" + _process_map[proc],
                                         selection="-" + selection if selection != "" else "",
-                                        variation=variation,
-                                        variable=variable)), -1.0)
+                                        variation="same_sign" if "subtrMC" in variation else variation,
+                                        variable=variable)), -sub_scale)
 
     proc_name = "QCD" if is_embedding else "QCDMC"
     if variation in ["same_sign"]:
@@ -222,7 +222,7 @@ def qcd_estimation(rootfile, channel, selection, variable, variation="Nominal", 
                        base_hist.GetName())
         base_hist.Scale(0.0)
     variation_name = base_hist.GetName().replace("data", proc_name) \
-                                        .replace(variation, qcd_variation) \
+                                        .replace(variation if "subtrMC" not in variation else "same_sign", qcd_variation) \
                                         .replace(channel, "-".join([channel, proc_name]), 1)
     base_hist.SetName(variation_name)
     base_hist.SetTitle(variation_name)
@@ -656,25 +656,25 @@ def main(args):
     for ch in qcd_inputs:
         for cat in qcd_inputs[ch]:
             logger.info("Do estimation for category %s", cat)
+            extrapolation_factor = 1.0
+            if ch in ["et", "mt"] and  args.era == "2016":
+                extrapolation_factor = 1.17
+            elif ch in ["em"]:
+                if "NbtagGt1" in cat:
+                    if args.era == "2016":
+                        extrapolation_factor = 0.71
+                    elif args.era == "2017":
+                        extrapolation_factor = 0.69
+                    elif args.era == "2018":
+                        extrapolation_factor = 0.67
+                    else:
+                        logger.warning("No correction for given era %s available. "
+                                       "Setting extrapolation factor to 1.0",
+                                       args.era)
+                        extrapolation_factor = 1.0
             for var in qcd_inputs[ch][cat]:
                 for variation in qcd_inputs[ch][cat][var]:
                     if ch in ["et", "mt", "em"]:
-                        extrapolation_factor = 1.0
-                        if ch in ["et", "mt"] and  args.era == "2016":
-                            extrapolation_factor = 1.17
-                        elif ch in ["em"]:
-                            if "NbtagGt1" in cat:
-                                if args.era == "2016":
-                                    extrapolation_factor = 0.71
-                                elif args.era == "2017":
-                                    extrapolation_factor = 0.69
-                                elif args.era == "2018":
-                                    extrapolation_factor = 0.67
-                                else:
-                                    logger.warning("No correction for given era %s available. "
-                                                   "Setting extrapolation factor to 1.0",
-                                                   args.era)
-                                    extrapolation_factor = 1.0
                         estimated_hist = qcd_estimation(input_file, ch, cat, var,
                                                         variation=variation,
                                                         extrapolation_factor=extrapolation_factor)
@@ -691,6 +691,19 @@ def main(args):
                         estimated_hist = abcd_estimation(input_file, ch, cat, var,
                                                          variation=variation,
                                                          is_embedding=False)
+                        estimated_hist.Write()
+                if ch in ["em"]:
+                    for variation, scale in zip(["subtrMCUp",
+                                                 "subtrMCDown"], [0.8, 1.2]):
+                        estimated_hist = qcd_estimation(input_file, ch, cat, var,
+                                                        variation=variation,
+                                                        extrapolation_factor=extrapolation_factor,
+                                                        sub_scale=scale)
+                        estimated_hist.Write()
+                        estimated_hist = qcd_estimation(input_file, ch, cat, var,
+                                                        variation=variation, is_embedding=False,
+                                                        extrapolation_factor=extrapolation_factor,
+                                                        sub_scale=scale)
                         estimated_hist.Write()
     logger.info("Starting estimations for wfakes")
     logger.debug("%s", json.dumps(wfakes_inputs, sort_keys=True, indent=4))
