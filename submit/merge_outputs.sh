@@ -29,16 +29,23 @@ do
         # hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-bkg.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt/*.root
         # echo "[INFO] Adding outputs of sm signal jobs..."
         # hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-sm_signals.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-ggh,gghww,qqh,qqhww,tth,wh,whww,zh,zhww/*.root
-        echo "[INFO] Adding outputs of mssm bbh signal jobs..."
-        hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_bbh.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-bbh*/*.root
+        # echo "[INFO] Adding outputs of mssm bbh signal jobs..."
+        # hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_bbh.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-bbh*/*.root
+        # echo "[INFO] Adding outputs of mssm ggh signal jobs..."
+        # hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_ggh.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT1})/*.root \
+        #                                                                          output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT2})/*.root \
+        #                                                                          output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT3})/*.root
+        hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_bbhpowheg.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-bbhpowheg*/*.root
         echo "[INFO] Adding outputs of mssm ggh signal jobs..."
-        hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_ggh.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT1})/*.root \
-                                                                                 output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT2})/*.root \
-                                                                                 output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_SAMPLES_SPLIT3})/*.root
+        hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_gghpowheg.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_POWHEG_SPLIT1})/*.root \
+                                                                                 output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_POWHEG_SPLIT2})/*.root \
+                                                                                 output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string ${GGH_POWHEG_SPLIT3})/*.root
         echo "[INFO] Adding intermediate merge files to final merged file..."
         hadd ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}.root ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-bkg_sm.root \
-                                                           ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_ggh.root \
-                                                           ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_bbh.root
+                                                           ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_gghpowheg.root \
+                                                           ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_bbhpowheg.root
+        #                                                    ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_ggh.root \
+        #                                                    ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-mssm_bbh.root
                                                            # ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-sm_signals.root \
     else
         echo "[INFO] Adding outputs of background and sm signal jobs..."
