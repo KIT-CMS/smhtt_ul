@@ -173,10 +173,10 @@ emb_met_scale = [
 # Energy scales of leptons faking tau leptons.
 # Inclusive in eta
 ele_fake_es = [
-        ChangeDataset("CMS_ZLShape_et_1prong_EraUp", "tauEleFakeEsOneProngUp"),
-        ChangeDataset("CMS_ZLShape_et_1prong_EraDown", "tauEleFakeEsOneProngDown"),
-        ChangeDataset("CMS_ZLShape_et_1prong1pizero_EraUp", "tauEleFakeEsOneProngPiZerosUp"),
-        ChangeDataset("CMS_ZLShape_et_1prong1pizero_EraDown", "tauEleFakeEsOneProngPiZerosDown"),
+        ChangeDataset("CMS_ZLShape_et_1prong_EraUp", "tauEleFakeEsOneProngCommonUp"),
+        ChangeDataset("CMS_ZLShape_et_1prong_EraDown", "tauEleFakeEsOneProngCommonDown"),
+        ChangeDataset("CMS_ZLShape_et_1prong1pizero_EraUp", "tauEleFakeEsOneProngPiZerosCommonUp"),
+        ChangeDataset("CMS_ZLShape_et_1prong1pizero_EraDown", "tauEleFakeEsOneProngPiZerosCommonDown"),
         ]
 
 # Eta binned uncertainty
