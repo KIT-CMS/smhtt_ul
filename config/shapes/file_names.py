@@ -101,6 +101,12 @@ common_files_2016 = {
     "ttH": [
         "ttHJetToTTM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext4-v1",
     ],
+    "ggH_95": [
+        "GluGluHToTauTauM95_RunIISummer16MiniAODv3_Private_13TeV_USER_powheg-pythia8_v1",
+    ],
+    "qqH_95": [
+        "VBFHToTauTauM95_RunIISummer16MiniAODv3_Private_13TeV_USER_powheg-pythia8_v1",
+    ],
     **{"susybbH_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIISummer16MiniAODv3_94X_13TeV_MINIAOD_amcatnlo-pythia8_v2".format(mass)]
             for mass in [ 80, 90, 110, 120, 130, 140, 160, 180, 200, 250, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1400, 1600, 1800, 2000, 2900]},
     **{"susybbH_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIISummer16MiniAODv3_94X_13TeV_MINIAOD_amcatnlo-pythia8_v3".format(mass)]
@@ -225,6 +231,12 @@ common_files_2017 = {
     "ttH": [
         "ttHToTauTauM125_RunIIFall17MiniAODv2_PU2017newmpx_13TeV_MINIAOD_powheg-pythia8_v1",
     ],
+    "ggH_95": [
+        "GluGluHToTauTauM95_RunIIFall17MiniAODv2_Private_13TeV_USER_powheg-pythia8_v1",
+    ],
+    "qqH_95": [
+        "VBFHToTauTauM95_RunIIFall17MiniAODv2_PRIVATE_13TeV_USER_powheg-pythia8_v1",
+    ],
     **{"susybbH_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_amcatnlo-pythia8_v1".format(mass)]
             for mass in [  80,   90,  110,  120,  125,  130,  140,  160,  180,  200,
                           250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000,
@@ -335,6 +347,12 @@ common_files_2018 = {
     ],
     "ttH": [
         "ttHToTauTauM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    ],
+    "ggH_95": [
+        "GluGluHToTauTauM95_RunIIAutumn18MiniAOD_Private_13TeV_USER_powheg-pythia8_v1",
+    ],
+    "qqH_95": [
+        "VBFHToTauTauM95_RunIIAutumn18MiniAOD_PRIVATE_13TeV_USER_powheg-pythia_v1",
     ],
     **{"susybbH_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_amcatnlo-pythia8_v1".format(mass)]
             for mass in [  80,   90,  100,  110,  120,  125,  130,  140,  160,  180,  200,

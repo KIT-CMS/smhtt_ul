@@ -15,6 +15,7 @@ from config.shapes.file_names import files
 from config.shapes.process_selection import DY_process_selection, TT_process_selection, VV_process_selection, W_process_selection, ZTT_process_selection, ZL_process_selection, ZJ_process_selection, TTT_process_selection, TTL_process_selection, TTJ_process_selection, VVT_process_selection, VVJ_process_selection, VVL_process_selection, ggH125_process_selection, qqH125_process_selection, ZTT_embedded_process_selection, ZH_process_selection, WH_process_selection, ggHWW_process_selection, qqHWW_process_selection, ZHWW_process_selection, WHWW_process_selection, ttH_process_selection
 from config.shapes.process_selection import SUSYbbH_process_selection, SUSYggH_process_selection, SUSYggH_Ai_contribution_selection, SUSYggH_At_contribution_selection, SUSYggH_Ab_contribution_selection, SUSYggH_Hi_contribution_selection, SUSYggH_Ht_contribution_selection, SUSYggH_Hb_contribution_selection, SUSYggH_hi_contribution_selection, SUSYggH_ht_contribution_selection, SUSYggH_hb_contribution_selection
 from config.shapes.process_selection import SUSYggHpowheg_Ai_contribution_selection, SUSYggHpowheg_At_contribution_selection, SUSYggHpowheg_Ab_contribution_selection, SUSYggHpowheg_Hi_contribution_selection, SUSYggHpowheg_Ht_contribution_selection, SUSYggHpowheg_Hb_contribution_selection, SUSYggHpowheg_hi_contribution_selection, SUSYggHpowheg_ht_contribution_selection, SUSYggHpowheg_hb_contribution_selection
+from config.shapes.process_selection import ggH95_process_selection, qqH95_process_selection
 # from config.shapes.category_selection import categorization
 from config.shapes.category_selection import categorization
 # Variations for estimation of fake processes
@@ -355,6 +356,32 @@ def main(args):
                                 channel_selection(channel, era),
                                 WHWW_process_selection(channel, era),
                                 category_selection], actions) for category_selection, actions in categorization[channel]],
+                "qqh95": [Unit(
+                            datasets["qqH_95"], [
+                                channel_selection(channel, era),
+                                qqH95_process_selection(channel, era),
+                                category_selection], actions) for category_selection, actions in categorization[channel]],
+                "ggh95": [Unit(
+                            datasets["ggH_95"], [
+                                channel_selection(channel, era),
+                                ggH95_process_selection(channel, era),
+                                contribution_selection(channel),
+                                category_selection], actions) for category_selection, actions in categorization[channel]
+                                                                               for contribution_selection in [
+                                                                                                              SUSYggHpowheg_Ai_contribution_selection,
+                                                                                                              SUSYggHpowheg_At_contribution_selection,
+                                                                                                              SUSYggHpowheg_Ab_contribution_selection,
+                                                                                                              SUSYggHpowheg_Hi_contribution_selection,
+                                                                                                              SUSYggHpowheg_Ht_contribution_selection,
+                                                                                                              SUSYggHpowheg_Hb_contribution_selection,
+                                                                                                              SUSYggHpowheg_hi_contribution_selection,
+                                                                                                              SUSYggHpowheg_ht_contribution_selection,
+                                                                                                              SUSYggHpowheg_hb_contribution_selection]]
+                        + [Unit(
+                            datasets["ggH_95"], [
+                                channel_selection(channel, era),
+                                ggH95_process_selection(channel, era),
+                                category_selection], actions) for category_selection, actions in categorization[channel]],
                 **{"ggh{}".format(mass): [Unit(
                                             datasets["susyggH_{}".format(mass)], [
                                                 channel_selection(channel, era),
@@ -539,7 +566,8 @@ def main(args):
                     | set("bbh{}".format(mass) for mass in susy_masses[args.era]["bbH"]) ) & procS
     mssm_powheg_signalsS = (set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggHpowheg"]) & procS  \
                            | set("bbhpowheg{}".format(mass) for mass in susy_masses[args.era]["bbHpowheg"]) ) & procS
-    signalsS = sm_signalsS | mssm_signalsS | mssm_powheg_signalsS
+    m95_signals = {"ggh95", "qqh95"} & procS
+    signalsS = sm_signalsS | mssm_signalsS | mssm_powheg_signalsS | m95_signals
     if args.control_plots and not args.control_plots_full_samples:
         signalsS = signalsS & {"ggh", "qqh"}
 

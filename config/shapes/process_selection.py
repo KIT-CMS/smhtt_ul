@@ -668,6 +668,20 @@ def qqH125_process_selection(channel, era):
     return Selection(name = "qqH125", weights = qqH125_weights, cuts = qqH125_cuts)
 
 
+def ggH95_process_selection(channel, era):
+    ggH95_weights = HTT_base_process_selection(channel, era).weights + [
+        ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+        ]
+    return Selection("ggH95", weights=ggH95_weights)
+
+
+def qqH95_process_selection(channel, era):
+    qqH95_weights = HTT_base_process_selection(channel, era).weights + [
+        ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+        ]
+    return Selection(name="qqH95", weights=qqH95_weights)
+
+
 def SUSYggH_process_selection(channel, era):
     SUSYggH_weights = HTT_base_process_selection(channel, era).weights + [
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
