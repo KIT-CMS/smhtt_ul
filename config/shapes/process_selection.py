@@ -558,13 +558,20 @@ def VH_process_selection(channel, era):
 
 def WH_process_selection(channel, era):
     return Selection(name = "WH125",
-                     weights = HTT_process_selection(channel, era).weights,
+                     weights = HTT_base_process_selection(channel, era).weights + [
+                         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+                         ("(abs(crossSectionPerEventWeight - 0.052685) < 0.001)*0.051607+"
+                          "(abs(crossSectionPerEventWeight - 0.03342) < 0.001)*0.032728576", "crossSectionPerEventWeight")],
                      cuts = [("(htxs_stage1p1cat>=300)&&(htxs_stage1p1cat<=305)", "htxs_match")])
 
 
 def ZH_process_selection(channel, era):
     return Selection(name = "ZH125",
-                     weights = HTT_process_selection(channel, era).weights,
+                     weights = HTT_base_process_selection(channel, era).weights + [
+                         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+                         ("(abs(crossSectionPerEventWeight - 0.04774) < 0.001)*0.04683+"
+                          "(abs(crossSectionPerEventWeight - 0.0007771) < 0.00001)*0.0007666+"
+                          "(abs(crossSectionPerEventWeight - 0.0015391) < 0.0001)*0.00151848", "crossSectionPerEventWeight")],
                      cuts = [("(htxs_stage1p1cat>=400)&&(htxs_stage1p1cat<=405)", "htxs_match")])
 
 
@@ -613,7 +620,7 @@ def ZHWW_process_selection(channel, era):
 
 def ggh_stitching_weight(era):
     if era == "2016":
-        weight = ("(numberGeneratedEventsWeight*(abs(crossSectionPerEventWeight - 3.0469376) > 1e-5)+1.0/(9673200 + 19939500 + 19977000)*(abs(crossSectionPerEventWeight - 3.0469376) < 1e-5))*crossSectionPerEventWeight", "ggh_stitching_weight")
+        weight = ("(numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 3.0469376) > 1e-5)+1.0/(9673200 + 19939500 + 19977000)*2.998464*(abs(crossSectionPerEventWeight - 3.0469376) < 1e-5))", "ggh_stitching_weight")
     elif era == "2017":
         weight = ("((htxs_stage1p1cat==100||htxs_stage1p1cat==102||htxs_stage1p1cat==103)*crossSectionPerEventWeight*8.210e-8+"
                   "(htxs_stage1p1cat==101)*2.08e-8+"
@@ -621,7 +628,7 @@ def ggh_stitching_weight(era):
                   "(htxs_stage1p1cat==106)*1.19e-8+"
                   "(htxs_stage1p1cat>=107&&htxs_stage1p1cat<=109)*4.91e-8+"
                   "(htxs_stage1p1cat>=110&&htxs_stage1p1cat<=113)*7.90e-9"
-                  ")*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*crossSectionPerEventWeight*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5)","ggh_stitching_weight")
+                  ")*0.98409104275716*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5)","ggh_stitching_weight")
     elif era == "2018":
         weight = ("(((htxs_stage1p1cat==100||htxs_stage1p1cat==102||htxs_stage1p1cat==103)*crossSectionPerEventWeight*numberGeneratedEventsWeight+"
                   "(htxs_stage1p1cat==101)*2.09e-8+"
@@ -629,21 +636,32 @@ def ggh_stitching_weight(era):
                   "(htxs_stage1p1cat==106)*1.39e-8+"
                   "(htxs_stage1p1cat>=107&&htxs_stage1p1cat<=109)*4.90e-8+"
                   "(htxs_stage1p1cat>=110&&htxs_stage1p1cat<=113)*9.69e-9"
-                  ")*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*crossSectionPerEventWeight*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5))","ggh_stitching_weight")
+                  ")*0.98409104275716*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5))","ggh_stitching_weight")
     return weight
 
 
 def qqh_stitching_weight(era):
     if era == "2016":
-        weight = ("(numberGeneratedEventsWeight*(abs(crossSectionPerEventWeight - 0.2370687)>1e-4)+1.0/(1499400 + 1999000 + 2997000)*(abs(crossSectionPerEventWeight - 0.2370687)<1e-4))*crossSectionPerEventWeight", "qqh_stitching_weight")
+        weight = ("(numberGeneratedEventsWeight*((abs(crossSectionPerEventWeight - 0.04774)<0.001)*0.04683+"
+                                                "(abs(crossSectionPerEventWeight - 0.052685)<0.001)*0.051607+"
+                                                "(abs(crossSectionPerEventWeight - 0.03342)<0.001)*0.032728576)"
+                    "+1.0/(1499400 + 1999000 + 2997000)*0.2340416*(abs(crossSectionPerEventWeight - 0.2370687)<1e-4))", "qqh_stitching_weight")
     elif era == "2017":
-        weight = ("((htxs_stage1p1cat>=200&&htxs_stage1p1cat<=202)||abs(crossSectionPerEventWeight-0.04774)<0.001||abs(crossSectionPerEventWeight-0.052685)<0.001||abs(crossSectionPerEventWeight-0.03342)<0.001)*crossSectionPerEventWeight*numberGeneratedEventsWeight+(abs(crossSectionPerEventWeight-0.04774)>=0.001&&abs(crossSectionPerEventWeight-0.052685)>=0.001&&abs(crossSectionPerEventWeight-0.03342)>=0.001)*("
+        weight = ("(((htxs_stage1p1cat>=200&&htxs_stage1p1cat<=202)*(abs(crossSectionPerEventWeight-0.237207)<1e-4)*0.2340416)+"
+                    "(abs(crossSectionPerEventWeight-0.04774)<0.001)*0.04683+"
+                    "(abs(crossSectionPerEventWeight-0.052685)<0.001)*0.051607+"
+                    "(abs(crossSectionPerEventWeight-0.03342)<0.001)*0.032728576)*numberGeneratedEventsWeight"
+                  "+0.987231127517045*(abs(crossSectionPerEventWeight-0.04774)>=0.001&&abs(crossSectionPerEventWeight-0.052685)>=0.001&&abs(crossSectionPerEventWeight-0.03342)>=0.001)*("
                   "(htxs_stage1p1cat>=203&&htxs_stage1p1cat<=205)*8.70e-9+"
                   "(htxs_stage1p1cat==206)*8.61e-9+"
                   "(htxs_stage1p1cat>=207&&htxs_stage1p1cat<=210)*1.79e-8"
                   ")" ,"qqh_stitching_weight")
     elif era == "2018":
-        weight = ("((htxs_stage1p1cat>=200&&htxs_stage1p1cat<=202)||abs(crossSectionPerEventWeight-0.04774)<0.001||abs(crossSectionPerEventWeight-0.052685)<0.001||abs(crossSectionPerEventWeight-0.03342)<0.001)*crossSectionPerEventWeight*numberGeneratedEventsWeight+(abs(crossSectionPerEventWeight-0.04774)>=0.001&&abs(crossSectionPerEventWeight-0.052685)>=0.001&&abs(crossSectionPerEventWeight-0.03342)>=0.001)*("
+        weight = ("(((htxs_stage1p1cat>=200&&htxs_stage1p1cat<=202)*(abs(crossSectionPerEventWeight-0.2370687)<1e-4)*0.2340416)+"
+                    "(abs(crossSectionPerEventWeight-0.04774)<0.001)*0.04683+"
+                    "(abs(crossSectionPerEventWeight-0.052685)<0.001)*0.051607+"
+                    "(abs(crossSectionPerEventWeight-0.03342)<0.001)*0.032728576)*numberGeneratedEventsWeight"
+                  "+0.987231127517045*(abs(crossSectionPerEventWeight-0.04774)>=0.001&&abs(crossSectionPerEventWeight-0.052685)>=0.001&&abs(crossSectionPerEventWeight-0.03342)>=0.001)*("
                   "(htxs_stage1p1cat>=203&&htxs_stage1p1cat<=205)*9.41e-9+"
                   "(htxs_stage1p1cat==206)*8.52e-9+"
                   "(htxs_stage1p1cat>=207&&htxs_stage1p1cat<=210)*1.79e-8"
