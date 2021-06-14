@@ -26,11 +26,18 @@ for PROC in ${PROCS_ARR[@]};
 do
     if [[ "$PROC" =~ "backgrounds" ]]
     then
-        BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
+        # BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
+        if [[ "$CHANNEL" == "et" -o "$CHANNEL" == "mt" ]]
+        then
+            BKG_PROCS="data,emb,zl,ttl,vvl,ttt"
+        else
+            BKG_PROCS="data,emb,zl,ttl,vvl,ttt,w"
+        fi
         PROCESSES="$PROCESSES,$BKG_PROCS"
     elif [[ "$PROC" =~ "sm_signals" ]]
     then
-        SIG_PROCS="ggh,qqh,zh,wh,tth,gghww,qqhww,whww,zhww"
+        # SIG_PROCS="ggh,qqh,zh,wh,tth,gghww,qqhww,whww,zhww"
+        SIG_PROCS="ggh,qqh,zh,wh"
         PROCESSES="$PROCESSES,$SIG_PROCS"
     elif [[ "$PROC" =~ "mssm_ggh_split1" ]]
     then

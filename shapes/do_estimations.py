@@ -640,17 +640,17 @@ def main(args):
                 for variation in ff_inputs[ch][cat][var]:
                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation)
                    estimated_hist.Write()
-                   estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
-                   estimated_hist.Write()
+                   # estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
+                   # estimated_hist.Write()
                 for variation, scale in zip(["CMS_ff_total_sub_syst_Channel_EraUp",
                                              "CMS_ff_total_sub_syst_Channel_EraDown"], [0.9, 1.1]):
                     estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
                                                             variation=variation, sub_scale=scale)
                     estimated_hist.Write()
-                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
-                                                            variation=variation, is_embedding=False,
-                                                            sub_scale=scale)
-                    estimated_hist.Write()
+                    # estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
+                    #                                         variation=variation, is_embedding=False,
+                    #                                         sub_scale=scale)
+                    # estimated_hist.Write()
     logger.info("Starting estimations for the QCD mulitjet process.")
     logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
     for ch in qcd_inputs:
@@ -674,7 +674,18 @@ def main(args):
                         extrapolation_factor = 1.0
             for var in qcd_inputs[ch][cat]:
                 for variation in qcd_inputs[ch][cat][var]:
-                    if ch in ["et", "mt", "em"]:
+                    if ch in ["et", "mt"]:
+                        pass
+                        # estimated_hist = qcd_estimation(input_file, ch, cat, var,
+                        #                                 variation=variation,
+                        #                                 extrapolation_factor=extrapolation_factor)
+                        # estimated_hist.Write()
+                        # estimated_hist = qcd_estimation(input_file, ch, cat, var,
+                        #                                 variation=variation,
+                        #                                 is_embedding=False,
+                        #                                 extrapolation_factor=extrapolation_factor)
+                        # estimated_hist.Write()
+                    elif ch in ["em"]:
                         estimated_hist = qcd_estimation(input_file, ch, cat, var,
                                                         variation=variation,
                                                         extrapolation_factor=extrapolation_factor)

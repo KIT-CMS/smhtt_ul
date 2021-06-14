@@ -242,7 +242,7 @@ def main(args):
     def get_analysis_units(channel, era, datasets, nn_shapes=False):
         with open("generatorWeights.yaml", "r") as fi:
             gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
-        return {
+        analysis_units = {
                 "data" : [Unit(
                             datasets["data"], [
                                 channel_selection(channel, era),
@@ -306,11 +306,6 @@ def main(args):
                                 VV_process_selection(channel, era),
                                 VVJ_process_selection(channel),
                                 category_selection], actions) for category_selection, actions in categorization[channel]],
-                "w"   : [Unit(
-                            datasets["W"], [
-                                channel_selection(channel, era),
-                                W_process_selection(channel, era),
-                                category_selection], actions) for category_selection, actions in categorization[channel]],
                 "ggh" : [Unit(
                             datasets["ggH"], [
                                 channel_selection(channel, era),
@@ -331,31 +326,31 @@ def main(args):
                                 channel_selection(channel, era),
                                 ZH_process_selection(channel, era),
                                 category_selection], actions) for category_selection, actions in categorization[channel]],
-                "tth"  : [Unit(
-                            datasets["ttH"], [
-                                channel_selection(channel, era),
-                                ttH_process_selection(channel, era),
-                                category_selection], actions) for category_selection, actions in categorization[channel]],
-                "gghww"  : [Unit(
-                            datasets["ggHWW"], [
-                                channel_selection(channel, era),
-                                ggHWW_process_selection(channel, era),
-                                category_selection], actions) for category_selection, actions in categorization[channel]],
-                "qqhww"  : [Unit(
-                            datasets["qqHWW"], [
-                                channel_selection(channel, era),
-                                qqHWW_process_selection(channel, era),
-                                category_selection], actions) for category_selection, actions in categorization[channel]],
-                "zhww"  : [Unit(
-                            datasets["ZHWW"], [
-                                channel_selection(channel, era),
-                                ZHWW_process_selection(channel, era),
-                                category_selection], actions) for category_selection, actions in categorization[channel]],
-                "whww"  : [Unit(
-                            datasets["WHWW"], [
-                                channel_selection(channel, era),
-                                WHWW_process_selection(channel, era),
-                                category_selection], actions) for category_selection, actions in categorization[channel]],
+                # "tth"  : [Unit(
+                #             datasets["ttH"], [
+                #                 channel_selection(channel, era),
+                #                 ttH_process_selection(channel, era),
+                #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+                # "gghww"  : [Unit(
+                #             datasets["ggHWW"], [
+                #                 channel_selection(channel, era),
+                #                 ggHWW_process_selection(channel, era),
+                #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+                # "qqhww"  : [Unit(
+                #             datasets["qqHWW"], [
+                #                 channel_selection(channel, era),
+                #                 qqHWW_process_selection(channel, era),
+                #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+                # "zhww"  : [Unit(
+                #             datasets["ZHWW"], [
+                #                 channel_selection(channel, era),
+                #                 ZHWW_process_selection(channel, era),
+                #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+                # "whww"  : [Unit(
+                #             datasets["WHWW"], [
+                #                 channel_selection(channel, era),
+                #                 WHWW_process_selection(channel, era),
+                #                 category_selection], actions) for category_selection, actions in categorization[channel]],
                 "qqh95": [Unit(
                             datasets["qqH_95"], [
                                 channel_selection(channel, era),
@@ -431,11 +426,20 @@ def main(args):
                                                     category_selection], actions) for category_selection, actions in categorization[channel]]
                                             for mass in susy_masses[era]["bbHpowheg"]},
         }
+        if channel == "et":
+            pass
+        else:
+            analysis_units["w"] = [Unit(
+                                        datasets["W"], [
+                                            channel_selection(channel, era),
+                                            W_process_selection(channel, era),
+                                            category_selection], actions) for category_selection, actions in categorization[channel]]
+        return analysis_units
 
     def get_control_units(channel, era, datasets):
         with open("generatorWeights.yaml", "r") as fi:
             gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
-        return {
+        control_units = {
                'data' : [Unit(
                    datasets['data'],[
                        channel_selection(channel, era)],
@@ -499,11 +503,6 @@ def main(args):
                        VV_process_selection(channel, era),
                        VVJ_process_selection(channel)],
                        [control_binning[channel][v] for v in set(control_binning[channel].keys()) & set(args.control_plot_set)])],
-               'w' :   [Unit(
-                   datasets['W'], [
-                       channel_selection(channel, era),
-                       W_process_selection(channel, era)],
-                       [control_binning[channel][v] for v in set(control_binning[channel].keys()) & set(args.control_plot_set)])],
                'ggh' : [Unit(
                    datasets['ggH'], [
                        channel_selection(channel, era),
@@ -532,6 +531,15 @@ def main(args):
                                                                                                                               SUSYggH_hb_contribution_selection]]
                                             for mass in susy_masses[era]["ggH"]},
                 }
+        if channel == "et":
+            pass
+        else:
+            control_units["w"] = [Unit(
+                                        datasets['W'], [
+                                            channel_selection(channel, era),
+                                            W_process_selection(channel, era)],
+                                            [control_binning[channel][v] for v in set(control_binning[channel].keys()) & set(args.control_plot_set)])]
+        return control_units
     # Step 1: create units and book actions
     for channel in args.channels:
         nominals[args.era]['datasets'][channel] = get_nominal_datasets(args.era, channel)
@@ -544,9 +552,15 @@ def main(args):
 
     if args.process_selection is None:
         procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
-                 "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
-                | set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) \
-                | set("bbh{}".format(mass) for mass in susy_masses[args.era]["bbH"])
+                 "ggh", "qqh", "zh", "wh"} \
+                | set("gghpowheg{}".format(mass) for mass in susy_masses[args.era]["ggH"]) \
+                | set("bbhpowheg{}".format(mass) for mass in susy_masses[args.era]["bbH"])
+        if "et" in args.channels:
+            procS = procS - {"w"}
+        # procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
+        #          "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
+        #         | set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) \
+        #         | set("bbh{}".format(mass) for mass in susy_masses[args.era]["bbH"])
     else:
         procS = args.process_selection
 

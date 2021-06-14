@@ -46,7 +46,8 @@ def check_output_files(era, channel, process_string, control_arg):
 
 def main(args):
     proc_dict = {
-            "bkg": ["data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt,ggh,gghww,qqh,qqhww,tth,wh,whww,zh,zhww"],
+            # "bkg": ["data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt,ggh,gghww,qqh,qqhww,tth,wh,whww,zh,zhww"],
+            "bkg": ["data,emb,ttl,ttt,vvl,w,zl,ggh,qqh,wh,zh"],
             "mssm_bbhpowheg": [os.environ["BBH_POWHEG_SPLIT{}".format(i)] for i in range(1,3)],
             "mssm_gghpowheg": [os.environ["GGH_POWHEG_SPLIT{}".format(i)] for i in range(1,4)],
             # "mssm_bbh": [os.environ["BBH_SAMPLES_SPLIT{}".format(i)] for i in range(1,3)],
@@ -57,6 +58,8 @@ def main(args):
             if args.control and proc in ["mssm_bbh", "mssm_ggh",
                                          "mssm_bbhpowheg", "mssm_gghpowheg"]:
                 continue
+            if ch not in ["et", "mt"] and proc == "bkg":
+                proc_splits.append("w")
             # Read number of graphs that should have been processed from pickled graph list.
             c_arg = "control" if args.control else "analysis"
             for proc_str in proc_splits:

@@ -24,7 +24,13 @@ do
     if [[ "$PREFIX" =~ "analysis" ]]
     then 
         echo "[INFO] Adding outputs of background and sm signal jobs..."
-        hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-bkg_sm.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt,ggh,gghww,qqh,qqhww,tth,wh,whww,zh,zhww)/*.root
+        # hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-bkg_sm.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt,ggh,gghww,qqh,qqhww,tth,wh,whww,zh,zhww)/*.root
+        if [[ "$CH" == "et" -o "$CH" == "mt" ]]
+        then
+            hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-bkg_sm.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string data,emb,ttl,ttt,vvl,zl,ggh,qqh,wh,zh)/*.root
+        else
+            hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-bkg_sm.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-$(sort_string data,emb,ttl,ttt,vvl,w,zl,ggh,qqh,wh,zh)/*.root
+        fi
         # echo "[INFO] Adding outputs of background jobs..."
         # hadd -j 5 -n 600 ${DIRNAME}/shapes-${PREFIX}-${ERA}-${CH}-bkg.root output/shapes/${PREFIX}_unit_graphs-${ERA}-${CH}-data,emb,ttj,ttl,ttt,vvj,vvl,vvt,w,zj,zl,ztt/*.root
         # echo "[INFO] Adding outputs of sm signal jobs..."
