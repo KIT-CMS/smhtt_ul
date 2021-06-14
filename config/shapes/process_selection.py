@@ -672,7 +672,6 @@ def qqh_stitching_weight(era):
 def ggH125_process_selection(channel, era):
     ggH125_weights = HTT_base_process_selection(channel, era).weights + [
         ("ggh_NNLO_weight", "gghNNLO"),
-        ("1.01", "bbh_inclusion_weight"),
         ggh_stitching_weight(era),
         ]
     ggH125_cuts = [("(htxs_stage1p1cat>=100)&&(htxs_stage1p1cat<=113)", "htxs")]
