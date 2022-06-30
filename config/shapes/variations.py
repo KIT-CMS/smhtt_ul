@@ -32,8 +32,8 @@ abcd_method = [ReplaceCut("abcd_same_sign", "os", Cut("q_1*q_2>0", "ss")),
 ]
 
 anti_iso_lt = ReplaceCutAndAddWeight("anti_iso", "tau_iso",
-                                     Cut("byMediumDeepTau2017v2p1VSjet_2<0.5&&byVVVLooseDeepTau2017v2p1VSjet_2>0.5", "tau_anti_iso"),
-                                     Weight("ff_total", "fake_factor")
+                                     Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VVLoose_2>0.5", "tau_anti_iso"),
+                                    Weight("1.0", "fake_factor") # TODO no ff for now (later use ff_total here)
                                      )
 anti_iso_tt_mcl = ReplaceMultipleCutsAndAddWeight("anti_iso", ["tau_iso", "ff_veto"],
                                      [Cut("(byMediumDeepTau2017v2p1VSjet_2>0.5&&byMediumDeepTau2017v2p1VSjet_1<0.5&&byVVVLooseDeepTau2017v2p1VSjet_1>0.5)", "tau_anti_iso"),
