@@ -225,7 +225,9 @@ def DY_process_selection(channel, era):
     DY_process_weights = MC_base_process_selection(channel, era).weights
     DY_process_weights.extend(
         [
-            dy_stitching_weight(era),
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            # dy_stitching_weight(era),  # TODO add stitching weight
             # ("zPtReweightWeight", "zPtReweightWeight"),
         ]
     )
@@ -275,6 +277,12 @@ def W_stitching_weight(era):
 
 def W_process_selection(channel, era):
     W_process_weights = MC_base_process_selection(channel, era).weights
+    W_process_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+        ]
+    )
     # W_process_weights.append(W_stitching_weight(era)) # TODO add W stitching weight in when npartons is available
     return Selection(name="W", weights=W_process_weights)
 
@@ -300,19 +308,9 @@ def HWW_process_selection(channel, era):
     HWW_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         ]
     )
-    if era == "2018":
-        HWW_process_weights.append(
-            (
-                "0.0857883*(abs(numberGeneratedEventsWeight - 2e-06) < 1e-07) + 1.1019558*(abs(numberGeneratedEventsWeight - 2e-06) >= 1e-07)",
-                "crossSectionPerEventWeight",
-            )
-        )
-    else:
-        HWW_process_weights.append(
-            ("crossSectionPerEventWeight", "crossSectionPerEventWeight")
-        )
     return Selection(name="HWW", weights=HWW_process_weights)
 
 
@@ -411,10 +409,10 @@ def ZTT_embedded_process_selection(channel, era):
                 ("iso_wgt_mu_1", "isoweight"),
                 ("id_wgt_mu_1", "idweight"),
                 ("trg_wgtsingle_mu24Ormu27", "trgweight"),
-                (
-                    "id_wgt_tau_vsJet_Tight_2",
-                    "taubyIsoIdWeight",
-                ),  # TODO replace with embedded tau id weight
+                # (
+                #     "id_wgt_tau_vsJet_Tight_2",
+                #     "taubyIsoIdWeight",
+                # ),  # TODO replace with embedded tau id weight
                 # tau_by_iso_id_weight(channel),
                 # triggerweight_emb(channel, era),
                 # fakemetweight_emb(channel, era),
@@ -494,6 +492,8 @@ def ZL_nlo_process_selection(channel):
 
 
 def __get_ZL_cut(channel):
+    emb_veto = ""
+    ff_veto = ""
     if "mt" in channel:
         emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
         ff_veto = "!(gen_match_2 == 6)"

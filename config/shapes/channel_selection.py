@@ -23,9 +23,15 @@ def channel_selection(channel, era):
         #  Add era specific cuts. This is basically restricted to trigger selections.
         # TODO add 2017 and 2016
         if era == "2018":
+            # cuts.append(
+            #     (
+            #         "pt_2>30 && ((pt_1<25 && (trg_cross_mu20tau27_hps == 1 )) || (pt_1>=25 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))))",
+            #         "trg_selection",
+            #     ),  # TODO add nonHPS Triggerflag for also MC
+            # )
             cuts.append(
                 (
-                    "pt_2>30 && ((pt_1<25 && (trg_cross_mu20tau27_hps == 1 )) || (pt_1>=25 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))))",
+                    "pt_2>30 && pt_1>=25 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))",
                     "trg_selection",
                 ),  # TODO add nonHPS Triggerflag for also MC
             )

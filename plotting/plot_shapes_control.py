@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import Dumbledraw.dumbledraw as dd
-import Dumbledraw.rootfile_parser_inputshapes as rootfile_parser
+import Dumbledraw.rootfile_parser_ntuple_processor_inputshapes as rootfile_parser
 import Dumbledraw.styles as styles
 import ROOT
 
@@ -149,7 +149,7 @@ def main(info):
     # category = "_".join([channel, variable])
     # if args.category_postfix is not None:
     #     category += "_%s"%args.category_postfix
-    rootfile = rootfile_parser.Rootfile_parser(args.input, variable)
+    rootfile = rootfile_parser.Rootfile_parser(args.input, variable, )
     bkg_processes = [b for b in all_bkg_processes]
     if "em" in channel:
         if not args.embedding:
@@ -497,7 +497,7 @@ def main(info):
         os.mkdir("%s_plots_%s"%(args.era,postfix))
     if not os.path.exists("%s_plots_%s/%s"%(args.era,postfix,channel)):
         os.mkdir("%s_plots_%s/%s"%(args.era,postfix,channel))
-    print "Trying to save the created plot"
+    print("Trying to save the created plot")
     plot.save("%s_plots_%s/%s/%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, variable, "pdf"))
     plot.save("%s_plots_%s/%s/%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, variable, "png"))
 

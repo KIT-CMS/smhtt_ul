@@ -568,8 +568,11 @@ common_files_2018 = {
     "DY": [
         "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
         "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "EWKZ2Jets_ZToNuNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        "DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        "DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        "DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        # "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        # "EWKZ2Jets_ZToNuNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
     ],
     "TT": [
         "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
@@ -590,15 +593,15 @@ common_files_2018 = {
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
         "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
     ],
-    # "W": [
-    #     "W1JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-    #     "W2JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-    #     "W3JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-    #     "W4JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-    #     "WJetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-    #     "EWKWMinus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
-    #     "EWKWPlus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
-    # ],
+    "W": [
+        # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        #     "EWKWMinus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
+        #     "EWKWPlus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
+    ],
     "ggH": [
         "GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
         # "ggZHHToTauTauZToQQM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
@@ -651,33 +654,6 @@ common_files_2018 = {
     # "ttH": [
     #     # "ttHToTauTauM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
     # ],
-    # "ggH_95": [
-    #     "GluGluHToTauTauM95_RunIIAutumn18MiniAOD_Private_13TeV_USER_powheg-pythia8_v1",
-    # ],
-    # "qqH_95": [
-    #     "VBFHToTauTauM95_RunIIAutumn18MiniAOD_PRIVATE_13TeV_USER_powheg-pythia_v1",
-    # ],
-    # **{"susybbH_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_amcatnlo-pythia8_v1".format(mass)]
-    #         for mass in [  80,   90,  100,  110,  120,  125,  130,  140,  160,  180,  200,
-    #                       250,  300,  350,  400,  450,  500,  600,  700,  800,  900, 1000,
-    #                      1200, 1400, 1600, 1800, 2000, 2300, 2600, 2900, 3200, 3500]},
-    # **{"susybbHpowheg_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v2".format(mass)]
-    #         for mass in [  60,   80,  120,  125,  130,  160,  400,  600,  800, 900,
-    #                      1000, 1200, 1600, 1800, 2300, 2600, 2900, 3200, 3500]},
-    # **{"susybbHpowheg_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v3".format(mass)]
-    #         for mass in [ 140,  180,  250,  450,  500]},
-    # **{"susybbHpowheg_{}".format(mass): ["SUSYGluGluToBBHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v4".format(mass)]
-    #         for mass in [ 100,  200,  300,  350,  700, 1400, 2000]},
-    # **{"susyggH_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_pythia8_v2".format(mass)]
-    #         for mass in [  80,   90,  100,  110,  120,  130,  140,  160,  180,  200,
-    #                       250,  300,  350,  400,  450,  600,  700,  800,  900,
-    #                      1200, 1400, 1500, 1600, 1800, 2000, 2300, 2600, 2900, 3200]},
-    # **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v3".format(mass)]
-    #         for mass in [ 160, 1200, 1400, 1600, 2000, 2300, 3200]},
-    # **{"susyggHpowheg_{}".format(mass): ["SUSYGluGluToHToTauTauM{}_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v4".format(mass)]
-    #         for mass in [  60,   80,  100,  120,  125,  130,  140,  180,  200,
-    #                       250,  300,  350,  400,  450,  500,  600,  700,  800,  900,
-    #                      1000, 1800, 2600, 2900, 3500]},
 }
 
 files = {
@@ -989,10 +965,6 @@ files = {
                     "SingleMuon_Run2018B-UL2018",
                     "SingleMuon_Run2018C-UL2018",
                     "SingleMuon_Run2018D-UL2018",
-                    "Tau_Run2018A-UL2018",
-                    "Tau_Run2018B-UL2018",
-                    "Tau_Run2018C-UL2018",
-                    "Tau_Run2018D-UL2018",
                 ],
                 "EMB": [
                     "TauEmbedding-MuTauFinalState_Run2018A-UL2018",
@@ -1000,38 +972,22 @@ files = {
                     "TauEmbedding-MuTauFinalState_Run2018C-UL2018",
                     "TauEmbedding-MuTauFinalState_Run2018D-UL2018",
                 ],
-                "W": [
-                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                ],
             },
             **common_files_2018
         ),
         "tt": dict(
             {
                 "data": [
-                    "Tau_Run2018A_17Sep2018v1_13TeV_MINIAOD",
-                    "Tau_Run2018B_17Sep2018v1_13TeV_MINIAOD",
-                    "Tau_Run2018C_17Sep2018v1_13TeV_MINIAOD",
-                    "Tau_Run2018D_PromptRecov2_13TeV_MINIAOD",
+                    "Tau_Run2018A-UL2018",
+                    "Tau_Run2018B-UL2018",
+                    "Tau_Run2018C-UL2018",
+                    "Tau_Run2018D-UL2018",
                 ],
                 "EMB": [
-                    "Embedding2018A_TauTauFinalState_inputDoubleMu102XminiAODv1_13TeV_USER_v1",
-                    "Embedding2018B_TauTauFinalState_inputDoubleMu102XminiAODv1_13TeV_USER_v1",
-                    "Embedding2018C_TauTauFinalState_inputDoubleMu102XminiAODv1_13TeV_USER_v1",
-                    "Embedding2018D_TauTauFinalState_inputDoubleMu102XminiAODv1_13TeV_USER_v1",
-                ],
-                "W": [
-                    "W1JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "W2JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "W3JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "W4JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "WJetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "EWKWMinus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "EWKWPlus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
+                    "TauEmbedding-TauTauFinalState_Run2018A-UL2018",
+                    "TauEmbedding-TauTauFinalState_Run2018B-UL2018",
+                    "TauEmbedding-TauTauFinalState_Run2018C-UL2018",
+                    "TauEmbedding-TauTauFinalState_Run2018D-UL2018",
                 ],
             },
             **common_files_2018
@@ -1039,25 +995,16 @@ files = {
         "em": dict(
             {
                 "data": [
-                    "MuonEG_Run2018A_17Sep2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2018B_17Sep2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2018C_17Sep2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2018D_PromptRecov2_13TeV_MINIAOD",
+                    "EGamma_Run2018A-UL2018",
+                    "EGamma_Run2018B-UL2018",
+                    "EGamma_Run2018C-UL2018",
+                    "EGamma_Run2018D-UL2018",
                 ],
                 "EMB": [
-                    "Embedding2018A_ElMuFinalState_inputDoubleMu102XminiAODv1_13TeV_USER_v1",
-                    "Embedding2018B_ElMuFinalState_inputDoubleMu102XminiAODv1_13TeV_USER_v1",
-                    "Embedding2018C_ElMuFinalState_inputDoubleMu102XminiAODv1_13TeV_USER_v1",
-                    "Embedding2018D_ElMuFinalState_inputDoubleMu102XminiAODv1_13TeV_USER_v1",
-                ],
-                "W": [
-                    "W1JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "W2JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "W3JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "W4JetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "WJetsToLNu_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "EWKWMinus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "EWKWPlus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
+                    "TauEmbedding-ElMuFinalState_Run2018A-UL2018",
+                    "TauEmbedding-ElMuFinalState_Run2018B-UL2018",
+                    "TauEmbedding-ElMuFinalState_Run2018C-UL2018",
+                    "TauEmbedding-ElMuFinalState_Run2018D-UL2018",
                 ],
             },
             **common_files_2018
