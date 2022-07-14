@@ -4,7 +4,6 @@ from ntuple_processor.utils import Selection
 def channel_selection(channel, era):
     # Specify general channel and era independent cuts.
     cuts = [
-        # ("flagMETFilter == 1", "METFilter"), # TODO MISSING IN NTUPLE
         ("extraelec_veto<0.5", "extraelec_veto"),
         ("extramuon_veto<0.5", "extramuon_veto"),
         ("dimuon_veto<0.5", "dilepton_veto"),
