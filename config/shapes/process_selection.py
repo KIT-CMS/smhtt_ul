@@ -174,7 +174,7 @@ def MC_base_process_selection(channel, era):
             "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        trgweight = ("trg_wgtsingle_mu24Ormu27", "trgweight")  # TODO fix naming
+        trgweight = ("trg_wgtsingle_mu24ormu27", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -187,7 +187,7 @@ def MC_base_process_selection(channel, era):
     else:
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
-        # ("generatorWeight", "generatorWeight"), # TODO add in ntuples
+        # ("genWeight", "generatorWeight"),
         ("puweight", "puweight"),
         isoweight,
         idweight,
