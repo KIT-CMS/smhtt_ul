@@ -174,7 +174,7 @@ def MC_base_process_selection(channel, era):
             "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        trgweight = ("trg_wgtsingle_mu24ormu27", "trgweight")
+        trgweight = ("trg_wgt_single_mu24ormu27", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -408,7 +408,7 @@ def ZTT_embedded_process_selection(channel, era):
                 ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
                 ("iso_wgt_mu_1", "isoweight"),
                 ("id_wgt_mu_1", "idweight"),
-                ("trg_wgtsingle_mu24Ormu27", "trgweight"),
+                ("trg_wgt_single_mu24Ormu27", "trgweight"),
                 # (
                 #     "id_wgt_tau_vsJet_Tight_2",
                 #     "taubyIsoIdWeight",

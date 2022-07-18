@@ -811,10 +811,9 @@ prefiring = [
     ),
 ]
 
-# TODO add zPt reweighting
 zpt = [
-    SquareWeight("CMS_htt_dyShape_EraUp", "zPtReweightWeight"),
-    RemoveWeight("CMS_htt_dyShape_EraDown", "zPtReweightWeight"),
+    SquareWeight("CMS_htt_dyShape_EraUp", "ZPtMassReweightWeight"),
+    RemoveWeight("CMS_htt_dyShape_EraDown", "ZPtMassReweightWeight"),
 ]
 
 top_pt = [

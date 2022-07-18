@@ -6,7 +6,7 @@ import pickle
 import re
 import yaml
 
-from shapes.utils import add_process
+from shapes.utils import add_process, book_histograms
 
 from ntuple_processor import Histogram
 from ntuple_processor import (
@@ -77,6 +77,7 @@ from config.shapes.variations import tau_id_eff_lt
 # fake rate uncertainties
 from config.shapes.variations import (
     jet_to_tau_fake,
+    zll_mt_fake_rate,
 )
 
 # trigger efficiencies
@@ -228,6 +229,475 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def get_analysis_units(channel, era, datasets, nn_shapes=False):
+    print(f"Using the categorization {categorization[channel]}")
+    with open("generatorWeights.yaml", "r") as fi:
+        gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
+    analysis_units = {}
+
+    add_process(
+        analysis_units,
+        name="data",
+        dataset=datasets["data"],
+        selections=channel_selection(channel, era, "TauID"),
+        categorization=categorization,
+        channel=channel,
+    )
+    # Embedding
+    add_process(
+        analysis_units,
+        name="emb",
+        dataset=datasets["EMB"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            ZTT_embedded_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ztt",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            DY_process_selection(channel, era),
+            ZTT_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="zl",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            DY_process_selection(channel, era),
+            ZL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="zj",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            DY_process_selection(channel, era),
+            ZJ_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ttt",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            TT_process_selection(channel, era),
+            TTT_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ttl",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            TT_process_selection(channel, era),
+            TTL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ttj",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            TT_process_selection(channel, era),
+            TTJ_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="vvt",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            VV_process_selection(channel, era),
+            VVT_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="vvl",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            VV_process_selection(channel, era),
+            VVL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="vvj",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            VV_process_selection(channel, era),
+            VVJ_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ggh",
+        dataset=datasets["ggH"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            ggH125_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="qqh",
+        dataset=datasets["qqH"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            qqH125_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="wh",
+        dataset=datasets["WH"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            WH_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="zh",
+        dataset=datasets["ZH"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            ZH_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    # "tth"  : [Unit(
+    #             datasets["ttH"], [
+    #                 channel_selection(channel, era, "TauID"),
+    #                 ttH_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # "gghww"  : [Unit(
+    #             datasets["ggHWW"], [
+    #                 channel_selection(channel, era, "TauID"),
+    #                 ggHWW_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # "qqhww"  : [Unit(
+    #             datasets["qqHWW"], [
+    #                 channel_selection(channel, era, "TauID"),
+    #                 qqHWW_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # "zhww"  : [Unit(
+    #             datasets["ZHWW"], [
+    #                 channel_selection(channel, era, "TauID"),
+    #                 ZHWW_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # "whww"  : [Unit(
+    #             datasets["WHWW"], [
+    #                 channel_selection(channel, era, "TauID"),
+    #                 WHWW_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # data
+
+    if channel != "et":
+        add_process(
+            analysis_units,
+            name="w",
+            dataset=datasets["W"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                W_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+    return analysis_units
+
+
+def get_control_units(channel, era, datasets):
+    with open("generatorWeights.yaml", "r") as fi:
+        gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
+    control_units = {
+        "data": [
+            Unit(
+                datasets["data"],
+                [channel_selection(channel, era, "TauID")],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "emb": [
+            Unit(
+                datasets["EMB"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    ZTT_embedded_process_selection(channel, era),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "ztt": [
+            Unit(
+                datasets["DY"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    DY_process_selection(channel, era),
+                    ZTT_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "zl": [
+            Unit(
+                datasets["DY"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    DY_process_selection(channel, era),
+                    ZL_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "zj": [
+            Unit(
+                datasets["DY"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    DY_process_selection(channel, era),
+                    ZJ_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "ttl": [
+            Unit(
+                datasets["TT"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    TT_process_selection(channel, era),
+                    TTL_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "ttt": [
+            Unit(
+                datasets["TT"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    TT_process_selection(channel, era),
+                    TTT_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "ttj": [
+            Unit(
+                datasets["TT"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    TT_process_selection(channel, era),
+                    TTJ_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "vvl": [
+            Unit(
+                datasets["VV"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    VV_process_selection(channel, era),
+                    VVL_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "vvt": [
+            Unit(
+                datasets["VV"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    VV_process_selection(channel, era),
+                    VVT_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "vvj": [
+            Unit(
+                datasets["VV"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    VV_process_selection(channel, era),
+                    VVJ_process_selection(channel),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "ggh": [
+            Unit(
+                datasets["ggH"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    ggH125_process_selection(channel, era),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+        "qqh": [
+            Unit(
+                datasets["qqH"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    qqH125_process_selection(channel, era),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ],
+    }
+
+    if channel == "et":
+        pass
+    else:
+        control_units["w"] = [
+            Unit(
+                datasets["W"],
+                [
+                    channel_selection(channel, era, "TauID"),
+                    W_process_selection(channel, era),
+                ],
+                [
+                    control_binning[channel][v]
+                    for v in set(control_binning[channel].keys())
+                    & set(args.control_plot_set)
+                ],
+            )
+        ]
+    return control_units
+
+
+def filter_friends(dataset, friend):
+    # Add fake factor friends only for backgrounds.
+    if re.match("(gg|qq|susybb|susygg|tt|w|z|v)h", dataset.lower()):
+        if "FakeFactors" in friend or "EMQCDWeights" in friend:
+            return False
+    # Add NLOReweighting friends only for ggh signals.
+    if "NLOReweighting" in friend:
+        if re.match("(susygg)h", dataset.lower()) and not "powheg" in dataset.lower():
+            pass
+        else:
+            return False
+    elif re.match("data", dataset.lower()):
+        if "xsec" in friend:
+            return False
+    elif re.match("emb", dataset.lower()):
+        if "xsec" in friend:
+            return False
+    return True
+
+
+def get_nominal_datasets(era, channel, friend_directories):
+    datasets = dict()
+    for key, names in files[era][channel].items():
+        datasets[key] = dataset_from_crownoutput(
+            key,
+            names,
+            era,
+            channel,
+            channel + "_nominal",
+            args.directory,
+            [fdir for fdir in friend_directories[channel] if filter_friends(key, fdir)],
+        )
+    return datasets
+
+
 def main(args):
     # Parse given arguments.
     friend_directories = {
@@ -242,500 +712,28 @@ def main(args):
     else:
         output_file = "{}.root".format(args.output_file)
         log_file = "{}.log".format(args.output_file)
+    um = UnitManager()
+    do_check = args.enable_booking_check
+    era = args.era
 
     nominals = {}
-    nominals[args.era] = {}
-    nominals[args.era]["datasets"] = {}
-    nominals[args.era]["units"] = {}
-
-    def get_nominal_datasets(era, channel):
-        datasets = dict()
-
-        def filter_friends(dataset, friend):
-            # Add fake factor friends only for backgrounds.
-            if re.match("(gg|qq|susybb|susygg|tt|w|z|v)h", dataset.lower()):
-                if "FakeFactors" in friend or "EMQCDWeights" in friend:
-                    return False
-            # Add NLOReweighting friends only for ggh signals.
-            if "NLOReweighting" in friend:
-                if (
-                    re.match("(susygg)h", dataset.lower())
-                    and not "powheg" in dataset.lower()
-                ):
-                    pass
-                else:
-                    return False
-            elif re.match("data", dataset.lower()):
-                if "xsec" in friend:
-                    return False
-            elif re.match("emb", dataset.lower()):
-                if "xsec" in friend:
-                    return False
-            return True
-
-        for key, names in files[era][channel].items():
-            datasets[key] = dataset_from_crownoutput(
-                key,
-                names,
-                args.era,
-                channel,
-                channel + "_nominal",
-                args.directory,
-                [
-                    fdir
-                    for fdir in friend_directories[channel]
-                    if filter_friends(key, fdir)
-                ],
-            )
-        return datasets
-
-    def get_analysis_units(channel, era, datasets, nn_shapes=False):
-        print(f"Using the categorization {categorization[channel]}")
-        with open("generatorWeights.yaml", "r") as fi:
-            gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
-        analysis_units = {}
-
-        add_process(
-            analysis_units,
-            name="data",
-            dataset=datasets["data"],
-            selections=channel_selection(channel, era, "TauID"),
-            categorization=categorization,
-            channel=channel,
-        )
-        # Embedding
-        add_process(
-            analysis_units,
-            name="emb",
-            dataset=datasets["EMB"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                ZTT_embedded_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ztt",
-            dataset=datasets["DY"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                DY_process_selection(channel, era),
-                ZTT_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="zl",
-            dataset=datasets["DY"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                DY_process_selection(channel, era),
-                ZL_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="zj",
-            dataset=datasets["DY"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                DY_process_selection(channel, era),
-                ZJ_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ttt",
-            dataset=datasets["TT"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                TT_process_selection(channel, era),
-                TTT_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ttl",
-            dataset=datasets["TT"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                TT_process_selection(channel, era),
-                TTL_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ttj",
-            dataset=datasets["TT"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                TT_process_selection(channel, era),
-                TTJ_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="vvt",
-            dataset=datasets["VV"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                VV_process_selection(channel, era),
-                VVT_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="vvl",
-            dataset=datasets["VV"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                VV_process_selection(channel, era),
-                VVL_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="vvj",
-            dataset=datasets["VV"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                VV_process_selection(channel, era),
-                VVJ_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ggh",
-            dataset=datasets["ggH"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                ggH125_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="qqh",
-            dataset=datasets["qqH"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                qqH125_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="WH",
-            dataset=datasets["WH"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                WH_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ZH",
-            dataset=datasets["ZH"],
-            selections=[
-                channel_selection(channel, era, "TauID"),
-                ZH_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        # "tth"  : [Unit(
-        #             datasets["ttH"], [
-        #                 channel_selection(channel, era, "TauID"),
-        #                 ttH_process_selection(channel, era),
-        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-        # "gghww"  : [Unit(
-        #             datasets["ggHWW"], [
-        #                 channel_selection(channel, era, "TauID"),
-        #                 ggHWW_process_selection(channel, era),
-        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-        # "qqhww"  : [Unit(
-        #             datasets["qqHWW"], [
-        #                 channel_selection(channel, era, "TauID"),
-        #                 qqHWW_process_selection(channel, era),
-        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-        # "zhww"  : [Unit(
-        #             datasets["ZHWW"], [
-        #                 channel_selection(channel, era, "TauID"),
-        #                 ZHWW_process_selection(channel, era),
-        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-        # "whww"  : [Unit(
-        #             datasets["WHWW"], [
-        #                 channel_selection(channel, era, "TauID"),
-        #                 WHWW_process_selection(channel, era),
-        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-        # data
-
-        if channel != "et":
-            add_process(
-                analysis_units,
-                name="w",
-                dataset=datasets["W"],
-                selections=[
-                    channel_selection(channel, era, "TauID"),
-                    W_process_selection(channel, era),
-                ],
-                categorization=categorization,
-                channel=channel,
-            )
-        return analysis_units
-
-    def get_control_units(channel, era, datasets):
-        with open("generatorWeights.yaml", "r") as fi:
-            gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
-        control_units = {
-            "data": [
-                Unit(
-                    datasets["data"],
-                    [channel_selection(channel, era, "TauID")],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "emb": [
-                Unit(
-                    datasets["EMB"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        ZTT_embedded_process_selection(channel, era),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ztt": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        DY_process_selection(channel, era),
-                        ZTT_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "zl": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        DY_process_selection(channel, era),
-                        ZL_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "zj": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        DY_process_selection(channel, era),
-                        ZJ_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ttl": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        TT_process_selection(channel, era),
-                        TTL_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ttt": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        TT_process_selection(channel, era),
-                        TTT_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ttj": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        TT_process_selection(channel, era),
-                        TTJ_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "vvl": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        VV_process_selection(channel, era),
-                        VVL_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "vvt": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        VV_process_selection(channel, era),
-                        VVT_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "vvj": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        VV_process_selection(channel, era),
-                        VVJ_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ggh": [
-                Unit(
-                    datasets["ggH"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        ggH125_process_selection(channel, era),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "qqh": [
-                Unit(
-                    datasets["qqH"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        qqH125_process_selection(channel, era),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-        }
-
-        if channel == "et":
-            pass
-        else:
-            control_units["w"] = [
-                Unit(
-                    datasets["W"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        W_process_selection(channel, era),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ]
-        return control_units
+    nominals[era] = {}
+    nominals[era]["datasets"] = {}
+    nominals[era]["units"] = {}
 
     # Step 1: create units and book actions
     for channel in args.channels:
-        nominals[args.era]["datasets"][channel] = get_nominal_datasets(
-            args.era, channel
+        nominals[era]["datasets"][channel] = get_nominal_datasets(
+            era, channel, friend_directories
         )
         if args.control_plots:
-            nominals[args.era]["units"][channel] = get_control_units(
-                channel, args.era, nominals[args.era]["datasets"][channel]
+            nominals[era]["units"][channel] = get_control_units(
+                channel, era, nominals[era]["datasets"][channel]
             )
         else:
-            nominals[args.era]["units"][channel] = get_analysis_units(
-                channel, args.era, nominals[args.era]["datasets"][channel]
+            nominals[era]["units"][channel] = get_analysis_units(
+                channel, era, nominals[era]["datasets"][channel]
             )
-
-    um = UnitManager()
 
     if args.process_selection is None:
         procS = {
@@ -760,8 +758,8 @@ def main(args):
             procS = procS - {"w"}
         # procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
         #          "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
-        #         | set("ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]) \
-        #         | set("bbh{}".format(mass) for mass in susy_masses[args.era]["bbH"])
+        #         | set("ggh{}".format(mass) for mass in susy_masses[era]["ggH"]) \
+        #         | set("bbh{}".format(mass) for mass in susy_masses[era]["bbH"])
     else:
         procS = args.process_selection
 
@@ -795,152 +793,142 @@ def main(args):
         for chname_ in ["et", "mt", "tt", "em"]
     }
 
-    for ch_ in args.channels:
-        um.book(
-            [unit for d in signalsS for unit in nominals[args.era]["units"][ch_][d]],
-            enable_check=args.enable_booking_check,
+    for channel in args.channels:
+        # um.book(
+        #     [unit for d in signalsS for unit in nominals[era]["units"][channel][d]],
+        #     enable_check=args.enable_booking_check,
+        # )
+        book_histograms(
+            um,
+            processes=signalsS,
+            datasets=nominals[era]["units"][channel],
+            enable_check=do_check,
         )
-        if ch_ in ["mt", "et"]:
-            um.book(
-                [
-                    unit
-                    for d in dataS | embS | trueTauBkgS | leptonFakesS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [same_sign, anti_iso_lt],
-                enable_check=args.enable_booking_check,
+        if channel in ["mt", "et"]:
+            book_histograms(
+                um,
+                processes=dataS | embS | trueTauBkgS | leptonFakesS,
+                datasets=nominals[era]["units"][channel],
+                variations=[same_sign, anti_iso_lt],
+                enable_check=do_check,
             )
-            um.book(
-                [
-                    unit
-                    for d in jetFakesDS[ch_]
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [same_sign],
-                enable_check=args.enable_booking_check,
+            book_histograms(
+                um,
+                processes=jetFakesDS[channel],
+                datasets=nominals[era]["units"][channel],
+                variations=[same_sign],
+                enable_check=do_check,
             )
-        elif ch_ == "tt":
-            um.book(
-                [
-                    unit
-                    for d in dataS | embS | trueTauBkgS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [anti_iso_tt, *abcd_method],
-                enable_check=args.enable_booking_check,
+        elif channel == "tt":
+            book_histograms(
+                um,
+                processes=dataS | embS | trueTauBkgS,
+                datasets=nominals[era]["units"][channel],
+                variations=[anti_iso_tt, abcd_method],
+                enable_check=do_check,
             )
-            um.book(
-                [
-                    unit
-                    for d in jetFakesDS[ch_]
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [*abcd_method],
-                enable_check=args.enable_booking_check,
+
+            book_histograms(
+                um,
+                processes=jetFakesDS[channel],
+                datasets=nominals[era]["units"][channel],
+                variations=[abcd_method],
+                enable_check=do_check,
             )
-            um.book(
-                [
-                    unit
-                    for d in leptonFakesS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [wfakes_tt, anti_iso_tt_mcl, *abcd_method],
-                enable_check=args.enable_booking_check,
+
+            book_histograms(
+                um,
+                processes=leptonFakesS,
+                datasets=nominals[era]["units"][channel],
+                variations=[wfakes_tt, anti_iso_tt_mcl, abcd_method],
+                enable_check=do_check,
             )
-            um.book(
-                [
-                    unit
-                    for d in {"w"} & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [wfakes_w_tt],
-                enable_check=args.enable_booking_check,
+
+            book_histograms(
+                um,
+                processes={"w"} & procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[wfakes_w_tt],
+                enable_check=do_check,
             )
-        elif ch_ == "em":
-            um.book(
-                [
-                    unit
-                    for d in dataS | embS | simulatedProcsDS[ch_] - signalsS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [same_sign_em],
-                enable_check=args.enable_booking_check,
+        elif channel == "em":
+            book_histograms(
+                um,
+                processes=dataS | embS | simulatedProcsDS[channel] - signalsS,
+                datasets=nominals[era]["units"][channel],
+                variations=[same_sign_em],
+                enable_check=do_check,
             )
+
+        ##################################
+        # SYSTEMATICS
+        ############################
         if args.skip_systematic_variations:
             pass
         else:
-            # Book variations common to all channels.
-            # um.book([unit for d in {"ggh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
-            # um.book([unit for d in {"qqh"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
-
-            um.book(
-                [
-                    unit
-                    for d in simulatedProcsDS[ch_]
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [*jet_es, *met_unclustered],
+            book_histograms(
+                um,
+                processes=simulatedProcsDS[channel],
+                datasets=nominals[era]["units"][channel],
                 # TODO add btag eff and mistag eff to the list of systematics
-                # [*jet_es, *met_unclustered, *btag_eff, *mistag_eff],
-                enable_check=args.enable_booking_check,
+                # variations=[jet_es, met_unclustered, btag_eff, mistag_eff],
+                variations=[jet_es, met_unclustered],
+                enable_check=do_check,
             )
-            um.book(
-                [
-                    unit
-                    for d in {"ztt", "zj", "zl", "w"} & procS | signalsS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [*recoil_resolution, *recoil_response],
-                enable_check=args.enable_booking_check,
+
+            book_histograms(
+                um,
+                processes={"ztt", "zj", "zl", "w"} & procS | signalsS,
+                datasets=nominals[era]["units"][channel],
+                variations=[recoil_resolution, recoil_response],
+                enable_check=do_check,
             )
-            um.book(
-                [
-                    unit
-                    for d in {"ztt", "zl", "zj"} & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [*zpt],
-                enable_check=args.enable_booking_check,
+            # TODO add zpt reweighting
+            # book_histograms(
+            #     um,
+            #     processes={"ztt", "zl", "zj"} & procS,
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[zpt],
+            #     enable_check=do_check,
+            # )
+
+            book_histograms(
+                um,
+                processes={"ttt", "ttl", "ttj"} & procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[top_pt],
+                enable_check=do_check,
             )
-            um.book(
-                [
-                    unit
-                    for d in {"ttt", "ttl", "ttj"} & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                ],
-                [*top_pt],
-                enable_check=args.enable_booking_check,
-            )
-            # Book variations common to multiple channels.
-            if ch_ in ["mt"]:
-                um.book(
-                    [
-                        unit
-                        for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"}
-                        for unit in nominals[args.era]["units"][ch_][d]
+
+            # Book variations by channels
+            if channel in ["mt"]:
+                book_histograms(
+                    um,
+                    processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        tau_es_3prong,
+                        tau_es_3prong1pizero,
+                        tau_es_1prong,
+                        tau_es_1prong1pizero,
+                        tau_id_eff_lt,
                     ],
-                    [
-                        *tau_es_3prong,
-                        *tau_es_3prong1pizero,
-                        *tau_es_1prong,
-                        *tau_es_1prong1pizero,
-                    ],
-                    enable_check=args.enable_booking_check,
+                    enable_check=do_check,
                 )
-                um.book(
-                    [
-                        unit
-                        for d in jetFakesDS[ch_]
-                        for unit in nominals[args.era]["units"][ch_][d]
+                book_histograms(
+                    um,
+                    processes=jetFakesDS[channel],
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        jet_to_tau_fake,
                     ],
-                    [*jet_to_tau_fake],
-                    enable_check=args.enable_booking_check,
+                    enable_check=do_check,
                 )
                 # um.book(
                 #     [
                 #         unit
                 #         for d in embS
-                #         for unit in nominals[args.era]["units"][ch_][d]
+                #         for unit in nominals[era]["units"][channel][d]
                 #     ],
                 #     [
                 #         *emb_tau_es_3prong,
@@ -958,37 +946,39 @@ def main(args):
                 #     [
                 #         unit
                 #         for d in embS & procS
-                #         for unit in nominals[args.era]["units"][ch_][d]
+                #         for unit in nominals[era]["units"][channel][d]
                 #     ],
                 #     [*emb_met_scale],
                 #     enable_check=args.enable_booking_check,
                 # )
-            if ch_ in ["mt"]:
-                um.book(
-                    [
-                        unit
-                        for d in (trueTauBkgS | leptonFakesS | signalsS) - {"zl"}
-                        for unit in nominals[args.era]["units"][ch_][d]
+                book_histograms(
+                    um,
+                    processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        tau_es_3prong,
+                        tau_es_3prong1pizero,
+                        tau_es_1prong,
+                        tau_es_1prong1pizero,
                     ],
-                    [*tau_id_eff_lt],
-                    enable_check=args.enable_booking_check,
+                    enable_check=do_check,
                 )
                 # TODO add fake factor variations
                 # um.book(
                 #     [
                 #         unit
                 #         for d in dataS
-                #         for unit in nominals[args.era]["units"][ch_][d]
+                #         for unit in nominals[era]["units"][channel][d]
                 #     ],
                 #     [*ff_variations_lt],
                 #     enable_check=args.enable_booking_check,
                 # )
-                # # um.book([unit for d in embS | leptonFakesS | trueTauBkgS for unit in nominals[args.era]['units'][ch_][d]], [*ff_variations_lt, *ff_variations_tau_es_lt], enable_check=args.enable_booking_check)
+                # # um.book([unit for d in embS | leptonFakesS | trueTauBkgS for unit in nominals[era]['units'][channel][d]], [*ff_variations_lt, *ff_variations_tau_es_lt], enable_check=args.enable_booking_check)
                 # um.book(
                 #     [
                 #         unit
                 #         for d in embS | leptonFakesS | trueTauBkgS
-                #         for unit in nominals[args.era]["units"][ch_][d]
+                #         for unit in nominals[era]["units"][channel][d]
                 #     ],
                 #     [*ff_variations_lt],
                 #     enable_check=args.enable_booking_check,
@@ -997,28 +987,24 @@ def main(args):
                 #     [
                 #         unit
                 #         for d in embS
-                #         for unit in nominals[args.era]["units"][ch_][d]
+                #         for unit in nominals[era]["units"][channel][d]
                 #     ],
                 #     [*emb_tau_id_eff_lt, *tau_id_eff_lt, *emb_decay_mode_eff_lt],
                 #     enable_check=args.enable_booking_check,
                 # )
-            # Book channel independent variables.
-            if ch_ == "mt":
-                um.book(
-                    [
-                        unit
-                        for d in {"zl"} & procS
-                        for unit in nominals[args.era]["units"][ch_][d]
-                    ],
-                    [*mu_fake_es_inc],
-                    enable_check=args.enable_booking_check,
+                book_histograms(
+                    um,
+                    processes={"zl"} & procS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[mu_fake_es_inc],
+                    enable_check=do_check,
                 )
                 # TODO add trigger shifts
                 # um.book(
                 #     [
                 #         unit
-                #         for d in simulatedProcsDS[ch_]
-                #         for unit in nominals[args.era]["units"][ch_][d]
+                #         for d in simulatedProcsDS[channel]
+                #         for unit in nominals[era]["units"][channel][d]
                 #     ],
                 #     [*trigger_eff_mt],
                 #     enable_check=args.enable_booking_check,
@@ -1027,38 +1013,27 @@ def main(args):
                 #     [
                 #         unit
                 #         for d in embS
-                #         for unit in nominals[args.era]["units"][ch_][d]
+                #         for unit in nominals[era]["units"][channel][d]
                 #     ],
                 #     [*trigger_eff_mt_emb, *trigger_eff_mt],
                 #     enable_check=args.enable_booking_check,
                 # )
+                book_histograms(
+                    um,
+                    processes={"zl"} & procS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[zll_mt_fake_rate],
+                    enable_check=do_check,
+                )
             # Book era dependent uncertainty shapes
-            if "2016" in args.era:
-                um.book(
-                    [
-                        unit
-                        for d in simulatedProcsDS[ch_]
-                        for unit in nominals[args.era]["units"][ch_][d]
-                    ],
-                    [*prefiring],
-                    enable_check=args.enable_booking_check,
+            if "2016" in era or "2017" in era:
+                book_histograms(
+                    um,
+                    processes=simulatedProcsDS[channel],
+                    datasets=nominals[era]["units"][channel],
+                    variations=[prefiring],
+                    enable_check=do_check,
                 )
-                # if ch_ == "mt":
-                #     um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_mt_fake_rate_2016], enable_check=args.enable_booking_check)
-                # elif ch_ == "et":
-                #     um.book([unit for d in {"zl"} & procS for unit in nominals[args.era]['units'][ch_][d]], [*zll_et_fake_rate_2016], enable_check=args.enable_booking_check)
-            elif "2017" in args.era:
-                um.book(
-                    [
-                        unit
-                        for d in simulatedProcsDS[ch_]
-                        for unit in nominals[args.era]["units"][ch_][d]
-                    ],
-                    [*prefiring],
-                    enable_check=args.enable_booking_check,
-                )
-            elif "2018" in args.era:
-                pass
 
     # Step 2: convert units to graphs and merge them
     g_manager = GraphManager(um.booked_units, True)
@@ -1070,11 +1045,11 @@ def main(args):
     if args.only_create_graphs:
         if args.control_plots:
             graph_file_name = "control_unit_graphs-{}-{}-{}.pkl".format(
-                args.era, ",".join(args.channels), ",".join(sorted(procS))
+                era, ",".join(args.channels), ",".join(sorted(procS))
             )
         else:
             graph_file_name = "analysis_unit_graphs-{}-{}-{}.pkl".format(
-                args.era, ",".join(args.channels), ",".join(sorted(procS))
+                era, ",".join(args.channels), ",".join(sorted(procS))
             )
         if args.graph_dir is not None:
             graph_file = os.path.join(args.graph_dir, graph_file_name)
