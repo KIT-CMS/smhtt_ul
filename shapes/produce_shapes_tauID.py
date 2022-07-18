@@ -6,6 +6,8 @@ import pickle
 import re
 import yaml
 
+from shapes.utils import add_process
+
 from ntuple_processor import Histogram
 from ntuple_processor import (
     dataset_from_crownoutput,
@@ -291,233 +293,219 @@ def main(args):
         print(f"Using the categorization {categorization[channel]}")
         with open("generatorWeights.yaml", "r") as fi:
             gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
-        analysis_units = {
-            "data": [
-                Unit(
-                    datasets["data"],
-                    [channel_selection(channel, era, "TauID"), category_selection],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+        analysis_units = {}
+
+        add_process(
+            analysis_units,
+            name="data",
+            dataset=datasets["data"],
+            selections=channel_selection(channel, era, "TauID"),
+            categorization=categorization,
+            channel=channel,
+        )
+        # Embedding
+        add_process(
+            analysis_units,
+            name="emb",
+            dataset=datasets["EMB"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                ZTT_embedded_process_selection(channel, era),
             ],
-            "emb": [
-                Unit(
-                    datasets["EMB"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        ZTT_embedded_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ztt",
+            dataset=datasets["DY"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                DY_process_selection(channel, era),
+                ZTT_process_selection(channel),
             ],
-            "ztt": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        DY_process_selection(channel, era),
-                        ZTT_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="zl",
+            dataset=datasets["DY"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                DY_process_selection(channel, era),
+                ZL_process_selection(channel),
             ],
-            "zl": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        DY_process_selection(channel, era),
-                        ZL_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="zj",
+            dataset=datasets["DY"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                DY_process_selection(channel, era),
+                ZJ_process_selection(channel),
             ],
-            "zj": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        DY_process_selection(channel, era),
-                        ZJ_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ttt",
+            dataset=datasets["TT"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                TT_process_selection(channel, era),
+                TTT_process_selection(channel),
             ],
-            "ttt": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        TT_process_selection(channel, era),
-                        TTT_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ttl",
+            dataset=datasets["TT"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                TT_process_selection(channel, era),
+                TTL_process_selection(channel),
             ],
-            "ttl": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        TT_process_selection(channel, era),
-                        TTL_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ttj",
+            dataset=datasets["TT"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                TT_process_selection(channel, era),
+                TTJ_process_selection(channel),
             ],
-            "ttj": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        TT_process_selection(channel, era),
-                        TTJ_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="vvt",
+            dataset=datasets["VV"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                VV_process_selection(channel, era),
+                VVT_process_selection(channel),
             ],
-            "vvt": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        VV_process_selection(channel, era),
-                        VVT_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="vvl",
+            dataset=datasets["VV"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                VV_process_selection(channel, era),
+                VVL_process_selection(channel),
             ],
-            "vvl": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        VV_process_selection(channel, era),
-                        VVL_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="vvj",
+            dataset=datasets["VV"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                VV_process_selection(channel, era),
+                VVJ_process_selection(channel),
             ],
-            "vvj": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        VV_process_selection(channel, era),
-                        VVJ_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ggh",
+            dataset=datasets["ggH"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                ggH125_process_selection(channel, era),
             ],
-            "ggh": [
-                Unit(
-                    datasets["ggH"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        ggH125_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="qqh",
+            dataset=datasets["qqH"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                qqH125_process_selection(channel, era),
             ],
-            "qqh": [
-                Unit(
-                    datasets["qqH"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        qqH125_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="WH",
+            dataset=datasets["WH"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                WH_process_selection(channel, era),
             ],
-            "wh": [
-                Unit(
-                    datasets["WH"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        WH_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ZH",
+            dataset=datasets["ZH"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                ZH_process_selection(channel, era),
             ],
-            "zh": [
-                Unit(
-                    datasets["ZH"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        ZH_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            # "tth"  : [Unit(
-            #             datasets["ttH"], [
-            #                 channel_selection(channel, era, "TauID"),
-            #                 ttH_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-            # "gghww"  : [Unit(
-            #             datasets["ggHWW"], [
-            #                 channel_selection(channel, era, "TauID"),
-            #                 ggHWW_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-            # "qqhww"  : [Unit(
-            #             datasets["qqHWW"], [
-            #                 channel_selection(channel, era, "TauID"),
-            #                 qqHWW_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-            # "zhww"  : [Unit(
-            #             datasets["ZHWW"], [
-            #                 channel_selection(channel, era, "TauID"),
-            #                 ZHWW_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-            # "whww"  : [Unit(
-            #             datasets["WHWW"], [
-            #                 channel_selection(channel, era, "TauID"),
-            #                 WHWW_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-        }
-        if channel == "et":
-            pass
-        else:
-            analysis_units["w"] = [
-                Unit(
-                    datasets["W"],
-                    [
-                        channel_selection(channel, era, "TauID"),
-                        W_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ]
+            categorization=categorization,
+            channel=channel,
+        )
+        # "tth"  : [Unit(
+        #             datasets["ttH"], [
+        #                 channel_selection(channel, era, "TauID"),
+        #                 ttH_process_selection(channel, era),
+        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+        # "gghww"  : [Unit(
+        #             datasets["ggHWW"], [
+        #                 channel_selection(channel, era, "TauID"),
+        #                 ggHWW_process_selection(channel, era),
+        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+        # "qqhww"  : [Unit(
+        #             datasets["qqHWW"], [
+        #                 channel_selection(channel, era, "TauID"),
+        #                 qqHWW_process_selection(channel, era),
+        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+        # "zhww"  : [Unit(
+        #             datasets["ZHWW"], [
+        #                 channel_selection(channel, era, "TauID"),
+        #                 ZHWW_process_selection(channel, era),
+        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+        # "whww"  : [Unit(
+        #             datasets["WHWW"], [
+        #                 channel_selection(channel, era, "TauID"),
+        #                 WHWW_process_selection(channel, era),
+        #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+        # data
+
+        if channel != "et":
+            add_process(
+                analysis_units,
+                name="w",
+                dataset=datasets["W"],
+                selections=[
+                    channel_selection(channel, era, "TauID"),
+                    W_process_selection(channel, era),
+                ],
+                categorization=categorization,
+                channel=channel,
+            )
         return analysis_units
 
     def get_control_units(channel, era, datasets):
@@ -713,6 +701,7 @@ def main(args):
                 )
             ],
         }
+
         if channel == "et":
             pass
         else:
