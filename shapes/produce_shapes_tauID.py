@@ -85,12 +85,12 @@ from config.shapes.variations import (
 # )
 
 # Additional uncertainties
-# TODO add btag eff and zpt reweighting
+# TODO add btag eff
 from config.shapes.variations import (
     prefiring,
     # btag_eff,
     # mistag_eff,
-    # zpt,
+    zpt,
     top_pt,
 )
 
@@ -904,16 +904,15 @@ def main(args):
                 [*recoil_resolution, *recoil_response],
                 enable_check=args.enable_booking_check,
             )
-            # TODO add zpt reweighting to the list of systematics
-            # um.book(
-            #     [
-            #         unit
-            #         for d in {"ztt", "zl", "zj"} & procS
-            #         for unit in nominals[args.era]["units"][ch_][d]
-            #     ],
-            #     [*zpt],
-            #     enable_check=args.enable_booking_check,
-            # )
+            um.book(
+                [
+                    unit
+                    for d in {"ztt", "zl", "zj"} & procS
+                    for unit in nominals[args.era]["units"][ch_][d]
+                ],
+                [*zpt],
+                enable_check=args.enable_booking_check,
+            )
             um.book(
                 [
                     unit

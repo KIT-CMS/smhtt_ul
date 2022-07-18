@@ -47,8 +47,8 @@ categories = {
         },
         "PtGt70": {
             "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_binning_enlarged,
+            "bins": discriminator_binning_enlarged,
+            "expression": discriminator_variable,
             "cut": "(pt_2 >= 70)",
         },
         "DM0": {
@@ -90,11 +90,13 @@ categorization = {
             Selection(
                 name=x, cuts=[(categories["mt"][x]["cut"], "category_selection")]
             ),
-            [Histogram(
-                categories["mt"][x]["var"],
-                categories["mt"][x]["expression"],
-                categories["mt"][x]["bins"],
-            )],
+            [
+                Histogram(
+                    categories["mt"][x]["var"],
+                    categories["mt"][x]["expression"],
+                    categories["mt"][x]["bins"],
+                )
+            ],
         )
         for x in categories["mt"]
     ]

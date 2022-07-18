@@ -1,7 +1,7 @@
 from ntuple_processor.utils import Cut
 from ntuple_processor.utils import Weight
 
-from ntuple_processor.variations import ChangeDataset
+from ntuple_processor.variations import ReplaceVariable
 from ntuple_processor.variations import ReplaceCut
 from ntuple_processor.variations import ReplaceWeight
 from ntuple_processor.variations import RemoveCut
@@ -107,145 +107,147 @@ anti_iso_split_lt = [
 # Energy scales.
 # Previously defined with 2017 in name.
 tau_es_3prong = [
-    ChangeDataset("CMS_scale_t_3prong_EraUp", "tauEs3prong0pizeroUp"),
-    ChangeDataset("CMS_scale_t_3prong_EraDown", "tauEs3prong0pizeroDown"),
+    ReplaceVariable("CMS_scale_t_3prong_EraUp", "tauEs3prong0pizeroUp"),
+    ReplaceVariable("CMS_scale_t_3prong_EraDown", "tauEs3prong0pizeroDown"),
 ]
 
 tau_es_3prong1pizero = [
-    ChangeDataset("CMS_scale_t_3prong1pizero_EraUp", "tauEs3prong1pizeroUp"),
-    ChangeDataset("CMS_scale_t_3prong1pizero_EraDown", "tauEs3prong1pizeroDown"),
+    ReplaceVariable("CMS_scale_t_3prong1pizero_EraUp", "tauEs3prong1pizeroUp"),
+    ReplaceVariable("CMS_scale_t_3prong1pizero_EraDown", "tauEs3prong1pizeroDown"),
 ]
 
 tau_es_1prong = [
-    ChangeDataset("CMS_scale_t_1prong_EraUp", "tauEs1prong0pizeroUp"),
-    ChangeDataset("CMS_scale_t_1prong_EraDown", "tauEs1prong0pizeroDown"),
+    ReplaceVariable("CMS_scale_t_1prong_EraUp", "tauEs1prong0pizeroUp"),
+    ReplaceVariable("CMS_scale_t_1prong_EraDown", "tauEs1prong0pizeroDown"),
 ]
 
 tau_es_1prong1pizero = [
-    ChangeDataset("CMS_scale_t_1prong1pizero_EraUp", "tauEs1prong1pizeroUp"),
-    ChangeDataset("CMS_scale_t_1prong1pizero_EraDown", "tauEs1prong1pizeroDown"),
+    ReplaceVariable("CMS_scale_t_1prong1pizero_EraUp", "tauEs1prong1pizeroUp"),
+    ReplaceVariable("CMS_scale_t_1prong1pizero_EraDown", "tauEs1prong1pizeroDown"),
 ]
 
 emb_tau_es_3prong = [
-    ChangeDataset("CMS_scale_t_emb_3prong_EraUp", "tauEs3prong0pizeroUp"),
-    ChangeDataset("CMS_scale_t_emb_3prong_EraDown", "tauEs3prong0pizeroDown"),
+    ReplaceVariable("CMS_scale_t_emb_3prong_EraUp", "tauEs3prong0pizeroUp"),
+    ReplaceVariable("CMS_scale_t_emb_3prong_EraDown", "tauEs3prong0pizeroDown"),
 ]
 
 emb_tau_es_3prong1pizero = [
-    ChangeDataset("CMS_scale_t_emb_3prong1pizero_EraUp", "tauEs3prong1pizeroUp"),
-    ChangeDataset("CMS_scale_t_emb_3prong1pizero_EraDown", "tauEs3prong1pizeroDown"),
+    ReplaceVariable("CMS_scale_t_emb_3prong1pizero_EraUp", "tauEs3prong1pizeroUp"),
+    ReplaceVariable("CMS_scale_t_emb_3prong1pizero_EraDown", "tauEs3prong1pizeroDown"),
 ]
 
 emb_tau_es_1prong = [
-    ChangeDataset("CMS_scale_t_emb_1prong_EraUp", "tauEs1prong0pizeroUp"),
-    ChangeDataset("CMS_scale_t_emb_1prong_EraDown", "tauEs1prong0pizeroDown"),
+    ReplaceVariable("CMS_scale_t_emb_1prong_EraUp", "tauEs1prong0pizeroUp"),
+    ReplaceVariable("CMS_scale_t_emb_1prong_EraDown", "tauEs1prong0pizeroDown"),
 ]
 
 emb_tau_es_1prong1pizero = [
-    ChangeDataset("CMS_scale_t_emb_1prong1pizero_EraUp", "tauEs1prong1pizeroUp"),
-    ChangeDataset("CMS_scale_t_emb_1prong1pizero_EraDown", "tauEs1prong1pizeroDown"),
+    ReplaceVariable("CMS_scale_t_emb_1prong1pizero_EraUp", "tauEs1prong1pizeroUp"),
+    ReplaceVariable("CMS_scale_t_emb_1prong1pizero_EraDown", "tauEs1prong1pizeroDown"),
 ]
 
 
 # Electron energy scale
 # TODO add in ntuples ?
 # ele_es = [
-#     ChangeDataset("CMS_scale_eUp", "eleScaleUp"),
-#     ChangeDataset("CMS_scale_eDown", "eleScaleDown"),
+#     ReplaceVariable("CMS_scale_eUp", "eleScaleUp"),
+#     ReplaceVariable("CMS_scale_eDown", "eleScaleDown"),
 # ]
 
 # ele_res = [
-#     ChangeDataset("CMS_res_eUp", "eleSmearUp"),
-#     ChangeDataset("CMS_res_eDown", "eleSmearDown"),
+#     ReplaceVariable("CMS_res_eUp", "eleSmearUp"),
+#     ReplaceVariable("CMS_res_eDown", "eleSmearDown"),
 # ]
 
 # Jet energy scale split by sources.
 jet_es = [
-    ChangeDataset("CMS_scale_j_AbsoluteUp", "jecUncAbsoluteUp"),
-    ChangeDataset("CMS_scale_j_AbsoluteDown", "jecUncAbsoluteDown"),
-    ChangeDataset("CMS_scale_j_Absolute_EraUp", "jecUncAbsoluteYearUp"),
-    ChangeDataset("CMS_scale_j_Absolute_EraDown", "jecUncAbsoluteYearDown"),
-    ChangeDataset("CMS_scale_j_BBEC1Up", "jecUncBBEC1Up"),
-    ChangeDataset("CMS_scale_j_BBEC1Down", "jecUncBBEC1Down"),
-    ChangeDataset("CMS_scale_j_BBEC1_EraUp", "jecUncBBEC1YearUp"),
-    ChangeDataset("CMS_scale_j_BBEC1_EraDown", "jecUncBBEC1YearDown"),
-    ChangeDataset("CMS_scale_j_EC2Up", "jecUncEC2Up"),
-    ChangeDataset("CMS_scale_j_EC2Down", "jecUncEC2Down"),
-    ChangeDataset("CMS_scale_j_EC2_EraUp", "jecUncEC2YearUp"),
-    ChangeDataset("CMS_scale_j_EC2_EraDown", "jecUncEC2YearDown"),
-    ChangeDataset("CMS_scale_j_HFUp", "jecUncHFUp"),
-    ChangeDataset("CMS_scale_j_HFDown", "jecUncHFDown"),
-    ChangeDataset("CMS_scale_j_HF_EraUp", "jecUncHFYearUp"),
-    ChangeDataset("CMS_scale_j_HF_EraDown", "jecUncHFYearDown"),
-    ChangeDataset("CMS_scale_j_FlavorQCDUp", "jecUncFlavorQCDUp"),
-    ChangeDataset("CMS_scale_j_FlavorQCDDown", "jecUncFlavorQCDDown"),
-    ChangeDataset("CMS_scale_j_RelativeBalUp", "jecUncRelativeBalUp"),
-    ChangeDataset("CMS_scale_j_RelativeBalDown", "jecUncRelativeBalDown"),
-    ChangeDataset("CMS_scale_j_RelativeSample_EraUp", "jecUncRelativeSampleYearUp"),
-    ChangeDataset("CMS_scale_j_RelativeSample_EraDown", "jecUncRelativeSampleYearDown"),
-    ChangeDataset("CMS_res_j_EraUp", "jerUncUp"),
-    ChangeDataset("CMS_res_j_EraDown", "jerUncDown"),
+    ReplaceVariable("CMS_scale_j_AbsoluteUp", "jesUncAbsoluteUp"),
+    ReplaceVariable("CMS_scale_j_AbsoluteDown", "jesUncAbsoluteDown"),
+    ReplaceVariable("CMS_scale_j_Absolute_EraUp", "jesUncAbsoluteYearUp"),
+    ReplaceVariable("CMS_scale_j_Absolute_EraDown", "jesUncAbsoluteYearDown"),
+    ReplaceVariable("CMS_scale_j_BBEC1Up", "jesUncBBEC1Up"),
+    ReplaceVariable("CMS_scale_j_BBEC1Down", "jesUncBBEC1Down"),
+    ReplaceVariable("CMS_scale_j_BBEC1_EraUp", "jesUncBBEC1YearUp"),
+    ReplaceVariable("CMS_scale_j_BBEC1_EraDown", "jesUncBBEC1YearDown"),
+    ReplaceVariable("CMS_scale_j_EC2Up", "jesUncEC2Up"),
+    ReplaceVariable("CMS_scale_j_EC2Down", "jesUncEC2Down"),
+    ReplaceVariable("CMS_scale_j_EC2_EraUp", "jesUncEC2YearUp"),
+    ReplaceVariable("CMS_scale_j_EC2_EraDown", "jesUncEC2YearDown"),
+    ReplaceVariable("CMS_scale_j_HFUp", "jesUncHFUp"),
+    ReplaceVariable("CMS_scale_j_HFDown", "jesUncHFDown"),
+    ReplaceVariable("CMS_scale_j_HF_EraUp", "jesUncHFYearUp"),
+    ReplaceVariable("CMS_scale_j_HF_EraDown", "jesUncHFYearDown"),
+    ReplaceVariable("CMS_scale_j_FlavorQCDUp", "jesUncFlavorQCDUp"),
+    ReplaceVariable("CMS_scale_j_FlavorQCDDown", "jesUncFlavorQCDDown"),
+    ReplaceVariable("CMS_scale_j_RelativeBalUp", "jesUncRelativeBalUp"),
+    ReplaceVariable("CMS_scale_j_RelativeBalDown", "jesUncRelativeBalDown"),
+    ReplaceVariable("CMS_scale_j_RelativeSample_EraUp", "jesUncRelativeSampleYearUp"),
+    ReplaceVariable(
+        "CMS_scale_j_RelativeSample_EraDown", "jesUncRelativeSampleYearDown"
+    ),
+    ReplaceVariable("CMS_res_j_EraUp", "jerUncUp"),
+    ReplaceVariable("CMS_res_j_EraDown", "jerUncDown"),
 ]
 
 
 # MET variations.
 met_unclustered = [
-    ChangeDataset("CMS_scale_met_unclustered_EraUp", "metUnclusteredEnUp"),
-    ChangeDataset("CMS_scale_met_unclustered_EraDown", "metUnclusteredEnDown"),
+    ReplaceVariable("CMS_scale_met_unclustered_EraUp", "metUnclusteredEnUp"),
+    ReplaceVariable("CMS_scale_met_unclustered_EraDown", "metUnclusteredEnDown"),
 ]
 
 # Recoil correction uncertainties
 recoil_resolution = [
-    ChangeDataset("CMS_htt_boson_res_met_EraUp", "metRecoilResolutionUp"),
-    ChangeDataset("CMS_htt_boson_res_met_EraDown", "metRecoilResolutionDown"),
+    ReplaceVariable("CMS_htt_boson_res_met_EraUp", "metRecoilResolutionUp"),
+    ReplaceVariable("CMS_htt_boson_res_met_EraDown", "metRecoilResolutionDown"),
 ]
 
 recoil_response = [
-    ChangeDataset("CMS_htt_boson_scale_met_EraUp", "metRecoilResponseUp"),
-    ChangeDataset("CMS_htt_boson_scale_met_EraDown", "metRecoilResponseDown"),
+    ReplaceVariable("CMS_htt_boson_scale_met_EraUp", "metRecoilResponseUp"),
+    ReplaceVariable("CMS_htt_boson_scale_met_EraDown", "metRecoilResponseDown"),
 ]
 
 # # fake met scaling in embedded samples
 # TODO still needed ?
 # emb_met_scale = [
-#         ChangeDataset("scale_embed_metUp", "emb_scale_metUp"),
-#         ChangeDataset("scale_embed_metDown", "emb_scale_metDown")
+#         ReplaceVariable("scale_embed_metUp", "emb_scale_metUp"),
+#         ReplaceVariable("scale_embed_metDown", "emb_scale_metDown")
 #         ]
 
 # Energy scales of leptons faking tau leptons.
 # Inclusive in eta
 # TODO do we need the ones without barrel / endcap plit ?
 # ele_fake_es = [
-#         ChangeDataset("CMS_ZLShape_et_1prong_EraUp", "tauEleFakeEsOneProngCommonUp"),
-#         ChangeDataset("CMS_ZLShape_et_1prong_EraDown", "tauEleFakeEsOneProngCommonDown"),
-#         ChangeDataset("CMS_ZLShape_et_1prong1pizero_EraUp", "tauEleFakeEsOneProngPiZerosCommonUp"),
-#         ChangeDataset("CMS_ZLShape_et_1prong1pizero_EraDown", "tauEleFakeEsOneProngPiZerosCommonDown"),
+#         ReplaceVariable("CMS_ZLShape_et_1prong_EraUp", "tauEleFakeEsOneProngCommonUp"),
+#         ReplaceVariable("CMS_ZLShape_et_1prong_EraDown", "tauEleFakeEsOneProngCommonDown"),
+#         ReplaceVariable("CMS_ZLShape_et_1prong1pizero_EraUp", "tauEleFakeEsOneProngPiZerosCommonUp"),
+#         ReplaceVariable("CMS_ZLShape_et_1prong1pizero_EraDown", "tauEleFakeEsOneProngPiZerosCommonDown"),
 #         ]
 
 # Eta binned uncertainty
 ele_fake_es_1prong = [
-    ChangeDataset("CMS_ZLShape_et_1prong_barrel_EraUp", "tauEleFakeEs1prongBarrelUp"),
-    ChangeDataset(
+    ReplaceVariable("CMS_ZLShape_et_1prong_barrel_EraUp", "tauEleFakeEs1prongBarrelUp"),
+    ReplaceVariable(
         "CMS_ZLShape_et_1prong_barrel_EraDown", "tauEleFakeEs1prongBarrelDown"
     ),
-    ChangeDataset("CMS_ZLShape_et_1prong_endcap_EraUp", "tauEleFakeEs1prongEndcapUp"),
-    ChangeDataset(
+    ReplaceVariable("CMS_ZLShape_et_1prong_endcap_EraUp", "tauEleFakeEs1prongEndcapUp"),
+    ReplaceVariable(
         "CMS_ZLShape_et_1prong_endcap_EraDown", "tauEleFakeEs1prongEndcapDown"
     ),
 ]
 
 ele_fake_es_1prong1pizero = [
-    ChangeDataset(
+    ReplaceVariable(
         "CMS_ZLShape_et_1prong1pizero_barrel_EraUp", "tauEleFakeEs1prong1pizeroBarrelUp"
     ),
-    ChangeDataset(
+    ReplaceVariable(
         "CMS_ZLShape_et_1prong1pizero_barrel_EraDown",
         "tauEleFakeEs1prong1pizeroBarrelDown",
     ),
-    ChangeDataset(
+    ReplaceVariable(
         "CMS_ZLShape_et_1prong1pizero_endcap_EraUp", "tauEleFakeEs1prong1pizeroEndcapUp"
     ),
-    ChangeDataset(
+    ReplaceVariable(
         "CMS_ZLShape_et_1prong1pizero_endcap_EraDown",
         "tauEleFakeEs1prong1pizeroEndcapDown",
     ),
@@ -253,30 +255,30 @@ ele_fake_es_1prong1pizero = [
 
 # TODO add split by decay mode ?
 # mu_fake_es_1prong = [
-#         ChangeDataset("CMS_ZLShape_mt_1prong_EraUp", "tauMuFakeEsOneProngUp"),
-#         ChangeDataset("CMS_ZLShape_mt_1prong_EraDown", "tauMuFakeEsOneProngDown")
+#         ReplaceVariable("CMS_ZLShape_mt_1prong_EraUp", "tauMuFakeEsOneProngUp"),
+#         ReplaceVariable("CMS_ZLShape_mt_1prong_EraDown", "tauMuFakeEsOneProngDown")
 #         ]
 
 # mu_fake_es_1prong1pizero = [
-#         ChangeDataset("CMS_ZLShape_mt_1prong1pizero_EraUp", "tauMuFakeEsOneProngPiZerosUp"),
-#         ChangeDataset("CMS_ZLShape_mt_1prong1pizero_EraDown", "tauMuFakeEsOneProngPiZerosDown")
+#         ReplaceVariable("CMS_ZLShape_mt_1prong1pizero_EraUp", "tauMuFakeEsOneProngPiZerosUp"),
+#         ReplaceVariable("CMS_ZLShape_mt_1prong1pizero_EraDown", "tauMuFakeEsOneProngPiZerosDown")
 #         ]
 
 mu_fake_es_inc = [
-    ChangeDataset("CMS_ZLShape_mt_EraUp", "tauMuFakeEsUp"),
-    ChangeDataset("CMS_ZLShape_mt_EraDown", "tauMuFakeEsDown"),
+    ReplaceVariable("CMS_ZLShape_mt_EraUp", "tauMuFakeEsUp"),
+    ReplaceVariable("CMS_ZLShape_mt_EraDown", "tauMuFakeEsDown"),
 ]
 
 # # B-tagging uncertainties.
 # TODO correct naming for these ?
 # btag_eff = [
-#         ChangeDataset("CMS_htt_eff_b_EraUp", "btagEffUp"),
-#         ChangeDataset("CMS_htt_eff_b_EraDown", "btagEffDown")
+#         ReplaceVariable("CMS_htt_eff_b_EraUp", "btagEffUp"),
+#         ReplaceVariable("CMS_htt_eff_b_EraDown", "btagEffDown")
 #         ]
 
 # mistag_eff = [
-#         ChangeDataset("CMS_htt_mistag_b_EraUp", "btagMistagUp"),
-#         ChangeDataset("CMS_htt_mistag_b_EraDown", "btagMistagDown")
+#         ReplaceVariable("CMS_htt_mistag_b_EraUp", "btagMistagUp"),
+#         ReplaceVariable("CMS_htt_mistag_b_EraDown", "btagMistagDown")
 #         ]
 
 # Efficiency corrections.
@@ -284,14 +286,14 @@ mu_fake_es_inc = [
 
 # TODO add high pt tau ID efficiency
 tau_id_eff_lt = [
-    ChangeDataset("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
-    ChangeDataset("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
-    ChangeDataset("CMS_eff_t_35-40_EraUp", "vsJetTau35to40Up"),
-    ChangeDataset("CMS_eff_t_35-40_EraDown", "vsJetTau35to40Down"),
-    ChangeDataset("CMS_eff_t_40-500_EraUp", "vsJetTau40to500Up"),
-    ChangeDataset("CMS_eff_t_40-500_EraDown", "vsJetTau40to500Down"),
-    ChangeDataset("CMS_eff_t_500-1000_EraUp", "vsJetTau500to1000Up"),
-    ChangeDataset("CMS_eff_t_500-1000_EraDown", "vsJetTau500to1000Down"),
+    ReplaceVariable("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
+    ReplaceVariable("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
+    ReplaceVariable("CMS_eff_t_35-40_EraUp", "vsJetTau35to40Up"),
+    ReplaceVariable("CMS_eff_t_35-40_EraDown", "vsJetTau35to40Down"),
+    ReplaceVariable("CMS_eff_t_40-500_EraUp", "vsJetTau40to500Up"),
+    ReplaceVariable("CMS_eff_t_40-500_EraDown", "vsJetTau40to500Down"),
+    ReplaceVariable("CMS_eff_t_500-1000_EraUp", "vsJetTau500to1000Up"),
+    ReplaceVariable("CMS_eff_t_500-1000_EraDown", "vsJetTau500to1000Down"),
 ]
 
 # TODO High PT variarions:
@@ -301,14 +303,14 @@ tau_id_eff_lt = [
 # "CMS_eff_t_emb_highpT_500-inf_EraDown"
 
 emb_tau_id_eff_lt = [
-    ChangeDataset("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
-    ChangeDataset("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
-    ChangeDataset("CMS_eff_t_35-40_EraUp", "vsJetTau35to40Up"),
-    ChangeDataset("CMS_eff_t_35-40_EraDown", "vsJetTau35to40Down"),
-    ChangeDataset("CMS_eff_t_40-500_EraUp", "vsJetTau40to500Up"),
-    ChangeDataset("CMS_eff_t_40-500_EraDown", "vsJetTau40to500Down"),
-    ChangeDataset("CMS_eff_t_500-1000_EraUp", "vsJetTau500to1000Up"),
-    ChangeDataset("CMS_eff_t_500-1000_EraDown", "vsJetTau500to1000Down"),
+    ReplaceVariable("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
+    ReplaceVariable("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
+    ReplaceVariable("CMS_eff_t_35-40_EraUp", "vsJetTau35to40Up"),
+    ReplaceVariable("CMS_eff_t_35-40_EraDown", "vsJetTau35to40Down"),
+    ReplaceVariable("CMS_eff_t_40-500_EraUp", "vsJetTau40to500Up"),
+    ReplaceVariable("CMS_eff_t_40-500_EraDown", "vsJetTau40to500Down"),
+    ReplaceVariable("CMS_eff_t_500-1000_EraUp", "vsJetTau500to1000Up"),
+    ReplaceVariable("CMS_eff_t_500-1000_EraDown", "vsJetTau500to1000Down"),
 ]
 
 # TODO High PT variarions:
@@ -317,25 +319,25 @@ emb_tau_id_eff_lt = [
 # "CMS_eff_t_emb_highpT_500-inf_EraUp",
 # "CMS_eff_t_emb_highpT_500-inf_EraDown"
 tau_id_eff_tt = [
-    ChangeDataset("CMS_eff_t_dm0_EraUp", "vsJetTauDM0Up"),
-    ChangeDataset("CMS_eff_t_dm0_EraDown", "vsJetTauDM0Down"),
-    ChangeDataset("CMS_eff_t_dm1_EraUp", "vsJetTauDM1Up"),
-    ChangeDataset("CMS_eff_t_dm1_EraDown", "vsJetTauDM1Down"),
-    ChangeDataset("CMS_eff_t_dm10_EraUp", "vsJetTauDM10Up"),
-    ChangeDataset("CMS_eff_t_dm10_EraDown", "vsJetTauDM10Down"),
-    ChangeDataset("CMS_eff_t_dm11_EraUp", "vsJetTauDM11Up"),
-    ChangeDataset("CMS_eff_t_dm11_EraDown", "vsJetTauDM11Down"),
+    ReplaceVariable("CMS_eff_t_dm0_EraUp", "vsJetTauDM0Up"),
+    ReplaceVariable("CMS_eff_t_dm0_EraDown", "vsJetTauDM0Down"),
+    ReplaceVariable("CMS_eff_t_dm1_EraUp", "vsJetTauDM1Up"),
+    ReplaceVariable("CMS_eff_t_dm1_EraDown", "vsJetTauDM1Down"),
+    ReplaceVariable("CMS_eff_t_dm10_EraUp", "vsJetTauDM10Up"),
+    ReplaceVariable("CMS_eff_t_dm10_EraDown", "vsJetTauDM10Down"),
+    ReplaceVariable("CMS_eff_t_dm11_EraUp", "vsJetTauDM11Up"),
+    ReplaceVariable("CMS_eff_t_dm11_EraDown", "vsJetTauDM11Down"),
 ]
 
 emb_tau_id_eff_tt = [
-    ChangeDataset("CMS_eff_t_dm0_EraUp", "vsJetTauDM0Up"),
-    ChangeDataset("CMS_eff_t_dm0_EraDown", "vsJetTauDM0Down"),
-    ChangeDataset("CMS_eff_t_dm1_EraUp", "vsJetTauDM1Up"),
-    ChangeDataset("CMS_eff_t_dm1_EraDown", "vsJetTauDM1Down"),
-    ChangeDataset("CMS_eff_t_dm10_EraUp", "vsJetTauDM10Up"),
-    ChangeDataset("CMS_eff_t_dm10_EraDown", "vsJetTauDM10Down"),
-    ChangeDataset("CMS_eff_t_dm11_EraUp", "vsJetTauDM11Up"),
-    ChangeDataset("CMS_eff_t_dm11_EraDown", "vsJetTauDM11Down"),
+    ReplaceVariable("CMS_eff_t_dm0_EraUp", "vsJetTauDM0Up"),
+    ReplaceVariable("CMS_eff_t_dm0_EraDown", "vsJetTauDM0Down"),
+    ReplaceVariable("CMS_eff_t_dm1_EraUp", "vsJetTauDM1Up"),
+    ReplaceVariable("CMS_eff_t_dm1_EraDown", "vsJetTauDM1Down"),
+    ReplaceVariable("CMS_eff_t_dm10_EraUp", "vsJetTauDM10Up"),
+    ReplaceVariable("CMS_eff_t_dm10_EraDown", "vsJetTauDM10Down"),
+    ReplaceVariable("CMS_eff_t_dm11_EraUp", "vsJetTauDM11Up"),
+    ReplaceVariable("CMS_eff_t_dm11_EraDown", "vsJetTauDM11Down"),
 ]
 
 
@@ -352,18 +354,18 @@ jet_to_tau_fake = [
 ]
 
 zll_et_fake_rate = [
-    ChangeDataset("CMS_fake_e_BA_EraUp", "vsEleBarrelUp"),
-    ChangeDataset("CMS_fake_e_BA_EraDown", "vsEleBarrelDown"),
-    ChangeDataset("CMS_fake_e_EC_EraUp", "vsEleEndcapUp"),
-    ChangeDataset("CMS_fake_e_EC_EraDown", "vsEleEndcapDown"),
+    ReplaceVariable("CMS_fake_e_BA_EraUp", "vsEleBarrelUp"),
+    ReplaceVariable("CMS_fake_e_BA_EraDown", "vsEleBarrelDown"),
+    ReplaceVariable("CMS_fake_e_EC_EraUp", "vsEleEndcapUp"),
+    ReplaceVariable("CMS_fake_e_EC_EraDown", "vsEleEndcapDown"),
 ]
 
 zll_mt_fake_rate_up = [
-    ChangeDataset(f"CMS_fake_m_WH{region}_EraUp", f"vsMuWheel{region}Up")
+    ReplaceVariable(f"CMS_fake_m_WH{region}_EraUp", f"vsMuWheel{region}Up")
     for region in ["1", "2", "3", "4", "5"]
 ]
 zll_mt_fake_rate_down = [
-    ChangeDataset(f"CMS_fake_m_WH{region}_EraDown", f"vsMuWheel{region}Down")
+    ReplaceVariable(f"CMS_fake_m_WH{region}_EraDown", f"vsMuWheel{region}Down")
     for region in ["1", "2", "3", "4", "5"]
 ]
 
@@ -682,8 +684,8 @@ zll_mt_fake_rate = zll_mt_fake_rate_up + zll_mt_fake_rate_down
 # Embedding specific variations.
 # TODO Embedding electron scale
 # emb_e_es = [
-#     ChangeDataset("CMS_scale_e_embUp", "eleEsUp"),
-#     ChangeDataset("CMS_scale_e_embDown", "eleEsDown"),
+#     ReplaceVariable("CMS_scale_e_embUp", "eleEsUp"),
+#     ReplaceVariable("CMS_scale_e_embDown", "eleEsDown"),
 # ]
 
 # TODO add embeddedDecayModeWeight
@@ -810,10 +812,10 @@ prefiring = [
 ]
 
 # TODO add zPt reweighting
-# zpt = [
-#     SquareWeight("CMS_htt_dyShape_EraUp", "zPtReweightWeight"),
-#     RemoveWeight("CMS_htt_dyShape_EraDown", "zPtReweightWeight"),
-# ]
+zpt = [
+    SquareWeight("CMS_htt_dyShape_EraUp", "zPtReweightWeight"),
+    RemoveWeight("CMS_htt_dyShape_EraDown", "zPtReweightWeight"),
+]
 
 top_pt = [
     SquareWeight("CMS_htt_ttbarShapeUp", "topPtReweightWeight"),
