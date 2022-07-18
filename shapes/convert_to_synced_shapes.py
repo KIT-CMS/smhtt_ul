@@ -35,20 +35,31 @@ _process_map = {
     "ggA_b": "SUSYggH-ggA_b",
 }
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--era", help="Experiment era.")
     parser.add_argument("-i", "--input", help="Input root file.")
     parser.add_argument("-o", "--output", help="Output directory.")
-    parser.add_argument("--gof", action="store_true",
-                        help="Convert shapes for GoF or control plots. "
-                             "Use variable as category indicator.")
-    parser.add_argument("--mc", action="store_true",
-                        help="Use jet fake estimation based on mc shapes.")
-    parser.add_argument("--variable-selection", default=None, type=str, nargs=1,
-                        help="Select final discriminator for shape creation.")
-    parser.add_argument("-n", "--num-processes", default=1, type=int,
-                        help="Number of processes used.")
+    parser.add_argument(
+        "--gof",
+        action="store_true",
+        help="Convert shapes for GoF or control plots. "
+        "Use variable as category indicator.",
+    )
+    parser.add_argument(
+        "--mc", action="store_true", help="Use jet fake estimation based on mc shapes."
+    )
+    parser.add_argument(
+        "--variable-selection",
+        default=None,
+        type=str,
+        nargs=1,
+        help="Select final discriminator for shape creation.",
+    )
+    parser.add_argument(
+        "-n", "--num-processes", default=1, type=int, help="Number of processes used."
+    )
     return parser.parse_args()
 
 
@@ -65,37 +76,45 @@ def setup_logging(output_file, level=logging.INFO):
     logger.addHandler(file_handler)
     return
 
+
 def correct_nominal_shape(hist, name, integral):
     if integral >= 0:
-         # if integral is larger than 0, everything is fine
+        # if integral is larger than 0, everything is fine
         sf = 1.0
     elif integral == 0.0:
         logger.info("Nominal histogram is empty: {}".format(name))
         # if integral of nominal is 0, we make sure to scale the histogram with 0.0
         sf = 0
     else:
-        logger.info("Nominal histogram is negative : {} {} --> fixing it now...".format(integral, name))
+        logger.info(
+            "Nominal histogram is negative : {} {} --> fixing it now...".format(
+                integral, name
+            )
+        )
         # if the histogram is negative, the make all negative bins positive,
         # and scale the histogram to a small positive value
         for i in range(hist.GetNbinsX()):
-            if hist.GetBinContent(i+1)<0.0:
-                logger.info("Negative Bin {} - {}".format(i, hist.GetBinContent(i+1)))
-                hist.SetBinContent(i+1, 0.001)
-                logger.info("After fixing: {} - {}".format(i, hist.GetBinContent(i+1)))
+            if hist.GetBinContent(i + 1) < 0.0:
+                logger.info("Negative Bin {} - {}".format(i, hist.GetBinContent(i + 1)))
+                hist.SetBinContent(i + 1, 0.001)
+                logger.info(
+                    "After fixing: {} - {}".format(i, hist.GetBinContent(i + 1))
+                )
         sf = 0.001 / hist.Integral()
     hist.Scale(sf)
     return hist
 
 
-def write_hists_per_category(cat_hists : tuple):
+def write_hists_per_category(cat_hists: tuple):
     category, keys, channel, ofname, ifname = cat_hists
     infile = ROOT.TFile(ifname, "READ")
-    dir_name = "{CHANNEL}_{CATEGORY}".format(
-            CHANNEL=channel, CATEGORY=category)
+    dir_name = "{CHANNEL}_{CATEGORY}".format(CHANNEL=channel, CATEGORY=category)
     if "{category}" in ofname:
         outfile = ROOT.TFile(ofname.format(category=dir_name), "RECREATE")
     else:
-        outfile = ROOT.TFile(ofname.replace(".root", "-" + category + ".root"), "RECREATE")
+        outfile = ROOT.TFile(
+            ofname.replace(".root", "-" + category + ".root"), "RECREATE"
+        )
     outfile.cd()
     outfile.mkdir(dir_name)
     outfile.cd(dir_name)
@@ -162,25 +181,39 @@ def write_hists_per_category(cat_hists : tuple):
         #             print("Integrals now: %f (nominal), %f (variation)" % (nominal.Integral(), hist.Integral()))
         # Write shapes with partial correlations across eras.
         if "Era" in name_output:
-            if ("_1ProngPi0Eff_" in name_output
-                    or "_qcd_iso" in name_output
-                    or "_3ProngEff_" in name_output
-                    or "_dyShape_" in name_output):
+            if (
+                "_1ProngPi0Eff_" in name_output
+                or "_qcd_iso" in name_output
+                or "_3ProngEff_" in name_output
+                or "_dyShape_" in name_output
+            ):
                 hist.SetTitle(name_output.replace("_Era", ""))
                 hist.SetName(name_output.replace("_Era", ""))
                 hist.Write()
         if "Hdamp_ggH_REWEIGHT" in name_output:
             contrib = name_output.split("_")[1]
-            hist.SetTitle(name_output.replace("Hdamp_ggH_REWEIGHT", "Hdamp_ggH_{}_REWEIGHT".format(contrib)))
-            hist.SetName(name_output.replace("Hdamp_ggH_REWEIGHT", "Hdamp_ggH_{}_REWEIGHT".format(contrib)))
+            hist.SetTitle(
+                name_output.replace(
+                    "Hdamp_ggH_REWEIGHT", "Hdamp_ggH_{}_REWEIGHT".format(contrib)
+                )
+            )
+            hist.SetName(
+                name_output.replace(
+                    "Hdamp_ggH_REWEIGHT", "Hdamp_ggH_{}_REWEIGHT".format(contrib)
+                )
+            )
             hist.Write()
             continue
         if "scale_embed_met" in name_output:
             hist.SetTitle(name_output.replace("met", "_".join(["met", args.era])))
             hist.SetName(name_output.replace("met", "_".join(["met", args.era])))
             hist.Write()
-            hist.SetTitle(name_output.replace("met", "_".join(["met", channel, args.era])))
-            hist.SetName(name_output.replace("met", "_".join(["met", channel, args.era])))
+            hist.SetTitle(
+                name_output.replace("met", "_".join(["met", channel, args.era]))
+            )
+            hist.SetName(
+                name_output.replace("met", "_".join(["met", channel, args.era]))
+            )
             hist.Write()
         if "Era" in name_output:
             name_output = name_output.replace("Era", args.era)
@@ -207,10 +240,18 @@ def main(args):
         if args.gof:
             # Use variable as category label for GOF test and control plots.
             category = split_name[3]
-            process = "-".join(split_name[1].split("-")[1:]) if not "data" in split_name[0] else "data_obs"
+            process = (
+                "-".join(split_name[1].split("-")[1:])
+                if not "data" in split_name[0]
+                else "data_obs"
+            )
         else:
             category = split_name[1].split("-")[-1]
-            process = "-".join(split_name[1].split("-")[1:-1]) if not "data" in split_name[0] else "data_obs"
+            process = (
+                "-".join(split_name[1].split("-")[1:-1])
+                if not "data" in split_name[0]
+                else "data_obs"
+            )
             # Check if process is from hotfixed powheg signal samples. If so,
             # remove the hot fix part from the process.
             if "corrGenWeight" in process:
@@ -262,33 +303,47 @@ def main(args):
         name_output = "{process}".format(process=process)
         if "Nominal" not in variation:
             name_output += "_" + variation
-        logging.debug("Adding histogram with name %s as %s to category %s.",
-                      key.GetName(), name_output, channel + "_" + category)
+        logging.debug(
+            "Adding histogram with name %s as %s to category %s.",
+            key.GetName(),
+            name_output,
+            channel + "_" + category,
+        )
         hist_map[channel][category][key.GetName()] = name_output
     # Clean up
     input_file.Close()
 
     # Loop over map and create the output file.
     for channel in hist_map:
-        ofname = os.path.join(args.output,
-                              "{ERA}-{CHANNELS}-synced-MSSM.root".format(
-                                  CHANNELS=channel,
-                                  ERA=args.era))
+        ofname = os.path.join(
+            args.output,
+            "{ERA}-{CHANNELS}-synced-MSSM.root".format(CHANNELS=channel, ERA=args.era),
+        )
         if args.gof:
-            ofname = os.path.join(args.output,
-                                  "htt_{{category}}.inputs-mssm-vs-sm-Run{ERA}.root".format(
-                                      ERA=args.era))
+            ofname = os.path.join(
+                args.output,
+                "htt_{{category}}.inputs-mssm-vs-sm-Run{ERA}.root".format(ERA=args.era),
+            )
 
-        logging.info("Writing histograms to file %s with %s processes",
-                     ofname, args.num_processes)
+        logging.info(
+            "Writing histograms to file %s with %s processes",
+            ofname,
+            args.num_processes,
+        )
 
         if not os.path.exists(args.output):
             os.mkdir(args.output)
         with multiprocessing.Pool(args.num_processes) as pool:
-            pool.map(write_hists_per_category,
-                     [(*item, channel, ofname, args.input) for item in sorted(hist_map[channel].items())])
+            pool.map(
+                write_hists_per_category,
+                [
+                    (*item, channel, ofname, args.input)
+                    for item in sorted(hist_map[channel].items())
+                ],
+            )
 
     logging.info("Successfully written all histograms to file.")
+
 
 if __name__ == "__main__":
     args = parse_args()

@@ -106,7 +106,7 @@ def channel_selection(channel, era, special=None):
                 raise ValueError("Given era does not exist")
             return Selection(name="em", cuts=cuts)
     # Special selection for TauID measurement
-    if special=="TauID":
+    if special == "TauID":
         if channel != "mt":
             raise ValueError("TauID measurement is only available for mt")
         cuts.extend(
