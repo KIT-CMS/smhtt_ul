@@ -794,10 +794,6 @@ def main(args):
     }
 
     for channel in args.channels:
-        # um.book(
-        #     [unit for d in signalsS for unit in nominals[era]["units"][channel][d]],
-        #     enable_check=args.enable_booking_check,
-        # )
         book_histograms(
             um,
             processes=signalsS,
