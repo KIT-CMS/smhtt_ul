@@ -6,6 +6,7 @@ SUBMIT_MODE=$3
 TAG=$4
 CONTROL=$5
 NTUPLETAG=$6
+OUTPUT=$7
 
 [[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4  && ! -z $5 ]] || ( echo "[ERROR] Number of given parameters is too small."; exit 1 )
 [[ ! -z $6 ]] || CONTROL=0
@@ -45,7 +46,6 @@ then
 elif [[ "$SUBMIT_MODE" == "singlegraph" ]]
 then
     echo "[INFO] Preparing graph for processes $PROCESSES for submission..."
-    OUTPUT=output/submit_files/${ERA}-${CHANNEL}-${PROCESSES}-${CONTROL}-${TAG}
     [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
     python shapes/produce_shapes_tauID.py --channels $CHANNEL \
         			    --output-file dummy.root \

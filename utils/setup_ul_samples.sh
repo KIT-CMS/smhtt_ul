@@ -4,24 +4,25 @@ NTUPLETAG=$1
 ERA=$2
 
 
-basedir="/storage/gridka-nrg/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
-NTUPLES_2016="$basedir"
-# SVFit_Friends_2016="$basedir/2016/friends/SVFit/"
-# FF_Friends_2016="$basedir/2016/friends/FakeFactors_v5/"
-# NLOReweighting_Friends_2016="$basedir/2016/friends/NLOReweighting/"
+KINGMAKER_BASEDIR="/storage/gridka-nrg/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+BASEDIR="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/ntuples/"
+NTUPLES_2016="$BASEDIR"
+# SVFit_Friends_2016="$BASEDIR/2016/friends/SVFit/"
+# FF_Friends_2016="$BASEDIR/2016/friends/FakeFactors_v5/"
+# NLOReweighting_Friends_2016="$BASEDIR/2016/friends/NLOReweighting/"
 
 # # Samples Run2017
-NTUPLES_2017="$basedir"
-# SVFit_Friends_2017="$basedir/2017/friends/SVFit/"
-# FF_Friends_2017="$basedir/2017/friends/FakeFactors_v5/"
-# NLOReweighting_Friends_2017="$basedir/2017/friends/NLOReweighting/"
+NTUPLES_2017="$BASEDIR"
+# SVFit_Friends_2017="$BASEDIR/2017/friends/SVFit/"
+# FF_Friends_2017="$BASEDIR/2017/friends/FakeFactors_v5/"
+# NLOReweighting_Friends_2017="$BASEDIR/2017/friends/NLOReweighting/"
 
 # Samples Run2018
-NTUPLES_2018="$basedir"
+NTUPLES_2018="$BASEDIR"
 XSEC_FRIENDS_2018="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/friends/xsec"
-# SVFit_Friends_2018="$basedir/2018/friends/SVFit/"
-# FF_Friends_2018="$basedir/2018/friends/FakeFactors_v5/"
-# NLOReweighting_Friends_2018="$basedir/2018/friends/NLOReweighting/"
+# SVFit_Friends_2018="$BASEDIR/2018/friends/SVFit/"
+# FF_Friends_2018="$BASEDIR/2018/friends/FakeFactors_v5/"
+# NLOReweighting_Friends_2018="$BASEDIR/2018/friends/NLOReweighting/"
 
 
 # ERA handling
