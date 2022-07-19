@@ -7,12 +7,22 @@ import pickle
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-g", "--graph-file",
-                        help="The input file containing the graphs to be produced.")
-    parser.add_argument("-o", "--output-dir",
-                        help="The output directory the arguments file is written to.")
-    parser.add_argument("--pack-multiple-pipelines", default=None, type=int,
-                        help="Run given number of pipelines in one job.")
+    parser.add_argument(
+        "-g",
+        "--graph-file",
+        help="The input file containing the graphs to be produced.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        help="The output directory the arguments file is written to.",
+    )
+    parser.add_argument(
+        "--pack-multiple-pipelines",
+        default=None,
+        type=int,
+        help="Run given number of pipelines in one job.",
+    )
     return parser.parse_args()
 
 
@@ -20,9 +30,9 @@ def write_file(output_dir, graph_file, job_nums, workdir):
     tmp_string = "{directory} {job_num} {file}\n"
     with open(os.path.join(output_dir, "arguments.txt"), "w") as f:
         for job_num in job_nums:
-            f.write(tmp_string.format(file=graph_file,
-                                      job_num=job_num,
-                                      directory=workdir))
+            f.write(
+                tmp_string.format(file=graph_file, job_num=job_num, directory=workdir)
+            )
     return
 
 
@@ -30,9 +40,9 @@ def write_file_multicore(output_dir, graph_file, num_jobs, workdir):
     tmp_string = "{directory} {job_num} 8 {file}\n"
     with open(os.path.join(output_dir, "arguments_multicore.txt"), "w") as f:
         for job_num in num_jobs:
-            f.write(tmp_string.format(file=graph_file,
-                                      job_num=job_num,
-                                      directory=workdir))
+            f.write(
+                tmp_string.format(file=graph_file, job_num=job_num, directory=workdir)
+            )
     return
 
 
@@ -58,18 +68,20 @@ def prepare_multigraph_jobs(graph_inds, group_size):
     num_jobs = len(graph_inds) // group_size
     grouped_inds = []
     for i in range(num_jobs):
-        grouped_inds.append("{}-{}".format(graph_inds[i*group_size],
-                                           graph_inds[i*group_size+group_size-1]
-                                           ))
+        grouped_inds.append(
+            "{}-{}".format(
+                graph_inds[i * group_size], graph_inds[i * group_size + group_size - 1]
+            )
+        )
     # Check if only one graph remains. If more than one job remains
     if (len(graph_inds) % group_size) == 0:
         pass
     elif (len(graph_inds) % group_size) == 1:
         grouped_inds.append("{}".format(graph_inds[-1]))
     else:
-        grouped_inds.append("{}-{}".format(graph_inds[(num_jobs)*group_size],
-                                           graph_inds[-1]
-                                           ))
+        grouped_inds.append(
+            "{}-{}".format(graph_inds[(num_jobs) * group_size], graph_inds[-1])
+        )
     return grouped_inds
 
 
@@ -81,7 +93,9 @@ def main(args):
     if args.pack_multiple_pipelines is None:
         pass
     else:
-        num_singles = prepare_multigraph_jobs(list(num_singles), args.pack_multiple_pipelines)
+        num_singles = prepare_multigraph_jobs(
+            list(num_singles), args.pack_multiple_pipelines
+        )
     write_file(args.output_dir, args.graph_file, num_singles, workdir)
     write_file_multicore(args.output_dir, args.graph_file, num_multi, workdir)
     return
