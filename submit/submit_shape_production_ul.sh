@@ -58,8 +58,8 @@ then
                         --graph-dir $OUTPUT \
                         $CONTROL_ARG
     # Set output graph file name produced during graph creation.
-    GRAPH_FILE=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
-    [[ $CONTROL == 1 ]] && GRAPH_FILE=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
+    GRAPH_FILE=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}.pkl
+    [[ $CONTROL == 1 ]] && GRAPH_FILE=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}.pkl
     # Prepare the jdl file for single core jobs.
     echo "[INFO] Creating the logging direcory for the jobs..."
     GF_NAME=$(basename $GRAPH_FILE)
