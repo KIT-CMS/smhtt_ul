@@ -6,9 +6,15 @@ import pickle
 import re
 import yaml
 
+from shapes.utils import (
+    add_process,
+    book_histograms,
+    add_control_process,
+    get_nominal_datasets,
+)
+
 from ntuple_processor import Histogram
 from ntuple_processor import (
-    dataset_from_crownoutput,
     Unit,
     UnitManager,
     GraphManager,
@@ -141,23 +147,6 @@ from config.shapes.variations import (
     ff_variations_tau_es_tt_mcl,
 )
 
-# ggH reweighting variations
-from config.shapes.variations import (
-    ggh_scale_ggA_t,
-    ggh_scale_ggA_b,
-    ggh_scale_ggA_i,
-    ggh_scale_ggh_t,
-    ggh_scale_ggh_b,
-    ggh_scale_ggh_i,
-)
-from config.shapes.variations import (
-    gghpowheg_scale_ggA_t,
-    gghpowheg_scale_ggA_b,
-    gghpowheg_scale_ggA_i,
-    gghpowheg_scale_ggh_t,
-    gghpowheg_scale_ggh_b,
-    gghpowheg_scale_ggh_i,
-)
 from config.shapes.control_binning import control_binning, minimal_control_plot_set
 
 logger = logging.getLogger("")
@@ -282,6 +271,410 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def get_analysis_units(channel, era, datasets, nn_shapes=False):
+    print(f"Using the categorization {categorization[channel]}")
+    with open("generatorWeights.yaml", "r") as fi:
+        gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
+    analysis_units = {}
+
+    add_process(
+        analysis_units,
+        name="data",
+        dataset=datasets["data"],
+        selections=channel_selection(channel, era),
+        categorization=categorization,
+        channel=channel,
+    )
+    # Embedding
+    add_process(
+        analysis_units,
+        name="emb",
+        dataset=datasets["EMB"],
+        selections=[
+            channel_selection(channel, era),
+            ZTT_embedded_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ztt",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era),
+            DY_process_selection(channel, era),
+            ZTT_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="zl",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era),
+            DY_process_selection(channel, era),
+            ZL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="zj",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era),
+            DY_process_selection(channel, era),
+            ZJ_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ttt",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era),
+            TT_process_selection(channel, era),
+            TTT_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ttl",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era),
+            TT_process_selection(channel, era),
+            TTL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ttj",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era),
+            TT_process_selection(channel, era),
+            TTJ_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="vvt",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era),
+            VV_process_selection(channel, era),
+            VVT_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="vvl",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era),
+            VV_process_selection(channel, era),
+            VVL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="vvj",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era),
+            VV_process_selection(channel, era),
+            VVJ_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="ggh",
+        dataset=datasets["ggH"],
+        selections=[
+            channel_selection(channel, era),
+            ggH125_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="qqh",
+        dataset=datasets["qqH"],
+        selections=[
+            channel_selection(channel, era),
+            qqH125_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="wh",
+        dataset=datasets["WH"],
+        selections=[
+            channel_selection(channel, era),
+            WH_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="zh",
+        dataset=datasets["ZH"],
+        selections=[
+            channel_selection(channel, era),
+            ZH_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    # "tth"  : [Unit(
+    #             datasets["ttH"], [
+    #                 channel_selection(channel, era),
+    #                 ttH_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # "gghww"  : [Unit(
+    #             datasets["ggHWW"], [
+    #                 channel_selection(channel, era),
+    #                 ggHWW_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # "qqhww"  : [Unit(
+    #             datasets["qqHWW"], [
+    #                 channel_selection(channel, era),
+    #                 qqHWW_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # "zhww"  : [Unit(
+    #             datasets["ZHWW"], [
+    #                 channel_selection(channel, era),
+    #                 ZHWW_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # "whww"  : [Unit(
+    #             datasets["WHWW"], [
+    #                 channel_selection(channel, era),
+    #                 WHWW_process_selection(channel, era),
+    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+    # data
+
+    if channel != "et":
+        add_process(
+            analysis_units,
+            name="w",
+            dataset=datasets["W"],
+            selections=[
+                channel_selection(channel, era),
+                W_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+    return analysis_units
+
+
+def get_control_units(channel, era, datasets):
+    with open("generatorWeights.yaml", "r") as fi:
+        gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
+    control_units = {}
+    variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
+    add_control_process(
+        control_units,
+        name="data",
+        dataset=datasets["data"],
+        selections=channel_selection(channel, era),
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="emb",
+        dataset=datasets["EMB"],
+        selections=[
+            channel_selection(channel, era),
+            ZTT_embedded_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ztt",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era),
+            DY_process_selection(channel, era),
+            ZTT_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="zl",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era),
+            DY_process_selection(channel, era),
+            ZL_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="zj",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era),
+            DY_process_selection(channel, era),
+            ZJ_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ttl",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era),
+            TT_process_selection(channel, era),
+            TTL_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ttt",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era),
+            TT_process_selection(channel, era),
+            TTT_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ttj",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era),
+            TT_process_selection(channel, era),
+            TTJ_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="vvl",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era),
+            VV_process_selection(channel, era),
+            VVL_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="vvt",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era),
+            VV_process_selection(channel, era),
+            VVT_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="vvj",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era),
+            VV_process_selection(channel, era),
+            VVJ_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="qqh",
+        dataset=datasets["qqG"],
+        selections=[
+            channel_selection(channel, era),
+            qqH125_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ggh",
+        dataset=datasets["ggH"],
+        selections=[
+            channel_selection(channel, era),
+            ggH125_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+
+    if channel != "et":
+        add_control_process(
+            control_units,
+            name="w",
+            dataset=datasets["W"],
+            selections=[
+                channel_selection(channel, era),
+                W_process_selection(channel, era),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        )
+    return control_units
+
+
 def main(args):
     # Parse given arguments.
     friend_directories = {
@@ -297,500 +690,19 @@ def main(args):
         output_file = "{}.root".format(args.output_file)
         log_file = "{}.log".format(args.output_file)
 
+    um = UnitManager()
+    do_check = args.enable_booking_check
+    era = args.era
+
     nominals = {}
     nominals[args.era] = {}
     nominals[args.era]["datasets"] = {}
     nominals[args.era]["units"] = {}
 
-    def get_nominal_datasets(era, channel):
-        datasets = dict()
-
-        def filter_friends(dataset, friend):
-            # Add fake factor friends only for backgrounds.
-            if re.match("(gg|qq|susybb|susygg|tt|w|z|v)h", dataset.lower()):
-                if "FakeFactors" in friend or "EMQCDWeights" in friend:
-                    return False
-            # Add NLOReweighting friends only for ggh signals.
-            if "NLOReweighting" in friend:
-                if (
-                    re.match("(susygg)h", dataset.lower())
-                    and not "powheg" in dataset.lower()
-                ):
-                    pass
-                else:
-                    return False
-            elif re.match("data", dataset.lower()):
-                if "xsec" in friend:
-                    return False
-            elif re.match("emb", dataset.lower()):
-                if "xsec" in friend:
-                    return False
-            return True
-
-        for key, names in files[era][channel].items():
-            datasets[key] = dataset_from_crownoutput(
-                key,
-                names,
-                args.era,
-                channel,
-                channel + "_nominal",
-                args.directory,
-                [
-                    fdir
-                    for fdir in friend_directories[channel]
-                    if filter_friends(key, fdir)
-                ],
-            )
-        return datasets
-
-    def get_analysis_units(channel, era, datasets, nn_shapes=False):
-        with open("generatorWeights.yaml", "r") as fi:
-            gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
-        analysis_units = {
-            "data": [
-                Unit(
-                    datasets["data"],
-                    [channel_selection(channel, era), category_selection],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "emb": [
-                Unit(
-                    datasets["EMB"],
-                    [
-                        channel_selection(channel, era),
-                        ZTT_embedded_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "ztt": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era),
-                        DY_process_selection(channel, era),
-                        ZTT_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "zl": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era),
-                        DY_process_selection(channel, era),
-                        ZL_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "zj": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era),
-                        DY_process_selection(channel, era),
-                        ZJ_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "ttt": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era),
-                        TT_process_selection(channel, era),
-                        TTT_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "ttl": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era),
-                        TT_process_selection(channel, era),
-                        TTL_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "ttj": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era),
-                        TT_process_selection(channel, era),
-                        TTJ_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "vvt": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era),
-                        VV_process_selection(channel, era),
-                        VVT_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "vvl": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era),
-                        VV_process_selection(channel, era),
-                        VVL_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "vvj": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era),
-                        VV_process_selection(channel, era),
-                        VVJ_process_selection(channel),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "ggh": [
-                Unit(
-                    datasets["ggH"],
-                    [
-                        channel_selection(channel, era),
-                        ggH125_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "qqh": [
-                Unit(
-                    datasets["qqH"],
-                    [
-                        channel_selection(channel, era),
-                        qqH125_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "wh": [
-                Unit(
-                    datasets["WH"],
-                    [
-                        channel_selection(channel, era),
-                        WH_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            "zh": [
-                Unit(
-                    datasets["ZH"],
-                    [
-                        channel_selection(channel, era),
-                        ZH_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ],
-            # "tth"  : [Unit(
-            #             datasets["ttH"], [
-            #                 channel_selection(channel, era),
-            #                 ttH_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-            # "gghww"  : [Unit(
-            #             datasets["ggHWW"], [
-            #                 channel_selection(channel, era),
-            #                 ggHWW_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-            # "qqhww"  : [Unit(
-            #             datasets["qqHWW"], [
-            #                 channel_selection(channel, era),
-            #                 qqHWW_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-            # "zhww"  : [Unit(
-            #             datasets["ZHWW"], [
-            #                 channel_selection(channel, era),
-            #                 ZHWW_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-            # "whww"  : [Unit(
-            #             datasets["WHWW"], [
-            #                 channel_selection(channel, era),
-            #                 WHWW_process_selection(channel, era),
-            #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-        }
-        if channel == "et":
-            pass
-        else:
-            analysis_units["w"] = [
-                Unit(
-                    datasets["W"],
-                    [
-                        channel_selection(channel, era),
-                        W_process_selection(channel, era),
-                        category_selection,
-                    ],
-                    actions,
-                )
-                for category_selection, actions in categorization[channel]
-            ]
-        return analysis_units
-
-    def get_control_units(channel, era, datasets):
-        with open("generatorWeights.yaml", "r") as fi:
-            gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
-        control_units = {
-            "data": [
-                Unit(
-                    datasets["data"],
-                    [channel_selection(channel, era)],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "emb": [
-                Unit(
-                    datasets["EMB"],
-                    [
-                        channel_selection(channel, era),
-                        ZTT_embedded_process_selection(channel, era),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ztt": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era),
-                        DY_process_selection(channel, era),
-                        ZTT_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "zl": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era),
-                        DY_process_selection(channel, era),
-                        ZL_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "zj": [
-                Unit(
-                    datasets["DY"],
-                    [
-                        channel_selection(channel, era),
-                        DY_process_selection(channel, era),
-                        ZJ_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ttl": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era),
-                        TT_process_selection(channel, era),
-                        TTL_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ttt": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era),
-                        TT_process_selection(channel, era),
-                        TTT_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ttj": [
-                Unit(
-                    datasets["TT"],
-                    [
-                        channel_selection(channel, era),
-                        TT_process_selection(channel, era),
-                        TTJ_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "vvl": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era),
-                        VV_process_selection(channel, era),
-                        VVL_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "vvt": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era),
-                        VV_process_selection(channel, era),
-                        VVT_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "vvj": [
-                Unit(
-                    datasets["VV"],
-                    [
-                        channel_selection(channel, era),
-                        VV_process_selection(channel, era),
-                        VVJ_process_selection(channel),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "ggh": [
-                Unit(
-                    datasets["ggH"],
-                    [
-                        channel_selection(channel, era),
-                        ggH125_process_selection(channel, era),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-            "qqh": [
-                Unit(
-                    datasets["qqH"],
-                    [
-                        channel_selection(channel, era),
-                        qqH125_process_selection(channel, era),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ],
-        }
-        if channel == "et":
-            pass
-        else:
-            control_units["w"] = [
-                Unit(
-                    datasets["W"],
-                    [
-                        channel_selection(channel, era),
-                        W_process_selection(channel, era),
-                    ],
-                    [
-                        control_binning[channel][v]
-                        for v in set(control_binning[channel].keys())
-                        & set(args.control_plot_set)
-                    ],
-                )
-            ]
-        return control_units
-
     # Step 1: create units and book actions
     for channel in args.channels:
         nominals[args.era]["datasets"][channel] = get_nominal_datasets(
-            args.era, channel
+            args.era, channel, friend_directories, files, args.directory
         )
         if args.control_plots:
             nominals[args.era]["units"][channel] = get_control_units(
@@ -800,8 +712,6 @@ def main(args):
             nominals[args.era]["units"][channel] = get_analysis_units(
                 channel, args.era, nominals[args.era]["datasets"][channel]
             )
-
-    um = UnitManager()
 
     if args.process_selection is None:
         procS = {
@@ -973,192 +883,6 @@ def main(args):
                     for unit in nominals[args.era]["units"][ch_][d]
                 ],
                 [*top_pt],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggA_t"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*ggh_scale_ggA_t],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggA_b"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*ggh_scale_ggA_b],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggA_i"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*ggh_scale_ggA_i],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggh_i"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                    or "ggH_i"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*ggh_scale_ggh_i],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggh_b"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                    or "ggH_b"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*ggh_scale_ggh_b],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "ggh{}".format(mass) for mass in susy_masses[args.era]["ggH"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggh_t"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                    or "ggH_t"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*ggh_scale_ggh_t],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "gghpowheg{}".format(mass)
-                        for mass in susy_masses[args.era]["ggHpowheg"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggA_t"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*gghpowheg_scale_ggA_t],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "gghpowheg{}".format(mass)
-                        for mass in susy_masses[args.era]["ggHpowheg"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggA_b"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*gghpowheg_scale_ggA_b],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "gghpowheg{}".format(mass)
-                        for mass in susy_masses[args.era]["ggHpowheg"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggA_i"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*gghpowheg_scale_ggA_i],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "gghpowheg{}".format(mass)
-                        for mass in susy_masses[args.era]["ggHpowheg"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggh_i"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                    or "ggH_i"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*gghpowheg_scale_ggh_i],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "gghpowheg{}".format(mass)
-                        for mass in susy_masses[args.era]["ggHpowheg"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggh_b"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                    or "ggH_b"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*gghpowheg_scale_ggh_b],
-                enable_check=args.enable_booking_check,
-            )
-            um.book(
-                [
-                    unit
-                    for d in set(
-                        "gghpowheg{}".format(mass)
-                        for mass in susy_masses[args.era]["ggHpowheg"]
-                    )
-                    & procS
-                    for unit in nominals[args.era]["units"][ch_][d]
-                    if "ggh_t"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                    or "ggH_t"
-                    in map(getattr, unit.selections, ["name"] * len(unit.selections))
-                ],
-                [*gghpowheg_scale_ggh_t],
                 enable_check=args.enable_booking_check,
             )
             # Book variations common to multiple channels.

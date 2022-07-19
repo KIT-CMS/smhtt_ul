@@ -6,7 +6,12 @@ import pickle
 import re
 import yaml
 
-from shapes.utils import add_process, book_histograms
+from shapes.utils import (
+    add_process,
+    book_histograms,
+    add_control_process,
+    get_nominal_datasets,
+)
 
 from ntuple_processor import Histogram
 from ntuple_processor import (
@@ -452,250 +457,185 @@ def get_analysis_units(channel, era, datasets, nn_shapes=False):
 def get_control_units(channel, era, datasets):
     with open("generatorWeights.yaml", "r") as fi:
         gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
-    control_units = {
-        "data": [
-            Unit(
-                datasets["data"],
-                [channel_selection(channel, era, "TauID")],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+    control_units = {}
+    variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
+    add_control_process(
+        control_units,
+        name="data",
+        dataset=datasets["data"],
+        selections=channel_selection(channel, era, "TauID"),
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="emb",
+        dataset=datasets["EMB"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            ZTT_embedded_process_selection(channel, era),
         ],
-        "emb": [
-            Unit(
-                datasets["EMB"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    ZTT_embedded_process_selection(channel, era),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ztt",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            DY_process_selection(channel, era),
+            ZTT_process_selection(channel),
         ],
-        "ztt": [
-            Unit(
-                datasets["DY"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    DY_process_selection(channel, era),
-                    ZTT_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="zl",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            DY_process_selection(channel, era),
+            ZL_process_selection(channel),
         ],
-        "zl": [
-            Unit(
-                datasets["DY"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    DY_process_selection(channel, era),
-                    ZL_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="zj",
+        dataset=datasets["DY"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            DY_process_selection(channel, era),
+            ZJ_process_selection(channel),
         ],
-        "zj": [
-            Unit(
-                datasets["DY"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    DY_process_selection(channel, era),
-                    ZJ_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ttl",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            TT_process_selection(channel, era),
+            TTL_process_selection(channel),
         ],
-        "ttl": [
-            Unit(
-                datasets["TT"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    TT_process_selection(channel, era),
-                    TTL_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ttt",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            TT_process_selection(channel, era),
+            TTT_process_selection(channel),
         ],
-        "ttt": [
-            Unit(
-                datasets["TT"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    TT_process_selection(channel, era),
-                    TTT_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ttj",
+        dataset=datasets["TT"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            TT_process_selection(channel, era),
+            TTJ_process_selection(channel),
         ],
-        "ttj": [
-            Unit(
-                datasets["TT"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    TT_process_selection(channel, era),
-                    TTJ_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="vvl",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            VV_process_selection(channel, era),
+            VVL_process_selection(channel),
         ],
-        "vvl": [
-            Unit(
-                datasets["VV"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    VV_process_selection(channel, era),
-                    VVL_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="vvt",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            VV_process_selection(channel, era),
+            VVT_process_selection(channel),
         ],
-        "vvt": [
-            Unit(
-                datasets["VV"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    VV_process_selection(channel, era),
-                    VVT_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="vvj",
+        dataset=datasets["VV"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            VV_process_selection(channel, era),
+            VVJ_process_selection(channel),
         ],
-        "vvj": [
-            Unit(
-                datasets["VV"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    VV_process_selection(channel, era),
-                    VVJ_process_selection(channel),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="qqh",
+        dataset=datasets["qqG"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            qqH125_process_selection(channel, era),
         ],
-        "ggh": [
-            Unit(
-                datasets["ggH"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    ggH125_process_selection(channel, era),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ggh",
+        dataset=datasets["ggH"],
+        selections=[
+            channel_selection(channel, era, "TauID"),
+            ggH125_process_selection(channel, era),
         ],
-        "qqh": [
-            Unit(
-                datasets["qqH"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    qqH125_process_selection(channel, era),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
-        ],
-    }
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
 
-    if channel == "et":
-        pass
-    else:
-        control_units["w"] = [
-            Unit(
-                datasets["W"],
-                [
-                    channel_selection(channel, era, "TauID"),
-                    W_process_selection(channel, era),
-                ],
-                [
-                    control_binning[channel][v]
-                    for v in set(control_binning[channel].keys())
-                    & set(args.control_plot_set)
-                ],
-            )
-        ]
-    return control_units
-
-
-def filter_friends(dataset, friend):
-    # Add fake factor friends only for backgrounds.
-    if re.match("(gg|qq|susybb|susygg|tt|w|z|v)h", dataset.lower()):
-        if "FakeFactors" in friend or "EMQCDWeights" in friend:
-            return False
-    # Add NLOReweighting friends only for ggh signals.
-    if "NLOReweighting" in friend:
-        if re.match("(susygg)h", dataset.lower()) and not "powheg" in dataset.lower():
-            pass
-        else:
-            return False
-    elif re.match("data", dataset.lower()):
-        if "xsec" in friend:
-            return False
-    elif re.match("emb", dataset.lower()):
-        if "xsec" in friend:
-            return False
-    return True
-
-
-def get_nominal_datasets(era, channel, friend_directories):
-    datasets = dict()
-    for key, names in files[era][channel].items():
-        datasets[key] = dataset_from_crownoutput(
-            key,
-            names,
-            era,
-            channel,
-            channel + "_nominal",
-            args.directory,
-            [fdir for fdir in friend_directories[channel] if filter_friends(key, fdir)],
+    if channel != "et":
+        add_control_process(
+            control_units,
+            name="w",
+            dataset=datasets["W"],
+            selections=[
+                channel_selection(channel, era, "TauID"),
+                W_process_selection(channel, era),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
         )
-    return datasets
+    return control_units
 
 
 def main(args):
@@ -723,8 +663,8 @@ def main(args):
 
     # Step 1: create units and book actions
     for channel in args.channels:
-        nominals[era]["datasets"][channel] = get_nominal_datasets(
-            era, channel, friend_directories
+        get_nominal_datasets(
+            args.era, channel, friend_directories, files, args.directory
         )
         if args.control_plots:
             nominals[era]["units"][channel] = get_control_units(
