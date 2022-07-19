@@ -75,11 +75,13 @@ echo "##########################################################################
 echo "#      Additional estimations                                      #"
 echo "##############################################################################################"
 
-bash ./shapes/do_estimations.sh 2018 ${shape_output_folder}.root 1
+bash ./shapes/do_estimations.sh 2018 ${shapes_output}.root 1
 
 
 echo "##############################################################################################"
 echo "#     plotting                                      #"
 echo "##############################################################################################"
 
-python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shape_output_folder}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding
+python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding
+
+python2 ~/tools/webgallery/gallery.py Run${ERA}_plots_emb_classic/
