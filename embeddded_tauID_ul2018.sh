@@ -4,25 +4,27 @@ CHANNEL=$1
 ERA=$2
 NTUPLETAG=$3
 TAG=$4
+MODE=$5
 
 VARIABLES="m_vis"
+source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
-# ntuple_dir="/ceph/sbrommer/smhtt_ul/ntuples/${NTUPLETAG}/ntuples/${ERA}/"
-ntuple_dir="/storage/gridka-nrg/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/${ERA}/"
-shape_input_ntuple_dir="/storage/gridka-nrg/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+# basedir="/ceph/sbrommer/smhtt_ul/ntuples/${NTUPLETAG}/ntuples/${ERA}/"
+# ntuple_dir="/storage/gridka-nrg/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/${ERA}/"
+# NTUPLES="/storage/gridka-nrg/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
 output_shapes="control_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
-xsec_friends_dir="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/friends/xsec"
+# XSEC_FRIENDS="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/friends/xsec"
 
 # print the paths to be used
-echo "ntuple_dir: ${ntuple_dir}"
+echo "basedir: ${basedir}"
 echo "output_shapes: ${output_shapes}"
-echo "xsec_friends_dir: ${xsec_friends_dir}"
+echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
 
 # echo "##############################################################################################"
 # echo "#      unset multicore bit                                                          #"
 # echo "##############################################################################################"
 
-# python3 unset_rootbit.py --basepath ${ntuple_dir}
+# python3 unset_rootbit.py --basepath ${basedir}
 
 categories=( "Pt20to25" "Pt25to30" "Pt30to35" "Pt35to40" "Pt40to50" "Pt50to70" "PtGt70" "DM0" "DM1" "DM10" "DM11" "Inclusive" )
 printf -v categories_string '%s,' "${categories[@]}"
@@ -33,16 +35,16 @@ echo "#      Checking xsec friends directory                                    
 echo "##############################################################################################"
 
 # if the xsec friends directory does not exist, create it
-if [ ! -d "$xsec_friends_dir" ]; then
-    mkdir -p $xsec_friends_dir
+if [ ! -d "$XSEC_FRIENDS" ]; then
+    mkdir -p $XSEC_FRIENDS
 fi
 # if th xsec friends dir is empty, run the xsec friends script
-if [ "$(ls -A $xsec_friends_dir)" ]; then
+if [ "$(ls -A $XSEC_FRIENDS)" ]; then
     echo "xsec friends dir is not empty"
 else
     echo "xsec friends dir is empty"
     echo "running xsec friends script"
-    python3 friends/build_friend_tree.py --basepath $ntuple_dir --outputpath $xsec_friends_dir --nthreads 20 --xrootd
+    python3 friends/build_friend_tree.py --basepath $basedir --outputpath $XSEC_FRIENDS --nthreads 20 --xrootd
 fi
 
 echo "##############################################################################################"
@@ -55,14 +57,22 @@ if [ ! -d "$shape_output_folder" ]; then
     mkdir -p $shape_output_folder
 fi
 
-python shapes/produce_shapes_tauID.py --channels $CHANNEL \
-    --directory $shape_input_ntuple_dir \
-    --${CHANNEL}-friend-directory $xsec_friends_dir  \
-    --era $ERA --num-processes 4 --num-threads 4 \
-    --optimization-level 1 \
-    --control-plot-set ${VARIABLES} \
-    --output-file $shape_output_folder
-
+if [[ $MODE == "LOCAL" ]]
+then
+    python shapes/produce_shapes_tauID.py --channels $CHANNEL \
+        --directory $NTUPLES \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS  \
+        --era $ERA --num-processes 2 --num-threads 4 \
+        --optimization-level 1 \
+        --control-plot-set ${VARIABLES} \
+        --output-file $shape_output_folder
+elif [[ $MODE == "CONDOR" ]]
+then
+    bash submit/submit_shape_production_ul.sh $ERA $CHANNEL \
+       "singlegraph" $TAG 0 $NTUPLETAG
+else
+    echo "Mode $MODE is not implemented "
+fi
 # echo "##############################################################################################"
 # echo "#      Additional estimations                                      #"
 # echo "##############################################################################################"

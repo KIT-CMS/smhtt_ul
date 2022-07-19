@@ -2,10 +2,10 @@
 
 ERA=$1
 CHANNEL=$2
-PROCESSES=$3
-SUBMIT_MODE=$4
-TAG=$5
-CONTROL=$6
+SUBMIT_MODE=$3
+TAG=$4
+CONTROL=$5
+NTUPLETAG=$6
 
 [[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4  && ! -z $5 ]] || ( echo "[ERROR] Number of given parameters is too small."; exit 1 )
 [[ ! -z $6 ]] || CONTROL=0
@@ -15,36 +15,27 @@ then
     CONTROL_ARG="--control-plots"
 fi
 
-source utils/setup_susy_samples.sh $ERA
-source utils/setup_samples.sh $ERA
+source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 source utils/setup_root.sh
 source utils/bashFunctionCollection.sh
 
-IFS="," read -a PROCS_ARR <<< $PROCESSES
-PROCESSES=""
+PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w,ggh,qqh,zh,wh"
 for PROC in ${PROCS_ARR[@]};
 do
     if [[ "$PROC" =~ "backgrounds" ]]
     then
         # BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
-        if [[ "$CHANNEL" == "et" -o "$CHANNEL" == "mt" ]]
-        then
-            BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
-        else
-            BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
-        fi
-        PROCESSES="$PROCESSES,$BKG_PROCS"
+        PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
     elif [[ "$PROC" =~ "sm_signals" ]]
     then
         # SIG_PROCS="ggh,qqh,zh,wh,tth,gghww,qqhww,whww,zhww"
-        SIG_PROCS="ggh,qqh,zh,wh"
-        PROCESSES="$PROCESSES,$SIG_PROCS"
+        PROCESSES="ggh,qqh,zh,wh"
     else
         echo "[INFO] Add selection of single process $PROC"
         PROCESSES="$PROCESSES,$PROC"
     fi
 done
-# Remove introduced leading comma again.
+# # Remove introduced leading comma again.
 PROCESSES=$(sort_string ${PROCESSES#,})
 
 if [[ "$SUBMIT_MODE" == "multigraph" ]]
@@ -56,19 +47,16 @@ then
     echo "[INFO] Preparing graph for processes $PROCESSES for submission..."
     OUTPUT=output/submit_files/${ERA}-${CHANNEL}-${PROCESSES}-${CONTROL}-${TAG}
     [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
-    python shapes/produce_shapes.py --channels $CHANNEL \
+    python shapes/produce_shapes_tauID.py --channels $CHANNEL \
         			    --output-file dummy.root \
-        			    --directory $ARTUS_OUTPUTS \
-                                    --et-friend-directory $ARTUS_FRIENDS_ET $ARTUS_FRIENDS_FAKE_FACTOR \
-                                    --mt-friend-directory $ARTUS_FRIENDS_MT $ARTUS_FRIENDS_FAKE_FACTOR \
-                                    --tt-friend-directory $ARTUS_FRIENDS_TT $ARTUS_FRIENDS_FAKE_FACTOR \
-                                    --em-friend-directory $ARTUS_FRIENDS_EM \
-                                    --era $ERA \
-                                    --optimization-level 1 \
-                                    --process-selection $PROCESSES \
-                                    --only-create-graphs \
-                                    --graph-dir $OUTPUT \
-                                    $CONTROL_ARG
+        			    --directory $NTUPLES \
+                        --$CHANNEL-friend-directory $FRIENDS \
+                        --era $ERA \
+                        --optimization-level 1 \
+                        --process-selection $PROCESSES \
+                        --only-create-graphs \
+                        --graph-dir $OUTPUT \
+                        $CONTROL_ARG
     # Set output graph file name produced during graph creation.
     GRAPH_FILE=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
     [[ $CONTROL == 1 ]] && GRAPH_FILE=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
@@ -90,6 +78,7 @@ then
     echo "error = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).err" >> $OUTPUT/produce_shapes_cc7.jdl
     echo "log = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).log" >> $OUTPUT/produce_shapes_cc7.jdl
     echo "queue a3,a2,a1 from $OUTPUT/arguments.txt" >> $OUTPUT/produce_shapes_cc7.jdl
+    echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >> $OUTPUT/produce_shapes_cc7.jdl
     
     # Prepare the multicore jdl.
     echo "[INFO] Preparing submission file for multi core jobs for nominal pipeline..."
@@ -107,6 +96,7 @@ then
     echo "output = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).out" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "error = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).err" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "log = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).log" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
+    echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "queue a3,a2,a4,a1 from $OUTPUT/arguments_multicore.txt" >> $OUTPUT/produce_shapes_cc7_multicore.jdl
 
     # Assemble the arguments.txt file used in the submission
