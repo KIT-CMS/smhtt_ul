@@ -54,7 +54,7 @@ if [ ! -d "$XSEC_FRIENDS" ]; then
 fi
 # if th xsec friends dir is empty, run the xsec friends script
 if [ "$(ls -A $XSEC_FRIENDS)" ]; then
-    echo "xsec friends dir is not empty"
+    echo "xsec friends dir already exists"
 else
     echo "xsec friends dir is empty"
     echo "running xsec friends script"
@@ -87,9 +87,9 @@ then
        "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT
     echo "[INFO] Jobs submitted"
 elif [[ $MODE == "MERGE" ]]
+then
     echo "[INFO] Merging outputs located in ${CONDOR_OUTPUT}"
     hadd -j 5 -n 600 $shapes_output.root ${CONDOR_OUTPUT}/*.root
-then
 else
     echo "Mode $MODE is not implemented "
 fi
