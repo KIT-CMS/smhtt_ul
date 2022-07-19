@@ -483,18 +483,18 @@ def get_analysis_units(channel, era, datasets, nn_shapes=False):
     #                 category_selection], actions) for category_selection, actions in categorization[channel]],
     # data
 
-    if channel != "et":
-        add_process(
-            analysis_units,
-            name="w",
-            dataset=datasets["W"],
-            selections=[
-                channel_selection(channel, era),
-                W_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
+    # if channel != "et":
+    add_process(
+        analysis_units,
+        name="w",
+        dataset=datasets["W"],
+        selections=[
+            channel_selection(channel, era),
+            W_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
     return analysis_units
 
 
@@ -666,19 +666,19 @@ def get_control_units(channel, era, datasets):
         variables=variable_set,
     )
 
-    if channel != "et":
-        add_control_process(
-            control_units,
-            name="w",
-            dataset=datasets["W"],
-            selections=[
-                channel_selection(channel, era),
-                W_process_selection(channel, era),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
+    # if channel != "et":
+    add_control_process(
+        control_units,
+        name="w",
+        dataset=datasets["W"],
+        selections=[
+            channel_selection(channel, era),
+            W_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
     return control_units
 
 

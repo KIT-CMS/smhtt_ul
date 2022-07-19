@@ -155,11 +155,17 @@ def lumi_weight(era):
 
 def MC_base_process_selection(channel, era):
     if channel == "em":
+        # TODO rename to
+        # isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
+        # idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
         isoweight = ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight")
         idweight = ("id_wgt_mu_1 * id_wgt_mu_2", "idweight")
         tauidweight = None
         trgweight = None
     elif channel == "et":
+        # TODO rename to
+        # isoweight = ("iso_wgt_ele_1", "isoweight")
+        # idweight = ("id_wgt_ele_1", "idweight")
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
         tauidweight = (
