@@ -50,8 +50,12 @@ def channel_selection(channel, era, special=None):
             )
             if era == "2018":
                 cuts.append(
+                    # (
+                    #     "pt_2>30 && ((pt_1>25 && pt_1<33 && ((trg_cross_ele24tau30_hps==1) || (trg_cross_ele24tau30_hps==1))) || (pt_1 >=33 && ((trg_single_ele35==1) || (trg_single_ele32==1))))",
+                    #     "trg_selection",
+                    # ),
                     (
-                        "pt_2>30 && ((pt_1>25 && pt_1<33 && ((trg_cross_ele24tau30_hps==1) || (trg_cross_ele24tau30_hps==1))) || (pt_1 >=33 && ((trg_single_ele35==1) || (trg_single_ele32==1))))",
+                        "pt_2>30 && pt_1 >=33 && (trg_single_ele32==1)",
                         "trg_selection",
                     ),
                 )

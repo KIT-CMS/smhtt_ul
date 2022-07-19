@@ -166,7 +166,7 @@ def MC_base_process_selection(channel, era):
             "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        trgweight = ("trg_wgt_mu_1", "trgweight")
+        trgweight = ("trg_wgt_single_ele32", "trgweight")
     elif channel == "mt":
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")

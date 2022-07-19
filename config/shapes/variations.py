@@ -253,6 +253,8 @@ ele_fake_es_1prong1pizero = [
     ),
 ]
 
+ele_fake_es = ele_fake_es_1prong + ele_fake_es_1prong1pizero
+
 # TODO add split by decay mode ?
 # mu_fake_es_1prong = [
 #         ReplaceVariable("CMS_ZLShape_mt_1prong_EraUp", "tauMuFakeEsOneProngUp"),
