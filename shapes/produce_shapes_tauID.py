@@ -887,18 +887,6 @@ def main(args):
                 #     [*emb_met_scale],
                 #     enable_check=args.enable_booking_check,
                 # )
-                book_histograms(
-                    um,
-                    processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        tau_es_3prong,
-                        tau_es_3prong1pizero,
-                        tau_es_1prong,
-                        tau_es_1prong1pizero,
-                    ],
-                    enable_check=do_check,
-                )
                 # TODO add fake factor variations
                 # um.book(
                 #     [
