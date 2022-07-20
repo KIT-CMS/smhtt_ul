@@ -663,8 +663,8 @@ def main(args):
 
     # Step 1: create units and book actions
     for channel in args.channels:
-        get_nominal_datasets(
-            args.era, channel, friend_directories, files, args.directory
+        nominals[era]["datasets"][channel] = get_nominal_datasets(
+            era, channel, friend_directories, files, args.directory
         )
         if args.control_plots:
             nominals[era]["units"][channel] = get_control_units(
