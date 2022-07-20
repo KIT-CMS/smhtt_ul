@@ -2,7 +2,7 @@
 log/
 output/
 Run201*/
-
+CMSSW*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

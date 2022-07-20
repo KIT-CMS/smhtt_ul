@@ -24,9 +24,9 @@ git clone git@github.com:cms-analysis/CombineHarvester.git CombineHarvester
 git clone git@github.com:KIT-CMS/SMRun2Legacy.git CombineHarvester/SMRun2Legacy
 
 # TauID analysis specific code
-git clone git@github.com:KIT-CMS/TauIDSFMeasurement.git CombineHarvester/TauID
+git clone git@github.com:KIT-CMS/TauIDSFMeasurement.git CombineHarvester/TauIDSFMeasurement
 
 # compile everything
 # Build
-CORES=`grep -c ^processor /proc/cpuinfo`
-scramv1 b clean; scramv1 b -j $CORES
+scram b clean
+scram b -j 10
