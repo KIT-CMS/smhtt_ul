@@ -75,7 +75,7 @@ def job_wrapper(args):
 def friend_producer(
     inputfile, output_path, dataset_proc, era, channel, use_xrootd, debug=False
 ):
-    filepath = os.path.dirname(inputfile).split("/")
+    # filepath = os.path.dirname(inputfile).split("/")
     output_file = os.path.join(
         output_path, era, dataset_proc["nick"], channel, os.path.basename(inputfile)
     )
@@ -95,8 +95,12 @@ def friend_producer(
     if use_xrootd:
         inputfile = convert_to_xrootd(inputfile)
     # check if the output file is empty
-    print(f"Checking if {inputfile} is empty")
-    rootfile = ROOT.TFile.Open(inputfile, "READ")
+    # print(f"Checking if {inputfile} is empty")
+    try:
+        rootfile = ROOT.TFile.Open(inputfile, "READ")
+    except OSError:
+        print(f"{inputfile} is broken")
+        return
     # if the ntuple tree does not exist, the file is empty, so we can skip it
     if "ntuple" not in [x.GetTitle() for x in rootfile.GetListOfKeys()]:
         print(f"{inputfile} is empty, generating empty friend tree")
@@ -110,8 +114,8 @@ def friend_producer(
         rootfile.Close()
         print("done")
         return
-    else:
-        print(f"{inputfile} is not empty, generating friend tree")
+    # else:
+        # print(f"{inputfile} is not empty, generating friend tree")
     rdf = ROOT.RDataFrame("ntuple", rootfile)
     numberGeneratedEventsWeight = 1 / float(dataset_proc["nevents"])
     crossSectionPerEventWeight = float(dataset_proc["xsec"])
@@ -145,16 +149,6 @@ def generate_friend_trees(dataset, ntuples, nthreads, output_path, use_xrootd):
         )
         for ntuple in ntuples
     ]
-    # pool = Pool(nthreads, initargs=(RLock(),), initializer=tqdm.set_lock)
-    # for _ in tqdm(
-    #     pool.imap_unordered(job_wrapper, arguments),
-    #     total=len(arguments),
-    #     desc="Total progess",
-    #     position=nthreads + 1,
-    #     dynamic_ncols=True,
-    #     leave=True,
-    # ):
-    #     pass
     pbar = tqdm(
         total=len(arguments),
         desc="Total progess",
@@ -171,8 +165,7 @@ def generate_friend_trees(dataset, ntuples, nthreads, output_path, use_xrootd):
 
 if __name__ == "__main__":
     args = args_parser()
-
-    base_path = os.path.join(args.basepath, "*/*/*.root")
+    base_path = os.path.join(args.basepath, "*/*/*/*.root")
     output_path = os.path.join(args.outputpath)
     dataset = yaml.safe_load(open(args.dataset_config))
     ntuples = glob.glob(base_path)
