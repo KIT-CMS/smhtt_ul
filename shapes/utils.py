@@ -10,7 +10,7 @@ def add_process(analysis_unit, name, dataset, selections, categorization, channe
         selections = [selections]
     unitlist = []
     for category_selection, actions in categorization[channel]:
-        full_selection = [category_selection] + selections
+        full_selection = selections + [category_selection]
         unitlist.append(Unit(dataset, full_selection, actions))
 
     analysis_unit[name] = unitlist
