@@ -66,19 +66,19 @@ def main(args):
         output_file = os.path.join(
             "output/condor_shapes",
             os.path.basename(args.input).replace(".pkl", ""),
-            "output-single_graph_job-{}-{}.root".format(
-                os.path.basename(args.input.replace(".pkl", "")).replace(
-                    "bbhpowheg", "bbhphg"
-                ),
+            "{}-{}.root".format(
+                os.path.basename(args.input.replace(".pkl", "")),
                 args.graph_number.replace("-", "_"),
             ),
         )
     else:
         output_file = args.output
-
+    # create the output directory if it doesn't exist
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
     # Step 3: convert to RDataFrame and run the event loop
     r_manager = RunManager(graph_to_process)
     r_manager.run_locally(output_file, 1, args.num_threads)
+
 
     return
 
@@ -89,10 +89,9 @@ if __name__ == "__main__":
     setup_logging(
         os.path.join(
             pathname,
-            "single_graph_job-{id}-{num}.log".format(
+            "{id}-{num}.log".format(
                 id=os.path.basename(args.input)
-                .replace(".pkl", "")
-                .replace("bbhpowheg", "bbhphg"),
+                .replace(".pkl", ""),
                 num=args.graph_number,
             ),
         ),

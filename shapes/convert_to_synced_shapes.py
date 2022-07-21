@@ -23,16 +23,6 @@ _process_map = {
     "W": "W",
     "jetFakes": "jetFakes",
     "QCD": "QCD",
-    "bbH": "SUSYbbH",
-    "ggh_i": "SUSYggH-ggh_i",
-    "ggh_t": "SUSYggH-ggh_t",
-    "ggh_b": "SUSYggH-ggh_b",
-    "ggH_i": "SUSYggH-ggH_i",
-    "ggH_t": "SUSYggH-ggH_t",
-    "ggH_b": "SUSYggH-ggH_b",
-    "ggA_i": "SUSYggH-ggA_i",
-    "ggA_t": "SUSYggH-ggA_t",
-    "ggA_b": "SUSYggH-ggA_b",
 }
 
 
@@ -190,20 +180,6 @@ def write_hists_per_category(cat_hists: tuple):
                 hist.SetTitle(name_output.replace("_Era", ""))
                 hist.SetName(name_output.replace("_Era", ""))
                 hist.Write()
-        if "Hdamp_ggH_REWEIGHT" in name_output:
-            contrib = name_output.split("_")[1]
-            hist.SetTitle(
-                name_output.replace(
-                    "Hdamp_ggH_REWEIGHT", "Hdamp_ggH_{}_REWEIGHT".format(contrib)
-                )
-            )
-            hist.SetName(
-                name_output.replace(
-                    "Hdamp_ggH_REWEIGHT", "Hdamp_ggH_{}_REWEIGHT".format(contrib)
-                )
-            )
-            hist.Write()
-            continue
         if "scale_embed_met" in name_output:
             hist.SetTitle(name_output.replace("met", "_".join(["met", args.era])))
             hist.SetName(name_output.replace("met", "_".join(["met", args.era])))
@@ -216,7 +192,7 @@ def write_hists_per_category(cat_hists: tuple):
             )
             hist.Write()
         if "Era" in name_output:
-            name_output = name_output.replace("Era", args.era)
+            name_output = name_output.replace("Era", f"Run{args.era}")
         if "Channel" in name_output:
             name_output = name_output.replace("Channel", channel)
         hist.SetTitle(name_output)
@@ -317,14 +293,13 @@ def main(args):
     for channel in hist_map:
         ofname = os.path.join(
             args.output,
-            "{ERA}-{CHANNELS}-synced-MSSM.root".format(CHANNELS=channel, ERA=args.era),
+            "{ERA}-{CHANNELS}-synced.root".format(CHANNELS=channel, ERA=args.era),
         )
-        if args.gof:
-            ofname = os.path.join(
-                args.output,
-                "htt_{{category}}.inputs-mssm-vs-sm-Run{ERA}.root".format(ERA=args.era),
-            )
-
+        # if args.gof:
+        #     ofname = os.path.join(
+        #         args.output,
+        #         "htt_{{category}}.inputs-mssm-vs-sm-Run{ERA}.root".format(ERA=args.era),
+        #     )
         logging.info(
             "Writing histograms to file %s with %s processes",
             ofname,
