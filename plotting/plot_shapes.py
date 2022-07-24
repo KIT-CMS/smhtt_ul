@@ -101,6 +101,9 @@ def parse_arguments():
         action="store_true",
         help="if set, plotting blinded shapes with no entries above threshold in  signal categories",
     )
+    parser.add_argument(
+        "--prefit", action="store_true", help="If set, use prefit shapes"
+    )
     return parser.parse_args()
 
 
@@ -135,7 +138,6 @@ def main(args):
         signalcats = []
         for channel in ["mt"]:
             channel_categories[channel] += signalcats
-    background_categories = channel_categories
     channel_dict = {
         "ee": "ee",
         "em": "e#mu",
@@ -146,17 +148,16 @@ def main(args):
     }
     # bkgs+stage1
     category_dict = {
-        "1": "mt_Pt20to25",
-        "2": "mt_Pt25to30",
-        "3": "mt_Pt30to35",
-        "4": "mt_Pt35to40",
-        "5": "mt_Pt40to50",
-        "6": "mt_Pt50to70",
-        "7": "mt_PtGt70",
-        "8": "mt_DM0",
-        "9": "mt_DM1",
-        "10": "mt_DM10",
-        "11": "mt_DM11",
+        "1": "Pt20to25",
+        "2": "Pt25to30",
+        "3": "Pt30to35",
+        "4": "Pt35to40",
+        "5": "PtGt40",
+        "8": "DM0",
+        "9": "DM1",
+        "10": "DM10",
+        "11": "DM11",
+        "100": "Inclusive",
     }
     if args.linear:
         split_value = 0
@@ -187,7 +188,7 @@ def main(args):
             "ZL",
             "ZTT",
         ]
-    bkg_processes = ["QCD", "VVJ", "VVL","W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
+    bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -203,12 +204,6 @@ def main(args):
         raise Exception
     logger.debug("Channel Categories: {}".format(channel_categories))
     plots = []
-    if args.categories == "stxs_stage0" and args.single_category == "1":
-        # special for 2D category
-        dummy = ROOT.TH1F("dummy", "dummy", 28, 0.0, 28.0)
-    else:
-        dummy = ROOT.TH1F("dummy", "dummy", 5, 0.0, 1.0)
-        dummy_signal = ROOT.TH1F("dummy", "dummy", 28, 0.0, 28.0)
     channel = args.channel[0]
     if args.single_category != "":
         logger.debug(f"channel {channel}")
@@ -219,7 +214,7 @@ def main(args):
     else:
         categories = channel_categories[channel]
     for category in categories:
-        rootfile = rootfile_parser.Rootfile_parser(args.input)
+        rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit)
         if channel == "em" and args.embedding:
             bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
         elif channel == "em" and not args.embedding:
@@ -406,13 +401,7 @@ def main(args):
         )
 
         # save plot
-        postfix = (
-            "prefit"
-            if "prefit" in args.input
-            else "postfit"
-            if "postfit" in args.input
-            else "undefined"
-        )
+        postfix = "prefit" if args.prefit else "postfit"
         plot.save(
             "%s/%s_%s_%s_%s.%s"
             % (

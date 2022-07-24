@@ -27,7 +27,7 @@ echo "BASEDIR: ${BASEDIR}"
 echo "output_shapes: ${output_shapes}"
 echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
 
-categories=( "Pt20to25" "Pt25to30" "Pt30to35" "Pt35to40" "Pt40to50" "Pt50to70" "PtGt70" "DM0" "DM1" "DM10" "DM11" "Inclusive" )
+categories=( "Pt20to25" "Pt25to30" "Pt30to35" "PtGt40" "DM0" "DM1" "DM10_11" "Inclusive" )
 printf -v categories_string '%s,' "${categories[@]}"
 echo "Using Cateogires ${categories_string%,}"
 
@@ -57,7 +57,10 @@ then
     echo "##############################################################################################"
     echo "[INFO] Copying ntuples to ceph via xrootd"
     echo "xrdcp -r $KINGMAKER_BASEDIR_XROOTD$ERA/ $BASEDIR$ERA/"
-    xrdcp -r $KINGMAKER_BASEDIR_XROOTD$ERA/ $BASEDIR$ERA/
+    if [ ! -d "$BASEDIR/$ERA" ]; then
+        mkdir -p $BASEDIR/$ERA
+    fi
+    xrdcp -r $KINGMAKER_BASEDIR_XROOTD$ERA $BASEDIR
     exit 0
 fi
 # echo "##############################################################################################"
@@ -256,6 +259,7 @@ then
             mkdir -p output/postfitplots/
         fi
         echo "[INFO] Postfits plots for category $CATEGORY"
+        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $i --categories "None" -o output/postfitplots/ --prefit
         python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $i --categories "None" -o output/postfitplots/
         i=$((i+1))
     done
