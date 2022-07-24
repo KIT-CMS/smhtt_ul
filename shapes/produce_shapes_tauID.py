@@ -87,10 +87,10 @@ from config.shapes.variations import (
 
 # trigger efficiencies
 # TODO add trigger shifts
-# from config.shapes.variations import (
-#     trigger_eff_mt,
-#     trigger_eff_mt_emb,
-# )
+from config.shapes.variations import (
+    trigger_eff_mt,
+    trigger_eff_mt_emb,
+)
 
 # Additional uncertainties
 # TODO add btag eff
@@ -923,25 +923,20 @@ def main(args):
                     variations=[mu_fake_es_inc],
                     enable_check=do_check,
                 )
-                # TODO add trigger shifts
-                # um.book(
-                #     [
-                #         unit
-                #         for d in simulatedProcsDS[channel]
-                #         for unit in nominals[era]["units"][channel][d]
-                #     ],
-                #     [*trigger_eff_mt],
-                #     enable_check=args.enable_booking_check,
-                # )
-                # um.book(
-                #     [
-                #         unit
-                #         for d in embS
-                #         for unit in nominals[era]["units"][channel][d]
-                #     ],
-                #     [*trigger_eff_mt_emb, *trigger_eff_mt],
-                #     enable_check=args.enable_booking_check,
-                # )
+                book_histograms(
+                    um,
+                    processes=simulatedProcsDS[channel],
+                    datasets=nominals[era]["units"][channel],
+                    variations=[trigger_eff_mt],
+                    enable_check=do_check,
+                )
+                book_histograms(
+                    um,
+                    processes=embS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[trigger_eff_mt_emb],
+                    enable_check=do_check,
+                )
                 book_histograms(
                     um,
                     processes={"zl"} & procS,

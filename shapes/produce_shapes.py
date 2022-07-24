@@ -107,14 +107,14 @@ from config.shapes.variations import jet_to_tau_fake, zll_et_fake_rate, zll_mt_f
 
 # TODO add trigger efficiency uncertainties
 # # trigger efficiencies
-# from config.shapes.variations import (
-#     tau_trigger_eff_tt,
-#     tau_trigger_eff_tt_emb,
-#     trigger_eff_mt,
-#     trigger_eff_et,
-#     trigger_eff_et_emb,
-#     trigger_eff_mt_emb,
-# )
+from config.shapes.variations import (
+    # tau_trigger_eff_tt,
+    # tau_trigger_eff_tt_emb,
+    trigger_eff_mt,
+    trigger_eff_et,
+    trigger_eff_et_emb,
+    trigger_eff_mt_emb,
+)
 
 # Additional uncertainties
 from config.shapes.variations import (
@@ -995,22 +995,20 @@ def main(args):
                     variations=[mu_fake_es_inc],
                     enable_check=do_check,
                 )
-                # Todo add trigger efficiency
-                # book_histograms(
-                #     um,
-                #     processes=simulatedProcsDS[channel],
-                #     datasets=nominals[era]["units"][channel],
-                #     variations=[trigger_eff_mt],
-                #     enable_check=do_check,
-                # )
-                # TODO add trigger efficiency for emb
-                # book_histograms(
-                #     um,
-                #     processes=embS,
-                #     datasets=nominals[era]["units"][channel],
-                #     variations=[trigger_eff_mt_emb, trigger_eff_mt],
-                #     enable_check=do_check,
-                # )
+                book_histograms(
+                    um,
+                    processes=simulatedProcsDS[channel],
+                    datasets=nominals[era]["units"][channel],
+                    variations=[trigger_eff_mt],
+                    enable_check=do_check,
+                )
+                book_histograms(
+                    um,
+                    processes=embS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[trigger_eff_mt_emb],
+                    enable_check=do_check,
+                )
                 book_histograms(
                     um,
                     processes={"zl"} & procS,
@@ -1027,21 +1025,21 @@ def main(args):
                     enable_check=do_check,
                 )
                 # Todo add trigger efficiency
-                # book_histograms(
-                #     um,
-                #     processes=simulatedProcsDS[channel],
-                #     datasets=nominals[era]["units"][channel],
-                #     variations=[trigger_eff_et],
-                #     enable_check=do_check,
-                # )
+                book_histograms(
+                    um,
+                    processes=simulatedProcsDS[channel],
+                    datasets=nominals[era]["units"][channel],
+                    variations=[trigger_eff_et],
+                    enable_check=do_check,
+                )
                 # TODO add trigger efficiency for emb
-                # book_histograms(
-                #     um,
-                #     processes=embS,
-                #     datasets=nominals[era]["units"][channel],
-                #     variations=[trigger_eff_et_emb, trigger_eff_et],
-                #     enable_check=do_check,
-                # )
+                book_histograms(
+                    um,
+                    processes=embS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[trigger_eff_et_emb],
+                    enable_check=do_check,
+                )
                 book_histograms(
                     um,
                     processes={"zl"} & procS,

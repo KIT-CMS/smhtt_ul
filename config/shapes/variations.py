@@ -375,6 +375,23 @@ zll_mt_fake_rate = zll_mt_fake_rate_up + zll_mt_fake_rate_down
 
 # TODO add trigger up/Down shifts
 # # Trigger efficiency uncertainties.
+trigger_eff_mt = [
+    ReplaceVariable("CMS_eff_trigger_mt_EraUp", "singleMuonTriggerSFUp"),
+    ReplaceVariable("CMS_eff_trigger_mt_EraDown", "singleMuonTriggerSFDown"),
+]
+trigger_eff_mt_emb = [
+    ReplaceVariable("CMS_eff_trigger_emb_mt_EraUp", "singleMuonTriggerSFUp"),
+    ReplaceVariable("CMS_eff_trigger_emb_mt_EraDown", "singleMuonTriggerSFDown"),
+]
+
+trigger_eff_et = [
+    ReplaceVariable("CMS_eff_trigger_et_EraUp", "singleElectronTriggerSFUp"),
+    ReplaceVariable("CMS_eff_trigger_et_EraDown", "singleElectronTriggerSFDown"),
+]
+trigger_eff_et_emb = [
+    ReplaceVariable("CMS_eff_trigger_emb_et_EraUp", "singleElectronTriggerSFUp"),
+    ReplaceVariable("CMS_eff_trigger_emb_et_EraDown", "singleElectronTriggerSFDown"),
+]
 # trigger_eff_mt = [
 #     ReplaceWeight(
 #         "CMS_eff_trigger_mt_EraUp",
