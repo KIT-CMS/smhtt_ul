@@ -153,11 +153,10 @@ def main(args):
         "3": "Pt30to35",
         "4": "Pt35to40",
         "5": "PtGt40",
-        "8": "DM0",
-        "9": "DM1",
-        "10": "DM10",
-        "11": "DM11",
-        "100": "Inclusive",
+        "6": "Inclusive",
+        "7": "DM0",
+        "8": "DM1",
+        "9": "DM10_11",
     }
     if args.linear:
         split_value = 0
@@ -205,14 +204,22 @@ def main(args):
     logger.debug("Channel Categories: {}".format(channel_categories))
     plots = []
     channel = args.channel[0]
+    categories = []
     if args.single_category != "":
         logger.debug(f"channel {channel}")
-        logger.debug(channel_categories)
-        categories = set(channel_categories[channel]).intersection(
-            set([args.single_category])
-        )
+        logger.warning("Selected category: {}".format(args.single_category))
+        logger.warning("Available categories: {}".format(category_dict))
+        catname = args.single_category.replace("htt_mt_", "")
+        if catname in category_dict.values():
+            categories = list(category_dict.keys())[
+                list(category_dict.values()).index(catname)
+            ]
+        # categories = set(channel_categories[channel]).intersection(
+        #     set([args.single_category])
+        # )
     else:
         categories = channel_categories[channel]
+    logger.warning("Categories: {}".format(categories))
     for category in categories:
         rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit)
         if channel == "em" and args.embedding:
