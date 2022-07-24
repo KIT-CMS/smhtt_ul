@@ -47,12 +47,13 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]
 then
     echo "[INFO] Preparing graph for processes $PROCESSES for submission..."
     [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
-    python shapes/produce_shapes_tauID.py --channels $CHANNEL \
+    python shapes/produce_shapes.py --channels $CHANNEL \
         			    --output-file dummy.root \
         			    --directory $NTUPLES \
                         --$CHANNEL-friend-directory $FRIENDS \
                         --era $ERA \
                         --optimization-level 1 \
+                        --special-analysis "TauID" \
                         --process-selection $PROCESSES \
                         --only-create-graphs \
                         --graph-dir $OUTPUT \

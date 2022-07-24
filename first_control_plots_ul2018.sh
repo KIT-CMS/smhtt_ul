@@ -5,7 +5,7 @@ ERA=$2
 NTUPLETAG=$3
 TAG=$4
 
-VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,pt_tt,met"
+VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,pt_tt,met,pzetamissvis,iso_1"
 
 ulimit -s unlimited
 source utils/setup_root.sh

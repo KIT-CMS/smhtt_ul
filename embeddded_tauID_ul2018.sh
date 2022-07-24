@@ -18,7 +18,7 @@ shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
 # Datacard Setup
 WP="tight"
-datacard_output="datacards/${ERA}_tauid_${WP}"
+datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 
 # print the paths to be used
@@ -103,11 +103,12 @@ fi
 if [[ $MODE == "CONTROL" ]]
 then
     source utils/setup_root.sh
-    python shapes/produce_shapes_tauID.py --channels $CHANNEL \
+    python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $XSEC_FRIENDS  \
         --era $ERA --num-processes 2 --num-threads 8 \
         --optimization-level 1 --skip-systematic-variations \
+        --special-analysis "TauID" \
         --control-plot-set ${VARIABLES} \
         --output-file $shapes_output
 fi
@@ -124,7 +125,7 @@ if [[ $MODE == "MERGE" ]]
 then
     source utils/setup_root.sh
     echo "[INFO] Merging outputs located in ${CONDOR_OUTPUT}"
-    hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../analysis_unit_graphs*/*.root
+    hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/*.root
 fi
 
 if [[ $MODE == "SYNC" ]]
@@ -158,6 +159,8 @@ then
         --variable-selection ${VARIABLES} \
         -n 1
 
+    hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${ERA}-${CHANNEL}*.root
+
     exit 0
 fi
 
@@ -167,23 +170,24 @@ then
     # inputfile
     POSTFIX="-ML"
     inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
-    hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${ERA}-${CHANNEL}*.root
+    # for category in "pt_binned" "inclusive" "dm_binned"
     $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \
-    --base_path=$PWD \
-    --input_folder_mt=$shapes_output_synced \
-    --input_folder_mm="/" \
-    --real_data=true \
-    --classic_bbb=false \
-    --binomial_bbb=false \
-    --jetfakes=0 \
-    --embedding=1 \
-    --postfix=$POSTFIX \
-    --use_control_region=false \
-    --auto_rebin=true \
-    --categories="pt_binned" \
-    --era=$ERA \
-    --output=$datacard_output
-    THIS_PWD=${PWD}
+        --base_path=$PWD \
+        --input_folder_mt=$shapes_output_synced \
+        --input_folder_mm="/" \
+        --real_data=true \
+        --classic_bbb=false \
+        --binomial_bbb=false \
+        --jetfakes=0 \
+        --embedding=1 \
+        --verbose=true \
+        --postfix=$POSTFIX \
+        --use_control_region=false \
+        --auto_rebin=true \
+        --categories="all" \
+        --era=$ERA \
+        --output=$datacard_output
+        THIS_PWD=${PWD}
     echo $THIS_PWD
     cd output/$datacard_output/
     for FILE in htt_mt_*/*.txt
@@ -201,7 +205,7 @@ if [[ $MODE == "FIT" ]]
 then
     source utils/setup_cmssw.sh
     # --setParameterRanges CMS_htt_doublemutrg_Run${ERA}=$RANGE \
-    combineTool.py -M MultiDimFit -m 125 -d output/$datacard_output/htt_mt_*/combined.txt.cmb.root \
+    combineTool.py -M MultiDimFit -m 125 -d output/$datacard_output/htt_mt_*/combined.txt.cmb \
         --algo singles --robustFit 1 \
         --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
         --floatOtherPOIs 1 \
@@ -259,8 +263,8 @@ then
             mkdir -p output/postfitplots/
         fi
         echo "[INFO] Postfits plots for category $CATEGORY"
-        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $i --categories "None" -o output/postfitplots/ --prefit
-        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $i --categories "None" -o output/postfitplots/
+        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/ --prefit
+        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/
         i=$((i+1))
     done
     exit 0
