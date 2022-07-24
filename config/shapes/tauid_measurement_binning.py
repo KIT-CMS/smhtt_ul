@@ -33,23 +33,11 @@ categories = {
             "expression": discriminator_variable,
             "cut": "(pt_2 >= 35) && (pt_2 < 40)",
         },
-        "Pt40to50": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(pt_2 >= 40) && (pt_2 < 50)",
-        },
-        "Pt50to70": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(pt_2 >= 50) && (pt_2 < 70)",
-        },
-        "PtGt70": {
+        "PtGt40": {
             "var": discriminator_variable,
             "bins": discriminator_binning_enlarged,
             "expression": discriminator_variable,
-            "cut": "(pt_2 >= 70)",
+            "cut": "(pt_2 >= 40)",
         },
         "DM0": {
             "var": discriminator_variable,
@@ -63,17 +51,11 @@ categories = {
             "expression": discriminator_variable,
             "cut": "(decaymode_2 == 1) && (pt_2 >= 40)",
         },
-        "DM10": {
+        "DM10_11": {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "(decaymode_2 == 10) && (pt_2 >= 40)",
-        },
-        "DM11": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(decaymode_2 == 11) && (pt_2 >= 40)",
+            "cut": "((decaymode_2 == 10) || (decaymode_2 == 11)) && (pt_2 >= 40)",
         },
         "Inclusive": {
             "var": discriminator_variable,
