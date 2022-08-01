@@ -119,8 +119,8 @@ def channel_selection(channel, era, special=None):
                 ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
                 ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
                 ("iso_1<0.15", "muon_iso"),
-                ("pzetamissvis > -25", "pzetamissvis"),
-                ("mt_1 < 60", "mt_1"),
+                ("pzetamissvis_pf > -25", "pzetamissvis"),
+                ("mt_1_pf < 60", "mt_1"),
             ]
         )
         if era == "2018":
@@ -143,8 +143,8 @@ def channel_selection(channel, era, special=None):
                 ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
                 ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
                 ("iso_1<0.15", "muon_iso"),
-                ("pzetamissvis > -25", "pzetamissvis"),
-                ("mt_1 < 60", "mt_1"),
+                ("pzetamissvis_pf > -25", "pzetamissvis"),
+                ("mt_1_pf < 60", "mt_1"),
             ]
         )
         if era == "2018":

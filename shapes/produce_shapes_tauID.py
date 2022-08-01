@@ -15,7 +15,6 @@ from shapes.utils import (
 
 from ntuple_processor import Histogram
 from ntuple_processor import (
-    dataset_from_crownoutput,
     Unit,
     UnitManager,
     GraphManager,
@@ -230,6 +229,12 @@ def parse_arguments():
         "--enable-booking-check",
         action="store_true",
         help="Enables check for double actions during booking. Takes long for all variations.",
+    )
+    parser.add_argument(
+        "--special-analyses",
+        help="Can be set to a special analysis name to only run that analysis.",
+        choices=["TauID", "TauES"],
+        default=None,
     )
     return parser.parse_args()
 
@@ -655,6 +660,9 @@ def main(args):
     um = UnitManager()
     do_check = args.enable_booking_check
     era = args.era
+
+
+
 
     nominals = {}
     nominals[era] = {}
