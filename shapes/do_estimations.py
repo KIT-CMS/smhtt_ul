@@ -1055,5 +1055,5 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    setup_logging("do_estimations.log", level=logging.INFO)
+    setup_logging("do_estimations.log", level=logging.DEBUG)
     main(args)

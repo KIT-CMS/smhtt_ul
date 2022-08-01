@@ -12,7 +12,7 @@ from shapes.utils import (
     add_control_process,
     get_nominal_datasets,
 )
-
+from ntuple_processor.variations import ReplaceVariable
 from ntuple_processor import Histogram
 from ntuple_processor import (
     Unit,
@@ -160,7 +160,7 @@ from config.shapes.variations import (
 #     ff_variations_tau_es_tt_mcl,
 # )
 
-from config.shapes.control_binning import control_binning, minimal_control_plot_set
+from config.shapes.control_binning import control_binning
 
 logger = logging.getLogger("")
 
@@ -255,7 +255,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--control-plot-set",
-        default=minimal_control_plot_set,
+        default=[],
         type=lambda varlist: [variable for variable in varlist.split(",")],
         help="Variables the shapes should be produced for.",
     )
@@ -717,13 +717,11 @@ def main(args):
     }
     if ".root" in args.output_file:
         output_file = args.output_file
-        log_file = args.output_file.replace(".root", ".log")
     else:
         output_file = "{}.root".format(args.output_file)
-        log_file = "{}.log".format(args.output_file)
     # setup categories depending on the selected anayses
-    special_anaylsis = args.special_analysis
-    categorization = prepare_special_analysis(special_anaylsis)
+    special_analysis = args.special_analysis
+    categorization = prepare_special_analysis(special_analysis)
     um = UnitManager()
     do_check = args.enable_booking_check
     era = args.era
@@ -740,7 +738,7 @@ def main(args):
         )
         if args.control_plots:
             nominals[era]["units"][channel] = get_control_units(
-                channel, era, nominals[era]["datasets"][channel], special_anaylsis
+                channel, era, nominals[era]["datasets"][channel], special_analysis
             )
         else:
             nominals[era]["units"][channel] = get_analysis_units(
@@ -748,7 +746,7 @@ def main(args):
                 era,
                 nominals[era]["datasets"][channel],
                 categorization,
-                special_anaylsis,
+                special_analysis,
             )
 
     if args.process_selection is None:
@@ -816,10 +814,39 @@ def main(args):
             datasets=nominals[era]["units"][channel],
             enable_check=do_check,
         )
+        if channel == "mt" and special_analysis == "TauES":
+            # to special booking here
+            logger.info("Booking TauES")
+            tauESvariations = [-2.4 + 0.05 * i for i in range(0, 96)]
+            variations = []
+            for tauESvariation in tauESvariations:
+                name = (
+                    str(round(tauESvariation, 2))
+                    .replace("-", "minus")
+                    .replace(".", "p")
+                )
+                variations.append(
+                    ReplaceVariable(f"EMBtauESshift_{name}", f"EMBtauESshift_{name}")
+                )
+            book_histograms(
+                um,
+                processes=embS,
+                datasets=nominals[era]["units"][channel],
+                variations=[same_sign, anti_iso_lt, variations],
+                enable_check=do_check,
+            )
+        else:
+            book_histograms(
+                um,
+                processes=embS,
+                datasets=nominals[era]["units"][channel],
+                variations=[same_sign, anti_iso_lt],
+                enable_check=do_check,
+            )
         if channel in ["mt", "et"]:
             book_histograms(
                 um,
-                processes=dataS | embS | trueTauBkgS | leptonFakesS,
+                processes=dataS | trueTauBkgS | leptonFakesS,
                 datasets=nominals[era]["units"][channel],
                 variations=[same_sign, anti_iso_lt],
                 enable_check=do_check,
@@ -870,9 +897,6 @@ def main(args):
                 variations=[same_sign_em],
                 enable_check=do_check,
             )
-        if channel == "mt" and special_anaylsis == "TauES":
-            # to special booking here
-            logger.info("Booking TauES")
 
         ##################################
         # SYSTEMATICS

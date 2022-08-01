@@ -2,16 +2,38 @@ from ntuple_processor import dataset_from_crownoutput, Unit
 import re
 
 
-def add_process(analysis_unit, name, dataset, selections, categorization, channel):
+# def add_process(analysis_unit, name, dataset, selections, categorization, channel):
+#     """
+#     Add a process to the analysis unit.
+#     """
+#     if not isinstance(selections, list):
+#         selections = [selections]
+#     unitlist = []
+#     for category_selection, actions in categorization[channel]:
+#         full_selection = selections + [category_selection]
+#         unitlist.append(Unit(dataset, full_selection, actions))
+
+#     analysis_unit[name] = unitlist
+
+
+def add_process(
+    analysis_unit, name, dataset, selections, categorization, channel, variations=None
+):
     """
     Add a process to the analysis unit.
     """
     if not isinstance(selections, list):
         selections = [selections]
     unitlist = []
-    for category_selection, actions in categorization[channel]:
-        full_selection = selections + [category_selection]
-        unitlist.append(Unit(dataset, full_selection, actions))
+    if variations is not None:
+        for variation in variations:
+            for category_selection, actions in categorization[channel]:
+                full_selection = selections + [category_selection]
+                unitlist.append(Unit(dataset, full_selection, actions, variation))
+    else:
+        for category_selection, actions in categorization[channel]:
+            full_selection = selections + [category_selection]
+            unitlist.append(Unit(dataset, full_selection, actions))
 
     analysis_unit[name] = unitlist
 
