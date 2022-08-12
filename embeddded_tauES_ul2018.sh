@@ -20,20 +20,17 @@ shapes_rootfile_synced=${shapes_output_synced}_synced.root
 WP="tight"
 datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-
 # print the paths to be used
 echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
 echo "BASEDIR: ${BASEDIR}"
 echo "output_shapes: ${output_shapes}"
 echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
 
-categories=( "DM0" "DM1" "DM10" "DM11" "Inclusive" )
+categories=("DM0" "DM1" "DM10" "DM11" "Inclusive")
 printf -v categories_string '%s,' "${categories[@]}"
 echo "Using Cateogires ${categories_string%,}"
 
-
-if [[ $MODE == "COPY" ]]
-then
+if [[ $MODE == "COPY" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
     echo "#      Copy sample to ceph, it not there yet                                                     #"
@@ -49,8 +46,7 @@ then
         rsync -avhPl $KINGMAKER_BASEDIR$ERA/ $BASEDIR$ERA/
     fi
     exit 0
-elif [[ $MODE == "COPY_XROOTD" ]]
-then
+elif [[ $MODE == "COPY_XROOTD" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
     echo "#      Copy sample to ceph, it not there yet                                                     #"
@@ -69,9 +65,7 @@ fi
 
 # python3 unset_rootbit.py --basepath ${BASEDIR}
 
-
-if [[ $MODE == "XSEC" ]]
-then
+if [[ $MODE == "XSEC" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
     echo "#      Checking xsec friends directory                                                       #"
@@ -100,8 +94,7 @@ if [ ! -d "$shapes_output" ]; then
     mkdir -p $shapes_output
 fi
 
-if [[ $MODE == "CONTROL" ]]
-then
+if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
@@ -112,31 +105,28 @@ then
         --control-plot-set ${VARIABLES} \
         --output-file $shapes_output
 fi
-if [[ $MODE == "CONDOR" ]]
-then
+if [[ $MODE == "CONDOR" ]]; then
     source utils/setup_root.sh
     echo "[INFO] Running on Condor"
     echo "[INFO] Condor output folder: ${CONDOR_OUTPUT}"
     bash submit/submit_shape_production_ul.sh $ERA $CHANNEL \
-       "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT
+        "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT
     echo "[INFO] Jobs submitted"
 fi
-if [[ $MODE == "MERGE" ]]
-then
+if [[ $MODE == "MERGE" ]]; then
     source utils/setup_root.sh
     echo "[INFO] Merging outputs located in ${CONDOR_OUTPUT}"
     hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/*.root
 fi
 
-if [[ $MODE == "SYNC" ]]
-then
+if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
+
     echo "##############################################################################################"
 
     bash ./shapes/do_estimations.sh 2018 ${shapes_rootfile} 1
-
 
     echo "##############################################################################################"
     echo "#     plotting                                      #"
@@ -164,8 +154,7 @@ then
     exit 0
 fi
 
-if [[ $MODE == "DATACARD" ]]
-then
+if [[ $MODE == "DATACARD" ]]; then
     source utils/setup_cmssw.sh
     # inputfile
     POSTFIX="-ML"
@@ -187,22 +176,20 @@ then
         --categories="all" \
         --era=$ERA \
         --output=$datacard_output
-        THIS_PWD=${PWD}
+    THIS_PWD=${PWD}
     echo $THIS_PWD
     cd output/$datacard_output/
-    for FILE in htt_mt_*/*.txt
-    do
+    for FILE in htt_mt_*/*.txt; do
         sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
     done
     cd $THIS_PWD
 
     echo "[INFO] Create Workspace for datacard"
-    combineTool.py -M T2W  -i output/$datacard_output/htt_mt_*/ -o workspace.root --parallel 4 -m 125
+    combineTool.py -M T2W -i output/$datacard_output/htt_mt_*/ -o workspace.root --parallel 4 -m 125
     exit 0
 fi
 
-if [[ $MODE == "FIT" ]]
-then
+if [[ $MODE == "FIT" ]]; then
     source utils/setup_cmssw.sh
     # --setParameterRanges CMS_htt_doublemutrg_Run${ERA}=$RANGE \
     combineTool.py -M MultiDimFit -m 125 -d output/$datacard_output/htt_mt_*/combined.txt.cmb \
@@ -211,22 +198,19 @@ then
         --floatOtherPOIs 1 \
         -n $ERA -v3 \
         --parallel 1 --there
-    for RESDIR in output/$datacard_output/htt_mt_*
-    do
-        echo "[INFO] Printing fit result for category `basename $RESDIR`"
+    for RESDIR in output/$datacard_output/htt_mt_*; do
+        echo "[INFO] Printing fit result for category $(basename $RESDIR)"
         FITFILE=${RESDIR}/higgsCombine${ERA}.MultiDimFit.mH125.root
         python datacards/print_fitresult.py ${FITFILE}
     done
     exit 0
 fi
 
-if [[ $MODE == "POSTFIT" ]]
-then
+if [[ $MODE == "POSTFIT" ]]; then
     source utils/setup_cmssw.sh
-    for RESDIR in output/$datacard_output/htt_mt_*
-    do
+    for RESDIR in output/$datacard_output/htt_mt_*; do
         WORKSPACE=${RESDIR}/workspace.root
-        echo "[INFO] Printing fit result for category `basename $RESDIR`"
+        echo "[INFO] Printing fit result for category $(basename $RESDIR)"
         FILE=${RESDIR}/postfitshape.root
         FITFILE=${RESDIR}/fitDiagnostics.${ERA}.root
         combine \
@@ -240,22 +224,20 @@ then
         mv fitDiagnostics.2018.root $FITFILE
         echo "[INFO] Building Prefit/Postfit shapes"
         PostFitShapesFromWorkspace -w ${WORKSPACE} \
-                    -m 125 -d ${RESDIR}/combined.txt.cmb \
-                    -o ${FILE} \
-                    -f ${FITFILE}:fit_s --postfit
+            -m 125 -d ${RESDIR}/combined.txt.cmb \
+            -o ${FILE} \
+            -f ${FITFILE}:fit_s --postfit
     done
     exit 0
 fi
 
-if [[ $MODE == "PLOT-POSTFIT" ]]
-then
+if [[ $MODE == "PLOT-POSTFIT" ]]; then
     source utils/setup_root.sh
     i=1
-    for RESDIR in output/$datacard_output/htt_mt_*
-    do
+    for RESDIR in output/$datacard_output/htt_mt_*; do
         WORKSPACE=${RESDIR}/workspace.root
 
-        CATEGORY=`basename $RESDIR`
+        CATEGORY=$(basename $RESDIR)
         FILE=${RESDIR}/postfitshape.root
         FITFILE=${RESDIR}/fitDiagnostics.${ERA}.root
         # create output folder if it does not exist
@@ -265,7 +247,7 @@ then
         echo "[INFO] Postfits plots for category $CATEGORY"
         python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/ --prefit
         python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/
-        i=$((i+1))
+        i=$((i + 1))
     done
     exit 0
 fi

@@ -897,7 +897,14 @@ def main(args):
                 variations=[same_sign_em],
                 enable_check=do_check,
             )
-
+        elif channel == "mm" and special_analysis == "TauES":
+            book_histograms(
+                um,
+                processes={"data", "zl", "w", "ttl"},
+                datasets=nominals[era]["units"][channel],
+                variations=[],
+                enable_check=do_check,
+            )
         ##################################
         # SYSTEMATICS
         ############################

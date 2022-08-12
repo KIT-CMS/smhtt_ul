@@ -650,5 +650,16 @@ files = {
             },
             **common_files_2018
         ),
+        "mm": dict(
+            {
+                "data": [
+                    "DoubleMuon_Run2018A-UL2018",
+                    "DoubleMuon_Run2018B-UL2018",
+                    "DoubleMuon_Run2018C-UL2018",
+                    "DoubleMuon_Run2018D-UL2018",
+                ],
+            },
+            **common_files_2018
+        ),
     },
 }
