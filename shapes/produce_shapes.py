@@ -134,11 +134,13 @@ from config.shapes.variations import (
 # from config.shapes.variations import (
 #     btag_eff,
 #     mistag_eff,
-#     ggh_acceptance,
-#     qqh_acceptance,
 #     emb_decay_mode_eff_lt,
 #     emb_decay_mode_eff_tt,
 # )
+from config.shapes.variations import (
+    ggh_acceptance,
+    qqh_acceptance,
+)
 
 # jet fake uncertainties
 from config.shapes.variations import (
@@ -914,15 +916,34 @@ def main(args):
             # Book variations common to all channels.
             # um.book([unit for d in {"ggh"} & procS for unit in nominals[era]['units'][channel][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
             # um.book([unit for d in {"qqh"} & procS for unit in nominals[era]['units'][channel][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
+            book_histograms(
+                um,
+                processes={"ggh"} & procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[ggh_acceptance],
+                enable_check=do_check,
+            )
+            book_histograms(
+                um,
+                processes={"qqh"} & procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[qqh_acceptance],
+                enable_check=do_check,
+            )
+            book_histograms(
+                um,
+                processes=simulatedProcsDS[channel],
+                datasets=nominals[era]["units"][channel],
+                variations=[jet_es],
+                enable_check=do_check,
+            )
             # TODO add btag stuff
-            # um.book(
-            #     [
-            #         unit
-            #         for d in simulatedProcsDS[channel]
-            #         for unit in nominals[era]["units"][channel][d]
-            #     ],
-            #     [*jet_es, *met_unclustered, *btag_eff, *mistag_eff],
-            #     enable_check=args.enable_booking_check,
+            # book_histograms(
+            #     um,
+            #     processes=simulatedProcsDS[channel],
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[mistag_eff, btag_eff],
+            #     enable_check=do_check,
             # )
             book_histograms(
                 um,
