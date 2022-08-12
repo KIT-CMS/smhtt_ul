@@ -55,7 +55,7 @@ def channel_selection(channel, era, special=None):
                     #     "trg_selection",
                     # ),
                     (
-                        "pt_2>30 && pt_1 >=33 && (trg_single_ele32==1)",
+                        "pt_2>30 && (pt_1 >=33 && ((trg_single_ele35==1) || (trg_single_ele32==1)))",
                         "trg_selection",
                     ),
                 )
@@ -82,11 +82,15 @@ def channel_selection(channel, era, special=None):
             )
             if era == "2018":
                 cuts.append(
+                    ("pt_1 > 40 && pt_2 > 40", "pt_selection"),
+                )
+                cuts.append(
                     (
-                        "((trg_double_tau35_mediumiso_hps==1) || (trg_double_tau35_tightiso_tightid==1) || (trg_double_tau_40mediso_tightid==1) || (trg_double_tau40_tightiso==1)) || ((pt_1>180)&&((trg_single_tau180_1==1))) || ((pt_2>180)&&(trg_single_tau180_1==1))",
+                        "((trg_double_tau35_mediumiso_hps==1) || (trg_double_tau35_tightiso_tightid==1) || (trg_double_tau40_mediumiso_tightid==1) || (trg_double_tau40_tightiso==1)) || ((pt_1>180)&&((trg_single_tau180_1==1))) || ((pt_2>180)&&(trg_single_tau180_1==1))",
                         "trg_selection",
                     ),
                 )
+                print("No triggers atm ...")
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="tt", cuts=cuts)

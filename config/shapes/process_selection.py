@@ -155,24 +155,18 @@ def lumi_weight(era):
 
 def MC_base_process_selection(channel, era):
     if channel == "em":
-        # TODO rename to
-        # isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
-        # idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
-        isoweight = ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight")
-        idweight = ("id_wgt_mu_1 * id_wgt_mu_2", "idweight")
+        isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
+        idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
         tauidweight = None
         trgweight = None
     elif channel == "et":
-        # TODO rename to
-        # isoweight = ("iso_wgt_ele_1", "isoweight")
-        # idweight = ("id_wgt_ele_1", "idweight")
-        isoweight = ("iso_wgt_mu_1", "isoweight")
-        idweight = ("id_wgt_mu_1", "idweight")
+        isoweight = ("iso_wgt_ele_1", "isoweight")
+        idweight = ("id_wgt_ele_1", "idweight")
         tauidweight = (
             "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        trgweight = ("trg_wgt_single_ele32", "trgweight")
+        trgweight = ("trg_wgt_single_ele32orele35", "trgweight")
     elif channel == "mt":
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
@@ -208,7 +202,8 @@ def MC_base_process_selection(channel, era):
         # prefiring_weight(era),  # only used in 2016 and 2017 per function definition.
         lumi_weight(era),
     ]
-    return Selection(name="MC base", weights=MC_base_process_weights)
+    # print("MC_base_process_weights:", [weight for weight in MC_base_process_weights if weight is not None])
+    return Selection(name="MC base", weights=[weight for weight in MC_base_process_weights if weight is not None])
 
 
 def dy_stitching_weight(era):
@@ -428,13 +423,13 @@ def ZTT_embedded_process_selection(channel, era):
         ztt_embedded_weights.extend(
             [
                 ("gen_match_1==3 && gen_match_2==5", "emb_veto"),
-                ("iso_wgt_mu_1", "isoweight"),
-                ("id_wgt_mu_1", "idweight"),
-                ("1.0", "trgweight"),  # TODO replace with correct trigger weight
-                (
-                    "id_wgt_tau_vsJet_Tight_2",
-                    "taubyIsoIdWeight",
-                ),  # TODO replace with embedded tau id weight
+                ("iso_wgt_ele_1", "isoweight"),
+                ("id_wgt_ele_1", "idweight"),
+                ("trg_wgt_single_ele32orele35", "trgweight"),
+                # (
+                #     "id_wgt_tau_vsJet_Tight_2",
+                #     "taubyIsoIdWeight",
+                # ),  # TODO replace with embedded tau id weight
                 # tau_by_iso_id_weight(channel),
                 # triggerweight_emb(channel, era),
                 # fakemetweight_emb(channel, era),
@@ -463,8 +458,8 @@ def ZTT_embedded_process_selection(channel, era):
             [
                 # TODO trigger weights for em
                 ("(gen_match_1==3 && gen_match_2==4)", "emb_gen_match"),
-                ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
-                ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
+                ("iso_wgt_ele_1 * iso_wgt_mu_2", "isoweight"),
+                ("id_wgt_ele_1 * id_wgt_mu_2", "idweight"),
                 # triggerweight_emb(channel, era),
             ]
         )
