@@ -41,6 +41,11 @@ def args_parser():
         action="store_true",
         help="if set, the files will be read via xrootd",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="if set, debug mode will be enabled",
+    )
     return parser.parse_args()
 
 
@@ -66,6 +71,8 @@ def convert_to_xrootd(path):
             "/storage/gridka-nrg/",
             "root://xrootd-cms.infn.it///store/user/",
         )
+    elif path.startswith("/ceph"):
+        return path
 
 
 def job_wrapper(args):
@@ -136,7 +143,7 @@ def friend_producer(
     return
 
 
-def generate_friend_trees(dataset, ntuples, nthreads, output_path, use_xrootd):
+def generate_friend_trees(dataset, ntuples, nthreads, output_path, use_xrootd, debug):
     print("Using {} threads".format(nthreads))
     arguments = [
         (
@@ -146,6 +153,7 @@ def generate_friend_trees(dataset, ntuples, nthreads, output_path, use_xrootd):
             parse_filepath(ntuple)["era"],
             parse_filepath(ntuple)["channel"],
             use_xrootd,
+            debug
         )
         for ntuple in ntuples
     ]
@@ -175,5 +183,5 @@ if __name__ == "__main__":
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)
-    generate_friend_trees(dataset, ntuples_wo_data, nthreads, output_path, args.xrootd)
+    generate_friend_trees(dataset, ntuples_wo_data, nthreads, output_path, args.xrootd, args.debug)
     print("Done")
