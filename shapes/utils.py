@@ -113,5 +113,6 @@ def get_nominal_datasets(era, channel, friend_directories, files, directory):
             channel + "_nominal",
             directory,
             [fdir for fdir in friend_directories[channel] if filter_friends(key, fdir)],
+            validate_samples=True
         )
     return datasets
