@@ -6,10 +6,11 @@ TAG=$4
 MODE=$5
 
 VARIABLES="m_vis"
+POSTFIX="-ML"
 ulimit -s unlimited
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
-output_shapes="control_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+output_shapes="tauid_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
 shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
 shapes_output_synced=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
@@ -87,6 +88,7 @@ echo "##########################################################################
 # if the output folder does not exist, create it
 if [ ! -d "$shapes_output" ]; then
     mkdir -p $shapes_output
+    mkdir -p "${shapes_output}_mm"
 fi
 
 if [[ $MODE == "CONTROL" ]]; then
@@ -112,6 +114,18 @@ if [[ $MODE == "LOCAL" ]]; then
         --control-plot-set ${VARIABLES} \
         --output-file $shapes_output
 fi
+
+if [[ $MODE == "CONTROLREGION" ]]; then
+    source utils/setup_root.sh
+    python shapes/produce_shapes.py --channels mm \
+        --directory $NTUPLES \
+        --mm-friend-directory $XSEC_FRIENDS \
+        --era $ERA --num-processes 3 --num-threads 8 \
+        --optimization-level 1 --skip-systematic-variations \
+        --special-analysis "TauID" \
+        --output-file "${shapes_output}_mm"
+fi
+
 if [[ $MODE == "CONDOR" ]]; then
     source utils/setup_root.sh
     echo "[INFO] Running on Condor"
@@ -155,6 +169,8 @@ if [[ $MODE == "SYNC" ]]; then
         --variable-selection ${VARIABLES} \
         -n 1
 
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+
     hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${ERA}-${CHANNEL}*.root
 
     exit 0
@@ -163,7 +179,6 @@ fi
 if [[ $MODE == "DATACARD" ]]; then
     source utils/setup_cmssw.sh
     # inputfile
-    POSTFIX="-ML"
     inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
     # for category in "pt_binned" "inclusive" "dm_binned"
     $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \

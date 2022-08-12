@@ -81,5 +81,11 @@ categorization = {
             ],
         )
         for x in categories["mt"]
+    ],
+    "mm": [
+        (
+            Selection(name="control_region", cuts=[("m_vis > 60 && m_vis < 120", "category_selection")]),
+            [ Histogram("m_vis", "m_vis",[60,120])],
+        )
     ]
 }
