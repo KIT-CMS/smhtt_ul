@@ -68,13 +68,11 @@ python shapes/produce_shapes.py --channels $CHANNEL \
     --control-plot-set ${VARIABLES} --skip-systematic-variations \
     --output-file $shapes_output
 
-
 echo "##############################################################################################"
 echo "#      Additional estimations                                      #"
 echo "##############################################################################################"
 
 bash ./shapes/do_estimations.sh 2018 ${shapes_output}.root 1
-
 
 echo "##############################################################################################"
 echo "#     plotting                                      #"
