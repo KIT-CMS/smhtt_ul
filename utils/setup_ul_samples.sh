@@ -21,6 +21,7 @@ NTUPLES_2017="$BASEDIR"
 # Samples Run2018
 NTUPLES_2018="$BASEDIR"
 XSEC_FRIENDS_2018="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/friends/xsec"
+FF_FRIENDS_2018="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/friends/FakeFactors"
 # SVFit_Friends_2018="$BASEDIR/2018/friends/SVFit/"
 # FF_Friends_2018="$BASEDIR/2018/friends/FakeFactors_v5/"
 # NLOReweighting_Friends_2018="$BASEDIR/2018/friends/NLOReweighting/"
@@ -44,7 +45,7 @@ then
     NTUPLES=$NTUPLES_2018
     XSEC_FRIENDS=$XSEC_FRIENDS_2018
     # SVFit_Friends=$SVFit_Friends_2018
-    # FF_Friends=$FF_Friends_2018
+    FF_FRIENDS=$FF_FRIENDS_2018
     # NLOReweighting_Friends=$NLOReweighting_Friends_2018
 fi
 
