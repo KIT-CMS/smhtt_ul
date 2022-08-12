@@ -223,6 +223,13 @@ def parse_arguments():
         help="Directories arranged as Artus output and containing a friend tree for em.",
     )
     parser.add_argument(
+        "--mm-friend-directory",
+        type=str,
+        default=[],
+        nargs="+",
+        help="Directories arranged as Artus output and containing a friend tree for mm.",
+    )
+    parser.add_argument(
         "--optimization-level",
         default=2,
         type=int,
@@ -716,6 +723,7 @@ def main(args):
         "mt": args.mt_friend_directory,
         "tt": args.tt_friend_directory,
         "em": args.em_friend_directory,
+        "mm": args.mm_friend_directory,
     }
     if ".root" in args.output_file:
         output_file = args.output_file
@@ -949,7 +957,7 @@ def main(args):
                 um,
                 processes={"ztt", "zj", "zl", "w"} & procS | signalsS,
                 datasets=nominals[era]["units"][channel],
-                variations=[recoil_resolution, recoil_response],
+                variations=[recoil_resolution, recoil_response, met_unclustered],
                 enable_check=do_check,
             )
             # TODO add zpt reweighting
@@ -990,25 +998,22 @@ def main(args):
                     ],
                     enable_check=do_check,
                 )
-                # TODO add emb ES variations
-                # um.book(
-                #     [
-                #         unit
-                #         for d in embS
-                #         for unit in nominals[era]["units"][channel][d]
-                #     ],
-                #     [
-                #         *emb_tau_es_3prong,
-                #         *emb_tau_es_3prong1pizero,
-                #         *emb_tau_es_1prong,
-                #         *emb_tau_es_1prong1pizero,
-                #         *tau_es_3prong,
-                #         *tau_es_3prong1pizero,
-                #         *tau_es_1prong,
-                #         *tau_es_1prong1pizero,
-                #     ],
-                #     enable_check=args.enable_booking_check,
-                # )
+                book_histograms(
+                    um,
+                    processes=embS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        emb_tau_es_3prong,
+                        emb_tau_es_3prong1pizero,
+                        emb_tau_es_1prong,
+                        emb_tau_es_1prong1pizero,
+                        tau_es_3prong,
+                        tau_es_3prong1pizero,
+                        tau_es_1prong,
+                        tau_es_1prong1pizero,
+                    ],
+                    enable_check=do_check,
+                )
             if channel in ["et", "mt"]:
                 book_histograms(
                     um,
@@ -1042,7 +1047,7 @@ def main(args):
 
                 book_histograms(
                     um,
-                    processes= leptonFakesS | trueTauBkgS, #TODO add embS here
+                    processes=leptonFakesS | trueTauBkgS,  # TODO add embS here
                     datasets=nominals[era]["units"][channel],
                     variations=[
                         ff_variations_tau_es_lt,
@@ -1239,5 +1244,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.INFO)
+    setup_logging(log_file, logging.DEBUG)
     main(args)

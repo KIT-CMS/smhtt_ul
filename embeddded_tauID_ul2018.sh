@@ -66,7 +66,7 @@ if [[ $MODE == "XSEC" ]]; then
     echo "##############################################################################################"
     echo "#      Checking xsec friends directory                                                       #"
     echo "##############################################################################################"
-
+    python3 friends/build_friend_tree.py --basepath $BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
     # if the xsec friends directory does not exist, create it
     if [ ! -d "$XSEC_FRIENDS" ]; then
         mkdir -p $XSEC_FRIENDS
