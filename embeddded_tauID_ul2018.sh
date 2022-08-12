@@ -105,7 +105,7 @@ then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $XSEC_FRIENDS  \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS $FF_FRIENDS \
         --era $ERA --num-processes 2 --num-threads 8 \
         --optimization-level 1 --skip-systematic-variations \
         --special-analysis "TauID" \

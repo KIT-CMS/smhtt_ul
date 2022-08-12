@@ -148,17 +148,17 @@ from config.shapes.variations import (
 
 # TODO add jetfake uncertainties
 # # jet fake uncertainties
-# from config.shapes.variations import (
-#     ff_variations_lt,
-#     ff_variations_tt,
-#     ff_variations_tt_mcl,
-#     qcd_variations_em,
-#     wfakes_tt,
-#     wfakes_w_tt,
-#     ff_variations_tau_es_lt,
-#     ff_variations_tau_es_tt,
-#     ff_variations_tau_es_tt_mcl,
-# )
+from config.shapes.variations import (
+    ff_variations_lt,
+    # ff_variations_tt,
+    # ff_variations_tt_mcl,
+    # qcd_variations_em,
+    wfakes_tt,
+    wfakes_w_tt,
+    ff_variations_tau_es_lt,
+    # ff_variations_tau_es_tt,
+    # ff_variations_tau_es_tt_mcl,
+)
 
 from config.shapes.control_binning import control_binning
 
@@ -768,8 +768,8 @@ def main(args):
             "zh",
             "wh",
         }
-        if "et" in args.channels:
-            procS = procS - {"w"}
+        # if "et" in args.channels:
+        #     procS = procS - {"w"}
         # procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
         #          "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
         #         | set("ggh{}".format(mass) for mass in susy_masses[era]["ggH"]) \
@@ -992,25 +992,35 @@ def main(args):
                     enable_check=do_check,
                 )
                 # TODO add fake factors
-                # book_histograms(
-                #     um,
-                #     processes=dataS,
-                #     datasets=nominals[era]["units"][channel],
-                #     variations=[
-                #         ff_variations_lt,
-                #     ],
-                #     enable_check=do_check,
-                # )
+                book_histograms(
+                    um,
+                    processes=dataS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        ff_variations_lt,
+                    ],
+                    enable_check=do_check,
+                )
 
-                # book_histograms(
-                #     um,
-                #     processes=embS | leptonFakesS | trueTauBkgS,
-                #     datasets=nominals[era]["units"][channel],
-                #     variations=[
-                #         ff_variations_lt,
-                #     ],
-                #     enable_check=do_check,
-                # )
+                book_histograms(
+                    um,
+                    processes=embS | leptonFakesS | trueTauBkgS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        ff_variations_lt,
+                    ],
+                    enable_check=do_check,
+                )
+
+                book_histograms(
+                    um,
+                    processes= leptonFakesS | trueTauBkgS, #TODO add embS here
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        ff_variations_tau_es_lt,
+                    ],
+                    enable_check=do_check,
+                )
                 # TODO add embedded decay mode weights
                 # book_histograms(
                 #     um,
@@ -1201,5 +1211,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.DEBUG)
+    setup_logging(log_file, logging.INFO)
     main(args)

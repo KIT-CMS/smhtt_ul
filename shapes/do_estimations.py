@@ -345,6 +345,9 @@ def abcd_estimation(
     logger.debug("variation: %s", variation)
     logger.debug("is_embedding: %s", is_embedding)
     logger.debug("transposed: %s", transposed)
+    if variation != "Nominal" and not variation.startswith("abcd_"):
+        # add abcd_ on the front of the variation
+        variation = "abcd_" + variation
     if is_embedding:
         procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
         if "em" in channel:
@@ -504,9 +507,9 @@ def abcd_estimation(
     )
     base_hist.Scale(extrapolation_factor)
     variation = (
-        variation.replace("same_sign_anti_iso", "same_sign")
+        variation.replace("abcd_same_sign_anti_iso", "abcd_same_sign")
         if transposed
-        else variation.replace("same_sign_anti_iso", "anti_iso")
+        else variation.replace("abcd_same_sign_anti_iso", "abcd_anti_iso")
     )
     variation_name = (
         base_hist.GetName()
@@ -883,26 +886,26 @@ def main(args):
                 qqh_procs[channel] = {category: {variable: {variation: [process]}}}
 
     # Loop over available ff inputs and do the estimations
-    # logger.info("Starting estimations for fake factors and their variations")
-    # logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
-    # for ch in ff_inputs:
-    #     for cat in ff_inputs[ch]:
-    #         logger.info("Do estimation for category %s", cat)
-    #         for var in ff_inputs[ch][cat]:
-    #             for variation in ff_inputs[ch][cat][var]:
-    #                estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation)
-    #                estimated_hist.Write()
-    #                # estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
-    #                # estimated_hist.Write()
-    #             for variation, scale in zip(["CMS_ff_total_sub_syst_Channel_EraUp",
-    #                                          "CMS_ff_total_sub_syst_Channel_EraDown"], [0.9, 1.1]):
-    #                 estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
-    #                                                         variation=variation, sub_scale=scale)
-    #                 estimated_hist.Write()
-    #                 # estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
-    #                 #                                         variation=variation, is_embedding=False,
-    #                 #                                         sub_scale=scale)
-    #                 # estimated_hist.Write()
+    logger.info("Starting estimations for fake factors and their variations")
+    logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
+    for ch in ff_inputs:
+        for cat in ff_inputs[ch]:
+            logger.info("Do estimation for category %s", cat)
+            for var in ff_inputs[ch][cat]:
+                for variation in ff_inputs[ch][cat][var]:
+                   estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation)
+                   estimated_hist.Write()
+                   # estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
+                   # estimated_hist.Write()
+                for variation, scale in zip(["CMS_ff_total_sub_syst_Channel_EraUp",
+                                             "CMS_ff_total_sub_syst_Channel_EraDown"], [0.9, 1.1]):
+                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
+                                                            variation=variation, sub_scale=scale)
+                    estimated_hist.Write()
+                    # estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
+                    #                                         variation=variation, is_embedding=False,
+                    #                                         sub_scale=scale)
+                    # estimated_hist.Write()
     logger.info("Starting estimations for the QCD mulitjet process.")
     logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
     for channel in qcd_inputs:
