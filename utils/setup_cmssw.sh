@@ -5,6 +5,6 @@ export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
 source $VO_CMS_SW_DIR/cmsset_default.sh
 
 # pushd CMSSW_10_2_21/src
-pushd CMSSW_10_2_16_UL/src
+pushd CMSSW_10_2_28/src
 eval `scramv1 runtime -sh`
 popd
