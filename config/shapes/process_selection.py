@@ -183,7 +183,11 @@ def MC_base_process_selection(channel, era):
             "taubyIsoIdWeight",
         )
         trgweight = None
-
+    elif channel == "mm":
+        isoweight = ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight")
+        idweight = ("id_wgt_mu_1 * id_wgt_mu_2", "idweight")
+        tauidweight = None
+        trgweight = ("1", "trgweight")
     else:
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [

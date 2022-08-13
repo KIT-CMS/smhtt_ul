@@ -315,30 +315,6 @@ def get_analysis_units(
         categorization=categorization,
         channel=channel,
     )
-    # Embedding
-    add_process(
-        analysis_units,
-        name="emb",
-        dataset=datasets["EMB"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            ZTT_embedded_process_selection(channel, era),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="ztt",
-        dataset=datasets["DY"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_process_selection(channel, era),
-            ZTT_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
     add_process(
         analysis_units,
         name="zl",
@@ -347,30 +323,6 @@ def get_analysis_units(
             channel_selection(channel, era, special_analysis),
             DY_process_selection(channel, era),
             ZL_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="zj",
-        dataset=datasets["DY"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_process_selection(channel, era),
-            ZJ_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="ttt",
-        dataset=datasets["TT"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            TT_process_selection(channel, era),
-            TTT_process_selection(channel),
         ],
         categorization=categorization,
         channel=channel,
@@ -389,30 +341,6 @@ def get_analysis_units(
     )
     add_process(
         analysis_units,
-        name="ttj",
-        dataset=datasets["TT"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            TT_process_selection(channel, era),
-            TTJ_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="vvt",
-        dataset=datasets["VV"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            VV_process_selection(channel, era),
-            VVT_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
         name="vvl",
         dataset=datasets["VV"],
         selections=[
@@ -423,62 +351,136 @@ def get_analysis_units(
         categorization=categorization,
         channel=channel,
     )
-    add_process(
-        analysis_units,
-        name="vvj",
-        dataset=datasets["VV"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            VV_process_selection(channel, era),
-            VVJ_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="ggh",
-        dataset=datasets["ggH"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            ggH125_process_selection(channel, era),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="qqh",
-        dataset=datasets["qqH"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            qqH125_process_selection(channel, era),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="wh",
-        dataset=datasets["WH"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            WH_process_selection(channel, era),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="zh",
-        dataset=datasets["ZH"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            ZH_process_selection(channel, era),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
+    if channel != "mm":
+        # Embedding
+        add_process(
+            analysis_units,
+            name="emb",
+            dataset=datasets["EMB"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                ZTT_embedded_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+
+        add_process(
+            analysis_units,
+            name="ztt",
+            dataset=datasets["DY"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                DY_process_selection(channel, era),
+                ZTT_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="vvt",
+            dataset=datasets["VV"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                VV_process_selection(channel, era),
+                VVT_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ttt",
+            dataset=datasets["TT"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                TT_process_selection(channel, era),
+                TTT_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="zj",
+            dataset=datasets["DY"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                DY_process_selection(channel, era),
+                ZJ_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="vvj",
+            dataset=datasets["VV"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                VV_process_selection(channel, era),
+                VVJ_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ttj",
+            dataset=datasets["TT"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                TT_process_selection(channel, era),
+                TTJ_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ggh",
+            dataset=datasets["ggH"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                ggH125_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="qqh",
+            dataset=datasets["qqH"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                qqH125_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="wh",
+            dataset=datasets["WH"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                WH_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="zh",
+            dataset=datasets["ZH"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                ZH_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
     # "tth"  : [Unit(
     #             datasets["ttH"], [
     #                 channel_selection(channel, era, special_analysis),
@@ -506,18 +508,18 @@ def get_analysis_units(
     #                 category_selection], actions) for category_selection, actions in categorization[channel]],
     # data
 
-    # if channel != "et":
-    add_process(
-        analysis_units,
-        name="w",
-        dataset=datasets["W"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            W_process_selection(channel, era),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
+    if channel != "et":
+        add_process(
+            analysis_units,
+            name="w",
+            dataset=datasets["W"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                W_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
     return analysis_units
 
 
@@ -786,7 +788,14 @@ def main(args):
         #         | set("bbh{}".format(mass) for mass in susy_masses[era]["bbH"])
     else:
         procS = args.process_selection
-
+    if args.channels == ["mm"]:
+        procS = {
+            "data",
+            "zl",
+            "ttl",
+            "vvl",
+            "w",
+        }
     print("Processes to be computed: ", procS)
     dataS = {"data"} & procS
     embS = {"emb"} & procS
@@ -915,6 +924,14 @@ def main(args):
                 variations=[],
                 enable_check=do_check,
             )
+        elif channel == "mm":
+            book_histograms(
+                um,
+                processes=procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[],
+                enable_check=do_check,
+            )
         ##################################
         # SYSTEMATICS
         ############################
@@ -924,20 +941,20 @@ def main(args):
             # Book variations common to all channels.
             # um.book([unit for d in {"ggh"} & procS for unit in nominals[era]['units'][channel][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
             # um.book([unit for d in {"qqh"} & procS for unit in nominals[era]['units'][channel][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
-            book_histograms(
-                um,
-                processes={"ggh"} & procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[ggh_acceptance],
-                enable_check=do_check,
-            )
-            book_histograms(
-                um,
-                processes={"qqh"} & procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[qqh_acceptance],
-                enable_check=do_check,
-            )
+            # book_histograms(
+            #     um,
+            #     processes={"ggh"} & procS,
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[ggh_acceptance],
+            #     enable_check=do_check,
+            # )
+            # book_histograms(
+            #     um,
+            #     processes={"qqh"} & procS,
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[qqh_acceptance],
+            #     enable_check=do_check,
+            # )
             book_histograms(
                 um,
                 processes=simulatedProcsDS[channel],
@@ -1244,5 +1261,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.DEBUG)
+    setup_logging(log_file, logging.INFO)
     main(args)
