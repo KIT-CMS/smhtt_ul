@@ -68,7 +68,7 @@ for fitfile in files:
 pt_binning = ["20to25","25to30","30to35","35to40","Gt40"]
 dm_binning = ["DM0", "DM1", "DM10_11"]
 pt_labels = ["20-25", "25-30", "30-35", "35-40", ">40"]
-dm_labels = ["0", "1", "10 & 11"]
+dm_labels = ["1 Prong", "1 Prong + Pizero", "3 Prong"]
 
 # first the pt_binned plot
 print("[INFO] Plotting pt binned SF.")
@@ -97,7 +97,7 @@ hep.cms.label(ax=ax, label=f"TauID {args.wp} WP", data=True, lumi="59.83", fonts
 ax.set_xlabel(r"$p_{T}(\tau_h)$ [GeV]")
 ax.set_ylabel("Correction Factor")
 ax.set_xticks(x, minor=False)
-ax.set_xticklabels(pt_labels, rotation = 45, ha="center")
+ax.set_xticklabels(pt_labels, rotation = 0, ha="center")
 ax.set_ylim(0.0, 1.5)
 ax.set_xlim(-0.5, len(pt_binning)-0.5)
 # set the default fontsize
@@ -132,7 +132,7 @@ hep.cms.label(ax=ax, label=f"TauID {args.wp} WP", data=True, lumi="59.83", fonts
 ax.set_xlabel(r"$\tau_h$ decay mode")
 ax.set_ylabel("Correction Factor")
 ax.set_xticks(x, minor=False)
-ax.set_xticklabels(dm_labels, rotation = 45, ha="center")
+ax.set_xticklabels(dm_labels, rotation = 0, ha="center")
 ax.set_ylim(0.0, 1.5)
 ax.set_xlim(-0.5, len(dm_binning)-0.5)
 # set the default fontsize

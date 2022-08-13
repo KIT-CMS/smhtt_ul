@@ -308,8 +308,8 @@ def main(args):
                 ""
             )  # otherwise number labels are not drawn on axis
         plot.subplot(0).setYlabel("N_{events}")
-
-        plot.subplot(2).setYlabel("")
+        plot.subplot(2).setXlabel("m_{vis} [GeV]")
+        plot.subplot(2).setYlabel("Ratio")
         # plot.scaleXLabelSize(0.8)
         # plot.scaleYTitleSize(0.8)
         plot.scaleYLabelSize(0.8)

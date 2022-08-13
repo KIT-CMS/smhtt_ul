@@ -276,12 +276,12 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
             mkdir -p output/postfitplots/
         fi
         echo "[INFO] Postfits plots for category $CATEGORY"
-        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/ --prefit
-        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/
-        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/ --prefit
-        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/
+        python3 plotting/plot_shapes_tauID.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/ --prefit
+        python3 plotting/plot_shapes_tauID.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/
+        python3 plotting/plot_shapes_tauID.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/ --prefit
+        python3 plotting/plot_shapes_tauID.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/
     done
-    python3 plotting/plot_TauID_sf.py --input output/$datacard_output --output output/postfitplots/ --wp ${WP}
+    python3 plotting/plot_TauID_sf.py --input output/$datacard_output/ --output output/postfitplots/ --wp ${WP}
     exit 0
 fi
 
@@ -302,4 +302,5 @@ if [[ $MODE == "IMPACTS" ]]; then
     plotImpacts.py -i tauid_${WP}_impacts.json -o tauid_${WP}_impacts
     # cleanup the fit files
     rm higgsCombine*.root
+    exit 0
 fi
