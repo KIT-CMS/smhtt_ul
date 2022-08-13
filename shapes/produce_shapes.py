@@ -941,6 +941,7 @@ def main(args):
             # Book variations common to all channels.
             # um.book([unit for d in {"ggh"} & procS for unit in nominals[era]['units'][channel][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
             # um.book([unit for d in {"qqh"} & procS for unit in nominals[era]['units'][channel][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
+            # TODO add signal uncertainties
             # book_histograms(
             #     um,
             #     processes={"ggh"} & procS,
@@ -974,9 +975,17 @@ def main(args):
                 um,
                 processes={"ztt", "zj", "zl", "w"} & procS | signalsS,
                 datasets=nominals[era]["units"][channel],
-                variations=[recoil_resolution, recoil_response, met_unclustered],
+                variations=[recoil_resolution, recoil_response],
                 enable_check=do_check,
             )
+            book_histograms(
+                um,
+                processes=simulatedProcsDS[channel],
+                datasets=nominals[era]["units"][channel],
+                variations=[met_unclustered],
+                enable_check=do_check,
+            )
+
             # TODO add zpt reweighting
             # book_histograms(
             #     um,
