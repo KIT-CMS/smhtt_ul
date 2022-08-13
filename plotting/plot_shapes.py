@@ -157,6 +157,7 @@ def main(args):
         "7": "DM0",
         "8": "DM1",
         "9": "DM10_11",
+        "100": "Control Region"
     }
     if args.linear:
         split_value = 0
@@ -166,7 +167,7 @@ def main(args):
         else:
             split_value = 101
 
-    split_dict = {c: split_value for c in ["et", "mt", "tt", "em"]}
+    split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
 
     bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
     if not args.fake_factor and args.embedding:
@@ -214,6 +215,8 @@ def main(args):
             categories = list(category_dict.keys())[
                 list(category_dict.values()).index(catname)
             ]
+        if catname == "100" and channel == "mm":
+            categories =["100"]
         # categories = set(channel_categories[channel]).intersection(
         #     set([args.single_category])
         # )
@@ -226,6 +229,8 @@ def main(args):
             bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
         elif channel == "em" and not args.embedding:
             bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
+        elif channel == "mm":
+            bkg_processes = ["VVL", "W", "TTL", "ZL"]
         else:
             bkg_processes = [b for b in all_bkg_processes]
         legend_bkg_processes = copy.deepcopy(bkg_processes)

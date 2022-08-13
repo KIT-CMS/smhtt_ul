@@ -15,6 +15,7 @@ CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
 shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
 shapes_output_synced=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
+shapes_rootfile_mm=${shapes_output}_mm.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
 # Datacard Setup
@@ -108,7 +109,7 @@ if [[ $MODE == "LOCAL" ]]; then
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $FRIENDS \
-        --era $ERA --num-processes 3 --num-threads 8 \
+        --era $ERA --num-processes 4 --num-threads 12 \
         --optimization-level 1 \
         --special-analysis "TauID" \
         --control-plot-set ${VARIABLES} \
@@ -125,6 +126,7 @@ if [[ $MODE == "CONTROLREGION" ]]; then
         --special-analysis "TauID" \
         --output-file "${shapes_output}_mm"
 fi
+
 
 if [[ $MODE == "CONDOR" ]]; then
     source utils/setup_root.sh
@@ -169,12 +171,21 @@ if [[ $MODE == "SYNC" ]]; then
         --variable-selection ${VARIABLES} \
         -n 1
 
-    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+    python shapes/convert_to_synced_shapes.py -e $ERA \
+        -i "${shapes_rootfile_mm}" \
+        -o "${shapes_output_synced}_mm" \
+        --variable-selection ${VARIABLES} \
+        -n 1
 
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
     hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${ERA}-${CHANNEL}*.root
+
+    inputfile="htt_mm.inputs-sm-Run${ERA}${POSTFIX}.root"
+    hadd -f $shapes_output_synced/$inputfile ${shapes_output_synced}_mm/${ERA}-mm-*.root
 
     exit 0
 fi
+
 
 if [[ $MODE == "DATACARD" ]]; then
     source utils/setup_cmssw.sh
@@ -184,7 +195,7 @@ if [[ $MODE == "DATACARD" ]]; then
     $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \
         --base_path=$PWD \
         --input_folder_mt=$shapes_output_synced \
-        --input_folder_mm="/" \
+        --input_folder_mm=$shapes_output_synced \
         --real_data=true \
         --classic_bbb=false \
         --binomial_bbb=false \
@@ -192,7 +203,7 @@ if [[ $MODE == "DATACARD" ]]; then
         --embedding=1 \
         --verbose=true \
         --postfix=$POSTFIX \
-        --use_control_region=false \
+        --use_control_region=true \
         --auto_rebin=true \
         --categories="all" \
         --era=$ERA \
@@ -254,7 +265,6 @@ fi
 
 if [[ $MODE == "PLOT-POSTFIT" ]]; then
     source utils/setup_root.sh
-    i=1
     for RESDIR in output/$datacard_output/htt_mt_*; do
         WORKSPACE=${RESDIR}/workspace.root
 
@@ -268,7 +278,27 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
         echo "[INFO] Postfits plots for category $CATEGORY"
         python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/ --prefit
         python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/
-        i=$((i + 1))
+        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/ --prefit
+        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/
     done
     exit 0
+fi
+
+if [[ $MODE == "IMPACTS" ]]; then
+    source utils/setup_cmssw.sh
+    WORKSPACE=output/$datacard_output/htt_mt_Inclusive/workspace.root
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+                --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+                --doInitialFit --robustFit 1 \
+                --parallel 16
+
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+                --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+                --robustFit 1 --doFits \
+                --parallel 16
+
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o tauid_${WP}_impacts.json
+    plotImpacts.py -i tauid_${WP}_impacts.json -o tauid_${WP}_impacts
+    # cleanup the fit files
+    rm higgsCombine*.root
 fi
