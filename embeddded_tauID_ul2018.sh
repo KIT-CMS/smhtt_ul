@@ -281,6 +281,7 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
         python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/ --prefit
         python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/
     done
+    python3 plotting/plot_TauID_sf.py --input output/$datacard_output --output output/postfitplots/ --wp ${WP}
     exit 0
 fi
 
