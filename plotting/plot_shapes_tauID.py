@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import Dumbledraw.dumbledraw as dd
 import Dumbledraw.rootfile_parser as rootfile_parser
 import Dumbledraw.styles as styles
