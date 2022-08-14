@@ -10,17 +10,19 @@ POSTFIX="-ML"
 ulimit -s unlimited
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
-output_shapes="tauid_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
-CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
-shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
-shapes_output_synced=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
+# Datacard Setup
+WP="tight"
+datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+
+output_shapes="tauid_shapes-${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+CONDOR_OUTPUT=output/condor_shapes/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
+shapes_output=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
+shapes_output_synced=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
 shapes_rootfile_mm=${shapes_output}_mm.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
-# Datacard Setup
-WP="tight"
-datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+
 
 # print the paths to be used
 echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
@@ -154,7 +156,9 @@ if [[ $MODE == "SYNC" ]]; then
     echo "#     plotting                                      #"
     echo "##############################################################################################"
 
-    python3 plotting/plot_shapes_tauID.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL} --embedding --categories ${categories_string%,}
+    mkdir -p control_plots_tauid/${WP}/
+
+    python3 plotting/plot_shapes_tauID.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL} --embedding --categories ${categories_string%,} --output control_plots_tauid/${WP}/
 
     echo "##############################################################################################"
     echo "#     synced shapes                                      #"
@@ -273,13 +277,13 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
         FITFILE=${RESDIR}/fitDiagnostics.${ERA}.root
         # create output folder if it does not exist
         if [ ! -d "output/postfitplots/" ]; then
-            mkdir -p output/postfitplots/
+            mkdir -p output/postfitplots/${WP}
         fi
         echo "[INFO] Postfits plots for category $CATEGORY"
-        python3 plotting/plot_shapes_tauID.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/ --prefit
-        python3 plotting/plot_shapes_tauID.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/
-        python3 plotting/plot_shapes_tauID.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/ --prefit
-        python3 plotting/plot_shapes_tauID.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/${WP} --prefit
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/${WP}
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/${WP} --prefit
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/${WP}
     done
     python3 plotting/plot_TauID_sf.py --input output/$datacard_output/ --output output/postfitplots/ --wp ${WP}
     exit 0
@@ -302,5 +306,11 @@ if [[ $MODE == "IMPACTS" ]]; then
     plotImpacts.py -i tauid_${WP}_impacts.json -o tauid_${WP}_impacts
     # cleanup the fit files
     rm higgsCombine*.root
+    exit 0
+fi
+
+if [[ $MODE == "IMPACTS" ]]; then
+    source utils/setup_root.sh
+    python3 friends/create_xpog_json.py  --input output/$datacard_output/
     exit 0
 fi
