@@ -307,9 +307,6 @@ def parse_arguments():
 def get_analysis_units(
     channel, era, datasets, categorization, special_analysis, nn_shapes=False
 ):
-    print(f"Using the categorization {categorization[channel]}")
-    with open("generatorWeights.yaml", "r") as fi:
-        gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
     analysis_units = {}
 
     add_process(
@@ -822,7 +819,7 @@ def main(args):
             "vvl",
             "w",
         }
-    logger.info("Processes to be computed: ", procS)
+    logger.info(f"Processes to be computed: {procS}")
     dataS = {"data"} & procS
     embS = {"emb"} & procS
     jetFakesDS = {
@@ -1280,5 +1277,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.DEBUG)
+    setup_logging(log_file, logging.INFO)
     main(args)
