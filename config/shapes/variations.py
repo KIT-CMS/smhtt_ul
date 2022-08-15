@@ -309,6 +309,7 @@ tau_id_eff_lt = [
 # "CMS_eff_t_emb_highpT_500-inf_EraUp",
 # "CMS_eff_t_emb_highpT_500-inf_EraDown"
 
+# TODO add TauID variations for embedded
 emb_tau_id_eff_lt = [
     ReplaceVariable("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
     ReplaceVariable("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
@@ -837,8 +838,8 @@ prefiring = [
 ]
 
 zpt = [
-    SquareWeight("CMS_htt_dyShape_EraUp", "ZPtMassReweightWeight"),
-    RemoveWeight("CMS_htt_dyShape_EraDown", "ZPtMassReweightWeight"),
+    SquareWeight("CMS_htt_dyShape_EraUp", "zPtReweightWeight"),
+    RemoveWeight("CMS_htt_dyShape_EraDown", "zPtReweightWeight"),
 ]
 
 top_pt = [
