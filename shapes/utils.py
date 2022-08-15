@@ -79,7 +79,7 @@ def add_control_process(
 
 def book_histograms(manager, processes, datasets, variations=None, enable_check=False):
     logger.debug(f"Booking {processes}")
-    logger.debug(f"Datasets: {datasets}")
+    logger.debug(f"Datasets: {datasets.keys()}")
     if not isinstance(processes, set):
         processes = set(processes)
     unitlist = [unit for process in processes for unit in datasets[process]]
