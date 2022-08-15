@@ -25,6 +25,7 @@ from ntuple_processor.utils import Selection
 from config.shapes.channel_selection import channel_selection
 from config.shapes.file_names import files
 from config.shapes.process_selection import (
+    Data_base_process_selection,
     DY_process_selection,
     TT_process_selection,
     VV_process_selection,
@@ -311,7 +312,10 @@ def get_analysis_units(
         analysis_units,
         name="data",
         dataset=datasets["data"],
-        selections=channel_selection(channel, era, special_analysis),
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            Data_base_process_selection(era, channel),
+        ],
         categorization=categorization,
         channel=channel,
     )
@@ -691,19 +695,19 @@ def get_control_units(channel, era, datasets, special_analysis):
         variables=variable_set,
     )
 
-    # if channel != "et":
-    add_control_process(
-        control_units,
-        name="w",
-        dataset=datasets["W"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            W_process_selection(channel, era),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
+    if channel != "et":
+        add_control_process(
+            control_units,
+            name="w",
+            dataset=datasets["W"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                W_process_selection(channel, era),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        )
     return control_units
 
 
@@ -780,8 +784,8 @@ def main(args):
             "zh",
             "wh",
         }
-        # if "et" in args.channels:
-        #     procS = procS - {"w"}
+        if "et" in args.channels:
+            procS = procS - {"w"}
         # procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
         #          "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
         #         | set("ggh{}".format(mass) for mass in susy_masses[era]["ggH"]) \
@@ -986,14 +990,13 @@ def main(args):
                 enable_check=do_check,
             )
 
-            # TODO add zpt reweighting
-            # book_histograms(
-            #     um,
-            #     processes={"ztt", "zl", "zj"} & procS,
-            #     datasets=nominals[era]["units"][channel],
-            #     variations=[zpt],
-            #     enable_check=do_check,
-            # )
+            book_histograms(
+                um,
+                processes={"ztt", "zl", "zj"} & procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[zpt],
+                enable_check=do_check,
+            )
             book_histograms(
                 um,
                 processes={"ttt", "ttl", "ttj"} & procS,
@@ -1050,7 +1053,6 @@ def main(args):
                     ],
                     enable_check=do_check,
                 )
-                # TODO add fake factors
                 book_histograms(
                     um,
                     processes=dataS,
@@ -1152,7 +1154,6 @@ def main(args):
                     variations=[ele_fake_es],
                     enable_check=do_check,
                 )
-                # Todo add trigger efficiency
                 book_histograms(
                     um,
                     processes=simulatedProcsDS[channel],
@@ -1160,7 +1161,6 @@ def main(args):
                     variations=[trigger_eff_et],
                     enable_check=do_check,
                 )
-                # TODO add trigger efficiency for emb
                 book_histograms(
                     um,
                     processes=embS,
@@ -1270,5 +1270,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.INFO)
+    setup_logging(log_file, logging.DEBUG)
     main(args)

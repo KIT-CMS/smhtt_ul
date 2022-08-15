@@ -53,7 +53,7 @@ anti_iso_lt = ReplaceCutAndAddWeight(
     "tau_iso",
     Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
     # Weight("1.0", "fake_factor"),
-    Weight("ff2_nom", "fake_factor"),  # TODO no ff for now (later use ff2_nom here)
+    Weight("ff2_nom", "fake_factor"),
 )
 anti_iso_tt_mcl = ReplaceMultipleCutsAndAddWeight(
     "anti_iso",
@@ -68,16 +68,18 @@ anti_iso_tt_mcl = ReplaceMultipleCutsAndAddWeight(
     # Weight("1.0", "fake_factor"),
     Weight("ff2_nom", "fake_factor"),
 )
+
 anti_iso_tt = ReplaceCutAndAddWeight(
     "anti_iso",
     "tau_iso",
     Cut(
-        "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+        "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5))",
         "tau_anti_iso",
     ),
     # Weight("1.0", "fake_factor"),
     Weight("0.5 * ff1_nom * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * ff2_nom * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
 )
+
 
 wfakes_tt = ReplaceCut(
     "wfakes", "ff_veto", Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut")
@@ -376,7 +378,6 @@ zll_mt_fake_rate_down = [
 
 zll_mt_fake_rate = zll_mt_fake_rate_up + zll_mt_fake_rate_down
 
-# TODO add trigger up/Down shifts
 # # Trigger efficiency uncertainties.
 trigger_eff_mt = [
     ReplaceVariable("CMS_eff_trigger_mt_EraUp", "singleMuonTriggerSFUp"),
@@ -395,6 +396,7 @@ trigger_eff_et_emb = [
     ReplaceVariable("CMS_eff_trigger_emb_et_EraUp", "singleElectronTriggerSFUp"),
     ReplaceVariable("CMS_eff_trigger_emb_et_EraDown", "singleElectronTriggerSFDown"),
 ]
+# TODO cross triggers
 # trigger_eff_mt = [
 #     ReplaceWeight(
 #         "CMS_eff_trigger_mt_EraUp",
@@ -591,6 +593,7 @@ trigger_eff_et_emb = [
 #     ),
 # ]
 
+# TODO Tau Triggers
 # tau_trigger_eff_tt = [
 #     *[
 #         ReplaceWeight(

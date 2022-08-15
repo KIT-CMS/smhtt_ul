@@ -152,6 +152,12 @@ def lumi_weight(era):
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
 
+def Data_base_process_selection(channel, era):
+    if channel == "tt" and era == "2018":
+        return Selection(name="", cuts=["((trg_double_tau35_tightiso_tightid==1) || (trg_double_tau40_mediumiso_tightid==1))", "trg_extension"])
+    else:
+        return Selection(name="")
+
 
 def MC_base_process_selection(channel, era):
     if channel == "em":
@@ -233,7 +239,7 @@ def DY_process_selection(channel, era):
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
             ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
             # dy_stitching_weight(era),  # TODO add stitching weight
-            # ("zPtReweightWeight", "zPtReweightWeight"),
+            ("ZPtMassReweightWeight", "zPtReweightWeight"),
         ]
     )
     return Selection(name="DY", weights=DY_process_weights)
@@ -414,6 +420,7 @@ def ZTT_embedded_process_selection(channel, era):
                 ("iso_wgt_mu_1", "isoweight"),
                 ("id_wgt_mu_1", "idweight"),
                 ("trg_wgtsingle_mu24Ormu27", "trgweight"), # TODO fix naming
+                ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 # (
                 #     "id_wgt_tau_vsJet_Tight_2",
                 #     "taubyIsoIdWeight",
@@ -430,6 +437,7 @@ def ZTT_embedded_process_selection(channel, era):
                 ("iso_wgt_ele_1", "isoweight"),
                 ("id_wgt_ele_1", "idweight"),
                 ("trg_wgt_single_ele32orele35", "trgweight"),
+                ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 # (
                 #     "id_wgt_tau_vsJet_Tight_2",
                 #     "taubyIsoIdWeight",
