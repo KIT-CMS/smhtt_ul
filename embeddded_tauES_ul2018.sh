@@ -9,7 +9,7 @@ VARIABLES="m_vis"
 ulimit -s unlimited
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
-output_shapes="control_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+output_shapes="taues_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
 shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
 shapes_output_synced=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
@@ -17,8 +17,7 @@ shapes_rootfile=${shapes_output}.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
 # Datacard Setup
-WP="tight"
-datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_taues"
 
 # print the paths to be used
 echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
@@ -99,12 +98,26 @@ if [[ $MODE == "CONTROL" ]]; then
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $XSEC_FRIENDS $FF_FRIENDS \
-        --era $ERA --num-processes 2 --num-threads 8 \
+        --era $ERA --num-processes 1 --num-threads 8 \
         --optimization-level 1 --skip-systematic-variations \
         --special-analysis "TauES" \
         --control-plot-set ${VARIABLES} \
         --output-file $shapes_output
 fi
+
+if [[ $MODE == "LOCAL" ]]; then
+    source utils/setup_root.sh
+    python shapes/produce_shapes.py --channels $CHANNEL \
+        --directory $NTUPLES \
+        --${CHANNEL}-friend-directory $FRIENDS \
+        --era $ERA --num-processes 4 --num-threads 12 \
+        --optimization-level 1 \
+        --special-analysis "TauES" \
+        --control-plot-set ${VARIABLES} \
+        --output-file $shapes_output
+fi
+
+
 if [[ $MODE == "CONDOR" ]]; then
     source utils/setup_root.sh
     echo "[INFO] Running on Condor"

@@ -11,6 +11,9 @@ from shapes.utils import (
     book_histograms,
     add_control_process,
     get_nominal_datasets,
+    filter_friends,
+    add_tauES_datasets,
+    book_tauES_histograms,
 )
 from ntuple_processor.variations import ReplaceVariable
 from ntuple_processor import Histogram
@@ -19,6 +22,7 @@ from ntuple_processor import (
     UnitManager,
     GraphManager,
     RunManager,
+    dataset_from_crownoutput,
 )
 from ntuple_processor.utils import Selection
 
@@ -764,6 +768,24 @@ def main(args):
                 categorization,
                 special_analysis,
             )
+        if special_analysis == "TauES":
+            additional_emb_procS = set()
+            tauESvariations = [-1.2 + 0.05 * i for i in range(0, 47)]
+            add_tauES_datasets(
+                era,
+                channel,
+                friend_directories,
+                files,
+                args.directory,
+                nominals,
+                tauESvariations,
+                [
+                    channel_selection(channel, era, special_analysis),
+                    ZTT_embedded_process_selection(channel, era),
+                ],
+                categorization,
+                additional_emb_procS,
+            )
 
     if args.process_selection is None:
         procS = {
@@ -800,7 +822,7 @@ def main(args):
             "vvl",
             "w",
         }
-    print("Processes to be computed: ", procS)
+    logger.info("Processes to be computed: ", procS)
     dataS = {"data"} & procS
     embS = {"emb"} & procS
     jetFakesDS = {
@@ -838,25 +860,13 @@ def main(args):
             enable_check=do_check,
         )
         if channel == "mt" and special_analysis == "TauES":
-            # to special booking here
             logger.info("Booking TauES")
-            tauESvariations = [-2.4 + 0.05 * i for i in range(0, 96)]
-            variations = []
-            for tauESvariation in tauESvariations:
-                name = (
-                    str(round(tauESvariation, 2))
-                    .replace("-", "minus")
-                    .replace(".", "p")
-                )
-                variations.append(
-                    ReplaceVariable(f"EMBtauESshift_{name}", f"EMBtauESshift_{name}")
-                )
-            book_histograms(
+            book_tauES_histograms(
                 um,
-                processes=embS,
-                datasets=nominals[era]["units"][channel],
-                variations=[same_sign, anti_iso_lt, variations],
-                enable_check=do_check,
+                additional_emb_procS,
+                nominals[era]["units"][channel],
+                [same_sign, anti_iso_lt],
+                do_check,
             )
         else:
             book_histograms(
