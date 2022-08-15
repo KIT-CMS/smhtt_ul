@@ -94,13 +94,13 @@ def replace_negative_entries_and_renormalize(histogram, tolerance):
         )
         raise Exception
 
-    if norm_all < 0.0:
-        logger.fatal(
-            "Aborted renormalization because initial normalization is negative: %f. Check histogram %s ",
-            norm_all,
-            histogram.GetName(),
-        )
-        raise Exception
+    # if norm_all < 0.0:
+    #     logger.fatal(
+    #         "Aborted renormalization because initial normalization is negative: %f. Check histogram %s ",
+    #         norm_all,
+    #         histogram.GetName(),
+    #     )
+    #     raise Exception
 
     if abs(norm_all - norm_positive) > tolerance * norm_all:
         logger.warning(
@@ -233,6 +233,8 @@ def qcd_estimation(
         procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
         if "em" in channel:
             procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
+        elif "et" in channel:
+            procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ"]
     else:
         procs_to_subtract = [
             "ZTT",
@@ -248,6 +250,8 @@ def qcd_estimation(
         ]
         if "em" in channel:
             procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
+        elif "et" in channel:
+            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
 
     logger.debug(
         "Trying to get object {}".format(
@@ -893,19 +897,21 @@ def main(args):
             logger.info("Do estimation for category %s", cat)
             for var in ff_inputs[ch][cat]:
                 for variation in ff_inputs[ch][cat][var]:
-                   estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation)
-                   estimated_hist.Write()
-                   # estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
-                   # estimated_hist.Write()
+                    if "scale_t" in variation:
+                        continue
+                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation)
+                    estimated_hist.Write()
+                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
+                    estimated_hist.Write()
                 for variation, scale in zip(["CMS_ff_total_sub_syst_Channel_EraUp",
                                              "CMS_ff_total_sub_syst_Channel_EraDown"], [0.9, 1.1]):
                     estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
                                                             variation=variation, sub_scale=scale)
                     estimated_hist.Write()
-                    # estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
-                    #                                         variation=variation, is_embedding=False,
-                    #                                         sub_scale=scale)
-                    # estimated_hist.Write()
+                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
+                                                            variation=variation, is_embedding=False,
+                                                            sub_scale=scale)
+                    estimated_hist.Write()
     logger.info("Starting estimations for the QCD mulitjet process.")
     logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
     for channel in qcd_inputs:

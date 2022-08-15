@@ -309,7 +309,7 @@ if [[ $MODE == "IMPACTS" ]]; then
     exit 0
 fi
 
-if [[ $MODE == "IMPACTS" ]]; then
+if [[ $MODE == "JSON" ]]; then
     source utils/setup_root.sh
     python3 friends/create_xpog_json.py  --input output/$datacard_output/
     exit 0
