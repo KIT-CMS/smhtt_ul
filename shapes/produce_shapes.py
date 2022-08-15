@@ -1002,7 +1002,7 @@ def main(args):
 
             book_histograms(
                 um,
-                processes={"ztt", "zl", "zj"} & procS,
+                processes={"ztt", "zl", "zj"},
                 datasets=nominals[era]["units"][channel],
                 variations=[zpt],
                 enable_check=do_check,
@@ -1085,14 +1085,14 @@ def main(args):
 
                 book_histograms(
                     um,
-                    processes=leptonFakesS | trueTauBkgS,  # TODO add embS here
+                    processes=leptonFakesS | trueTauBkgS | embS,
                     datasets=nominals[era]["units"][channel],
                     variations=[
                         ff_variations_tau_es_lt,
                     ],
                     enable_check=do_check,
                 )
-                # TODO add embedded decay mode weights
+                # TODO add embedded decay mode weights and tau ID variations
                 # book_histograms(
                 #     um,
                 #     processes=embS,
