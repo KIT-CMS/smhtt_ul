@@ -152,11 +152,11 @@ def lumi_weight(era):
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
 
-def Data_base_process_selection(channel, era):
-    if channel == "tt" and era == "2018":
-        return Selection(name="", cuts=["((trg_double_tau35_tightiso_tightid==1) || (trg_double_tau40_mediumiso_tightid==1))", "trg_extension"])
-    else:
-        return Selection(name="")
+# def Data_base_process_selection(channel, era):
+#     if channel == "tt" and era == "2018":
+#         return Selection(name="", cuts=["((trg_double_tau35_tightiso_tightid==1) || (trg_double_tau40_mediumiso_tightid==1))", "trg_extension"])
+#     else:
+#         return Selection(name="")
 
 
 def MC_base_process_selection(channel, era):

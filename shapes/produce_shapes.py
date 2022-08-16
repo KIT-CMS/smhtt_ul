@@ -29,7 +29,7 @@ from ntuple_processor.utils import Selection
 from config.shapes.channel_selection import channel_selection
 from config.shapes.file_names import files
 from config.shapes.process_selection import (
-    Data_base_process_selection,
+    # Data_base_process_selection,
     DY_process_selection,
     TT_process_selection,
     VV_process_selection,
@@ -315,7 +315,7 @@ def get_analysis_units(
         dataset=datasets["data"],
         selections=[
             channel_selection(channel, era, special_analysis),
-            Data_base_process_selection(era, channel),
+            # Data_base_process_selection(era, channel),
         ],
         categorization=categorization,
         channel=channel,
