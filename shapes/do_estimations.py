@@ -56,6 +56,7 @@ def parse_args():
         action="store_true",
         help="Add embedded ttbar contamination variation to file.",
     )
+    parser.add_argument("-s", "--special", help="Special selection.", default="")
     return parser.parse_args()
 
 
@@ -94,13 +95,13 @@ def replace_negative_entries_and_renormalize(histogram, tolerance):
         )
         raise Exception
 
-    # if norm_all < 0.0:
-    #     logger.fatal(
-    #         "Aborted renormalization because initial normalization is negative: %f. Check histogram %s ",
-    #         norm_all,
-    #         histogram.GetName(),
-    #     )
-    #     raise Exception
+    if norm_all < 0.0:
+        logger.fatal(
+            "Aborted renormalization because initial normalization is negative: %f. Check histogram %s ",
+            norm_all,
+            histogram.GetName(),
+        )
+        raise Exception
 
     if abs(norm_all - norm_positive) > tolerance * norm_all:
         logger.warning(
@@ -132,11 +133,18 @@ def fake_factor_estimation(
     variation="Nominal",
     is_embedding=True,
     sub_scale=1.0,
+    special="",
+    doTauES=False,
 ):
     if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "TTL", "VVL"]
+        if doTauES:
+            procs_to_subtract = [special, "ZL", "TTL", "VVL"]
+        else:
+            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL"]
     else:
         procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
+    if special == "TauES":
+        logger.debug("TauES special selection")
     logger.debug(
         "Trying to get object {}".format(
             _name_string.format(
@@ -190,6 +198,8 @@ def fake_factor_estimation(
             -sub_scale,
         )
     proc_name = "jetFakes" if is_embedding else "jetFakesMC"
+    if doTauES:
+        proc_name = "jetFakes{}".format(special)
     if variation in ["anti_iso"]:
         ff_variation = "Nominal"
     else:
@@ -528,15 +538,15 @@ def abcd_estimation(
 
 
 def emb_ttbar_contamination_estimation(
-    rootfile, channel, category, variable, sub_scale=0.1
+    rootfile, channel, category, variable, sub_scale=0.1, embname="EMB"
 ):
     procs_to_subtract = ["TTT"]
     logger.debug(
         "Trying to get object {}".format(
             _name_string.format(
-                dataset=_dataset_map["EMB"],
+                dataset=_dataset_map[embname],
                 channel=channel,
-                process="-" + _process_map["EMB"],
+                process="-" + _process_map[embname],
                 selection=category,
                 variation="Nominal",
                 variable=variable,
@@ -545,9 +555,9 @@ def emb_ttbar_contamination_estimation(
     )
     base_hist = rootfile.Get(
         _name_string.format(
-            dataset=_dataset_map["EMB"],
+            dataset=_dataset_map[embname],
             channel=channel,
-            process="-" + _process_map["EMB"],
+            process="-" + _process_map[embname],
             selection="-" + category if category != "" else "",
             variation="Nominal",
             variable=variable,
@@ -729,6 +739,16 @@ def main(args):
     wfakes_inputs = {}
     emb_categories = {}
     qqh_procs = {}
+    tauES_names = []
+    if args.special == "TauES":
+        # we have to extend the _dataset_map and the _process_map to include the TauES variations
+        tauESvariations = [-2.5 + 0.1 * i for i in range(0, 52)]
+        for variation in tauESvariations:
+            name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
+            processname = f"emb{name}"
+            tauES_names.append(processname)
+            _dataset_map[processname] = processname
+            _process_map[processname] = "Embedded"
     logger.info("Reading inputs from file {}".format(args.input))
     for key in input_file.GetListOfKeys():
         logger.debug("Processing histogram %s", key.GetName())
@@ -833,7 +853,7 @@ def main(args):
         if "Nominal" in variation:
             sel_split = selection.split("-", maxsplit=1)
 
-            if "EMB" in dataset:
+            if "EMB" in dataset or ("emb" in dataset and not "jetFakes" in dataset):
                 channel = sel_split[0]
                 category = sel_split[1].replace("Embedded", "").strip("-")
                 if channel in emb_categories:
@@ -897,164 +917,254 @@ def main(args):
             logger.info("Do estimation for category %s", cat)
             for var in ff_inputs[ch][cat]:
                 for variation in ff_inputs[ch][cat][var]:
-                    if "scale_t" in variation:
-                        continue
-                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation)
-                    estimated_hist.Write()
-                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var, variation=variation, is_embedding=False)
-                    estimated_hist.Write()
-                for variation, scale in zip(["CMS_ff_total_sub_syst_Channel_EraUp",
-                                             "CMS_ff_total_sub_syst_Channel_EraDown"], [0.9, 1.1]):
-                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
-                                                            variation=variation, sub_scale=scale)
-                    estimated_hist.Write()
-                    estimated_hist = fake_factor_estimation(input_file, ch, cat, var,
-                                                            variation=variation, is_embedding=False,
-                                                            sub_scale=scale)
-                    estimated_hist.Write()
-    logger.info("Starting estimations for the QCD mulitjet process.")
-    logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
-    for channel in qcd_inputs:
-        for category in qcd_inputs[channel]:
-            logger.info("Do estimation for category %s", category)
-            extrapolation_factor = 1.0
-            if channel in ["et", "mt"] and args.era == "2016":
-                extrapolation_factor = 1.17
-            elif channel in ["em"]:
-                if "NbtagGt1" in category:
-                    if args.era == "2016":
-                        extrapolation_factor = 0.71
-                    elif args.era == "2017":
-                        extrapolation_factor = 0.69
-                    elif args.era == "2018":
-                        extrapolation_factor = 0.67
+                    if args.special == "TauES":
+                        for embsignal in tauES_names:
+                            estimated_hist = fake_factor_estimation(
+                                input_file,
+                                ch,
+                                cat,
+                                var,
+                                variation=variation,
+                                special=embsignal,
+                                doTauES=True,
+                            )
+                            estimated_hist.Write()
+                            for variation, scale in zip(
+                                [
+                                    "CMS_ff_total_sub_syst_Channel_EraUp",
+                                    "CMS_ff_total_sub_syst_Channel_EraDown",
+                                ],
+                                [0.9, 1.1],
+                            ):
+                                estimated_hist = fake_factor_estimation(
+                                    input_file,
+                                    ch,
+                                    cat,
+                                    var,
+                                    variation=variation,
+                                    sub_scale=scale,
+                                    special=embsignal,
+                                    doTauES=True,
+                                )
+                                estimated_hist.Write()
                     else:
-                        logger.warning(
-                            "No correction for given era %s available. "
-                            "Setting extrapolation factor to 1.0",
-                            args.era,
-                        )
-                        extrapolation_factor = 1.0
-            for var in qcd_inputs[channel][category]:
-                for variation in qcd_inputs[channel][category][var]:
-                    if channel in ["et", "mt"]:
-                        estimated_hist = qcd_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            variation=variation,
-                            extrapolation_factor=extrapolation_factor,
+                        if "scale_t" in variation:
+                            continue
+                        estimated_hist = fake_factor_estimation(
+                            input_file, ch, cat, var, variation=variation
                         )
                         estimated_hist.Write()
-                        estimated_hist = qcd_estimation(
+                        estimated_hist = fake_factor_estimation(
                             input_file,
-                            channel,
-                            category,
+                            ch,
+                            cat,
                             var,
                             variation=variation,
                             is_embedding=False,
-                            extrapolation_factor=extrapolation_factor,
                         )
                         estimated_hist.Write()
-                    elif channel in ["em"]:
-                        estimated_hist = qcd_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            variation=variation,
-                            extrapolation_factor=extrapolation_factor,
-                        )
-                        estimated_hist.Write()
-                        estimated_hist = qcd_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            variation=variation,
-                            is_embedding=False,
-                            extrapolation_factor=extrapolation_factor,
-                        )
-                        estimated_hist.Write()
-                    else:
-                        estimated_hist = abcd_estimation(
+                        for variation, scale in zip(
+                            [
+                                "CMS_ff_total_sub_syst_Channel_EraUp",
+                                "CMS_ff_total_sub_syst_Channel_EraDown",
+                            ],
+                            [0.9, 1.1],
+                        ):
+                            estimated_hist = fake_factor_estimation(
+                                input_file,
+                                ch,
+                                cat,
+                                var,
+                                variation=variation,
+                                sub_scale=scale,
+                            )
+                            estimated_hist.Write()
+                            estimated_hist = fake_factor_estimation(
+                                input_file,
+                                ch,
+                                cat,
+                                var,
+                                variation=variation,
+                                is_embedding=False,
+                                sub_scale=scale,
+                            )
+                            estimated_hist.Write()
+    if args.special == "tauES":
+        logger.info("Starting estimations for the QCD mulitjet process.")
+        logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
+        for channel in qcd_inputs:
+            for category in qcd_inputs[channel]:
+                logger.info("Do estimation for category %s", category)
+                extrapolation_factor = 1.0
+                if channel in ["et", "mt"] and args.era == "2016":
+                    extrapolation_factor = 1.17
+                elif channel in ["em"]:
+                    if "NbtagGt1" in category:
+                        if args.era == "2016":
+                            extrapolation_factor = 0.71
+                        elif args.era == "2017":
+                            extrapolation_factor = 0.69
+                        elif args.era == "2018":
+                            extrapolation_factor = 0.67
+                        else:
+                            logger.warning(
+                                "No correction for given era %s available. "
+                                "Setting extrapolation factor to 1.0",
+                                args.era,
+                            )
+                            extrapolation_factor = 1.0
+                for var in qcd_inputs[channel][category]:
+                    for variation in qcd_inputs[channel][category][var]:
+                        if channel in ["et", "mt"]:
+                            estimated_hist = qcd_estimation(
+                                input_file,
+                                channel,
+                                category,
+                                var,
+                                variation=variation,
+                                extrapolation_factor=extrapolation_factor,
+                            )
+                            estimated_hist.Write()
+                            estimated_hist = qcd_estimation(
+                                input_file,
+                                channel,
+                                category,
+                                var,
+                                variation=variation,
+                                is_embedding=False,
+                                extrapolation_factor=extrapolation_factor,
+                            )
+                            estimated_hist.Write()
+                        elif channel in ["em"]:
+                            estimated_hist = qcd_estimation(
+                                input_file,
+                                channel,
+                                category,
+                                var,
+                                variation=variation,
+                                extrapolation_factor=extrapolation_factor,
+                            )
+                            estimated_hist.Write()
+                            estimated_hist = qcd_estimation(
+                                input_file,
+                                channel,
+                                category,
+                                var,
+                                variation=variation,
+                                is_embedding=False,
+                                extrapolation_factor=extrapolation_factor,
+                            )
+                            estimated_hist.Write()
+                        else:
+                            estimated_hist = abcd_estimation(
+                                input_file, channel, category, var, variation=variation
+                            )
+                            estimated_hist.Write()
+                            estimated_hist = abcd_estimation(
+                                input_file,
+                                channel,
+                                category,
+                                var,
+                                variation=variation,
+                                is_embedding=False,
+                            )
+                            estimated_hist.Write()
+                    if channel in ["em"]:
+                        for variation, scale in zip(
+                            ["subtrMCUp", "subtrMCDown"], [0.8, 1.2]
+                        ):
+                            estimated_hist = qcd_estimation(
+                                input_file,
+                                channel,
+                                category,
+                                var,
+                                variation=variation,
+                                extrapolation_factor=extrapolation_factor,
+                                sub_scale=scale,
+                            )
+                            estimated_hist.Write()
+                            estimated_hist = qcd_estimation(
+                                input_file,
+                                channel,
+                                category,
+                                var,
+                                variation=variation,
+                                is_embedding=False,
+                                extrapolation_factor=extrapolation_factor,
+                                sub_scale=scale,
+                            )
+                            estimated_hist.Write()
+        logger.info("Starting estimations for wfakes")
+        logger.debug("%s", json.dumps(wfakes_inputs, sort_keys=True, indent=4))
+        for channel in wfakes_inputs:
+            for category in wfakes_inputs[channel]:
+                logger.info("Do estimation for category %s", category)
+                for var in wfakes_inputs[channel][category]:
+                    for variation in wfakes_inputs[channel][category][var]:
+                        estimated_hist = wfakes_estimation(
                             input_file, channel, category, var, variation=variation
                         )
                         estimated_hist.Write()
-                        estimated_hist = abcd_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            variation=variation,
-                            is_embedding=False,
+        logger.info("Starting adding for qqH and VH processes.")
+        logger.debug("%s", json.dumps(qqh_procs, sort_keys=True, indent=4))
+        for channel in qqh_procs:
+            for category in qqh_procs[channel]:
+                if "MTGt70" in category:
+                    continue
+                logger.info("Do estimation for category %s", category)
+                for var in qqh_procs[channel][category]:
+                    for variation in qqh_procs[channel][category][var]:
+                        estimated_hist = qqH_merge_estimation(
+                            input_file, channel, category, var, variation=variation
                         )
                         estimated_hist.Write()
-                if channel in ["em"]:
-                    for variation, scale in zip(
-                        ["subtrMCUp", "subtrMCDown"], [0.8, 1.2]
-                    ):
-                        estimated_hist = qcd_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            variation=variation,
-                            extrapolation_factor=extrapolation_factor,
-                            sub_scale=scale,
-                        )
-                        estimated_hist.Write()
-                        estimated_hist = qcd_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            variation=variation,
-                            is_embedding=False,
-                            extrapolation_factor=extrapolation_factor,
-                            sub_scale=scale,
-                        )
-                        estimated_hist.Write()
-    logger.info("Starting estimations for wfakes")
-    logger.debug("%s", json.dumps(wfakes_inputs, sort_keys=True, indent=4))
-    for channel in wfakes_inputs:
-        for category in wfakes_inputs[channel]:
-            logger.info("Do estimation for category %s", category)
-            for var in wfakes_inputs[channel][category]:
-                for variation in wfakes_inputs[channel][category][var]:
-                    estimated_hist = wfakes_estimation(
-                        input_file, channel, category, var, variation=variation
-                    )
-                    estimated_hist.Write()
+
     if args.emb_tt:
         logger.info("Producing embedding ttbar variations.")
         logger.debug("%s", json.dumps(emb_categories, sort_keys=True, indent=4))
         for channel in emb_categories:
             for category in emb_categories[channel]:
                 logger.info("Do estimation for category %s", category)
-                for var in emb_categories[channel][category]:
-                    estimated_hist = emb_ttbar_contamination_estimation(
-                        input_file, channel, category, var, sub_scale=0.1
-                    )
-                    estimated_hist.Write()
-                    estimated_hist = emb_ttbar_contamination_estimation(
-                        input_file, channel, category, var, sub_scale=-0.1
-                    )
-                    estimated_hist.Write()
-    logger.info("Starting adding for qqH and VH processes.")
-    logger.debug("%s", json.dumps(qqh_procs, sort_keys=True, indent=4))
-    for channel in qqh_procs:
-        for category in qqh_procs[channel]:
-            if "MTGt70" in category:
-                continue
-            logger.info("Do estimation for category %s", category)
-            for var in qqh_procs[channel][category]:
-                for variation in qqh_procs[channel][category][var]:
-                    estimated_hist = qqH_merge_estimation(
-                        input_file, channel, category, var, variation=variation
-                    )
-                    estimated_hist.Write()
+                if args.special == "TauES":
+                    for embsignal in tauES_names:
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=0.1,
+                            embname=embsignal,
+                        )
+                        estimated_hist.Write()
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=-0.1,
+                            embname=embsignal,
+                        )
+                        estimated_hist.Write()
+                else:
+                    for var in emb_categories[channel][category]:
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=0.1,
+                            embname="EMB",
+                        )
+                        estimated_hist.Write()
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=-0.1,
+                            embname="EMB",
+                        )
+                        estimated_hist.Write()
 
     logger.info("Successfully finished estimations.")
     # Clean-up.

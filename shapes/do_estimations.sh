@@ -3,6 +3,7 @@
 ERA=$1
 INPUT=$2
 EMBTT=$3
+SPECIAL=$4
 [[ -z $EMBTT ]] && EMBTT=1
 echo $EMBTT
 
@@ -15,4 +16,11 @@ fi
 
 source utils/setup_root.sh
 
-python shapes/do_estimations.py -e $ERA -i $INPUT $EMB_ARG
+if [[ $SPECIAL != "" ]]
+then
+    SPECIAL_ARG="--special $SPECIAL"
+else
+    SPECIAL_ARG=""
+fi
+
+python shapes/do_estimations.py -e $ERA -i $INPUT $EMB_ARG $SPECIAL_ARG
