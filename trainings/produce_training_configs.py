@@ -112,24 +112,9 @@ def parse_arguments():
 logger = logging.getLogger("")
 
 
-def create_mapping_config(outputfolder, trainings, no_embedding, no_fake_factors):
-    data = {}
-    for channel in trainings["channels"]:
-        data[channel] = {}
-        mapping = create_process_mapping(
-            channel, outputfolder, no_embedding, no_fake_factors
-        )
-        for training in trainings["trainings"]:
-            data[channel][training] = mapping
-            # we update the trainings dict with the correct mappings
-            trainings["trainings"][training]["processes"] = mapping.keys()
-            trainings["trainings"][training]["classes"] = list(set(mapping.values()))
-    filename = f"{outputfolder}/mapping.yaml"
-    with open(filename, "w") as f:
-        yaml.dump(data, f)
-
-
-def create_training_configs(outputfolder, trainings, base_config):
+def create_training_configs(
+    outputfolder, trainings, base_config, no_embedding, no_fake_factors
+):
 
     # load the base config
     with open(base_config, "r") as f:
@@ -138,11 +123,17 @@ def create_training_configs(outputfolder, trainings, base_config):
     for training in trainings["trainings"]:
         seleted_training = trainings["trainings"][training]
         config[training] = deepcopy(base_config)
-        config[training]["processes"] = list(seleted_training["processes"])
-        config[training]["classes"] = seleted_training["classes"]
         config[training]["variables"] = seleted_training["variables"]
         config[training]["era"] = seleted_training["era"]
         config[training]["channel"] = seleted_training["channel"]
+        config[training]["mapping"] = create_process_mapping(
+            seleted_training["channel"],
+            seleted_training["era"],
+            no_embedding,
+            no_fake_factors,
+        )
+        config[training]["processes"] = list(config[training]["mapping"].keys())
+        config[training]["classes"] = list(set(config[training]["mapping"].values()))
     # write the configs to files
     filename = f"{outputfolder}/trainings.yaml"
     with open(filename, "w") as f:
@@ -150,7 +141,7 @@ def create_training_configs(outputfolder, trainings, base_config):
         yaml.dump(config, f)
 
 
-def create_process_mapping(channel, outputfolder, no_embedding, no_fake_factors):
+def create_process_mapping(channel, era, no_embedding, no_fake_factors):
     default_mapping = {
         "emb": "emb",
         "ggh": "ggh",
@@ -213,13 +204,13 @@ def add_fake_factors(era, channel, datasets, categorization, special_analysis):
     if channel != "em":
         add_process(
             analysis_unit,
-            name="jetFakes",
+            name="jetfakes",
             dataset=datasets["data"],
             selections=selections,
             categorization=categorization,
             channel=channel,
         )
-    return analysis_unit["jetFakes"]
+    return analysis_unit["jetfakes"]
 
 
 def setup_trainings(eras, channels, analysistype):
@@ -346,7 +337,7 @@ def main(args):
                 special_analysis,
             )
             # add fake factors
-            nominals[era]["units"][channel]["jetFakes"] = add_fake_factors(
+            nominals[era]["units"][channel]["jetfakes"] = add_fake_factors(
                 era,
                 channel,
                 nominals[era]["datasets"][channel],
@@ -357,10 +348,10 @@ def main(args):
                 "Found {} analysis units".format(len(nominals[era]["units"][channel]))
             )
             logger.info(
-                "jetFakes: {}".format(nominals[era]["units"][channel]["jetFakes"])
+                "jetfakes: {}".format(nominals[era]["units"][channel]["jetfakes"])
             )
-            logger.info(nominals[era]["units"][channel]["jetFakes"][0])
-            logger.info(nominals[era]["units"][channel]["jetFakes"][0].dataset)
+            logger.info(nominals[era]["units"][channel]["jetfakes"][0])
+            logger.info(nominals[era]["units"][channel]["jetfakes"][0].dataset)
             # Step 2: create process yamls
             for unit in nominals[era]["units"][channel]:
                 logger.info(
@@ -376,15 +367,15 @@ def main(args):
                     args.directory,
                     friend_directories[channel],
                 )
-    # Step 3: create mapping configs
-    logger.info("Creating mapping configs")
-    # create one mapping file
-    create_mapping_config(
-        outputfolder, trainings, args.no_embedding, args.no_fake_factors
-    )
-    # Step 4: create training configs
+    # Step 3: create training configs
     logger.info("Creating training configs")
-    create_training_configs(outputfolder, trainings, args.trainings_config)
+    create_training_configs(
+        outputfolder,
+        trainings,
+        args.trainings_config,
+        args.no_embedding,
+        args.no_fake_factors,
+    )
 
 
 if __name__ == "__main__":
