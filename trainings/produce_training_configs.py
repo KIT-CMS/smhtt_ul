@@ -1,5 +1,6 @@
 import argparse
 from copy import deepcopy
+from dataclasses import dataclass
 import logging
 import os
 import yaml
@@ -99,45 +100,49 @@ def parse_arguments():
         type=str,
         help="Path to the trainings config file to use.",
     )
+    parser.add_argument(
+        "--output-folder",
+        type=str,
+        default="training_files",
+        help="Path where the training config files should be stored.",
+    )
     return parser.parse_args()
 
 
 logger = logging.getLogger("")
 
 
-def create_mapping_config(
-    channel, outputfolder, no_embedding, no_fake_factors, trainings
-):
-    mapping = create_process_mapping(
-        channel, outputfolder, no_embedding, no_fake_factors
-    )
-    mapping_config = {}
-    for training in trainings:
-        mapping_config[training] = mapping
-        trainings[training]["processes"] = mapping.keys()
-        trainings[training]["classes"] = list(set(mapping.values()))
-    data = {
-        "channel": channel,
-        "mapping": mapping_config,
-    }
-    filename = f"{outputfolder}/mapping_{channel}.yaml"
+def create_mapping_config(outputfolder, trainings, no_embedding, no_fake_factors):
+    data = {}
+    for channel in trainings["channels"]:
+        data[channel] = {}
+        mapping = create_process_mapping(
+            channel, outputfolder, no_embedding, no_fake_factors
+        )
+        for training in trainings["trainings"]:
+            data[channel][training] = mapping
+            # we update the trainings dict with the correct mappings
+            trainings["trainings"][training]["processes"] = mapping.keys()
+            trainings["trainings"][training]["classes"] = list(set(mapping.values()))
+    filename = f"{outputfolder}/mapping.yaml"
     with open(filename, "w") as f:
         yaml.dump(data, f)
 
 
-def create_training_configs(outputfolder, trainings, base_config, era, channel):
-    default_vars = ["pt_1", "pt_2", "m_vis", "njets", "jpt_1", "jpt_2"]
+def create_training_configs(outputfolder, trainings, base_config):
+
     # load the base config
     with open(base_config, "r") as f:
         base_config = yaml.safe_load(f)
     config = {}
-    for training in trainings:
+    for training in trainings["trainings"]:
+        seleted_training = trainings["trainings"][training]
         config[training] = deepcopy(base_config)
-        config[training]["processes"] = list(trainings[training]["processes"])
-        config[training]["classes"] = trainings[training]["classes"]
-        config[training]["variables"] = default_vars
-        config[training]["era"] = era
-        config[training]["channel"] = channel
+        config[training]["processes"] = list(seleted_training["processes"])
+        config[training]["classes"] = seleted_training["classes"]
+        config[training]["variables"] = seleted_training["variables"]
+        config[training]["era"] = seleted_training["era"]
+        config[training]["channel"] = seleted_training["channel"]
     # write the configs to files
     filename = f"{outputfolder}/trainings.yaml"
     with open(filename, "w") as f:
@@ -199,7 +204,6 @@ def set_training_categorization():
 
 
 def add_fake_factors(era, channel, datasets, categorization, special_analysis):
-    # TODO remove tau iso cut from selection, add weight
     selections = []
     selections.append(deepcopy(channel_selection(channel, era, special_analysis)))
     # now we have to remove the 'tau_iso' cut from the channel selection
@@ -216,6 +220,28 @@ def add_fake_factors(era, channel, datasets, categorization, special_analysis):
             channel=channel,
         )
     return analysis_unit["jetFakes"]
+
+
+def setup_trainings(eras, channels, analysistype):
+    trainings = {}
+    trainings["channels"] = channels
+    trainings["eras"] = eras
+    trainings["trainings"] = {}
+    if analysistype == "sm":
+        default_vars = ["pt_1", "pt_2", "m_vis", "njets", "jpt_1", "jpt_2"]
+        # here we have one training per era and channel
+        for era in eras:
+            for channel in channels:
+                trainings["trainings"][f"sm_{era}_{channel}"] = {
+                    "processes": [],
+                    "classes": [],
+                    "channel": channel,
+                    "era": era,
+                    "variables": default_vars,
+                }
+    else:
+        raise NotImplementedError(f"Analysis type {analysistype} not implemented.")
+    return trainings
 
 
 def create_process_yaml(
@@ -278,7 +304,8 @@ def create_process_yaml(
 
 
 def main(args):
-    # Parse given arguments.
+    # Parse given arguments
+    # TODO add comments to the config files to make dependencies clear
     friend_directories = {
         "et": args.et_friend_directory,
         "mt": args.mt_friend_directory,
@@ -286,14 +313,15 @@ def main(args):
         "em": args.em_friend_directory,
         "mm": args.mm_friend_directory,
     }
-    outputfolder = "training_configs"
+    outputfolder = args.output_folder
     if not os.path.exists(os.path.join(outputfolder, "processes")):
         os.makedirs(os.path.join(outputfolder, "processes"))
     channels = args.channels
     eras = args.eras
     special_analysis = args.special_analysis
     categorization = set_training_categorization()
-    trainings = {"default_training_sm": {"classes": [], "processes": []}}
+    trainings = setup_trainings(eras, channels, "sm")
+    # first create the processes configs for all processes relevant
     for era in eras:
         nominals = {}
         nominals[era] = {}
@@ -350,15 +378,13 @@ def main(args):
                 )
     # Step 3: create mapping configs
     logger.info("Creating mapping configs")
-    for channel in channels:
-        logger.info("Creating mapping config for {}".format(channel))
-        # create one mapping file
-        create_mapping_config(
-            channel, outputfolder, args.no_embedding, args.no_fake_factors, trainings
-        )
+    # create one mapping file
+    create_mapping_config(
+        outputfolder, trainings, args.no_embedding, args.no_fake_factors
+    )
     # Step 4: create training configs
     logger.info("Creating training configs")
-    create_training_configs(outputfolder, trainings, args.trainings_config, era, channel)
+    create_training_configs(outputfolder, trainings, args.trainings_config)
 
 
 if __name__ == "__main__":
