@@ -41,6 +41,9 @@ def parse_args():
         "--mc", action="store_true", help="Use jet fake estimation based on mc shapes."
     )
     parser.add_argument(
+        "--special", help="Use for special cases with no-trivial shapes.", default=""
+    )
+    parser.add_argument(
         "--variable-selection",
         default=None,
         type=str,
@@ -211,7 +214,6 @@ def main(args):
     hist_map = {}
     for key in input_file.GetListOfKeys():
         split_name = key.GetName().split("#")
-
         channel = split_name[1].split("-")[0]
         if args.gof:
             # Use variable as category label for GOF test and control plots.
@@ -228,6 +230,18 @@ def main(args):
                 if not "data" in split_name[0]
                 else "data_obs"
             )
+            if args.special == "TauES":
+                if "emb" in split_name[0]:
+                    if "jetFakes" in split_name[0]:
+                        process = "jetFakes_"
+                        split_name[0] = split_name[0].replace("jetFakes", "").replace("emb", "")
+                    else:
+                        process = "EMB_"
+                        split_name[0] = split_name[0].replace("emb", "")
+                    if "minus" in split_name[0]:
+                        process += "-"
+                        split_name[0] = split_name[0].replace("minus", "")
+                    process += ".".join(split_name[0].split("p"))
             # Check if process is from hotfixed powheg signal samples. If so,
             # remove the hot fix part from the process.
             if "corrGenWeight" in process:
@@ -275,7 +289,11 @@ def main(args):
                 mass = split_name[0].split("_")[-1]
                 process = "_".join([_rev_process_map[process], mass])
             else:
-                process = _rev_process_map[process]
+                if args.special != "TauES":
+                    process = _rev_process_map[process]
+                else:
+                    if not "emb" in process and not "jetFakes" in process:
+                        process = _rev_process_map[process]
         name_output = "{process}".format(process=process)
         if "Nominal" not in variation:
             name_output += "_" + variation
