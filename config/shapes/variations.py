@@ -31,7 +31,7 @@ abcd_method = [
         "abcd_anti_iso",
         "tau_iso",
         Cut(
-            "(id_tau_vsJet_Medium_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_Loose_2>0.5)",
+            "(id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
             "tau_anti_iso",
         ),
     ),
@@ -41,7 +41,7 @@ abcd_method = [
         [
             Cut("q_1*q_2>0", "ss"),
             Cut(
-                "(id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_Loose_2>0.5)",
+                "(id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
                 "tau_anti_iso",
             ),
         ],
@@ -74,7 +74,7 @@ anti_iso_tt = ReplaceCutAndAddWeight(
     "tau_iso",
     Cut(
         "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5))",
-        "tau_anti_iso",
+        "tau_anti_iso"
     ),
     # Weight("1.0", "fake_factor"),
     Weight("0.5 * ff1_nom * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * ff2_nom * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
