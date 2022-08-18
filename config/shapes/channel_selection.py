@@ -168,7 +168,8 @@ def channel_selection(channel, era, special=None):
                 ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
                 ("iso_1<0.15", "muon_iso"),
                 ("pzetamissvis > -25", "pzetamissvis"),
-                ("mt_1 < 60", "mt_1"),
+                ("mt_1 < 50", "mt_1"),
+                ("nbtag==0", "nbtag"),
             ]
         )
         if era == "2018":
