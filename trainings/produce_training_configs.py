@@ -1,0 +1,367 @@
+import argparse
+from copy import deepcopy
+import logging
+import os
+import yaml
+from ntuple_processor import Histogram
+from ntuple_processor.utils import Selection
+
+from shapes.utils import get_nominal_datasets, add_process
+
+from config.shapes.file_names import files
+
+from shapes.produce_shapes import setup_logging, get_analysis_units
+
+# for fake factors
+from config.shapes.channel_selection import channel_selection
+from config.shapes.process_selection import FF_training_process_selection
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Produce shapes for the legacy MSSM analysis."
+    )
+    parser.add_argument(
+        "--eras",
+        required=True,
+        type=lambda eralist: [era for era in eralist.split(",")],
+        help="Experiment eras.",
+    )
+    parser.add_argument(
+        "--channels",
+        default=[],
+        type=lambda channellist: [channel for channel in channellist.split(",")],
+        help="Channels to be considered, seperated by a comma without space",
+    )
+    parser.add_argument(
+        "--directory", required=True, type=str, help="Directory with Artus outputs."
+    )
+    parser.add_argument(
+        "--et-friend-directory",
+        type=str,
+        default=[],
+        nargs="+",
+        help="Directories arranged as Artus output and containing a friend tree for et.",
+    )
+    parser.add_argument(
+        "--mt-friend-directory",
+        type=str,
+        default=[],
+        nargs="+",
+        help="Directories arranged as Artus output and containing a friend tree for mt.",
+    )
+    parser.add_argument(
+        "--tt-friend-directory",
+        type=str,
+        default=[],
+        nargs="+",
+        help="Directories arranged as Artus output and containing a friend tree for tt.",
+    )
+    parser.add_argument(
+        "--em-friend-directory",
+        type=str,
+        default=[],
+        nargs="+",
+        help="Directories arranged as Artus output and containing a friend tree for em.",
+    )
+    parser.add_argument(
+        "--mm-friend-directory",
+        type=str,
+        default=[],
+        nargs="+",
+        help="Directories arranged as Artus output and containing a friend tree for mm.",
+    )
+    parser.add_argument(
+        "--process-selection",
+        default=None,
+        type=lambda proclist: set([process.lower() for process in proclist.split(",")]),
+        help="Subset of processes to be processed.",
+    )
+    parser.add_argument(
+        "--special-analysis",
+        default=None,
+        type=str,
+        help="Special analysis to be considered.",
+    )
+    parser.add_argument(
+        "--no-embedding",
+        action="store_true",
+        help="Do not include embedding in the training.",
+    )
+    parser.add_argument(
+        "--no-fake-factors",
+        action="store_true",
+        help="Do not include fake factors in the training.",
+    )
+    parser.add_argument(
+        "--trainings-config",
+        required=True,
+        type=str,
+        help="Path to the trainings config file to use.",
+    )
+    return parser.parse_args()
+
+
+logger = logging.getLogger("")
+
+
+def create_mapping_config(
+    channel, outputfolder, no_embedding, no_fake_factors, trainings
+):
+    mapping = create_process_mapping(
+        channel, outputfolder, no_embedding, no_fake_factors
+    )
+    mapping_config = {}
+    for training in trainings:
+        mapping_config[training] = mapping
+        trainings[training]["processes"] = mapping.keys()
+        trainings[training]["classes"] = list(set(mapping.values()))
+    data = {
+        "channel": channel,
+        "mapping": mapping_config,
+    }
+    filename = f"{outputfolder}/mapping_{channel}.yaml"
+    with open(filename, "w") as f:
+        yaml.dump(data, f)
+
+
+def create_training_configs(outputfolder, trainings, base_config, era, channel):
+    default_vars = ["pt_1", "pt_2", "m_vis", "njets", "jpt_1", "jpt_2"]
+    # load the base config
+    with open(base_config, "r") as f:
+        base_config = yaml.safe_load(f)
+    config = {}
+    for training in trainings:
+        config[training] = deepcopy(base_config)
+        config[training]["processes"] = list(trainings[training]["processes"])
+        config[training]["classes"] = trainings[training]["classes"]
+        config[training]["variables"] = default_vars
+        config[training]["era"] = era
+        config[training]["channel"] = channel
+    # write the configs to files
+    filename = f"{outputfolder}/trainings.yaml"
+    with open(filename, "w") as f:
+        print(config)
+        yaml.dump(config, f)
+
+
+def create_process_mapping(channel, outputfolder, no_embedding, no_fake_factors):
+    default_mapping = {
+        "emb": "emb",
+        "ggh": "ggh",
+        "jetfakes": "ff",
+        "qqh": "qqh",
+        "w": "misc",
+        "wh": "misc",
+        "zh": "misc",
+        "wj": "ff",
+        "zj": "ff",
+        "ztt": "ztt",
+        "ttj": "tt",
+        "ttl": "tt",
+        "ttt": "ztt",
+        "vvl": "misc",
+        "vvt": "ztt",
+        "vvj": "ff",
+    }
+    if no_embedding:
+        default_mapping.pop("emb")
+    else:
+        default_mapping.pop("ztt")
+        default_mapping.pop("ttt")
+        default_mapping.pop("vvt")
+    if no_fake_factors:
+        default_mapping.pop("jetfakes")
+    else:
+        default_mapping.pop("wj")
+        default_mapping.pop("zj")
+        default_mapping.pop("ttj")
+        default_mapping.pop("vvj")
+    # now write the mapping to a file
+    return default_mapping
+
+
+def set_training_categorization():
+    # this is just a dummy selection we need to trick the framework, we do not use it !
+    inclusive = [
+        (
+            Selection(name="Inclusive", cuts=[("", "category_selection")]),
+            [Histogram("m_vis", "m_vis", [i for i in range(0, 255, 5)])],
+        )
+    ]
+    training_categorization = {
+        "et": inclusive,
+        "mt": inclusive,
+        "tt": inclusive,
+        "em": inclusive,
+    }
+    return training_categorization
+
+
+def add_fake_factors(era, channel, datasets, categorization, special_analysis):
+    # TODO remove tau iso cut from selection, add weight
+    selections = []
+    selections.append(deepcopy(channel_selection(channel, era, special_analysis)))
+    # now we have to remove the 'tau_iso' cut from the channel selection
+    selections[0].cuts = [cut for cut in selections[0].cuts if cut.name != "tau_iso"]
+    selections.append(FF_training_process_selection(channel, era))
+    analysis_unit = {}
+    if channel != "em":
+        add_process(
+            analysis_unit,
+            name="jetFakes",
+            dataset=datasets["data"],
+            selections=selections,
+            categorization=categorization,
+            channel=channel,
+        )
+    return analysis_unit["jetFakes"]
+
+
+def create_process_yaml(
+    era, channel, name, unit, outputfolder, categorization, basedir, frienddirs
+):
+    cut_to_be_removed = categorization[channel][0][0].cuts[0].expression
+    print(cut_to_be_removed)
+    # first get the information from the unit
+    logger.info("Unit: {}".format(unit[0]))
+    filename = "{}_{}_{}.yaml".format(era, channel, name)
+    # first get all selections
+    cuts = ""
+    weights = ""
+    files = []
+    friend_paths = []
+    # get the friends, this we only have to do for the first ntuple
+    if unit[0].dataset.ntuples[0].friends is not None:
+        for friend_dir in frienddirs:
+            for friendfile in [x.path for x in unit[0].dataset.ntuples[0].friends]:
+                if friend_dir in friendfile and friend_dir not in friend_paths:
+                    friend_paths.append(f"{friend_dir}/")
+    files = [ntuple.path.replace(basedir, "") for ntuple in unit[0].dataset.ntuples]
+    for selection in unit[0].selections:
+        logger.debug("adding cuts: {}".format(selection.cuts))
+        logger.debug("adding weights: {}".format(selection.weights))
+        cutstring = " && ".join(
+            [
+                "({})".format(cut.expression)
+                for cut in selection.cuts
+                if cut.expression != ""
+            ]
+        )
+        weightstring = " * ".join(
+            [
+                "({})".format(weight.expression)
+                for weight in selection.weights
+                if weight.expression != ""
+            ]
+        )
+        if cutstring != "":
+            cuts += cutstring + " && "
+        if weightstring != "":
+            weights += weightstring + " * "
+    if len(weights) > 0:
+        weights = weights[:-3]
+    if len(cuts) > 0:
+        cuts = cuts[:-4]
+    data = {
+        "process": name,
+        "weight_string": f"({weights})",
+        "files": files,
+        "cut_string": f"({cuts})",
+        "friend_paths": friend_paths,
+        "tree_path": "ntuple",
+        "base_path": basedir,
+        "training_weight_branch": "weight",
+    }
+    with open(os.path.join(outputfolder, filename), "w") as f:
+        yaml.dump(data, f)
+
+
+def main(args):
+    # Parse given arguments.
+    friend_directories = {
+        "et": args.et_friend_directory,
+        "mt": args.mt_friend_directory,
+        "tt": args.tt_friend_directory,
+        "em": args.em_friend_directory,
+        "mm": args.mm_friend_directory,
+    }
+    outputfolder = "training_configs"
+    if not os.path.exists(os.path.join(outputfolder, "processes")):
+        os.makedirs(os.path.join(outputfolder, "processes"))
+    channels = args.channels
+    eras = args.eras
+    special_analysis = args.special_analysis
+    categorization = set_training_categorization()
+    trainings = {"default_training_sm": {"classes": [], "processes": []}}
+    for era in eras:
+        nominals = {}
+        nominals[era] = {}
+        nominals[era]["datasets"] = {}
+        nominals[era]["units"] = {}
+        logger.info("Processing era {}".format(era))
+        # Step 1: create units and book actions
+        for channel in channels:
+            logger.info("Processing channel {}".format(channel))
+            nominals[era]["datasets"][channel] = get_nominal_datasets(
+                era, channel, friend_directories, files, args.directory
+            )
+            logger.info(
+                "Found {} datasets".format(len(nominals[era]["datasets"][channel]))
+            )
+            logger.info("Creating analysis units")
+            nominals[era]["units"][channel] = get_analysis_units(
+                channel,
+                era,
+                nominals[era]["datasets"][channel],
+                categorization,
+                special_analysis,
+            )
+            # add fake factors
+            nominals[era]["units"][channel]["jetFakes"] = add_fake_factors(
+                era,
+                channel,
+                nominals[era]["datasets"][channel],
+                categorization,
+                special_analysis,
+            )
+            logger.info(
+                "Found {} analysis units".format(len(nominals[era]["units"][channel]))
+            )
+            logger.info(
+                "jetFakes: {}".format(nominals[era]["units"][channel]["jetFakes"])
+            )
+            logger.info(nominals[era]["units"][channel]["jetFakes"][0])
+            logger.info(nominals[era]["units"][channel]["jetFakes"][0].dataset)
+            # Step 2: create process yamls
+            for unit in nominals[era]["units"][channel]:
+                logger.info(
+                    "Creating process yaml for {} {} {}".format(era, channel, unit)
+                )
+                create_process_yaml(
+                    era,
+                    channel,
+                    unit,
+                    nominals[era]["units"][channel][unit],
+                    f"{outputfolder}/processes",
+                    categorization,
+                    args.directory,
+                    friend_directories[channel],
+                )
+    # Step 3: create mapping configs
+    logger.info("Creating mapping configs")
+    for channel in channels:
+        logger.info("Creating mapping config for {}".format(channel))
+        # create one mapping file
+        create_mapping_config(
+            channel, outputfolder, args.no_embedding, args.no_fake_factors, trainings
+        )
+    # Step 4: create training configs
+    logger.info("Creating training configs")
+    create_training_configs(outputfolder, trainings, args.trainings_config, era, channel)
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    setup_logging("create_ml_training.txt", logging.INFO)
+    main(args)
