@@ -4,10 +4,12 @@ from ntuple_processor.variations import (
     ReplaceCut,
     ReplaceWeight,
     ReplaceCutAndAddWeight,
+    ReplaceVariable,
 )
 import re
 from copy import deepcopy
 import logging
+import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -234,6 +236,7 @@ def book_tauES_histograms(
         logger.debug(f"Booking {tau_es_shift}")
         shiftname = f"EMBtauESshift_{tau_es_shift.replace('emb', '')}"
         updated_variations = deepcopy(variations)
+        final_variations = []
         unitlist = datasets[tau_es_shift]
         if len(unitlist) == 0:
             continue
@@ -259,8 +262,13 @@ def book_tauES_histograms(
                     subvariation.add_weight.weight.expression = replace_expression(
                         subvariation.add_weight.weight.expression, quants
                     )
+                else:
+                    logger.critical(f"Unknown variation {subvariation}")
+                    raise ValueError(f"Unknown variation {subvariation}")
+                final_variations.append(subvariation)
+        logger.warning(f"final_variations: {final_variations}")
         manager.book(
             unitlist,
-            updated_variations,
+            final_variations,
             enable_check=enable_check,
         )
