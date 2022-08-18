@@ -158,7 +158,7 @@ if [[ $MODE == "SYNC" ]]; then
 
     mkdir -p control_plots_tauid/${WP}/
 
-    python3 plotting/plot_shapes_tauID.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL} --embedding --categories ${categories_string%,} --output control_plots_tauid/${WP}/
+    # python3 plotting/plot_shapes_tauID.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL} --embedding --categories ${categories_string%,} --output control_plots_tauid/${WP}/
 
     echo "##############################################################################################"
     echo "#     synced shapes                                      #"
@@ -232,7 +232,7 @@ if [[ $MODE == "FIT" ]]; then
         --algo singles --robustFit 1 \
         --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
         --floatOtherPOIs 1 \
-        -n $ERA -v3 \
+        -n $ERA -v1 \
         --parallel 1 --there
     for RESDIR in output/$datacard_output/htt_mt_*; do
         echo "[INFO] Printing fit result for category $(basename $RESDIR)"
@@ -285,6 +285,10 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
         python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/${WP} --prefit
         python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/${WP}
     done
+    exit 0
+fi
+if [[ $MODE == "PLOT-SF" ]]; then
+    source utils/setup_root.sh
     python3 plotting/plot_TauID_sf.py --input output/$datacard_output/ --output output/postfitplots/ --wp ${WP}
     exit 0
 fi
