@@ -854,3 +854,23 @@ def qqH125_process_selection(channel, era):
         )
     ]
     return Selection(name="qqH125", weights=qqH125_weights, cuts=qqH125_cuts)
+
+def FF_training_process_selection(channel, era):
+    cuts = []
+    weights = []
+    if channel == "et" or channel == "mt":
+        cuts = [
+            ("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+        ]
+        weights = [
+            ("ff2_nom", "fake_factor")
+        ]
+    elif channel == "tt":
+        raise NotImplementedError("FF training not implemented for tt")
+    elif channel == "em":
+        raise NotImplementedError("FF training not implemented for em")
+    else:
+        raise ValueError("Invalid channel: {}".format(channel))
+    print("FF training cuts:", cuts)
+    print("FF training weights:", weights)
+    return Selection(name="jetFakes", cuts=cuts, weights=weights)
