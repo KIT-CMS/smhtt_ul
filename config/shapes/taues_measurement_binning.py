@@ -3,7 +3,7 @@ from ntuple_processor.utils import Selection
 from ntuple_processor import Histogram
 
 discriminator_variable = "m_vis"
-discriminator_binning = np.arange(45, 85, 2.5)
+discriminator_binning = np.arange(45, 115, 2.5)
 
 
 categories = {
