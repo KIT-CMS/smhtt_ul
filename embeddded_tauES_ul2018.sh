@@ -23,9 +23,9 @@ datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_taues"
 echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
 echo "BASEDIR: ${BASEDIR}"
 echo "output_shapes: ${output_shapes}"
-echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
+echo "FRIENDS: ${FRIENDS}"
 
-categories=("DM0" "DM1" "DM10" "DM11" "Inclusive")
+categories=("DM0" "DM1" "DM10_11" "Inclusive")
 printf -v categories_string '%s,' "${categories[@]}"
 echo "Using Cateogires ${categories_string%,}"
 
@@ -131,6 +131,22 @@ if [[ $MODE == "MERGE" ]]; then
     hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/*.root
 fi
 
+if [[ $MODE == "PLOT-CONTROL" ]]; then
+    source utils/setup_root.sh
+    echo "##############################################################################################"
+    echo "#     plotting                                      #"
+    echo "##############################################################################################"
+    bash ./shapes/do_estimations.sh 2018 ${shapes_rootfile} 1
+    for CATEGORY in "${categories[@]}"; do
+        python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL} --embedding --fake-factor --category $CATEGORY
+        python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category $CATEGORY
+        python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor --category $CATEGORY
+        python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL}  --category $CATEGORY
+    done
+
+fi
+
+
 if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
@@ -138,13 +154,8 @@ if [[ $MODE == "SYNC" ]]; then
 
     echo "##############################################################################################"
 
-    # bash ./shapes/do_estimations.sh 2018 ${shapes_rootfile} 1 "TauES"
+    bash ./shapes/do_estimations.sh 2018 ${shapes_rootfile} 1 "TauES"
 
-    # echo "##############################################################################################"
-    # echo "#     plotting                                      #"
-    # echo "##############################################################################################"
-
-    # python3 plotting/plot_shapes_tauID.py -l --era Run${ERA} --input ${shapes_rootfile} --variables ${VARIABLES} --channels ${CHANNEL} --embedding --categories ${categories_string%,}
 
     echo "##############################################################################################"
     echo "#     synced shapes                                      #"
@@ -213,7 +224,7 @@ fi
 
 if [[ $MODE == "FIT" ]]; then
     source utils/setup_cmssw.sh
-    for INPUT in output/$datacard_output/htt_mt_*; do
+    for INPUT in output/$datacard_output/htt_mt_Inclusive; do
         echo "[INFO] Fit workspace from path ${INPUT}"
         WORKSPACE=${INPUT}/workspace.root
         combine \
@@ -221,10 +232,10 @@ if [[ $MODE == "FIT" ]]; then
             -n _initialFit_Test \
             --algo singles \
             --redefineSignalPOIs taues,r \
-            --setParameterRanges taues=-1.2,1.1:r=0.8,1.2 \
+            --setParameterRanges taues=-2.5,2.5:r=0.8,1.2 \
             --robustFit 1 \
             -m 0 -d ${WORKSPACE} \
-            --setParameters taues=0.0,r=1.0 \
+            --setParameters taues=-1.5,r=1.0 \
             --setRobustFitAlgo=Minuit2 \
             --setRobustFitStrategy=0 \
             --setRobustFitTolerance=0.2 \
@@ -237,20 +248,22 @@ if [[ $MODE == "FIT" ]]; then
         combineTool.py -M MultiDimFit -d ${WORKSPACE} \
             --algo grid \
             --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
-            -P taues \
-            --setParameters taues=-0.45 \
+            -P taues -m 0 \
+            --redefineSignalPOIs taues,r \
+            --setParameterRanges taues=-2.05,-0.45:r=0.8,1.2 \
             --floatOtherPOIs 1 \
-            --points 47 \
-            --setParameterRanges taues=-1.2,1.1 \
+            --points 30 \
+            --robustFit 1 \
             --setRobustFitAlgo=Minuit2 \
             --setRobustFitStrategy=0 \
             --setRobustFitTolerance=0.2 \
             --X-rtd FITTER_NEW_CROSSING_ALGO \
             --X-rtd FITTER_NEVER_GIVE_UP \
             --X-rtd FITTER_BOUND \
-            --robustFit 1 \
+            --cminFallbackAlgo "Minuit2,0:0.1" \
+            --cminFallbackAlgo "Minuit,0:0.1" \
             -n ${ERA}_taues
-        cp higgsCombine${ERA}_taues.MultiDimFit.mH120.root ${INPUT}
+        cp higgsCombine${ERA}_taues.MultiDimFit.mH0.root ${INPUT}
     done
     exit 0
 fi
@@ -258,13 +271,13 @@ fi
 if [[ $MODE == "POSTFIT" ]]; then
     source utils/setup_cmssw.sh
     for INPUT in output/$datacard_output/htt_mt_Inclusive; do
+        CATEGORY=$(basename $INPUT)
         python fitting/plot1DScan.py \
-            --main ${INPUT}/higgsCombine${ERA}_taues.MultiDimFit.mH120.root \
-            --POI taues \
-            --y-max 10 \
-            --remin-main --improve \
-            --output ${ERA}_taues_plot_nll \
-            --translate fitting/translate.json
+            --main ${INPUT}/higgsCombine${ERA}_taues.MultiDimFit.mH0.root \
+            --POI taues --remin-main \
+            --output ${ERA}_${CATEGORY}_taues_plot_nll \
+            --translate fitting/translate.json \
+            --y-max 2.5 --main-color 2
         done
     exit 0
 fi
@@ -281,7 +294,7 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
             -M FitDiagnostics \
             -d $WORKSPACE \
             --redefineSignalPOIs taues,r \
-            --setParameterRanges taues=-1.2,1.1:r=0.8,1.2 \
+            --setParameterRanges taues=-2.0,-0.5:r=0.8,1.2 \
             --robustFit 1 -v1 \
             --robustHesse 1 \
             --X-rtd MINIMIZER_analytic \
@@ -306,8 +319,8 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
             mkdir -p output/postfitplots/
         fi
         echo "[INFO] Postfits plots for category $CATEGORY"
-        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --fake-factor --single-category $CATEGORY --categories "None" -o output/postfitplots/ --prefit
-        python3 plotting/plot_shapes.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --fake-factor --single-category $CATEGORY --categories "None" -o output/postfitplots/
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --fake-factor --single-category $CATEGORY --categories "None" -o output/postfitplots/ --prefit
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --fake-factor --single-category $CATEGORY --categories "None" -o output/postfitplots/
         i=$((i + 1))
     done
     exit 0

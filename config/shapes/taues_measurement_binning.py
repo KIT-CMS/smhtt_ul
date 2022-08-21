@@ -3,7 +3,7 @@ from ntuple_processor.utils import Selection
 from ntuple_processor import Histogram
 
 discriminator_variable = "m_vis"
-discriminator_binning = np.arange(45, 115, 2.5)
+discriminator_binning = np.arange(35, 85, 2.5)
 
 
 categories = {
@@ -20,17 +20,11 @@ categories = {
             "expression": discriminator_variable,
             "cut": "(decaymode_2 == 1)",
         },
-        "DM10": {
+        "DM10_11": {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "(decaymode_2 == 10)",
-        },
-        "DM11": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(decaymode_2 == 11)",
+            "cut": "(decaymode_2 == 11 || decaymode_2 == 10)",
         },
         "Inclusive": {
             "var": discriminator_variable,
