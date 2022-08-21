@@ -62,6 +62,11 @@ def parse_arguments():
         type=str,
         default=None,
         help="Draw variation of jetFakes or QCD in derivation region.")
+    parser.add_argument(
+        "--category",
+        type=str,
+        default=None,
+        help="Plot a special category instead of nominal")
 
     return parser.parse_args()
 
@@ -189,25 +194,28 @@ def main(info):
 
     # get background histograms
     total_bkg = None
-    if args.draw_jet_fake_variation is None:
+    if args.category is None:
         stype = "Nominal"
+        cat = ""
     else:
-        stype = args.draw_jet_fake_variation
+        stype = "Nominal"
+        cat = args.category
+
     for index,process in enumerate(bkg_processes):
         if index == 0:
-            total_bkg = rootfile.get(channel, process, shape_type=stype).Clone()
+            total_bkg = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
         else:
-            total_bkg.Add(rootfile.get(channel, process, shape_type=stype))
+            total_bkg.Add(rootfile.get(channel, process, category=cat, shape_type=stype))
         if process in ["jetFakesEMB", "jetFakes"] and channel == "tt":
-            total_bkg.Add(rootfile.get(channel, "wFakes", shape_type=stype))
-            jetfakes_hist = rootfile.get(channel, process, shape_type=stype)
+            total_bkg.Add(rootfile.get(channel, "wFakes", category=cat, shape_type=stype))
+            jetfakes_hist = rootfile.get(channel, process, category=cat, shape_type=stype)
             jetfakes_hist.Add(
-                rootfile.get(channel, "wFakes", shape_type=stype))
+                rootfile.get(channel, "wFakes", category=cat, shape_type=stype))
             plot.add_hist(
                 jetfakes_hist, process, "bkg")
         else:
             plot.add_hist(
-                rootfile.get(channel, process, shape_type=stype), process, "bkg")
+                rootfile.get(channel, process, category=cat, shape_type=stype), process, "bkg")
         plot.setGraphStyle(
             process, "hist", fillcolor=styles.color_dict[process])
 
@@ -226,7 +234,7 @@ def main(info):
         fillcolor=styles.color_dict["unc"],
         linecolor=0)
 
-    plot.add_hist(rootfile.get(channel, "data", shape_type=stype), "data_obs")
+    plot.add_hist(rootfile.get(channel, "data", category=cat, shape_type=stype), "data_obs")
     data_norm = plot.subplot(0).get_hist("data_obs").Integral()
     plot.subplot(0).get_hist("data_obs").GetXaxis().SetMaxDigits(4)
     plot.subplot(0).setGraphStyle("data_obs", "e0")
@@ -240,8 +248,8 @@ def main(info):
         # get signal histograms
         plot_idx_to_add_signal = [0,2] if args.linear else [1,2]
         for i in plot_idx_to_add_signal:
-            ggH = rootfile.get(channel, "ggH125").Clone()
-            qqH = rootfile.get(channel, "qqH125").Clone()
+            ggH = rootfile.get(channel, "ggH125",category=cat).Clone()
+            qqH = rootfile.get(channel, "qqH125",category=cat).Clone()
             # VH = rootfile.get(channel, "VH125").Clone()
             # ttH = rootfile.get(channel, "ttH125").Clone()
             # HWW = rootfile.get(channel, "HWW").Clone()
@@ -482,6 +490,10 @@ def main(info):
         begin_left=posChannelCategoryLabelLeft)
 
     # save plot
+    if args.category is not None:
+        category = args.category
+    else:
+        category = "Nominal"
     if not args.embedding and not args.fake_factor:
         postfix = "fully_classic"
     if args.embedding and not args.fake_factor:
@@ -498,8 +510,8 @@ def main(info):
     if not os.path.exists("%s_plots_%s/%s"%(args.era,postfix,channel)):
         os.mkdir("%s_plots_%s/%s"%(args.era,postfix,channel))
     print("Trying to save the created plot")
-    plot.save("%s_plots_%s/%s/%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, variable, "pdf"))
-    plot.save("%s_plots_%s/%s/%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, variable, "png"))
+    plot.save("%s_plots_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, category, variable, "pdf"))
+    plot.save("%s_plots_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, category, variable, "png"))
 
 
 if __name__ == "__main__":
