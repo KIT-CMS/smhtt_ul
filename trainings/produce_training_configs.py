@@ -289,6 +289,7 @@ def create_process_yaml(
         "tree_path": "ntuple",
         "base_path": basedir,
         "training_weight_branch": "weight",
+        "event_branch": "event",
     }
     with open(os.path.join(outputfolder, filename), "w") as f:
         yaml.dump(data, f)
