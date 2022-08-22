@@ -10,4 +10,4 @@ python trainings/produce_training_configs.py --channels $CHANNEL \
     --directory $NTUPLES \
     --${CHANNEL}-friend-directory $XSEC_FRIENDS $FF_FRIENDS \
     --eras $ERA --trainings-config trainings/default_training_sm.yaml \
-    --output-folder /work/sbrommer/smhtt_ul/training_configs/v2
+    --output-folder /work/sbrommer/smhtt_ul/training_configs/v4

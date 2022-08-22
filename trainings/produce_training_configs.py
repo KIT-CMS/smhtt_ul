@@ -139,6 +139,7 @@ def create_training_configs(
     with open(filename, "w") as f:
         print(config)
         yaml.dump(config, f)
+    return filename
 
 
 def create_process_mapping(channel, era, no_embedding, no_fake_factors):
@@ -216,6 +217,7 @@ def add_fake_factors(era, channel, datasets, categorization, special_analysis):
 def setup_trainings(eras, channels, analysistype):
     trainings = {}
     trainings["channels"] = channels
+    trainings["analysis"] = analysistype
     trainings["eras"] = eras
     trainings["trainings"] = {}
     if analysistype == "sm":
@@ -289,9 +291,25 @@ def create_process_yaml(
         "tree_path": "ntuple",
         "base_path": basedir,
         "training_weight_branch": "weight",
-        "event_branch": "event",
     }
     with open(os.path.join(outputfolder, filename), "w") as f:
+        yaml.dump(data, f)
+
+def create_analysis_configs(analysis_name, outputfolder, trainings, trainings_config_path, processes_config_path):
+    configname = f"{analysis_name}.yaml"
+    data = {}
+    for training in trainings["trainings"]:
+        subdata = {}
+        subdata["trainings"] = [training]
+        subdata["model"] = {}
+        subdata["trainings_config"] = trainings_config_path
+        subdata["processes_config"] = processes_config_path
+        subdata["condor_parameter"] = {
+            "condor_gpu" : 1,
+            "condor_memory" : "16000",
+        }
+        data[training] = subdata
+    with open(os.path.join(outputfolder, configname), "w") as f:
         yaml.dump(data, f)
 
 
@@ -312,7 +330,9 @@ def main(args):
     eras = args.eras
     special_analysis = args.special_analysis
     categorization = set_training_categorization()
-    trainings = setup_trainings(eras, channels, "sm")
+    analysis_name = "sm"
+    process_config_path = f"{outputfolder}/processes"
+    trainings = setup_trainings(eras, channels, analysis_name)
     # first create the processes configs for all processes relevant
     for era in eras:
         nominals = {}
@@ -363,19 +383,29 @@ def main(args):
                     channel,
                     unit,
                     nominals[era]["units"][channel][unit],
-                    f"{outputfolder}/processes",
+                    process_config_path,
                     categorization,
                     args.directory,
                     friend_directories[channel],
                 )
     # Step 3: create training configs
-    logger.info("Creating training configs")
-    create_training_configs(
+    logger.info("Creating training config")
+    trainings_config_path = create_training_configs(
         outputfolder,
         trainings,
         args.trainings_config,
         args.no_embedding,
         args.no_fake_factors,
+    )
+    # Step 4: create analysis configs
+    # in the analysis configs, multiple trainings can be combined, e.g. mt channel 2016-2018
+    logger.info("Creating analysis config")
+    create_analysis_configs(
+        analysis_name,
+        outputfolder,
+        trainings,
+        trainings_config_path,
+        process_config_path,
     )
 
 

@@ -1,5 +1,5 @@
 event_weights: training_weight
-global_weight_scale: 1.0
+# global_weight_scale: 1.0
 model:
   cut_fraction: 0.1
   early_stopping: 50
@@ -8,9 +8,9 @@ model:
   name: smhtt_dropout_tanh_GPU
   save_best_only: true
   steps_per_epoch: 100
-preprocessing: standard_scaler
-seed: 1234
-train_test_split: 0.75
+  preprocessing: standard_scaler
+  seed: 1234
+  train_test_split: 0.75
 variables:
   -
 processes:
