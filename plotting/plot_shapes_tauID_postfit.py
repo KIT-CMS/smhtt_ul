@@ -133,6 +133,7 @@ def main(args):
     else:
         channel_categories = {
             "mt": ["1", "2", "3", "4", "5", "6", "7"],
+            "mt": [ "6", "7", "8", "10", "11"],
         }
 
         signalcats = []
@@ -157,6 +158,8 @@ def main(args):
         "7": "DM0",
         "8": "DM1",
         "9": "DM10_11",
+        "10": "DM10",
+        "11": "DM11",
         "100": "Control Region"
     }
     if args.linear:
@@ -171,7 +174,7 @@ def main(args):
 
     bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
     if not args.fake_factor and args.embedding:
-        bkg_processes = ["QCD", "VVJ", "W", "TTJ", "ZJ", "ZL", "EMB"]
+        bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
     if not args.embedding and args.fake_factor:
         bkg_processes = ["VVT", "VVJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"]
     if not args.embedding and not args.fake_factor:
@@ -188,7 +191,7 @@ def main(args):
             "ZL",
             "ZTT",
         ]
-    bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
+    # bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -223,6 +226,8 @@ def main(args):
     else:
         categories = channel_categories[channel]
     logger.warning("Categories: {}".format(categories))
+    if not isinstance(categories, list):
+        categories = [categories]
     for category in categories:
         rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit)
         if channel == "em" and args.embedding:
