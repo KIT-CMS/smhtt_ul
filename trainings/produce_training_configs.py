@@ -113,7 +113,7 @@ logger = logging.getLogger("")
 
 
 def create_training_configs(
-    outputfolder, trainings, base_config, no_embedding, no_fake_factors
+    outputfolder, trainings, process_config_path, base_config, no_embedding, no_fake_factors
 ):
 
     # load the base config
@@ -134,6 +134,18 @@ def create_training_configs(
         )
         config[training]["processes"] = list(config[training]["mapping"].keys())
         config[training]["classes"] = list(set(config[training]["mapping"].values()))
+        config[training]["processes_config"] = process_config_path
+    
+    # also add all combined trainings here
+    for combined_training in trainings["combined_trainings"]:
+        config[combined_training] = {}
+        config[combined_training]["trainings"] = trainings["combined_trainings"][combined_training]["trainings"]
+        config[combined_training]["condor_parameters"] = {
+            "condor_gpu" : 1,
+            "condor_memory" : "16000",
+        }
+        config[combined_training]["composite"] = True
+
     # write the configs to files
     filename = f"{outputfolder}/trainings.yaml"
     with open(filename, "w") as f:
@@ -220,8 +232,10 @@ def setup_trainings(eras, channels, analysistype):
     trainings["analysis"] = analysistype
     trainings["eras"] = eras
     trainings["trainings"] = {}
+    trainings["combined_trainings"] = {}
     if analysistype == "sm":
         default_vars = ["pt_1", "pt_2", "m_vis", "njets", "jpt_1", "jpt_2"]
+        logger.info(f"Using default variables {default_vars}")
         # here we have one training per era and channel
         for era in eras:
             for channel in channels:
@@ -231,6 +245,14 @@ def setup_trainings(eras, channels, analysistype):
                     "channel": channel,
                     "era": era,
                     "variables": default_vars,
+                    "single_training": True,
+                }
+        # if we have multiple channels, also define a combined training for testing purposes
+        if len(channels) > 1:
+            for era in eras:
+                trainings["combined_trainings"][f"sm_{era}_{'_'.join(channels)}"] = {
+                    "trainings": [f"sm_{era}_{channel}" for channel in channels],
+                    "single_training": False,
                 }
     else:
         raise NotImplementedError(f"Analysis type {analysistype} not implemented.")
@@ -291,6 +313,10 @@ def create_process_yaml(
         "tree_path": "ntuple",
         "base_path": basedir,
         "training_weight_branch": "weight",
+        "condor_parameter" :{
+            "condor_gpu" : 1,
+            "condor_memory" : "16000",
+        }
     }
     with open(os.path.join(outputfolder, filename), "w") as f:
         yaml.dump(data, f)
@@ -301,13 +327,8 @@ def create_analysis_configs(analysis_name, outputfolder, trainings, trainings_co
     for training in trainings["trainings"]:
         subdata = {}
         subdata["trainings"] = [training]
-        subdata["model"] = {}
         subdata["trainings_config"] = trainings_config_path
-        subdata["processes_config"] = processes_config_path
-        subdata["condor_parameter"] = {
-            "condor_gpu" : 1,
-            "condor_memory" : "16000",
-        }
+
         data[training] = subdata
     with open(os.path.join(outputfolder, configname), "w") as f:
         yaml.dump(data, f)
@@ -393,6 +414,7 @@ def main(args):
     trainings_config_path = create_training_configs(
         outputfolder,
         trainings,
+        process_config_path,
         args.trainings_config,
         args.no_embedding,
         args.no_fake_factors,
