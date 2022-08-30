@@ -129,8 +129,10 @@ def create_training_configs(
         seleted_training = trainings["trainings"][training]
         config[training] = deepcopy(base_config)
         config[training]["variables"] = seleted_training["variables"]
-        config[training]["era"] = seleted_training["identifier"]["era"]
-        config[training]["channel"] = seleted_training["identifier"]["channel"]
+        config[training]["identifier"] = {
+            "era": seleted_training["identifier"]["era"],
+            "channel": seleted_training["identifier"]["channel"],
+        }
         config[training]["mapping"] = create_process_mapping(
             seleted_training["identifier"]["channel"],
             seleted_training["identifier"]["era"],
