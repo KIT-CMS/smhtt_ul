@@ -113,7 +113,12 @@ logger = logging.getLogger("")
 
 
 def create_training_configs(
-    outputfolder, trainings, process_config_path, base_config, no_embedding, no_fake_factors
+    outputfolder,
+    trainings,
+    process_config_path,
+    base_config,
+    no_embedding,
+    no_fake_factors,
 ):
 
     # load the base config
@@ -124,25 +129,27 @@ def create_training_configs(
         seleted_training = trainings["trainings"][training]
         config[training] = deepcopy(base_config)
         config[training]["variables"] = seleted_training["variables"]
-        config[training]["era"] = seleted_training["era"]
-        config[training]["channel"] = seleted_training["channel"]
+        config[training]["era"] = seleted_training["identifier"]["era"]
+        config[training]["channel"] = seleted_training["identifier"]["channel"]
         config[training]["mapping"] = create_process_mapping(
-            seleted_training["channel"],
-            seleted_training["era"],
+            seleted_training["identifier"]["channel"],
+            seleted_training["identifier"]["era"],
             no_embedding,
             no_fake_factors,
         )
         config[training]["processes"] = list(config[training]["mapping"].keys())
         config[training]["classes"] = list(set(config[training]["mapping"].values()))
         config[training]["processes_config"] = process_config_path
-    
+
     # also add all combined trainings here
     for combined_training in trainings["combined_trainings"]:
         config[combined_training] = {}
-        config[combined_training]["trainings"] = trainings["combined_trainings"][combined_training]["trainings"]
+        config[combined_training]["trainings"] = trainings["combined_trainings"][
+            combined_training
+        ]["trainings"]
         config[combined_training]["condor_parameters"] = {
-            "condor_gpu" : 1,
-            "condor_memory" : "16000",
+            "condor_gpu": 1,
+            "condor_memory": "16000",
         }
         config[combined_training]["composite"] = True
 
@@ -242,8 +249,10 @@ def setup_trainings(eras, channels, analysistype):
                 trainings["trainings"][f"sm_{era}_{channel}"] = {
                     "processes": [],
                     "classes": [],
-                    "channel": channel,
-                    "era": era,
+                    "identifier": {
+                        "channel": channel,
+                        "era": era,
+                    },
                     "variables": default_vars,
                     "single_training": True,
                 }
@@ -313,15 +322,18 @@ def create_process_yaml(
         "tree_path": "ntuple",
         "base_path": basedir,
         "training_weight_branch": "weight",
-        "condor_parameter" :{
-            "condor_gpu" : 1,
-            "condor_memory" : "16000",
-        }
+        "condor_parameter": {
+            "condor_gpu": 1,
+            "condor_memory": "16000",
+        },
     }
     with open(os.path.join(outputfolder, filename), "w") as f:
         yaml.dump(data, f)
 
-def create_analysis_configs(analysis_name, outputfolder, trainings, trainings_config_path, processes_config_path):
+
+def create_analysis_configs(
+    analysis_name, outputfolder, trainings, trainings_config_path, processes_config_path
+):
     configname = f"{analysis_name}.yaml"
     data = {}
     for training in trainings["trainings"]:
