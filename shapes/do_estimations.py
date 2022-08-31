@@ -5,46 +5,15 @@ import json
 
 import ROOT
 
+# import the estimation functions
+from shapes.estimations.additionals import qqH_merge_estimation
+from shapes.estimations.fakefactors import fake_factor_estimation
+from shapes.estimations.qcd import qcd_estimation, abcd_estimation
+from shapes.estimations.ttbar_emb import emb_ttbar_contamination_estimation
+from shapes.estimations.wfakes import wfakes_estimation
+
 
 logger = logging.getLogger("")
-
-_dataset_map = {
-    "data": "data",
-    "ZTT": "DY",
-    "ZL": "DY",
-    "ZJ": "DY",
-    "TTT": "TT",
-    "TTL": "TT",
-    "TTJ": "TT",
-    "VVT": "VV",
-    "VVL": "VV",
-    "VVJ": "VV",
-    "EMB": "EMB",
-    "W": "W",
-    "qqH125": "qqH",
-    "ZH125": "ZH",
-    "WH125": "WH",
-}
-
-_process_map = {
-    "data": "data",
-    "ZTT": "DY-ZTT",
-    "ZL": "DY-ZL",
-    "ZJ": "DY-ZJ",
-    "TTT": "TT-TTT",
-    "TTL": "TT-TTL",
-    "TTJ": "TT-TTJ",
-    "VVT": "VV-VVT",
-    "VVL": "VV-VVL",
-    "VVJ": "VV-VVJ",
-    "EMB": "Embedded",
-    "W": "W",
-    "qqH125": "qqH125",
-    "ZH125": "ZH125",
-    "WH125": "WH125",
-}
-
-_name_string = "{dataset}#{channel}{process}{selection}#{variation}#{variable}"
 
 
 def parse_args():
@@ -52,11 +21,30 @@ def parse_args():
     parser.add_argument("-i", "--input", required=True, help="Input root file.")
     parser.add_argument("-e", "--era", required=True, help="Experiment era.")
     parser.add_argument(
-        "--emb-tt",
+        "--do-emb-tt",
         action="store_true",
         help="Add embedded ttbar contamination variation to file.",
     )
-    parser.add_argument("-s", "--special", help="Special selection.", default="")
+    parser.add_argument(
+        "--do-ff",
+        action="store_true",
+        help="Add fake factor estimations to file.",
+    )
+    parser.add_argument(
+        "--do-qcd",
+        action="store_true",
+        help="Add qcd estimations to file.",
+    )
+    parser.add_argument(
+        "--do-wfakes",
+        action="store_true",
+        help="Add wfakes estimations to file.",
+    )
+    parser.add_argument(
+        "--do-qqh-procs",
+        action="store_true",
+        help="Add qqh procs estimations to file.",
+    )
     return parser.parse_args()
 
 
@@ -74,786 +62,101 @@ def setup_logging(output_file, level=logging.INFO):
     return
 
 
-def replace_negative_entries_and_renormalize(histogram, tolerance):
-    # This function is taken from https://github.com/KIT-CMS/shape-producer/blob/beddc4a43e2e326018d804e58d612d8688ec33b6/shape_producer/histogram.py#L189
-
-    # Find negative entries and calculate norm.
-    norm_all = 0.0
-    norm_positive = 0.0
-    for i_bin in range(1, histogram.GetNbinsX() + 1):
-        this_bin = histogram.GetBinContent(i_bin)
-        if this_bin < 0.0:
-            histogram.SetBinContent(i_bin, 0.0)
+def parse_process_name(name, variation_key):
+    logger.debug("Processing histogram %s", name.GetName())
+    dataset, selection, variation, variable = name.GetName().split("#")
+    if variation_key in variation:
+        sel_split = selection.split("-", maxsplit=1)
+        # Set category to default since not present in control plots.
+        category = ""
+        # Treat data hists seperately because only channel selection is applied to data.
+        if "data" in dataset:
+            channel = sel_split[0]
+            # Set category label for analysis categories.
+            if len(sel_split) > 1:
+                category = sel_split[1]
+            process = "data"
         else:
-            norm_positive += this_bin
-        norm_all += this_bin
-
-    if norm_all == 0.0 and norm_positive != 0.0:
-        logger.fatal(
-            "Aborted renormalization because initial normalization is zero, but positive normalization not. . Check histogram %s",
-            histogram.GetName(),
-        )
-        raise Exception
-
-    if norm_all < 0.0:
-        logger.fatal(
-            "Aborted renormalization because initial normalization is negative: %f. Check histogram %s ",
-            norm_all,
-            histogram.GetName(),
-        )
-        raise Exception
-
-    if abs(norm_all - norm_positive) > tolerance * norm_all:
-        logger.warning(
-            "Renormalization failed because the normalization changed by %f, which is above the tolerance %f. Check histogram %s",
-            abs(norm_all - norm_positive),
-            tolerance * norm_all,
-            histogram.GetName(),
-        )
-
-    # Renormalize histogram if negative entries are found
-    if norm_all != norm_positive:
-        if norm_positive == 0.0:
-            logger.fatal(
-                "Renormalization failed because all bins have negative entries."
-            )
-            raise Exception
-        for i_bin in range(1, histogram.GetNbinsX() + 1):
-            this_bin = histogram.GetBinContent(i_bin)
-            histogram.SetBinContent(i_bin, this_bin * norm_all / norm_positive)
-
-    return histogram
-
-
-def fake_factor_estimation(
-    rootfile,
-    channel,
-    selection,
-    variable,
-    variation="Nominal",
-    is_embedding=True,
-    sub_scale=1.0,
-    special="",
-    doTauES=False,
-):
-    if is_embedding:
-        if doTauES:
-            procs_to_subtract = [special, "ZL", "TTL", "VVL"]
-        else:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL"]
-    else:
-        procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
-    if special == "TauES":
-        logger.debug("TauES special selection")
-    logger.debug(
-        "Trying to get object {}".format(
-            _name_string.format(
-                dataset="data",
-                channel=channel,
-                process="",
-                selection="-" + selection if selection != "" else "",
-                variation="anti_iso"
-                if "scale_t" in variation or "sub_syst" in variation
-                else variation,
-                variable=variable,
-            )
-        )
-    )
-    base_hist = rootfile.Get(
-        _name_string.format(
-            dataset="data",
-            channel=channel,
-            process="",
-            selection="-" + selection if selection != "" else "",
-            variation="anti_iso"
-            if "scale_t" in variation or "sub_syst" in variation
-            else variation,
-            variable=variable,
-        )
-    ).Clone()
-    for proc in procs_to_subtract:
-        logger.debug(
-            "Trying to get object {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation if not "sub_syst" in variation else "anti_iso",
-                    variable=variable,
-                )
-            )
-        )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation if not "sub_syst" in variation else "anti_iso",
-                    variable=variable,
-                )
-            ),
-            -sub_scale,
-        )
-    proc_name = "jetFakes" if is_embedding else "jetFakesMC"
-    if doTauES:
-        proc_name = "jetFakes{}".format(special)
-    if variation in ["anti_iso"]:
-        ff_variation = "Nominal"
-    else:
-        ff_variation = variation.replace("anti_iso_", "")
-    variation_name = (
-        base_hist.GetName()
-        .replace("data", proc_name)
-        .replace(
-            variation
-            if "scale_t" not in variation and "sub_syst" not in variation
-            else "anti_iso",
-            ff_variation,
-        )
-        .replace("#" + channel, "#" + "-".join([channel, proc_name]), 1)
-    )
-    base_hist.SetName(variation_name)
-    base_hist.SetTitle(variation_name)
-    logger.debug("Finished estimation of shape %s.", variation_name)
-    return base_hist
-
-
-def qcd_estimation(
-    rootfile,
-    channel,
-    selection,
-    variable,
-    variation="Nominal",
-    is_embedding=True,
-    extrapolation_factor=1.0,
-    sub_scale=1.0,
-):
-    logger.debug("Parameters for qcd estimation")
-    logger.debug("channel: %s", channel)
-    logger.debug("selection: %s", selection)
-    logger.debug("variable: %s", variable)
-    logger.debug("variation: %s", variation)
-    logger.debug("is_embedding: %s", is_embedding)
-    logger.debug("extrapolation_factor: %s", extrapolation_factor)
-    logger.debug("sub_scale: %s", sub_scale)
-    if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
-        if "em" in channel:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
-        elif "et" in channel:
-            procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ"]
-    else:
-        procs_to_subtract = [
-            "ZTT",
-            "ZL",
-            "ZJ",
-            "TTT",
-            "TTL",
-            "TTJ",
-            "VVT",
-            "VVL",
-            "VVJ",
-            "W",
-        ]
-        if "em" in channel:
-            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
-        elif "et" in channel:
-            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
-
-    logger.debug(
-        "Trying to get object {}".format(
-            _name_string.format(
-                dataset="data",
-                channel=channel,
-                process="",
-                selection="-" + selection if selection != "" else "",
-                variation="same_sign" if "subtrMC" in variation else variation,
-                variable=variable,
-            )
-        )
-    )
-    base_hist = rootfile.Get(
-        _name_string.format(
-            dataset="data",
-            channel=channel,
-            process="",
-            selection="-" + selection if selection != "" else "",
-            variation="same_sign" if "subtrMC" in variation else variation,
-            variable=variable,
-        )
-    ).Clone()
-    for proc in procs_to_subtract:
-        logger.debug(
-            "Trying to get object {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation="same_sign" if "subtrMC" in variation else variation,
-                    variable=variable,
-                )
-            )
-        )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation="same_sign" if "subtrMC" in variation else variation,
-                    variable=variable,
-                )
-            ),
-            -sub_scale,
-        )
-
-    proc_name = "QCD" if is_embedding else "QCDMC"
-    if variation in ["same_sign"]:
-        qcd_variation = "Nominal"
-    else:
-        qcd_variation = variation.replace("same_sign_", "")
-    logger.debug(
-        "Use extrapolation_factor factor with value %.2f to scale from ss to os region.",
-        extrapolation_factor,
-    )
-    if base_hist.Integral() > 0.0:
-        base_hist.Scale(extrapolation_factor)
-    else:
-        logger.warning(
-            "No data in same-sign region for histogram %s. Setting extrapolation factor to 0.0",
-            base_hist.GetName(),
-        )
-        base_hist.Scale(0.0)
-    variation_name = (
-        base_hist.GetName()
-        .replace("data", proc_name)
-        .replace(
-            variation if "subtrMC" not in variation else "same_sign", qcd_variation
-        )
-        .replace(channel, "-".join([channel, proc_name]), 1)
-    )
-    base_hist.SetName(variation_name)
-    base_hist.SetTitle(variation_name)
-    replace_negative_entries_and_renormalize(base_hist, tolerance=100.05)
-    return base_hist
-
-
-def abcd_estimation(
-    rootfile,
-    channel,
-    selection,
-    variable,
-    variation="Nominal",
-    is_embedding=True,
-    transposed=False,
-):
-    logger.debug("Parameters for abcd estimation")
-    logger.debug("channel: %s", channel)
-    logger.debug("selection: %s", selection)
-    logger.debug("variable: %s", variable)
-    logger.debug("variation: %s", variation)
-    logger.debug("is_embedding: %s", is_embedding)
-    logger.debug("transposed: %s", transposed)
-    if variation != "Nominal" and not variation.startswith("abcd_"):
-        # add abcd_ on the front of the variation
-        variation = "abcd_" + variation
-    if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
-        if "em" in channel:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
-    else:
-        procs_to_subtract = [
-            "ZTT",
-            "ZL",
-            "ZJ",
-            "TTT",
-            "TTL",
-            "TTJ",
-            "VVT",
-            "VVL",
-            "VVJ",
-            "W",
-        ]
-        if "em" in channel:
-            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
-
-    # Get the shapes from region B.
-    logger.debug(
-        "Trying to get object {}".format(
-            _name_string.format(
-                dataset="data",
-                channel=channel,
-                process="",
-                selection="-" + selection if selection != "" else "",
-                variation=variation.replace("same_sign_anti_iso", "same_sign")
-                if transposed
-                else variation.replace("same_sign_anti_iso", "anti_iso"),
-                variable=variable,
-            )
-        )
-    )
-    base_hist = rootfile.Get(
-        _name_string.format(
-            dataset="data",
-            channel=channel,
-            process="",
-            selection="-" + selection if selection != "" else "",
-            variation=variation.replace("same_sign_anti_iso", "same_sign")
-            if transposed
-            else variation.replace("same_sign_anti_iso", "anti_iso"),
-            variable=variable,
-        )
-    ).Clone()
-    for proc in procs_to_subtract:
-        logger.debug(
-            "Trying to get object {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation.replace("same_sign_anti_iso", "same_sign")
-                    if transposed
-                    else variation.replace("same_sign_anti_iso", "anti_iso"),
-                    variable=variable,
-                )
-            )
-        )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation.replace("same_sign_anti_iso", "same_sign")
-                    if transposed
-                    else variation.replace("same_sign_anti_iso", "anti_iso"),
-                    variable=variable,
-                )
-            ),
-            -1.0,
-        )
-    # Calculate extrapolation_factor from regions C and D.
-    data_yield_C = rootfile.Get(
-        _name_string.format(
-            dataset="data",
-            channel=channel,
-            process="",
-            selection="-" + selection if selection != "" else "",
-            variation=variation.replace("same_sign_anti_iso", "anti_iso")
-            if transposed
-            else variation.replace("same_sign_anti_iso", "same_sign"),
-            variable=variable,
-        )
-    ).Integral()
-    bkg_yield_C = sum(
-        rootfile.Get(
-            _name_string.format(
-                dataset=_dataset_map[proc],
-                channel=channel,
-                process="-" + _process_map[proc],
-                selection="-" + selection if selection != "" else "",
-                variation=variation.replace("same_sign_anti_iso", "anti_iso")
-                if transposed
-                else variation.replace("same_sign_anti_iso", "same_sign"),
-                variable=variable,
-            )
-        ).Integral()
-        for proc in procs_to_subtract
-    )
-    data_yield_D = rootfile.Get(
-        _name_string.format(
-            dataset="data",
-            channel=channel,
-            process="",
-            selection="-" + selection if selection != "" else "",
-            variation=variation,
-            variable=variable,
-        )
-    ).Integral()
-    bkg_yield_D = sum(
-        rootfile.Get(
-            _name_string.format(
-                dataset=_dataset_map[proc],
-                channel=channel,
-                process="-" + _process_map[proc],
-                selection="-" + selection if selection != "" else "",
-                variation=variation,
-                variable=variable,
-            )
-        ).Integral()
-        for proc in procs_to_subtract
-    )
-    if data_yield_C == 0 or data_yield_D == 0:
-        logger.warning(
-            "No data in region C or region D for shape of variable %s in category %s. Setting extrapolation_factor to zero.",
-            variable,
-            "-" + selection if selection != "" else "",
-        )
-        extrapolation_factor = 0.0
-    elif not data_yield_D - bkg_yield_D > 0:
-        logger.warning(
-            "Event content in region D for shape of variable %s in category %s is %f.",
-            variable,
-            selection if selection != "" else "inclusive",
-            data_yield_D - bkg_yield_D,
-        )
-        extrapolation_factor = 0.0
-    else:
-        extrapolation_factor = (data_yield_C - bkg_yield_C) / (
-            data_yield_D - bkg_yield_D
-        )
-
-    proc_name = "QCD" if is_embedding else "QCDMC"
-    if variation in ["abcd_same_sign_anti_iso"]:
-        qcd_variation = "Nominal"
-    else:
-        qcd_variation = variation.replace("abcd_same_sign_anti_iso_", "")
-    logger.debug(
-        "Use extrapolation_factor factor with value %.2f to scale from region B to region A.",
-        extrapolation_factor,
-    )
-    base_hist.Scale(extrapolation_factor)
-    variation = (
-        variation.replace("abcd_same_sign_anti_iso", "abcd_same_sign")
-        if transposed
-        else variation.replace("abcd_same_sign_anti_iso", "abcd_anti_iso")
-    )
-    variation_name = (
-        base_hist.GetName()
-        .replace("data", proc_name)
-        .replace(variation, qcd_variation)
-        .replace(channel, "-".join([channel, proc_name]), 1)
-    )
-    base_hist.SetName(variation_name)
-    base_hist.SetTitle(variation_name)
-    replace_negative_entries_and_renormalize(base_hist, tolerance=100.05)
-    return base_hist
-
-
-def emb_ttbar_contamination_estimation(
-    rootfile, channel, category, variable, sub_scale=0.1, embname="EMB"
-):
-    procs_to_subtract = ["TTT"]
-    logger.debug(
-        "Trying to get object {}".format(
-            _name_string.format(
-                dataset=_dataset_map[embname],
-                channel=channel,
-                process="-" + _process_map[embname],
-                selection=category,
-                variation="Nominal",
-                variable=variable,
-            )
-        )
-    )
-    base_hist = rootfile.Get(
-        _name_string.format(
-            dataset=_dataset_map[embname],
-            channel=channel,
-            process="-" + _process_map[embname],
-            selection="-" + category if category != "" else "",
-            variation="Nominal",
-            variable=variable,
-        )
-    ).Clone()
-    for proc in procs_to_subtract:
-        logger.debug(
-            "Trying to fetch root histogram {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection=category,
-                    variation="Nominal",
-                    variable=variable,
-                )
-            )
-        )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + category if category != "" else "",
-                    variation="Nominal",
-                    variable=variable,
-                )
-            ),
-            -sub_scale,
-        )
-        if sub_scale > 0:
-            variation_name = base_hist.GetName().replace(
-                "Nominal", "CMS_htt_emb_ttbar_EraDown"
-            )
-        else:
-            variation_name = base_hist.GetName().replace(
-                "Nominal", "CMS_htt_emb_ttbar_EraUp"
-            )
-        base_hist.SetName(variation_name)
-        base_hist.SetTitle(variation_name)
-    return base_hist
-
-
-def wfakes_estimation(
-    rootfile, channel, selection, variable, variation="Nominal", is_embedding=True
-):
-    procs_to_add = ["ZL", "TTL", "VVL", "W"]
-    logger.debug(
-        "Trying to get object {}".format(
-            _name_string.format(
-                dataset=_dataset_map[procs_to_add[0]],
-                channel=channel,
-                process="-" + _process_map[procs_to_add[0]],
-                selection="-" + selection if selection != "" else "",
-                variation=variation,
-                variable=variable,
-            )
-        )
-    )
-    base_hist = (
-        rootfile.Get(
-            _name_string.format(
-                dataset=_dataset_map[procs_to_add[0]],
-                channel=channel,
-                process="-" + _process_map[procs_to_add[0]],
-                selection="-" + selection if selection != "" else "",
-                variation=variation,
-                variable=variable,
-            )
-        )
-    ).Clone()
-    for proc in procs_to_add[1:]:
-        logger.debug(
-            "Trying to get object {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation,
-                    variable=variable,
-                )
-            )
-        )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation,
-                    variable=variable,
-                )
-            )
-        )
-    proc_name = "wFakes"
-    if variation in ["wfakes"]:
-        wf_variation = "Nominal"
-    else:
-        wf_variation = variation.replace("wFakes_", "")
-    variation_name = (
-        base_hist.GetName()
-        .replace(_process_map[procs_to_add[0]], proc_name)
-        .replace(_dataset_map[procs_to_add[0]], proc_name)
-        .replace(variation, wf_variation)
-    )
-    base_hist.SetName(variation_name)
-    base_hist.SetTitle(variation_name)
-    return base_hist
-
-
-def qqH_merge_estimation(rootfile, channel, selection, variable, variation="Nominal"):
-    procs_to_add = ["qqH125", "ZH125", "WH125"]
-    logger.debug(
-        "Trying to get object {}".format(
-            _name_string.format(
-                dataset=_dataset_map[procs_to_add[0]],
-                channel=channel,
-                process="-" + _process_map[procs_to_add[0]],
-                selection="-" + selection if selection != "" else "",
-                variation=variation,
-                variable=variable,
-            )
-        )
-    )
-    base_hist = (
-        rootfile.Get(
-            _name_string.format(
-                dataset=_dataset_map[procs_to_add[0]],
-                channel=channel,
-                process="-" + _process_map[procs_to_add[0]],
-                selection="-" + selection if selection != "" else "",
-                variation=variation,
-                variable=variable,
-            )
-        )
-    ).Clone()
-    for proc in procs_to_add[1:]:
-        logger.debug(
-            "Trying to get object {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation,
-                    variable=variable,
-                )
-            )
-        )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation,
-                    variable=variable,
-                )
-            )
-        )
-    proc_name = "qqHComb125"
-    variation_name = base_hist.GetName().replace(
-        _process_map[procs_to_add[0]], proc_name
-    )
-    base_hist.SetName(variation_name)
-    base_hist.SetTitle(variation_name)
-    return base_hist
-
-
-def main(args):
-    input_file = ROOT.TFile(args.input, "update")
-    # Loop over histograms in root file to find available FF inputs.
-    ff_inputs = {}
-    qcd_inputs = {}
-    wfakes_inputs = {}
-    emb_categories = {}
-    qqh_procs = {}
-    tauES_names = []
-    if args.special == "TauES":
-        # we have to extend the _dataset_map and the _process_map to include the TauES variations
-        tauESvariations = [-2.5 + 0.1 * i for i in range(0, 52)]
-        for variation in tauESvariations:
-            name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
-            processname = f"emb{name}"
-            tauES_names.append(processname)
-            _dataset_map[processname] = processname
-            _process_map[processname] = "Embedded"
-    logger.info("Reading inputs from file {}".format(args.input))
-    for key in input_file.GetListOfKeys():
-        logger.debug("Processing histogram %s", key.GetName())
-        dataset, selection, variation, variable = key.GetName().split("#")
-        if "anti_iso" in variation or "same_sign" in variation or "wfakes" in variation:
-            sel_split = selection.split("-", maxsplit=1)
-            # Set category to default since not present in control plots.
-            category = ""
-            # Treat data hists seperately because only channel selection is applied to data.
-            if "data" in dataset:
-                channel = sel_split[0]
-                # Set category label for analysis categories.
-                if len(sel_split) > 1:
-                    category = sel_split[1]
-                process = "data"
+            channel = sel_split[0]
+            #  Check if analysis category present in root file.
+            if (
+                len(sel_split[1].split("-")) > 2
+                or ("Embedded" in sel_split[1] and len(sel_split[1].split("-")) > 1)
+                or ("W" in sel_split[1] and len(sel_split[1].split("-")) > 1)
+                or ("H125" in sel_split[1] and len(sel_split[1].split("-")) > 1)
+                or ("qqHComb125" in sel_split[1])
+            ):
+                process = "-".join(sel_split[1].split("-")[:-1])
+                category = sel_split[1].split("-")[-1]
             else:
-                channel = sel_split[0]
-                #  Check if analysis category present in root file.
-                if (
-                    len(sel_split[1].split("-")) > 2
-                    or ("Embedded" in sel_split[1] and len(sel_split[1].split("-")) > 1)
-                    or ("W" in sel_split[1] and len(sel_split[1].split("-")) > 1)
-                ):
-                    process = "-".join(sel_split[1].split("-")[:-1])
-                    category = sel_split[1].split("-")[-1]
-                else:
-                    # Set only process if no categorization applied.
-                    process = sel_split[1]
-            if "anti_iso" in variation and not variation.startswith("abcd"):
-                if channel in ff_inputs:
-                    if category in ff_inputs[channel]:
-                        if variable in ff_inputs[channel][category]:
-                            if variation in ff_inputs[channel][category][variable]:
-                                ff_inputs[channel][category][variable][
-                                    variation
-                                ].append(process)
-                            else:
-                                ff_inputs[channel][category][variable][variation] = [
-                                    process
-                                ]
-                        else:
-                            ff_inputs[channel][category][variable] = {
-                                variation: [process]
-                            }
-                    else:
-                        ff_inputs[channel][category] = {
-                            variable: {variation: [process]}
-                        }
-                else:
-                    ff_inputs[channel] = {category: {variable: {variation: [process]}}}
-            if "same_sign" in variation:
-                if channel in qcd_inputs:
-                    if (
-                        channel in ["et", "mt", "em"]
-                        or "abcd_same_sign_anti_iso" in variation
-                    ):
-                        if category in qcd_inputs[channel]:
-                            if variable in qcd_inputs[channel][category]:
-                                if variation in qcd_inputs[channel][category][variable]:
-                                    qcd_inputs[channel][category][variable][
-                                        variation
-                                    ].append(process)
-                                else:
-                                    qcd_inputs[channel][category][variable][
-                                        variation
-                                    ] = [process]
-                            else:
-                                qcd_inputs[channel][category][variable] = {
-                                    variation: [process]
-                                }
-                        else:
-                            qcd_inputs[channel][category] = {
-                                variable: {variation: [process]}
-                            }
-                else:
-                    qcd_inputs[channel] = {category: {variable: {variation: [process]}}}
-            if "wfakes" in variation:
-                if channel in wfakes_inputs:
-                    if category in wfakes_inputs[channel]:
-                        if variable in wfakes_inputs[channel][category]:
-                            if variation in wfakes_inputs[channel][category][variable]:
-                                wfakes_inputs[channel][category][variable][
-                                    variation
-                                ].append(process)
-                            else:
-                                wfakes_inputs[channel][category][variable][
-                                    variation
-                                ] = [process]
-                        else:
-                            wfakes_inputs[channel][category][variable] = {
-                                variation: [process]
-                            }
-                    else:
-                        wfakes_inputs[channel][category] = {
-                            variable: {variation: [process]}
-                        }
-                else:
-                    wfakes_inputs[channel] = {
-                        category: {variable: {variation: [process]}}
-                    }
-        #  Booking of necessary categories for embedded tt bar variation.
+                # Set only process if no categorization applied.
+                process = sel_split[1]
+        return channel, category, variable, variation, process
+    else:
+        return None, None, None, None, None
+
+
+def add_input_to_inputdict(input_dict, channel, category, variable, variation, process):
+    if channel not in input_dict:
+        input_dict[channel] = {category: {variable: {variation: [process]}}}
+    if category not in input_dict[channel]:
+        input_dict[channel][category] = {variable: {variation: [process]}}
+    if variable not in input_dict[channel][category]:
+        input_dict[channel][category][variable] = {variation: [process]}
+    if variation not in input_dict[channel][category][variable]:
+        input_dict[channel][category][variable][variation] = [process]
+    if variation in input_dict[channel][category][variable]:
+        input_dict[channel][category][variable][variation].append(process)
+
+
+def parse_histograms_for_ff(inputfile):
+    ff_inputs = {}
+    for key in inputfile.GetListOfKeys():
+        channel, category, variable, variation, process = parse_process_name(
+            key, "anti_iso"
+        )
+        if channel is not None:
+            if not variation.startswith("abcd"):
+                add_input_to_inputdict(
+                    ff_inputs, channel, category, variable, variation, process
+                )
+    return ff_inputs
+
+
+def parse_histograms_for_qcd(inputfile):
+    qcd_inputs = {}
+    for key in inputfile.GetListOfKeys():
+        channel, category, variable, variation, process = parse_process_name(
+            key, "same_sign"
+        )
+        if channel is not None:
+            if channel in ["et", "mt", "em"] or "abcd_same_sign_anti_iso" in variation:
+                add_input_to_inputdict(
+                    qcd_inputs, channel, category, variable, variation, process
+                )
+    return qcd_inputs
+
+
+def parse_histograms_for_wfakes(inputfile):
+    wfakes_inputs = {}
+    for key in inputfile.GetListOfKeys():
+        channel, category, variable, variation, process = parse_process_name(
+            key, "wfakes"
+        )
+        if channel is not None:
+            add_input_to_inputdict(
+                wfakes_inputs, channel, category, variable, variation, process
+            )
+    return wfakes_inputs
+
+
+def parse_histograms_for_emb_estimation(inputfile):
+    emb_categories = {}
+    for key in inputfile.GetListOfKeys():
+        dataset, selection, variation, variable = key.GetName().split("#")
         if "Nominal" in variation:
             sel_split = selection.split("-", maxsplit=1)
-
-            if "EMB" in dataset or ("emb" in dataset and not "jetFakes" in dataset):
+            if "EMB" in dataset or ("emb" in dataset and "jetFakes" not in dataset):
                 channel = sel_split[0]
                 category = sel_split[1].replace("Embedded", "").strip("-")
                 if channel in emb_categories:
@@ -863,6 +166,13 @@ def main(args):
                         emb_categories[channel][category] = [variable]
                 else:
                     emb_categories[channel] = {category: [variable]}
+    return emb_categories
+
+
+def parse_histograms_for_qqh(inputfile):
+    qqh_procs = {}
+    for key in inputfile.GetListOfKeys():
+        dataset, selection, variation, variable = key.GetName().split("#")
         if dataset in ["qqH", "ZH", "WH"] and not variation.startswith("THU"):
             sel_split = selection.split("-", maxsplit=1)
             # Set category to default since not present in control plots.
@@ -891,63 +201,26 @@ def main(args):
                     process = sel_split[1]
             if category == "":
                 continue
-            if channel in qqh_procs:
-                if category in qqh_procs[channel]:
-                    if variable in qqh_procs[channel][category]:
-                        if variation in qqh_procs[channel][category][variable]:
-                            qqh_procs[channel][category][variable][variation].append(
-                                process
-                            )
-                        else:
-                            qqh_procs[channel][category][variable][variation] = [
-                                process
-                            ]
-                    else:
-                        qqh_procs[channel][category][variable] = {variation: [process]}
-                else:
-                    qqh_procs[channel][category] = {variable: {variation: [process]}}
-            else:
-                qqh_procs[channel] = {category: {variable: {variation: [process]}}}
+            add_input_to_inputdict(
+                qqh_procs, channel, category, variable, variation, process
+            )
+    return qqh_procs
 
+
+def main(args):
+    input_file = ROOT.TFile(args.input, "update")
+
+    logger.info("Reading inputs from file {}".format(args.input))
     # Loop over available ff inputs and do the estimations
-    logger.info("Starting estimations for fake factors and their variations")
-    logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
-    for ch in ff_inputs:
-        for cat in ff_inputs[ch]:
-            logger.info("Do estimation for category %s", cat)
-            for var in ff_inputs[ch][cat]:
-                for variation in ff_inputs[ch][cat][var]:
-                    if args.special == "TauES":
-                        for embsignal in tauES_names:
-                            estimated_hist = fake_factor_estimation(
-                                input_file,
-                                ch,
-                                cat,
-                                var,
-                                variation=variation,
-                                special=embsignal,
-                                doTauES=True,
-                            )
-                            estimated_hist.Write()
-                            for variation, scale in zip(
-                                [
-                                    "CMS_ff_total_sub_syst_Channel_EraUp",
-                                    "CMS_ff_total_sub_syst_Channel_EraDown",
-                                ],
-                                [0.9, 1.1],
-                            ):
-                                estimated_hist = fake_factor_estimation(
-                                    input_file,
-                                    ch,
-                                    cat,
-                                    var,
-                                    variation=variation,
-                                    sub_scale=scale,
-                                    special=embsignal,
-                                    doTauES=True,
-                                )
-                                estimated_hist.Write()
-                    else:
+    if args.do_ff:
+        logger.info("Starting estimations for fake factors and their variations")
+        ff_inputs = parse_histograms_for_ff(input_file)
+        logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
+        for ch in ff_inputs:
+            for cat in ff_inputs[ch]:
+                logger.info("Do estimation for category %s", cat)
+                for var in ff_inputs[ch][cat]:
+                    for variation in ff_inputs[ch][cat][var]:
                         if "scale_t" in variation:
                             continue
                         estimated_hist = fake_factor_estimation(
@@ -989,9 +262,10 @@ def main(args):
                                 sub_scale=scale,
                             )
                             estimated_hist.Write()
-    if args.special == "tauES":
+    if args.do_qcd:
+        qcd_inputs = parse_histograms_for_qcd(input_file)
         logger.info("Starting estimations for the QCD mulitjet process.")
-        logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
+        logger.info("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
         for channel in qcd_inputs:
             for category in qcd_inputs[channel]:
                 logger.info("Do estimation for category %s", category)
@@ -1016,84 +290,58 @@ def main(args):
                 for var in qcd_inputs[channel][category]:
                     for variation in qcd_inputs[channel][category][var]:
                         if channel in ["et", "mt"]:
-                            estimated_hist = qcd_estimation(
-                                input_file,
-                                channel,
-                                category,
-                                var,
-                                variation=variation,
-                                extrapolation_factor=extrapolation_factor,
-                            )
-                            estimated_hist.Write()
-                            estimated_hist = qcd_estimation(
-                                input_file,
-                                channel,
-                                category,
-                                var,
-                                variation=variation,
-                                is_embedding=False,
-                                extrapolation_factor=extrapolation_factor,
-                            )
-                            estimated_hist.Write()
+                            for use_emb in [True, False]:
+                                estimated_hist = qcd_estimation(
+                                    input_file,
+                                    channel,
+                                    category,
+                                    var,
+                                    variation=variation,
+                                    is_embedding=use_emb,
+                                    extrapolation_factor=extrapolation_factor,
+                                )
+                                estimated_hist.Write()
                         elif channel in ["em"]:
-                            estimated_hist = qcd_estimation(
-                                input_file,
-                                channel,
-                                category,
-                                var,
-                                variation=variation,
-                                extrapolation_factor=extrapolation_factor,
-                            )
-                            estimated_hist.Write()
-                            estimated_hist = qcd_estimation(
-                                input_file,
-                                channel,
-                                category,
-                                var,
-                                variation=variation,
-                                is_embedding=False,
-                                extrapolation_factor=extrapolation_factor,
-                            )
-                            estimated_hist.Write()
+                            for use_emb in [True, False]:
+                                estimated_hist = qcd_estimation(
+                                    input_file,
+                                    channel,
+                                    category,
+                                    var,
+                                    variation=variation,
+                                    is_embedding=use_emb,
+                                    extrapolation_factor=extrapolation_factor,
+                                )
+                                estimated_hist.Write()
                         else:
-                            estimated_hist = abcd_estimation(
-                                input_file, channel, category, var, variation=variation
-                            )
-                            estimated_hist.Write()
-                            estimated_hist = abcd_estimation(
-                                input_file,
-                                channel,
-                                category,
-                                var,
-                                variation=variation,
-                                is_embedding=False,
-                            )
-                            estimated_hist.Write()
+                            for use_emb in [True, False]:
+                                estimated_hist = abcd_estimation(
+                                    input_file,
+                                    channel,
+                                    category,
+                                    var,
+                                    variation=variation,
+                                    is_embedding=use_emb,
+                                )
+                                estimated_hist.Write()
                     if channel in ["em"]:
                         for variation, scale in zip(
                             ["subtrMCUp", "subtrMCDown"], [0.8, 1.2]
                         ):
-                            estimated_hist = qcd_estimation(
-                                input_file,
-                                channel,
-                                category,
-                                var,
-                                variation=variation,
-                                extrapolation_factor=extrapolation_factor,
-                                sub_scale=scale,
-                            )
-                            estimated_hist.Write()
-                            estimated_hist = qcd_estimation(
-                                input_file,
-                                channel,
-                                category,
-                                var,
-                                variation=variation,
-                                is_embedding=False,
-                                extrapolation_factor=extrapolation_factor,
-                                sub_scale=scale,
-                            )
-                            estimated_hist.Write()
+                            for use_emb in [True, False]:
+                                estimated_hist = qcd_estimation(
+                                    input_file,
+                                    channel,
+                                    category,
+                                    var,
+                                    variation=variation,
+                                    is_embedding=use_emb,
+                                    extrapolation_factor=extrapolation_factor,
+                                    sub_scale=scale,
+                                )
+                                estimated_hist.Write()
+    if args.do_wfakes:
+        wfakes_inputs = parse_histograms_for_wfakes(input_file)
         logger.info("Starting estimations for wfakes")
         logger.debug("%s", json.dumps(wfakes_inputs, sort_keys=True, indent=4))
         for channel in wfakes_inputs:
@@ -1105,6 +353,8 @@ def main(args):
                             input_file, channel, category, var, variation=variation
                         )
                         estimated_hist.Write()
+    if args.do_qqh_procs:
+        qqh_procs = parse_histograms_for_qqh(input_file)
         logger.info("Starting adding for qqH and VH processes.")
         logger.debug("%s", json.dumps(qqh_procs, sort_keys=True, indent=4))
         for channel in qqh_procs:
@@ -1119,52 +369,32 @@ def main(args):
                         )
                         estimated_hist.Write()
 
-    if args.emb_tt:
+    if args.do_emb_tt:
+        emb_categories = parse_histograms_for_emb_estimation(input_file)
         logger.info("Producing embedding ttbar variations.")
         logger.debug("%s", json.dumps(emb_categories, sort_keys=True, indent=4))
         for channel in emb_categories:
             for category in emb_categories[channel]:
                 logger.info("Do estimation for category %s", category)
-                if args.special == "TauES":
-                    for embsignal in tauES_names:
-                        estimated_hist = emb_ttbar_contamination_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            sub_scale=0.1,
-                            embname=embsignal,
-                        )
-                        estimated_hist.Write()
-                        estimated_hist = emb_ttbar_contamination_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            sub_scale=-0.1,
-                            embname=embsignal,
-                        )
-                        estimated_hist.Write()
-                else:
-                    for var in emb_categories[channel][category]:
-                        estimated_hist = emb_ttbar_contamination_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            sub_scale=0.1,
-                            embname="EMB",
-                        )
-                        estimated_hist.Write()
-                        estimated_hist = emb_ttbar_contamination_estimation(
-                            input_file,
-                            channel,
-                            category,
-                            var,
-                            sub_scale=-0.1,
-                            embname="EMB",
-                        )
-                        estimated_hist.Write()
+                for var in emb_categories[channel][category]:
+                    estimated_hist = emb_ttbar_contamination_estimation(
+                        input_file,
+                        channel,
+                        category,
+                        var,
+                        sub_scale=0.1,
+                        embname="EMB",
+                    )
+                    estimated_hist.Write()
+                    estimated_hist = emb_ttbar_contamination_estimation(
+                        input_file,
+                        channel,
+                        category,
+                        var,
+                        sub_scale=-0.1,
+                        embname="EMB",
+                    )
+                    estimated_hist.Write()
 
     logger.info("Successfully finished estimations.")
     # Clean-up.
@@ -1174,5 +404,5 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    setup_logging("do_estimations.log", level=logging.DEBUG)
+    setup_logging("do_estimations.log", level=logging.INFO)
     main(args)
