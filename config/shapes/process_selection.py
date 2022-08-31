@@ -429,11 +429,7 @@ def ZTT_embedded_process_selection(channel, era):
                 ("iso_wgt_mu_1", "isoweight"),
                 ("id_wgt_mu_1", "idweight"),
                 ("trg_wgtsingle_mu24Ormu27", "trgweight"), # TODO fix naming
-                # ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-                # (
-                #     "id_wgt_tau_vsJet_Tight_2",
-                #     "taubyIsoIdWeight",
-                # ),  # TODO replace with embedded tau id weight
+                ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 # tau_by_iso_id_weight(channel),
                 # triggerweight_emb(channel, era),
                 # fakemetweight_emb(channel, era),
