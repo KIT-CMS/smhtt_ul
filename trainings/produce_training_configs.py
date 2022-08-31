@@ -340,7 +340,7 @@ def create_analysis_configs(
     data = {}
     for training in trainings["trainings"]:
         subdata = {}
-        subdata["trainings"] = [training]
+        subdata["training"] = training
         subdata["trainings_config"] = trainings_config_path
 
         data[training] = subdata
