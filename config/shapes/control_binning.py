@@ -65,6 +65,11 @@ common_binning = {
     "bpt_2": Histogram("bpt_2", "bpt_2", np.arange(0, 160, 5)),
     "beta_1": Histogram("beta_1", "beta_1", np.linspace(-5, 5, 20)),
     "beta_2": Histogram("beta_2", "beta_2", np.linspace(-5, 5, 20)),
+    # fastmtt variables
+    "m_fastmtt": Histogram("m_fastmtt", "m_fastmtt", np.arange(0, 225, 5)),
+    "pt_fastmtt": Histogram("pt_fastmtt", "pt_fastmtt", np.arange(0, 160, 5)),
+    "eta_fastmtt": Histogram("eta_fastmtt", "eta_fastmtt", np.linspace(-2.5, 2.5, 50)),
+    "phi_fastmtt": Histogram("phi_fastmtt", "phi_fastmtt", np.linspace(-3.14, 3.14, 50)),
 
 
 }
