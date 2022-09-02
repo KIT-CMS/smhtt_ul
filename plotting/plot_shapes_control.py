@@ -196,7 +196,7 @@ def main(info):
     total_bkg = None
     if args.category is None:
         stype = "Nominal"
-        cat = ""
+        cat = None
     else:
         stype = "Nominal"
         cat = args.category

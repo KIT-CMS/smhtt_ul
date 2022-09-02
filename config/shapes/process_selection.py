@@ -828,7 +828,7 @@ def qqh_stitching_weight(era):
 def ggH125_process_selection(channel, era):
     ggH125_weights = HTT_base_process_selection(channel, era).weights + [
         ("ggh_NNLO_weight", "gghNNLO"),
-        ggh_stitching_weight(era),
+        # ggh_stitching_weight(era),
     ]
     ggH125_cuts = [
         (
@@ -841,7 +841,7 @@ def ggH125_process_selection(channel, era):
 
 def qqH125_process_selection(channel, era):
     qqH125_weights = HTT_base_process_selection(channel, era).weights + [
-        qqh_stitching_weight(era)
+        # qqh_stitching_weight(era)
     ]
     qqH125_cuts = [
         (
