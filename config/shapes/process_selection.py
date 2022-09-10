@@ -756,6 +756,36 @@ def ZHWW_process_selection(channel, era):
     return Selection(name="ZHWW125", weights=ZHWW_weights)
 
 
+# def ggh_stitching_weight(era):
+#     if era == "2016":
+#         weight = (
+#             "(numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 3.0469376) > 1e-5)+1.0/(9673200 + 19939500 + 19977000)*2.998464*(abs(crossSectionPerEventWeight - 3.0469376) < 1e-5))",
+#             "ggh_stitching_weight",
+#         )
+#     elif era == "2017":
+#         weight = (
+#             "((HTXS_stage1_2_cat_pTjet30GeV==100||HTXS_stage1_2_cat_pTjet30GeV==102||HTXS_stage1_2_cat_pTjet30GeV==103)*crossSectionPerEventWeight*8.210e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV==101)*2.08e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV==104||HTXS_stage1_2_cat_pTjet30GeV==105)*4.39e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV==106)*1.19e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV>=107&&HTXS_stage1_2_cat_pTjet30GeV<=109)*4.91e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV>=110&&HTXS_stage1_2_cat_pTjet30GeV<=113)*7.90e-9"
+#             ")*0.98409104275716*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5)",
+#             "ggh_stitching_weight",
+#         )
+#     elif era == "2018":
+#         weight = (
+#             "(((HTXS_stage1_2_cat_pTjet30GeV==100||HTXS_stage1_2_cat_pTjet30GeV==102||HTXS_stage1_2_cat_pTjet30GeV==103)*crossSectionPerEventWeight*numberGeneratedEventsWeight+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV==101)*2.09e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV==104||HTXS_stage1_2_cat_pTjet30GeV==105)*4.28e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV==106)*1.39e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV>=107&&HTXS_stage1_2_cat_pTjet30GeV<=109)*4.90e-8+"
+#             "(HTXS_stage1_2_cat_pTjet30GeV>=110&&HTXS_stage1_2_cat_pTjet30GeV<=113)*9.69e-9"
+#             ")*0.98409104275716*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5))",
+#             "ggh_stitching_weight",
+#         )
+#     return weight
+
 def ggh_stitching_weight(era):
     if era == "2016":
         weight = (
@@ -828,6 +858,8 @@ def qqh_stitching_weight(era):
 def ggH125_process_selection(channel, era):
     ggH125_weights = HTT_base_process_selection(channel, era).weights + [
         ("ggh_NNLO_weight", "gghNNLO"),
+        ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+        ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         # ggh_stitching_weight(era),
     ]
     ggH125_cuts = [
@@ -842,6 +874,8 @@ def ggH125_process_selection(channel, era):
 def qqH125_process_selection(channel, era):
     qqH125_weights = HTT_base_process_selection(channel, era).weights + [
         # qqh_stitching_weight(era)
+        ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+        ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
     ]
     qqH125_cuts = [
         (
