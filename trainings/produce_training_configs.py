@@ -112,6 +112,22 @@ def parse_arguments():
 logger = logging.getLogger("")
 
 
+def setup_default_class_ordering(inputclasses):
+    final_order = []
+    # put signal first
+    for cls in inputclasses:
+        if "ggh" in cls.lower() or "qqh" in cls.lower():
+            final_order.append(cls)
+    # afterwards always ff and ztt, then the rest
+    for cls in inputclasses:
+        if "ztt" in cls.lower() or "ff" in cls.lower():
+            final_order.append(cls)
+    for cls in inputclasses:
+        if cls not in final_order:
+            final_order.append(cls)
+    return final_order
+
+
 def create_training_configs(
     outputfolder,
     trainings,
@@ -140,7 +156,9 @@ def create_training_configs(
             no_fake_factors,
         )
         config[training]["processes"] = list(config[training]["mapping"].keys())
-        config[training]["classes"] = list(set(config[training]["mapping"].values()))
+        config[training]["classes"] = setup_default_class_ordering(
+            list(set(config[training]["mapping"].values()))
+        )
         config[training]["processes_config"] = process_config_path
 
     # also add all combined trainings here
@@ -165,36 +183,26 @@ def create_training_configs(
 
 def create_process_mapping(channel, era, no_embedding, no_fake_factors):
     default_mapping = {
-        "emb": "emb",
-        "ggh": "ggh",
-        "jetfakes": "ff",
-        "qqh": "qqh",
-        "w": "misc",
-        "wh": "misc",
-        "zh": "misc",
-        "wj": "ff",
-        "zj": "ff",
-        "ztt": "ztt",
-        "ttj": "tt",
+        # 'ewkz': 'misc',
         "ttl": "tt",
-        "ttt": "ztt",
         "vvl": "misc",
-        "vvt": "ztt",
-        "vvj": "ff",
+        "zl": "zll",
+        "ggh": "ggh",
+        "qqh": "qqh",
     }
     if no_embedding:
-        default_mapping.pop("emb")
+        default_mapping["ztt"] = "ztt"
+        default_mapping["ttt"] = "ztt"
+        default_mapping["vvt"] = "ztt"
     else:
-        default_mapping.pop("ztt")
-        default_mapping.pop("ttt")
-        default_mapping.pop("vvt")
+        default_mapping["emb"] = "ztt"
     if no_fake_factors:
-        default_mapping.pop("jetfakes")
+        default_mapping["wj"] = "ff"
+        default_mapping["zj"] = "ff"
+        default_mapping["ttj"] = "ff"
+        default_mapping["vvj"] = "ff"
     else:
-        default_mapping.pop("wj")
-        default_mapping.pop("zj")
-        default_mapping.pop("ttj")
-        default_mapping.pop("vvj")
+        default_mapping["jetfakes"] = "ff"
     # now write the mapping to a file
     return default_mapping
 
@@ -243,7 +251,23 @@ def setup_trainings(eras, channels, analysistype):
     trainings["trainings"] = {}
     trainings["combined_trainings"] = {}
     if analysistype == "sm":
-        default_vars = ["pt_1", "pt_2", "m_vis", "njets", "jpt_1", "jpt_2"]
+        # add dijetpt
+        default_vars = [
+            "pt_1",
+            "pt_2",
+            "m_vis",
+            "njets",
+            "nbtag",
+            "jpt_1",
+            "jpt_2",
+            "jeta_1",
+            "jeta_2",
+            "m_fastmtt",
+            "pt_vis",
+            "mjj",
+            "deltaR_ditaupair",
+            "pt_tt",
+        ]
         logger.info(f"Using default variables {default_vars}")
         # here we have one training per era and channel
         for era in eras:
