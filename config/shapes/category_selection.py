@@ -2,37 +2,123 @@ import numpy as np
 from ntuple_processor import Histogram
 from ntuple_processor.utils import Selection
 
+def build_xxh_cutstring(channel):
+    # this function is used to build up the 2D signal category
+    # from the ggh and the qqh category. This way,
+    # we can rover signal events, that have a large ggh+qqh score
+    ggh_binning = [0.0, 0.2, 0.3, 0.4, 0.5, 0.65, 0.8, 1.0]
+    qqh_binning = [0.0, 0.35, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0]
+    cutstring = "("
+    bincounter = 0.0
+    bindata = []
+    for i,qqh_bin in enumerate(qqh_binning[:-1]):
+        # outer binning is the qqh score
+        cutstring += f"({channel}_qqh >= {qqh_bin} && {channel}_qqh < {qqh_binning[i+1]}) * ("
+        for j,ggh_bin in enumerate(ggh_binning[:-1]):
+            # inner binning is the ggh score, only if the sum of the two scores is below 1
+            if qqh_bin + ggh_bin < 1.0:
+                cutstring += f"{bincounter} * ({channel}_ggh >= {ggh_bin} && {channel}_ggh < {ggh_binning[j+1]}) + "
+                bincounter += 1.0
+        # remove the last " + "
+        cutstring = cutstring[:-3] +  ") + "
+    # remove the last " + " and close the parenthesis
+    cutstring = cutstring[:-3] + ")"
+    # print(cutstring)
+    # print("Number of bins: {}".format(bincounter))
+    return cutstring, bincounter
+
+
+fine_binning = [
+    0.0,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.92,
+    0.94,
+    0.96,
+    0.98,
+    1.0,
+]
 category_mapping = {
     "mt": {
-    "ff": 0,
-    "zll": 1,
-    "ztt": 2,
-    "ggh": 3,
-    "qqh": 4,
-    "misc": 5,
-    "tt": 6,
+        "qqh": {
+            "index": 0,
+            "binning": fine_binning,
+        },
+        "ggh": {
+            "index": 1,
+            "binning": fine_binning,
+        },
+        "ztt": {
+            "index": 2,
+            "binning": [0.0, 0.3, 0.4, 0.45, 0.5, 0.525, 0.55, 0.575, 0.6, 0.65, 0.7, 0.75, 0.8, 0.9, 1.0],
+        },
+        "ff": {
+            "index": 3,
+            "binning": fine_binning,
+        },
+        "tt": {
+            "index": 4,
+            "binning": fine_binning,
+        },
+        "misc": {
+            "index": 5,
+            "binning": fine_binning,
+        },
     }
 }
-# updated order to be used starting with the next training
-# category_mapping = {
-#     "mt": {
-#         "qqh": 0,
-#         "ggh": 1,
-#         "ztt": 2,
-#         "ff": 3,
-#         "misc": 4,
-#         "zll": 5,
-#         "tt": 6,
-#     }
-# }
 
 categorization = {}
 for channel in ["mt"]:
     categorization[channel] = []
     for category in category_mapping[channel].keys():
-        selection = (Selection(name=category,
-        cuts=[
-            f"{channel}_max_index == {category_mapping[channel][category]}", "category selection"
-        ]),
-        [Histogram(f"{channel}_max_score", f"{channel}_max_score", np.linspace(0.0, 1.0, 10))])
+        selection = (
+            Selection(
+                name=category,
+                cuts=[
+                    (
+                        f"{channel}_max_index == {category_mapping[channel][category]['index']}",
+                        "category selection",
+                    )
+                ],
+            ),
+            [
+                Histogram(
+                    f"{channel}_max_score",
+                    f"{channel}_max_score",
+                    category_mapping[channel][category]["binning"],
+                )
+            ],
+        )
         categorization[channel].append(selection)
+    # add the xxh category
+    cutstring, nbins = build_xxh_cutstring(channel)
+    selection = (
+        Selection(
+            name="xxh",
+            cuts=[
+                (
+                    "1==1", "category selection"
+                )
+            ]
+        ),
+        [
+            Histogram(
+                f"{channel}_max_score",
+                cutstring,
+                np.arange(nbins),
+            )
+        ]
+    )
+    categorization[channel].append(selection)
+

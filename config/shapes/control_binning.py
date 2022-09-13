@@ -3,7 +3,7 @@ import numpy as np
 
 common_binning = {
     "genbosonpt": Histogram("genbosonpt", "genbosonpt", np.arange(0, 150, 10)),
-    "DiTauDeltaR": Histogram("DiTauDeltaR", "DiTauDeltaR", np.arange(0, 5, 0.2)),
+    "deltaR_ditaupair": Histogram("DiTauDeltaR", "DiTauDeltaR", np.arange(0, 5, 0.2)),
     "mTdileptonMET_puppi": Histogram("mTdileptonMET_puppi", "mTdileptonMET_puppi", np.arange(0, 200, 4)),
     "pzetamissvis": Histogram("pzetamissvis", "pzetamissvis", np.arange(-200, 200, 5)),
     "pzetamissvis_pf": Histogram("pzetamissvis_pf", "pzetamissvis_pf", np.arange(-200, 200, 5)),
