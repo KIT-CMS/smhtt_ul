@@ -7,7 +7,7 @@ model:
   eventsPerClassAndBatch: 100
   name: smhtt_dropout_tanh_GPU
   save_best_only: true
-  steps_per_epoch: 200
+  steps_per_epoch: 1000
   preprocessing: standard_scaler
   seed: 1234
   train_test_split: 0.75

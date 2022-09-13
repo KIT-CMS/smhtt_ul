@@ -186,7 +186,7 @@ def create_process_mapping(channel, era, no_embedding, no_fake_factors):
         # 'ewkz': 'misc',
         "ttl": "tt",
         "vvl": "misc",
-        "zl": "zll",
+        "zl": "misc",
         "ggh": "ggh",
         "qqh": "qqh",
     }
