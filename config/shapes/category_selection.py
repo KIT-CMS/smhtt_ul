@@ -60,19 +60,19 @@ category_mapping = {
             "binning": fine_binning,
         },
         "ztt": {
-            "index": 2,
-            "binning": [0.0, 0.3, 0.4, 0.45, 0.5, 0.525, 0.55, 0.575, 0.6, 0.65, 0.7, 0.75, 0.8, 0.9, 1.0],
-        },
-        "ff": {
             "index": 3,
             "binning": fine_binning,
         },
+        "ff": {
+            "index": 2,
+            "binning": fine_binning,
+        },
         "tt": {
-            "index": 4,
+            "index": 5,
             "binning": fine_binning,
         },
         "misc": {
-            "index": 5,
+            "index": 4,
             "binning": fine_binning,
         },
     }
@@ -94,7 +94,7 @@ for channel in ["mt"]:
             ),
             [
                 Histogram(
-                    f"{channel}_max_score",
+                    f"{channel}_score",
                     f"{channel}_max_score",
                     category_mapping[channel][category]["binning"],
                 )
@@ -114,9 +114,9 @@ for channel in ["mt"]:
         ),
         [
             Histogram(
-                f"{channel}_max_score",
+                "mt_score",
                 cutstring,
-                np.arange(nbins),
+                np.arange(nbins + 1),
             )
         ]
     )
