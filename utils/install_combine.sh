@@ -21,7 +21,7 @@ git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnaly
 git clone git@github.com:cms-analysis/CombineHarvester.git CombineHarvester
 
 # SM analysis specific code
-git clone git@github.com:KIT-CMS/SMRun2Legacy.git CombineHarvester/SMRun2Legacy
+git clone git@github.com:KIT-CMS/SMRun2Legacy.git CombineHarvester/SMRun2Legacy -b ul
 
 # TauID analysis specific code
 git clone git@github.com:KIT-CMS/TauIDSFMeasurement.git CombineHarvester/TauIDSFMeasurement -b ul

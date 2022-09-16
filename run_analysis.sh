@@ -80,14 +80,14 @@ fi
 
 if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
-    python shapes/produce_shapes.py --channels $CHANNEL \
-        --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS \
-        --era $ERA --num-processes 4 --num-threads 6 \
-        --optimization-level 1 --skip-systematic-variations \
-        --output-file $shapes_output
+    # python shapes/produce_shapes.py --channels $CHANNEL $NNSCORE_FRIENDS \
+    #     --directory $NTUPLES \
+    #     --${CHANNEL}-friend-directory $FRIENDS \
+    #     --era $ERA --num-processes 4 --num-threads 6 \
+    #     --optimization-level 1 --skip-systematic-variations \
+    #     --output-file $shapes_output
 
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
+    # python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
 
     # now plot the shapes by looping over the categories
     for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
@@ -97,9 +97,9 @@ fi
 
 if [[ $MODE == "LOCAL" ]]; then
     source utils/setup_root.sh
-    python shapes/produce_shapes.py --channels $CHANNEL \
+    python shapes/produce_shapes.py --channels $CHANNEL $NNSCORE_FRIENDS \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS \
+        --${CHANNEL}-friend-directory $FRIENDS \
         --era $ERA --num-processes 4 --num-threads 12 \
         --optimization-level 1 \
         --output-file $shapes_output
@@ -110,7 +110,7 @@ if [[ $MODE == "CONDOR" ]]; then
     echo "[INFO] Running on Condor"
     echo "[INFO] Condor output folder: ${CONDOR_OUTPUT}"
     bash submit/submit_shape_production_ul.sh $ERA $CHANNEL \
-        "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT
+        "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT 0 $NNSCORE_FRIENDS
     echo "[INFO] Jobs submitted"
 fi
 if [[ $MODE == "MERGE" ]]; then
@@ -131,7 +131,6 @@ if [[ $MODE == "SYNC" ]]; then
     python shapes/convert_to_synced_shapes.py -e $ERA \
         -i ${shapes_rootfile} \
         -o ${shapes_output_synced} \
-        --variable-selection ${VARIABLES} \
         -n 1
 
     inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
@@ -144,46 +143,67 @@ if [[ $MODE == "DATACARD" ]]; then
     source utils/setup_cmssw.sh
     # inputfile
     inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
-    # for category in "pt_binned" "inclusive" "dm_binned"
-    $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \
+
+    ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
         --base_path=$PWD \
         --input_folder_mt=$shapes_output_synced \
-        --input_folder_mm=$shapes_output_synced \
-        --real_data=true \
+        --input_folder_tt=$shapes_output_synced \
+        --input_folder_et=$shapes_output_synced \
+        --input_folder_em=$shapes_output_synced \
+        --real_data=false \
         --classic_bbb=false \
         --binomial_bbb=false \
-        --jetfakes=0 \
+        --jetfakes=1 \
         --embedding=1 \
-        --verbose=true \
-        --postfix=$POSTFIX \
-        --use_control_region=true \
+        --postfix="-ML" \
+        --channel=${CHANNEL} \
         --auto_rebin=true \
-        --categories="all" \
-        --era=$ERA \
-        --output=$datacard_output
+        --stxs_signals="stxs_stage0" \
+        --categories="stxs_stage0" \
+        --era=${ERA} \
+        --output=output/$datacard_output \
+        --use_automc=true \
+        --train_ff=1 \
+        --train_stage0=1\
+        --train_emb=1
     THIS_PWD=${PWD}
-    echo $THIS_PWD
-    cd output/$datacard_output/
-    for FILE in htt_mt_*/*.txt; do
-        sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
-    done
-    cd $THIS_PWD
+    # echo $THIS_PWD
+    # cd output/$datacard_output/
+    # for FILE in htt_mt_*/*.txt; do
+    #     sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+    # done
+    # cd $THIS_PWD
 
-    echo "[INFO] Create Workspace for datacard"
-    combineTool.py -M T2W -i output/$datacard_output/htt_mt_*/ -o workspace.root --parallel 4 -m 125
+    # echo "[INFO] Create Workspace for datacard"
+    # combineTool.py -M T2W -i output/$datacard_output/htt_mt_*/ -o workspace.root --parallel 4 -m 125
+    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/mt/125/ -m 125 \
+        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+        --PO '"map=^.*/ggH.?$:r_ggH[1,-5,5]"'
+        # --PO '"map=^.*/ggZH_had_htt.?$:r_ggH[1,-5,5]"' \
+        # --PO '"map=^.*/WH_had_htt.?$:r_qqH[1,-5,5]"' \
+        # --PO '"map=^.*/ZH_had_htt.?$:r_qqH[1,-5,5]"' \
+        # --PO '"map=^.*/qqH_htt.?$:r_qqH[1,-5,5]"' \
+        # --PO '"map=^.*/WH_lep_htt.?$:r_VH[1,-5,7]"' \
+       	# --PO '"map=^.*/ZH_lep_htt.?$:r_VH[1,-5,7]"' \
+        # --PO '"map=^.*/ggZH_lep_htt.?$:r_VH[1,-5,7]"'
     exit 0
 fi
 
 if [[ $MODE == "FIT" ]]; then
     source utils/setup_cmssw.sh
-    # --setParameterRanges CMS_htt_doublemutrg_Run${ERA}=$RANGE \
-    combineTool.py -M MultiDimFit -m 125 -d output/$datacard_output/htt_mt_*/combined.txt.cmb \
-        --algo singles --robustFit 1 \
-        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+        combineTool.py \
+        -M MultiDimFit \
+        -m 125 \
+        -d output/$datacard_output/mt/125/combined.txt.cmb \
+        --algo singles \
+        --robustFit 1 \
+        --X-rtd MINIMIZER_analytic \
+        --cminDefaultMinimizerStrategy 0 \
         --floatOtherPOIs 1 \
+        -t -1 --expectSignal 1 \
         -n $ERA -v1 \
         --parallel 1 --there
-    for RESDIR in output/$datacard_output/htt_mt_*; do
+    for RESDIR in output/$datacard_output/mt/125; do
         echo "[INFO] Printing fit result for category $(basename $RESDIR)"
         FITFILE=${RESDIR}/higgsCombine${ERA}.MultiDimFit.mH125.root
         python datacards/print_fitresult.py ${FITFILE}
@@ -244,19 +264,21 @@ fi
 
 if [[ $MODE == "IMPACTS" ]]; then
     source utils/setup_cmssw.sh
-    WORKSPACE=output/$datacard_output/htt_mt_Inclusive/workspace.root
+    WORKSPACE=output/$datacard_output/mt/125/workspace.root
     combineTool.py -M Impacts -d $WORKSPACE -m 125 \
         --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
         --doInitialFit --robustFit 1 \
+        -t -1 --expectSignal=1 \
         --parallel 16
 
     combineTool.py -M Impacts -d $WORKSPACE -m 125 \
         --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
         --robustFit 1 --doFits \
+        -t -1 --expectSignal=1 \
         --parallel 16
 
-    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o tauid_${WP}_impacts.json
-    plotImpacts.py -i tauid_${WP}_impacts.json -o tauid_${WP}_impacts
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o sm_${ERA}_${CHANNEL}.json
+    plotImpacts.py -i sm_${ERA}_${CHANNEL}.json -o sm_${ERA}_${CHANNEL}_impacts
     # cleanup the fit files
     rm higgsCombine*.root
     exit 0

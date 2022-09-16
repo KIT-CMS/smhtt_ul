@@ -8,6 +8,7 @@ CONTROL=$5
 NTUPLETAG=$6
 OUTPUT=$7
 SPECIAL=$8
+NNSCORE_FRIENDS=$9
 
 [[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4 && ! -z $5 ]] || (
     echo "[ERROR] Number of given parameters is too small."
@@ -23,14 +24,14 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 source utils/setup_root.sh
 source utils/bashFunctionCollection.sh
 
-PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w,ggh,qqh,zh,wh"
+PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w,ggh,qqh,zh,wh,tth"
 for PROC in ${PROCS_ARR[@]}; do
     if [[ "$PROC" =~ "backgrounds" ]]; then
         # BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
         PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
     elif [[ "$PROC" =~ "sm_signals" ]]; then
         # SIG_PROCS="ggh,qqh,zh,wh,tth,gghww,qqhww,whww,zhww"
-        PROCESSES="ggh,qqh,zh,wh"
+        PROCESSES="ggh,qqh,zh,wh,tth"
     else
         echo "[INFO] Add selection of single process $PROC"
         PROCESSES="$PROCESSES,$PROC"
@@ -44,6 +45,8 @@ if [[ "$SUBMIT_MODE" == "multigraph" ]]; then
     exit 1
 elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "[INFO] Preparing graph for processes $PROCESSES for submission..."
+    echo "[INFO] Using tag $TAG"
+    echo "[INFO] Using friends $FRIENDS $NNSCORE_FRIENDS"
     [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
     if [[ "$SPECIAL" == "TauID" ]]; then
         python shapes/produce_shapes.py --channels $CHANNEL \
@@ -73,7 +76,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
         python shapes/produce_shapes.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
-            --$CHANNEL-friend-directory $FRIENDS \
+            --$CHANNEL-friend-directory $FRIENDS $NNSCORE_FRIENDS \
             --era $ERA \
             --optimization-level 1 \
             --process-selection $PROCESSES \
