@@ -111,6 +111,7 @@ from config.shapes.variations import (
     tau_id_eff_tt,
     emb_tau_id_eff_lt,
     emb_tau_id_eff_tt,
+    emb_tau_id_eff_lt_corr,
 )
 
 # fake rate uncertainties
@@ -163,6 +164,7 @@ from config.shapes.variations import (
     wfakes_tt,
     wfakes_w_tt,
     ff_variations_tau_es_lt,
+    ff_variations_tau_es_emb_lt
     # ff_variations_tau_es_tt,
     # ff_variations_tau_es_tt_mcl,
 )
@@ -486,11 +488,17 @@ def get_analysis_units(
             categorization=categorization,
             channel=channel,
         )
-    # "tth"  : [Unit(
-    #             datasets["ttH"], [
-    #                 channel_selection(channel, era, special_analysis),
-    #                 ttH_process_selection(channel, era),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+        add_process(
+            analysis_units,
+            name="tth",
+            dataset=datasets["ttH"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                ttH_process_selection(channel, era),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
     # "gghww"  : [Unit(
     #             datasets["ggHWW"], [
     #                 channel_selection(channel, era, special_analysis),
@@ -511,7 +519,6 @@ def get_analysis_units(
     #                 channel_selection(channel, era, special_analysis),
     #                 WHWW_process_selection(channel, era),
     #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-    # data
 
     if channel != "et":
         add_process(
@@ -953,20 +960,20 @@ def main(args):
             # um.book([unit for d in {"ggh"} & procS for unit in nominals[era]['units'][channel][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
             # um.book([unit for d in {"qqh"} & procS for unit in nominals[era]['units'][channel][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
             # TODO add signal uncertainties
-            # book_histograms(
-            #     um,
-            #     processes={"ggh"} & procS,
-            #     datasets=nominals[era]["units"][channel],
-            #     variations=[ggh_acceptance],
-            #     enable_check=do_check,
-            # )
-            # book_histograms(
-            #     um,
-            #     processes={"qqh"} & procS,
-            #     datasets=nominals[era]["units"][channel],
-            #     variations=[qqh_acceptance],
-            #     enable_check=do_check,
-            # )
+            book_histograms(
+                um,
+                processes={"ggh"} & procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[ggh_acceptance],
+                enable_check=do_check,
+            )
+            book_histograms(
+                um,
+                processes={"qqh"} & procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[qqh_acceptance],
+                enable_check=do_check,
+            )
             book_histograms(
                 um,
                 processes=simulatedProcsDS[channel],
@@ -1062,17 +1069,7 @@ def main(args):
                 )
                 book_histograms(
                     um,
-                    processes=dataS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        ff_variations_lt,
-                    ],
-                    enable_check=do_check,
-                )
-
-                book_histograms(
-                    um,
-                    processes=embS | leptonFakesS | trueTauBkgS,
+                    processes=dataS | embS | leptonFakesS | trueTauBkgS,
                     datasets=nominals[era]["units"][channel],
                     variations=[
                         ff_variations_lt,
@@ -1089,19 +1086,27 @@ def main(args):
                     ],
                     enable_check=do_check,
                 )
-                # TODO add embedded decay mode weights and tau ID variations
-                # book_histograms(
-                #     um,
-                #     processes=embS,
-                #     datasets=nominals[era]["units"][channel],
-                #     variations=[
-                #         emb_decay_mode_eff_lt,
-                #         emb_tau_id_eff_lt,
-                #         tau_id_eff_lt,
-                #     ],
-                #     enable_check=do_check,
-                # )
-            # if channel in ["et", "em"]:
+                book_histograms(
+                    um,
+                    processes=embS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        ff_variations_tau_es_emb_lt,
+                    ],
+                    enable_check=do_check,
+                )
+                book_histograms(
+                    um,
+                    processes=embS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[
+                        emb_tau_id_eff_lt,
+                        emb_tau_id_eff_lt_corr,
+                    ],
+                    enable_check=do_check,
+                )
+            if channel in ["et", "em"]:
+                pass
             # TODO add eleES
             # book_histograms(
             #     um,
@@ -1114,15 +1119,15 @@ def main(args):
             #     enable_check=do_check,
             # )
             # TODO add emb ele ES
-            # book_histograms(
-            #     um,
-            #     processes=embS,
-            #     datasets=nominals[era]["units"][channel],
-            #     variations=[
-            #         emb_e_es
-            #     ],
-            #     enable_check=do_check,
-            # )
+                # book_histograms(
+                #     um,
+                #     processes=embS,
+                #     datasets=nominals[era]["units"][channel],
+                #     variations=[
+                #         emb_e_es
+                #     ],
+                #     enable_check=do_check,
+                # )
             # Book channel independent variables.
             if channel == "mt":
                 book_histograms(
