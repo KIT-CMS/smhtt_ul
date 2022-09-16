@@ -7,8 +7,8 @@ TAG=$4
 
 # VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,pt_tt,pt_tt_pf,iso_1,pfmet,mt_1_pf,mt_2_pf,met,pzetamissvis,pzetamissvis_pf,metphi,pfmetphi"
 # VARIABLES="m_vis"
-VARIABLES="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
-# VARIABLES="pt_1,pt_2,m_vis,njets,nbtag,jpt_1,jpt_2,jeta_1,jeta_2,m_fastmtt,pt_vis,mjj,deltaR_ditaupair,pt_tt",
+# VARIABLES="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
+VARIABLES="pt_1,pt_2,m_vis,njets,nbtag,jpt_1,jpt_2,jeta_1,jeta_2,m_fastmtt,pt_vis,mjj,pt_tt",
 ulimit -s unlimited
 source utils/setup_root.sh
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
@@ -76,15 +76,14 @@ echo "##########################################################################
 
 python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
 
-# bash ./shapes/do_estimations.sh 2018 ${shapes_output}.root 1
 
 echo "##############################################################################################"
 echo "#     plotting                                      #"
 echo "##############################################################################################"
 
 python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --fake-factor
-python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding
-python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
+# python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding
+# python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
 python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor
 
 # python2 ~/tools/webgallery/gallery.py Run${ERA}_plots_emb_classic/
