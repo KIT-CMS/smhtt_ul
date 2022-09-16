@@ -22,141 +22,17 @@ List of base processes, mostly containing only weights:
 """
 
 
-def triggerweight(channel, era):
-    weight = ("1.0", "triggerweight")
-
-    # General definitions of weights valid for all eras and channels
-    if "mt" in channel:
-        weight = ("mtau_triggerweight_ic", "triggerweight")
-    elif "et" in channel:
-        weight = ("etau_triggerweight_ic", "triggerweight")
-    elif "tt" in channel:
-        weight = ("tautau_triggerweight_ic", "triggerweight")
-    elif "em" in channel:
-        ElMuData = "(trigger_23_data_Weight_2*trigger_12_data_Weight_1*(trg_muonelectron_mu23ele12==1)+trigger_23_data_Weight_1*trigger_8_data_Weight_2*(trg_muonelectron_mu8ele23==1) - trigger_23_data_Weight_2*trigger_23_data_Weight_1*(trg_muonelectron_mu8ele23==1 && trg_muonelectron_mu23ele12==1))"
-        ElMuEmb = ElMuData.replace("data", "mc")
-        ElMu = "(" + ElMuData + ")/(" + ElMuEmb + ")"
-        weight = (ElMu, "triggerweight")
-
-    # In previous software only used in 2017 and 2018. Before usage in 2016 check if the weight is valid.
-    elif "mm" in channel:
-        weight = (
-            "singleTriggerDataEfficiencyWeightKIT_1/singleTriggerMCEfficiencyWeightKIT_1",
-            "trigger_lepton_sf",
-        )
-
-    return weight
-
-
-def triggerweight_emb(channel, era):
-    weight = ("1.0", "triggerweight")
-    if "mt" in channel:
-        weight = ("mtau_triggerweight_ic", "triggerweight")
-    elif "et" in channel:
-        weight = ("etau_triggerweight_ic", "triggerweight")
-    elif "tt" in channel:
-        weight = ("tautau_triggerweight_ic", "triggerweight")
-    elif "em" in channel:
-        ElMuData = "(trigger_23_data_Weight_2*trigger_12_data_Weight_1*(trg_muonelectron_mu23ele12==1)+trigger_23_data_Weight_1*trigger_8_data_Weight_2*(trg_muonelectron_mu8ele23==1) - trigger_23_data_Weight_2*trigger_23_data_Weight_1*(trg_muonelectron_mu8ele23==1 && trg_muonelectron_mu23ele12==1))"
-        ElMuEmb = ElMuData.replace("data", "embed")
-        ElMu = "(" + ElMuData + ")/(" + ElMuEmb + ")"
-        weight = (ElMu, "triggerweight")
-    return weight
-
-
-def fakemetweight_emb(channel, era):
-    weightmap = {
-        "2016": {
-            "et": "1.005",
-            "mt": "1.005",
-            "tt": "1.008",
-        },
-        "2017": {
-            "et": "1.005",
-            "mt": "1.005",
-            "tt": "1.010",
-        },
-        "2018": {
-            "et": "1.005",
-            "mt": "1.005",
-            "tt": "1.010",
-        },
-    }
-    weight = (weightmap[era][channel], "fakemetweight")
-    return weight
-
-
-def tau_by_iso_id_weight(channel):
-    weight = ("1.0", "taubyIsoIdWeight")
-    if "mt" in channel or "et" in channel:
-        weight = (
-            "((pt_2<100)*((gen_match_2==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_2 + (gen_match_2!=5))"
-            "+ (pt_2>=100)*((gen_match_2==5)*tauIDScaleFactorWeight_highpt_deeptauid_2 + (gen_match_2!=5)))",
-            "taubyIsoIdWeight",
-        )
-    elif "tt" in channel:
-        weight = (
-            "((pt_1<100)*(((gen_match_1==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_1 + (gen_match_1!=5))*((gen_match_2==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_2 + (gen_match_2!=5)))"
-            "+ (pt_1>=100)*(pt_2<100)*(((gen_match_1==5)*tauIDScaleFactorWeight_highpt_deeptauid_1 + (gen_match_1!=5))*((gen_match_2==5)*tauIDScaleFactorWeight_medium_DeepTau2017v2p1VSjet_2 + (gen_match_2!=5)))"
-            "+ (pt_2>=100)*(((gen_match_1==5)*tauIDScaleFactorWeight_highpt_deeptauid_1 + (gen_match_1!=5))*((gen_match_2==5)*tauIDScaleFactorWeight_highpt_deeptauid_2 + (gen_match_2!=5))))",
-            "taubyIsoIdWeight",
-        )
-    return weight
-
-
-def ele_hlt_Z_vtx_weight(channel, era):
-    weight = ("1.0", "eleHLTZvtxWeight")
-    if "et" in channel and era == "2017":
-        weight = (
-            "(trg_singleelectron_35 || trg_singleelectron_32 || trg_singleelectron_27 || trg_crossele_ele24tau30)*0.991 + (!(trg_singleelectron_35 || trg_singleelectron_32 || trg_singleelectron_27 || trg_crossele_ele24tau30))*1.0",
-            "eleHLTZvtxWeight",
-        )
-    return weight
-
-
-def ele_reco_weight(channel, era):
-    if channel in ["et", "em"] and era == "2016":
-        weight = ("eleRecoWeight_1", "eleRecoWeight")
-    else:
-        weight = ("1.0", "eleRecoWeight")
-    return weight
-
-
-def aiso_muon_correction(channel, era):
-    if "em" in channel and "2016" in era:
-        weight = (
-            "(iso_2 <= 0.15)*1.0+((iso_2 > 0.15 && iso_2 < 0.20)*(((abs(eta_2) > 0 && abs(eta_2) < 0.9)*(((pt_2 > 10.0 && pt_2 < 15.0)*0.9327831343)+((pt_2 > 15.0 && pt_2 < 20.0)*0.953716709495)+((pt_2 > 20.0 && pt_2 < 22.0)*0.970107931338)+((pt_2 > 22.0 && pt_2 < 24.0)*0.975194707069)+((pt_2 > 24.0 && pt_2 < 26.0)*0.987926954702)+((pt_2 > 26.0 && pt_2 < 28.0)*0.984899759186)+((pt_2 > 28.0 && pt_2 < 30.0)*0.98461236424)+((pt_2 > 30.0 && pt_2 < 32.0)*0.982678110647)+((pt_2 > 32.0 && pt_2 < 34.0)*0.969564600424)+((pt_2 > 34.0 && pt_2 < 36.0)*0.952545963996)+((pt_2 > 36.0 && pt_2 < 38.0)*0.93801027736)+((pt_2 > 38.0 && pt_2 < 40.0)*0.928180181431)+((pt_2 > 40.0 && pt_2 < 45.0)*0.936587036212)+((pt_2 > 45.0 && pt_2 < 50.0)*0.937996645301)+((pt_2 > 50.0 && pt_2 < 60.0)*0.906087339587)+((pt_2 > 60.0 && pt_2 < 80.0)*0.887611582681)+((pt_2 > 80.0 && pt_2 < 100.0)*0.8834356199)+((pt_2 > 100.0 && pt_2 < 200.0)*1.17717912783)+((pt_2 > 200.0)*0.782070939337)))+((abs(eta_2) > 0.9 && abs(eta_2) < 1.2)*(((pt_2 > 10.0 && pt_2 < 15.0)*0.886291162409)+((pt_2 > 15.0 && pt_2 < 20.0)*0.915805873893)+((pt_2 > 20.0 && pt_2 < 22.0)*0.928213984488)+((pt_2 > 22.0 && pt_2 < 24.0)*0.968808738285)+((pt_2 > 24.0 && pt_2 < 26.0)*1.00847685497)+((pt_2 > 26.0 && pt_2 < 28.0)*1.01823133239)+((pt_2 > 28.0 && pt_2 < 30.0)*0.992528525978)+((pt_2 > 30.0 && pt_2 < 32.0)*0.978795541905)+((pt_2 > 32.0 && pt_2 < 34.0)*0.942964386045)+((pt_2 > 34.0 && pt_2 < 36.0)*0.938710844744)+((pt_2 > 36.0 && pt_2 < 38.0)*0.922702562159)+((pt_2 > 38.0 && pt_2 < 40.0)*0.897758415445)+((pt_2 > 40.0 && pt_2 < 45.0)*0.909162491)+((pt_2 > 45.0 && pt_2 < 50.0)*0.90265167858)+((pt_2 > 50.0 && pt_2 < 60.0)*0.912325787246)+((pt_2 > 60.0 && pt_2 < 80.0)*0.897018870572)+((pt_2 > 80.0 && pt_2 < 100.0)*0.972647372742)+((pt_2 > 100.0 && pt_2 < 200.0)*1.38562213225)+((pt_2 > 200.0)*0.738304282781)))+((abs(eta_2) > 1.2 && abs(eta_2) < 2.1)*(((pt_2 > 10.0 && pt_2 < 15.0)*0.88678133381)+((pt_2 > 15.0 && pt_2 < 20.0)*0.855042730357)+((pt_2 > 20.0 && pt_2 < 22.0)*0.897842682768)+((pt_2 > 22.0 && pt_2 < 24.0)*0.905849165918)+((pt_2 > 24.0 && pt_2 < 26.0)*0.910626040493)+((pt_2 > 26.0 && pt_2 < 28.0)*0.952076550342)+((pt_2 > 28.0 && pt_2 < 30.0)*0.968869527514)+((pt_2 > 30.0 && pt_2 < 32.0)*0.942569376345)+((pt_2 > 32.0 && pt_2 < 34.0)*0.941205386066)+((pt_2 > 34.0 && pt_2 < 36.0)*0.925500794627)+((pt_2 > 36.0 && pt_2 < 38.0)*0.907300484346)+((pt_2 > 38.0 && pt_2 < 40.0)*0.87984390364)+((pt_2 > 40.0 && pt_2 < 45.0)*0.87339713294)+((pt_2 > 45.0 && pt_2 < 50.0)*0.87980130335)+((pt_2 > 50.0 && pt_2 < 60.0)*0.860066115116)+((pt_2 > 60.0 && pt_2 < 80.0)*0.857712710727)+((pt_2 > 80.0 && pt_2 < 100.0)*1.0645948221)+((pt_2 > 100.0 && pt_2 < 200.0)*1.18849162977)+((pt_2 > 200.0)*1.28784467602)))+((abs(eta_2) > 2.1 && abs(eta_2) < 2.4)*(((pt_2 > 10.0 && pt_2 < 15.0)*0.776167258269)+((pt_2 > 15.0 && pt_2 < 20.0)*0.770868349402)+((pt_2 > 20.0 && pt_2 < 22.0)*0.808779663589)+((pt_2 > 22.0 && pt_2 < 24.0)*0.812754474056)+((pt_2 > 24.0 && pt_2 < 26.0)*0.84667222665)+((pt_2 > 26.0 && pt_2 < 28.0)*0.837142139899)+((pt_2 > 28.0 && pt_2 < 30.0)*0.8356560823)+((pt_2 > 30.0 && pt_2 < 32.0)*0.888386540505)+((pt_2 > 32.0 && pt_2 < 34.0)*0.881083238091)+((pt_2 > 34.0 && pt_2 < 36.0)*0.872500048844)+((pt_2 > 36.0 && pt_2 < 38.0)*0.861737355714)+((pt_2 > 38.0 && pt_2 < 40.0)*0.872186406375)+((pt_2 > 40.0 && pt_2 < 45.0)*0.853060222605)+((pt_2 > 45.0 && pt_2 < 50.0)*0.927735148085)+((pt_2 > 50.0 && pt_2 < 60.0)*0.82749753618)+((pt_2 > 60.0 && pt_2 < 80.0)*0.924329437022)+((pt_2 > 80.0 && pt_2 < 100.0)*0.887073323216)+((pt_2 > 100.0 && pt_2 < 200.0)*1.15559449916)+((pt_2 > 200.0)*0.37887229649)))))",
-            "m_aiso_correction",
-        )
-    else:
-        weight = ("1.0", "m_aiso_correction")
-    return weight
-
-
-def prefiring_weight(era):
-    if era in ["2016", "2017"]:
-        weight = ("prefiringweight", "prefireWeight")
-    else:
-        weight = ("1.0", "prefireWeight")
-    return weight
-
-
 def lumi_weight(era):
     if era == "2016":
         lumi = "36.33"  # "36.326450080"
     elif era == "2017":
         lumi = "41.529"
     elif era == "2018":
-        lumi = "59.74"
+        lumi = "59.83"
     else:
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
 
-# def Data_base_process_selection(channel, era):
-#     if channel == "tt" and era == "2018":
-#         return Selection(name="", cuts=["((trg_double_tau35_tightiso_tightid==1) || (trg_double_tau40_mediumiso_tightid==1))", "trg_extension"])
-#     else:
-#         return Selection(name="")
 
 
 def MC_base_process_selection(channel, era):
@@ -205,39 +81,28 @@ def MC_base_process_selection(channel, era):
     else:
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
-        # ("genWeight", "generatorWeight"),
         ("puweight", "puweight"),
+        ("btag_weight", "btagWeight"),
         isoweight,
         idweight,
         tauidweight,
         vsmu_weight,
         trgweight,
-        # ("trackWeight_1*trackWeight_2","trackweight"),
-        # ("eleTauFakeRateWeight*muTauFakeRateWeight", "leptonTauFakeRateWeight"),
-        # triggerweight(channel, era),
-        # tau_by_iso_id_weight(channel),
-        # ele_hlt_Z_vtx_weight(channel, era),  # only used in the et channel in 2017 per function definition.
-        # ele_reco_weight(channel, era),  # only used in the et, em channels in 2016 per function definition.
-        # prefiring_weight(era),  # only used in 2016 and 2017 per function definition.
         lumi_weight(era),
     ]
-    # print("MC_base_process_weights:", [weight for weight in MC_base_process_weights if weight is not None])
     return Selection(name="MC base", weights=[weight for weight in MC_base_process_weights if weight is not None])
 
 
 def dy_stitching_weight(era):
-    # if era == "2016":
-    #     weight = ("((genbosonmass >= 50.0) * 4.1545e-05*((npartons == 0 || npartons >= 5)*1.0+(npartons == 1)*0.32123574062076404+(npartons == 2)*0.3314444833963529+(npartons == 3)*0.3389929050626262+(npartons == 4)*0.2785338687268455) + (genbosonmass < 50.0)*(numberGeneratedEventsWeight * crossSectionPerEventWeight))",
-    #               "dy_stitching_weight")
-    # elif era == "2017":
-    #     weight = ("((genbosonmass >= 50.0)*6.2139e-05*((npartons == 0 || npartons >= 5)*1.0 + (npartons == 1)*0.1743 + (npartons == 2)*0.3556 + (npartons == 3)*0.2273 + (npartons == 4)*0.2104) + (genbosonmass < 50.0)*numberGeneratedEventsWeight*crossSectionPerEventWeight)","dy_stitching_weight")
-    #     # xsec_NNLO [pb] = 2025.74*3, N_inclusive = 97800939, xsec_NNLO/N_inclusive = 6.2139e-05 [pb] weights: [1.0, 0.1743347690195873, 0.3556373947627093, 0.22728901609456784, 0.21040417678899315]
     if era == "2018":
         weight = (
             "((genbosonmass >= 50.0)*0.0000606542*((npartons == 0 || npartons >= 5)*1.0 + (npartons == 1)*0.194267667208 + (npartons == 2)*0.21727746547 + (npartons == 3)*0.26760465744 + (npartons == 4)*0.294078683662) + (genbosonmass < 50.0)*numberGeneratedEventsWeight*crossSectionPerEventWeight)",
             "dy_stitching_weight",
         )
         # xsec_NNLO [pb] = 2025.74*3, N_inclusive = 100194597,  xsec_NNLO/N_inclusive = 0.0000606542 [pb] weights: [1.0, 0.194267667208, 0.21727746547, 0.26760465744, 0.294078683662]
+    else:
+        raise ValueError("DY stitching weight not defined for era {}".format(era))
+
     return weight
 
 
@@ -278,20 +143,14 @@ def VV_process_selection(channel, era):
 
 
 def W_stitching_weight(era):
-    # if era == "2016":
-    #     weight = ("((0.00070788321*((npartons <= 0 || npartons >= 5)*1.0 + (npartons == 1)*0.2691615837248596 + (npartons == 2)*0.1532341436287767 + (npartons == 3)*0.03960756033932645 + (npartons == 4)*0.03969970742404736)) * (genbosonmass>=0.0) + numberGeneratedEventsWeight * crossSectionPerEventWeight * (genbosonmass<0.0))",
-    #                                             "wj_stitching_weight")
-    #     # xsec_NNLO [pb] = 61526.7, N_inclusive = 86916455, xsec_NNLO/N_inclusive = 0.00070788321 [pb] weights: [1.0, 0.2691615837248596, 0.1532341436287767, 0.03960756033932645, 0.03969970742404736]
-    # elif era == "2017":
-    #     weight = ("((0.000824363*((npartons <= 0 || npartons >= 5)*1.0 + (npartons == 1)*0.1713 + (npartons == 2)*0.1062 + (npartons == 3)*0.0652 + (npartons == 4)*0.0645)) * (genbosonmass>=0.0) + numberGeneratedEventsWeight * crossSectionPerEventWeight * (genbosonmass<0.0))",
-    #                             "wj_stitching_weight")
-    #     # xsec_NNLO [pb] = 61526.7, N_inclusive = 74635450, xsec_NNLO/N_inclusive = 0.000824363 [pb] weights: [1.0, 0.17130790070213678, 0.10621353263705156, 0.0651931323853371, 0.06454171311164039]
     if era == "2018":
         weight = (
             "((0.0008662455*((npartons <= 0 || npartons >= 5)*1.0 + (npartons == 1)*0.174101755934 + (npartons == 2)*0.136212630745 + (npartons == 3)*0.0815667415121 + (npartons == 4)*0.06721295702670023)) * (genbosonmass>=0.0) + numberGeneratedEventsWeight * crossSectionPerEventWeight * (genbosonmass<0.0))",
             "wj_stitching_weight",
         )
         # xsec_NNLO [pb] = 61526.7, N_inclusive = 71026861, xsec_NNLO/N_inclusive = 0.0008662455 [pb] weights: [1.0, 0.1741017559343336, 0.13621263074538312, 0.08156674151214884, 0.06721295702670023]
+    else:
+        raise ValueError("DY stitching weight not defined for era {}".format(era))
     return weight
 
 
@@ -430,9 +289,6 @@ def ZTT_embedded_process_selection(channel, era):
                 ("id_wgt_mu_1", "idweight"),
                 ("trg_wgtsingle_mu24Ormu27", "trgweight"), # TODO fix naming
                 ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-                # tau_by_iso_id_weight(channel),
-                # triggerweight_emb(channel, era),
-                # fakemetweight_emb(channel, era),
             ]
         )
     elif "et" in channel:
@@ -443,13 +299,6 @@ def ZTT_embedded_process_selection(channel, era):
                 ("id_wgt_ele_1", "idweight"),
                 ("trg_wgt_single_ele32orele35", "trgweight"),
                 ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-                # (
-                #     "id_wgt_tau_vsJet_Tight_2",
-                #     "taubyIsoIdWeight",
-                # ),  # TODO replace with embedded tau id weight
-                # tau_by_iso_id_weight(channel),
-                # triggerweight_emb(channel, era),
-                # fakemetweight_emb(channel, era),
             ]
         )
     elif "tt" in channel:
@@ -714,13 +563,7 @@ def ZH_process_selection(channel, era):
 
 
 def ttH_process_selection(channel, era):
-    if era in ["2016", "2017"]:
-        ttH_weights = HTT_process_selection(channel, era).weights
-    else:
-        ttH_weights = HTT_base_process_selection(channel, era).weights + [
-            ("4.569757345884934e-08", "numberGeneratedEventsWeight"),
-            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
-        ]
+    ttH_weights = HTT_process_selection(channel, era).weights
     return Selection(name="ttH125", weights=ttH_weights)
 
 
