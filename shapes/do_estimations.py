@@ -111,15 +111,18 @@ def add_input_to_inputdict(input_dict, channel, category, variable, variation, p
 
 def parse_histograms_for_ff(inputfile):
     ff_inputs = {}
+    available_variations = set()
     for key in inputfile.GetListOfKeys():
         channel, category, variable, variation, process = parse_process_name(
             key, "anti_iso"
         )
+        available_variations.add(variation)
         if channel is not None:
             if not variation.startswith("abcd"):
                 add_input_to_inputdict(
                     ff_inputs, channel, category, variable, variation, process
                 )
+    logger.debug(available_variations)
     return ff_inputs
 
 
@@ -221,21 +224,19 @@ def main(args):
                 logger.info("Do estimation for category %s", cat)
                 for var in ff_inputs[ch][cat]:
                     for variation in ff_inputs[ch][cat][var]:
-                        if "scale_t" in variation:
-                            continue
                         estimated_hist = fake_factor_estimation(
                             input_file, ch, cat, var, variation=variation
                         )
                         estimated_hist.Write()
-                        estimated_hist = fake_factor_estimation(
-                            input_file,
-                            ch,
-                            cat,
-                            var,
-                            variation=variation,
-                            is_embedding=False,
-                        )
-                        estimated_hist.Write()
+                        # estimated_hist = fake_factor_estimation(
+                        #     input_file,
+                        #     ch,
+                        #     cat,
+                        #     var,
+                        #     variation=variation,
+                        #     is_embedding=False,
+                        # )
+                        # estimated_hist.Write()
                         for variation, scale in zip(
                             [
                                 "CMS_ff_total_sub_syst_Channel_EraUp",
@@ -265,7 +266,7 @@ def main(args):
     if args.do_qcd:
         qcd_inputs = parse_histograms_for_qcd(input_file)
         logger.info("Starting estimations for the QCD mulitjet process.")
-        logger.info("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
+        logger.debug("%s", json.dumps(qcd_inputs, sort_keys=True, indent=4))
         for channel in qcd_inputs:
             for category in qcd_inputs[channel]:
                 logger.info("Do estimation for category %s", category)

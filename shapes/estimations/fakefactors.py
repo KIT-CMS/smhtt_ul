@@ -51,31 +51,58 @@ def fake_factor_estimation(
         )
     ).Clone()
     for proc in procs_to_subtract:
-        logger.debug(
-            "Trying to get object {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation if not "sub_syst" in variation else "anti_iso",
-                    variable=variable,
+        if "anti_iso_CMS_scale_t_emb" in variation and proc != "EMB":
+            logger.debug(
+                "Trying to get object {}".format(
+                    _name_string.format(
+                        dataset=_dataset_map[proc],
+                        channel=channel,
+                        process="-" + _process_map[proc],
+                        selection="-" + selection if selection != "" else "",
+                        variation=variation.replace("anti_iso_CMS_scale_t_emb","anti_iso_CMS_scale_t") if not "sub_syst" in variation else "anti_iso",
+                        variable=variable,
+                    )
                 )
             )
-        )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation if not "sub_syst" in variation else "anti_iso",
-                    variable=variable,
+            base_hist.Add(
+                rootfile.Get(
+                    _name_string.format(
+                        dataset=_dataset_map[proc],
+                        channel=channel,
+                        process="-" + _process_map[proc],
+                        selection="-" + selection if selection != "" else "",
+                        variation=variation.replace("anti_iso_CMS_scale_t_emb","anti_iso_CMS_scale_t") if not "sub_syst" in variation else "anti_iso",
+                        variable=variable,
+                    )
+                ),
+                -sub_scale,
+            )
+        else:
+            logger.debug(
+                "Trying to get object {}".format(
+                    _name_string.format(
+                        dataset=_dataset_map[proc],
+                        channel=channel,
+                        process="-" + _process_map[proc],
+                        selection="-" + selection if selection != "" else "",
+                        variation=variation if not "sub_syst" in variation else "anti_iso",
+                        variable=variable,
+                    )
                 )
-            ),
-            -sub_scale,
-        )
+            )
+            base_hist.Add(
+                rootfile.Get(
+                    _name_string.format(
+                        dataset=_dataset_map[proc],
+                        channel=channel,
+                        process="-" + _process_map[proc],
+                        selection="-" + selection if selection != "" else "",
+                        variation=variation if not "sub_syst" in variation else "anti_iso",
+                        variable=variable,
+                    )
+                ),
+                -sub_scale,
+            )
     proc_name = "jetFakes" if is_embedding else "jetFakesMC"
     if doTauES:
         proc_name = "jetFakes{}".format(special)
