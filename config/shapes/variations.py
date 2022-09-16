@@ -781,45 +781,6 @@ trigger_eff_et_emb = [
 #     ),
 # ]
 
-ggh_acceptance = []
-for unc in [
-    "THU_ggH_Mig01",
-    "THU_ggH_Mig12",
-    "THU_ggH_Mu",
-    "THU_ggH_PT120",
-    "THU_ggH_PT60",
-    "THU_ggH_Res",
-    "THU_ggH_VBF2j",
-    "THU_ggH_VBF3j",
-    "THU_ggH_qmtop",
-]:
-    ggh_acceptance.append(
-        AddWeight(unc + "Up", Weight("({})".format(unc), "{}_weight".format(unc)))
-    )
-    ggh_acceptance.append(
-        AddWeight(unc + "Down", Weight("(2.0-{})".format(unc), "{}_weight".format(unc)))
-    )
-
-qqh_acceptance = []
-for unc in [
-    "THU_qqH_25",
-    "THU_qqH_JET01",
-    "THU_qqH_Mjj1000",
-    "THU_qqH_Mjj120",
-    "THU_qqH_Mjj1500",
-    "THU_qqH_Mjj350",
-    "THU_qqH_Mjj60",
-    "THU_qqH_Mjj700",
-    "THU_qqH_PTH200",
-    "THU_qqH_TOT",
-]:
-    qqh_acceptance.append(
-        AddWeight(unc + "Up", Weight("({})".format(unc), "{}_weight".format(unc)))
-    )
-    qqh_acceptance.append(
-        AddWeight(unc + "Down", Weight("(2.0-{})".format(unc), "{}_weight".format(unc)))
-    )
-
 
 prefiring = [
     ReplaceWeight(

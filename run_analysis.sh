@@ -167,24 +167,24 @@ if [[ $MODE == "DATACARD" ]]; then
         --train_stage0=1\
         --train_emb=1
     THIS_PWD=${PWD}
-    # echo $THIS_PWD
-    # cd output/$datacard_output/
-    # for FILE in htt_mt_*/*.txt; do
-    #     sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
-    # done
-    # cd $THIS_PWD
+    echo $THIS_PWD
+    cd output/$datacard_output/mt
+    for FILE in */*.txt; do
+        sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+    done
+    cd $THIS_PWD
 
-    # echo "[INFO] Create Workspace for datacard"
+    echo "[INFO] Create Workspace for datacard"
     # combineTool.py -M T2W -i output/$datacard_output/htt_mt_*/ -o workspace.root --parallel 4 -m 125
-    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/mt/125/ -m 125 \
+    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/mt/125 --parallel 4 -m 125 \
         -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-        --PO '"map=^.*/ggH.?$:r_ggH[1,-5,5]"'
+        --PO '"map=^.*/ggH_htt.?$:r_ggH[1,-5,5]"' \
+        --PO '"map=^.*/qqH_htt.?$:r_qqH[1,-5,5]"'
+        # --PO '"map=^.*/WH_htt.?$:r_VH[1,-5,7]"' \
+       	# --PO '"map=^.*/ZH_htt.?$:r_VH[1,-5,7]"'
         # --PO '"map=^.*/ggZH_had_htt.?$:r_ggH[1,-5,5]"' \
         # --PO '"map=^.*/WH_had_htt.?$:r_qqH[1,-5,5]"' \
         # --PO '"map=^.*/ZH_had_htt.?$:r_qqH[1,-5,5]"' \
-        # --PO '"map=^.*/qqH_htt.?$:r_qqH[1,-5,5]"' \
-        # --PO '"map=^.*/WH_lep_htt.?$:r_VH[1,-5,7]"' \
-       	# --PO '"map=^.*/ZH_lep_htt.?$:r_VH[1,-5,7]"' \
         # --PO '"map=^.*/ggZH_lep_htt.?$:r_VH[1,-5,7]"'
     exit 0
 fi
@@ -194,13 +194,12 @@ if [[ $MODE == "FIT" ]]; then
         combineTool.py \
         -M MultiDimFit \
         -m 125 \
-        -d output/$datacard_output/mt/125/combined.txt.cmb \
+        -d output/$datacard_output/mt/125/workspace.root \
         --algo singles \
         --robustFit 1 \
+        --expectSignal 1\
         --X-rtd MINIMIZER_analytic \
         --cminDefaultMinimizerStrategy 0 \
-        --floatOtherPOIs 1 \
-        -t -1 --expectSignal 1 \
         -n $ERA -v1 \
         --parallel 1 --there
     for RESDIR in output/$datacard_output/mt/125; do
@@ -213,54 +212,47 @@ fi
 
 if [[ $MODE == "POSTFIT" ]]; then
     source utils/setup_cmssw.sh
-    for RESDIR in output/$datacard_output/htt_mt_*; do
-        WORKSPACE=${RESDIR}/workspace.root
-        echo "[INFO] Printing fit result for category $(basename $RESDIR)"
-        FILE=${RESDIR}/postfitshape.root
-        FITFILE=${RESDIR}/fitDiagnostics.${ERA}.root
-        combine \
-            -n .$ERA \
-            -M FitDiagnostics \
-            -m 125 -d $WORKSPACE \
-            --robustFit 1 -v1 \
-            --robustHesse 1 \
-            --X-rtd MINIMIZER_analytic \
-            --cminDefaultMinimizerStrategy 0
-        mv fitDiagnostics.2018.root $FITFILE
-        echo "[INFO] Building Prefit/Postfit shapes"
-        PostFitShapesFromWorkspace -w ${WORKSPACE} \
-            -m 125 -d ${RESDIR}/combined.txt.cmb \
-            -o ${FILE} \
-            -f ${FITFILE}:fit_s --postfit
-    done
+    RESDIR=output/$datacard_output/mt/125
+    WORKSPACE=${RESDIR}/workspace.root
+    echo "[INFO] Printing fit result for category $(basename $RESDIR)"
+    FILE=${RESDIR}/postfitshape.root
+    FITFILE=${RESDIR}/fitDiagnostics.${ERA}.root
+    combine \
+        -n .$ERA \
+        -M FitDiagnostics \
+        -m 125 -d $WORKSPACE \
+        --robustFit 1 -v1 \
+        --robustHesse 1 \
+        --X-rtd MINIMIZER_analytic \
+        --cminDefaultMinimizerStrategy 0
+    mv fitDiagnostics.2018.root $FITFILE
+    echo "[INFO] Building Prefit/Postfit shapes"
+    PostFitShapesFromWorkspace -w ${WORKSPACE} \
+        -m 125 -d ${RESDIR}/combined.txt.cmb \
+        -o ${FILE} \
+        -f ${FITFILE}:fit_s --postfit
     exit 0
 fi
 
 if [[ $MODE == "PLOT-POSTFIT" ]]; then
     source utils/setup_root.sh
-    for RESDIR in output/$datacard_output/htt_mt_*; do
-        WORKSPACE=${RESDIR}/workspace.root
+    RESDIR=output/$datacard_output/mt/125
+    WORKSPACE=${RESDIR}/workspace.root
+    CATEGORIES="stxs_stage0"
+    PLOTDIR=output/plots/${ERA}-${TAG}-${CHANNEL}_shape-plots
+    FILE=${RESDIR}/postfitshape.root
+    [ -d $PLOTDIR ] || mkdir -p $PLOTDIR
+    echo "[INFO] Using postfitshapes from $FILE"
+    # python3 plotting/plot_shapes.py -i $FILE -o $PLOTDIR \
+    #         -c ${channel} -e $ERA --categories $CATEGORIES \
+    #         --fake-factor --embedding --normalize-by-bin-width \
+    #         -l --train-ff True --train-emb True
+        # CATEGORIES="stxs_stage0"
 
-        CATEGORY=$(basename $RESDIR)
-        FILE=${RESDIR}/postfitshape.root
-        FITFILE=${RESDIR}/fitDiagnostics.${ERA}.root
-        # create output folder if it does not exist
-        if [ ! -d "output/postfitplots/" ]; then
-            mkdir -p output/postfitplots/${WP}
-        fi
-        echo "[INFO] Postfits plots for category $CATEGORY"
-        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/${WP} --prefit
-        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots/${WP}
-        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/${WP} --prefit
-        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots/${WP}
-    done
+    python3 plotting/plot_shapes_combined.py -i $FILE -o $PLOTDIR -c ${CHANNEL} -e $ERA  --categories $CATEGORIES --fake-factor --embedding -l --train-ff True --train-emb True --combine-backgrounds
     exit 0
 fi
-if [[ $MODE == "PLOT-SF" ]]; then
-    source utils/setup_root.sh
-    python3 plotting/plot_TauID_sf.py --input output/$datacard_output/ --output output/postfitplots/ --wp ${WP}
-    exit 0
-fi
+
 
 if [[ $MODE == "IMPACTS" ]]; then
     source utils/setup_cmssw.sh
@@ -268,24 +260,16 @@ if [[ $MODE == "IMPACTS" ]]; then
     combineTool.py -M Impacts -d $WORKSPACE -m 125 \
         --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
         --doInitialFit --robustFit 1 \
-        -t -1 --expectSignal=1 \
         --parallel 16
 
     combineTool.py -M Impacts -d $WORKSPACE -m 125 \
         --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
         --robustFit 1 --doFits \
-        -t -1 --expectSignal=1 \
         --parallel 16
 
     combineTool.py -M Impacts -d $WORKSPACE -m 125 -o sm_${ERA}_${CHANNEL}.json
     plotImpacts.py -i sm_${ERA}_${CHANNEL}.json -o sm_${ERA}_${CHANNEL}_impacts
     # cleanup the fit files
     rm higgsCombine*.root
-    exit 0
-fi
-
-if [[ $MODE == "JSON" ]]; then
-    source utils/setup_root.sh
-    python3 friends/create_xpog_json.py --input output/$datacard_output/
     exit 0
 fi

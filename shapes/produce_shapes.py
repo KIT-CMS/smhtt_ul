@@ -143,7 +143,7 @@ from config.shapes.variations import (
 #     emb_decay_mode_eff_lt,
 #     emb_decay_mode_eff_tt,
 # )
-from config.shapes.variations import (
+from config.shapes.signal_variations import (
     ggh_acceptance,
     qqh_acceptance,
 )
