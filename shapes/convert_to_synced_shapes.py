@@ -195,9 +195,16 @@ def write_hists_per_category(cat_hists: tuple):
             )
             hist.Write()
         if "Era" in name_output:
-            name_output = name_output.replace("Era", f"Run{args.era}")
+            name_output = name_output.replace("Era", f"{args.era}")
         if "Channel" in name_output:
             name_output = name_output.replace("Channel", channel)
+        # rename dR0 and dr1 to lowdR and highdR
+        if "dr0" in name_output:
+            name_output = name_output.replace("dr0", "lowdR")
+        if "dr1" in name_output:
+            name_output = name_output.replace("dr1", "highdR")
+        if f"{channel}__{args.era}" in name_output:
+            name_output = name_output.replace(f"{channel}__{args.era}", f"{channel}_{args.era}_")
         hist.SetTitle(name_output)
         hist.SetName(name_output)
         hist.Write()
@@ -230,22 +237,6 @@ def main(args):
                 if not "data" in split_name[0]
                 else "data_obs"
             )
-            if args.special == "TauES":
-                if "emb" in split_name[0]:
-                    if "jetFakes" in split_name[0]:
-                        process = "jetFakes_"
-                        split_name[0] = split_name[0].replace("jetFakes", "").replace("emb", "")
-                    else:
-                        process = "EMB_"
-                        split_name[0] = split_name[0].replace("emb", "")
-                    if "minus" in split_name[0]:
-                        process += "-"
-                        split_name[0] = split_name[0].replace("minus", "")
-                    process += ".".join(split_name[0].split("p"))
-            # Check if process is from hotfixed powheg signal samples. If so,
-            # remove the hot fix part from the process.
-            if "corrGenWeight" in process:
-                process = process.replace("-corrGenWeight", "")
             # Skip discriminant variables we do not want in the sync file.
             # This is necessary because the sync file only allows for one type of histogram.
             # A combination of the runs for different variables can then be used in separate files.
@@ -258,10 +249,6 @@ def main(args):
         # Skip variations necessary for estimations which are of no further use.
         if "same_sign" in variation or "anti_iso" in variation:
             continue
-        if process in ["qqH125", "ZH125", "WH125"] and not args.gof:
-            continue
-        elif "qqHComb125" in process:
-            process = process.replace("qqHComb125", "qqH125")
 
         # Check if channel and category are already in the map
         if not channel in hist_map:
@@ -295,6 +282,9 @@ def main(args):
                     if not "emb" in process and not "jetFakes" in process:
                         process = _rev_process_map[process]
         name_output = "{process}".format(process=process)
+        # rename signal processes from ggH to ggH_htt
+        if process in ["ggH125", "qqH125", "WH125", "ZH125", "ttH125"]:
+            name_output = process.replace("125", "_htt125")
         if "Nominal" not in variation:
             name_output += "_" + variation
         logging.debug(
