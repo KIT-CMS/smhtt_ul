@@ -205,6 +205,10 @@ def write_hists_per_category(cat_hists: tuple):
             name_output = name_output.replace("dr1", "highdR")
         if f"{channel}__{args.era}" in name_output:
             name_output = name_output.replace(f"{channel}__{args.era}", f"{channel}_{args.era}_")
+        if f"Up_{channel}_{args.era}" in name_output:
+            name_output = name_output.replace(f"Up_{channel}_{args.era}", f"{channel}_{args.era}Up")
+        if f"Down_{channel}_{args.era}" in name_output:
+            name_output = name_output.replace(f"Down_{channel}_{args.era}", f"{channel}_{args.era}Down")
         hist.SetTitle(name_output)
         hist.SetName(name_output)
         hist.Write()

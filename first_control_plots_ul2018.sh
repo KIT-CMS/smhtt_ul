@@ -5,10 +5,10 @@ ERA=$2
 NTUPLETAG=$3
 TAG=$4
 
-# VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,pt_tt,pt_tt_pf,iso_1,pfmet,mt_1_pf,mt_2_pf,met,pzetamissvis,pzetamissvis_pf,metphi,pfmetphi"
+VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,pt_tt,pt_tt_pf,pfmet,mt_1_pf,mt_2_pf,met,pzetamissvis,pzetamissvis_pf,metphi,pfmetphi,m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
 # VARIABLES="m_vis"
 # VARIABLES="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
-VARIABLES="pt_1,pt_2,m_vis,njets,nbtag,jpt_1,jpt_2,jeta_1,jeta_2,m_fastmtt,pt_vis,mjj,pt_tt",
+# VARIABLES="pt_1,pt_2,m_vis,njets,nbtag,jpt_1,jpt_2,jeta_1,jeta_2,m_fastmtt,pt_vis,mjj,pt_tt",
 ulimit -s unlimited
 source utils/setup_root.sh
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
@@ -62,19 +62,19 @@ if [ ! -d "$shapes_output" ]; then
     mkdir -p $shapes_output
 fi
 
-python shapes/produce_shapes.py --channels $CHANNEL \
-    --directory $NTUPLES \
-    --${CHANNEL}-friend-directory $XSEC_FRIENDS $FF_FRIENDS $FASTMTT_FRIENDS \
-    --era $ERA --num-processes 4 --num-threads 2 \
-    --optimization-level 1 --control-plots \
-    --control-plot-set ${VARIABLES} --skip-systematic-variations \
-    --output-file $shapes_output
+# python shapes/produce_shapes.py --channels $CHANNEL \
+#     --directory $NTUPLES \
+#     --${CHANNEL}-friend-directory $XSEC_FRIENDS $FF_FRIENDS $FASTMTT_FRIENDS \
+#     --era $ERA --num-processes 4 --num-threads 8 \
+#     --optimization-level 1 --control-plots \
+#     --control-plot-set ${VARIABLES} --skip-systematic-variations \
+#     --output-file $shapes_output
 
-echo "##############################################################################################"
-echo "#      Additional estimations                                      #"
-echo "##############################################################################################"
+# echo "##############################################################################################"
+# echo "#      Additional estimations                                      #"
+# echo "##############################################################################################"
 
-python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
+# python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
 
 
 echo "##############################################################################################"
