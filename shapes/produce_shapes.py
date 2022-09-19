@@ -169,7 +169,8 @@ from config.shapes.variations import (
     # ff_variations_tau_es_tt_mcl,
 )
 
-from config.shapes.control_binning import control_binning
+from config.shapes.control_binning import control_binning as default_control_binning
+from config.shapes.gof_binning import load_gof_binning
 
 logger = logging.getLogger("")
 
@@ -261,6 +262,11 @@ def parse_arguments():
     )
     parser.add_argument(
         "--control-plots",
+        action="store_true",
+        help="Produce shapes for control plots. Default is production of analysis shapes.",
+    )
+    parser.add_argument(
+        "--gof-inputs",
         action="store_true",
         help="Produce shapes for control plots. Default is production of analysis shapes.",
     )
@@ -535,9 +541,13 @@ def get_analysis_units(
     return analysis_units
 
 
-def get_control_units(channel, era, datasets, special_analysis):
+def get_control_units(channel, era, datasets, special_analysis, do_gofs=False):
     control_units = {}
+    control_binning = default_control_binning
     variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
+    if do_gofs:
+        # in this case we have to load the binning from the gof yaml file
+        control_binning = load_gof_binning(era, channel)
     add_control_process(
         control_units,
         name="data",
@@ -762,6 +772,10 @@ def main(args):
             nominals[era]["units"][channel] = get_control_units(
                 channel, era, nominals[era]["datasets"][channel], special_analysis
             )
+        elif args.gof_inputs:
+            nominals[era]["units"][channel] = get_control_units(
+                channel, era, nominals[era]["datasets"][channel], special_analysis, do_gofs=True
+            )
         else:
             nominals[era]["units"][channel] = get_analysis_units(
                 channel,
@@ -847,7 +861,7 @@ def main(args):
         "whww",
     } & procS
     signalsS = sm_signalsS
-    if args.control_plots and not args.control_plots_full_samples:
+    if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
         signalsS = signalsS & {"ggh", "qqh"}
     simulatedProcsDS = {
         chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
@@ -1252,7 +1266,7 @@ def main(args):
         print("%s" % graph)
 
     if args.only_create_graphs:
-        if args.control_plots:
+        if args.control_plots or args.gof_inputs:
             graph_file_name = "control_unit_graphs-{}-{}-{}.pkl".format(
                 era, ",".join(args.channels), ",".join(sorted(procS))
             )

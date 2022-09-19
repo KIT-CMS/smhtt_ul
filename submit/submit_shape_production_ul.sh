@@ -17,7 +17,7 @@ NNSCORE_FRIENDS=$9
 [[ ! -z $6 ]] || CONTROL=0
 CONTROL_ARG=""
 if [[ $CONTROL == 1 ]]; then
-    CONTROL_ARG="--control-plots --control-plot-set ${SPECIAL}"
+    CONTROL_ARG="--gof-inputs --control-plot-set ${SPECIAL}"
     echo "[INFO] Control plots will be produced. Argument: ${CONTROL_ARG}"
 fi
 

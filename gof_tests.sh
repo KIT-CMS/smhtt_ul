@@ -78,7 +78,7 @@ if [[ $MODE == "LOCAL" ]]; then
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $FRIENDS \
         --era $ERA --num-processes 4 --num-threads 12 \
-        --optimization-level 1 --control-plots \
+        --optimization-level 1 --gof-inputs \
         --control-plot-set ${VARIABLES} \
         --output-file $shapes_output
 fi

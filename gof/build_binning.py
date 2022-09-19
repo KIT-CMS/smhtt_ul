@@ -263,7 +263,11 @@ def main(args):
     logger.info("Processing era {}".format(era))
     logger.info("Processing channel {}".format(channel))
     logger.info("Friends: {}".format(friend_directories[channel]))
-    logger.info("Variables: {}".format(args.variables))
+    if "," in args.variables[0]:
+        variables = args.variables[0].split(",")
+    else:
+        variables = args.variables
+    logger.info("Variables: {}".format(variables))
     nominals[era]["datasets"][channel] = get_nominal_datasets(
         era, channel, friend_directories, files, args.directory
     )
@@ -290,7 +294,7 @@ def main(args):
 
     outputfile = os.path.join(args.output_folder, f"binning_{era}_{channel}.yaml")
     chain = build_chain(data_selection)
-    binning = get_1d_binning(channel, chain, args.variables, percentiles)
+    binning = get_1d_binning(channel, chain, variables, percentiles)
     with open(outputfile, "w") as f:
         yaml.dump(binning, f, default_flow_style=False)
 
