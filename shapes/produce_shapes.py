@@ -536,8 +536,6 @@ def get_analysis_units(
 
 
 def get_control_units(channel, era, datasets, special_analysis):
-    with open("generatorWeights.yaml", "r") as fi:
-        gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
     control_units = {}
     variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
     add_control_process(

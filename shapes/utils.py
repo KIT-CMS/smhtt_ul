@@ -123,18 +123,30 @@ def filter_friends(dataset, friend):
 
 def get_nominal_datasets(era, channel, friend_directories, files, directory):
     datasets = dict()
-
-    for key, names in files[era][channel].items():
-        datasets[key] = dataset_from_crownoutput(
-            key,
-            names,
-            era,
-            channel,
-            channel + "_nominal",
-            directory,
-            [fdir for fdir in friend_directories[channel] if filter_friends(key, fdir)],
-            validate_samples=False,
-        )
+    if friend_directories is not None:
+        for key, names in files[era][channel].items():
+            datasets[key] = dataset_from_crownoutput(
+                key,
+                names,
+                era,
+                channel,
+                channel + "_nominal",
+                directory,
+                [fdir for fdir in friend_directories[channel] if filter_friends(key, fdir)],
+                validate_samples=False,
+            )
+    else:
+        for key, names in files[era][channel].items():
+            datasets[key] = dataset_from_crownoutput(
+                key,
+                names,
+                era,
+                channel,
+                channel + "_nominal",
+                directory,
+                [],
+                validate_samples=False,
+            )
     return datasets
 
 

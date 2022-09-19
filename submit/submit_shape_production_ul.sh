@@ -17,7 +17,8 @@ NNSCORE_FRIENDS=$9
 [[ ! -z $6 ]] || CONTROL=0
 CONTROL_ARG=""
 if [[ $CONTROL == 1 ]]; then
-    CONTROL_ARG="--control-plots"
+    CONTROL_ARG="--control-plots --control-plot-set ${SPECIAL}"
+    echo "[INFO] Control plots will be produced. Argument: ${CONTROL_ARG}"
 fi
 
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
@@ -87,9 +88,13 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     # Set output graph file name produced during graph creation.
     GRAPH_FILE_FULL_NAME=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
     GRAPH_FILE=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}.pkl
+    if [[ $CONTROL == 1 ]]; then
+        GRAPH_FILE_FULL_NAME=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
+        GRAPH_FILE=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}.pkl
+    fi
     # rename the graph file to a shorter name
     mv $GRAPH_FILE_FULL_NAME $GRAPH_FILE
-    [[ $CONTROL == 1 ]] && GRAPH_FILE=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}.pkl
+
     # Prepare the jdl file for single core jobs.
     echo "[INFO] Creating the logging direcory for the jobs..."
     GF_NAME=$(basename $GRAPH_FILE)
