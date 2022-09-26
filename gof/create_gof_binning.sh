@@ -11,4 +11,4 @@ source utils/setup_root.sh
 python3 gof/build_binning.py --channel $CHANNEL \
     --directory $NTUPLES \
     --era $ERA --variables ${VARIABLES} --${CHANNEL}-friend-directory $FRIENDS \
-    --output-folder "gof"
+    --output-folder "config/gof_binning"

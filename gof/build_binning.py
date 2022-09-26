@@ -245,6 +245,58 @@ def get_1d_binning(channel, chain, variables, percentiles):
         logger.debug("Binning for variable %s: %s", v, binning[v]["bins"])
     return binning
 
+def add_2d_unrolled_binning(variables, binning):
+    for i1, v1 in enumerate(variables):
+        for i2, v2 in enumerate(variables):
+            if i2 <= i1:
+                continue
+
+            if len(binning[v1]["bins"]) < 11:
+                bins1 = binning[v1]["bins"]
+            else:
+                bins1 = binning[v1]["bins"][::2]
+            if len(binning[v2]["bins"]) < 11:
+                bins2 = binning[v2]["bins"]
+            else:
+                bins2 = binning[v2]["bins"][::2]
+            range_ = max(bins1) - min(bins1)
+
+            bins = [bins1[0]]
+            expression = ""
+            for b in range(len(bins2) - 1):
+                expression += "({OFFSET}+{VAR1})*({VAR2}>{MIN})*({VAR2}<={MAX})".format(
+                    VAR1=v1,
+                    VAR2=v2,
+                    MIN=bins2[b],
+                    MAX=bins2[b + 1],
+                    OFFSET=b * range_)
+                if b != len(bins2) - 2:
+                    expression += "+"
+                for c in range(len(bins1)-1):
+                    bins.append(b * range_ + bins1[c+1])
+            # Add separate term shifting undefined values away from zero.
+            # If this is not done the bin including zero is populated with all events
+            # with default values.
+            # This problem only occurs for variables taking integer values.
+            jet_variables = ["mjj", "jdeta", "dijetpt", "ME_q2v1", "ME_q2v2"]
+            default_val = -10.
+            if v1 in ["njets", "nbtag"]:
+                if v2 in jet_variables:
+                    expression += "({DEF})*(({VAR2}<{MIN})+({VAR2}>{MAX}))".format(
+                            DEF=default_val,
+                            VAR2=v2,
+                            MIN=bins2[0],
+                            MAX=bins2[-1])
+
+            name = "{}_{}".format(v1, v2)
+            binning[name] = {}
+            binning[name]["bins"] = bins
+            binning[name]["expression"] = expression
+            binning[name]["cut"] = "({VAR}>{MIN})&&({VAR}<{MAX})".format(
+                VAR=v1, MIN=bins1[0], MAX=bins1[-1])
+
+    return binning
+
 
 def main(args):
     friend_directories = {
@@ -293,9 +345,14 @@ def main(args):
     percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
 
     outputfile = os.path.join(args.output_folder, f"binning_{era}_{channel}.yaml")
+    outputfile2d = os.path.join(args.output_folder, f"binning_{era}_{channel}_2D.yaml")
     chain = build_chain(data_selection)
     binning = get_1d_binning(channel, chain, variables, percentiles)
     with open(outputfile, "w") as f:
+        yaml.dump(binning, f, default_flow_style=False)
+
+    binning = add_2d_unrolled_binning(variables, binning)
+    with open(outputfile2d, "w") as f:
         yaml.dump(binning, f, default_flow_style=False)
 
 
