@@ -5,6 +5,7 @@ import os
 import pickle
 import re
 import yaml
+from itertools import combinations
 
 from shapes.utils import (
     add_process,
@@ -92,7 +93,7 @@ from config.shapes.variations import (
     # mu_fake_es_1prong1pizero,
     # ele_es,
     # ele_res,
-    # emb_e_es,
+    emb_e_es,
     # ele_fake_es_1prong,
     # ele_fake_es_1prong1pizero,
     # ele_fake_es,
@@ -164,7 +165,7 @@ from config.shapes.variations import (
     wfakes_tt,
     wfakes_w_tt,
     ff_variations_tau_es_lt,
-    ff_variations_tau_es_emb_lt
+    ff_variations_tau_es_emb_lt,
     # ff_variations_tau_es_tt,
     # ff_variations_tau_es_tt_mcl,
 )
@@ -526,28 +527,60 @@ def get_analysis_units(
     #                 WHWW_process_selection(channel, era),
     #                 category_selection], actions) for category_selection, actions in categorization[channel]],
 
-    if channel != "et":
-        add_process(
-            analysis_units,
-            name="w",
-            dataset=datasets["W"],
-            selections=[
-                channel_selection(channel, era, special_analysis),
-                W_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
+    add_process(
+        analysis_units,
+        name="w",
+        dataset=datasets["W"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            W_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
     return analysis_units
 
 
-def get_control_units(channel, era, datasets, special_analysis, do_gofs=False):
+def get_control_units(
+    channel, era, datasets, special_analysis, variables, do_gofs=False
+):
     control_units = {}
     control_binning = default_control_binning
-    variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
     if do_gofs:
         # in this case we have to load the binning from the gof yaml file
         control_binning = load_gof_binning(era, channel)
+        # also build all aviailable 2D variables from the 1D variables
+        variables_2d = []
+        for var1 in variables:
+            for var2 in variables:
+                if var1 == var2:
+                    continue
+                elif f"{var1}_{var2}" in control_binning[channel]:
+                    variables_2d.append(f"{var1}_{var2}")
+                elif f"{var2}_{var1}" in control_binning[channel]:
+                    variables_2d.append(f"{var2}_{var1}")
+                else:
+                    raise ValueError(
+                        "No binning found for 2D variable from {} and {}".format(
+                            var1, var2
+                        )
+                    )
+        variables.extend(variables_2d)
+        logger.info(
+            "Will run GoFs for {} variables, indluding {} 2D variables".format(
+                len(variables) - len(variables_2d), len(variables_2d)
+            )
+        )
+        logger.debug("Variables: {}".format(variables))
+    # check that all variables are available
+    variable_set = set()
+    for variable in set(variables):
+        if variable not in control_binning[channel]:
+            raise Exception("Variable %s not available in control_binning" % variable)
+        else:
+            variable_set.add(variable)
+    # variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
+    logger.info("[INFO] Running control plots for variables: {}".format(variable_set))
     add_control_process(
         control_units,
         name="data",
@@ -711,19 +744,18 @@ def get_control_units(channel, era, datasets, special_analysis, do_gofs=False):
         variables=variable_set,
     )
 
-    if channel != "et":
-        add_control_process(
-            control_units,
-            name="w",
-            dataset=datasets["W"],
-            selections=[
-                channel_selection(channel, era, special_analysis),
-                W_process_selection(channel, era),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
+    add_control_process(
+        control_units,
+        name="w",
+        dataset=datasets["W"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            W_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
     return control_units
 
 
@@ -770,11 +802,21 @@ def main(args):
         )
         if args.control_plots:
             nominals[era]["units"][channel] = get_control_units(
-                channel, era, nominals[era]["datasets"][channel], special_analysis
+                channel,
+                era,
+                nominals[era]["datasets"][channel],
+                special_analysis,
+                args.control_plot_set,
+                do_gofs=False,
             )
         elif args.gof_inputs:
             nominals[era]["units"][channel] = get_control_units(
-                channel, era, nominals[era]["datasets"][channel], special_analysis, do_gofs=True
+                channel,
+                era,
+                nominals[era]["datasets"][channel],
+                special_analysis,
+                args.control_plot_set,
+                do_gofs=True,
             )
         else:
             nominals[era]["units"][channel] = get_analysis_units(
@@ -822,8 +864,8 @@ def main(args):
             "zh",
             "wh",
         }
-        if "et" in args.channels:
-            procS = procS - {"w"}
+        # if "et" in args.channels:
+        #     procS = procS - {"w"}
         # procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
         #          "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
         #         | set("ggh{}".format(mass) for mass in susy_masses[era]["ggH"]) \
@@ -1118,28 +1160,25 @@ def main(args):
                     enable_check=do_check,
                 )
             if channel in ["et", "em"]:
-                pass
-            # TODO add eleES
-            # book_histograms(
-            #     um,
-            #     processes=simulatedProcsDS[channel],
-            #     datasets=nominals[era]["units"][channel],
-            #     variations=[
-            #         ele_res,
-            #         ele_es
-            #     ],
-            #     enable_check=do_check,
-            # )
-            # TODO add emb ele ES
+                # TODO add eleES
                 # book_histograms(
                 #     um,
-                #     processes=embS,
+                #     processes=simulatedProcsDS[channel],
                 #     datasets=nominals[era]["units"][channel],
                 #     variations=[
-                #         emb_e_es
+                #         ele_res,
+                #         ele_es
                 #     ],
                 #     enable_check=do_check,
                 # )
+                # TODO add emb ele ES
+                book_histograms(
+                    um,
+                    processes=embS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[emb_e_es],
+                    enable_check=do_check,
+                )
             # Book channel independent variables.
             if channel == "mt":
                 book_histograms(
@@ -1294,5 +1333,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.INFO)
+    setup_logging(log_file, logging.DEBUG)
     main(args)
