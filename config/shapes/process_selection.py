@@ -41,6 +41,7 @@ def MC_base_process_selection(channel, era):
         idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
         tauidweight = None
         vsmu_weight = None
+        vsele_weight = None
         trgweight = None
     elif channel == "et":
         isoweight = ("iso_wgt_ele_1", "isoweight")
@@ -50,6 +51,7 @@ def MC_base_process_selection(channel, era):
             "taubyIsoIdWeight",
         )
         vsmu_weight = ("id_wgt_tau_vsMu_VLoose_2", "vsmuweight")
+        vsele_weight = ("id_wgt_tau_vsEle_Tight_2", "vseleweight")
         trgweight = ("trg_wgt_single_ele32orele35", "trgweight")
     elif channel == "mt":
         isoweight = ("iso_wgt_mu_1", "isoweight")
@@ -59,7 +61,8 @@ def MC_base_process_selection(channel, era):
             "taubyIsoIdWeight",
         )
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
-        trgweight = ("trg_wgt_single_mu24ormu27", "trgweight")
+        vsele_weight = ("id_wgt_tau_vsEle_VVLoose_2", "vseleweight")
+        trgweight = ("((pt_1>=25 && pt_1<28)* trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -69,7 +72,11 @@ def MC_base_process_selection(channel, era):
         )
         vsmu_weight = (
             "((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1 + (gen_match_2!=5))",
-            "taubyIsoIdWeight",
+            "vsmuweight",
+        )
+        vsele_weight = (
+            "((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1 + (gen_match_2!=5))",
+            "vseleweight",
         )
         trgweight = None
     elif channel == "mm":
@@ -77,6 +84,7 @@ def MC_base_process_selection(channel, era):
         idweight = ("id_wgt_mu_1 * id_wgt_mu_2", "idweight")
         tauidweight = None
         vsmu_weight = None
+        vsele_weight = None
         trgweight = ("1", "trgweight")
     else:
         raise ValueError("Given channel {} not defined.".format(channel))
@@ -87,6 +95,7 @@ def MC_base_process_selection(channel, era):
         idweight,
         tauidweight,
         vsmu_weight,
+        vsele_weight,
         trgweight,
         lumi_weight(era),
     ]
@@ -287,7 +296,7 @@ def ZTT_embedded_process_selection(channel, era):
                 ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
                 ("iso_wgt_mu_1", "isoweight"),
                 ("id_wgt_mu_1", "idweight"),
-                ("trg_wgtsingle_mu24Ormu27", "trgweight"), # TODO fix naming
+                ("((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)", "trgweight"),
                 ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
             ]
         )
