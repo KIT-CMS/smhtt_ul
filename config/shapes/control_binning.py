@@ -3,7 +3,7 @@ import numpy as np
 
 common_binning = {
     "genbosonpt": Histogram("genbosonpt", "genbosonpt", np.arange(0, 150, 10)),
-    "deltaR_ditaupair": Histogram("DiTauDeltaR", "DiTauDeltaR", np.arange(0, 5, 0.2)),
+    "deltaR_ditaupair": Histogram("deltaR_ditaupair", "deltaR_ditaupair", np.arange(0, 5, 0.2)),
     "mTdileptonMET_puppi": Histogram("mTdileptonMET_puppi", "mTdileptonMET_puppi", np.arange(0, 200, 4)),
     "pzetamissvis": Histogram("pzetamissvis", "pzetamissvis", np.arange(-200, 200, 5)),
     "pzetamissvis_pf": Histogram("pzetamissvis_pf", "pzetamissvis_pf", np.arange(-200, 200, 5)),
@@ -35,16 +35,17 @@ common_binning = {
     "jdeta": Histogram("jdeta", "jdeta", np.arange(0, 6, 0.2)),
     "njets": Histogram("njets", "njets", [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]),
     "nbtag": Histogram("nbtag", "nbtag", [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]),
-    "decayMode_1": Histogram(
-            "decayMode_1",
-            "decayMode_1",
+    "decaymode_1": Histogram(
+            "decaymode_1",
+            "decaymode_1",
             [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5],
         ),
-    "decayMode_2": Histogram(
-        "decayMode_2",
-        "decayMode_2",
+    "decaymode_2": Histogram(
+        "decaymode_2",
+        "decaymode_2",
         [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5],
     ),
+    "jet_hemisphere": Histogram("jet_hemisphere", "jet_hemisphere", [-0.5, 0.5, 1.5]),
     "rho": Histogram("rho", "rho", np.arange(0, 100, 2)),
     "m_1": Histogram("m_1", "m_1", np.linspace(0, 3, 50)),
     "m_2": Histogram("m_2", "m_2", np.linspace(0, 3, 50)),
@@ -52,8 +53,9 @@ common_binning = {
     "mt_2": Histogram("mt_2", "mt_2", np.arange(0, 160, 5)),
     "mt_1_pf": Histogram("mt_1_pf", "mt_1_pf", np.arange(0, 160, 5)),
     "mt_2_pf": Histogram("mt_2_pf", "mt_2_pf", np.arange(0, 160, 5)),
-    "ptvis": Histogram("ptvis", "ptvis", np.arange(0, 160, 5)),
+    "pt_vis": Histogram("pt_vis", "pt_vis", np.arange(0, 160, 5)),
     "pt_tt": Histogram("pt_tt", "pt_tt", np.arange(0, 160, 5)),
+    "pt_dijet": Histogram("pt_dijet", "pt_dijet", np.arange(0, 300, 5)),
     "pt_tt_pf": Histogram("pt_tt_pf", "pt_tt_pf", np.arange(0, 160, 5)),
     "pt_ttjj": Histogram("pt_ttjj", "pt_ttjj", np.arange(0, 160, 5)),
     "mjj": Histogram("mjj", "mjj", np.arange(0, 300, 10)),

@@ -32,7 +32,7 @@ def channel_selection(channel, era, special=None):
                 # )
                 cuts.append(
                     (
-                        "pt_2>30 && pt_1>=25 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))",
+                        "pt_2>30 && ( (pt_1>=28 && (trg_single_mu27 == 1)) || (pt_1>=25 && pt_1 < 28 && (trg_single_mu24 == 1)))",
                         "trg_selection",
                     ),  # TODO add nonHPS Triggerflag for also MC
                 )

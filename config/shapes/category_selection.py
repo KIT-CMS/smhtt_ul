@@ -25,7 +25,6 @@ def build_xxh_cutstring(channel):
     ]
     cutstring = "("
     bincounter = 0.0
-    bindata = []
     for i, qqh_bin in enumerate(qqh_binning[:-1]):
         # outer binning is the qqh score
         cutstring += (
