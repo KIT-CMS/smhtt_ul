@@ -115,16 +115,11 @@ logger = logging.getLogger("")
 def setup_default_class_ordering(inputclasses):
     final_order = []
     # put signal first
-    for cls in inputclasses:
-        if "ggh" in cls.lower() or "qqh" in cls.lower():
-            final_order.append(cls)
-    # afterwards always ff and ztt, then the rest
-    for cls in inputclasses:
-        if "ztt" in cls.lower() or "ff" in cls.lower():
-            final_order.append(cls)
-    for cls in inputclasses:
-        if cls not in final_order:
-            final_order.append(cls)
+    default_order = ["ggh", "qqh", "ztt", "ff", "zll", "tt", "misc"]
+    for default in default_order:
+        for cls in inputclasses:
+            if cls == default:
+                final_order.append(cls)
     return final_order
 
 
@@ -186,7 +181,7 @@ def create_process_mapping(channel, era, no_embedding, no_fake_factors):
         # 'ewkz': 'misc',
         "ttl": "tt",
         "vvl": "misc",
-        "zl": "misc",
+        "zl": "zll",
         "ggh": "ggh",
         "qqh": "qqh",
     }
@@ -251,7 +246,6 @@ def setup_trainings(eras, channels, analysistype):
     trainings["trainings"] = {}
     trainings["combined_trainings"] = {}
     if analysistype == "sm":
-        # add dijetpt
         default_vars = [
             "pt_1",
             "pt_2",
@@ -266,7 +260,8 @@ def setup_trainings(eras, channels, analysistype):
             "pt_vis",
             "mjj",
             "deltaR_ditaupair",
-            "pt_tt",
+            "pt_dijet",
+
         ]
         logger.info(f"Using default variables {default_vars}")
         # here we have one training per era and channel
