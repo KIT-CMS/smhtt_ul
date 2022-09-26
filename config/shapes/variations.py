@@ -704,10 +704,12 @@ trigger_eff_et_emb = [
 
 # Embedding specific variations.
 # TODO Embedding electron scale
-# emb_e_es = [
-#     ReplaceVariable("CMS_scale_e_embUp", "eleEsUp"),
-#     ReplaceVariable("CMS_scale_e_embDown", "eleEsDown"),
-# ]
+emb_e_es = [
+    ReplaceVariable("CMS_scale_e_barrel_embUp", "eleEsBarrelUp"),
+    ReplaceVariable("CMS_scale_e_barrel_embDown", "eleEsBarrelDown"),
+    ReplaceVariable("CMS_scale_e_endcap_embUp", "eleEsEndcapUp"),
+    ReplaceVariable("CMS_scale_e_endcap_embDown", "eleEsEndcapDown"),
+]
 
 # TODO add embeddedDecayModeWeight
 
