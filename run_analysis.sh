@@ -80,14 +80,14 @@ fi
 
 if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
-    # python shapes/produce_shapes.py --channels $CHANNEL $NNSCORE_FRIENDS \
-    #     --directory $NTUPLES \
-    #     --${CHANNEL}-friend-directory $FRIENDS \
-    #     --era $ERA --num-processes 4 --num-threads 6 \
-    #     --optimization-level 1 --skip-systematic-variations \
-    #     --output-file $shapes_output
+    python shapes/produce_shapes.py --channels $CHANNEL \
+        --directory $NTUPLES \
+        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS  \
+        --era $ERA --num-processes 4 --num-threads 6 \
+        --optimization-level 1 --skip-systematic-variations \
+        --output-file $shapes_output
 
-    # python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
+    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
 
     # now plot the shapes by looping over the categories
     for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
@@ -97,9 +97,9 @@ fi
 
 if [[ $MODE == "LOCAL" ]]; then
     source utils/setup_root.sh
-    python shapes/produce_shapes.py --channels $CHANNEL $NNSCORE_FRIENDS \
+    python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS \
+        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS \
         --era $ERA --num-processes 4 --num-threads 12 \
         --optimization-level 1 \
         --output-file $shapes_output
