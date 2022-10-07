@@ -120,7 +120,7 @@ def DY_process_selection(channel, era):
     DY_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
             # dy_stitching_weight(era),  # TODO add stitching weight
             ("ZPtMassReweightWeight", "zPtReweightWeight"),
         ]
@@ -133,7 +133,7 @@ def TT_process_selection(channel, era):
     TT_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
             ("topPtReweightWeight", "topPtReweightWeight"),
         ]
     )
@@ -145,7 +145,7 @@ def VV_process_selection(channel, era):
     VV_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         ]
     )
     return Selection(name="VV", weights=VV_process_weights)
@@ -168,7 +168,7 @@ def W_process_selection(channel, era):
     W_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         ]
     )
     # W_process_weights.append(W_stitching_weight(era)) # TODO add W stitching weight in when npartons is available
@@ -184,7 +184,7 @@ def HTT_base_process_selection(channel, era):
 def HTT_process_selection(channel, era):
     HTT_weights = HTT_base_process_selection(channel, era).weights + [
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-        ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+        ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
     ]
     return Selection(name="HTT", weights=HTT_weights)
 
@@ -196,7 +196,7 @@ def HWW_process_selection(channel, era):
     HWW_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-            ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         ]
     )
     return Selection(name="HWW", weights=HWW_process_weights)
@@ -205,7 +205,7 @@ def HWW_process_selection(channel, era):
 def HWW_base_process_selection(channel, era):
     HWW_base_process_weights = MC_base_process_selection(channel, era).weights + [
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-        ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+        ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
     ]
     return Selection(name="HTT", weights=HWW_base_process_weights)
 
@@ -711,7 +711,7 @@ def ggH125_process_selection(channel, era):
     ggH125_weights = HTT_base_process_selection(channel, era).weights + [
         ("ggh_NNLO_weight", "gghNNLO"),
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-        ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+        ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         # ggh_stitching_weight(era),
     ]
     ggH125_cuts = [
@@ -727,7 +727,7 @@ def qqH125_process_selection(channel, era):
     qqH125_weights = HTT_base_process_selection(channel, era).weights + [
         # qqh_stitching_weight(era)
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-        ("crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+        ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
     ]
     qqH125_cuts = [
         (

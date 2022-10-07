@@ -44,43 +44,27 @@ def build_xxh_cutstring(channel):
     return cutstring, bincounter
 
 
-fine_binning = [
-    0.0,
-    0.3,
-    0.35,
-    0.4,
-    0.45,
-    0.5,
-    0.55,
-    0.6,
-    0.65,
-    0.7,
-    0.75,
-    0.8,
-    0.85,
-    0.9,
-    0.92,
-    0.94,
-    0.96,
-    0.98,
-    1.0,
-]
+fine_binning = np.linspace(0.0, 1.0, 51)
 category_mapping = {
     "mt": {
-        "qqh": {
+        "ggh": {
             "index": 0,
             "binning": fine_binning,
         },
-        "ggh": {
+        "qqh": {
             "index": 1,
             "binning": fine_binning,
         },
         "ztt": {
-            "index": 3,
+            "index": 2,
             "binning": fine_binning,
         },
         "ff": {
-            "index": 2,
+            "index": 3,
+            "binning": fine_binning,
+        },
+        "zll": {
+            "index": 4,
             "binning": fine_binning,
         },
         "tt": {
@@ -88,12 +72,11 @@ category_mapping = {
             "binning": fine_binning,
         },
         "misc": {
-            "index": 4,
+            "index": 6,
             "binning": fine_binning,
         },
     }
 }
-
 categorization = {}
 for channel in ["mt"]:
     categorization[channel] = []

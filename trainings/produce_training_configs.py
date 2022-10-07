@@ -187,8 +187,8 @@ def create_process_mapping(channel, era, no_embedding, no_fake_factors):
     }
     if no_embedding:
         default_mapping["ztt"] = "ztt"
-        default_mapping["ttt"] = "ztt"
-        default_mapping["vvt"] = "ztt"
+        default_mapping["ttt"] = "tt"
+        default_mapping["vvt"] = "misc"
     else:
         default_mapping["emb"] = "ztt"
     if no_fake_factors:

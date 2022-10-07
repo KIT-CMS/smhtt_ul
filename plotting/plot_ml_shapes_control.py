@@ -496,13 +496,13 @@ def main(args):
     plot.legend(3).Draw()
 
     # draw additional labels
-    plot.DrawCMS()
+    plot.DrawCMS(thesisstyle=True, preliminary=False)
     if "2016" in args.era:
         plot.DrawLumi("35.9 fb^{-1} (2016, 13 TeV)")
     elif "2017" in args.era:
         plot.DrawLumi("41.5 fb^{-1} (2017, 13 TeV)")
     elif "2018" in args.era:
-        plot.DrawLumi("59.7 fb^{-1} (2018, 13 TeV)")
+        plot.DrawLumi("59.8 fb^{-1} (2018, 13 TeV)")
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception

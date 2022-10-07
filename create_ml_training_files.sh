@@ -12,4 +12,4 @@ python trainings/produce_training_configs.py --channels $CHANNEL \
     --et-friend-directory $XSEC_FRIENDS $FF_FRIENDS $FASTMTT_FRIENDS \
     --mt-friend-directory $XSEC_FRIENDS $FF_FRIENDS $FASTMTT_FRIENDS \
     --eras $ERA --trainings-config trainings/default_training_sm.yaml \
-    --output-folder /work/sbrommer/smhtt_ul/training/KingMaker/sm-htt-analysis/$VERSION
+    --output-folder /work/sbrommer/smhtt_ul/training/KingMaker/sm-htt-analysis/$VERSION 
