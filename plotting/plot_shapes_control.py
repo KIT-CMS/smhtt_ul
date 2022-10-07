@@ -455,7 +455,7 @@ def main(info):
     plot.legend(3).Draw()
 
     # draw additional labels
-    plot.DrawCMS()
+    plot.DrawCMS(thesisstyle=True, preliminary=False)
     if "2016" in args.era:
         plot.DrawLumi("35.9 fb^{-1} (2016, 13 TeV)")
     elif "2017" in args.era:

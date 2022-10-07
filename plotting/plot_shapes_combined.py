@@ -116,6 +116,11 @@ def parse_arguments():
         action="store_true",
         help="if set, all backgrounds are combined into 3 bg categories (embedding, jetfakes, rest)",
     )
+    parser.add_argument(
+        "--combine-signals",
+        action="store_true",
+        help="if set, all minor signals are combined",
+    )
     return parser.parse_args()
 
 
@@ -369,12 +374,12 @@ class plot:
         self.id = "{}_{}_{}".format(self.era, self.channel, self.category)
         self.ratiolist = []
         width = 600
-        # if category == "1":
-        #    width = 750
+        if category == "1":
+           width = 750
         if self.isSignal:
             self.painter = dd.Plot([[0.5, 0.48]], "ModTDR", r=0.04, l=0.14, width=width)
         else:
-            self.painter = dd.Plot([[0.5, 0.48]], "ModTDR", r=0.04, l=0.14, width=width)
+            self.painter = dd.Plot([[0.3, 0.28]], "ModTDR", r=0.04, l=0.14, width=width)
 
     def __call__(self):
         return self.painter
@@ -464,7 +469,7 @@ class plot:
                             continue
                         if self.channel == "tt" and self.category in ["13", "15", "19"]:
                             continue
-                        if self.channel == "mt" and self.category in ["15", "19"]:
+                        if self.channel == "mt" and self.category in ["19"]:
                             continue
                         if self.channel == "et" and self.category in ["19"]:
                             continue
@@ -623,7 +628,7 @@ class plot:
                                 continue
                             if channel == "tt" and self.category in ["13", "15", "19"]:
                                 continue
-                            if channel == "mt" and self.category in ["15", "19"]:
+                            if channel == "mt" and self.category in ["19"]:
                                 continue
                             if channel == "et" and self.category in ["19"]:
                                 continue
@@ -661,7 +666,7 @@ class plot:
                             continue
                         if self.channel == "tt" and self.category in ["13", "15", "19"]:
                             continue
-                        if self.channel == "mt" and self.category in ["15", "19"]:
+                        if self.channel == "mt" and self.category in ["19"]:
                             continue
                         if self.channel == "et" and self.category in ["19"]:
                             continue
@@ -699,7 +704,7 @@ class plot:
                             continue
                         if channel == "tt" and self.category in ["13", "15", "19"]:
                             continue
-                        if channel == "mt" and self.category in ["15", "19"]:
+                        if channel == "mt" and self.category in ["19"]:
                             continue
                         if channel == "et" and self.category in ["19"]:
                             continue
@@ -818,7 +823,7 @@ class plot:
                             continue
                         if channel == "tt" and self.category in ["13", "15", "19"]:
                             continue
-                        if channel == "mt" and self.category in ["15", "19"]:
+                        if channel == "mt" and self.category in ["19"]:
                             continue
                         if channel == "et" and self.category in ["19"]:
                             continue
@@ -854,7 +859,7 @@ class plot:
                         continue
                     if self.channel == "tt" and self.category in ["13", "15", "19"]:
                         continue
-                    if self.channel == "mt" and self.category in ["15", "19"]:
+                    if self.channel == "mt" and self.category in ["19"]:
                         continue
                     if self.channel == "et" and self.category in ["19"]:
                         continue
@@ -890,7 +895,7 @@ class plot:
                         continue
                     if channel == "tt" and self.category in ["13", "15", "19"]:
                         continue
-                    if channel == "mt" and self.category in ["15", "19"]:
+                    if channel == "mt" and self.category in ["19"]:
                         continue
                     if channel == "et" and self.category in ["19"]:
                         continue
@@ -1150,12 +1155,13 @@ class plot:
 
         self.painter.subplot(1).setYlabel("Ratio")
         # self.painter.subplot(1).setYlabel("Ratio w.r.t. bkg.")
-        self.painter.scaleXLabelSize(1.0)  # 0.8
-        self.painter.scaleXTitleSize(1.0)  # 0.8
-        self.painter.scaleYLabelSize(1.0)  # 0.8
+        self.painter.scaleXLabelSize(0.8)  # 0.8
+        self.painter.scaleXTitleSize(0.8)  # 0.8
+        self.painter.scaleYLabelSize(0.8)  # 0.8
         self.painter.scaleYTitleSize(
-            1.0
-        )  # 0.8       self.painter.scaleYTitleOffset(1.1)
+            0.8
+        )  # 0.8
+        self.painter.scaleYTitleOffset(1.30)
         if self.plotConfig.tag == "stxs_stage0" and self.category == "1":
             self.painter.scaleYTitleOffset(1.0)  # 0.85)
 
@@ -1223,9 +1229,13 @@ class plot:
 
     def set_upper_legend(self):
         height = 0.20  # 0.15
-        if not self.isSignal and self.plotConfig.settings["combine_backgrounds"]:
-            height = 0.20 * 0.8
-        self.painter.add_legend(width=0.65, height=height * 0.8)  # 0.68
+        cols = 3
+        width = 0.45 * 1.2
+        if not self.isSignal:
+            height = 0.20
+            cols = 2
+            width = 0.45
+        self.painter.add_legend(width=width, height=height * 0.8)  # 0.68
         # set background labels
         for process in collections.OrderedDict(
             reversed(list(self.background_processes.items()))
@@ -1256,7 +1266,7 @@ class plot:
                     pass
         self.painter.legend(0).add_entry(0, "total_bkg", "Bkg. unc.", "f")
         self.painter.legend(0).add_entry(0, "data_obs", "Observed", "PEL")
-        self.painter.legend(0).setNColumns(2)
+        self.painter.legend(0).setNColumns(cols)
         self.painter.legend(0).scaleTextSize(1.2)
         self.painter.legend(0).Draw()
 
@@ -1479,6 +1489,7 @@ class plotConfigurator:
             "blinded_shapes": args.blinded_shapes,
             "single_category": args.single_category,
             "combine_backgrounds": args.combine_backgrounds,
+            "combine_signals": args.combine_signals,
         }
         self.background_categories = [
             "12",
@@ -1560,8 +1571,8 @@ class plotConfigurator:
         else:
             default_categories = {
                 "et": {"12": {}, "15": {}, "11": {}, "13": {}, "14": {}, "16": {}},
-                # "mt": {"12": {}, "15": {}, "11": {}, "13": {}, "14": {}, "16": {}},
-                "mt": {"12": {}, "11": {}, "13": {}, "14": {}, "16": {}},
+                "mt": {"12": {}, "15": {}, "11": {}, "13": {}, "14": {}, "16": {}},
+                # "mt": {"12": {}, "11": {}, "13": {}, "14": {}, "16": {}},
                 "tt": {"12": {}, "17": {}, "16": {}},
                 "em": {"12": {}, "13": {}, "14": {}, "16": {}, "19": {}},
                 "cmb": {
@@ -1657,24 +1668,7 @@ class plotConfigurator:
                     bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
                 elif channel == "cmb":
                     bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB", "jetFakes"]
-                if self.settings["combine_backgrounds"]:
-                    single_plot.add_background(
-                        "REST",
-                        styles.legend_label_dict["REST"],
-                        styles.color_dict["REST"],
-                        [
-                            "VVL",
-                            "W",
-                            "TTL",
-                            "ZL",
-                            "qqH_hww",
-                            "ggH_hww",
-                            "VH_htt",
-                            "ZH_htt",
-                            "WH_htt",
-                            "ttH_htt",
-                        ],
-                    )
+                if self.settings["combine_backgrounds"] and self.settings["combine_signals"]:
                     single_plot.add_background(
                         "jetFakesCMB",
                         styles.legend_label_dict["jetFakesCMB"],
@@ -1687,7 +1681,37 @@ class plotConfigurator:
                         styles.color_dict["EMB"],
                         ["EMB"],
                     )
-                else:
+                    single_plot.add_background(
+                            "REST",
+                            styles.legend_label_dict["REST"],
+                            styles.color_dict["REST"],
+                            [
+                                "VVL",
+                                "W",
+                                "TTL",
+                                "ZL",
+                                "qqH_hww",
+                                "ggH_hww",
+                                "VH_htt",
+                                "ZH_htt",
+                                "WH_htt",
+                                "ttH_htt",
+                            ],
+                        )
+                if self.settings["combine_signals"] and not self.settings["combine_backgrounds"]:
+                    single_plot.add_background(
+                            "REST",
+                            styles.legend_label_dict["REST"],
+                            styles.color_dict["REST"],
+                            [
+                                "qqH_hww",
+                                "ggH_hww",
+                                "VH_htt",
+                                "ZH_htt",
+                                "WH_htt",
+                                "ttH_htt",
+                            ],
+                        )
                     for process in bkg_processes:
                         single_plot.add_background(
                             process,
@@ -1695,10 +1719,25 @@ class plotConfigurator:
                             styles.color_dict[process],
                             [process],
                         )
-
+                if not self.settings["combine_signals"] and self.settings["combine_backgrounds"]:
+                    for process in bkg_processes:
+                        single_plot.add_background(
+                            process,
+                            styles.legend_label_dict[process],
+                            styles.color_dict[process],
+                            [process],
+                        )
+                if not self.settings["combine_signals"] and not self.settings["combine_backgrounds"]:
+                    for process in bkg_processes:
+                        single_plot.add_background(
+                            process,
+                            styles.legend_label_dict[process],
+                            styles.color_dict[process],
+                            [process],
+                        )
                 # if category is not a background category, include signals
                 if category not in self.background_categories:
-                    if not self.settings["combine_backgrounds"]:
+                    if not self.settings["combine_signals"]:
                         single_plot.add_signal(
                             "ttH",
                             signal_labels["ttH"]["label"],
@@ -1964,15 +2003,15 @@ def main(args):
         # draw additional labels
         ##################
         plot.painter.DrawCMS(
-            preliminary=False,
-            subtext=r"#splitline{#scale[0.6]{Supplementary}}{ }",
+            preliminary=False, thesisstyle=True
+            # subtext=r"#splitline{#scale[0.6]{Own Work}}{ }",
         )
         if era == "2016":
             plot.painter.DrawLumi("35.9 fb^{-1} (2016, 13 TeV)", textsize=0.45)
         elif era == "2017":
             plot.painter.DrawLumi("41.5 fb^{-1} (2017, 13 TeV)", textsize=0.45)
         elif era == "2018":
-            plot.painter.DrawLumi("59.7 fb^{-1} (2018, 13 TeV)", textsize=0.45)
+            plot.painter.DrawLumi("59.8 fb^{-1} (2018, 13 TeV)", textsize=0.45)
         elif era == "all":
             # (35.9 + 41.5 + 59.7)
             plot.painter.DrawLumi("138 fb^{-1} (13 TeV)", textsize=0.6)  # 0.5
