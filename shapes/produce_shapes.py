@@ -134,6 +134,7 @@ from config.shapes.variations import (
     prefiring,
     zpt,
     top_pt,
+    pileup_reweighting,
 )
 
 # TODO add missing uncertainties
@@ -270,6 +271,11 @@ def parse_arguments():
         "--gof-inputs",
         action="store_true",
         help="Produce shapes for control plots. Default is production of analysis shapes.",
+    )
+    parser.add_argument(
+        "--do-2dGofs",
+        action="store_true",
+        help="It set, run the 2D gof Tests as well",
     )
     parser.add_argument(
         "--control-plots-full-samples",
@@ -542,7 +548,7 @@ def get_analysis_units(
 
 
 def get_control_units(
-    channel, era, datasets, special_analysis, variables, do_gofs=False
+    channel, era, datasets, special_analysis, variables, do_gofs=False, do_2dGofs=False
 ):
     control_units = {}
     control_binning = default_control_binning
@@ -550,27 +556,28 @@ def get_control_units(
         # in this case we have to load the binning from the gof yaml file
         control_binning = load_gof_binning(era, channel)
         # also build all aviailable 2D variables from the 1D variables
-        variables_2d = []
-        for var1 in variables:
-            for var2 in variables:
-                if var1 == var2:
-                    continue
-                elif f"{var1}_{var2}" in control_binning[channel]:
-                    variables_2d.append(f"{var1}_{var2}")
-                elif f"{var2}_{var1}" in control_binning[channel]:
-                    variables_2d.append(f"{var2}_{var1}")
-                else:
-                    raise ValueError(
-                        "No binning found for 2D variable from {} and {}".format(
-                            var1, var2
+        if do_2dGofs:
+            variables_2d = []
+            for var1 in variables:
+                for var2 in variables:
+                    if var1 == var2:
+                        continue
+                    elif f"{var1}_{var2}" in control_binning[channel]:
+                        variables_2d.append(f"{var1}_{var2}")
+                    elif f"{var2}_{var1}" in control_binning[channel]:
+                        variables_2d.append(f"{var2}_{var1}")
+                    else:
+                        raise ValueError(
+                            "No binning found for 2D variable from {} and {}".format(
+                                var1, var2
+                            )
                         )
-                    )
-        variables.extend(variables_2d)
-        logger.info(
-            "Will run GoFs for {} variables, indluding {} 2D variables".format(
-                len(variables) - len(variables_2d), len(variables_2d)
+            variables.extend(variables_2d)
+            logger.info(
+                "Will run GoFs for {} variables, indluding {} 2D variables".format(
+                    len(variables) - len(variables_2d), len(variables_2d)
+                )
             )
-        )
         logger.debug("Variables: {}".format(variables))
     # check that all variables are available
     variable_set = set()
@@ -817,6 +824,7 @@ def main(args):
                 special_analysis,
                 args.control_plot_set,
                 do_gofs=True,
+                do_2dGofs=args.do_2dGofs,
             )
         else:
             nominals[era]["units"][channel] = get_analysis_units(
@@ -1054,7 +1062,7 @@ def main(args):
                 um,
                 processes=simulatedProcsDS[channel],
                 datasets=nominals[era]["units"][channel],
-                variations=[met_unclustered],
+                variations=[met_unclustered, pileup_reweighting],
                 enable_check=do_check,
             )
 
@@ -1333,5 +1341,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.DEBUG)
+    setup_logging(log_file, logging.INFO)
     main(args)

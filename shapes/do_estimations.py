@@ -228,15 +228,15 @@ def main(args):
                             input_file, ch, cat, var, variation=variation
                         )
                         estimated_hist.Write()
-                        # estimated_hist = fake_factor_estimation(
-                        #     input_file,
-                        #     ch,
-                        #     cat,
-                        #     var,
-                        #     variation=variation,
-                        #     is_embedding=False,
-                        # )
-                        # estimated_hist.Write()
+                        estimated_hist = fake_factor_estimation(
+                            input_file,
+                            ch,
+                            cat,
+                            var,
+                            variation=variation,
+                            is_embedding=False,
+                        )
+                        estimated_hist.Write()
                         for variation, scale in zip(
                             [
                                 "CMS_ff_total_sub_syst_Channel_EraUp",

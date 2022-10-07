@@ -122,10 +122,11 @@ def friend_producer(
         print("done")
         return
     # else:
-        # print(f"{inputfile} is not empty, generating friend tree")
+    # print(f"{inputfile} is not empty, generating friend tree")
     rdf = ROOT.RDataFrame("ntuple", rootfile)
     numberGeneratedEventsWeight = 1 / float(dataset_proc["nevents"])
     crossSectionPerEventWeight = float(dataset_proc["xsec"])
+    negative_events_fraction = float(dataset_proc["generator_weight"])
     rdf = rdf.Define(
         "numberGeneratedEventsWeight",
         "(float){ngw}".format(ngw=numberGeneratedEventsWeight),
@@ -134,10 +135,20 @@ def friend_producer(
         "crossSectionPerEventWeight",
         "(float){xsec}".format(xsec=crossSectionPerEventWeight),
     )
+    rdf = rdf.Define(
+        "negative_events_fraction",
+        "(float){negative_events_fraction}".format(
+            negative_events_fraction=negative_events_fraction
+        ),
+    )
     rdf.Snapshot(
         "ntuple",
         output_file,
-        ["numberGeneratedEventsWeight", "crossSectionPerEventWeight"],
+        [
+            "numberGeneratedEventsWeight",
+            "crossSectionPerEventWeight",
+            "negative_events_fraction",
+        ],
     )
     rootfile.Close()
     return
@@ -153,7 +164,7 @@ def generate_friend_trees(dataset, ntuples, nthreads, output_path, use_xrootd, d
             parse_filepath(ntuple)["era"],
             parse_filepath(ntuple)["channel"],
             use_xrootd,
-            debug
+            debug,
         )
         for ntuple in ntuples
     ]
@@ -183,5 +194,7 @@ if __name__ == "__main__":
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)
-    generate_friend_trees(dataset, ntuples_wo_data, nthreads, output_path, args.xrootd, args.debug)
+    generate_friend_trees(
+        dataset, ntuples_wo_data, nthreads, output_path, args.xrootd, args.debug
+    )
     print("Done")

@@ -6,7 +6,7 @@ NTUPLETAG=$3
 TAG=$4
 
 VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,mt_1_pf,mt_2_pf,pt_tt,pfmet,met,pzetamissvis,metphi,m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt,pt_dijet,deltaR_ditaupair,decaymode_2,jet_hemisphere,pt_vis"
-VARIABLES="pt_vis"
+# VARIABLES="pt_vis"
 # VARIABLES="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
 # VARIABLES="pt_1,pt_2,m_vis,njets,nbtag,jpt_1,jpt_2,jeta_1,jeta_2,m_fastmtt,pt_vis,mjj,pt_tt",
 ulimit -s unlimited
@@ -84,6 +84,6 @@ echo "##########################################################################
 python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --fake-factor
 # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding
 # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
-# python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor
+python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor
 
 # python2 ~/tools/webgallery/gallery.py Run${ERA}_plots_emb_classic/
