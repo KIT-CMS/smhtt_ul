@@ -108,6 +108,12 @@ wfakes_w_tt = AddCut(
 #         Weight("ff_lt_ttbar", "fake_factor"),
 #     ),
 # ]
+# Pileup reweighting
+pileup_reweighting = [
+    ReplaceVariable("CMS_PileUpUp", "PileUpUp"),
+    ReplaceVariable("CMS_PileUpDown", "PileUpDown")
+]
+
 
 # Energy scales.
 # Previously defined with 2017 in name.
