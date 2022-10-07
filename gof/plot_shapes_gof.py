@@ -210,7 +210,7 @@ def main(args):
         ]
     if not args.embedding and args.fake_factor:
         bkg_processes = [
-            "VVT", "VVJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"
+           "VVL", "VVT", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
         ]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
@@ -219,7 +219,7 @@ def main(args):
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
-
+    print("all_bkg_processes ",all_bkg_processes)
     if "2016" in args.era:
         era = "2016"
     elif "2017" in args.era:

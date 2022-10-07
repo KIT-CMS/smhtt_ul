@@ -8,7 +8,7 @@ MODE=$5
 VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,mt_1_pf,mt_2_pf,pt_tt,pfmet,met,pzetamissvis,metphi,m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt,pt_dijet,deltaR_ditaupair,decaymode_2,mt_tot,jet_hemisphere,pt_vis"
 # used in training
 VARIABLES="pt_1,pt_2,m_vis,njets,nbtag,jpt_1,jpt_2,jeta_1,jeta_2,m_fastmtt,mjj,pt_vis,deltaR_ditaupair,pt_dijet"
-# VARIABLES="pt_1"
+# VARIABLES="pt_2,jpt_2"
 POSTFIX="-ML"
 ulimit -s unlimited
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
@@ -161,6 +161,48 @@ if [[ $MODE == "DATACARD" ]]; then
     exit 0
 fi
 
+if [[ $MODE == "DATACARD-MC" ]]; then
+    source utils/setup_cmssw.sh
+    # Datacard Setup
+    for VARIABLE in ${VARIABLES//,/ }; do
+        datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ERA}_${CHANNEL}_${VARIABLE}"
+        GOF_CATEGORY_NAME=${CHANNEL}_${VARIABLE}
+        ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
+            --base_path=$PWD \
+            --input_folder_mt=$shapes_output_synced \
+            --input_folder_tt=$shapes_output_synced \
+            --input_folder_et=$shapes_output_synced \
+            --input_folder_em=$shapes_output_synced \
+            --real_data=true \
+            --classic_bbb=false \
+            --binomial_bbb=false \
+            --jetfakes=1 \
+            --embedding=0 \
+            --postfix="-ML" \
+            --channel=${CHANNEL} \
+            --auto_rebin=false \
+            --rebin_categories=false \
+            --stxs_signals="stxs_stage0" \
+            --categories="gof" \
+            --era=${ERA} \
+            --gof_category_name=$GOF_CATEGORY_NAME \
+            --output=$datacard_output \
+            --train_ff=1 \
+            --train_stage0=1 --train_emb=1
+        THIS_PWD=${PWD}
+        echo $THIS_PWD
+        cd $datacard_output/${CHANNEL}
+        for FILE in */*.txt; do
+            sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+        done
+        cd $THIS_PWD
+
+        echo "[INFO] Create Workspace for datacard"
+        combineTool.py -M T2W -o workspace.root -i $datacard_output/${CHANNEL}/125 --channel-masks
+    done
+    exit 0
+fi
+
 if [[ $MODE == "GOF" ]]; then
     source utils/setup_cmssw.sh
     for VARIABLE in ${VARIABLES//,/ }; do
@@ -223,6 +265,8 @@ if [[ $MODE == "GOF" ]]; then
             fi
         done
     done
+    source utils/setup_root.sh
+    python3 gof/plot_gof_summary.py --variables $VARIABLES --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL
     exit 0
 fi
 
@@ -295,6 +339,31 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
                 --gof-variable $VARIABLE -o ${PLOTDIR}
             python3 gof/plot_shapes_gof.py -i $POSTFITFILE -c $CHANNEL -e $ERA $OPTION \
                 --categories 'None' --fake-factor --embedding \
+                --gof-variable $VARIABLE -o ${PLOTDIR}
+        done
+        cp ${PLOTDIR}/*.p{df,ng} $SUMMARYFOLDER
+    done
+    exit 0
+fi
+
+if [[ $MODE == "PLOT-POSTFIT-MC" ]]; then
+    source utils/setup_root.sh
+    SUMMARYFOLDER=output/gof/${NTUPLETAG}-${TAG}/plots
+    [ -d $SUMMARYFOLDER ] || mkdir -p $SUMMARYFOLDER
+    for VARIABLE in ${VARIABLES//,/ }; do
+        ID=${ERA}_${CHANNEL}_${VARIABLE}
+        datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
+        PLOTDIR=${datacard_output}/plots
+        PREFITFILE=${datacard_output}/${ID}-datacard-shapes-prefit.root
+        POSTFITFILE=${datacard_output}/${ID}-datacard-shapes-postfit-b.root
+        [ -d $PLOTDIR ] || mkdir -p $PLOTDIR
+        echo "[INFO] Using postfitshapes from $FILE"
+        for OPTION in "" "--png"; do
+            python3 gof/plot_shapes_gof.py -i $PREFITFILE -c $CHANNEL -e $ERA $OPTION \
+                --categories 'None' --fake-factor \
+                --gof-variable $VARIABLE -o ${PLOTDIR}
+            python3 gof/plot_shapes_gof.py -i $POSTFITFILE -c $CHANNEL -e $ERA $OPTION \
+                --categories 'None' --fake-factor \
                 --gof-variable $VARIABLE -o ${PLOTDIR}
         done
         cp ${PLOTDIR}/*.p{df,ng} $SUMMARYFOLDER

@@ -71,6 +71,7 @@ labeldict = {
     'decaymode_1': 'decay mode 1',
     'mt_tot': '$m_{T}(\\tau_1+\\tau_2, MET)$',
     "jet_hemisphere": 'jet hemisphere',
+    "pt_vis": 'visible $p_T(\\tau\\tau)$',
 
 
 
