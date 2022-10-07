@@ -168,15 +168,65 @@ if [[ $MODE == "DATACARD" ]]; then
         --train_emb=1
     THIS_PWD=${PWD}
     echo $THIS_PWD
-    cd output/$datacard_output/mt
+    cd output/$datacard_output/$CHANNEL
     for FILE in */*.txt; do
         sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
     done
     cd $THIS_PWD
 
     echo "[INFO] Create Workspace for datacard"
-    # combineTool.py -M T2W -i output/$datacard_output/htt_mt_*/ -o workspace.root --parallel 4 -m 125
-    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/mt/125 --parallel 4 -m 125 \
+    # combineTool.py -M T2W -i output/$datacard_output/htt_$channel_*/ -o workspace.root --parallel 4 -m 125
+    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/$CHANNEL/125 --parallel 4 -m 125 \
+        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+        --PO '"map=^.*/ggH_htt.?$:r_ggH[1,-5,5]"' \
+        --PO '"map=^.*/qqH_htt.?$:r_qqH[1,-5,5]"'
+        # --PO '"map=^.*/WH_htt.?$:r_VH[1,-5,7]"' \
+       	# --PO '"map=^.*/ZH_htt.?$:r_VH[1,-5,7]"'
+        # --PO '"map=^.*/ggZH_had_htt.?$:r_ggH[1,-5,5]"' \
+        # --PO '"map=^.*/WH_had_htt.?$:r_qqH[1,-5,5]"' \
+        # --PO '"map=^.*/ZH_had_htt.?$:r_qqH[1,-5,5]"' \
+        # --PO '"map=^.*/ggZH_lep_htt.?$:r_VH[1,-5,7]"'
+    exit 0
+fi
+
+if [[ $MODE == "DATACARD-MC" ]]; then
+    source utils/setup_cmssw.sh
+    # inputfile
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+
+    ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
+        --base_path=$PWD \
+        --input_folder_mt=$shapes_output_synced \
+        --input_folder_tt=$shapes_output_synced \
+        --input_folder_et=$shapes_output_synced \
+        --input_folder_em=$shapes_output_synced \
+        --real_data=false \
+        --classic_bbb=false \
+        --binomial_bbb=false \
+        --jetfakes=1 \
+        --embedding=0 \
+        --postfix="-ML" \
+        --channel=${CHANNEL} \
+        --auto_rebin=true \
+        --stxs_signals="stxs_stage0" \
+        --categories="stxs_stage0" \
+        --era=${ERA} \
+        --output=output/$datacard_output \
+        --use_automc=true \
+        --train_ff=1 \
+        --train_stage0=1\
+        --train_emb=1
+    THIS_PWD=${PWD}
+    echo $THIS_PWD
+    cd output/$datacard_output/$CHANNEL
+    for FILE in */*.txt; do
+        sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+    done
+    cd $THIS_PWD
+
+    echo "[INFO] Create Workspace for datacard"
+    # combineTool.py -M T2W -i output/$datacard_output/htt_$CHANNEL_*/ -o workspace.root --parallel 4 -m 125
+    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/$CHANNEL/125 --parallel 4 -m 125 \
         -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
         --PO '"map=^.*/ggH_htt.?$:r_ggH[1,-5,5]"' \
         --PO '"map=^.*/qqH_htt.?$:r_qqH[1,-5,5]"'
@@ -194,15 +244,14 @@ if [[ $MODE == "FIT" ]]; then
         combineTool.py \
         -M MultiDimFit \
         -m 125 \
-        -d output/$datacard_output/mt/125/workspace.root \
+        -d output/$datacard_output/$CHANNEL/125/workspace.root \
         --algo singles \
         --robustFit 1 \
-        --expectSignal 1\
         --X-rtd MINIMIZER_analytic \
         --cminDefaultMinimizerStrategy 0 \
         -n $ERA -v1 \
         --parallel 1 --there
-    for RESDIR in output/$datacard_output/mt/125; do
+    for RESDIR in output/$datacard_output/$CHANNEL/125; do
         echo "[INFO] Printing fit result for category $(basename $RESDIR)"
         FITFILE=${RESDIR}/higgsCombine${ERA}.MultiDimFit.mH125.root
         python datacards/print_fitresult.py ${FITFILE}
@@ -210,9 +259,23 @@ if [[ $MODE == "FIT" ]]; then
     exit 0
 fi
 
+if [[ $MODE == "FIT-SPLIT" ]]; then
+    # source utils/setup_cmssw.sh
+    ./fitting/fit_split_by_unc_cons.sh $datacard_output $ERA $CHANNEL 0 "inclusive"
+    ./fitting/fit_split_by_unc_cons.sh $datacard_output $ERA $CHANNEL 0 "stage0"
+    exit 0
+fi
+
+if [[ $MODE == "FIT-SPLIT-MC" ]]; then
+    # source utils/setup_cmssw.sh
+    ./fitting/fit_split_by_unc_cons.sh $datacard_output $ERA $CHANNEL 1 "inclusive"
+    ./fitting/fit_split_by_unc_cons.sh $datacard_output $ERA $CHANNEL 1 "stage0"
+    exit 0
+fi
+
 if [[ $MODE == "POSTFIT" ]]; then
     source utils/setup_cmssw.sh
-    RESDIR=output/$datacard_output/mt/125
+    RESDIR=output/$datacard_output/$CHANNEL/125
     WORKSPACE=${RESDIR}/workspace.root
     echo "[INFO] Printing fit result for category $(basename $RESDIR)"
     FILE=${RESDIR}/postfitshape.root
@@ -231,12 +294,16 @@ if [[ $MODE == "POSTFIT" ]]; then
         -m 125 -d ${RESDIR}/combined.txt.cmb \
         -o ${FILE} \
         -f ${FITFILE}:fit_s --postfit
+    FILE=${RESDIR}/prefitshape.root
+    PostFitShapesFromWorkspace -w ${WORKSPACE} \
+        -m 125 -d ${RESDIR}/combined.txt.cmb \
+        -o ${FILE}
     exit 0
 fi
 
 if [[ $MODE == "PLOT-POSTFIT" ]]; then
     source utils/setup_root.sh
-    RESDIR=output/$datacard_output/mt/125
+    RESDIR=output/$datacard_output/$CHANNEL/125
     WORKSPACE=${RESDIR}/workspace.root
     CATEGORIES="stxs_stage0"
     PLOTDIR=output/plots/${ERA}-${TAG}-${CHANNEL}_shape-plots
@@ -249,14 +316,35 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
     #         -l --train-ff True --train-emb True
         # CATEGORIES="stxs_stage0"
 
-    python3 plotting/plot_shapes_combined.py -i $FILE -o $PLOTDIR -c ${CHANNEL} -e $ERA  --categories $CATEGORIES --fake-factor --embedding -l --train-ff True --train-emb True --combine-backgrounds
+    python3 plotting/plot_shapes_combined.py -i $FILE -o $PLOTDIR -c ${CHANNEL} -e $ERA  --categories $CATEGORIES --fake-factor --embedding -l --train-ff True --train-emb True --combine-signals
+    FILE=${RESDIR}/prefitshape.root
+    python3 plotting/plot_shapes_combined.py -i $FILE -o $PLOTDIR -c ${CHANNEL} -e $ERA  --categories $CATEGORIES --fake-factor --embedding -l --train-ff True --train-emb True --combine-signals
+    exit 0
+fi
+
+if [[ $MODE == "PLOT-POSTFIT-MC" ]]; then
+    source utils/setup_root.sh
+    RESDIR=output/$datacard_output/$CHANNEL/125
+    WORKSPACE=${RESDIR}/workspace.root
+    CATEGORIES="stxs_stage0"
+    PLOTDIR=output/plots/${ERA}-${TAG}-${CHANNEL}_shape-plots
+    FILE=${RESDIR}/postfitshape.root
+    [ -d $PLOTDIR ] || mkdir -p $PLOTDIR
+    echo "[INFO] Using postfitshapes from $FILE"
+    python3 plotting/plot_shapes_combined.py -i $FILE -o $PLOTDIR -c ${CHANNEL} -e $ERA  --categories $CATEGORIES --fake-factor -l --train-ff True --train-emb True --combine-signals
+    FILE=${RESDIR}/prefitshape.root
+    python3 plotting/plot_shapes_combined.py -i $FILE -o $PLOTDIR -c ${CHANNEL} -e $ERA  --categories $CATEGORIES --fake-factor -l --train-ff True --train-emb True --combine-signals
     exit 0
 fi
 
 
 if [[ $MODE == "IMPACTS" ]]; then
     source utils/setup_cmssw.sh
-    WORKSPACE=output/$datacard_output/mt/125/workspace.root
+    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/$CHANNEL/125 --parallel 4 -m 125 \
+        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+        --PO '"map=^.*/ggH_htt.?$:r[1,-5,5]"' \
+        --PO '"map=^.*/qqH_htt.?$:r[1,-5,5]"'
+    WORKSPACE=output/$datacard_output/$CHANNEL/125/workspace.root
     combineTool.py -M Impacts -d $WORKSPACE -m 125 \
         --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
         --doInitialFit --robustFit 1 \
@@ -267,9 +355,189 @@ if [[ $MODE == "IMPACTS" ]]; then
         --robustFit 1 --doFits \
         --parallel 16
 
-    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o sm_${ERA}_${CHANNEL}.json
-    plotImpacts.py -i sm_${ERA}_${CHANNEL}.json -o sm_${ERA}_${CHANNEL}_impacts
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o sm_${ERA}_${CHANNEL}_impacts.json
+    plotImpacts.py -i sm_${ERA}_${CHANNEL}_impacts.json -o sm_${ERA}_${CHANNEL}_impacts
     # cleanup the fit files
     rm higgsCombine*.root
+    mv sm_${ERA}_${CHANNEL}_impacts.pdf output/$datacard_output/
+    mv sm_${ERA}_${CHANNEL}_impacts.json output/$datacard_output/
+    exit 0
+fi
+
+if [[ $MODE == "IMPACTS-MC" ]]; then
+    source utils/setup_cmssw.sh
+    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/$CHANNEL/125 --parallel 4 -m 125 \
+        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+        --PO '"map=^.*/ggH_htt.?$:r[1,-5,5]"' \
+        --PO '"map=^.*/qqH_htt.?$:r[1,-5,5]"'
+    WORKSPACE=output/$datacard_output/$CHANNEL/125/workspace.root
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+        --doInitialFit --robustFit 1 \
+        --parallel 16
+
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+        --robustFit 1 --doFits \
+        --parallel 16
+
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o sm_mc_${ERA}_${CHANNEL}_impacts.json
+    plotImpacts.py -i sm_mc_${ERA}_${CHANNEL}_impacts.json -o sm_mc_${ERA}_${CHANNEL}_impacts
+    # cleanup the fit files
+    rm higgsCombine*.root
+    mv sm_mc_${ERA}_${CHANNEL}_impacts.pdf output/$datacard_output/
+    mv sm_mc_${ERA}_${CHANNEL}_impacts.json output/$datacard_output/
+    exit 0
+fi
+
+if [[ $MODE == "DATACARD-ZFIT" ]]; then
+    source utils/setup_cmssw.sh
+    # inputfile
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+
+    ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
+        --base_path=$PWD \
+        --input_folder_mt=$shapes_output_synced \
+        --input_folder_tt=$shapes_output_synced \
+        --input_folder_et=$shapes_output_synced \
+        --input_folder_em=$shapes_output_synced \
+        --real_data=true \
+        --classic_bbb=false \
+        --binomial_bbb=false \
+        --jetfakes=1 \
+        --embedding=1 \
+        --postfix="-ML" \
+        --channel=${CHANNEL} \
+        --auto_rebin=true \
+        --stxs_signals="stxs_stage0" \
+        --categories="stxs_stage0" \
+        --era=${ERA} \
+        --output=output/${datacard_output} \
+        --use_automc=true \
+        --train_ff=1 \
+        --train_stage0=1\
+        --train_emb=1 \
+        --fit_ztt=true
+    THIS_PWD=${PWD}
+    echo $THIS_PWD
+    cd output/$datacard_output/$CHANNEL
+    for FILE in */*.txt; do
+        sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+    done
+    cd $THIS_PWD
+
+    echo "[INFO] Create Workspace for datacard"
+    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/$CHANNEL/125 --parallel 4 -m 125
+
+    source utils/setup_cmssw.sh
+        combineTool.py \
+        -M MultiDimFit \
+        -m 125 \
+        -d output/$datacard_output/$CHANNEL/125/workspace.root \
+        --algo singles \
+        --robustFit 1 \
+        --X-rtd MINIMIZER_analytic \
+        --cminDefaultMinimizerStrategy 0 \
+        -n $ERA -v1 \
+        --parallel 1 --there
+    for RESDIR in output/$datacard_output/$CHANNEL/125; do
+        echo "[INFO] Printing fit result for category $(basename $RESDIR)"
+        FITFILE=${RESDIR}/higgsCombine${ERA}.MultiDimFit.mH125.root
+        python datacards/print_fitresult.py ${FITFILE}
+    done
+
+    WORKSPACE=output/$datacard_output/$CHANNEL/125/workspace.root
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+        --doInitialFit --robustFit 1 \
+        --parallel 16
+
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+        --robustFit 1 --doFits \
+        --parallel 16
+
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o zfit_${ERA}_${CHANNEL}.json
+    plotImpacts.py -i zfit_${ERA}_${CHANNEL}.json -o zfit_${ERA}_${CHANNEL}_impacts
+    # cleanup the fit files
+    rm higgsCombine*.root
+    mv zfit_${ERA}_${CHANNEL}_impacts.pdf output/$datacard_output/
+    mv zfit_${ERA}_${CHANNEL}.json output/$datacard_output/
+    exit 0
+fi
+
+if [[ $MODE == "DATACARD-ZFIT-MC" ]]; then
+    source utils/setup_cmssw.sh
+    # inputfile
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+
+    ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
+        --base_path=$PWD \
+        --input_folder_mt=$shapes_output_synced \
+        --input_folder_tt=$shapes_output_synced \
+        --input_folder_et=$shapes_output_synced \
+        --input_folder_em=$shapes_output_synced \
+        --real_data=true \
+        --classic_bbb=false \
+        --binomial_bbb=false \
+        --jetfakes=1 \
+        --embedding=0 \
+        --postfix="-ML" \
+        --channel=${CHANNEL} \
+        --auto_rebin=true \
+        --stxs_signals="stxs_stage0" \
+        --categories="stxs_stage0" \
+        --era=${ERA} \
+        --output=output/${datacard_output} \
+        --use_automc=true \
+        --train_ff=1 \
+        --train_stage0=1\
+        --train_emb=1 \
+        --fit_ztt=true
+    THIS_PWD=${PWD}
+    echo $THIS_PWD
+    cd output/$datacard_output/$CHANNEL
+    for FILE in */*.txt; do
+        sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+    done
+    cd $THIS_PWD
+
+    echo "[INFO] Create Workspace for datacard"
+    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/$CHANNEL/125 --parallel 4 -m 125
+
+    source utils/setup_cmssw.sh
+        combineTool.py \
+        -M MultiDimFit \
+        -m 125 \
+        -d output/$datacard_output/$CHANNEL/125/workspace.root \
+        --algo singles \
+        --robustFit 1 \
+        --X-rtd MINIMIZER_analytic \
+        --cminDefaultMinimizerStrategy 0 \
+        -n $ERA -v1 \
+        --parallel 1 --there
+    for RESDIR in output/$datacard_output/$CHANNEL/125; do
+        echo "[INFO] Printing fit result for category $(basename $RESDIR)"
+        FITFILE=${RESDIR}/higgsCombine${ERA}.MultiDimFit.mH125.root
+        python datacards/print_fitresult.py ${FITFILE}
+    done
+
+        WORKSPACE=output/$datacard_output/$CHANNEL/125/workspace.root
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+        --doInitialFit --robustFit 1 \
+        --parallel 16
+
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
+        --robustFit 1 --doFits \
+        --parallel 16
+
+    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o zfit_mc_${ERA}_${CHANNEL}.json
+    plotImpacts.py -i zfit_mc_${ERA}_${CHANNEL}.json -o zfit_mc_${ERA}_${CHANNEL}_impacts
+    # cleanup the fit files
+    rm higgsCombine*.root
+    mv zfit_mc_${ERA}_${CHANNEL}_impacts.pdf output/$datacard_output/
+    mv zfit_mc_${ERA}_${CHANNEL}.json output/$datacard_output/
     exit 0
 fi

@@ -166,7 +166,6 @@ def BuildScan(scan, param, files, color, yvals, chop,
               pregraph=None,
               remove_delta=None,
               improve=False):
-    print files
     if pregraph is None:
         remove_dups = not envelope
         graph = read(scan, param, files, chop, remove_near_min,
@@ -181,7 +180,7 @@ def BuildScan(scan, param, files, color, yvals, chop,
     for i in xrange(graph.GetN()):
         fitsx.append(graph.GetX()[i])
         fitsy.append(graph.GetY()[i])
-    
+
     bestfit = fitsx[fitsy.index(min(fitsy))]
     if envelope:
         plot.RemoveGraphYAll(graph, 0.)
@@ -196,7 +195,7 @@ def BuildScan(scan, param, files, color, yvals, chop,
     func.SetNpx(NPX)
     NAMECOUNTER += 1
     func.SetLineColor(color)
-    func.SetLineWidth(3)
+    func.SetLineWidth(2)
     assert(bestfit is not None)
     if not envelope:
         plot.ImproveMinimum(graph, func)
@@ -227,42 +226,10 @@ def BuildScan(scan, param, files, color, yvals, chop,
     else:
         val_2sig = (0., 0., 0.)
         cross_2sig = cross_1sig
-    print val[0]+val[2]-0.1,val[0]+val[1]+0.1
-    del func # func = ROOT.TF1("func","(x<{0})*[0]*(x-[1])**2+(x>{0})*[2]*(x-[3])**2".format(bestfit),-2.4,1.6)
-    # func = ROOT.TF1("func","[0]*x**4+[1]*x**3+[2]*x**2+[3]*x",val[0]+val[2]-0.1,val[0]+val[1]+0.1)
-    # func = ROOT.TF1("func","[0]*(x-[1])**2",val[0]+val[2]-0.1,val[0]+val[1]+0.1)
-    # func = ROOT.TF1("func","[0]*(x-[1])**2",val[0]+val[2]-0.1,val[0]+val[1]+0.1)
-    func = ROOT.TF1("func","[0]*(x-[1])**2",val[0]+val[2]-0.1,val[0]+val[1]+0.1)
-    func = ROOT.TF1("func","([0]*x**2+[1]*x+[2])+([3]*x**2+[4]*x+[5])",val[0]+val[2]-0.1,val[0]+val[1]+0.1)
-    fitresult = graph.Fit(func,"S","",val[0]+val[2]-0.1,val[0]+val[1]+0.1)
-    bestfit = func.GetMinimumX()
-    # func = ROOT.TF1("func","(x<{0})*[0]*(x-{0})**2+(x>={0})*[1]*(x-{0})**2".format(bestfit),val[0]+val[2]-0.1,val[0]+val[1]+0.1)
-
-    # fitresult = graph.Fit(func,"S","",val[0]+val[2]-0.1,val[0]+val[1]+0.1)
-    # bestfit = func.GetMinimumX()
-    minimum_y = func.GetMinimum()
-    print minimum_y
     func.SetLineColor(color)
-    func.SetLineWidth(3)
-    import numpy as np
-    x_values = np.linspace(val[0]+val[2]-0.1,val[0]+val[1]+0.1,10000)
-    x_low = 0.0
-    x_high = 0.0
-    for x in x_values:
-        if func(x) < 1.0:
-            x_low = x
-            break
-    for x in x_values:
-        if x>bestfit:
-            if func(x) > 1.0:
-                x_high = x
-                break
-    
-    crossings[1.0] = [{'lo': x_low, 'hi': x_high, 'valid_hi': True, 'contains_bf': True, 'valid_lo': True}]
-    val = (bestfit, x_high - bestfit, x_low - bestfit)
-    print val
+    func.SetLineWidth(2)
     return {
-        "y_low": minimum_y,
+        "y_low": 0,
         "graph": graph,
         "spline": spline,
         "func": func,
@@ -274,6 +241,62 @@ def BuildScan(scan, param, files, color, yvals, chop,
         "other_1sig": other_1sig,
         "other_2sig": other_2sig
     }
+# def BuildScan(scan, param, files, color, yvals, ycut):
+#     graph = read(scan, param, files, ycut)
+#     if graph.GetN() <= 1:
+#         graph.Print()
+#         raise RuntimeError('Attempting to build %s scan from TGraph with zero or one point (see above)' % files)
+#     bestfit = None
+#     for i in xrange(graph.GetN()):
+#         if graph.GetY()[i] == 0.:
+#             bestfit = graph.GetX()[i]
+#     graph.SetMarkerColor(color)
+#     spline = ROOT.TSpline3("spline3", graph)
+#     global NAMECOUNTER
+#     func = ROOT.TF1('splinefn'+str(NAMECOUNTER), partial(Eval, spline), graph.GetX()[0], graph.GetX()[graph.GetN() - 1], 1)
+#     NAMECOUNTER += 1
+#     func.SetLineColor(color)
+#     func.SetLineWidth(3)
+#     assert(bestfit is not None)
+#     crossings = {}
+#     cross_1sig = None
+#     cross_2sig = None
+#     other_1sig = []
+#     other_2sig = []
+#     val = None
+#     val_2sig = None
+#     for yval in yvals:
+#         crossings[yval] = plot.FindCrossingsWithSpline(graph, func, yval)
+#         for cr in crossings[yval]:
+#             cr["contains_bf"] = cr["lo"] <= bestfit and cr["hi"] >= bestfit
+#     for cr in crossings[yvals[0]]:
+#         if cr['contains_bf']:
+#             val = (bestfit, cr['hi'] - bestfit, cr['lo'] - bestfit)
+#             cross_1sig = cr
+#         else:
+#             other_1sig.append(cr)
+#     if len(yvals) > 1:
+#         for cr in crossings[yvals[1]]:
+#             if cr['contains_bf']:
+#                 val_2sig = (bestfit, cr['hi'] - bestfit, cr['lo'] - bestfit)
+#                 cross_2sig = cr
+#             else:
+#                 other_2sig.append(cr)
+#     else:
+#         val_2sig = (0., 0., 0.)
+#         cross_2sig = cross_1sig
+#     return {
+#         "graph"     : graph,
+#         "spline"    : spline,
+#         "func"      : func,
+#         "crossings" : crossings,
+#         "val"       : val,
+#         "val_2sig": val_2sig,
+#         "cross_1sig" : cross_1sig,
+#         "cross_2sig" : cross_2sig,
+#         "other_1sig" : other_1sig,
+#         "other_2sig" : other_2sig
+#     }
 
 parser = argparse.ArgumentParser(
     prog='plot1DScan.py',
@@ -444,7 +467,7 @@ if args.envelope and args.breakdown:
         func.SetNpx(NPX)
         NAMECOUNTER += 1
         other['func'].SetLineColor(color)
-        other['func'].SetLineWidth(2)
+        other['func'].SetLineWidth(1)
         other['graph'].SetMarkerSize(0.4)
 elif args.envelope:
     if args.old_envelope:
@@ -461,7 +484,7 @@ elif args.envelope:
         other['func'].SetNpx(NPX)
         NAMECOUNTER += 1
         other['func'].SetLineColor(color)
-        other['func'].SetLineWidth(2)
+        other['func'].SetLineWidth(1)
         other['graph'].SetMarkerSize(0.4)
 
 canv = ROOT.TCanvas(args.output, args.output)
@@ -513,10 +536,10 @@ if len(other_scans) > 0:
 if args.x_range is not None:
     axishist.GetXaxis().SetLimits(float(args.x_range.split(',')[0]), float(args.x_range.split(',')[1]))
 
-if True: # args.vertical_line is not None:
-    vline = ROOT.TLine()
-    plot.Set(vline, LineColor=16, LineWidth=1, LineStyle=7)
-    plot.DrawVerticalLine(pads[0], vline, main_scan['val'][0])
+# if args.vertical_line is not None:
+#     vline = ROOT.TLine()
+#     plot.Set(vline, LineColor=16, LineWidth=1, LineStyle=7)
+#     plot.DrawVerticalLine(pads[0], vline, main_scan['val'][0])
 
 if args.breakdown and args.envelope:
     for other in new_others:
@@ -524,7 +547,7 @@ if args.breakdown and args.envelope:
 
 for other in other_scans:
     if args.breakdown is not None:
-        other['graph'].SetMarkerSize(0.4)
+        other['graph'].SetMarkerSize(0.0)
     if args.pub:
         other['graph'].SetMarkerSize(0.0)
     other['graph'].Draw('PSAME')
@@ -549,7 +572,7 @@ main_scan['func'].Draw('same')
 for other in other_scans:
     if args.breakdown is not None:
         other['func'].SetLineStyle(2)
-        other['func'].SetLineWidth(2)
+        other['func'].SetLineWidth(1)
     if args.pub:
         other['func'].SetLineStyle(2)
     if args.hide_envelope:
@@ -576,16 +599,17 @@ if args.envelope:
 #     syst_scan = BuildScan(args.output, args.POI, [args[3]], ROOT.kBlue, yvals)
 #     syst_scan['graph'].Draw('sameP')
 #     syst_scan['func'].Draw('same')
-
+vline = ROOT.TLine()
+plot.Set(vline, LineColor=16, LineWidth=1, LineStyle=7)
+# if args.vertical_line is not None:
+vline.DrawLine(main_scan['val'][0], 0, main_scan['val'][0], args.y_max)
 
 box = ROOT.TBox(axishist.GetXaxis().GetXmin(), args.box_frac *
                 args.y_max, axishist.GetXaxis().GetXmax(), args.y_max)
 # box = ROOT.TBox(axishist.GetXaxis().GetXmin(), 4.5, axishist.GetXaxis().GetXmax(), 7)
 if not args.no_box:
     box.Draw()
-    if args.vertical_line is not None:
-        vline.DrawLine(args.vertical_line, args.box_frac *
-                args.y_max, args.vertical_line, args.y_max)
+
 pads[0].GetFrame().Draw()
 pads[0].RedrawAxis()
 
@@ -649,7 +673,8 @@ if args.breakdown is not None:
             lo = v_lo[i]
         breakdown_json[br + "Hi"] = hi
         breakdown_json[br + "Lo"] = abs(lo) * -1.
-        textfit += '{}^{#plus %.3f}_{#minus %.3f}(%s)' % (hi, abs(lo), br)
+        if br != "rest":
+            textfit += '{}^{#plus %.3f}_{#minus %.3f}(%s)' % (hi, abs(lo), br)
     pt.AddText(textfit)
     # hi_1 = math.sqrt(val_nom[1]*val_nom[1] - other_scans[0]['val'][1]*other_scans[0]['val'][1])
     # lo_1 = math.sqrt(val_nom[2]*val_nom[2] - other_scans[0]['val'][2]*other_scans[0]['val'][2])
@@ -772,7 +797,7 @@ subtext = 'Own Work}'
 if args.pub:
     subtext = '{#it{LHC} #bf{Run 1}}'
     # subtext = '#it{#splitline{LHC Run 1}{Internal}}'
-plot.DrawCMSLogo(pads[0], 'CMS','#it{Internal}',
+plot.DrawCMSLogo(pads[0], 'CMS','#it{Data}',
                   11, 0.045, 0.035, 1.2, '', 0.9 if args.pub else 0.8)
 # plot.DrawCMSLogo(pads[0], '#it{ATLAS}#bf{ and }CMS',
 #                  '#it{LHC Run 1 Internal}', 11, 0.045, 0.035, 1.2)
