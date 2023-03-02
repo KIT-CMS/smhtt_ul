@@ -121,7 +121,8 @@ def filter_friends(dataset, friend):
     return True
 
 
-def get_nominal_datasets(era, channel, friend_directories, files, directory):
+def get_nominal_datasets(era, channel, friend_directories, files, directory,
+                         xrootd=False):
     datasets = dict()
     if friend_directories is not None:
         for key, names in files[era][channel].items():
@@ -130,10 +131,10 @@ def get_nominal_datasets(era, channel, friend_directories, files, directory):
                 names,
                 era,
                 channel,
-                channel + "_nominal",
                 directory,
                 [fdir for fdir in friend_directories[channel] if filter_friends(key, fdir)],
                 validate_samples=False,
+                xrootd=xrootd,
             )
     else:
         for key, names in files[era][channel].items():
@@ -142,7 +143,6 @@ def get_nominal_datasets(era, channel, friend_directories, files, directory):
                 names,
                 era,
                 channel,
-                channel + "_nominal",
                 directory,
                 [],
                 validate_samples=False,
