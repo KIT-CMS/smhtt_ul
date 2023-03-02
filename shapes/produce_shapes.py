@@ -1073,7 +1073,7 @@ def main(args):
 
             book_histograms(
                 um,
-                processes={"ztt", "zl", "zj"},
+                processes={"ztt", "zl", "zj"} & procS,
                 datasets=nominals[era]["units"][channel],
                 variations=[zpt],
                 enable_check=do_check,
