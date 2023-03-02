@@ -23,7 +23,6 @@ from ntuple_processor import (
     UnitManager,
     GraphManager,
     RunManager,
-    dataset_from_crownoutput,
 )
 from ntuple_processor.utils import Selection
 
