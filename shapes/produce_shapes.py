@@ -23,7 +23,6 @@ from ntuple_processor import (
     UnitManager,
     GraphManager,
     RunManager,
-    dataset_from_crownoutput,
 )
 from ntuple_processor.utils import Selection
 
@@ -315,6 +314,11 @@ def parse_arguments():
         help="Can be set to a special analysis name to only run that analysis.",
         choices=["TauID", "TauES"],
         default=None,
+    )
+    parser.add_argument(
+        "--xrootd",
+        action="store_true",
+        help="Read input ntuples and friends via xrootd from gridka dCache",
     )
     return parser.parse_args()
 
@@ -805,7 +809,8 @@ def main(args):
     # Step 1: create units and book actions
     for channel in args.channels:
         nominals[era]["datasets"][channel] = get_nominal_datasets(
-            era, channel, friend_directories, files, args.directory
+            era, channel, friend_directories, files, args.directory,
+            xrootd=args.xrootd
         )
         if args.control_plots:
             nominals[era]["units"][channel] = get_control_units(
@@ -1068,7 +1073,7 @@ def main(args):
 
             book_histograms(
                 um,
-                processes={"ztt", "zl", "zj"},
+                processes={"ztt", "zl", "zj"} & procS,
                 datasets=nominals[era]["units"][channel],
                 variations=[zpt],
                 enable_check=do_check,

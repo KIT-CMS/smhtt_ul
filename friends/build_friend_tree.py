@@ -6,6 +6,7 @@ import glob
 import time
 from tqdm import tqdm
 from multiprocessing import Pool, current_process, RLock
+import XRootD.client.glob_funcs as xrdglob
 
 
 def args_parser():
@@ -35,11 +36,6 @@ def args_parser():
         type=str,
         default="datasets/datasets.yaml",
         help="path to the datasets.yaml",
-    )
-    parser.add_argument(
-        "--xrootd",
-        action="store_true",
-        help="if set, the files will be read via xrootd",
     )
     parser.add_argument(
         "--debug",
@@ -79,9 +75,7 @@ def job_wrapper(args):
     return friend_producer(*args)
 
 
-def friend_producer(
-    inputfile, output_path, dataset_proc, era, channel, use_xrootd, debug=False
-):
+def friend_producer(inputfile, output_path, dataset_proc, era, channel, debug=False):
     # filepath = os.path.dirname(inputfile).split("/")
     output_file = os.path.join(
         output_path, era, dataset_proc["nick"], channel, os.path.basename(inputfile)
@@ -99,8 +93,6 @@ def friend_producer(
         or dataset_proc["sample_type"] == "embedding"
     ):
         return
-    if use_xrootd:
-        inputfile = convert_to_xrootd(inputfile)
     # check if the output file is empty
     # print(f"Checking if {inputfile} is empty")
     try:
@@ -154,7 +146,7 @@ def friend_producer(
     return
 
 
-def generate_friend_trees(dataset, ntuples, nthreads, output_path, use_xrootd, debug):
+def generate_friend_trees(dataset, ntuples, nthreads, output_path, debug):
     print("Using {} threads".format(nthreads))
     arguments = [
         (
@@ -163,14 +155,13 @@ def generate_friend_trees(dataset, ntuples, nthreads, output_path, use_xrootd, d
             dataset[parse_filepath(ntuple)["nick"]],
             parse_filepath(ntuple)["era"],
             parse_filepath(ntuple)["channel"],
-            use_xrootd,
             debug,
         )
         for ntuple in ntuples
     ]
     pbar = tqdm(
         total=len(arguments),
-        desc="Total progess",
+        desc="Total progress",
         position=nthreads + 1,
         dynamic_ncols=True,
         leave=True,
@@ -187,14 +178,21 @@ if __name__ == "__main__":
     base_path = os.path.join(args.basepath, "*/*/*/*.root")
     output_path = os.path.join(args.outputpath)
     dataset = yaml.safe_load(open(args.dataset_config))
-    ntuples = glob.glob(base_path)
-    ntuples_wo_data = ntuples.copy()
-    for ntuple in ntuples:
-        filename = os.path.basename(ntuple)
+    if base_path.startswith("root://"):
+        ntuples = xrdglob.glob(base_path)
+    else:
+        ntuples = glob.glob(base_path)
+    # Remove data and embedded samples from ntuple list as friends are not needed for these
+    ntuples_wo_data = list(
+        filter(
+            lambda ntuple: dataset[parse_filepath(ntuple)["nick"]]["sample_type"]
+            != "data"
+            and dataset[parse_filepath(ntuple)["nick"]]["sample_type"] != "embedding",
+            ntuples,
+        )
+    )
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)
-    generate_friend_trees(
-        dataset, ntuples_wo_data, nthreads, output_path, args.xrootd, args.debug
-    )
+    generate_friend_trees(dataset, ntuples_wo_data, nthreads, output_path, args.debug)
     print("Done")
