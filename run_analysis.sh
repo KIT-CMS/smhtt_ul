@@ -62,7 +62,6 @@ fi
 
 if [[ $MODE == "XSEC" ]]; then
     source utils/setup_root.sh
-    python3 friends/build_friend_tree.py --basepath $BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
     # if the xsec friends directory does not exist, create it
     if [ ! -d "$XSEC_FRIENDS" ]; then
         mkdir -p $XSEC_FRIENDS
@@ -74,6 +73,21 @@ if [[ $MODE == "XSEC" ]]; then
         echo "xsec friends dir is empty"
         echo "running xsec friends script"
         python3 friends/build_friend_tree.py --basepath $BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
+    fi
+    exit 0
+elif [[ $MODE == "XSEC_XROOTD" ]]; then
+    source utils/setup_root.sh
+    # if the xsec friends directory does not exist, create it
+    if [ ! -d "$XSEC_FRIENDS" ]; then
+        mkdir -p $XSEC_FRIENDS
+    fi
+    # if th xsec friends dir is empty, run the xsec friends script
+    if [ "$(ls -A $XSEC_FRIENDS)" ]; then
+        echo "xsec friends dir already exists"
+    else
+        echo "xsec friends dir is empty"
+        echo "running xsec friends script"
+        python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath $XSEC_FRIENDS --nthreads 20
     fi
     exit 0
 fi
