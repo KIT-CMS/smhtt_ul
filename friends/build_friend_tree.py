@@ -75,9 +75,7 @@ def job_wrapper(args):
     return friend_producer(*args)
 
 
-def friend_producer(
-    inputfile, output_path, dataset_proc, era, channel, debug=False
-):
+def friend_producer(inputfile, output_path, dataset_proc, era, channel, debug=False):
     # filepath = os.path.dirname(inputfile).split("/")
     output_file = os.path.join(
         output_path, era, dataset_proc["nick"], channel, os.path.basename(inputfile)
@@ -185,11 +183,16 @@ if __name__ == "__main__":
     else:
         ntuples = glob.glob(base_path)
     # Remove data and embedded samples from ntuple list as friends are not needed for these
-    ntuples_wo_data = list(filter(lambda ntuple: dataset[parse_filepath(ntuple)["nick"]]["sample_type"] != "data" and dataset[parse_filepath(ntuple)["nick"]]["sample_type"] != "embedding", ntuples))
+    ntuples_wo_data = list(
+        filter(
+            lambda ntuple: dataset[parse_filepath(ntuple)["nick"]]["sample_type"]
+            != "data"
+            and dataset[parse_filepath(ntuple)["nick"]]["sample_type"] != "embedding",
+            ntuples,
+        )
+    )
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)
-    generate_friend_trees(
-        dataset, ntuples_wo_data, nthreads, output_path, args.debug
-    )
+    generate_friend_trees(dataset, ntuples_wo_data, nthreads, output_path, args.debug)
     print("Done")
