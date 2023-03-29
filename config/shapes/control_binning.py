@@ -35,14 +35,14 @@ common_binning = {
     "jdeta": Histogram("jdeta", "jdeta", np.arange(0, 6, 0.2)),
     "njets": Histogram("njets", "njets", [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]),
     "nbtag": Histogram("nbtag", "nbtag", [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]),
-    "decaymode_1": Histogram(
-            "decaymode_1",
-            "decaymode_1",
+    "tau_decaymode_1": Histogram(
+            "tau_decaymode_1",
+            "tau_decaymode_1",
             [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5],
         ),
-    "decaymode_2": Histogram(
-        "decaymode_2",
-        "decaymode_2",
+    "tau_decaymode_2": Histogram(
+        "tau_decaymode_2",
+        "tau_decaymode_2",
         [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5],
     ),
     "jet_hemisphere": Histogram("jet_hemisphere", "jet_hemisphere", [-0.5, 0.5, 1.5]),
