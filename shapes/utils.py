@@ -122,7 +122,7 @@ def filter_friends(dataset, friend):
 
 
 def get_nominal_datasets(
-    era, channel, friend_directories, files, directory, xrootd=False
+    era, channel, friend_directories, files, directory, validation_tag, xrootd=False
 ):
     datasets = dict()
     if friend_directories is not None:
@@ -140,6 +140,7 @@ def get_nominal_datasets(
                     if filter_friends(key, fdir)
                 ],
                 validate_samples=False,
+                validation_tag=validation_tag,
                 xrootd=xrootd,
             )
     else:
@@ -153,6 +154,8 @@ def get_nominal_datasets(
                 directory,
                 [],
                 validate_samples=False,
+                validation_tag=validation_tag,
+                xrootd=xrootd,
             )
     return datasets
 
@@ -168,6 +171,8 @@ def add_tauES_datasets(
     selections,
     categorization,
     additional_emb_procS,
+    validation_tag,
+    xrootd=False,
 ):
     for variation in tauESvariations:
         name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
@@ -186,6 +191,8 @@ def add_tauES_datasets(
                 if filter_friends("EMB", fdir)
             ],
             validate_samples=False,
+            validation_tag=validation_tag,
+            xrootd=xrootd,
         )
         nominals[era]["datasets"][channel][processname] = dataset
         updated_unit = []
