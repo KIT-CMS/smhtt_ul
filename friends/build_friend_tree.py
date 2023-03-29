@@ -3,7 +3,7 @@ import argparse
 import yaml
 import os
 import glob
-import time
+import shutil
 from tqdm import tqdm
 from multiprocessing import Pool, current_process, RLock
 import XRootD.client.glob_funcs as xrdglob
@@ -42,6 +42,12 @@ def args_parser():
         action="store_true",
         help="if set, debug mode will be enabled",
     )
+    parser.add_argument(
+        '--tempdir',
+        type=str,
+        default='tmp_dir',
+        help='Temporary directory to store intermediate files',
+    )
     return parser.parse_args()
 
 
@@ -75,18 +81,21 @@ def job_wrapper(args):
     return friend_producer(*args)
 
 
-def friend_producer(inputfile, output_path, dataset_proc, era, channel, debug=False):
+def friend_producer(inputfile, workdir, output_path, dataset_proc, era, channel, debug=False):
     # filepath = os.path.dirname(inputfile).split("/")
-    output_file = os.path.join(
+    temp_output_file = os.path.join(
+        workdir, era, dataset_proc["nick"], channel, os.path.basename(inputfile)
+    )
+    final_output_file = os.path.join(
         output_path, era, dataset_proc["nick"], channel, os.path.basename(inputfile)
     )
     if debug:
         print(f"Processing {inputfile}")
-        print(f"Outputting to {output_file}")
+        print(f"Outputting to {temp_output_file}")
     # remove outputfile if it exists
     # if os.path.exists(output_path):
     #     os.remove(output_path)
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    os.makedirs(os.path.dirname(temp_output_file), exist_ok=True)
     # for data and embedded, we don't need to do anything
     if (
         dataset_proc["sample_type"] == "data"
@@ -135,7 +144,7 @@ def friend_producer(inputfile, output_path, dataset_proc, era, channel, debug=Fa
     )
     rdf.Snapshot(
         "ntuple",
-        output_file,
+        temp_output_file,
         [
             "numberGeneratedEventsWeight",
             "crossSectionPerEventWeight",
@@ -143,14 +152,23 @@ def friend_producer(inputfile, output_path, dataset_proc, era, channel, debug=Fa
         ],
     )
     rootfile.Close()
+    # now upload the file to the output path
+    # print(f"Uploading {temp_output_file} to {final_output_file}")
+    if final_output_file.startswith("root://"):
+        os.system(f"xrdcp {temp_output_file} {final_output_file}")
+    else:
+        if not os.path.exists(os.path.dirname(final_output_file)):
+            os.makedirs(os.path.dirname(final_output_file))
+        os.system(f"mv {temp_output_file} {final_output_file}")
     return
 
 
-def generate_friend_trees(dataset, ntuples, nthreads, output_path, debug):
+def generate_friend_trees(dataset, ntuples, nthreads, workdir, output_path, debug):
     print("Using {} threads".format(nthreads))
     arguments = [
         (
             ntuple,
+            workdir,
             output_path,
             dataset[parse_filepath(ntuple)["nick"]],
             parse_filepath(ntuple)["era"],
@@ -177,11 +195,13 @@ if __name__ == "__main__":
     args = args_parser()
     base_path = os.path.join(args.basepath, "*/*/*/*.root")
     output_path = os.path.join(args.outputpath)
+    workdir = os.path.join(args.tempdir)
     dataset = yaml.safe_load(open(args.dataset_config))
     if base_path.startswith("root://"):
         ntuples = xrdglob.glob(base_path)
     else:
         ntuples = glob.glob(base_path)
+    print(ntuples)
     # Remove data and embedded samples from ntuple list as friends are not needed for these
     ntuples_wo_data = list(
         filter(
@@ -194,5 +214,8 @@ if __name__ == "__main__":
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)
-    generate_friend_trees(dataset, ntuples_wo_data, nthreads, output_path, args.debug)
+    generate_friend_trees(dataset, ntuples_wo_data, nthreads, workdir, output_path, args.debug)
+    # remove the temporary directory
+    if os.path.exists(workdir):
+        shutil.rmtree(workdir)
     print("Done")
