@@ -62,6 +62,7 @@ def qcd_estimation(
     variable,
     variation="Nominal",
     is_embedding=True,
+    is_nlo=False,
     extrapolation_factor=1.0,
     sub_scale=1.0,
 ):
@@ -75,10 +76,19 @@ def qcd_estimation(
     logger.debug("sub_scale: %s", sub_scale)
     if is_embedding:
         procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
+        if is_nlo:
+            procs_to_subtract = ["EMB", "ZL_NLO", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W_NLO"]
         if "em" in channel:
             procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
-        elif "et" in channel:
-            procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ"]
+            if is_nlo:
+                procs_to_subtract = ["EMB", "ZL_NLO", "TTL", "VVL", "W_NLO"]
+        elif channel in ["mm", "ee"]:
+            if is_nlo:
+                procs_to_subtract = ["EMB", "W_NLO"]
+            else:
+                procs_to_subtract = ["EMB", "W"]
+        # elif "et" in channel:
+        #     procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ"]
     else:
         procs_to_subtract = [
             "ZTT",
@@ -92,10 +102,30 @@ def qcd_estimation(
             "VVJ",
             "W",
         ]
+        if is_nlo:
+            procs_to_subtract = [
+                "ZTT_NLO",
+                "ZL_NLO",
+                "ZJ_NLO",
+                "TTT",
+                "TTL",
+                "TTJ",
+                "VVT",
+                "VVL",
+                "VVJ",
+                "W_NLO",
+            ]
         if "em" in channel:
             procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
-        elif "et" in channel:
-            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
+            if is_nlo:
+                procs_to_subtract = ["ZTT_NLO", "ZL_NLO", "TTT", "TTL", "VVT", "VVL", "W_NLO"]
+        elif channel in ["mm", "ee"]:
+            if is_nlo:
+                procs_to_subtract = ["ZL_NLO", "W_NLO", "VVL", "TTL"]
+            else:
+                procs_to_subtract = ["ZL", "W", "VVL", "TTL"]
+        # elif "et" in channel:
+        #     procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
 
     logger.debug(
         "Trying to get object {}".format(
@@ -147,6 +177,8 @@ def qcd_estimation(
         )
 
     proc_name = "QCD" if is_embedding else "QCDMC"
+    if is_nlo:
+        proc_name = "_".join([proc_name, "NLO"])
     if variation in ["same_sign"]:
         qcd_variation = "Nominal"
     else:

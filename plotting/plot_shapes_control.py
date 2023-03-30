@@ -58,6 +58,14 @@ def parse_arguments():
         action="store_true",
         help="Fake factor estimation method used")
     parser.add_argument(
+        "--nlo",
+        action="store_true",
+        help="Use NLO DY and Wjets MC")
+    parser.add_argument(
+        "--add-signals",
+        action="store_true",
+        help="Draw also signal processes and not only backgrounds")
+    parser.add_argument(
         "--draw-jet-fake-variation",
         type=str,
         default=None,
@@ -104,23 +112,38 @@ def main(info):
         else:
             split_value = 101
 
-    split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
+    split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm", "ee"]}
 
     bkg_processes = [
         "VVL", "TTL", "ZL", "jetFakesEMB", "EMB"
     ]
     if not args.fake_factor and args.embedding:
-        bkg_processes = [
-            "QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
-        ]
+        if args.nlo:
+            bkg_processes = [
+                "QCDEMB", "VVL", "VVJ", "W_NLO", "TTL", "TTJ", "ZJ_NLO", "ZL_NLO", "EMB"  # TODO: Also use NLO version of QCD estimate?
+            ]
+        else:
+            bkg_processes = [
+                "VVL", "TTL", "ZL", "QCDEMB", "VVJ", "W","TTJ", "ZJ", "EMB"
+            ]
     if not args.embedding and args.fake_factor:
-        bkg_processes = [
-            "VVT", "VVL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
-        ]
+        if args.nlo:
+            bkg_processes = [
+                "VVT", "VVL", "TTT", "TTL", "ZL_NLO", "jetFakes", "ZTT_NLO",  # TODO jetFakes NLO
+            ]
+        else:
+            bkg_processes = [
+                "VVT", "VVL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
+            ]
     if not args.embedding and not args.fake_factor:
-        bkg_processes = [
-            "QCD", "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
-        ]
+        if args.nlo:
+            bkg_processes = [
+                "QCD_NLO", "VVT", "VVL", "VVJ", "W_NLO", "TTT", "TTL", "TTJ", "ZJ_NLO", "ZL_NLO", "ZTT_NLO"
+            ]
+        else:
+            bkg_processes = [
+                "QCD", "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
+            ]
     if args.draw_jet_fake_variation is not None:
         bkg_processes = [
             "VVL", "TTL", "ZL", "EMB"
@@ -158,13 +181,23 @@ def main(info):
     bkg_processes = [b for b in all_bkg_processes]
     if "em" in channel:
         if not args.embedding:
-            bkg_processes = [
-                "QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"
-            ]
+            if args.nlo:
+                bkg_processes = [
+                    "QCD_NLO", "VVT", "VVL", "W_NLO", "TTT", "TTL", "ZL_NLO", "ZTT_NLO"
+                ]
+            else:
+                bkg_processes = [
+                    "QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"
+                ]
         if args.embedding:
-            bkg_processes = [
-                "QCDEMB", "VVL", "W", "TTL", "ZL", "EMB"
-            ]
+            if args.nlo:
+                bkg_processes = [
+                    "QCDEMB_NLO", "VVL", "W_NLO", "TTL", "ZL_NLO", "EMB"
+                ]
+            else:
+                bkg_processes = [
+                    "QCDEMB", "VVL", "W", "TTL", "ZL", "EMB"
+                ]
         if args.draw_jet_fake_variation is not None:
             if not args.embedding:
                 bkg_processes = [
@@ -175,10 +208,31 @@ def main(info):
                     "VVL", "W", "TTL", "ZL", "EMB"
                 ]
 
-    if "mm" in channel:
-        bkg_processes = [
-            "QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZTT", "ZL"
-        ]
+    if "mm" in channel or "ee" in channel:
+        if args.embedding:
+            if args.nlo:
+                bkg_processes = [
+                    "QCDEMB_NLO", "W_NLO", "EMB"
+                ]
+            else:
+                bkg_processes = [
+                    "QCDEMB", "W", "EMB"
+                ]
+        else:
+            if args.nlo:
+                bkg_processes = [
+                    "QCD_NLO", "VVL", "W_NLO", "TTL", "ZL_NLO"
+                ]
+            else:
+                bkg_processes = [
+                    "QCDEMB", "VVL", "W", "TTL", "ZL"
+                ]
+    # TODO Remove QCD from list of shapes for now
+    # for i, elem in enumerate(bkg_processes):
+    #     if elem.startswith("QCD"):
+    #         to_remove = i
+    #         break
+    # bkg_processes.pop(to_remove)
 
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -246,93 +300,100 @@ def main(info):
 
     # get signal histograms
     plot_idx_to_add_signal = [0,2] if args.linear else [1,2]
-    for i in plot_idx_to_add_signal:
-        ggH = rootfile.get(channel, "ggH125",category=cat).Clone()
-        qqH = rootfile.get(channel, "qqH125",category=cat).Clone()
-        # VH = rootfile.get(channel, "VH125").Clone()
-        # ttH = rootfile.get(channel, "ttH125").Clone()
-        # HWW = rootfile.get(channel, "HWW").Clone()
-        if ggH.Integral() > 0:
-            ggH_scale = 10
-        else:
-            ggH_scale = 0.0
-        if qqH.Integral() > 0:
-            qqH_scale = 10
-        else:
-            qqH_scale = 0.0
-        # if VH.Integral() > 0:
-        #     VH_scale = 10
-        # else:
-        #     VH_scale = 0.0
-        # if ttH.Integral() > 0:
-        #     ttH_scale = 10
-        # else:
-        #     ttH_scale = 0.0
-        # if HWW.Integral() > 0:
-        #     HWW_scale = 10
-        # else:
-        #     HWW_scale = 0
+    if args.add_signals:
+        for i in plot_idx_to_add_signal:
+            ggH = rootfile.get(channel, "ggH125",category=cat).Clone()
+            qqH = rootfile.get(channel, "qqH125",category=cat).Clone()
+            # VH = rootfile.get(channel, "VH125").Clone()
+            # ttH = rootfile.get(channel, "ttH125").Clone()
+            # HWW = rootfile.get(channel, "HWW").Clone()
+            if ggH.Integral() > 0:
+                ggH_scale = 10
+            else:
+                ggH_scale = 0.0
+            if qqH.Integral() > 0:
+                qqH_scale = 10
+            else:
+                qqH_scale = 0.0
+            # if VH.Integral() > 0:
+            #     VH_scale = 10
+            # else:
+            #     VH_scale = 0.0
+            # if ttH.Integral() > 0:
+            #     ttH_scale = 10
+            # else:
+            #     ttH_scale = 0.0
+            # if HWW.Integral() > 0:
+            #     HWW_scale = 10
+            # else:
+            #     HWW_scale = 0
 
-        if i in [0,1]:
-            ggH.Scale(ggH_scale)
-            qqH.Scale(qqH_scale)
-            # VH.Scale(VH_scale)
-            # ttH.Scale(ttH_scale)
-            # HWW.Scale(HWW_scale)
-        plot.subplot(i).add_hist(ggH, "ggH")
-        plot.subplot(i).add_hist(ggH, "ggH_top")
-        plot.subplot(i).add_hist(qqH, "qqH")
-        plot.subplot(i).add_hist(qqH, "qqH_top")
-        # plot.subplot(i).add_hist(VH, "VH")
-        # plot.subplot(i).add_hist(VH, "VH_top")
-        # plot.subplot(i).add_hist(ttH, "ttH")
-        # plot.subplot(i).add_hist(ttH, "ttH_top")
-        # plot.subplot(i).add_hist(HWW, "HWW")
-        # plot.subplot(i).add_hist(HWW, "HWW_top")
+            if i in [0,1]:
+                ggH.Scale(ggH_scale)
+                qqH.Scale(qqH_scale)
+                # VH.Scale(VH_scale)
+                # ttH.Scale(ttH_scale)
+                # HWW.Scale(HWW_scale)
+            plot.subplot(i).add_hist(ggH, "ggH")
+            plot.subplot(i).add_hist(ggH, "ggH_top")
+            plot.subplot(i).add_hist(qqH, "qqH")
+            plot.subplot(i).add_hist(qqH, "qqH_top")
+            # plot.subplot(i).add_hist(VH, "VH")
+            # plot.subplot(i).add_hist(VH, "VH_top")
+            # plot.subplot(i).add_hist(ttH, "ttH")
+            # plot.subplot(i).add_hist(ttH, "ttH_top")
+            # plot.subplot(i).add_hist(HWW, "HWW")
+            # plot.subplot(i).add_hist(HWW, "HWW_top")
 
-    plot.subplot(0 if args.linear else 1).setGraphStyle(
-        "ggH", "hist", linecolor=styles.color_dict["ggH"], linewidth=3)
-    plot.subplot(0 if args.linear else 1).setGraphStyle("ggH_top", "hist", linecolor=0)
-    plot.subplot(0 if args.linear else 1).setGraphStyle(
-        "qqH", "hist", linecolor=styles.color_dict["qqH"], linewidth=3)
-    plot.subplot(0 if args.linear else 1).setGraphStyle("qqH_top", "hist", linecolor=0)
-    # plot.subplot(0 if args.linear else 1).setGraphStyle(
-    #     "VH", "hist", linecolor=styles.color_dict["VH"], linewidth=3)
-    # plot.subplot(0 if args.linear else 1).setGraphStyle("VH_top", "hist", linecolor=0)
-    # plot.subplot(0 if args.linear else 1).setGraphStyle(
-    #     "ttH", "hist", linecolor=styles.color_dict["ttH"], linewidth=3)
-    # plot.subplot(0 if args.linear else 1).setGraphStyle("ttH_top", "hist", linecolor=0)
-    # plot.subplot(0 if args.linear else 1).setGraphStyle(
-    #     "HWW", "hist", linecolor=styles.color_dict["HWW"], linewidth=3)
-    # plot.subplot(0 if args.linear else 1).setGraphStyle("HWW_top", "hist", linecolor=0)
+        plot.subplot(0 if args.linear else 1).setGraphStyle(
+            "ggH", "hist", linecolor=styles.color_dict["ggH"], linewidth=3)
+        plot.subplot(0 if args.linear else 1).setGraphStyle("ggH_top", "hist", linecolor=0)
+        plot.subplot(0 if args.linear else 1).setGraphStyle(
+            "qqH", "hist", linecolor=styles.color_dict["qqH"], linewidth=3)
+        plot.subplot(0 if args.linear else 1).setGraphStyle("qqH_top", "hist", linecolor=0)
+        # plot.subplot(0 if args.linear else 1).setGraphStyle(
+        #     "VH", "hist", linecolor=styles.color_dict["VH"], linewidth=3)
+        # plot.subplot(0 if args.linear else 1).setGraphStyle("VH_top", "hist", linecolor=0)
+        # plot.subplot(0 if args.linear else 1).setGraphStyle(
+        #     "ttH", "hist", linecolor=styles.color_dict["ttH"], linewidth=3)
+        # plot.subplot(0 if args.linear else 1).setGraphStyle("ttH_top", "hist", linecolor=0)
+        # plot.subplot(0 if args.linear else 1).setGraphStyle(
+        #     "HWW", "hist", linecolor=styles.color_dict["HWW"], linewidth=3)
+        # plot.subplot(0 if args.linear else 1).setGraphStyle("HWW_top", "hist", linecolor=0)
 
 
-    # assemble ratio
-    bkg_ggH = plot.subplot(2).get_hist("ggH")
-    bkg_qqH = plot.subplot(2).get_hist("qqH")
-    bkg_ggH.Add(plot.subplot(2).get_hist("total_bkg"))
-    bkg_qqH.Add(plot.subplot(2).get_hist("total_bkg"))
-    plot.subplot(2).add_hist(bkg_ggH, "bkg_ggH")
-    plot.subplot(2).add_hist(bkg_ggH, "bkg_ggH_top")
-    plot.subplot(2).add_hist(bkg_qqH, "bkg_qqH")
-    plot.subplot(2).add_hist(bkg_qqH, "bkg_qqH_top")
-    plot.subplot(2).setGraphStyle(
-        "bkg_ggH",
-        "hist",
-        linecolor=styles.color_dict["ggH"],
-        linewidth=3)
-    plot.subplot(2).setGraphStyle("bkg_ggH_top", "hist", linecolor=0)
-    plot.subplot(2).setGraphStyle(
-        "bkg_qqH",
-        "hist",
-        linecolor=styles.color_dict["qqH"],
-        linewidth=3)
-    plot.subplot(2).setGraphStyle("bkg_qqH_top", "hist", linecolor=0)
+        # assemble ratio
+        bkg_ggH = plot.subplot(2).get_hist("ggH")
+        bkg_qqH = plot.subplot(2).get_hist("qqH")
+        bkg_ggH.Add(plot.subplot(2).get_hist("total_bkg"))
+        bkg_qqH.Add(plot.subplot(2).get_hist("total_bkg"))
+        plot.subplot(2).add_hist(bkg_ggH, "bkg_ggH")
+        plot.subplot(2).add_hist(bkg_ggH, "bkg_ggH_top")
+        plot.subplot(2).add_hist(bkg_qqH, "bkg_qqH")
+        plot.subplot(2).add_hist(bkg_qqH, "bkg_qqH_top")
+        plot.subplot(2).setGraphStyle(
+            "bkg_ggH",
+            "hist",
+            linecolor=styles.color_dict["ggH"],
+            linewidth=3)
+        plot.subplot(2).setGraphStyle("bkg_ggH_top", "hist", linecolor=0)
+        plot.subplot(2).setGraphStyle(
+            "bkg_qqH",
+            "hist",
+            linecolor=styles.color_dict["qqH"],
+            linewidth=3)
+        plot.subplot(2).setGraphStyle("bkg_qqH_top", "hist", linecolor=0)
 
-    plot.subplot(2).normalize([
-        "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH",
-        "bkg_qqH_top", "data_obs"
-    ], "total_bkg")
+    if args.add_signals:
+        to_draw = [
+            "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH",
+            "bkg_qqH_top", "data_obs"
+        ]
+    else:
+        to_draw = [
+            "total_bkg", "data_obs"
+        ]
+    plot.subplot(2).normalize(to_draw, "total_bkg")
 
     # stack background processes
     plot.create_stack(bkg_processes, "stack")
@@ -356,9 +417,9 @@ def main(info):
             1000 * plot.subplot(0).get_hist("data_obs").GetMaximum())
 
     plot.subplot(2).setYlims(0.75, 1.45)
-    if channel == "mm":
-        plot.subplot(0).setLogY()
-        plot.subplot(0).setYlims(1, 10**10)
+    # if channel == "mm":
+    #     plot.subplot(0).setLogY()
+    #     plot.subplot(0).setYlims(1, 10**10)
 
     if args.linear != True:
         plot.subplot(1).setYlims(0.1, split_dict[channel])
@@ -396,7 +457,10 @@ def main(info):
 
     # draw subplots. Argument contains names of objects to be drawn in corresponding order.
     # procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "VH", "VH_top", "ttH", "ttH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
-    procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+    if args.add_signals:
+        procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+    else:
+        procs_to_draw = ["stack", "total_bkg", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
     if args.draw_jet_fake_variation is not None:
         procs_to_draw = ["stack", "total_bkg", "data_obs"]
     plot.subplot(0).Draw(procs_to_draw)
@@ -405,10 +469,15 @@ def main(info):
         #     "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
         #     "VH", "VH_top", "ttH", "ttH_top", "HWW", "HWW_top", "data_obs"
         # ])
-        plot.subplot(1).Draw([
-            "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
-            "data_obs"
-        ])
+        if args.add_signals:
+            plot.subplot(1).Draw([
+                "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
+                "data_obs"
+            ])
+        else:
+            plot.subplot(1).Draw([
+                "stack", "total_bkg", "data_obs"
+            ])
     if args.draw_jet_fake_variation is None:
         plot.subplot(2).Draw([
             "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH",
@@ -426,13 +495,14 @@ def main(info):
         plot.add_legend(width=0.6, height=0.15)
         for process in legend_bkg_processes:
             plot.legend(i).add_entry(
-                0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')
+                0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("_NLO","")], 'f')
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
-        plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s #times gg#rightarrowH"%str(int(ggH_scale)), 'l')
-        plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s #times qq#rightarrowH"%str(int(qqH_scale)), 'l')
-        # plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
-        # plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s #times ttH"%str(int(ttH_scale)), 'l')
-        # # plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "%s #times H#rightarrowWW"%str(int(HWW_scale)), 'l')
+        if args.add_signals:
+            plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s #times gg#rightarrowH"%str(int(ggH_scale)), 'l')
+            plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s #times qq#rightarrowH"%str(int(qqH_scale)), 'l')
+            # plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
+            # plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s #times ttH"%str(int(ttH_scale)), 'l')
+            # # plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "%s #times H#rightarrowWW"%str(int(HWW_scale)), 'l')
         plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(3)
     plot.legend(0).Draw()
@@ -443,7 +513,7 @@ def main(info):
         plot.add_legend(
             reference_subplot=2, pos=1, width=0.6, height=0.03)
         plot.legend(i + 2).add_entry(0, "data_obs", "Observed", 'PE2L')
-        if "mm" not in channel and args.draw_jet_fake_variation is None:
+        if "mm" not in channel and "ee" not in channel and args.draw_jet_fake_variation is None and args.add_signals:
             plot.legend(i + 2).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i],
                                          "ggH+bkg.", 'l')
             plot.legend(i + 2).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i],
@@ -484,6 +554,8 @@ def main(info):
         postfix = "classic_ff"
     if args.embedding and args.fake_factor:
         postfix = "emb_ff"
+    if args.nlo:
+        postfix = "_".join([postfix, "nlo"])
     if args.draw_jet_fake_variation is not None:
         postfix = postfix + "_" + args.draw_jet_fake_variation
 
@@ -504,13 +576,25 @@ if __name__ == "__main__":
     infolist = []
 
     if not args.embedding and not args.fake_factor:
-        postfix = "fully_classic"
+        if args.nlo:
+            postfix = "fully_classic_nlo"
+        else:
+            postfix = "fully_classic"
     if args.embedding and not args.fake_factor:
-        postfix = "emb_classic"
+        if args.nlo:
+            postfix = "emb_classic_nlo"
+        else:
+            postfix = "emb_classic"
     if not args.embedding and args.fake_factor:
-        postfix = "classic_ff"
+        if args.nlo:
+            postfix = "classic_ff_nlo"
+        else:
+            postfix = "classic_ff"
     if args.embedding and args.fake_factor:
-        postfix = "emb_ff"
+        if args.nlo:
+            postfix = "emb_ff_nlo"
+        else:
+            postfix = "emb_ff"
 
     if not os.path.exists("%s_plots_%s"%(args.era,postfix)):
         os.mkdir("%s_plots_%s"%(args.era,postfix))
