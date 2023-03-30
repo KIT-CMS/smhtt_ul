@@ -3,7 +3,7 @@ log/
 output/
 Run201*/
 CMSSW*/
-
+validation_database/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

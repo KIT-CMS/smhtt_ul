@@ -23,7 +23,6 @@ from ntuple_processor import (
     UnitManager,
     GraphManager,
     RunManager,
-    dataset_from_crownoutput,
 )
 from ntuple_processor.utils import Selection
 
@@ -323,6 +322,17 @@ def parse_arguments():
         help="Can be set to a special analysis name to only run that analysis.",
         choices=["TauID", "TauES"],
         default=None,
+    )
+    parser.add_argument(
+        "--xrootd",
+        action="store_true",
+        help="Read input ntuples and friends via xrootd from gridka dCache",
+    )
+    parser.add_argument(
+        "--validation-tag",
+        default="default",
+        type=str,
+        help="Tag to be used for the validation of the input samples",
     )
     return parser.parse_args()
 
@@ -865,7 +875,8 @@ def main(args):
     # Step 1: create units and book actions
     for channel in args.channels:
         nominals[era]["datasets"][channel] = get_nominal_datasets(
-            era, channel, friend_directories, files, args.directory
+            era, channel, friend_directories, files, args.directory,
+            xrootd=args.xrootd, validation_tag=args.validation_tag
         )
         if args.control_plots:
             nominals[era]["units"][channel] = get_control_units(
@@ -911,6 +922,8 @@ def main(args):
                 ],
                 categorization,
                 additional_emb_procS,
+                xrootd=args.xrootd,
+                validation_tag=args.validation_tag,
             )
 
     if args.process_selection is None:
@@ -955,7 +968,7 @@ def main(args):
             "w_nlo",
             "emb",
         } & procS
-    logger.info(f"Processes to be computed: {procS}")
+
     dataS = {"data"} & procS
     embS = {"emb"} & procS
     jetFakesDS = {
@@ -980,11 +993,19 @@ def main(args):
     signalsS = sm_signalsS
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
         signalsS = signalsS & {"ggh", "qqh"}
+
     simulatedProcsDS = {
         chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
         for chname_ in ["et", "mt", "tt", "em"]
     }
-
+    logger.info(f"Processes to be computed: {procS}")
+    logger.info(f"Simulated processes: {simulatedProcsDS}")
+    logger.info(f"Data processes: {dataS}")
+    logger.info(f"Embedded processes: {embS}")
+    logger.info(f"Jet fakes processes: {jetFakesDS}")
+    logger.info(f"Lepton fakes processes: {leptonFakesS}")
+    logger.info(f"True tau bkg processes: {trueTauBkgS}")
+    logger.info(f"signals: {signalsS}")
     for channel in args.channels:
         book_histograms(
             um,
@@ -1001,7 +1022,7 @@ def main(args):
                 [same_sign, anti_iso_lt],
                 do_check,
             )
-        else:
+        elif channel == "mt":
             book_histograms(
                 um,
                 processes=embS,
@@ -1027,11 +1048,12 @@ def main(args):
                 enable_check=do_check,
             )
         elif channel == "tt":
+            # TODO add anti_iso_tt
             book_histograms(
                 um,
                 processes=dataS | embS | trueTauBkgS,
                 datasets=nominals[era]["units"][channel],
-                variations=[anti_iso_tt, abcd_method],
+                variations=[abcd_method],
                 enable_check=do_check,
             )
 
@@ -1042,12 +1064,12 @@ def main(args):
                 variations=[abcd_method],
                 enable_check=do_check,
             )
-
+            # TODO add anti_iso_tt_mcl
             book_histograms(
                 um,
                 processes=leptonFakesS,
                 datasets=nominals[era]["units"][channel],
-                variations=[wfakes_tt, anti_iso_tt_mcl, abcd_method],
+                variations=[wfakes_tt, abcd_method],
                 enable_check=do_check,
             )
             book_histograms(
@@ -1145,7 +1167,7 @@ def main(args):
 
             book_histograms(
                 um,
-                processes={"ztt", "zl", "zj"},
+                processes={"ztt", "zl", "zj"} & procS,
                 datasets=nominals[era]["units"][channel],
                 variations=[zpt],
                 enable_check=do_check,

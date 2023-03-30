@@ -121,7 +121,9 @@ def filter_friends(dataset, friend):
     return True
 
 
-def get_nominal_datasets(era, channel, friend_directories, files, directory):
+def get_nominal_datasets(
+    era, channel, friend_directories, files, directory, validation_tag, xrootd=False
+):
     datasets = dict()
     if friend_directories is not None:
         for key, names in files[era][channel].items():
@@ -132,8 +134,14 @@ def get_nominal_datasets(era, channel, friend_directories, files, directory):
                 channel,
                 channel + "_nominal",
                 directory,
-                [fdir for fdir in friend_directories[channel] if filter_friends(key, fdir)],
+                [
+                    fdir
+                    for fdir in friend_directories[channel]
+                    if filter_friends(key, fdir)
+                ],
                 validate_samples=False,
+                validation_tag=validation_tag,
+                xrootd=xrootd,
             )
     else:
         for key, names in files[era][channel].items():
@@ -146,6 +154,8 @@ def get_nominal_datasets(era, channel, friend_directories, files, directory):
                 directory,
                 [],
                 validate_samples=False,
+                validation_tag=validation_tag,
+                xrootd=xrootd,
             )
     return datasets
 
@@ -161,6 +171,8 @@ def add_tauES_datasets(
     selections,
     categorization,
     additional_emb_procS,
+    validation_tag,
+    xrootd=False,
 ):
     for variation in tauESvariations:
         name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
@@ -179,6 +191,8 @@ def add_tauES_datasets(
                 if filter_friends("EMB", fdir)
             ],
             validate_samples=False,
+            validation_tag=validation_tag,
+            xrootd=xrootd,
         )
         nominals[era]["datasets"][channel][processname] = dataset
         updated_unit = []
@@ -197,7 +211,9 @@ def add_tauES_datasets(
                 for sel_obj in new_selections:
                     for cut in sel_obj.cuts:
                         # now find the intersection between quants and the expression set
-                        for quant in quants & get_quantities_from_expression(cut.expression):
+                        for quant in quants & get_quantities_from_expression(
+                            cut.expression
+                        ):
                             cut.expression = cut.expression.replace(
                                 quant,
                                 "{quant}__{var}".format(quant=quant, var=shiftname),
@@ -206,7 +222,9 @@ def add_tauES_datasets(
                                 f"Replaced {quant} in {cut.expression} ( quant: {quant}, var: {shiftname})"
                             )
                     for weight in sel_obj.weights:
-                        for quant in quants & get_quantities_from_expression(weight.expression):
+                        for quant in quants & get_quantities_from_expression(
+                            weight.expression
+                        ):
                             weight.expression = weight.expression.replace(
                                 quant,
                                 "{quant}__{var}".format(quant=quant, var=shiftname),
@@ -218,9 +236,7 @@ def add_tauES_datasets(
                     for quant in quants & get_quantities_from_expression(act.variable):
                         act.variable = act.variable.replace(
                             quant,
-                            "{quant}__{var}".format(
-                                quant=act.variable, var=shiftname
-                            ),
+                            "{quant}__{var}".format(quant=act.variable, var=shiftname),
                         )
                         logger.debug(
                             f"Replaced action {quant} with {act.variable} ( quant: {quant}, var: {shiftname})"
