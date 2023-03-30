@@ -95,6 +95,16 @@ def MC_base_process_selection(channel, era):
             trgweight = ("trg_wgt_single_mu27", "trgweight")
         elif era == "2018":
             trgweight = ("1", "trgweight")
+    elif channel == "ee":
+        isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
+        idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
+        tauidweight = None
+        vsmu_weight = None
+        vsele_weight = None
+        if era == "2017":
+            trgweight = ("trg_wgt_single_ele35", "trgweight")
+        elif era == "2018":
+            trgweight = ("1", "trgweight")
     else:
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
@@ -302,6 +312,8 @@ def __get_ZTT_cut(channel):
         return "gen_match_1==3 && gen_match_2==4"
     elif "mm" in channel:
         return "gen_match_1==4 && gen_match_2==4"
+    elif "ee" in channel:
+        return "gen_match_1==3 && gen_match_2==3"
 
 
 def ZTT_embedded_process_selection(channel, era):
@@ -384,6 +396,28 @@ def ZTT_embedded_process_selection(channel, era):
                 # triggerweight_emb(channel, era),
             ]
         )
+    elif "mm" in channel:
+        ztt_embedded_weights.extend(
+            [
+                # TODO trigger weights for em
+                ("(gen_match_1==2 && gen_match_2==2)", "emb_gen_match"),
+                ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
+                ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
+                ("trg_wgt_single_mu27", "trgweight")
+                # triggerweight_emb(channel, era),
+            ]
+        )
+    elif "ee" in channel:
+        ztt_embedded_weights.extend(
+            [
+                # TODO trigger weights for em
+                ("(gen_match_1==1 && gen_match_2==1)", "emb_gen_match"),
+                ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight"),
+                ("id_wgt_ele_1 * id_wgt_ele_2", "idweight"),
+                ("trg_wgt_single_ele35", "trgweight")
+                # triggerweight_emb(channel, era),
+            ]
+        )
 
     ztt_embedded_cuts = [
         (
@@ -393,7 +427,7 @@ def ZTT_embedded_process_selection(channel, era):
     ]
 
     return Selection(
-        name="Embedded", cuts=ztt_embedded_cuts, weights=ztt_embedded_weights
+        name="Embedded", cuts=ztt_embedded_cuts if channel not in ["mm", "ee"] else [], weights=ztt_embedded_weights
     )
 
 
@@ -431,6 +465,9 @@ def __get_ZL_cut(channel):
     elif "mm" in channel:
         emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
         ff_veto = "(1.0)"
+    elif "ee" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==3)"
+        ff_veto = "(1.0)"
     return (emb_veto, ff_veto)
 
 
@@ -451,6 +488,10 @@ def __get_ZJ_cut(channel):
         return "(gen_match_1 == 6 || gen_match_2 == 6)"
     elif "em" in channel:
         return "0 == 1"
+    elif "mm" in channel:
+        return "0 == 1"
+    elif "ee" in channel:
+        return "0 == 1"
     else:
         return ""
 
@@ -467,6 +508,8 @@ def TTT_process_selection(channel):
         tt_cut = "gen_match_1==3 && gen_match_2==4"
     elif "mm" in channel:
         tt_cut = "gen_match_1==4 && gen_match_2==4"
+    elif "ee" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==3"
     return Selection(name="TTT", cuts=[(tt_cut, "ttt_cut")])
 
 
@@ -488,6 +531,9 @@ def TTL_process_selection(channel):
     elif "mm" in channel:
         emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
         ff_veto = "(1.0)"
+    elif "ee" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==3)"
+        ff_veto = "(1.0)"
     return Selection(
         name="TTL",
         cuts=[
@@ -505,6 +551,8 @@ def TTJ_process_selection(channel):
         ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
     elif "em" in channel:
         ct = "0 == 1"
+    elif "mm" in channel or "ee" in channel:
+        ct = "0 == 1"
     return Selection(name="TTJ", cuts=[(ct, "tt_fakes")])
 
 
@@ -520,6 +568,8 @@ def VVT_process_selection(channel):
         tt_cut = "gen_match_1==3 && gen_match_2==4"
     elif "mm" in channel:
         tt_cut = "gen_match_1==4 && gen_match_2==4"
+    elif "ee" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==3"
     return Selection(name="VVT", cuts=[(tt_cut, "vvt_cut")])
 
 
@@ -530,6 +580,8 @@ def VVJ_process_selection(channel):
     elif "tt" in channel:
         ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
     elif "em" in channel:
+        ct = "0.0 == 1.0"
+    elif "mm" in channel or "ee" in channel:
         ct = "0.0 == 1.0"
     return Selection(name="VVJ", cuts=[(ct, "vv_fakes")])
 
@@ -551,6 +603,9 @@ def VVL_process_selection(channel):
         ff_veto = "(1.0)"
     elif "mm" in channel:
         emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
+        ff_veto = "(1.0)"
+    elif "ee" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==3)"
         ff_veto = "(1.0)"
     return Selection(
         name="VVL",
