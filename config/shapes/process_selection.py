@@ -52,7 +52,10 @@ def MC_base_process_selection(channel, era):
         )
         vsmu_weight = ("id_wgt_tau_vsMu_VLoose_2", "vsmuweight")
         vsele_weight = ("id_wgt_tau_vsEle_Tight_2", "vseleweight")
-        trgweight = ("trg_wgt_single_ele32orele35", "trgweight")
+        if era == "2017":
+            trgweight = ("((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)", "trgweight")
+        else:
+            trgweight = ("trg_wgt_single_ele32orele35", "trgweight")
     elif channel == "mt":
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
@@ -62,7 +65,10 @@ def MC_base_process_selection(channel, era):
         )
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
         vsele_weight = ("id_wgt_tau_vsEle_VVLoose_2", "vseleweight")
-        trgweight = ("((pt_1>=25 && pt_1<28)* trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
+        if era == "2017":
+            trgweight = ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
+        else:
+            trgweight = ("((pt_1>=25 && pt_1<28)* trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -85,7 +91,10 @@ def MC_base_process_selection(channel, era):
         tauidweight = None
         vsmu_weight = None
         vsele_weight = None
-        trgweight = ("1", "trgweight")
+        if era == "2017":
+            trgweight = ("trg_wgt_single_mu27", "trgweight")
+        elif era == "2018":
+            trgweight = ("1", "trgweight")
     else:
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
@@ -103,7 +112,13 @@ def MC_base_process_selection(channel, era):
 
 
 def dy_stitching_weight(era):
-    if era == "2018":
+    if era == "2017":
+        weight = (
+            "((genbosonmass >= 50.0)*0.0000298298*((npartons == 0 || npartons >= 5)*1.0 + (npartons == 1)*0.3478960398 + (npartons == 2)*0.2909516577 + (npartons == 3)*0.1397995594 + (npartons == 4)*0.1257217076) + (genbosonmass < 50.0)*numberGeneratedEventsWeight*crossSectionPerEventWeight)",
+            "dy_stitching_weight",
+            )
+        # xsec_NNLO [pb] = , N_inclusive = 203,729,540, xsec_NNLO/N_inclusive = 0.0000298298 [pb], weights: [1.0, 0.3478960398, 0.2909516577, 0.1397995594, 0.1257217076]
+    elif era == "2018":
         weight = (
             "((genbosonmass >= 50.0)*0.0000606542*((npartons == 0 || npartons >= 5)*1.0 + (npartons == 1)*0.194267667208 + (npartons == 2)*0.21727746547 + (npartons == 3)*0.26760465744 + (npartons == 4)*0.294078683662) + (genbosonmass < 50.0)*numberGeneratedEventsWeight*crossSectionPerEventWeight)",
             "dy_stitching_weight",
@@ -117,9 +132,13 @@ def dy_stitching_weight(era):
 
 def DY_process_selection(channel, era):
     DY_process_weights = MC_base_process_selection(channel, era).weights
+    if era == "2017":
+        gen_events_weight = ("(1./203729540)*(genbosonmass >= 50.0) + (genbosonmass < 50.0)*numberGeneratedEventsWeight", "numberGeneratedEventsWeight")
+    elif era == "2018":
+        gen_events_weight = ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight")
     DY_process_weights.extend(
         [
-            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            gen_events_weight,
             ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
             # dy_stitching_weight(era),  # TODO add stitching weight
             ("ZPtMassReweightWeight", "zPtReweightWeight"),
@@ -291,25 +310,52 @@ def ZTT_embedded_process_selection(channel, era):
         ("emb_idsel_wgt_1*emb_idsel_wgt_2*emb_triggersel_wgt", "emb_selection_weight"),
     ]
     if "mt" in channel:
-        ztt_embedded_weights.extend(
-            [
-                ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
-                ("iso_wgt_mu_1", "isoweight"),
-                ("id_wgt_mu_1", "idweight"),
-                ("((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)", "trgweight"),
-                ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-            ]
-        )
+        if era == "2017":
+            ztt_embedded_weights.extend(
+                [
+                    ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
+                    ("iso_wgt_mu_1", "isoweight"),
+                    ("id_wgt_mu_1", "idweight"),
+                    ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight"),
+                    # ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                ]
+            )
+        elif era == "2018":
+            ztt_embedded_weights.extend(
+                [
+                    ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
+                    ("iso_wgt_mu_1", "isoweight"),
+                    ("id_wgt_mu_1", "idweight"),
+                    ("((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)", "trgweight"),
+                    ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                ]
+            )
+        else:
+            raise ValueError(f"Embedded process selection for given era {era} not yet implemented")
     elif "et" in channel:
-        ztt_embedded_weights.extend(
-            [
-                ("gen_match_1==3 && gen_match_2==5", "emb_veto"),
-                ("iso_wgt_ele_1", "isoweight"),
-                ("id_wgt_ele_1", "idweight"),
-                ("trg_wgt_single_ele32orele35", "trgweight"),
-                ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-            ]
-        )
+        if era == "2017":
+            ztt_embedded_weights.extend(
+                [
+                    ("gen_match_1==3 && gen_match_2==5", "emb_veto"),
+                    ("iso_wgt_ele_1", "isoweight"),
+                    ("id_wgt_ele_1", "idweight"),
+                    #("trg_wgt_single_ele35", "trgweight"),
+                    ("((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)", "trgweight"),
+                    # ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                ]
+            )
+        elif era == "2018":
+            ztt_embedded_weights.extend(
+                [
+                    ("gen_match_1==3 && gen_match_2==5", "emb_veto"),
+                    ("iso_wgt_ele_1", "isoweight"),
+                    ("id_wgt_ele_1", "idweight"),
+                    ("trg_wgt_single_ele32orele35", "trgweight"),
+                    ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                ]
+            )
+        else:
+            raise ValueError(f"Embedded process selection for given era {era} not yet implemented")
     elif "tt" in channel:
         ztt_embedded_weights.extend(
             [
