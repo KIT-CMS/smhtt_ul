@@ -133,7 +133,7 @@ def parse_histograms_for_qcd(inputfile):
             key, "same_sign"
         )
         if channel is not None:
-            if channel in ["et", "mt", "em"] or "abcd_same_sign_anti_iso" in variation:
+            if channel in ["et", "mt", "em", "mm", "ee"] or "abcd_same_sign_anti_iso" in variation:
                 add_input_to_inputdict(
                     qcd_inputs, channel, category, variable, variation, process
                 )
@@ -290,30 +290,20 @@ def main(args):
                             extrapolation_factor = 1.0
                 for var in qcd_inputs[channel][category]:
                     for variation in qcd_inputs[channel][category][var]:
-                        if channel in ["et", "mt"]:
+                        if channel in ["et", "mt", "em", "mm", "ee"]:
                             for use_emb in [True, False]:
-                                estimated_hist = qcd_estimation(
-                                    input_file,
-                                    channel,
-                                    category,
-                                    var,
-                                    variation=variation,
-                                    is_embedding=use_emb,
-                                    extrapolation_factor=extrapolation_factor,
-                                )
-                                estimated_hist.Write()
-                        elif channel in ["em"]:
-                            for use_emb in [True, False]:
-                                estimated_hist = qcd_estimation(
-                                    input_file,
-                                    channel,
-                                    category,
-                                    var,
-                                    variation=variation,
-                                    is_embedding=use_emb,
-                                    extrapolation_factor=extrapolation_factor,
-                                )
-                                estimated_hist.Write()
+                                for use_nlo in [True, False]:
+                                    estimated_hist = qcd_estimation(
+                                        input_file,
+                                        channel,
+                                        category,
+                                        var,
+                                        variation=variation,
+                                        is_embedding=use_emb,
+                                        is_nlo=use_nlo,
+                                        extrapolation_factor=extrapolation_factor,
+                                    )
+                                    estimated_hist.Write()
                         else:
                             for use_emb in [True, False]:
                                 estimated_hist = abcd_estimation(
