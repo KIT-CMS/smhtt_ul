@@ -157,6 +157,19 @@ def DY_process_selection(channel, era):
     return Selection(name="DY", weights=DY_process_weights)
 
 
+def DY_NLO_process_selection(channel, era):
+    DY_process_weights = MC_base_process_selection(channel, era).weights
+    DY_process_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            # dy_stitching_weight(era),  # TODO add stitching weight
+            # ("ZPtMassReweightWeight", "zPtReweightWeight"),
+        ]
+    )
+    return Selection(name="DY_NLO", weights=DY_process_weights)
+
+
 def TT_process_selection(channel, era):
     TT_process_weights = MC_base_process_selection(channel, era).weights
     TT_process_weights.extend(
