@@ -31,6 +31,7 @@ from config.shapes.file_names import files
 from config.shapes.process_selection import (
     # Data_base_process_selection,
     DY_process_selection,
+    DY_NLO_process_selection,
     TT_process_selection,
     VV_process_selection,
     W_process_selection,
@@ -237,6 +238,13 @@ def parse_arguments():
         default=[],
         nargs="+",
         help="Directories arranged as Artus output and containing a friend tree for mm.",
+    )
+    parser.add_argument(
+        "--ee-friend-directory",
+        type=str,
+        default=[],
+        nargs="+",
+        help="Directories arranged as Artus output and containing a friend tree for ee.",
     )
     parser.add_argument(
         "--optimization-level",
@@ -660,6 +668,45 @@ def get_control_units(
     )
     add_control_process(
         control_units,
+        name="ztt_nlo",
+        dataset=datasets["DYNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            DY_NLO_process_selection(channel, era),
+            ZTT_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="zl_nlo",
+        dataset=datasets["DYNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            DY_NLO_process_selection(channel, era),
+            ZL_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="zj_nlo",
+        dataset=datasets["DYNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            DY_NLO_process_selection(channel, era),
+            ZJ_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
         name="ttl",
         dataset=datasets["TT"],
         selections=[
@@ -773,6 +820,18 @@ def get_control_units(
         binning=control_binning,
         variables=variable_set,
     )
+    add_control_process(
+        control_units,
+        name="w_nlo",
+        dataset=datasets["WNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            W_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
     return control_units
 
 
@@ -795,6 +854,7 @@ def main(args):
         "tt": args.tt_friend_directory,
         "em": args.em_friend_directory,
         "mm": args.mm_friend_directory,
+        "ee": args.ee_friend_directory,
     }
     if ".root" in args.output_file:
         output_file = args.output_file
@@ -873,6 +933,9 @@ def main(args):
             "ztt",
             "zl",
             "zj",
+            "ztt_nlo",
+            "zl_nlo",
+            "zj_nlo",
             "ttt",
             "ttl",
             "ttj",
@@ -880,10 +943,11 @@ def main(args):
             "vvl",
             "vvj",
             "w",
+            "w_nlo",
             "ggh",
             "qqh",
-            "zh",
-            "wh",
+            # "zh",
+            # "wh",
         }
         # if "et" in args.channels:
         #     procS = procS - {"w"}
@@ -893,25 +957,28 @@ def main(args):
         #         | set("bbh{}".format(mass) for mass in susy_masses[era]["bbH"])
     else:
         procS = args.process_selection
-    if args.channels == ["mm"]:
+    if "mm" in args.channels or "ee" in args.channels:
         procS = {
             "data",
             "zl",
+            "zl_nlo",
             "ttl",
             "vvl",
             "w",
-        }
+            "w_nlo",
+            "emb",
+        } & procS
 
     dataS = {"data"} & procS
     embS = {"emb"} & procS
     jetFakesDS = {
-        "et": {"zj", "ttj", "vvj", "w"} & procS,
-        "mt": {"zj", "ttj", "vvj", "w"} & procS,
-        "tt": {"zj", "ttj", "vvj", "w"} & procS,
-        "em": {"w"} & procS,
+        "et": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
+        "mt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
+        "tt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
+        "em": {"w", "w_nlo"} & procS,
     }
-    leptonFakesS = {"zl", "ttl", "vvl"} & procS
-    trueTauBkgS = {"ztt", "ttt", "vvt"} & procS
+    leptonFakesS = {"zl", "ttl", "vvl", "zl_nlo"} & procS
+    trueTauBkgS = {"ztt", "ttt", "vvt", "ztt_nlo"} & procS
     sm_signalsS = {
         "ggh",
         "qqh",
@@ -960,7 +1027,8 @@ def main(args):
                 um,
                 processes=embS,
                 datasets=nominals[era]["units"][channel],
-                variations=[same_sign, anti_iso_lt],
+                # variations=[same_sign, anti_iso_lt],
+                variations=[same_sign],
                 enable_check=do_check,
             )
         if channel in ["mt", "et"]:
@@ -968,7 +1036,8 @@ def main(args):
                 um,
                 processes=dataS | trueTauBkgS | leptonFakesS,
                 datasets=nominals[era]["units"][channel],
-                variations=[same_sign, anti_iso_lt],
+                # variations=[same_sign, anti_iso_lt],
+                variations=[same_sign],
                 enable_check=do_check,
             )
             book_histograms(
@@ -1031,7 +1100,15 @@ def main(args):
                 um,
                 processes=procS,
                 datasets=nominals[era]["units"][channel],
-                variations=[],
+                variations=[same_sign],
+                enable_check=do_check,
+            )
+        elif channel == "ee":
+            book_histograms(
+                um,
+                processes=procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[same_sign],
                 enable_check=do_check,
             )
         ##################################

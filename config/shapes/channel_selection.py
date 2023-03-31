@@ -23,7 +23,14 @@ def channel_selection(channel, era, special=None):
             )
             #  Add era specific cuts. This is basically restricted to trigger selections.
             # TODO add 2017 and 2016
-            if era == "2018":
+            if era == "2017":
+                cuts.append(
+                        (
+                            "pt_2>30 && (pt_1>=28 && (trg_single_mu27 == 1))",
+                            "trg_selection",
+                        ),
+                        )
+            elif era == "2018":
                 # cuts.append(
                 #     (
                 #         "pt_2>30 && ((pt_1<25 && (trg_cross_mu20tau27_hps == 1 )) || (pt_1>=25 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))))",
@@ -50,7 +57,14 @@ def channel_selection(channel, era, special=None):
                     ("mt_1 < 70", "mt_cut"),
                 ]
             )
-            if era == "2018":
+            if era == "2017":
+                cuts.append(
+                    (
+                        "pt_2>30 && ((pt_1>=33 && pt_1 < 36 && (trg_single_ele32==1)) || (pt_1 >=36 && (trg_single_ele35==1)))",
+                        "trg_selection",
+                    ),
+                )
+            elif era == "2018":
                 cuts.append(
                     # (
                     #     "pt_2>30 && ((pt_1>25 && pt_1<33 && ((trg_cross_ele24tau30_hps==1) || (trg_cross_ele24tau30_hps==1))) || (pt_1 >=33 && ((trg_single_ele35==1) || (trg_single_ele32==1))))",
@@ -115,6 +129,64 @@ def channel_selection(channel, era, special=None):
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="em", cuts=cuts)
+        if "mm" in channel:
+            #  Add channel specific cuts to the list of cuts.
+            cuts = [
+                    ("q_1*q_2<0", "os"),
+                    ("iso_1<0.15", "muon_iso"),
+                    ("iso_2<0.15", "muon2_iso"),
+            ]
+            #  Add era specific cuts. This is basically restricted to trigger selections.
+            # TODO add 2017 and 2016
+            if era == "2017":
+                cuts.append(
+                        (
+                            "pt_2>20 && (pt_1>=28 && (trg_single_mu27 == 1))",
+                            "trg_selection",
+                        ),
+                        )
+            elif era == "2018":
+                # cuts.append(
+                #     (
+                #         "pt_2>30 && ((pt_1<25 && (trg_cross_mu20tau27_hps == 1 )) || (pt_1>=25 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))))",
+                #         "trg_selection",
+                #     ),  # TODO add nonHPS Triggerflag for also MC
+                # )
+                cuts.append(
+                    (
+                        "pt_2>20 && ( (pt_1>=28 && (trg_single_mu27 == 1)) || (pt_1>=25 && pt_1 < 28 && (trg_single_mu24 == 1)))",
+                        "trg_selection",
+                    ),  # TODO add nonHPS Triggerflag for also MC
+                )
+            else:
+                raise ValueError("Given era does not exist")
+            return Selection(name="mm", cuts=cuts)
+        if "ee" in channel:
+            #  Add channel specific cuts to the list of cuts.
+            cuts = [
+                    ("q_1*q_2<0", "os"),
+                    ("iso_1<0.15", "ele_iso"),
+                    ("iso_2<0.15", "ele2_iso"),
+            ]
+            #  Add era specific cuts. This is basically restricted to trigger selections.
+            # TODO add 2016
+            if era == "2017":
+                cuts.append(
+                        (
+                            "pt_2>20 && (pt_1 >=36 && (trg_single_ele35==1))",
+                            "trg_selection",
+                        ),
+                        )
+            elif era == "2018":
+                cuts.append(
+                    (
+                        "pt_2>20 && (pt_1 >=33 && ((trg_single_ele35==1) || (trg_single_ele32==1)))",
+                        "trg_selection",
+                    ),
+                )
+            else:
+                raise ValueError("Given era does not exist")
+            return Selection(name="ee", cuts=cuts)
     # Special selection for TauID measurement
     if special == "TauID":
         if channel != "mt" and channel != "mm":
