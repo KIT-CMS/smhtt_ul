@@ -196,6 +196,13 @@ def parse_arguments():
         type=lambda channellist: [channel for channel in channellist.split(",")],
         help="Channels to be considered, seperated by a comma without space",
     )
+
+    parser.add_argument(
+        "--wp", required=True, type=str, help="Tau ID WP."
+    )
+    parser.add_argument(
+        "--vs_ele_wp", required=True, type=str, help="vs_ELE Tau discriminator WP."
+    )
     parser.add_argument(
         "--directory", required=True, type=str, help="Directory with Artus outputs."
     )
@@ -305,7 +312,7 @@ def parse_arguments():
 
 
 def get_analysis_units(
-    channel, era, datasets, categorization, special_analysis, nn_shapes=False
+    channel, era, wp, vs_ele_wp, datasets, categorization, special_analysis, nn_shapes=False
 ):
     analysis_units = {}
 
@@ -314,7 +321,7 @@ def get_analysis_units(
         name="data",
         dataset=datasets["data"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
             # Data_base_process_selection(era, channel),
         ],
         categorization=categorization,
@@ -325,8 +332,8 @@ def get_analysis_units(
         name="zl",
         dataset=datasets["DY"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            DY_process_selection(channel, era, wp),
             ZL_process_selection(channel),
         ],
         categorization=categorization,
@@ -337,8 +344,8 @@ def get_analysis_units(
         name="ttl",
         dataset=datasets["TT"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            TT_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            TT_process_selection(channel, era, wp),
             TTL_process_selection(channel),
         ],
         categorization=categorization,
@@ -349,8 +356,8 @@ def get_analysis_units(
         name="vvl",
         dataset=datasets["VV"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            VV_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            VV_process_selection(channel, era, wp),
             VVL_process_selection(channel),
         ],
         categorization=categorization,
@@ -362,7 +369,7 @@ def get_analysis_units(
         name="emb",
         dataset=datasets["EMB"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
             ZTT_embedded_process_selection(channel, era),
         ],
         categorization=categorization,
@@ -374,8 +381,8 @@ def get_analysis_units(
             name="ztt",
             dataset=datasets["DY"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                DY_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                DY_process_selection(channel, era, wp),
                 ZTT_process_selection(channel),
             ],
             categorization=categorization,
@@ -386,8 +393,8 @@ def get_analysis_units(
             name="vvt",
             dataset=datasets["VV"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                VV_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                VV_process_selection(channel, era, wp),
                 VVT_process_selection(channel),
             ],
             categorization=categorization,
@@ -398,8 +405,8 @@ def get_analysis_units(
             name="ttt",
             dataset=datasets["TT"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                TT_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                TT_process_selection(channel, era, wp),
                 TTT_process_selection(channel),
             ],
             categorization=categorization,
@@ -410,8 +417,8 @@ def get_analysis_units(
             name="zj",
             dataset=datasets["DY"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                DY_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                DY_process_selection(channel, era, wp),
                 ZJ_process_selection(channel),
             ],
             categorization=categorization,
@@ -422,8 +429,8 @@ def get_analysis_units(
             name="vvj",
             dataset=datasets["VV"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                VV_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                VV_process_selection(channel, era, wp),
                 VVJ_process_selection(channel),
             ],
             categorization=categorization,
@@ -434,42 +441,42 @@ def get_analysis_units(
             name="ttj",
             dataset=datasets["TT"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                TT_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                TT_process_selection(channel, era, wp),
                 TTJ_process_selection(channel),
             ],
             categorization=categorization,
             channel=channel,
         )
-        add_process(
-            analysis_units,
-            name="ggh",
-            dataset=datasets["ggH"],
-            selections=[
-                channel_selection(channel, era, special_analysis),
-                ggH125_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="qqh",
-            dataset=datasets["qqH"],
-            selections=[
-                channel_selection(channel, era, special_analysis),
-                qqH125_process_selection(channel, era),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
+        # add_process(
+        #     analysis_units,
+        #     name="ggh",
+        #     dataset=datasets["ggH"],
+        #     selections=[
+        #         channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+        #         ggH125_process_selection(channel, era, wp),
+        #     ],
+        #     categorization=categorization,
+        #     channel=channel,
+        # )
+        # add_process(
+        #     analysis_units,
+        #     name="qqh",
+        #     dataset=datasets["qqH"],
+        #     selections=[
+        #         channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+        #         qqH125_process_selection(channel, era, wp),
+        #     ],
+        #     categorization=categorization,
+        #     channel=channel,
+        # )
         add_process(
             analysis_units,
             name="wh",
             dataset=datasets["WH"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                WH_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                WH_process_selection(channel, era, wp),
             ],
             categorization=categorization,
             channel=channel,
@@ -479,8 +486,8 @@ def get_analysis_units(
             name="zh",
             dataset=datasets["ZH"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                ZH_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                ZH_process_selection(channel, era, wp),
             ],
             categorization=categorization,
             channel=channel,
@@ -518,8 +525,8 @@ def get_analysis_units(
             name="w",
             dataset=datasets["W"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                W_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                W_process_selection(channel, era, wp),
             ],
             categorization=categorization,
             channel=channel,
@@ -527,7 +534,7 @@ def get_analysis_units(
     return analysis_units
 
 
-def get_control_units(channel, era, datasets, special_analysis):
+def get_control_units(channel, era, wp,vs_ele_wp, datasets, special_analysis):
     with open("generatorWeights.yaml", "r") as fi:
         gen_weights = yaml.load(fi, Loader=yaml.SafeLoader)[era]
     control_units = {}
@@ -536,7 +543,7 @@ def get_control_units(channel, era, datasets, special_analysis):
         control_units,
         name="data",
         dataset=datasets["data"],
-        selections=channel_selection(channel, era, special_analysis),
+        selections=channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
         channel=channel,
         binning=control_binning,
         variables=variable_set,
@@ -546,7 +553,7 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="emb",
         dataset=datasets["EMB"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
             ZTT_embedded_process_selection(channel, era),
         ],
         channel=channel,
@@ -558,8 +565,8 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="ztt",
         dataset=datasets["DY"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            DY_process_selection(channel, era, wp),
             ZTT_process_selection(channel),
         ],
         channel=channel,
@@ -571,8 +578,8 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="zl",
         dataset=datasets["DY"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            DY_process_selection(channel, era, wp),
             ZL_process_selection(channel),
         ],
         channel=channel,
@@ -584,8 +591,8 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="zj",
         dataset=datasets["DY"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            DY_process_selection(channel, era, wp),
             ZJ_process_selection(channel),
         ],
         channel=channel,
@@ -597,8 +604,8 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="ttl",
         dataset=datasets["TT"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            TT_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            TT_process_selection(channel, era, wp),
             TTL_process_selection(channel),
         ],
         channel=channel,
@@ -610,8 +617,8 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="ttt",
         dataset=datasets["TT"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            TT_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            TT_process_selection(channel, era, wp),
             TTT_process_selection(channel),
         ],
         channel=channel,
@@ -623,8 +630,8 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="ttj",
         dataset=datasets["TT"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            TT_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            TT_process_selection(channel, era, wp),
             TTJ_process_selection(channel),
         ],
         channel=channel,
@@ -636,8 +643,8 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="vvl",
         dataset=datasets["VV"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            VV_process_selection(channel, era),
+            channel_selection(channel, era,wp, special_analysis),
+            VV_process_selection(channel, era, wp),
             VVL_process_selection(channel),
         ],
         channel=channel,
@@ -649,8 +656,8 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="vvt",
         dataset=datasets["VV"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            VV_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            VV_process_selection(channel, era, wp),
             VVT_process_selection(channel),
         ],
         channel=channel,
@@ -662,38 +669,38 @@ def get_control_units(channel, era, datasets, special_analysis):
         name="vvj",
         dataset=datasets["VV"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            VV_process_selection(channel, era),
+            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+            VV_process_selection(channel, era, wp),
             VVJ_process_selection(channel),
         ],
         channel=channel,
         binning=control_binning,
         variables=variable_set,
     )
-    add_control_process(
-        control_units,
-        name="qqh",
-        dataset=datasets["qqH"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            qqH125_process_selection(channel, era),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="ggh",
-        dataset=datasets["ggH"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            ggH125_process_selection(channel, era),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
+    # add_control_process(
+    #     control_units,
+    #     name="qqh",
+    #     dataset=datasets["qqH"],
+    #     selections=[
+    #         channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+    #         qqH125_process_selection(channel, era, wp),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
+    # add_control_process(
+    #     control_units,
+    #     name="ggh",
+    #     dataset=datasets["ggH"],
+    #     selections=[
+    #         channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+    #         ggH125_process_selection(channel, era, wp),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
 
     if channel != "et":
         add_control_process(
@@ -701,8 +708,8 @@ def get_control_units(channel, era, datasets, special_analysis):
             name="w",
             dataset=datasets["W"],
             selections=[
-                channel_selection(channel, era, special_analysis),
-                W_process_selection(channel, era),
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                W_process_selection(channel, era, wp),
             ],
             channel=channel,
             binning=control_binning,
@@ -741,6 +748,8 @@ def main(args):
     um = UnitManager()
     do_check = args.enable_booking_check
     era = args.era
+    wp = args.wp
+    vs_ele_wp = args.vs_ele_wp
 
     nominals = {}
     nominals[era] = {}
@@ -754,12 +763,14 @@ def main(args):
         )
         if args.control_plots:
             nominals[era]["units"][channel] = get_control_units(
-                channel, era, nominals[era]["datasets"][channel], special_analysis
+                channel, era, wp, vs_ele_wp, nominals[era]["datasets"][channel], special_analysis
             )
         else:
             nominals[era]["units"][channel] = get_analysis_units(
                 channel,
                 era,
+                wp,
+                vs_ele_wp,
                 nominals[era]["datasets"][channel],
                 categorization,
                 special_analysis,
@@ -776,7 +787,7 @@ def main(args):
                 nominals,
                 tauESvariations,
                 [
-                    channel_selection(channel, era, special_analysis),
+                    channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
                     ZTT_embedded_process_selection(channel, era),
                 ],
                 categorization,
@@ -797,8 +808,8 @@ def main(args):
             "vvl",
             "vvj",
             "w",
-            "ggh",
-            "qqh",
+            # "ggh",
+            # "qqh",
             "zh",
             "wh",
         }

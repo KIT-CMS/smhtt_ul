@@ -138,3 +138,18 @@ dmypy.json
 *.png
 *.pdf
 *.html
+
+#txt
+*.txt
+
+#out
+*.out
+
+#JSON
+*.json
+
+#GZ archieves
+*.gz
+
+#docker stderror
+docker_stderror

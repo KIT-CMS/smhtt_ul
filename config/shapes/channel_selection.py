@@ -1,7 +1,7 @@
 from ntuple_processor.utils import Selection
 
 
-def channel_selection(channel, era, special=None):
+def channel_selection(channel, era, wp, vs_ele, special=None):
     # Specify general channel and era independent cuts.
     cuts = [
         ("extraelec_veto<0.5", "extraelec_veto"),
@@ -9,18 +9,108 @@ def channel_selection(channel, era, special=None):
         ("dimuon_veto<0.5", "dilepton_veto"),
         ("q_1*q_2<0", "os"),
     ]
+
+    vs_ele_dict = {
+
+        "vvtight" : "VVTight",
+        "vtight" : "VVTight",
+        "tight" : "Tight",
+        "medium" : "Medium",
+        "loose" : "Loose",
+        "vloose" : "VLoose",
+        "vvloose" : "VVLoose",
+        "vvvloose" : "VVVLoose",
+    }
+
+    if vs_ele not in vs_ele_dict.keys():
+        print("This working point doen't exist. Please specify the correct vsEle discriminator ")
+    vs_ele_discr = vs_ele_dict[vs_ele]
+
     if special is None:
         if "mt" in channel:
             #  Add channel specific cuts to the list of cuts.
-            cuts.extend(
-                [
-                    ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                    ("id_tau_vsEle_VVLoose_2>0.5", "againstElectronDiscriminator"),
-                    ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
-                    ("iso_1<0.15", "muon_iso"),
-                    ("mt_1 < 70", "mt_cut"),
-                ]
-            )
+            if wp == "vvtight":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VVTight_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("mt_1 < 70", "mt_cut"),
+                    ]
+                )
+            if wp == "vtight":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VTight_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("mt_1 < 70", "mt_cut"),
+                    ]
+                )
+            if wp == "tight":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("mt_1 < 70", "mt_cut"),
+                    ]
+                )
+
+            if wp == "medium":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_Medium_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("mt_1 < 70", "mt_cut"),
+                    ]
+                )
+
+            if wp == "loose":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_Loose_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("mt_1 < 70", "mt_cut"),
+                    ]
+                )
+            if wp == "vloose":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VLoose_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("mt_1 < 70", "mt_cut"),
+                    ]
+                )
+            if wp == "vvloose":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VVLoose_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("mt_1 < 70", "mt_cut"),
+                    ]
+                )
+            if wp == "vvvloose":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VVVLoose_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("mt_1 < 70", "mt_cut"),
+                    ]
+                )
             #  Add era specific cuts. This is basically restricted to trigger selections.
             # TODO add 2017 and 2016
             if era == "2018":
@@ -120,16 +210,97 @@ def channel_selection(channel, era, special=None):
         if channel != "mt" and channel != "mm":
             raise ValueError("TauID measurement is only available for mt (with mm control region)")
         if channel == "mt":
-            cuts.extend(
-                [
-                    ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                    ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
-                    ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
-                    ("iso_1<0.15", "muon_iso"),
-                    ("pzetamissvis > -25", "pzetamissvis"),
-                    ("mt_1 < 60", "mt_1"),
-                ]
-            )
+
+            if wp == "vvtight":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VVTight_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("pzetamissvis > -25", "pzetamissvis"),
+                        ("mt_1 < 60", "mt_1"),
+                    ]
+                )
+            if wp == "vtight":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VTight_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("pzetamissvis > -25", "pzetamissvis"),
+                        ("mt_1 < 60", "mt_1"),
+                    ]
+                )
+            if wp == "tight":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("pzetamissvis > -25", "pzetamissvis"),
+                        ("mt_1 < 60", "mt_1"),
+                    ]
+                )
+            if wp == "medium":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_Medium_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("pzetamissvis > -25", "pzetamissvis"),
+                        ("mt_1 < 60", "mt_1"),
+                    ]
+                )
+
+            if wp == "loose":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_Loose_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("pzetamissvis > -25", "pzetamissvis"),
+                        ("mt_1 < 60", "mt_1"),
+                    ]
+                )
+            if wp == "vloose":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VLoose_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("pzetamissvis > -25", "pzetamissvis"),
+                        ("mt_1 < 60", "mt_1"),
+                    ]
+                )
+            if wp == "vvloose":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VVLoose_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("pzetamissvis > -25", "pzetamissvis"),
+                        ("mt_1 < 60", "mt_1"),
+                    ]
+                )
+
+            if wp == "vvvloose":
+                cuts.extend(
+                    [
+                        ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                        ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                        ("id_tau_vsJet_VVVLoose_2>0.5", "tau_iso"),
+                        ("iso_1<0.15", "muon_iso"),
+                        ("pzetamissvis > -25", "pzetamissvis"),
+                        ("mt_1 < 60", "mt_1"),
+                    ]
+                )
             if era == "2018":
                 cuts.append(
                     (
@@ -161,16 +332,43 @@ def channel_selection(channel, era, special=None):
     elif special == "TauES":
         if channel != "mt":
             raise ValueError("TauID measurement is only available for mt")
-        cuts.extend(
-            [
-                ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
-                ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
-                ("iso_1<0.15", "muon_iso"),
-                ("pzetamissvis > -25", "pzetamissvis"),
-                ("mt_1 < 60", "mt_1"),
-            ]
-        )
+        if wp == "tight":
+            cuts.extend(
+                [
+                    ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                    ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
+                    ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
+                    ("iso_1<0.15", "muon_iso"),
+                    ("pzetamissvis > -25", "pzetamissvis"),
+                    ("mt_1 < 60", "mt_1"),
+                ]
+            )
+
+        if wp == "medium":
+            cuts.extend(
+                [
+                    ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                    ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
+                    ("id_tau_vsJet_Medium_2>0.5", "tau_iso"),
+                    ("iso_1<0.15", "muon_iso"),
+                    ("pzetamissvis > -25", "pzetamissvis"),
+                    ("mt_1 < 60", "mt_1"),
+                ]
+            )
+
+        if wp == "loose":
+            cuts.extend(
+                [
+                    ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
+                    ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
+                    ("id_tau_vsJet_Loose_2>0.5", "tau_iso"),
+                    ("iso_1<0.15", "muon_iso"),
+                    ("pzetamissvis > -25", "pzetamissvis"),
+                    ("mt_1 < 60", "mt_1"),
+                ]
+            )
+        else:
+            print("WP not found")
         if era == "2018":
             cuts.append(
                 (

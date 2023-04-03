@@ -8,6 +8,9 @@ CONTROL=$5
 NTUPLETAG=$6
 OUTPUT=$7
 SPECIAL=$8
+WP=$9
+VS_ELE_WP=${10}
+
 
 [[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4 && ! -z $5 ]] || (
     echo "[ERROR] Number of given parameters is too small."
@@ -23,14 +26,23 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 source utils/setup_root.sh
 source utils/bashFunctionCollection.sh
 
-PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w,ggh,qqh,zh,wh"
+# PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w,ggh,qqh,zh,wh" 
+PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w,zh,wh" # eliminate qqh and ggh
+
+# PROCESSES="emb" # eliminate qqh and ggh
+
+
+
 for PROC in ${PROCS_ARR[@]}; do
     if [[ "$PROC" =~ "backgrounds" ]]; then
         # BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
-        PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
+        PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w" #eliminate qqh and ggh
+
+        # PROCESSES="emb"
     elif [[ "$PROC" =~ "sm_signals" ]]; then
         # SIG_PROCS="ggh,qqh,zh,wh,tth,gghww,qqhww,whww,zhww"
-        PROCESSES="ggh,qqh,zh,wh"
+        # PROCESSES="ggh,qqh,zh,wh"
+        PROCESSES="zh,wh" # eliminate qqh and ggh
     else
         echo "[INFO] Add selection of single process $PROC"
         PROCESSES="$PROCESSES,$PROC"
@@ -51,6 +63,8 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             --directory $NTUPLES \
             --$CHANNEL-friend-directory $FRIENDS \
             --era $ERA \
+            --wp $WP \
+            --vs_ele_wp $VS_ELE_WP \
             --optimization-level 1 \
             --special-analysis "TauID" \
             --process-selection $PROCESSES \
@@ -63,6 +77,8 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             --directory $NTUPLES \
             --$CHANNEL-friend-directory $FRIENDS \
             --era $ERA \
+            --wp $WP \
+            --vs_ele_vp $VS_ELE_WP \
             --optimization-level 1 \
             --special-analysis "TauES" \
             --process-selection $PROCESSES \
@@ -75,6 +91,8 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             --directory $NTUPLES \
             --$CHANNEL-friend-directory $FRIENDS \
             --era $ERA \
+            --wp $WP \
+            --vs_ele_vp $VS_ELE_WP \
             --optimization-level 1 \
             --process-selection $PROCESSES \
             --only-create-graphs \

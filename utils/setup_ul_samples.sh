@@ -3,9 +3,10 @@ set -e
 NTUPLETAG=$1
 ERA=$2
 
-KINGMAKER_BASEDIR="/storage/gridka-nrg/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
-KINGMAKER_BASEDIR_XROOTD="root://cmsxrootd-kit.gridka.de//store/user/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
-BASEDIR="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/ntuples/"
+# KINGMAKER_BASEDIR="/storage/gridka-nrg/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+# KINGMAKER_BASEDIR_XROOTD="root://cmsxrootd-kit.gridka.de//store/user/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+BASEDIR="/storage/9/olavoryk/smhtt/2022_07_v6/ntuples" #my ceph
+# BASEDIR="/storage/9/olavoryk/smhtt_DT2_5/2022_07_v6/ntuples" # DeepTau2.5
 NTUPLES_2016="$BASEDIR"
 # SVFit_Friends_2016="$BASEDIR/2016/friends/SVFit/"
 # FF_Friends_2016="$BASEDIR/2016/friends/FakeFactors_v5/"
@@ -19,8 +20,11 @@ NTUPLES_2017="$BASEDIR"
 
 # Samples Run2018
 NTUPLES_2018="$BASEDIR"
-XSEC_FRIENDS_2018="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/friends/xsec"
-FF_FRIENDS_2018="/ceph/sbrommer/smhtt_ul/${NTUPLETAG}/friends/FakeFactors"
+XSEC_FRIENDS_2018="/ceph/olavoryk/smhtt/2022_07_v6/friends/xsec" #my ceph
+# XSEC_FRIENDS_2018="/storage/9/olavoryk/smhtt_DT2_5/2022_07_v6/friends/xsec" # DeepTau2.5
+FF_FRIENDS_2018="/ceph/olavoryk/smhtt/2022_07_v6/friends/FakeFactors" #my ceph
+# XSEC_FRIENDS_2018="/storage/9/olavoryk/smhtt_DT2_5/2022_07_v6/friends/xsec" # DeepTau2.5
+# FF_FRIENDS_2018="/ceph/sbrommer/smhtt_ul/2022_07_v6/friends/FakeFactors" # sebastians ceph
 # SVFit_Friends_2018="$BASEDIR/2018/friends/SVFit/"
 # FF_Friends_2018="$BASEDIR/2018/friends/FakeFactors_v5/"
 # NLOReweighting_Friends_2018="$BASEDIR/2018/friends/NLOReweighting/"

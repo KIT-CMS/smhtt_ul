@@ -168,10 +168,9 @@ def main(args):
             split_value = 101
 
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
-
     bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
     if not args.fake_factor and args.embedding:
-        bkg_processes = ["QCD", "VVJ", "W", "TTJ", "ZJ", "ZL", "EMB"]
+        bkg_processes = ["QCD", "VVJ", "W", "TTJ", "ZJ", "ZL", "EMB_"+args.single_category]
     if not args.embedding and args.fake_factor:
         bkg_processes = ["VVT", "VVJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"]
     if not args.embedding and not args.fake_factor:
@@ -188,7 +187,9 @@ def main(args):
             "ZL",
             "ZTT",
         ]
-    bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
+    # bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
+    bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB_"+str(args.single_category)]
+
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -243,6 +244,7 @@ def main(args):
             plot = dd.Plot([0.5, [0.3, 0.28]], "ModTDR", r=0.04, l=0.14, width=width)
 
         # get background histograms
+        
         for process in bkg_processes:
             try:
                 plot.add_hist(
@@ -251,8 +253,15 @@ def main(args):
                 plot.setGraphStyle(
                     process, "hist", fillcolor=styles.color_dict[process]
                 )
+
+                    
             except BaseException:
                 pass
+
+        plot.setGraphStyle(
+                bkg_processes[-1], "hist", fillcolor=styles.color_dict["EMB"]
+            )
+                
         data_obs = rootfile.get(era, channel, category, "data_obs")
         plot.add_hist(data_obs, "data_obs")
 
@@ -350,8 +359,11 @@ def main(args):
                         ],
                         "f",
                     )
+
                 except BaseException:
                     pass
+
+            plot.legend(i).add_entry(0, legend_bkg_processes[0], "#tau  "+legend_bkg_processes[0], "f")
             plot.legend(i).add_entry(0, "model_total", "Bkg. unc.", "f")
             plot.legend(i).add_entry(0, "data_obs", "Data", "PE")
             plot.legend(i).setNColumns(3)

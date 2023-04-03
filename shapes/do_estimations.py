@@ -1048,17 +1048,17 @@ def main(args):
                     estimated_hist.Write()
     logger.info("Starting adding for qqH and VH processes.")
     logger.debug("%s", json.dumps(qqh_procs, sort_keys=True, indent=4))
-    for channel in qqh_procs:
-        for category in qqh_procs[channel]:
-            if "MTGt70" in category:
-                continue
-            logger.info("Do estimation for category %s", category)
-            for var in qqh_procs[channel][category]:
-                for variation in qqh_procs[channel][category][var]:
-                    estimated_hist = qqH_merge_estimation(
-                        input_file, channel, category, var, variation=variation
-                    )
-                    estimated_hist.Write()
+    # for channel in qqh_procs:
+    #     for category in qqh_procs[channel]:
+    #         if "MTGt70" in category:
+    #             continue
+    #         logger.info("Do estimation for category %s", category)
+    #         for var in qqh_procs[channel][category]:
+    #             for variation in qqh_procs[channel][category][var]:
+    #                 estimated_hist = qqH_merge_estimation(
+    #                     input_file, channel, category, var, variation=variation
+    #                 )
+    #                 estimated_hist.Write()
 
     logger.info("Successfully finished estimations.")
     # Clean-up.

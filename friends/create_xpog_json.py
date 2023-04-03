@@ -52,6 +52,7 @@ class Correction(object):
         outdir,
         configfile,
         era,
+        wps,
         fname="",
         data_only=False,
         verbose=False,
@@ -65,6 +66,7 @@ class Correction(object):
         self.inputfiles = []
         self.correction = None
         self.era = era
+        self.wps = wps
         self.header = ""
         self.fname = fname
         self.info = ""
@@ -100,6 +102,7 @@ class TauID(Correction):
         name,
         data,
         era,
+        wps, 
         outdir,
         fname="",
         verbose=False,
@@ -110,6 +113,7 @@ class TauID(Correction):
             outdir,
             data,
             era,
+            wps,
             fname,
             data_only=False,
             verbose=False,
@@ -124,7 +128,7 @@ class TauID(Correction):
         self.header = "Missing Header"
         pt_binning = {"Pt20to25" : 20, "Pt25to30":25, "Pt30to35":30, "Pt35to40":35, "PtGt40":40}
         dm_binning = ["DM0", "DM1", "DM10_11"]
-        self.wps = ["Tight"]
+        # self.wps = ["Tight"]
 
         self.pt_binned_data = {}
         self.dm_binned_data = {}
@@ -431,6 +435,9 @@ def load_fitresults_from_file(filename):
 # first a simple argparser to the the datacard directory
 parser = argparse.ArgumentParser(description="Plot the tau ID SF")
 parser.add_argument("--wp", type=str, default="tight", help="TauID WP")
+parser.add_argument("--user_out_tag", type=str, default="", help="Tag ")
+parser.add_argument("--era", type=str, default="2018", help="2016, 2017 or 2018")
+parser.add_argument("--channel", type=str, default="mt", help="mt, et, em , tt")
 parser.add_argument("--input", type=str, default="", help="input")
 parser.add_argument("--output", type=str, default="", help="output")
 
@@ -446,13 +453,13 @@ for fitfile in files:
 
 correctionset = CorrectionSet("TauID_SF")
 correction_pt = TauID(
-    tag="tag", name="TauID_sf_embedding_ptbinned", data=data, era="2018", outdir="/"
+    tag="tag", name="TauID_sf_embedding_ptbinned", data=data, era=args.era, wps = [args.wp],outdir="/"
 )
 correction_pt.generate_pt_scheme()
 correction_dm = TauID(
-    tag="tag", name="TauID_sf_embedding_dmbinned", data=data, era="2018", outdir="/"
+    tag="tag", name="TauID_sf_embedding_dmbinned", data=data, era=args.era, wps = [args.wp],  outdir="/"
 )
 correction_dm.generate_dm_scheme()
 correctionset.add_correction(correction_pt)
 correctionset.add_correction(correction_dm)
-correctionset.write_json("Tau.json")
+correctionset.write_json("Tau_"+str(args.wp)+"_"+str(args.era)+"UL_"+str(args.channel)+"_"+str(args.user_out_tag)+".json")

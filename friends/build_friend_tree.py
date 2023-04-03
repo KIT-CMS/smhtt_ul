@@ -73,6 +73,8 @@ def convert_to_xrootd(path):
         )
     elif path.startswith("/ceph"):
         return path
+    elif path.startswith("/storage/9/"):
+        return path
 
 
 def job_wrapper(args):

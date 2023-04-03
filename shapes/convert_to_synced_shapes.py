@@ -97,6 +97,8 @@ def correct_nominal_shape(hist, name, integral):
 
 def write_hists_per_category(cat_hists: tuple):
     category, keys, channel, ofname, ifname = cat_hists
+
+    print("::::::: Cat hists:", cat_hists)
     infile = ROOT.TFile(ifname, "READ")
     dir_name = "{CHANNEL}_{CATEGORY}".format(CHANNEL=channel, CATEGORY=category)
     if "{category}" in ofname:
@@ -108,6 +110,8 @@ def write_hists_per_category(cat_hists: tuple):
     outfile.cd()
     outfile.mkdir(dir_name)
     outfile.cd(dir_name)
+
+    print("$$$$$$$$$$$$$$$$ Directory name: ", dir_name)
     for name, name_output in sorted(keys.items(), key=lambda x: x[1]):
         hist = infile.Get(name)
         # pos = 0.0
@@ -231,6 +235,7 @@ def main(args):
                 if not "data" in split_name[0]
                 else "data_obs"
             )
+            # print("@@@@@@@@@@@@@@@@@@@@@@@ This is category :", category)
             # Check if process is from hotfixed powheg signal samples. If so,
             # remove the hot fix part from the process.
             if "corrGenWeight" in process:
@@ -279,6 +284,35 @@ def main(args):
                 process = "_".join([_rev_process_map[process], mass])
             else:
                 process = _rev_process_map[process]
+
+        if process == "EMB":
+            if category == "Pt20to25":
+                process="EMB_Pt20to25"
+
+            if category == "Pt25to30":
+                process="EMB_Pt25to30"
+
+            if category == "Pt30to35":
+                process="EMB_Pt30to35"
+
+            if category == "Pt35to40":
+                process = "EMB_Pt35to40"
+
+            if category == "PtGt40":
+                process="EMB_PtGt40"
+
+            if category == "DM0":
+                process="EMB_DM0"
+
+            if category == "DM1":
+                process="EMB_DM1"
+
+            if category == "DM10_11":
+                process="EMB_DM10_11"
+
+            if category == "Inclusive":
+                process="EMB_Inclusive"  
+
         name_output = "{process}".format(process=process)
         if "Nominal" not in variation:
             name_output += "_" + variation
@@ -289,6 +323,8 @@ def main(args):
             channel + "_" + category,
         )
         hist_map[channel][category][key.GetName()] = name_output
+        print("#### This is my name output: ", name_output)
+
     # Clean up
     input_file.Close()
 
