@@ -216,7 +216,7 @@ def main(info):
                 ]
             else:
                 bkg_processes = [
-                    "QCDEMB", "W", "EMB"
+                    "QCDEMB", "W", "EMB",
                 ]
         else:
             if args.nlo:

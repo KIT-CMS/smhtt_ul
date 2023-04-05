@@ -6,7 +6,7 @@ NTUPLETAG=$3
 TAG=$4
 MODE=$5
 
-VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,mt_1,mt_2,mt_1_pf,mt_2_pf,pt_tt,pfmet,met,pzetamissvis,metphi,pt_dijet,deltaR_ditaupair,tau_decaymode_2,jet_hemisphere,pt_vis"
+VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,mt_1,mt_2,mt_1_pf,mt_2_pf,pt_tt,pfmet,met,pzetamissvis,metphi,pt_dijet,deltaR_ditaupair,jet_hemisphere,pt_vis"
 
 ulimit -s unlimited
 source utils/setup_root.sh
@@ -54,8 +54,11 @@ if [[ $MODE == "SHAPES" ]]; then
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
     echo "##############################################################################################"
-
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-qcd
+    if [[ $CHANNEL == "mm" ]]; then
+        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
+    else
+        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-qcd
+    fi
 fi
 
 if [[ $MODE == "PLOT" ]]; then

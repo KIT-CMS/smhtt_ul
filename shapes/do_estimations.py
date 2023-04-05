@@ -292,7 +292,7 @@ def main(args):
                     for variation in qcd_inputs[channel][category][var]:
                         if channel in ["et", "mt", "em", "mm", "ee"]:
                             for use_emb in [True, False]:
-                                for use_nlo in [True, False]:
+                                for use_nlo in [False]:
                                     estimated_hist = qcd_estimation(
                                         input_file,
                                         channel,
@@ -395,5 +395,5 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    setup_logging("do_estimations.log", level=logging.INFO)
+    setup_logging("do_estimations.log", level=logging.DEBUG)
     main(args)

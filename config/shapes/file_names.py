@@ -305,6 +305,19 @@ files = {
                 "W": [
                     "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
                 ],
+                "EMB": [
+                    "MuonEmbedding_Run2018A-UL2018",
+                    "MuonEmbedding_Run2018B-UL2018",
+                    "MuonEmbedding_Run2018C-UL2018",
+                    "MuonEmbedding_Run2018D-UL2018",
+                ],
+                "DYNLO": [
+                    "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
+                ],
+                # "WNLO": [
+                #     "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                # ],
+
             },
         ),
     },

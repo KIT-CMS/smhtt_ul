@@ -197,11 +197,12 @@ if __name__ == "__main__":
     output_path = os.path.join(args.outputpath)
     workdir = os.path.join(args.tempdir)
     dataset = yaml.safe_load(open(args.dataset_config))
+    print("Collecting ntuples from {}".format(base_path))
     if base_path.startswith("root://"):
         ntuples = xrdglob.glob(base_path)
     else:
         ntuples = glob.glob(base_path)
-    print(ntuples)
+    print("Found {} ntuples".format(len(ntuples)))
     # Remove data and embedded samples from ntuple list as friends are not needed for these
     ntuples_wo_data = list(
         filter(

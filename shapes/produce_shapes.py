@@ -783,30 +783,43 @@ def get_control_units(
         binning=control_binning,
         variables=variable_set,
     )
-    add_control_process(
-        control_units,
-        name="qqh",
-        dataset=datasets["qqH"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            qqH125_process_selection(channel, era),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="ggh",
-        dataset=datasets["ggH"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            ggH125_process_selection(channel, era),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
+    if channel != "mm":
+        add_control_process(
+            control_units,
+            name="qqh",
+            dataset=datasets["qqH"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                qqH125_process_selection(channel, era),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        )
+        add_control_process(
+            control_units,
+            name="ggh",
+            dataset=datasets["ggH"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                ggH125_process_selection(channel, era),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        )
+        add_control_process(
+            control_units,
+            name="w_nlo",
+            dataset=datasets["WNLO"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                W_process_selection(channel, era),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        )
 
     add_control_process(
         control_units,
@@ -820,18 +833,7 @@ def get_control_units(
         binning=control_binning,
         variables=variable_set,
     )
-    add_control_process(
-        control_units,
-        name="w_nlo",
-        dataset=datasets["WNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            W_process_selection(channel, era),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
+
     return control_units
 
 
@@ -965,7 +967,7 @@ def main(args):
             "ttl",
             "vvl",
             "w",
-            "w_nlo",
+            # "w_nlo",
             "emb",
         } & procS
 
