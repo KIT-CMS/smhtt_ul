@@ -172,6 +172,43 @@ common_files_2017 = {
     # ],
 }
 
+common_files_2016postVFP = {
+    "DY": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        
+
+    ],
+    # "DYNLO": [
+    #     "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    #     "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+ 
+    # ],
+    "TT": [
+        "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "VV": [
+        # "WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",  # ToDo: Samples were missing in ntuple production, to be uncommented
+        "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        # "ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",  # ToDo: Samples were missing in ntuple production, to be uncommented
+        "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "ggH": [
+        "GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+    ],
+    # "qqH": [
+    #     "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+
+    # ],
+}
+
 files = {
 
     "2018": {
@@ -539,4 +576,33 @@ files = {
             **common_files_2017
         ),
     },
+
+    "2016postVFP": {
+        "mm": dict(
+            {
+                "data": [
+                    # "SingleMuon_Run2016F-UL2016",
+                    "SingleMuon_Run2016G-UL2016",
+                    # "SingleMuon_Run2016H-UL2016",
+                ],
+                "EMB": [
+                    # "MuonEmbedding_Run2016F-UL2016",
+		            "MuonEmbedding_Run2016G-UL2016",
+                    # "MuonEmbedding_Run2016H-UL2016",
+
+                ],
+                "W": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+                ],
+                # "WNLO": [
+
+                #     "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+                # ],
+            },
+            **common_files_2016postVFP
+        ),
+    }
 }
