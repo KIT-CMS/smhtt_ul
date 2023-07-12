@@ -3,9 +3,9 @@ set -e
 NTUPLETAG=$1
 ERA=$2
 
-KINGMAKER_BASEDIR="/store/user/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+KINGMAKER_BASEDIR="/store/user/olavoryk/CROWN_17_16/ntuples/${NTUPLETAG}/CROWNRun/"
 KINGMAKER_BASEDIR_XROOTD="root://cmsxrootd-kit.gridka.de/${KINGMAKER_BASEDIR}"
-XSEC_FRIENDS="/store/user/sbrommer/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
+XSEC_FRIENDS="/store/user/olavoryk/CROWN_17_16/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
 
 if [[ $ERA == *"2016"* ]]; then
     NTUPLES=$KINGMAKER_BASEDIR
