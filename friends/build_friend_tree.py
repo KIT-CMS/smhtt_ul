@@ -7,6 +7,8 @@ import shutil
 from tqdm import tqdm
 from multiprocessing import Pool, current_process, RLock
 import XRootD.client.glob_funcs as xrdglob
+import XRootD.client as client
+from XRootD.client.flags import DirListFlags
 
 
 def args_parser():
@@ -80,9 +82,20 @@ def convert_to_xrootd(path):
 def job_wrapper(args):
     return friend_producer(*args)
 
+def check_file_exists_remote(serverpath, file_path):
+    server_url = serverpath.split("store")[0][:-1]
+    file_path = "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
+    # print(f"Checking if {file_path} exists in {server_url}")
+    myclient = client.FileSystem(server_url)
+    status, listing = myclient.stat(file_path, DirListFlags.STAT)
+    if status.ok:
+        # print(f"{file_path} exists")
+        return True
+    else:
+        # print(f"{file_path} does not exist")
+        return False
 
 def friend_producer(inputfile, workdir, output_path, dataset_proc, era, channel, debug=False):
-    # filepath = os.path.dirname(inputfile).split("/")
     temp_output_file = os.path.join(
         workdir, era, dataset_proc["nick"], channel, os.path.basename(inputfile)
     )
@@ -92,38 +105,36 @@ def friend_producer(inputfile, workdir, output_path, dataset_proc, era, channel,
     if debug:
         print(f"Processing {inputfile}")
         print(f"Outputting to {temp_output_file}")
-    # remove outputfile if it exists
-    # if os.path.exists(output_path):
-    #     os.remove(output_path)
     os.makedirs(os.path.dirname(temp_output_file), exist_ok=True)
-    # for data and embedded, we don't need to do anything
-    if (
-        dataset_proc["sample_type"] == "data"
-        or dataset_proc["sample_type"] == "embedding"
-    ):
+    if dataset_proc["sample_type"] == "data" or dataset_proc["sample_type"] == "embedding":
         return
-    # check if the output file is empty
-    # print(f"Checking if {inputfile} is empty")
+    if not is_file_empty(inputfile, debug):
+        if not check_file_exists_remote(output_path, final_output_file):
+            rdf = build_rdf(inputfile, dataset_proc, temp_output_file)
+            upload_file(output_path, temp_output_file, final_output_file)
+    else:
+        if not check_file_exists_remote(output_path, final_output_file):
+            print(f"{inputfile} is empty, generating empty friend tree")
+            generate_empty_friend_tree(temp_output_file)
+            upload_file(output_path, temp_output_file, final_output_file)
+
+def is_file_empty(inputfile, debug=False):
     try:
         rootfile = ROOT.TFile.Open(inputfile, "READ")
     except OSError:
         print(f"{inputfile} is broken")
-        return
-    # if the ntuple tree does not exist, the file is empty, so we can skip it
+        return True
     if "ntuple" not in [x.GetTitle() for x in rootfile.GetListOfKeys()]:
-        print(f"{inputfile} is empty, generating empty friend tree")
+        print(f"{inputfile} is empty")
         if debug:
             print("Available keys: ", [x.GetTitle() for x in rootfile.GetListOfKeys()])
-        # generate empty friend tree
-        # friend_tree = ROOT.TFile(output_file, "CREATE")
-        # tree = ROOT.TTree("ntuple", "")
-        # tree.Write()
-        # friend_tree.Close()
         rootfile.Close()
-        print("done")
-        return
-    # else:
-    # print(f"{inputfile} is not empty, generating friend tree")
+        return True
+    rootfile.Close()
+    return False
+
+def build_rdf(inputfile, dataset_proc, output_file):
+    rootfile = ROOT.TFile.Open(inputfile, "READ")
     rdf = ROOT.RDataFrame("ntuple", rootfile)
     numberGeneratedEventsWeight = 1 / float(dataset_proc["nevents"])
     crossSectionPerEventWeight = float(dataset_proc["xsec"])
@@ -144,7 +155,7 @@ def friend_producer(inputfile, workdir, output_path, dataset_proc, era, channel,
     )
     rdf.Snapshot(
         "ntuple",
-        temp_output_file,
+        output_file,
         [
             "numberGeneratedEventsWeight",
             "crossSectionPerEventWeight",
@@ -152,15 +163,30 @@ def friend_producer(inputfile, workdir, output_path, dataset_proc, era, channel,
         ],
     )
     rootfile.Close()
-    # now upload the file to the output path
-    # print(f"Uploading {temp_output_file} to {final_output_file}")
-    if final_output_file.startswith("root://"):
-        os.system(f"xrdcp {temp_output_file} {final_output_file}")
-    else:
-        if not os.path.exists(os.path.dirname(final_output_file)):
-            os.makedirs(os.path.dirname(final_output_file))
-        os.system(f"mv {temp_output_file} {final_output_file}")
-    return
+
+def upload_file(redirector, input_file, output_file, max_retries=5):
+    success = False
+    n = 0
+    while not success and n < max_retries:
+        if output_file.startswith("root://"):
+            os.system(f"xrdcp {input_file} {output_file}")
+            if check_file_exists_remote(redirector, output_file):
+                success = True
+            else:
+                print(f"Failed to upload {output_file}")
+                print(f"Retrying {n+1}/{max_retries}")
+                n += 1
+        else:
+            if not os.path.exists(os.path.dirname(output_file)):
+                os.makedirs(os.path.dirname(output_file))
+            os.system(f"mv {input_file} {output_file}")
+            success = True
+
+def generate_empty_friend_tree(output_file):
+    friend_tree = ROOT.TFile(output_file, "CREATE")
+    tree = ROOT.TTree("ntuple", "")
+    tree.Write()
+    friend_tree.Close()
 
 
 def generate_friend_trees(dataset, ntuples, nthreads, workdir, output_path, debug):
