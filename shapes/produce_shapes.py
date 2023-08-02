@@ -33,6 +33,7 @@ from config.shapes.process_selection import (
     DY_process_selection,
     DY_NLO_process_selection,
     TT_process_selection,
+    ST_process_selection,
     VV_process_selection,
     W_process_selection,
     ZTT_process_selection,
@@ -54,6 +55,7 @@ from config.shapes.process_selection import (
     ZHWW_process_selection,
     WHWW_process_selection,
     ttH_process_selection,
+    NMSSM_process_selection,
 )
 
 # from config.shapes.category_selection import categorization
@@ -68,8 +70,9 @@ from config.shapes.taues_measurement_binning import (
 # Variations for estimation of fake processes
 from config.shapes.variations import (
     same_sign,
-    same_sign_em,
     anti_iso_lt,
+    boosted_same_sign,
+    boosted_anti_iso_lt,
     anti_iso_tt,
     anti_iso_tt_mcl,
     abcd_method,
@@ -192,7 +195,7 @@ def setup_logging(output_file, level=logging.DEBUG):
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="Produce shapes for the legacy MSSM analysis."
+        description="Produce shapes for the legacy NMSSM analysis."
     )
     parser.add_argument("--era", required=True, type=str, help="Experiment era.")
     parser.add_argument(
@@ -324,6 +327,11 @@ def parse_arguments():
         default=None,
     )
     parser.add_argument(
+        "--boosted-analysis",
+        action="store_true",
+        help="Can be set to a switch to a boosted analysis selection.",
+    )
+    parser.add_argument(
         "--xrootd",
         action="store_true",
         help="Read input ntuples and friends via xrootd from gridka dCache",
@@ -336,7 +344,7 @@ def parse_arguments():
     )
     return parser.parse_args()
 
-
+# TODO adjust analysis units for boosted selection
 def get_analysis_units(
     channel, era, datasets, categorization, special_analysis, nn_shapes=False
 ):
@@ -566,7 +574,7 @@ def get_analysis_units(
 
 
 def get_control_units(
-    channel, era, datasets, special_analysis, variables, do_gofs=False, do_2dGofs=False
+    channel, era, datasets, special_analysis, variables, boosted=False, do_gofs=False, do_2dGofs=False
 ):
     control_units = {}
     control_binning = default_control_binning
@@ -610,7 +618,7 @@ def get_control_units(
         control_units,
         name="data",
         dataset=datasets["data"],
-        selections=channel_selection(channel, era, special_analysis),
+        selections=channel_selection(channel, era, special_analysis, boosted),
         channel=channel,
         binning=control_binning,
         variables=variable_set,
@@ -620,8 +628,8 @@ def get_control_units(
         name="emb",
         dataset=datasets["EMB"],
         selections=[
-            channel_selection(channel, era, special_analysis),
-            ZTT_embedded_process_selection(channel, era),
+            channel_selection(channel, era, special_analysis, boosted),
+            ZTT_embedded_process_selection(channel, era, boosted),
         ],
         channel=channel,
         binning=control_binning,
@@ -632,9 +640,9 @@ def get_control_units(
         name="ztt",
         dataset=datasets["DY"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             DY_process_selection(channel, era),
-            ZTT_process_selection(channel),
+            ZTT_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
@@ -645,9 +653,9 @@ def get_control_units(
         name="zl",
         dataset=datasets["DY"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             DY_process_selection(channel, era),
-            ZL_process_selection(channel),
+            ZL_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
@@ -658,61 +666,61 @@ def get_control_units(
         name="zj",
         dataset=datasets["DY"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             DY_process_selection(channel, era),
-            ZJ_process_selection(channel),
+            ZJ_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
         variables=variable_set,
     )
-    add_control_process(
-        control_units,
-        name="ztt_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_NLO_process_selection(channel, era),
-            ZTT_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="zl_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_NLO_process_selection(channel, era),
-            ZL_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="zj_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis),
-            DY_NLO_process_selection(channel, era),
-            ZJ_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
+    # add_control_process(
+    #     control_units,
+    #     name="ztt_nlo",
+    #     dataset=datasets["DYNLO"],
+    #     selections=[
+    #         channel_selection(channel, era, special_analysis, boosted),
+    #         DY_NLO_process_selection(channel, era),
+    #         ZTT_process_selection(channel, boosted),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
+    # add_control_process(
+    #     control_units,
+    #     name="zl_nlo",
+    #     dataset=datasets["DYNLO"],
+    #     selections=[
+    #         channel_selection(channel, era, special_analysis, boosted),
+    #         DY_NLO_process_selection(channel, era),
+    #         ZL_process_selection(channel, boosted),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
+    # add_control_process(
+    #     control_units,
+    #     name="zj_nlo",
+    #     dataset=datasets["DYNLO"],
+    #     selections=[
+    #         channel_selection(channel, era, special_analysis, boosted),
+    #         DY_NLO_process_selection(channel, era),
+    #         ZJ_process_selection(channel, boosted),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
     add_control_process(
         control_units,
         name="ttl",
         dataset=datasets["TT"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             TT_process_selection(channel, era),
-            TTL_process_selection(channel),
+            TTL_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
@@ -723,9 +731,9 @@ def get_control_units(
         name="ttt",
         dataset=datasets["TT"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             TT_process_selection(channel, era),
-            TTT_process_selection(channel),
+            TTT_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
@@ -736,9 +744,9 @@ def get_control_units(
         name="ttj",
         dataset=datasets["TT"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             TT_process_selection(channel, era),
-            TTJ_process_selection(channel),
+            TTJ_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
@@ -749,9 +757,9 @@ def get_control_units(
         name="vvl",
         dataset=datasets["VV"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             VV_process_selection(channel, era),
-            VVL_process_selection(channel),
+            VVL_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
@@ -762,9 +770,9 @@ def get_control_units(
         name="vvt",
         dataset=datasets["VV"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             VV_process_selection(channel, era),
-            VVT_process_selection(channel),
+            VVT_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
@@ -775,59 +783,121 @@ def get_control_units(
         name="vvj",
         dataset=datasets["VV"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             VV_process_selection(channel, era),
-            VVJ_process_selection(channel),
+            VVJ_process_selection(channel, boosted),
         ],
         channel=channel,
         binning=control_binning,
         variables=variable_set,
     )
-    if channel != "mm":
-        add_control_process(
-            control_units,
-            name="qqh",
-            dataset=datasets["qqH"],
-            selections=[
-                channel_selection(channel, era, special_analysis),
-                qqH125_process_selection(channel, era),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
-        add_control_process(
-            control_units,
-            name="ggh",
-            dataset=datasets["ggH"],
-            selections=[
-                channel_selection(channel, era, special_analysis),
-                ggH125_process_selection(channel, era),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
-        add_control_process(
-            control_units,
-            name="w_nlo",
-            dataset=datasets["WNLO"],
-            selections=[
-                channel_selection(channel, era, special_analysis),
-                W_process_selection(channel, era),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
+    add_control_process(
+        control_units,
+        name="qqh",
+        dataset=datasets["qqH"],
+        selections=[
+            channel_selection(channel, era, special_analysis, boosted),
+            qqH125_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="ggh",
+        dataset=datasets["ggH"],
+        selections=[
+            channel_selection(channel, era, special_analysis, boosted),
+            ggH125_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    # add_control_process(
+    #     control_units,
+    #     name="w_nlo",
+    #     dataset=datasets["WNLO"],
+    #     selections=[
+    #         channel_selection(channel, era, special_analysis),
+    #         W_process_selection(channel, era),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
 
     add_control_process(
         control_units,
         name="w",
         dataset=datasets["W"],
         selections=[
-            channel_selection(channel, era, special_analysis),
+            channel_selection(channel, era, special_analysis, boosted),
             W_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="stt",
+        dataset=datasets["ST"],
+        selections=[
+            channel_selection(channel, era, special_analysis, boosted),
+            ST_process_selection(channel, era),
+            TTT_process_selection(channel, boosted), # same as for ttl
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="stl",
+        dataset=datasets["ST"],
+        selections=[
+            channel_selection(channel, era, special_analysis, boosted),
+            ST_process_selection(channel, era),
+            TTL_process_selection(channel, boosted), # same as for ttl
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="stj",
+        dataset=datasets["ST"],
+        selections=[
+            channel_selection(channel, era, special_analysis, boosted),
+            ST_process_selection(channel, era),
+            TTJ_process_selection(channel, boosted), # same as for ttl
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="nmssm_Ybb",
+        dataset=datasets["nmssm_Ybb"],
+        selections=[
+            channel_selection(channel, era, special_analysis, boosted),
+            NMSSM_process_selection(channel, era),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="nmssm_Ytautau",
+        dataset=datasets["nmssm_Ytautau"],
+        selections=[
+            channel_selection(channel, era, special_analysis, boosted),
+            NMSSM_process_selection(channel, era),
         ],
         channel=channel,
         binning=control_binning,
@@ -854,9 +924,6 @@ def main(args):
         "et": args.et_friend_directory,
         "mt": args.mt_friend_directory,
         "tt": args.tt_friend_directory,
-        "em": args.em_friend_directory,
-        "mm": args.mm_friend_directory,
-        "ee": args.ee_friend_directory,
     }
     if ".root" in args.output_file:
         output_file = args.output_file
@@ -864,6 +931,7 @@ def main(args):
         output_file = "{}.root".format(args.output_file)
     # setup categories depending on the selected anayses
     special_analysis = args.special_analysis
+    boosted_analysis = args.boosted_analysis
     categorization = prepare_special_analysis(special_analysis)
     um = UnitManager()
     do_check = args.enable_booking_check
@@ -887,6 +955,7 @@ def main(args):
                 nominals[era]["datasets"][channel],
                 special_analysis,
                 args.control_plot_set,
+                boosted=boosted_analysis,
                 do_gofs=False,
             )
         elif args.gof_inputs:
@@ -935,73 +1004,56 @@ def main(args):
             "ztt",
             "zl",
             "zj",
-            "ztt_nlo",
-            "zl_nlo",
-            "zj_nlo",
+            # "ztt_nlo",
+            # "zl_nlo",
+            # "zj_nlo",
             "ttt",
             "ttl",
             "ttj",
             "vvt",
             "vvl",
             "vvj",
+            "stt",
+            "stl",
+            "stj",
             "w",
-            "w_nlo",
+            # "w_nlo",
             "ggh",
             "qqh",
             # "zh",
             # "wh",
+            "nmssm_Ybb",
+            "nmssm_Ytautau",
         }
-        # if "et" in args.channels:
-        #     procS = procS - {"w"}
-        # procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
-        #          "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
-        #         | set("ggh{}".format(mass) for mass in susy_masses[era]["ggH"]) \
-        #         | set("bbh{}".format(mass) for mass in susy_masses[era]["bbH"])
     else:
         procS = args.process_selection
-    if "mm" in args.channels or "ee" in args.channels:
-        procS = {
-            "data",
-            "zl",
-            "zl_nlo",
-            "ttl",
-            "vvl",
-            "w",
-            # "w_nlo",
-            "emb",
-        } & procS
 
+    logger.info(f"Processes to be computed: {procS}")
     dataS = {"data"} & procS
     embS = {"emb"} & procS
     jetFakesDS = {
-        "et": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
-        "mt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
-        "tt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
-        "em": {"w", "w_nlo"} & procS,
+        "et": {"zj", "ttj", "vvj", "w", "stj"} & procS,
+        "mt": {"zj", "ttj", "vvj", "w", "stj"} & procS,
+        "tt": {"zj", "ttj", "vvj", "w", "stj"} & procS,
     }
-    leptonFakesS = {"zl", "ttl", "vvl", "zl_nlo"} & procS
-    trueTauBkgS = {"ztt", "ttt", "vvt", "ztt_nlo"} & procS
-    sm_signalsS = {
-        "ggh",
-        "qqh",
-        "tth",
-        "zh",
-        "wh",
-        "gghww",
-        "qqhww",
-        "zhww",
-        "whww",
+    leptonFakesS = {"zl", "ttl", "vvl", "stl"} & procS
+    trueTauBkgS = {"ztt", "ttt", "vvt", "stt"} & procS
+    smHiggsBkgS = {"ggh", "qqh", "tth", "vh"} & procS
+    signalsS = {
+        "nmssm_Ybb", 
+        "nmssm_Ytautau",
     } & procS
-    signalsS = sm_signalsS
+
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
-        signalsS = signalsS & {"ggh", "qqh"}
+        signalsS = signalsS & {"nmssm_Ybb", "nmssm_Ytautau"}
 
     simulatedProcsDS = {
-        chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
-        for chname_ in ["et", "mt", "tt", "em"]
+        chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS | smHiggsBkgS
+        for chname_ in ["et", "mt", "tt"]
     }
     logger.info(f"Processes to be computed: {procS}")
     logger.info(f"Simulated processes: {simulatedProcsDS}")
+    logger.info(f"SM Higgs processes: {smHiggsBkgS}")
     logger.info(f"Data processes: {dataS}")
     logger.info(f"Embedded processes: {embS}")
     logger.info(f"Jet fakes processes: {jetFakesDS}")
@@ -1021,7 +1073,7 @@ def main(args):
                 um,
                 additional_emb_procS,
                 nominals[era]["units"][channel],
-                [same_sign, anti_iso_lt],
+                [same_sign, anti_iso_lt] if not boosted_analysis else [boosted_same_sign, boosted_anti_iso_lt],
                 do_check,
             )
         elif channel == "mt":
@@ -1029,90 +1081,48 @@ def main(args):
                 um,
                 processes=embS,
                 datasets=nominals[era]["units"][channel],
-                # variations=[same_sign, anti_iso_lt],
-                variations=[same_sign],
+                variations=[same_sign, anti_iso_lt] if not boosted_analysis else [boosted_same_sign, boosted_anti_iso_lt],
                 enable_check=do_check,
             )
         if channel in ["mt", "et"]:
             book_histograms(
                 um,
-                processes=dataS | trueTauBkgS | leptonFakesS,
+                processes=dataS | trueTauBkgS | leptonFakesS | smHiggsBkgS,
                 datasets=nominals[era]["units"][channel],
-                # variations=[same_sign, anti_iso_lt],
-                variations=[same_sign],
+                variations=[same_sign, anti_iso_lt] if not boosted_analysis else [boosted_same_sign, boosted_anti_iso_lt],
                 enable_check=do_check,
             )
             book_histograms(
                 um,
                 processes=jetFakesDS[channel],
                 datasets=nominals[era]["units"][channel],
-                variations=[same_sign],
+                variations=[same_sign] if not boosted_analysis else [boosted_same_sign],
                 enable_check=do_check,
             )
         elif channel == "tt":
-            # TODO add anti_iso_tt
+            # TODO add abcd method
             book_histograms(
                 um,
-                processes=dataS | embS | trueTauBkgS,
+                processes=dataS | embS | trueTauBkgS | smHiggsBkgS,
                 datasets=nominals[era]["units"][channel],
-                variations=[abcd_method],
+                variations=[same_sign, anti_iso_tt],
                 enable_check=do_check,
             )
-
             book_histograms(
                 um,
                 processes=jetFakesDS[channel],
                 datasets=nominals[era]["units"][channel],
-                variations=[abcd_method],
+                variations=[same_sign],
                 enable_check=do_check,
             )
-            # TODO add anti_iso_tt_mcl
             book_histograms(
                 um,
                 processes=leptonFakesS,
                 datasets=nominals[era]["units"][channel],
-                variations=[wfakes_tt, abcd_method],
+                variations=[same_sign, anti_iso_tt],
                 enable_check=do_check,
             )
-            book_histograms(
-                um,
-                processes={"w"} & procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[wfakes_w_tt],
-                enable_check=do_check,
-            )
-        elif channel == "em":
-            book_histograms(
-                um,
-                processes=dataS | embS | simulatedProcsDS[channel] - signalsS,
-                datasets=nominals[era]["units"][channel],
-                variations=[same_sign_em],
-                enable_check=do_check,
-            )
-        elif channel == "mm" and special_analysis == "TauES":
-            book_histograms(
-                um,
-                processes={"data", "zl", "w", "ttl"},
-                datasets=nominals[era]["units"][channel],
-                variations=[],
-                enable_check=do_check,
-            )
-        elif channel == "mm":
-            book_histograms(
-                um,
-                processes=procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[same_sign],
-                enable_check=do_check,
-            )
-        elif channel == "ee":
-            book_histograms(
-                um,
-                processes=procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[same_sign],
-                enable_check=do_check,
-            )
+
         ##################################
         # SYSTEMATICS
         ############################
