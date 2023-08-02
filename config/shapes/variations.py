@@ -17,14 +17,8 @@ from ntuple_processor.variations import ChangeDatasetReplaceMultipleCutsAndAddWe
 
 #  Variations needed for the various jet background estimations.
 same_sign = ReplaceCut("same_sign", "os", Cut("q_1*q_2>0", "ss"))
+boosted_same_sign = ReplaceCut("same_sign", "os", Cut("boosted_q_1*boosted_q_2>0", "ss"))
 
-# TODO: In order to properly use this variation friend trees with the correct weights need to be created.
-same_sign_em = ReplaceCutAndAddWeight(
-    "same_sign",
-    "os",
-    Cut("q_1*q_2>0", "ss"),
-    Weight("em_qcd_osss_binned_Weight", "qcd_weight"),
-)
 abcd_method = [
     ReplaceCut("abcd_same_sign", "os", Cut("q_1*q_2>0", "ss")),
     ReplaceCut(
@@ -51,10 +45,18 @@ abcd_method = [
 anti_iso_lt = ReplaceCutAndAddWeight(
     "anti_iso",
     "tau_iso",
-    Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+    Cut("id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5", "tau_anti_iso"),
     # Weight("1.0", "fake_factor"),
-    Weight("ff2_nom", "fake_factor"),
+    Weight("fake_factor", "fake_factor"),
 )
+boosted_anti_iso_lt = ReplaceCutAndAddWeight(
+    "anti_iso",
+    "tau_iso",
+    Cut("id_boostedtau_iso_Loose_2<0.5", "tau_anti_iso"),
+    # Weight("1.0", "fake_factor"),
+    Weight("fake_factor_boosted", "fake_factor"),
+)
+
 anti_iso_tt_mcl = ReplaceMultipleCutsAndAddWeight(
     "anti_iso",
     ["tau_iso", "ff_veto"],
@@ -73,11 +75,11 @@ anti_iso_tt = ReplaceCutAndAddWeight(
     "anti_iso",
     "tau_iso",
     Cut(
-        "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5))",
+        "((id_tau_vsJet_Medium_2>0.5 && id_tau_vsJet_Medium_1<0.5 && id_tau_vsJet_VVVLoose_1>0.5) || (id_tau_vsJet_Madium_1>0.5 && id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5))",
         "tau_anti_iso"
     ),
     # Weight("1.0", "fake_factor"),
-    Weight("0.5 * ff1_nom * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * ff2_nom * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
+    Weight("0.5 * fake_factor_1 * (id_tau_vsJet_Medium_1 < 0.5) + 0.5 * fake_factor_2 * (id_tau_vsJet_Medium_2 < 0.5)", "fake_factor"),
 )
 
 
