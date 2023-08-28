@@ -666,45 +666,45 @@ def get_control_units(
         binning=control_binning,
         variables=variable_set,
     )
-    # add_control_process(
-    #     control_units,
-    #     name="ztt_nlo",
-    #     dataset=datasets["DYNLO"],
-    #     selections=[
-    #         channel_selection(channel, era, special_analysis),
-    #         DY_NLO_process_selection(channel, era),
-    #         ZTT_process_selection(channel),
-    #     ],
-    #     channel=channel,
-    #     binning=control_binning,
-    #     variables=variable_set,
-    # )
-    # add_control_process(
-    #     control_units,
-    #     name="zl_nlo",
-    #     dataset=datasets["DYNLO"],
-    #     selections=[
-    #         channel_selection(channel, era, special_analysis),
-    #         DY_NLO_process_selection(channel, era),
-    #         ZL_process_selection(channel),
-    #     ],
-    #     channel=channel,
-    #     binning=control_binning,
-    #     variables=variable_set,
-    # )
-    # add_control_process(
-    #     control_units,
-    #     name="zj_nlo",
-    #     dataset=datasets["DYNLO"],
-    #     selections=[
-    #         channel_selection(channel, era, special_analysis),
-    #         DY_NLO_process_selection(channel, era),
-    #         ZJ_process_selection(channel),
-    #     ],
-    #     channel=channel,
-    #     binning=control_binning,
-    #     variables=variable_set,
-    # )
+    add_control_process(
+        control_units,
+        name="ztt_nlo",
+        dataset=datasets["DYNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            DY_NLO_process_selection(channel, era),
+            ZTT_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="zl_nlo",
+        dataset=datasets["DYNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            DY_NLO_process_selection(channel, era),
+            ZL_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
+    add_control_process(
+        control_units,
+        name="zj_nlo",
+        dataset=datasets["DYNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            DY_NLO_process_selection(channel, era),
+            ZJ_process_selection(channel),
+        ],
+        channel=channel,
+        binning=control_binning,
+        variables=variable_set,
+    )
     add_control_process(
         control_units,
         name="ttl",
@@ -808,18 +808,18 @@ def get_control_units(
             binning=control_binning,
             variables=variable_set,
         )
-        # add_control_process(
-        #     control_units,
-        #     name="w_nlo",
-        #     dataset=datasets["WNLO"],
-        #     selections=[
-        #         channel_selection(channel, era, special_analysis),
-        #         W_process_selection(channel, era),
-        #     ],
-        #     channel=channel,
-        #     binning=control_binning,
-        #     variables=variable_set,
-        # )
+        add_control_process(
+            control_units,
+            name="w_nlo",
+            dataset=datasets["WNLO"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                W_process_selection(channel, era),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        )
 
     add_control_process(
         control_units,
@@ -935,9 +935,9 @@ def main(args):
             "ztt",
             "zl",
             "zj",
-            # "ztt_nlo",
-            # "zl_nlo",
-            # "zj_nlo",
+            "ztt_nlo",
+            "zl_nlo",
+            "zj_nlo",
             "ttt",
             "ttl",
             "ttj",
@@ -945,7 +945,7 @@ def main(args):
             "vvl",
             "vvj",
             "w",
-            # "w_nlo",
+            "w_nlo",
             "ggh",
             "qqh",
             # "zh",
@@ -963,7 +963,7 @@ def main(args):
         procS = {
             "data",
             "zl",
-            # "zl_nlo",
+            "zl_nlo",
             "ttl",
             "vvl",
             "w",
@@ -979,8 +979,8 @@ def main(args):
         "tt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
         "em": {"w", "w_nlo"} & procS,
     }
-    # leptonFakesS = {"zl", "ttl", "vvl", "zl_nlo"} & procS
-    # trueTauBkgS = {"ztt", "ttt", "vvt", "ztt_nlo"} & procS
+    leptonFakesS = {"zl", "ttl", "vvl", "zl_nlo"} & procS
+    trueTauBkgS = {"ztt", "ttt", "vvt", "ztt_nlo"} & procS
     leptonFakesS = {"zl", "ttl", "vvl", } & procS
     trueTauBkgS = {"ztt", "ttt", "vvt",} & procS
     sm_signalsS = {
