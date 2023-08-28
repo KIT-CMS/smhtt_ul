@@ -6,9 +6,15 @@ def channel_selection(channel, era, special=None):
     cuts = [
         ("extraelec_veto<0.5", "extraelec_veto"),
         ("extramuon_veto<0.5", "extramuon_veto"),
-        ("dimuon_veto<0.5", "dilepton_veto"),
         ("q_1*q_2<0", "os"),
     ]
+
+    if channel != "mm":
+        cuts.append(
+           (
+            "dimuon_veto<0.5", "dilepton_veto"
+           ),
+        )
     if special is None:
         if "mt" in channel:
             #  Add channel specific cuts to the list of cuts.
@@ -160,6 +166,14 @@ def channel_selection(channel, era, special=None):
                         "trg_selection",
                     ),  # TODO add nonHPS Triggerflag for also MC
                 )
+            elif era == "2016postVFP":
+                cuts.extend(
+                        [
+                            ("pt_2>10 && pt_1>=25 && (trg_single_mu24 == 1)", "trg_selection"),
+                            ("m_vis>60 && m_vis < 120", "m_vis"),
+                            
+                        ]
+                        )
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="mm", cuts=cuts)
@@ -220,6 +234,9 @@ def channel_selection(channel, era, special=None):
                     ("q_1*q_2<0", "os"),
                     ("m_vis>50", "m_vis"),
                     ("iso_1<0.15 && iso_2<0.15", "muon_iso"),
+                    ("extraelec_veto<0.5", "extraelec_veto"),
+                    ("extramuon_veto<0.5", "extramuon_veto"),
+
                 ]
             if era == "2018":
                 cuts.append(
@@ -228,6 +245,15 @@ def channel_selection(channel, era, special=None):
                         "trg_selection",
                     ),
                 )
+            if era == "2016postVFP":
+                
+                cuts.append(
+                     (
+                        # "pt_2>10 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
+                         "pt_2>10 && pt_1>=25 && trg_single_mu24 == 1",
+                         "trg_selection",
+                     ),
+                 )
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="mm", cuts=cuts)
