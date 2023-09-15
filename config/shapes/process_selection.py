@@ -110,6 +110,8 @@ def MC_base_process_selection(channel, era):
             trgweight = ("trg_wgt_single_mu27", "trgweight")
         elif era == "2018":
             trgweight = ("1", "trgweight")
+        elif era == "2016postVFP" or era == "2016preVFP":
+            trgweight = ("trg_wgt_single_mu22", "trgweight")
     elif channel == "ee":
         isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
         idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
@@ -134,7 +136,7 @@ def MC_base_process_selection(channel, era):
         vsele_weight,
         trgweight,
         lumi_weight(era),
-        prefiring_weight(era),
+        # prefiring_weight(era),
     ]
     return Selection(
         name="MC base",
@@ -482,16 +484,28 @@ def ZTT_embedded_process_selection(channel, era):
             ]
         )
     elif "mm" in channel:
-        ztt_embedded_weights.extend(
-            [
-                # TODO trigger weights for em
-                ("(gen_match_1==2 && gen_match_2==2)", "emb_gen_match"),
-                ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
-                ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
-                ("trg_wgt_single_mu27", "trgweight")
-                # triggerweight_emb(channel, era),
-            ]
-        )
+        if era == "2017" or era == "2018":
+            ztt_embedded_weights.extend(
+                [
+                    # TODO trigger weights for em
+                    ("(gen_match_1==2 && gen_match_2==2)", "emb_gen_match"),
+                    ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
+                    ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
+                    ("trg_wgt_single_mu27", "trgweight")
+                    # triggerweight_emb(channel, era),
+                ]
+            )
+        if era == "2016postVFP" or era == "2016preVFP":
+            ztt_embedded_weights.extend(
+                [
+                    # TODO trigger weights for em
+                    ("(gen_match_1==2 && gen_match_2==2)", "emb_gen_match"),
+                    ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
+                    ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
+                    ("trg_wgt_single_mu22", "trgweight")
+                    # triggerweight_emb(channel, era),
+                ]
+            )
     elif "ee" in channel:
         if era in ["2017", "2018"]:
             ztt_embedded_weights.extend(

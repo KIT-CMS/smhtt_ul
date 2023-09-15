@@ -159,6 +159,14 @@ def channel_selection(channel, era, special=None):
                         "trg_selection",
                     ),  # TODO add nonHPS Triggerflag for also MC
                 )
+            elif era == "2016postVFP" or era == "2016preVFP":
+                cuts.extend(
+                        [
+                            ("pt_2>10 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))", "trg_selection"),
+                            # ("m_vis>60 && m_vis < 120", "m_vis"),
+                            
+                        ]
+                        )
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="mm", cuts=cuts)
