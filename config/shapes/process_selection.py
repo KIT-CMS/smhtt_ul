@@ -23,8 +23,10 @@ List of base processes, mostly containing only weights:
 
 
 def lumi_weight(era):
-    if era == "2016":
-        lumi = "36.33"  # "36.326450080"
+    if era == "2016preVFP":
+        lumi = "19.5"  # "36.326450080"
+    elif era == "2016postVFP":
+        lumi = "16.8"
     elif era == "2017":
         lumi = "41.529"
     elif era == "2018":
@@ -35,8 +37,8 @@ def lumi_weight(era):
 
 
 def prefiring_weight(era):
-    if era in ["2016", "2017"]:
-        weight = ("prefiringweight", "prefireWeight")
+    if era in ["2016postVFP", "2016preVFP", "2017"]:
+        weight = ("prefiring_wgt", "prefireWeight")
     else:
         weight = ("1.0", "prefireWeight")
     return weight
@@ -117,7 +119,9 @@ def MC_base_process_selection(channel, era):
         if era == "2017":
             trgweight = ("trg_wgt_single_ele35", "trgweight")
         elif era == "2018":
-            trgweight = ("1", "trgweight")
+            trgweight = ("trg_wgt_single_ele35", "trgweight")
+        elif era in ["2016postVFP", "2016preVFP"]:
+            trgweight = ("trg_wgt_single_ele25", "trgweight")
     else:
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
@@ -165,6 +169,11 @@ def DY_process_selection(channel, era):
             "numberGeneratedEventsWeight",
         )
     elif era == "2018":
+        gen_events_weight = (
+            "numberGeneratedEventsWeight",
+            "numberGeneratedEventsWeight",
+        )
+    elif era in ["2016preVFP", "2016postVFP"]:
         gen_events_weight = (
             "numberGeneratedEventsWeight",
             "numberGeneratedEventsWeight",
@@ -484,16 +493,28 @@ def ZTT_embedded_process_selection(channel, era):
             ]
         )
     elif "ee" in channel:
-        ztt_embedded_weights.extend(
-            [
-                # TODO trigger weights for em
-                ("(gen_match_1==1 && gen_match_2==1)", "emb_gen_match"),
-                ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight"),
-                ("id_wgt_ele_1 * id_wgt_ele_2", "idweight"),
-                ("trg_wgt_single_ele35", "trgweight")
-                # triggerweight_emb(channel, era),
-            ]
-        )
+        if era in ["2017", "2018"]:
+            ztt_embedded_weights.extend(
+                [
+                    # TODO trigger weights for em
+                    ("(gen_match_1==1 && gen_match_2==1)", "emb_gen_match"),
+                    ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight"),
+                    ("id_wgt_ele_1 * id_wgt_ele_2", "idweight"),
+                    ("trg_wgt_single_ele35", "trgweight")
+                    # triggerweight_emb(channel, era),
+                ]
+            )
+        elif era in ["2016preVFP", "2016postVFP"]:
+            ztt_embedded_weights.extend(
+                [
+                    # TODO trigger weights for em
+                    ("(gen_match_1==1 && gen_match_2==1)", "emb_gen_match"),
+                    ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight"),
+                    ("id_wgt_ele_1 * id_wgt_ele_2", "idweight"),
+                    ("trg_wgt_single_ele25", "trgweight")
+                    # triggerweight_emb(channel, era),
+                ]
+            )
 
     ztt_embedded_cuts = [
         (

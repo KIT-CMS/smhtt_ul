@@ -25,11 +25,11 @@ def channel_selection(channel, era, special=None):
             # TODO add 2017 and 2016
             if era == "2017":
                 cuts.append(
-                        (
-                            "pt_2>30 && (pt_1>=28 && (trg_single_mu27 == 1))",
-                            "trg_selection",
-                        ),
-                        )
+                    (
+                        "pt_2>30 && (pt_1>=28 && (trg_single_mu27 == 1))",
+                        "trg_selection",
+                    ),
+                )
             elif era == "2018":
                 # cuts.append(
                 #     (
@@ -132,19 +132,19 @@ def channel_selection(channel, era, special=None):
         if "mm" in channel:
             #  Add channel specific cuts to the list of cuts.
             cuts = [
-                    ("q_1*q_2<0", "os"),
-                    ("iso_1<0.15", "muon_iso"),
-                    ("iso_2<0.15", "muon2_iso"),
+                ("q_1*q_2<0", "os"),
+                ("iso_1<0.15", "muon_iso"),
+                ("iso_2<0.15", "muon2_iso"),
             ]
             #  Add era specific cuts. This is basically restricted to trigger selections.
             # TODO add 2017 and 2016
             if era == "2017":
                 cuts.append(
-                        (
-                            "pt_2>20 && (pt_1>=28 && (trg_single_mu27 == 1))",
-                            "trg_selection",
-                        ),
-                        )
+                    (
+                        "pt_2>20 && (pt_1>=28 && (trg_single_mu27 == 1))",
+                        "trg_selection",
+                    ),
+                )
             elif era == "2018":
                 # cuts.append(
                 #     (
@@ -156,7 +156,6 @@ def channel_selection(channel, era, special=None):
                     (
                         # "pt_2>20 && ( (pt_1>=28 && (trg_single_mu27 == 1)) || (pt_1>=25 && pt_1 < 28 && (trg_single_mu24 == 1)))",
                         "pt_2>20 && pt_1>=28 && (trg_single_mu27 == 1)",
-
                         "trg_selection",
                     ),  # TODO add nonHPS Triggerflag for also MC
                 )
@@ -166,23 +165,30 @@ def channel_selection(channel, era, special=None):
         if "ee" in channel:
             #  Add channel specific cuts to the list of cuts.
             cuts = [
-                    ("q_1*q_2<0", "os"),
-                    ("iso_1<0.15", "ele_iso"),
-                    ("iso_2<0.15", "ele2_iso"),
+                ("q_1*q_2<0", "os"),
+                ("iso_1<0.15", "ele_iso"),
+                ("iso_2<0.15", "ele2_iso"),
             ]
             #  Add era specific cuts. This is basically restricted to trigger selections.
             # TODO add 2016
             if era == "2017":
                 cuts.append(
-                        (
-                            "pt_2>20 && (pt_1 >=36 && (trg_single_ele35==1))",
-                            "trg_selection",
-                        ),
-                        )
+                    (
+                        "pt_2>20 && (pt_1 >=36 && (trg_single_ele35==1))",
+                        "trg_selection",
+                    ),
+                )
             elif era == "2018":
                 cuts.append(
                     (
                         "pt_2>20 && (pt_1 >=33 && ((trg_single_ele35==1) || (trg_single_ele32==1)))",
+                        "trg_selection",
+                    ),
+                )
+            elif era in ["2016postVFP", "2016preVFP"]:
+                cuts.append(
+                    (
+                        "pt_2>20 && ((pt_1>=26 && (trg_single_ele25 == 1)))",
                         "trg_selection",
                     ),
                 )
@@ -192,7 +198,9 @@ def channel_selection(channel, era, special=None):
     # Special selection for TauID measurement
     if special == "TauID":
         if channel != "mt" and channel != "mm":
-            raise ValueError("TauID measurement is only available for mt (with mm control region)")
+            raise ValueError(
+                "TauID measurement is only available for mt (with mm control region)"
+            )
         if channel == "mt":
             cuts.extend(
                 [
@@ -217,10 +225,10 @@ def channel_selection(channel, era, special=None):
         # for mm we just need the control region between 60 and 120 GeV as a single bin
         if channel == "mm":
             cuts = [
-                    ("q_1*q_2<0", "os"),
-                    ("m_vis>50", "m_vis"),
-                    ("iso_1<0.15 && iso_2<0.15", "muon_iso"),
-                ]
+                ("q_1*q_2<0", "os"),
+                ("m_vis>50", "m_vis"),
+                ("iso_1<0.15 && iso_2<0.15", "muon_iso"),
+            ]
             if era == "2018":
                 cuts.append(
                     (
