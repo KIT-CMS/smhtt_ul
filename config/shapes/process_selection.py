@@ -136,7 +136,7 @@ def MC_base_process_selection(channel, era):
         vsele_weight,
         trgweight,
         lumi_weight(era),
-        # prefiring_weight(era),
+        prefiring_weight(era),
     ]
     return Selection(
         name="MC base",

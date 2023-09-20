@@ -138,7 +138,7 @@ def main(info):
     if not args.embedding and not args.fake_factor:
         if args.nlo:
             bkg_processes = [
-                "QCD", "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ_NLO", "ZL_NLO", "ZTT_NLO"
+                "QCD_NLO", "VVT", "VVL", "VVJ", "W_NLO", "TTT", "TTL", "TTJ", "ZJ_NLO", "ZL_NLO", "ZTT_NLO"    # if now QCD_NLO or W_NLO is available, use QCD and W instead
             ]
         else:
             bkg_processes = [
