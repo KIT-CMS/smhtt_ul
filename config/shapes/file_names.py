@@ -637,6 +637,32 @@ files = {
                 **common_files_2016postVFP,
             }
         ),
+        "mm": dict(
+            {
+                "data": [
+                    "SingleMuon_Run2016F-UL2016",
+                    "SingleMuon_Run2016G-UL2016",
+                    "SingleMuon_Run2016H-UL2016",
+                ],
+                "EMB": [
+                    "MuonEmbedding_Run2016F-UL2016",
+		            "MuonEmbedding_Run2016G-UL2016",
+                    "MuonEmbedding_Run2016H-UL2016",
+
+                ],
+                "W": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+                ],
+                "WNLO": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+                ],
+            },
+            **common_files_2016postVFP
+        ),
     },
     "2016preVFP": {
         "ee": dict(
@@ -668,6 +694,43 @@ files = {
                 ],
                 **common_files_2016preVFP,
             }
+        ),
+
+        "mm": dict(
+            {
+                "data": [
+                    "SingleMuon_Run2016B-ver1",
+                    "SingleMuon_Run2016B-ver2",
+                    "SingleMuon_Run2016C-HIPM",
+                    "SingleMuon_Run2016D-HIPM",
+                    "SingleMuon_Run2016E-HIPM",
+                    "SingleMuon_Run2016F-HIPM",
+                    
+                    
+                ],
+
+                "EMB": [
+
+                    "MuonEmbedding_Run2016-HIPM_B_ver1-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_B_ver2-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_C-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_D-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_E-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_F-UL2016",
+                ],
+
+                "W": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",  #NLO because LO was not in the database
+
+                ],
+                "WNLO": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+
+                ],
+            },
+            **common_files_2016preVFP
         ),
     },
 }
