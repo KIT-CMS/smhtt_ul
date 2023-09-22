@@ -128,7 +128,7 @@ def MC_base_process_selection(channel, era):
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
         ("puweight", "puweight"),
-        ("btag_weight", "btagWeight"),
+        # ("btag_weight", "btagWeight"),
         isoweight,
         idweight,
         tauidweight,
