@@ -54,7 +54,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
         python shapes/produce_shapes.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
-            --$CHANNEL-friend-directory $FRIENDS \
+            --$CHANNEL-friend-directory $XSEC_FRIENDS \
             --era $ERA \
             --wp $WP \
             --vs_ele_wp $VS_ELE_WP \
@@ -63,12 +63,13 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             --process-selection $PROCESSES \
             --only-create-graphs \
             --graph-dir $OUTPUT \
-            $CONTROL_ARG
+            $CONTROL_ARG \
+            --xrootd
     elif [[ "$SPECIAL" == "TauES" ]]; then
         python shapes/produce_shapes.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
-            --$CHANNEL-friend-directory $FRIENDS \
+            --$CHANNEL-friend-directory $XSEC_FRIENDS \
             --era $ERA \
             --wp $WP \
             --vs_ele_vp $VS_ELE_WP \
@@ -77,12 +78,12 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             --process-selection $PROCESSES \
             --only-create-graphs \
             --graph-dir $OUTPUT \
-            $CONTROL_ARG
+            $CONTROL_ARG --xrootd
     else
         python shapes/produce_shapes.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
-            --$CHANNEL-friend-directory $FRIENDS \
+            --$CHANNEL-friend-directory $XSEC_FRIENDS \
             --era $ERA \
             --wp $WP \
             --vs_ele_vp $VS_ELE_WP \
@@ -90,7 +91,8 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             --process-selection $PROCESSES \
             --only-create-graphs \
             --graph-dir $OUTPUT \
-            $CONTROL_ARG
+            $CONTROL_ARG \
+            --xrootd
     fi
     # Set output graph file name produced during graph creation.
     GRAPH_FILE_FULL_NAME=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${PROCESSES}.pkl
@@ -116,6 +118,8 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "queue a3,a2,a1 from $OUTPUT/arguments.txt" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>$OUTPUT/produce_shapes_cc7.jdl
 
+    echo "x509userproxy = /home/olavoryk/.globus/x509_proxy" >>$OUTPUT/produce_shapes_cc7.jdl
+
     # Prepare the multicore jdl.
     echo "[INFO] Preparing submission file for multi core jobs for nominal pipeline..."
     cp submit/produce_shapes_cc7.jdl $OUTPUT/produce_shapes_cc7_multicore.jdl
@@ -132,6 +136,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "error = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).err" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "log = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).log" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
+    echo "x509userproxy = /home/olavoryk/.globus/x509_proxy" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "queue a3,a2,a4,a1 from $OUTPUT/arguments_multicore.txt" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
 
     # Assemble the arguments.txt file used in the submission
