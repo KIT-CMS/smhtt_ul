@@ -27,6 +27,25 @@ def channel_selection(channel, era, wp, vs_ele, special=None):
     vs_ele_discr = vs_ele_dict[vs_ele]
 
     if special is None:
+        if "mm" in channel:
+
+            if era == "2018":
+                cuts.append(
+                    (
+                        "pt_2>28 && pt_1>=28 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))",
+                        "trg_selection",
+                    ),
+                )
+            elif era == "2016postVFP" or era == "2016preVFP":
+                cuts.append(
+                    (
+                        "pt_2>10 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
+                        "trg_selection",
+                    ),
+                )
+            else:
+                raise ValueError("Given {} era does not exist".format(era))
+            return Selection(name="mm", cuts=cuts)
         if "mt" in channel:
             #  Add channel specific cuts to the list of cuts.
             cuts.extend(
@@ -155,6 +174,13 @@ def channel_selection(channel, era, wp, vs_ele, special=None):
                         "trg_selection",
                     ),
                 )
+            elif era == "2016postVFP" or era == "2016preVFP":
+                cuts.append(
+                    (
+                        "pt_2>10 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
+                        "trg_selection",
+                    ),
+                )
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="mt", cuts=cuts)
@@ -169,6 +195,13 @@ def channel_selection(channel, era, wp, vs_ele, special=None):
                 cuts.append(
                     (
                         "pt_2>28 && pt_1>=28 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))",
+                        "trg_selection",
+                    ),
+                )
+            elif era == "2016postVFP" or era == "2016preVFP":
+                cuts.append(
+                    (
+                        "pt_2>10 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
                         "trg_selection",
                     ),
                 )

@@ -1,209 +1,3 @@
-# Input files used accross all channels in 2016.
-common_files_2016 = {
-    "DY": [
-        "DY1JetsToLLM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v1",
-        "DY2JetsToLLM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v2",
-        "DY3JetsToLLM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v2",
-        "DY4JetsToLLM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v2",
-        "DYJetsToLLM10to50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v2",
-        "DYJetsToLLM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-        "DYJetsToLLM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-        # "EWKZ2Jets_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-        # "EWKZ2JetsZToLLM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-        "EWKZ2Jets_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-        "EWKZ2JetsZToLLM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-    ],
-    "TT": [
-        # "TT_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "TTTo2L2Nu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "TTToHadronic_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "TTToSemiLeptonic_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "VV": [
-        # "WW_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_pythia8_ext1-v2",
-        # "WW_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_pythia8_v2",
-        # "WZ_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_pythia8_ext1-v2",
-        # "WZ_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_pythia8_v2",
-        # "ZZ_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_pythia8_ext1-v2",
-        # "ZZ_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_pythia8_v2",
-        "WZTo2L2Q_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_v2",
-        "WZTo3LNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_v2",
-        "ZZTo2L2Q_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_v1",
-        "ZZTo4L_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext1-v2",
-        "VVTo2L2Nu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext1-v2",
-        "STt-channelantitop4finclusiveDecays_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "STt-channeltop4finclusiveDecays_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "STtWantitop5finclusiveDecays_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_ext1-v1",
-        "STtWtop5finclusiveDecays_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_ext1-v1",
-    ],
-    # "W": [
-    #     "W1JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v1",
-    #     "W2JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-    #     "W3JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-    #     "W4JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-    #     "W4JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v1",
-    #     "WJetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-    #     "WJetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v2",
-    #     # "WGstarToLNuEE_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph_v1",
-    #     # "WGstarToLNuMuMu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph_v1",
-    #     # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext1-v1",
-    #     # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext2-v1",
-    #     # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext3-v1",
-    #     # "EWKWMinus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-    #     # "EWKWPlus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-    #     "EWKWMinus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-    #     "EWKWPlus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-    # ],
-    "ggH": [
-        "ggZHHToTauTauZToQQM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "GluGluHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_ext1-v3",
-        "GluGluHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_ext2-v1",
-        "GluGluHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v3",
-    ],
-    "qqH": [
-        "VBFHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_ext1-v1",
-        "VBFHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_ext2-v1",
-        "VBFHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-        "ZHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-        "WminusHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-        "WplusHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-    ],
-    "VH": [
-        "ggZHHToTauTauZToLLM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ggZHHToTauTauZToNuNuM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ZHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-        "WminusHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-        "WplusHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-    ],
-    "ZH": [
-        "ggZHHToTauTauZToLLM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ggZHHToTauTauZToNuNuM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ZHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-    ],
-    "WH": [
-        "WminusHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-        "WplusHToTauTauM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-    ],
-    "ggHWW": [
-        # "GluGluHToWWTo2L2NuM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-JHUgenv628-pythia8_v1",
-    ],
-    "qqHWW": [
-        # "VBFHToWWTo2L2NuM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-JHUgenv628-pythia8_v2",
-    ],
-    "WHWW": [
-        # "HWminusJHToWWM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-        # "HWplusJHToWWM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-    ],
-    "ZHWW": [
-        # "HZJHToWWM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-        # "GluGluZHHToWWM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_powheg-pythia8_v2",
-    ],
-    "ttH": [
-        # "ttHJetToTTM125_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext4-v1",
-    ],
-}
-# Input files used accross all channels in 2017.
-common_files_2017 = {
-    "DY": [
-        "DY1JetsToLLM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-        "DY1JetsToLLM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-        "DY2JetsToLLM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-        "DY2JetsToLLM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-        "DY3JetsToLLM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v1",
-        "DY3JetsToLLM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-        "DY4JetsToLLM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-        "DYJetsToLLM10to50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-        # "DYJetsToLLM10to50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-        "DYJetsToLLM50_RunIIFall17MiniAODv2_PU2017RECOSIMstep_13TeV_MINIAOD_madgraph-pythia8_ext1-v1",
-        "DYJetsToLLM50_RunIIFall17MiniAODv2_PU2017RECOSIMstep_13TeV_MINIAOD_madgraph-pythia8_v1",
-        "EWKZ2Jets_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-        "EWKZ2JetsZToLLM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-    ],
-    "TT": [
-        "TTTo2L2Nu_RunIIFall17MiniAODv2_PU2017newpmx_13TeV_MINIAOD_powheg-pythia8_v1",
-        "TTToHadronic_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-        "TTToSemiLeptonic_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "VV": [
-        # "ZZ_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_pythia8_v2",
-        # "WW_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_pythia8_v2",
-        # "WZ_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_pythia8_v1",
-        "ZZTo2L2Q_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_amcatnlo-pythia8_v1",
-        "ZZTo4L_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_amcatnlo-pythia8_v1",
-        "WZTo2L2Q_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_amcatnlo-pythia8_v1",
-        "WZTo3LNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_amcatnlo-pythia8_v1",
-        "VVTo2L2Nu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_amcatnlo-pythia8_v1",
-        "STt-channelantitop4finclusiveDecaysTuneCP5_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-        "STt-channeltop4finclusiveDecaysTuneCP5_RunIIFall17MiniAODv2_PU2017newpmx_13TeV_MINIAOD_powheg-pythia8_v1",
-        "STtWantitop5finclusiveDecaysTuneCP5_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-        "STtWtop5finclusiveDecaysTuneCP5_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-    ],
-    # "W": [
-    #     "W1JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v4",
-    #     "W2JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v5",
-    #     "W3JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-    #     "W4JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-    #     "WGToLNuG_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-    #     "WJetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-    #     "WJetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v3",
-    #     "EWKWMinus2JetsWToLNuM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-    #     "EWKWPlus2JetsWToLNuM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-    # ],
-    "ggH": [
-        "ggZHHToTauTauZToQQM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-        "GluGluHToTauTauHTXSFilterSTXS1p1Bin101M125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-        "GluGluHToTauTauHTXSFilterSTXS1p1Bin104to105M125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "GluGluHToTauTauHTXSFilterSTXS1p1Bin106M125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-        "GluGluHToTauTauHTXSFilterSTXS1p1Bin107to109M125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "GluGluHToTauTauHTXSFilterSTXS1p1Bin110to113M125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-        "GluGluHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_ext1-v1",
-        "GluGluHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2",
-        # "GluGluToHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_amcatnlo-pythia8_v1",
-    ],
-    "qqH": [
-        "VBFHToTauTauHTXSFilterSTXS1p1Bin203to205M125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "VBFHToTauTauHTXSFilterSTXS1p1Bin206M125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "VBFHToTauTauHTXSFilterSTXS1p1Bin207to210M125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "VBFHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "WminusHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "WplusHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ZHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "VH": [
-        "ZHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ggZHHToTauTauZToLLM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ggZHHToTauTauZToNuNuM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "WminusHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "WplusHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "ZH": [
-        "ggZHHToTauTauZToLLM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ggZHHToTauTauZToNuNuM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "ZHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "WH": [
-        "WminusHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        "WplusHToTauTauM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "ggHWW": [
-        # "GluGluHToWWTo2L2NuM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "qqHWW": [
-        # "VBFHToWWTo2L2NuM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "WHWW": [
-        # "HWminusJHToWWM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-        # "HWplusJHToWWM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "ZHWW": [
-        # "HZJHToWWM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v4",
-        # "GluGluZHHToWWM125_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-    "ttH": [
-        # "ttHToTauTauM125_RunIIFall17MiniAODv2_PU2017newmpx_13TeV_MINIAOD_powheg-pythia8_v1",
-    ],
-}
-
 # Input files used accross all channels in 2018.
 common_files_2018 = {
     "DY": [
@@ -215,6 +9,10 @@ common_files_2018 = {
         # "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
         # "EWKZ2Jets_ZToNuNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
     ],
+    # "DYNLO": [
+    #     "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
+    #     "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
+    # ],
     "TT": [
         "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
         "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
@@ -283,295 +81,147 @@ common_files_2018 = {
     #     # "HZJHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
     #     # "GluGluZHHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
     # ],
-    # "ttH": [
-    #     # "ttHToTauTauM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    # ],
+    "ttH": [
+        "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X"
+    ],
 }
 
+common_files_2017 = {
+    "DY": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X_ext1",
+        # "DY1JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "DY2JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "DY3JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "DY4JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "EWKZ2Jets_ZToNuNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    ],
+    "DYNLO": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "EWKZ2Jets_ZToNuNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    ],
+    "TT": [
+        "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    ],
+    "VV": [
+        # "WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",  # ToDo: Samples were missing in ntuple production, to be uncommented
+        "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",  # ToDo: Samples were missing in ntuple production, to be uncommented
+        "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    ],
+    "ggH": [
+        "GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "ggZHHToTauTauZToQQM125_RunIIAutumn17MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin101M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v2",
+        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin104to105M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin106M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v2",
+        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin107to109M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin110to113M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v2",
+    ],
+    "qqH": [
+        "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # # "VBFHToTauTauHTXSFilterSTXS1p1Bin203to205M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+        # # "VBFHToTauTauHTXSFilterSTXS1p1Bin206M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+        # # "VBFHToTauTauHTXSFilterSTXS1p1Bin207to210M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+        # # "VBFHToTauTauM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_ext1-v1",
+        # "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        # "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    ],
+    # "VH": [
+    #     # "ggZHHToTauTauZToLLM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    #     # "ggZHHToTauTauZToNuNuM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    #     "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    #     "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    #     "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    # ],
+    # "ZH": [
+    #     "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    #     # "ggZHHToTauTauZToLLM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    #     # "ggZHHToTauTauZToNuNuM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    # ],
+    # "WH": [
+    #     "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    #     "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    # ],
+    # "ggHWW": [
+    #     # "GluGluHToWWTo2L2NuM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    # ],
+    # "qqHWW": [
+    #     # "VBFHToWWTo2L2NuM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    # ],
+    # "WHWW": [
+    #     # "HWminusJHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    #     # "HWplusJHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    # ],
+    # "ZHWW": [
+    #     # "HZJHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    #     # "GluGluZHHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
+    # ],
+    # "ttH": [
+    #     "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X"
+    # ],
+}
+common_files_2016postVFP = {
+    "DY": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "DYNLO": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "TT": [
+        "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "VV": [
+        "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+}
+common_files_2016preVFP = {
+    "DY": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "DYNLO": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "TT": [
+        "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "VV": [
+        "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+}
 files = {
-    "2016": {
-        "et": dict(
-            {
-                "data": [
-                    "SingleElectron_Run2016B_17Jul2018ver2v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2016C_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2016D_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2016E_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2016F_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2016G_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2016H_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016B_17Jul2018ver2v1_13TeV_MINIAOD",
-                    "Tau_Run2016C_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016D_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016E_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016F_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016G_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016H_17Jul2018v1_13TeV_MINIAOD",
-                ],
-                "EMB": [
-                    "Embedding2016B_ElTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016C_ElTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016D_ElTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016E_ElTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016F_ElTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016G_ElTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016H_ElTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                ],
-            },
-            **common_files_2016
-        ),
-        "mt": dict(
-            {
-                "data": [
-                    "SingleMuon_Run2016B_17Jul2018ver2v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2016C_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2016D_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2016E_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2016F_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2016G_17Jul2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2016H_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016B_17Jul2018ver2v1_13TeV_MINIAOD",
-                    "Tau_Run2016C_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016D_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016E_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016F_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016G_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016H_17Jul2018v1_13TeV_MINIAOD",
-                ],
-                "EMB": [
-                    "Embedding2016B_MuTauFinalState_inputDoubleMu94XLegacyminiAODv2_13TeV_USER_v2",
-                    "Embedding2016C_MuTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016D_MuTauFinalState_inputDoubleMu94XLegacyminiAODv3_13TeV_USER_v3",
-                    "Embedding2016E_MuTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016F_MuTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016G_MuTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016H_MuTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                ],
-                "W": [
-                    "W1JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "W2JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W3JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W4JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W4JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v1",
-                    "WJetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                    "WJetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    # "WGstarToLNuEE_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph_v1",
-                    # "WGstarToLNuMuMu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph_v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext1-v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext2-v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext3-v1",
-                    # "EWKWMinus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    # "EWKWPlus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "EWKWMinus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                    "EWKWPlus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                ],
-            },
-            **common_files_2016
-        ),
-        "tt": dict(
-            {
-                "data": [
-                    "Tau_Run2016B_17Jul2018ver2v1_13TeV_MINIAOD",
-                    "Tau_Run2016C_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016D_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016E_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016F_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016G_17Jul2018v1_13TeV_MINIAOD",
-                    "Tau_Run2016H_17Jul2018v1_13TeV_MINIAOD",
-                ],
-                "EMB": [
-                    "Embedding2016B_TauTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016C_TauTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016D_TauTauFinalState_inputDoubleMu94XLegacyminiAODv3_13TeV_USER_v3",
-                    "Embedding2016E_TauTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016F_TauTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016G_TauTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016H_TauTauFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                ],
-                "W": [
-                    "W1JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "W2JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W3JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W4JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W4JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v1",
-                    "WJetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                    "WJetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    # "WGstarToLNuEE_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph_v1",
-                    # "WGstarToLNuMuMu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph_v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext1-v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext2-v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext3-v1",
-                    # "EWKWMinus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    # "EWKWPlus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "EWKWMinus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                    "EWKWPlus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                ],
-            },
-            **common_files_2016
-        ),
-        "em": dict(
-            {
-                "data": [
-                    "MuonEG_Run2016B_17Jul2018ver2v1_13TeV_MINIAOD",
-                    "MuonEG_Run2016C_17Jul2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2016D_17Jul2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2016E_17Jul2018v2_13TeV_MINIAOD",
-                    "MuonEG_Run2016F_17Jul2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2016G_17Jul2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2016H_17Jul2018v1_13TeV_MINIAOD",
-                ],
-                "EMB": [
-                    "Embedding2016B_ElMuFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016C_ElMuFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016D_ElMuFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016E_ElMuFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016F_ElMuFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016G_ElMuFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                    "Embedding2016H_ElMuFinalState_inputDoubleMu94XLegacyminiAODv1_13TeV_USER_v1",
-                ],
-                "W": [
-                    "W1JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "W2JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W3JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W4JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "W4JetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v1",
-                    "WJetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                    "WJetsToLNu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    # "WGstarToLNuEE_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph_v1",
-                    # "WGstarToLNuMuMu_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph_v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext1-v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext2-v1",
-                    # "WGToLNuG_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_amcatnlo-pythia8_ext3-v1",
-                    # "EWKWMinus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    # "EWKWPlus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "EWKWMinus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                    "EWKWPlus2JetsWToLNuM50_RunIISummer16MiniAODv3_PUMoriond17_13TeV_MINIAOD_madgraph-pythia8_ext2-v2",
-                ],
-            },
-            **common_files_2016
-        ),
-    },
-    "2017": {
-        "et": dict(
-            {
-                "data": [
-                    "SingleElectron_Run2017B_31Mar2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2017C_31Mar2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2017D_31Mar2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2017E_31Mar2018v1_13TeV_MINIAOD",
-                    "SingleElectron_Run2017F_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017B_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017C_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017D_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017E_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017F_31Mar2018v1_13TeV_MINIAOD",
-                ],
-                "EMB": [
-                    "Embedding2017B_ElTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017C_ElTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017D_ElTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017E_ElTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017F_ElTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                ],
-            },
-            **common_files_2017
-        ),
-        "mt": dict(
-            {
-                "data": [
-                    "SingleMuon_Run2017B_31Mar2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2017C_31Mar2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2017D_31Mar2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2017E_31Mar2018v1_13TeV_MINIAOD",
-                    "SingleMuon_Run2017F_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017B_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017C_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017D_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017E_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017F_31Mar2018v1_13TeV_MINIAOD",
-                ],
-                "EMB": [
-                    "Embedding2017B_MuTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017C_MuTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017D_MuTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017E_MuTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017F_MuTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                ],
-                "W": [
-                    "W1JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v4",
-                    "W2JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v5",
-                    "W3JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "W4JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "WGToLNuG_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "WJetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "WJetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v3",
-                    "EWKWMinus2JetsWToLNuM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "EWKWPlus2JetsWToLNuM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                ],
-            },
-            **common_files_2017
-        ),
-        "tt": dict(
-            {
-                "data": [
-                    "Tau_Run2017B_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017C_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017D_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017E_31Mar2018v1_13TeV_MINIAOD",
-                    "Tau_Run2017F_31Mar2018v1_13TeV_MINIAOD",
-                ],
-                "EMB": [
-                    "Embedding2017B_TauTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017C_TauTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017D_TauTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017E_TauTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017F_TauTauFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                ],
-                "W": [
-                    "W1JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v4",
-                    "W2JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v5",
-                    "W3JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "W4JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "WGToLNuG_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "WJetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "WJetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v3",
-                    "EWKWMinus2JetsWToLNuM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "EWKWPlus2JetsWToLNuM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                ],
-            },
-            **common_files_2017
-        ),
-        "em": dict(
-            {
-                "data": [
-                    "MuonEG_Run2017B_31Mar2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2017C_31Mar2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2017D_31Mar2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2017E_31Mar2018v1_13TeV_MINIAOD",
-                    "MuonEG_Run2017F_31Mar2018v1_13TeV_MINIAOD",
-                ],
-                "EMB": [
-                    "Embedding2017B_ElMuFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017C_ElMuFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017D_ElMuFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017E_ElMuFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                    "Embedding2017F_ElMuFinalState_inputDoubleMu94XminiAODv2_13TeV_USER_v2",
-                ],
-                "W": [
-                    "W1JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v4",
-                    "W2JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v5",
-                    "W3JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "W4JetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "WGToLNuG_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1",
-                    "WJetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v2",
-                    "WJetsToLNu_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v3",
-                    "EWKWMinus2JetsWToLNuM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                    "EWKWPlus2JetsWToLNuM50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v2",
-                ],
-            },
-            **common_files_2017
-        ),
-    },
     "2018": {
         "et": dict(
             {
@@ -586,6 +236,15 @@ files = {
                     "TauEmbedding-ElTauFinalState_Run2018B-UL2018",
                     "TauEmbedding-ElTauFinalState_Run2018C-UL2018",
                     "TauEmbedding-ElTauFinalState_Run2018D-UL2018",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+                    #     "EWKWMinus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
+                    #     "EWKWPlus2JetsWToLNuM50_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_madgraph-pythia8_v1",
                 ],
             },
             **common_files_2018
@@ -699,8 +358,379 @@ files = {
                     "MuonEmbedding_Run2018B-UL2018",
                     "MuonEmbedding_Run2018C-UL2018",
                     "MuonEmbedding_Run2018D-UL2018",
-                ]
+                ],
+                # "DYNLO": [
+                #     "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
+                # ],
+                # "WNLO": [
+                #     "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                # ],
             },
+        ),
+        "ee": dict(
+            {
+                "data": [
+                    "EGamma_Run2018A-UL2018",
+                    "EGamma_Run2018B-UL2018",
+                    "EGamma_Run2018C-UL2018",
+                    "EGamma_Run2018D-UL2018",
+                ],
+                "EMB": [
+                    "ElectronEmbedding_Run2018A-UL2018",
+                    "ElectronEmbedding_Run2018B-UL2018",
+                    "ElectronEmbedding_Run2018C-UL2018",
+                    "ElectronEmbedding_Run2018D-UL2018",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+            },
+            **common_files_2018
+        ),
+    },
+    "2017": {
+        "et": dict(
+            {
+                "data": [
+                    "SingleElectron_Run2017B-UL2017",
+                    "SingleElectron_Run2017C-UL2017",
+                    "SingleElectron_Run2017D-UL2017",
+                    "SingleElectron_Run2017E-UL2017",
+                    "SingleElectron_Run2017F-UL2017",
+                ],
+                "EMB": [
+                    "TauEmbedding-ElTauFinalState_Run2017B-UL2017",
+                    "TauEmbedding-ElTauFinalState_Run2017C-UL2017",
+                    "TauEmbedding-ElTauFinalState_Run2017D-UL2017",
+                    "TauEmbedding-ElTauFinalState_Run2017E-UL2017",
+                    "TauEmbedding-ElTauFinalState_Run2017F-UL2017",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+                "WNLO": [
+                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+            },
+            **common_files_2017
+        ),
+        "mt": dict(
+            {
+                "data": [
+                    "SingleMuon_Run2017B-UL2017",
+                    "SingleMuon_Run2017C-UL2017",
+                    "SingleMuon_Run2017D-UL2017",
+                    "SingleMuon_Run2017E-UL2017",
+                    "SingleMuon_Run2017F-UL2017",
+                ],
+                "EMB": [
+                    "TauEmbedding-MuTauFinalState_Run2017B-UL2017",
+                    "TauEmbedding-MuTauFinalState_Run2017C-UL2017",
+                    "TauEmbedding-MuTauFinalState_Run2017D-UL2017",
+                    "TauEmbedding-MuTauFinalState_Run2017E-UL2017",
+                    "TauEmbedding-MuTauFinalState_Run2017F-UL2017",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+                "WNLO": [
+                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+            },
+            **common_files_2017
+        ),
+        "tt": dict(
+            {
+                "data": [
+                    "Tau_Run2017B-UL2017",
+                    "Tau_Run2017C-UL2017",
+                    "Tau_Run2017D-UL2017",
+                    "Tau_Run2017E-UL2017",
+                    "Tau_Run2017F-UL2017",
+                ],
+                "EMB": [
+                    "TauEmbedding-TauTauFinalState_Run2017B-UL2017",
+                    "TauEmbedding-TauTauFinalState_Run2017C-UL2017",
+                    "TauEmbedding-TauTauFinalState_Run2017D-UL2017",
+                    "TauEmbedding-TauTauFinalState_Run2017E-UL2017",
+                    "TauEmbedding-TauTauFinalState_Run2017F-UL2017",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+                "WNLO": [
+                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+            },
+            **common_files_2017
+        ),
+        "em": dict(
+            {
+                "data": [
+                    "MuonEG_Run2017B-UL2017",
+                    "MuonEG_Run2017C-UL2017",
+                    "MuonEG_Run2017D-UL2017",
+                    "MuonEG_Run2017E-UL2017",
+                    "MuonEG_Run2017F-UL2017",
+                ],
+                "EMB": [
+                    "TauEmbedding-ElMuFinalState_Run2017B-UL2017",
+                    "TauEmbedding-ElMuFinalState_Run2017C-UL2017",
+                    "TauEmbedding-ElMuFinalState_Run2017D-UL2017",
+                    "TauEmbedding-ElMuFinalState_Run2017E-UL2017",
+                    "TauEmbedding-ElMuFinalState_Run2017F-UL2017",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+                "WNLO": [
+                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+            },
+            **common_files_2017
+        ),
+        "mm": dict(
+            {
+                "data": [
+                    "SingleMuon_Run2017B-UL2017",
+                    "SingleMuon_Run2017C-UL2017",
+                    "SingleMuon_Run2017D-UL2017",
+                    "SingleMuon_Run2017E-UL2017",
+                    "SingleMuon_Run2017F-UL2017",
+                ],
+                "EMB": [
+                    "MuonEmbedding_Run2017B-UL2017",
+                    "MuonEmbedding_Run2017C-UL2017",
+                    "MuonEmbedding_Run2017D-UL2017",
+                    "MuonEmbedding_Run2017E-UL2017",
+                    "MuonEmbedding_Run2017F-UL2017",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+                "WNLO": [
+                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+            },
+            **common_files_2017
+        ),
+        "ee": dict(
+            {
+                "data": [
+                    "SingleElectron_Run2017B-UL2017",
+                    "SingleElectron_Run2017C-UL2017",
+                    "SingleElectron_Run2017D-UL2017",
+                    "SingleElectron_Run2017E-UL2017",
+                    "SingleElectron_Run2017F-UL2017",
+                ],
+                "EMB": [
+                    "ElectronEmbedding_Run2017B-UL2017",
+                    "ElectronEmbedding_Run2017C-UL2017",
+                    "ElectronEmbedding_Run2017D-UL2017",
+                    "ElectronEmbedding_Run2017E-UL2017",
+                    "ElectronEmbedding_Run2017F-UL2017",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+                "WNLO": [
+                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+            },
+            **common_files_2017
+        ),
+    },
+    "2016postVFP": {
+        "ee": dict(
+            {
+                "data": [
+                    "SingleElectron_Run2016F-UL2016",
+                    "SingleElectron_Run2016G-UL2016",
+                    "SingleElectron_Run2016H-UL2016",
+                ],
+                "EMB": [
+                    "ElectronEmbedding_Run2016F-UL2016",
+                    "ElectronEmbedding_Run2016G-UL2016",
+                    "ElectronEmbedding_Run2016H-UL2016",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X"
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+                **common_files_2016postVFP,
+            }
+        ),
+        "mm": dict(
+            {
+                "data": [
+                    "SingleMuon_Run2016F-UL2016",
+                    "SingleMuon_Run2016G-UL2016",
+                    "SingleMuon_Run2016H-UL2016",
+                ],
+                "EMB": [
+                    "MuonEmbedding_Run2016F-UL2016",
+		            "MuonEmbedding_Run2016G-UL2016",
+                    "MuonEmbedding_Run2016H-UL2016",
+
+                ],
+                "W": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+                ],
+                "WNLO": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+                ],
+            },
+            **common_files_2016postVFP
+        ),
+    },
+    "2016preVFP": {
+        "ee": dict(
+            {
+                "data": [
+                    "SingleElectron_Run2016B-ver1",
+                    "SingleElectron_Run2016B-ver2",
+                    "SingleElectron_Run2016C-HIPM",
+                    "SingleElectron_Run2016D-HIPM",
+                    "SingleElectron_Run2016E-HIPM",
+                    "SingleElectron_Run2016F-HIPM",
+                ],
+                "EMB": [
+                    "ElectronEmbedding_Run2016-HIPM_B_ver1-UL2016",
+                    "ElectronEmbedding_Run2016-HIPM_B_ver2-UL2016",
+                    "ElectronEmbedding_Run2016-HIPM_C-UL2016",
+                    "ElectronEmbedding_Run2016-HIPM_D-UL2016",
+                    "ElectronEmbedding_Run2016-HIPM_E-UL2016",
+                    "ElectronEmbedding_Run2016-HIPM_F-UL2016",
+                ],
+                "W": [
+                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X"
+                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+                ],
+                **common_files_2016preVFP,
+            }
+        ),
+
+        "mm": dict(
+            {
+                "data": [
+                    "SingleMuon_Run2016B-ver1",
+                    "SingleMuon_Run2016B-ver2",
+                    "SingleMuon_Run2016C-HIPM",
+                    "SingleMuon_Run2016D-HIPM",
+                    "SingleMuon_Run2016E-HIPM",
+                    "SingleMuon_Run2016F-HIPM",
+                    
+                    
+                ],
+
+                "EMB": [
+
+                    "MuonEmbedding_Run2016-HIPM_B_ver1-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_B_ver2-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_C-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_D-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_E-UL2016",
+                    "MuonEmbedding_Run2016-HIPM_F-UL2016",
+                ],
+
+                "W": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",  #NLO because LO was not in the database
+
+                ],
+                "WNLO": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+
+                ],
+            },
+            **common_files_2016preVFP
         ),
     },
 }
