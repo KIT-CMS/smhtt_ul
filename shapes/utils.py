@@ -4,10 +4,12 @@ from ntuple_processor.variations import (
     ReplaceCut,
     ReplaceWeight,
     ReplaceCutAndAddWeight,
+    ReplaceVariable,
 )
 import re
 from copy import deepcopy
 import logging
+import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -119,20 +121,42 @@ def filter_friends(dataset, friend):
     return True
 
 
-def get_nominal_datasets(era, channel, friend_directories, files, directory):
+def get_nominal_datasets(
+    era, channel, friend_directories, files, directory, validation_tag, xrootd=False
+):
     datasets = dict()
-
-    for key, names in files[era][channel].items():
-        datasets[key] = dataset_from_crownoutput(
-            key,
-            names,
-            era,
-            channel,
-            channel + "_nominal",
-            directory,
-            [fdir for fdir in friend_directories[channel] if filter_friends(key, fdir)],
-            validate_samples=False,
-        )
+    if friend_directories is not None:
+        for key, names in files[era][channel].items():
+            datasets[key] = dataset_from_crownoutput(
+                key,
+                names,
+                era,
+                channel,
+                channel + "_nominal",
+                directory,
+                [
+                    fdir
+                    for fdir in friend_directories[channel]
+                    if filter_friends(key, fdir)
+                ],
+                validate_samples=False,
+                validation_tag=validation_tag,
+                xrootd=xrootd,
+            )
+    else:
+        for key, names in files[era][channel].items():
+            datasets[key] = dataset_from_crownoutput(
+                key,
+                names,
+                era,
+                channel,
+                channel + "_nominal",
+                directory,
+                [],
+                validate_samples=False,
+                validation_tag=validation_tag,
+                xrootd=xrootd,
+            )
     return datasets
 
 
@@ -147,6 +171,8 @@ def add_tauES_datasets(
     selections,
     categorization,
     additional_emb_procS,
+    validation_tag,
+    xrootd=False,
 ):
     for variation in tauESvariations:
         name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
@@ -165,6 +191,8 @@ def add_tauES_datasets(
                 if filter_friends("EMB", fdir)
             ],
             validate_samples=False,
+            validation_tag=validation_tag,
+            xrootd=xrootd,
         )
         nominals[era]["datasets"][channel][processname] = dataset
         updated_unit = []
@@ -183,7 +211,9 @@ def add_tauES_datasets(
                 for sel_obj in new_selections:
                     for cut in sel_obj.cuts:
                         # now find the intersection between quants and the expression set
-                        for quant in quants & get_quantities_from_expression(cut.expression):
+                        for quant in quants & get_quantities_from_expression(
+                            cut.expression
+                        ):
                             cut.expression = cut.expression.replace(
                                 quant,
                                 "{quant}__{var}".format(quant=quant, var=shiftname),
@@ -192,7 +222,9 @@ def add_tauES_datasets(
                                 f"Replaced {quant} in {cut.expression} ( quant: {quant}, var: {shiftname})"
                             )
                     for weight in sel_obj.weights:
-                        for quant in quants & get_quantities_from_expression(weight.expression):
+                        for quant in quants & get_quantities_from_expression(
+                            weight.expression
+                        ):
                             weight.expression = weight.expression.replace(
                                 quant,
                                 "{quant}__{var}".format(quant=quant, var=shiftname),
@@ -204,9 +236,7 @@ def add_tauES_datasets(
                     for quant in quants & get_quantities_from_expression(act.variable):
                         act.variable = act.variable.replace(
                             quant,
-                            "{quant}__{var}".format(
-                                quant=act.variable, var=shiftname
-                            ),
+                            "{quant}__{var}".format(quant=act.variable, var=shiftname),
                         )
                         logger.debug(
                             f"Replaced action {quant} with {act.variable} ( quant: {quant}, var: {shiftname})"
@@ -234,6 +264,7 @@ def book_tauES_histograms(
         logger.debug(f"Booking {tau_es_shift}")
         shiftname = f"EMBtauESshift_{tau_es_shift.replace('emb', '')}"
         updated_variations = deepcopy(variations)
+        final_variations = []
         unitlist = datasets[tau_es_shift]
         if len(unitlist) == 0:
             continue
@@ -259,8 +290,13 @@ def book_tauES_histograms(
                     subvariation.add_weight.weight.expression = replace_expression(
                         subvariation.add_weight.weight.expression, quants
                     )
+                else:
+                    logger.critical(f"Unknown variation {subvariation}")
+                    raise ValueError(f"Unknown variation {subvariation}")
+                final_variations.append(subvariation)
+        logger.warning(f"final_variations: {final_variations}")
         manager.book(
             unitlist,
-            updated_variations,
+            final_variations,
             enable_check=enable_check,
         )

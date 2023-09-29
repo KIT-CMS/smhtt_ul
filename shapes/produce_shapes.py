@@ -22,7 +22,7 @@ from ntuple_processor import (
     UnitManager,
     GraphManager,
     RunManager,
-    dataset_from_crownoutput,
+    
 )
 from ntuple_processor.utils import Selection
 
@@ -308,6 +308,18 @@ def parse_arguments():
         choices=["TauID", "TauES"],
         default=None,
     )
+    parser.add_argument(
+        "--xrootd",
+        action="store_true",
+        help="Read input ntuples and friends via xrootd from gridka dCache",
+    )
+    parser.add_argument(
+        "--validation-tag",
+        default="default",
+        type=str,
+        help="Tag to be used for the validation of the input samples",
+    )
+
     return parser.parse_args()
 
 
@@ -677,30 +689,32 @@ def get_control_units(channel, era, wp,vs_ele_wp, datasets, special_analysis):
         binning=control_binning,
         variables=variable_set,
     )
-    add_control_process(
-        control_units,
-        name="qqh",
-        dataset=datasets["qqH"],
-        selections=[
-            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
-            qqH125_process_selection(channel, era, wp),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="ggh",
-        dataset=datasets["ggH"],
-        selections=[
-            channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
-            ggH125_process_selection(channel, era, wp),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
+
+    if channel != "mm":
+        add_control_process(
+            control_units,
+            name="qqh",
+            dataset=datasets["qqH"],
+            selections=[
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                qqH125_process_selection(channel, era, wp),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        )
+        add_control_process(
+            control_units,
+            name="ggh",
+            dataset=datasets["ggH"],
+            selections=[
+                channel_selection(channel, era, wp, vs_ele_wp, special_analysis),
+                ggH125_process_selection(channel, era, wp),
+            ],
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        )
 
     if channel != "et":
         add_control_process(
@@ -759,7 +773,7 @@ def main(args):
     # Step 1: create units and book actions
     for channel in args.channels:
         nominals[era]["datasets"][channel] = get_nominal_datasets(
-            era, channel, friend_directories, files, args.directory
+            era, channel, friend_directories, files, args.directory, xrootd=args.xrootd, validation_tag=args.validation_tag
         )
         if args.control_plots:
             nominals[era]["units"][channel] = get_control_units(
@@ -1026,7 +1040,7 @@ def main(args):
 
             book_histograms(
                 um,
-                processes={"ztt", "zl", "zj"},
+                processes={"ztt", "zl", "zj"} & procS,
                 datasets=nominals[era]["units"][channel],
                 variations=[zpt],
                 enable_check=do_check,
@@ -1087,35 +1101,35 @@ def main(args):
                     ],
                     enable_check=do_check,
                 )
-                book_histograms(
-                    um,
-                    processes=dataS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        ff_variations_lt,
-                    ],
-                    enable_check=do_check,
-                )
+            #     book_histograms(
+            #         um,
+            #         processes=dataS,
+            #         datasets=nominals[era]["units"][channel],
+            #         variations=[
+            #             ff_variations_lt,
+            #         ],
+            #         enable_check=do_check,
+            #     )
 
-                book_histograms(
-                    um,
-                    processes=embS | leptonFakesS | trueTauBkgS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        ff_variations_lt,
-                    ],
-                    enable_check=do_check,
-                )
+            #     book_histograms(
+            #         um,
+            #         processes=embS | leptonFakesS | trueTauBkgS,
+            #         datasets=nominals[era]["units"][channel],
+            #         variations=[
+            #             ff_variations_lt,
+            #         ],
+            #         enable_check=do_check,
+            #     )
 
-                book_histograms(
-                    um,
-                    processes=leptonFakesS | trueTauBkgS | embS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        ff_variations_tau_es_lt,
-                    ],
-                    enable_check=do_check,
-                )
+            #     book_histograms(
+            #         um,
+            #         processes=leptonFakesS | trueTauBkgS | embS,
+            #         datasets=nominals[era]["units"][channel],
+            #         variations=[
+            #             ff_variations_tau_es_lt,
+            #         ],
+            #         enable_check=do_check,
+            #     )
                 # TODO add embedded decay mode weights and tau ID variations
                 # book_histograms(
                 #     um,
@@ -1259,7 +1273,7 @@ def main(args):
             #     enable_check=do_check,
             # )
             # Book era dependent uncertainty shapes
-            if "2016" in era or "2017" in era:
+            if "2016preVFP" in era or "2016postVFP" in era or "2017" in era :
                 book_histograms(
                     um,
                     processes=simulatedProcsDS[channel],

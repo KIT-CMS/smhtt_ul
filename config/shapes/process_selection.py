@@ -142,8 +142,10 @@ def prefiring_weight(era):
 
 
 def lumi_weight(era):
-    if era == "2016":
-        lumi = "36.33"  # "36.326450080"
+    if era == "2016preVFP":
+        lumi = "19.5"  # "36.326450080"
+    elif era == "2016postVFP":
+        lumi = "16.8"
     elif era == "2017":
         lumi = "41.529"
     elif era == "2018":

@@ -58,7 +58,7 @@ elif [[ $MODE == "COPY_XROOTD" ]]; then
     echo "#      Copy sample to ceph, it not there yet                                                     #"
     echo "##############################################################################################"
     echo "[INFO] Copying ntuples to ceph via xrootd"
-    echo "xrdcp -r $KINGMAKER_BASEDIR_XROOTD$ERA/ $BASEDIR$ERA/"
+    echo "xrdcp -r $KINGMAKER_BASEDIR_XROOTD$ERA/ $BASEDIR/"
     if [ ! -d "$BASEDIR/$ERA" ]; then
         mkdir -p $BASEDIR/$ERA
     fi
@@ -100,28 +100,29 @@ if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS \
         --era $ERA --num-processes 3 --num-threads 8 \
          --wp $WP \
          --vs_ele_wp ${VS_ELE_WP} \
         --optimization-level 1 --skip-systematic-variations \
         --special-analysis "TauID" \
         --control-plot-set ${VARIABLES} \
-        --output-file $shapes_output
+        --output-file $shapes_output  --xrootd
 fi
 
 if [[ $MODE == "LOCAL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS \
         --era $ERA --num-processes 2 --num-threads 12 \
          --wp $WP \
          --vs_ele_wp ${VS_ELE_WP} \
         --optimization-level 1 \
         --special-analysis "TauID" \
         --control-plot-set ${VARIABLES} \
-        --output-file $shapes_output
+        --output-file $shapes_output_emb \
+        --xrootd  --process-selection 
 fi
 
 if [[ $MODE == "CONTROLREGION" ]]; then
@@ -134,7 +135,7 @@ if [[ $MODE == "CONTROLREGION" ]]; then
          --vs_ele_wp ${VS_ELE_WP} \
         --optimization-level 1 --skip-systematic-variations \
         --special-analysis "TauID" \
-        --output-file "${shapes_output}_mm"
+        --output-file "${shapes_output}_mm"  --xrootd
 fi
 
 
