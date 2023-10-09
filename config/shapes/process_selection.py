@@ -128,7 +128,6 @@ def MC_base_process_selection(channel, era):
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
         ("puweight", "puweight"),
-        ("btag_weight", "btagWeight"),
         isoweight,
         idweight,
         tauidweight,
@@ -138,6 +137,8 @@ def MC_base_process_selection(channel, era):
         lumi_weight(era),
         prefiring_weight(era),
     ]
+    if channel != "mm":
+        MC_base_process_weights.append(("btag_weight", "btagWeight"))
     return Selection(
         name="MC base",
         weights=[weight for weight in MC_base_process_weights if weight is not None],
