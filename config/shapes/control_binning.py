@@ -40,9 +40,9 @@ common_binning = {
             "decayMode_1",
             [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5],
         ),
-    "decayMode_2": Histogram(
-        "decayMode_2",
-        "decayMode_2",
+    "tau_decayMode_2": Histogram(
+    "tau_decayMode_2",
+    "tau_decayMode_2",
         [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5],
     ),
     "rho": Histogram("rho", "rho", np.arange(0, 100, 2)),
