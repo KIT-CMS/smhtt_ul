@@ -150,3 +150,6 @@ dmypy.json
 
 #docker stderror
 docker_stderror
+
+#json
+*.json
