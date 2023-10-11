@@ -71,19 +71,7 @@ if [[ $MODE == "XSEC" ]]; then
     echo "##############################################################################################"
     echo "#      Checking xsec friends directory                                                       #"
     echo "##############################################################################################"
-    python3 friends/build_friend_tree.py --basepath $BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
-    # if the xsec friends directory does not exist, create it
-    if [ ! -d "$XSEC_FRIENDS" ]; then
-        mkdir -p $XSEC_FRIENDS
-    fi
-    # if th xsec friends dir is empty, run the xsec friends script
-    if [ "$(ls -A $XSEC_FRIENDS)" ]; then
-        echo "xsec friends dir already exists"
-    else
-        echo "xsec friends dir is empty"
-        echo "running xsec friends script"
-        python3 friends/build_friend_tree.py --basepath $BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
-    fi
+    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsxrootd-kit.gridka.de/$XSEC_FRIENDS --nthreads 20
     exit 0
 fi
 echo "##############################################################################################"
@@ -110,19 +98,22 @@ if [[ $MODE == "CONTROL" ]]; then
         --output-file $shapes_output  --xrootd
 fi
 
+
+shapes_output_emb=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/shape_w_v3
+PROCESSES="w"
 if [[ $MODE == "LOCAL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $XSEC_FRIENDS \
-        --era $ERA --num-processes 2 --num-threads 12 \
+        --era $ERA --num-processes 3 --num-threads 12 \
          --wp $WP \
          --vs_ele_wp ${VS_ELE_WP} \
         --optimization-level 1 \
         --special-analysis "TauID" \
         --control-plot-set ${VARIABLES} \
         --output-file $shapes_output_emb \
-        --xrootd  --process-selection 
+        --xrootd  --process-selection $PROCESSES 
 fi
 
 if [[ $MODE == "CONTROLREGION" ]]; then
@@ -153,15 +144,22 @@ if [[ $MODE == "MERGE" ]]; then
     hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/*.root
 fi
 
+
+if [[ "${ERA}" == "2018"  ||  "${ERA}" == "2017" ]]; then 
+    datacard_era=${ERA}
+elif [[ "${ERA}" == "2016postVFP"  ||  "${ERA}" == "2016preVFP" ]]; then
+   datacard_era="2016"
+fi
+
 if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
     echo "##############################################################################################"
 
-    bash ./shapes/do_estimations.sh 2018 ${shapes_rootfile} 1
+    bash ./shapes/do_estimations.sh ${datacard_era} ${shapes_rootfile} 1
 
-    bash ./shapes/do_estimations.sh 2018 ${shapes_rootfile_mm} 1
+    bash ./shapes/do_estimations.sh ${datacard_era} ${shapes_rootfile_mm} 1
 
     echo "##############################################################################################"
     echo "#     plotting                                      #"
@@ -180,23 +178,23 @@ if [[ $MODE == "SYNC" ]]; then
         mkdir -p $shapes_output_synced
     fi
 
-    python shapes/convert_to_synced_shapes.py -e $ERA \
+    python shapes/convert_to_synced_shapes.py -e ${datacard_era} \
         -i ${shapes_rootfile} \
         -o ${shapes_output_synced} \
         --variable-selection ${VARIABLES} \
         -n 1
 
-    python shapes/convert_to_synced_shapes.py -e $ERA \
+    python shapes/convert_to_synced_shapes.py -e ${datacard_era} \
         -i "${shapes_rootfile_mm}" \
         -o "${shapes_output_synced}_mm" \
         --variable-selection ${VARIABLES} \
         -n 1
 
-    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
-    hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${ERA}-${CHANNEL}*.root
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${datacard_era}${POSTFIX}.root"
+    hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${datacard_era}-${CHANNEL}*.root
 
-    inputfile="htt_mm.inputs-sm-Run${ERA}${POSTFIX}.root"
-    hadd -f $shapes_output_synced/$inputfile ${shapes_output_synced}_mm/${ERA}-mm-*.root
+    inputfile="htt_mm.inputs-sm-Run${datacard_era}${POSTFIX}.root"
+    hadd -f $shapes_output_synced/$inputfile ${shapes_output_synced}_mm/${datacard_era}-mm-*.root
 
     exit 0
 fi
@@ -221,7 +219,7 @@ if [[ $MODE == "DATACARD" ]]; then
         --use_control_region=true \
         --auto_rebin=true \
         --categories="all" \
-        --era=$ERA \
+        --era=$datacard_era \
         --output=$datacard_output
     THIS_PWD=${PWD}
     echo $THIS_PWD
@@ -245,11 +243,11 @@ if [[ $MODE == "FIT" ]]; then
         --floatOtherPOIs 1 \
         --setParameterRanges r=0.7,1.3 \
         --setParameters r=1.00 \
-        -n $ERA -v1 \
+        -n $datacard_era -v1 \
         --parallel 1 --there
     for RESDIR in output/$datacard_output/htt_mt_*; do
         echo "[INFO] Printing fit result for category $(basename $RESDIR)"
-        FITFILE=${RESDIR}/higgsCombine${ERA}.MultiDimFit.mH125.root
+        FITFILE=${RESDIR}/higgsCombine${datacard_era}.MultiDimFit.mH125.root
         python datacards/print_fitresult.py ${FITFILE}
     done
     exit 0
@@ -261,16 +259,16 @@ if [[ $MODE == "POSTFIT" ]]; then
         WORKSPACE=${RESDIR}/workspace.root
         echo "[INFO] Printing fit result for category $(basename $RESDIR)"
         FILE=${RESDIR}/postfitshape.root
-        FITFILE=${RESDIR}/fitDiagnostics.${ERA}.root
+        FITFILE=${RESDIR}/fitDiagnostics.${datacard_era}.root
         combine \
-            -n .$ERA \
+            -n .$datacard_era \
             -M FitDiagnostics \
             -m 125 -d $WORKSPACE \
             --robustFit 1 -v1 \
             --robustHesse 1 \
             --X-rtd MINIMIZER_analytic \
             --cminDefaultMinimizerStrategy 0
-        mv fitDiagnostics.2018.root $FITFILE
+        mv fitDiagnostics.${datacard_era}.root $FITFILE
         echo "[INFO] Building Prefit/Postfit shapes"
         PostFitShapesFromWorkspace -w ${WORKSPACE} \
             -m 125 -d ${RESDIR}/combined.txt.cmb \
