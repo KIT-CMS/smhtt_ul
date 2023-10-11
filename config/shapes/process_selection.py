@@ -135,7 +135,7 @@ def aiso_muon_correction(channel, era):
 
 def prefiring_weight(era):
     if era in ["2016", "2017"]:
-        weight = ("prefiringweight", "prefireWeight")
+        weight = ("prefiring_wgt", "prefireWeight")
     else:
         weight = ("1.0", "prefireWeight")
     return weight
@@ -199,7 +199,10 @@ def MC_base_process_selection(channel, era, wp):
  
 
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
-        trgweight = ("trg_wgt_single_mu24ormu27", "trgweight")
+        if era == "2018":
+            trgweight = ("trg_wgt_single_mu24ormu27", "trgweight")
+        elif era == "2016postVFP" or era == "2016preVFP":
+            trgweight = ("trg_wgt_single_mu22", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -234,7 +237,7 @@ def MC_base_process_selection(channel, era, wp):
         # tau_by_iso_id_weight(channel),
         # ele_hlt_Z_vtx_weight(channel, era),  # only used in the et channel in 2017 per function definition.
         # ele_reco_weight(channel, era),  # only used in the et, em channels in 2016 per function definition.
-        # prefiring_weight(era),  # only used in 2016 and 2017 per function definition.
+        prefiring_weight(era),  # only used in 2016 and 2017 per function definition.
         lumi_weight(era),
     ]
     # print("MC_base_process_weights:", [weight for weight in MC_base_process_weights if weight is not None])
@@ -453,7 +456,7 @@ def ZTT_embedded_process_selection(channel, era):
                 ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
                 ("iso_wgt_mu_1", "isoweight"),
                 ("id_wgt_mu_1", "idweight"),
-                ("trg_wgtsingle_mu24Ormu27", "trgweight"),  # TODO fix naming
+                # ("trg_wgtsingle_mu24Ormu27", "trgweight"),  # TODO fix naming
                 # ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 # (
                 #     "id_wgt_tau_vsJet_Tight_2",
@@ -464,6 +467,14 @@ def ZTT_embedded_process_selection(channel, era):
                 # fakemetweight_emb(channel, era),
             ]
         )
+        if era == "2016postVFP" or era == "2016preVFP":
+            ztt_embedded_weights.append(
+                ("trg_wgt_single_mu22", "trgweight")
+            )
+        if era == "2018":
+            ztt_embedded_weights.append(
+                ("trg_wgtsingle_mu24Ormu27", "trgweight")
+            )
     elif "et" in channel:
         ztt_embedded_weights.extend(
             [
@@ -518,10 +529,18 @@ def ZTT_embedded_process_selection(channel, era):
                 # TODO trigger weights for em
                 ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
                 ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
-                ("trg_wgtsingle_mu24Ormu27", "trgweight"),
+                # ("trg_wgtsingle_mu24Ormu27", "trgweight"),
                 # triggerweight_emb(channel, era),
             ]
         )
+        if era == "2016postVFP" or era == "2016preVFP":
+            ztt_embedded_weights.append(
+                ("trg_wgt_single_mu22", "trgweight")
+            )
+        if era == "2018":
+            ztt_embedded_weights.append(
+                ("trg_wgtsingle_mu24Ormu27", "trgweight")
+            )
         ztt_embedded_cuts = [
             (
                 "(gen_match_1==2 && gen_match_2==2)",
@@ -776,7 +795,7 @@ def ggHWW_process_selection(channel, era, wp):
     return Selection(name="ggHWW125", weights=ggHWW_weights)
 
 
-def qqHWW_process_selection(channel, era, wo):
+def qqHWW_process_selection(channel, era, wp):
     if era in ["2016", "2017"]:
         qqHWW_weights = HWW_base_process_selection(channel, era, wp).weights
     else:
@@ -798,7 +817,7 @@ def ZHWW_process_selection(channel, era, wp):
 
 
 def ggh_stitching_weight(era):
-    if era == "2016":
+    if era == "2016preVFP" or  era == "2016postVFP":
         weight = (
             "(numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 3.0469376) > 1e-5)+1.0/(9673200 + 19939500 + 19977000)*2.998464*(abs(crossSectionPerEventWeight - 3.0469376) < 1e-5))",
             "ggh_stitching_weight",
@@ -829,7 +848,7 @@ def ggh_stitching_weight(era):
 
 
 def qqh_stitching_weight(era):
-    if era == "2016":
+    if era == "2016preVFP" or  era == "2016postVFP":
         weight = (
             "(numberGeneratedEventsWeight*((abs(crossSectionPerEventWeight - 0.04774)<0.001)*0.04683+"
             "(abs(crossSectionPerEventWeight - 0.052685)<0.001)*0.051607+"
