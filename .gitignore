@@ -153,3 +153,5 @@ docker_stderror
 
 #json
 *.json
+
+validation_database/
