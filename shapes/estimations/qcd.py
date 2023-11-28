@@ -63,7 +63,7 @@ def qcd_estimation(
     variation="Nominal",
     is_embedding=True,
     is_nlo=False,
-    extrapolation_factor=1.0,
+    extrapolation_factor=1.2,
     sub_scale=1.0,
 ):
     logger.debug("Parameters for qcd estimation")
@@ -162,6 +162,16 @@ def qcd_estimation(
                 )
             )
         )
+        hist = rootfile.Get(
+                _name_string.format(
+                    dataset=_dataset_map[proc],
+                    channel=channel,
+                    process="-" + _process_map[proc],
+                    selection="-" + selection if selection != "" else "",
+                    variation="same_sign" if "subtrMC" in variation else variation,
+                    variable=variable,
+                )
+            )
         base_hist.Add(
             rootfile.Get(
                 _name_string.format(
