@@ -270,7 +270,7 @@ def main(args):
         for channel in qcd_inputs:
             for category in qcd_inputs[channel]:
                 logger.info("Do estimation for category %s", category)
-                extrapolation_factor = 1.0
+                extrapolation_factor = 1.25
                 if channel in ["et", "mt"] and args.era == "2016":
                     extrapolation_factor = 1.17
                 elif channel in ["em"]:

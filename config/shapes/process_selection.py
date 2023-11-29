@@ -72,12 +72,14 @@ def MC_base_process_selection(channel, era):
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
         tauidweight = (
-            "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
+            "((gen_match_2==5)*id_wgt_tau_vsJet_Medium_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
         vsele_weight = ("id_wgt_tau_vsEle_VVLoose_2", "vseleweight")
-        if era == "2017":
+        if era == "2016preVFP" or era == "2016postVFP":
+            trgweight = ("((pt_1>23)* trg_wgt_single_mu22)", "trgweight")
+        elif era == "2017":
             trgweight = ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
         else:
             trgweight = (
@@ -137,7 +139,7 @@ def MC_base_process_selection(channel, era):
         lumi_weight(era),
         prefiring_weight(era),
     ]
-    if channel != "mm":
+    if channel != "mm" and channel != "mt":
         MC_base_process_weights.append(("btag_weight", "btagWeight"))
     return Selection(
         name="MC base",
@@ -416,6 +418,26 @@ def ZTT_embedded_process_selection(channel, era):
                     ),
                     (
                         "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
+                        "taubyIsoIdWeight",
+                    ),
+                ]
+            )
+        elif era == "2016preVFP" or era == "2016postVFP":
+            ztt_embedded_weights.extend(
+                [
+                    ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
+                    ("iso_wgt_mu_1", "isoweight"),
+                    ("id_wgt_mu_1", "idweight"),
+                    # (
+                    #     "((pt_1>=23) * trg_wgt_single_mu22)",
+                    #     "trgweight",
+                    # ),
+                    (
+                        "((gen_match_2==5)*id_wgt_tau_vsJet_medium_2 + (gen_match_2!=5))",
+                        "taubyIsoIdWeight",
+                    ),
+                    (
+                        "((gen_match_2==5)*1 + (gen_match_2!=5))",
                         "taubyIsoIdWeight",
                     ),
                 ]

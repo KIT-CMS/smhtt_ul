@@ -197,6 +197,15 @@ common_files_2016postVFP = {
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
         "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
     ],
+    "ggH": [
+        "GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "qqH": [
+        "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_ext1_RunIISummer20UL16NanoAODv9-106X_ext1",
+        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
 }
 common_files_2016preVFP = {
     "DY": [
@@ -661,6 +670,33 @@ files = {
 
                 ],
             },
+            **common_files_2016postVFP
+        ),
+        "mt": dict(
+            {
+                "data": [
+                    "SingleMuon_Run2016F-UL2016",
+                    "SingleMuon_Run2016G-UL2016",
+                    "SingleMuon_Run2016H-UL2016",
+                ],
+                "EMB": [
+                    "TauEmbedding-MuTauFinalState_Run2016F-UL2016",
+		            "TauEmbedding-MuTauFinalState_Run2016G-UL2016",
+                    "TauEmbedding-MuTauFinalState_Run2016H-UL2016",
+
+                ],
+                "W": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+                ],
+                "WNLO": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+
+                ],
+            },
+            
             **common_files_2016postVFP
         ),
     },
