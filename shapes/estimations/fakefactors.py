@@ -19,9 +19,9 @@ def fake_factor_estimation(
         if doTauES:
             procs_to_subtract = [special, "ZL", "TTL", "VVL"]
         else:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL"]
+            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "STL"]
     else:
-        procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
+        procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "STT", "STL"]
     if special == "TauES":
         logger.debug("TauES special selection")
     logger.debug(

@@ -75,20 +75,7 @@ def qcd_estimation(
     logger.debug("extrapolation_factor: %s", extrapolation_factor)
     logger.debug("sub_scale: %s", sub_scale)
     if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
-        if is_nlo:
-            procs_to_subtract = ["EMB", "ZL_NLO", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W_NLO"]
-        if "em" in channel:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
-            if is_nlo:
-                procs_to_subtract = ["EMB", "ZL_NLO", "TTL", "VVL", "W_NLO"]
-        elif channel in ["mm", "ee"]:
-            if is_nlo:
-                procs_to_subtract = ["EMB", "W_NLO"]
-            else:
-                procs_to_subtract = ["EMB", "W"]
-        # elif "et" in channel:
-        #     procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ"]
+        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W", "STL", "STJ"]
     else:
         procs_to_subtract = [
             "ZTT",
@@ -101,31 +88,10 @@ def qcd_estimation(
             "VVL",
             "VVJ",
             "W",
+            "STT", 
+            "STL", 
+            "STJ",
         ]
-        if is_nlo:
-            procs_to_subtract = [
-                "ZTT_NLO",
-                "ZL_NLO",
-                "ZJ_NLO",
-                "TTT",
-                "TTL",
-                "TTJ",
-                "VVT",
-                "VVL",
-                "VVJ",
-                "W_NLO",
-            ]
-        if "em" in channel:
-            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
-            if is_nlo:
-                procs_to_subtract = ["ZTT_NLO", "ZL_NLO", "TTT", "TTL", "VVT", "VVL", "W_NLO"]
-        elif channel in ["mm", "ee"]:
-            if is_nlo:
-                procs_to_subtract = ["ZL_NLO", "W_NLO", "VVL", "TTL"]
-            else:
-                procs_to_subtract = ["ZL", "W", "VVL", "TTL"]
-        # elif "et" in channel:
-        #     procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
 
     logger.debug(
         "Trying to get object {}".format(
@@ -230,8 +196,6 @@ def abcd_estimation(
         variation = "abcd_" + variation
     if is_embedding:
         procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
-        if "em" in channel:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
     else:
         procs_to_subtract = [
             "ZTT",
@@ -245,8 +209,6 @@ def abcd_estimation(
             "VVJ",
             "W",
         ]
-        if "em" in channel:
-            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
 
     # Get the shapes from region B.
     logger.debug(

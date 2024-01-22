@@ -133,7 +133,7 @@ def parse_histograms_for_qcd(inputfile):
             key, "same_sign"
         )
         if channel is not None:
-            if channel in ["et", "mt", "em", "mm", "ee"] or "abcd_same_sign_anti_iso" in variation:
+            if channel in ["et", "mt", "tt", "em", "mm", "ee"] or "abcd_same_sign_anti_iso" in variation:
                 add_input_to_inputdict(
                     qcd_inputs, channel, category, variable, variation, process
                 )
@@ -288,9 +288,12 @@ def main(args):
                                 args.era,
                             )
                             extrapolation_factor = 1.0
+                elif channel in ["tt"]:
+                    extrapolation_factor = 1.0 # 1.37
+
                 for var in qcd_inputs[channel][category]:
                     for variation in qcd_inputs[channel][category][var]:
-                        if channel in ["et", "mt", "em", "mm", "ee"]:
+                        if channel in ["et", "mt", "tt", "em", "mm", "ee"]:
                             for use_emb in [True, False]:
                                 for use_nlo in [False]:
                                     estimated_hist = qcd_estimation(

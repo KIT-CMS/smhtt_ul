@@ -112,6 +112,7 @@ def main(info):
     split_dict = {c: split_value for c in ["et", "mt", "tt"]}
 
     bkg_processes = [
+        # "jetFakesEMB", "VVL", "TTL", "ZL", "EMB", "STL", "ggH125", "qqH125"
         "VVL", "TTL", "ZL", "STL", "jetFakesEMB", "EMB", "ggH125", "qqH125"
     ]
     if not args.fake_factor and args.embedding: 
@@ -216,11 +217,11 @@ def main(info):
             nmssm_Ytautau = rootfile.get(channel, "nmssm_Ytautau",category=cat).Clone()
 
             if nmssm_Ybb.Integral() > 0:
-                nmssm_Ybb_scale = 1.
+                nmssm_Ybb_scale = 10.
             else:
                 nmssm_Ybb_scale = 0.0
             if nmssm_Ytautau.Integral() > 0:
-                nmssm_Ytautau_scale = 1.
+                nmssm_Ytautau_scale = 10.
             else:
                 nmssm_Ytautau_scale = 0.0
 
@@ -229,16 +230,16 @@ def main(info):
                 nmssm_Ytautau.Scale(nmssm_Ytautau_scale)
 
             plot.subplot(i).add_hist(nmssm_Ybb, "nmssm_Ybb")
-            plot.subplot(i).add_hist(nmssm_Ybb, "nmssm_Ybb_top")
+            #plot.subplot(i).add_hist(nmssm_Ybb, "nmssm_Ybb_top")
             plot.subplot(i).add_hist(nmssm_Ytautau, "nmssm_Ytautau")
-            plot.subplot(i).add_hist(nmssm_Ytautau, "nmssm_Ytautau_top")
+            #plot.subplot(i).add_hist(nmssm_Ytautau, "nmssm_Ytautau_top")
 
         plot.subplot(0 if args.linear else 1).setGraphStyle(
             "nmssm_Ybb", "hist", linecolor=styles.color_dict["nmssm_Ybb"], linewidth=3)
-        plot.subplot(0 if args.linear else 1).setGraphStyle("nmssm_Ybb_top", "hist", linecolor=0)
+        #plot.subplot(0 if args.linear else 1).setGraphStyle("nmssm_Ybb_top", "hist", linecolor=0)
         plot.subplot(0 if args.linear else 1).setGraphStyle(
             "nmssm_Ytautau", "hist", linecolor=styles.color_dict["nmssm_Ytautau"], linewidth=3)
-        plot.subplot(0 if args.linear else 1).setGraphStyle("nmssm_Ytautau_top", "hist", linecolor=0)
+        #plot.subplot(0 if args.linear else 1).setGraphStyle("nmssm_Ytautau_top", "hist", linecolor=0)
 
 
         # assemble ratio
@@ -247,26 +248,26 @@ def main(info):
         bkg_nmssm_Ybb.Add(plot.subplot(2).get_hist("total_bkg"))
         bkg_nmssm_Ytautau.Add(plot.subplot(2).get_hist("total_bkg"))
         plot.subplot(2).add_hist(bkg_nmssm_Ybb, "bkg_nmssm_Ybb")
-        plot.subplot(2).add_hist(bkg_nmssm_Ybb, "bkg_nmssm_Ybb_top")
+        #plot.subplot(2).add_hist(bkg_nmssm_Ybb, "bkg_nmssm_Ybb_top")
         plot.subplot(2).add_hist(bkg_nmssm_Ytautau, "bkg_nmssm_Ytautau")
-        plot.subplot(2).add_hist(bkg_nmssm_Ytautau, "bkg_nmssm_Ytautau_top")
+        #plot.subplot(2).add_hist(bkg_nmssm_Ytautau, "bkg_nmssm_Ytautau_top")
         plot.subplot(2).setGraphStyle(
             "bkg_nmssm_Ybb",
             "hist",
             linecolor=styles.color_dict["nmssm_Ybb"],
             linewidth=3)
-        plot.subplot(2).setGraphStyle("bkg_nmssm_Ybb_top", "hist", linecolor=0)
+        #plot.subplot(2).setGraphStyle("bkg_nmssm_Ybb_top", "hist", linecolor=0)
         plot.subplot(2).setGraphStyle(
             "bkg_nmssm_Ytautau",
             "hist",
             linecolor=styles.color_dict["nmssm_Ytautau"],
             linewidth=3)
-        plot.subplot(2).setGraphStyle("bkg_nmssm_Ytautau_top", "hist", linecolor=0)
+        #plot.subplot(2).setGraphStyle("bkg_nmssm_Ytautau_top", "hist", linecolor=0)
 
     if args.add_signals:
         to_draw = [
-            "total_bkg", "bkg_nmssm_Ybb", "bkg_nmssm_Ybb_top", "bkg_nmssm_Ytautau",
-            "bkg_nmssm_Ytautau_top", "data_obs"
+            "total_bkg", "bkg_nmssm_Ybb", "bkg_nmssm_Ytautau",
+            "data_obs"
         ]
     else:
         to_draw = [
@@ -288,7 +289,7 @@ def main(info):
         max(1.6 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
             split_dict[channel] * 2))
 
-    log_quantities = ["bpair_btag_value_1", "bpair_btag_value_2", "fj_particleNet_XbbvsQCD_1"]
+    log_quantities = ["bpair_btag_value_1", "bpair_btag_value_2", "fj_particleNet_XbbvsQCD_1", "fj_Xbb_particleNet_XbbvsQCD"]
     if variable in log_quantities:
         plot.subplot(0).setLogY()
         plot.subplot(0).setYlims(
@@ -322,7 +323,8 @@ def main(info):
     else:
         plot.subplot(0).setYlabel("N_{events}")
 
-    plot.subplot(2).setYlabel("")
+    plot.subplot(2).setYlabel("data/bkg ratio")
+    plot.subplot(2).scaleYTitleSize(0.7)
     plot.subplot(2).setGrid()
     plot.scaleYLabelSize(0.8)
     plot.scaleYTitleOffset(1.1)
@@ -333,7 +335,7 @@ def main(info):
 
     # draw subplots. Argument contains names of objects to be drawn in corresponding order.
     if args.add_signals:
-        procs_to_draw = ["stack", "total_bkg", "nmssm_Ybb", "nmssm_Ybb_top", "nmssm_Ytautau", "nmssm_Ytautau_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+        procs_to_draw = ["stack", "total_bkg", "nmssm_Ybb", "nmssm_Ytautau", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
     else:
         procs_to_draw = ["stack", "total_bkg", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
     if args.draw_jet_fake_variation is not None:
@@ -342,7 +344,7 @@ def main(info):
     if args.linear != True:
         if args.add_signals:
             plot.subplot(1).Draw([
-                "stack", "total_bkg", "nmssm_Ybb", "nmssm_Ybb_top", "nmssm_Ytautau", "nmssm_Ytautau_top",
+                "stack", "total_bkg", "nmssm_Ybb", "nmssm_Ytautau",
                 "data_obs"
             ])
         else:
@@ -351,8 +353,8 @@ def main(info):
             ])
     if args.draw_jet_fake_variation is None:
         plot.subplot(2).Draw([
-            "total_bkg", "bkg_nmssm_Ybb", "bkg_nmssm_Ybb_top", "bkg_nmssm_Ytautau",
-            "bkg_nmssm_Ytautau_top", "data_obs"
+            "total_bkg", "bkg_nmssm_Ybb", "bkg_nmssm_Ytautau",
+            "data_obs"
         ])
     else:
         plot.subplot(2).Draw([
@@ -360,8 +362,8 @@ def main(info):
         ])
 
     # create legends
-    suffix = ["", "_top"]
-    for i in range(2):
+    suffix = [""]
+    for i in range(1):
 
         plot.add_legend(width=0.6, height=0.15)
         for process in legend_bkg_processes:
@@ -375,26 +377,26 @@ def main(info):
         plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(3)
     plot.legend(0).Draw()
-    plot.legend(1).setAlpha(0.0)
-    plot.legend(1).Draw()
+    # plot.legend(1).setAlpha(0.0)
+    # plot.legend(1).Draw()
 
-    for i in range(2):
-        plot.add_legend(
-            reference_subplot=2, pos=1, width=0.6, height=0.03)
-        plot.legend(i + 2).add_entry(0, "data_obs", "Observed", 'PE2L')
-        if args.draw_jet_fake_variation is None and args.add_signals:
-            plot.legend(i + 2).add_entry(0 if args.linear else 1, "nmssm_Ybb%s" % suffix[i],
-                                         "Y(bb)H(#tau#tau)+bkg.", 'l')
-            plot.legend(i + 2).add_entry(0 if args.linear else 1, "nmssm_Ytautau%s" % suffix[i],
-                                         "Y(#tau#tau)H(bb)+bkg.", 'l')
-        plot.legend(i + 2).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
-        plot.legend(i + 2).setNColumns(4)
-    plot.legend(2).Draw()
-    plot.legend(3).setAlpha(0.0)
-    plot.legend(3).Draw()
+    # for i in range(2):
+    #     plot.add_legend(
+    #         reference_subplot=2, pos=1, width=0.6, height=0.03)
+    #     plot.legend(i + 2).add_entry(0, "data_obs", "Observed", 'PE2L')
+    #     if args.draw_jet_fake_variation is None and args.add_signals:
+    #         plot.legend(i + 2).add_entry(0 if args.linear else 1, "nmssm_Ybb%s" % suffix[i],
+    #                                      "Y(bb)H(#tau#tau)+bkg.", 'l')
+    #         plot.legend(i + 2).add_entry(0 if args.linear else 1, "nmssm_Ytautau%s" % suffix[i],
+    #                                      "Y(#tau#tau)H(bb)+bkg.", 'l')
+    #     plot.legend(i + 2).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
+    #     plot.legend(i + 2).setNColumns(4)
+    # plot.legend(2).Draw()
+    # plot.legend(3).setAlpha(0.0)
+    # plot.legend(3).Draw()
 
     # draw additional labels
-    plot.DrawCMS(thesisstyle=True, preliminary=False)
+    plot.DrawCMS(thesisstyle=True, preliminary=True)
     if "2016" in args.era:
         plot.DrawLumi("35.9 fb^{-1} (2016, 13 TeV)")
     elif "2017" in args.era:
@@ -428,13 +430,13 @@ def main(info):
     if args.draw_jet_fake_variation is not None:
         postfix = postfix + "_" + args.draw_jet_fake_variation
 
-    if not os.path.exists("%s_plots_%s"%(args.era,postfix)):
-        os.mkdir("%s_plots_%s"%(args.era,postfix))
-    if not os.path.exists("%s_plots_%s/%s"%(args.era,postfix,channel)):
-        os.mkdir("%s_plots_%s/%s"%(args.era,postfix,channel))
+    if not os.path.exists("%s/%s_plots_%s"%(args.input.replace(".root", ""),args.era,postfix)):
+        os.mkdir("%s/%s_plots_%s"%(args.input.replace(".root", ""),args.era,postfix))
+    if not os.path.exists("%s/%s_plots_%s/%s"%(args.input.replace(".root", ""),args.era,postfix,channel)):
+        os.mkdir("%s/%s_plots_%s/%s"%(args.input.replace(".root", ""),args.era,postfix,channel))
     print("Trying to save the created plot")
-    plot.save("%s_plots_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, category, variable, "pdf"))
-    plot.save("%s_plots_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, category, variable, "png"))
+    plot.save("%s/%s_plots_%s/%s/%s_%s_%s_%s.%s" % (args.input.replace(".root", ""), args.era, postfix, channel, args.era, channel, category, variable, "pdf"))
+    plot.save("%s/%s_plots_%s/%s/%s_%s_%s_%s.%s" % (args.input.replace(".root", ""), args.era, postfix, channel, args.era, channel, category, variable, "png"))
 
 
 if __name__ == "__main__":
@@ -453,11 +455,11 @@ if __name__ == "__main__":
     if args.embedding and args.fake_factor:
         postfix = "emb_ff"
 
-    if not os.path.exists("%s_plots_%s"%(args.era,postfix)):
-        os.mkdir("%s_plots_%s"%(args.era,postfix))
+    if not os.path.exists("%s/%s_plots_%s"%(args.input.replace(".root", ""),args.era,postfix)):
+        os.mkdir("%s/%s_plots_%s"%(args.input.replace(".root", ""),args.era,postfix))
     for ch in channels:
-        if not os.path.exists("%s_plots_%s/%s"%(args.era,postfix,ch)):
-            os.mkdir("%s_plots_%s/%s"%(args.era,postfix,ch))
+        if not os.path.exists("%s/%s_plots_%s/%s"%(args.input.replace(".root", ""),args.era,postfix,ch)):
+            os.mkdir("%s/%s_plots_%s/%s"%(args.input.replace(".root", ""),args.era,postfix,ch))
         for v in variables:
             infolist.append({"args" : args, "channel" : ch, "variable" : v})
     pool = Pool(1)

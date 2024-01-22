@@ -75,13 +75,22 @@ anti_iso_tt = ReplaceCutAndAddWeight(
     "anti_iso",
     "tau_iso",
     Cut(
-        "((id_tau_vsJet_Medium_2>0.5 && id_tau_vsJet_Medium_1<0.5 && id_tau_vsJet_VVVLoose_1>0.5) || (id_tau_vsJet_Madium_1>0.5 && id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5))",
+        "((id_tau_vsJet_Medium_2>0.5 && id_tau_vsJet_Medium_1<0.5 && id_tau_vsJet_VVVLoose_1>0.5) || (id_tau_vsJet_Medium_1>0.5 && id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5))",
         "tau_anti_iso"
     ),
     # Weight("1.0", "fake_factor"),
     Weight("0.5 * fake_factor_1 * (id_tau_vsJet_Medium_1 < 0.5) + 0.5 * fake_factor_2 * (id_tau_vsJet_Medium_2 < 0.5)", "fake_factor"),
 )
-
+boosted_anti_iso_tt = ReplaceCutAndAddWeight(
+    "anti_iso",
+    "tau_iso",
+    Cut(
+        "((id_boostedtau_iso_Loose_2>0.5 && id_boostedtau_iso_Loose_1<0.5) || (id_boostedtau_iso_Loose_1>0.5 && id_boostedtau_iso_Loose_2<0.5))",
+        "tau_anti_iso"
+    ),
+    # Weight("1.0", "fake_factor"),
+    Weight("0.5 * fake_factor_boosted_1 * (id_boostedtau_iso_Loose_1<0.5) + 0.5 * fake_factor_boosted_2 * (id_boostedtau_iso_Loose_2<0.5)", "fake_factor"),
+)
 
 wfakes_tt = ReplaceCut(
     "wfakes", "ff_veto", Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut")

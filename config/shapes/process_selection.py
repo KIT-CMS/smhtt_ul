@@ -35,9 +35,9 @@ def lumi_weight(era):
 
 
 
-def MC_base_process_selection(channel, era, boosted=False):
+def MC_base_process_selection(channel, era, boosted_tau=False):
     if channel == "et":
-        if not boosted:
+        if not boosted_tau:
             isoweight = ("iso_wgt_ele_1", "isoweight")
             idweight = ("id_wgt_ele_1", "idweight")
             tauidweight = (
@@ -50,7 +50,7 @@ def MC_base_process_selection(channel, era, boosted=False):
                 trgweight = ("((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)", "trgweight")
             elif era == "2018":
                 trgweight = ("trg_wgt_single_ele32orele35", "trgweight")
-        elif boosted:
+        elif boosted_tau:
             isoweight = ("iso_wgt_ele_boosted_1", "isoweight")
             idweight = ("id_wgt_ele_boosted_1", "idweight")
             tauidweight = (
@@ -61,7 +61,7 @@ def MC_base_process_selection(channel, era, boosted=False):
             vsele_weight = ("((boosted_gen_match_2==5)*id_wgt_tau_antiEle_Loose_2 + (boosted_gen_match_2!=5))", "vseleweight")
             trgweight = None
     elif channel == "mt":
-        if not boosted:
+        if not boosted_tau:
             isoweight = ("iso_wgt_mu_1", "isoweight")
             idweight = ("id_wgt_mu_1", "idweight")
             tauidweight = (
@@ -74,18 +74,18 @@ def MC_base_process_selection(channel, era, boosted=False):
                 trgweight = ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
             elif era == "2018":
                 trgweight = ("trg_wgt_single_mu24ormu27", "trgweight")
-        elif boosted:
+        elif boosted_tau:
             isoweight = ("iso_wgt_mu_boosted_1", "isoweight")
             idweight = ("id_wgt_mu_boosted_1", "idweight")
             tauidweight = (
-                "((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_VLoose_2 + (boosted_gen_match_2!=5))",
+                "((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_Loose_2 + (boosted_gen_match_2!=5))",
                 "taubyIsoIdWeight",
             )
             vsmu_weight = ("((boosted_gen_match_2==5)*id_wgt_tau_antiMu_Loose_2 + (boosted_gen_match_2!=5))", "vsmuweight")
             vsele_weight = ("((boosted_gen_match_2==5)*id_wgt_tau_antiEle_VLoose_2 + (boosted_gen_match_2!=5))", "vseleweight")
             trgweight = None
     elif channel == "tt":
-        if not boosted:
+        if not boosted_tau:
             isoweight = None
             idweight = None
             tauidweight = (
@@ -101,11 +101,11 @@ def MC_base_process_selection(channel, era, boosted=False):
                 "vseleweight",
             )
             trgweight = None
-        elif boosted:
+        elif boosted_tau:
             isoweight = None
             idweight = None
             tauidweight = (
-                "((boosted_gen_match_1==5)*id_wgt_boostedtau_iso_VLoose_1 + (boosted_gen_match_1!=5)) * ((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_VLoose_2 + (boosted_gen_match_2!=5))",
+                "((boosted_gen_match_1==5)*id_wgt_boostedtau_iso_Loose_1 + (boosted_gen_match_1!=5)) * ((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_Loose_2 + (boosted_gen_match_2!=5))",
                 "taubyIsoIdWeight",
             )
             vsmu_weight = None # (
@@ -121,7 +121,6 @@ def MC_base_process_selection(channel, era, boosted=False):
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
         ("puweight", "puweight"),
-        #("btag_weight", "btagWeight"),
         isoweight,
         idweight,
         tauidweight,
@@ -225,11 +224,11 @@ def W_stitching_weight(era):
         )
         # xsec_NNLO [pb] = 61526.7, N_inclusive = 71026861, xsec_NNLO/N_inclusive = 0.0008662455 [pb] weights: [1.0, 0.1741017559343336, 0.13621263074538312, 0.08156674151214884, 0.06721295702670023]
     else:
-        raise ValueError("DY stitching weight not defined for era {}".format(era))
+        raise ValueError("W stitching weight not defined for era {}".format(era))
     return weight
 
 
-def W_process_selection(channel, era):
+def W_process_selection(channel, era, boosted_tau=False):
     W_process_weights = MC_base_process_selection(channel, era).weights
     # W_process_weights.extend(
     #     [
@@ -238,6 +237,23 @@ def W_process_selection(channel, era):
     #     ]
     # )
     W_process_weights.append(W_stitching_weight(era)) 
+    btag_weight = ""
+    if not boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.995256*btag_weight", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("0.995653*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("0.996317*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.988039*btag_weight_boosted", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    W_process_weights.append(btag_weight)
+
     return Selection(name="W", weights=W_process_weights)
 
 
@@ -328,25 +344,40 @@ List of other processes meant to be put on top of base processes:
 #     return Selection(name="DY_nlo", weights=DY_nlo_process_weights)
 
 
-def ZTT_process_selection(channel, boosted=False):
-    tt_cut = __get_ZTT_cut(channel, boosted=False)
-    return Selection(name="ZTT", cuts=[(tt_cut, "ztt_cut")])
+def ZTT_process_selection(channel, boosted_tau=False):
+    tt_cut = __get_ZTT_cut(channel, boosted_tau=False)
+    btag_weight = ""
+    if not boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.995725*btag_weight", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("0.996964*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("0.993891*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.946104*btag_weight_boosted", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(name="ZTT", cuts=[(tt_cut, "ztt_cut")], weights=[btag_weight])
 
 
-def ZTT_nlo_process_selection(channel):
-    tt_cut = __get_ZTT_cut(channel, boosted=False)
+def ZTT_nlo_process_selection(channel, boosted_tau=False):
+    tt_cut = __get_ZTT_cut(channel, boosted_tau=False)
     return Selection(name="ZTT_nlo", cuts=[(tt_cut, "ztt_cut")])
 
 
-def __get_ZTT_cut(channel, boosted=False):
-    if not boosted:
+def __get_ZTT_cut(channel, boosted_tau=False):
+    if not boosted_tau:
         if "mt" in channel:
             return "gen_match_1==4 && gen_match_2==5"
         elif "et" in channel:
             return "gen_match_1==3 && gen_match_2==5"
         elif "tt" in channel:
             return "gen_match_1==5 && gen_match_2==5"
-    elif boosted:
+    elif boosted_tau:
         if "mt" in channel:
             return "boosted_gen_match_1==4 && boosted_gen_match_2==5"
         elif "et" in channel:
@@ -354,7 +385,7 @@ def __get_ZTT_cut(channel, boosted=False):
         elif "tt" in channel:
             return "boosted_gen_match_1==5 && boosted_gen_match_2==5"
 
-def ZTT_embedded_process_selection(channel, era, boosted=False):
+def ZTT_embedded_process_selection(channel, era, boosted_tau=False):
     ztt_embedded_weights = [
         ("emb_genweight", "emb_genweight"),
         ("emb_idsel_wgt_1*emb_idsel_wgt_2*emb_triggersel_wgt", "emb_selection_weight"),
@@ -371,7 +402,7 @@ def ZTT_embedded_process_selection(channel, era, boosted=False):
                 ]
             )
         elif era == "2018":
-            if not boosted:
+            if not boosted_tau:
                 ztt_embedded_weights.extend(
                     [
                         ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
@@ -381,13 +412,13 @@ def ZTT_embedded_process_selection(channel, era, boosted=False):
                         ("((gen_match_2==5)*id_wgt_tau_vsJet_Medium_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
-            elif boosted:
+            elif boosted_tau:
                 ztt_embedded_weights.extend(
                     [
                         ("boosted_gen_match_1==4 && boosted_gen_match_2==5", "emb_veto"),
                         ("iso_wgt_mu_boosted_1", "isoweight"),
                         ("id_wgt_mu_boosted_1", "idweight"),
-                        ("((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_Loose_2 + (boosted_gen_match_2!=5))", "taubyIsoIdWeight")
+                        # ("((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_Loose_2 + (boosted_gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
         else:
@@ -405,7 +436,7 @@ def ZTT_embedded_process_selection(channel, era, boosted=False):
                 ]
             )
         elif era == "2018":
-            if not boosted:
+            if not boosted_tau:
                 ztt_embedded_weights.extend(
                     [
                         ("gen_match_1==3 && gen_match_2==5", "emb_veto"),
@@ -415,19 +446,19 @@ def ZTT_embedded_process_selection(channel, era, boosted=False):
                         ("((gen_match_2==5)*id_wgt_tau_vsJet_Medium_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
-            elif boosted:
+            elif boosted_tau:
                 ztt_embedded_weights.extend(
                     [
                         ("boosted_gen_match_1==3 && boosted_gen_match_2==5", "emb_veto"),
                         ("iso_wgt_ele_boosted_1", "isoweight"),
                         ("id_wgt_ele_boosted_1", "idweight"),
-                        ("((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_Loose_2 + (boosted_gen_match_2!=5))", "taubyIsoIdWeight")
+                        # ("((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_Loose_2 + (boosted_gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
         else:
             raise ValueError(f"Embedded process selection for given era {era} not yet implemented")
     elif "tt" in channel:
-        if not boosted:
+        if not boosted_tau:
             ztt_embedded_weights.extend(
                 [
                     ("gen_match_1==5 && gen_match_2==5", "emb_veto"),
@@ -438,25 +469,25 @@ def ZTT_embedded_process_selection(channel, era, boosted=False):
                     ), 
                 ]
             )
-        elif boosted:
+        elif boosted_tau:
             ztt_embedded_weights.extend(
                 [
                     ("boosted_gen_match_1==5 && boosted_gen_match_2==5", "emb_veto"),
-                    (
-                        "((boosted_gen_match_1==5)*id_wgt_boostedtau_iso_Loose_1 + (boosted_gen_match_1!=5)) * ((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_Loose_2 + (boosted_gen_match_2!=5))",
-                        "taubyIsoIdWeight",
-                    ), 
+                    # (
+                    #     "((boosted_gen_match_1==5)*id_wgt_boostedtau_iso_Loose_1 + (boosted_gen_match_1!=5)) * ((boosted_gen_match_2==5)*id_wgt_boostedtau_iso_Loose_2 + (boosted_gen_match_2!=5))",
+                    #     "taubyIsoIdWeight",
+                    # ), 
                 ]
             )
 
-    if not boosted:
+    if not boosted_tau:
         ztt_embedded_cuts = [
             (
                 "((gen_match_1>2 && gen_match_1<6) && (gen_match_2>2 && gen_match_2<6))",
                 "dy_genuine_tau",
             )
         ]
-    elif boosted:
+    elif boosted_tau:
         ztt_embedded_cuts = [
             (
                 "((boosted_gen_match_1>2 && boosted_gen_match_1<6) && (boosted_gen_match_2>2 && boosted_gen_match_2<6))",
@@ -468,26 +499,42 @@ def ZTT_embedded_process_selection(channel, era, boosted=False):
     )
 
 
-def ZL_process_selection(channel, boosted=False):
-    veto = __get_ZL_cut(channel, boosted=False)
+def ZL_process_selection(channel, boosted_tau=False):
+    veto = __get_ZL_cut(channel, boosted_tau=False)
+    btag_weight = ""
+    if not boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.996615*btag_weight", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("0.994832*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("0.996646*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.962257*btag_weight_boosted", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
     return Selection(
         name="ZL",
         cuts=[("{}".format(veto[0]), "dy_emb_veto"), ("{}".format(veto[1]), "ff_veto")],
+        weights=[btag_weight],
     )
 
 
-def ZL_nlo_process_selection(channel, boosted=False):
-    veto = __get_ZL_cut(channel, boosted=False)
+def ZL_nlo_process_selection(channel, boosted_tau=False):
+    veto = __get_ZL_cut(channel, boosted_tau=False)
     return Selection(
         name="ZL_nlo",
         cuts=[("{}".format(veto[0]), "dy_emb_veto"), ("{}".format(veto[1]), "ff_veto")],
     )
 
 
-def __get_ZL_cut(channel, boosted=False):
+def __get_ZL_cut(channel, boosted_tau=False):
     emb_veto = ""
     ff_veto = ""
-    if not boosted:
+    if not boosted_tau:
         if "mt" in channel:
             emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
             ff_veto = "!(gen_match_2 == 6)"
@@ -497,7 +544,7 @@ def __get_ZL_cut(channel, boosted=False):
         elif "tt" in channel:
             emb_veto = "!(gen_match_1==5 && gen_match_2==5)"
             ff_veto = "!(gen_match_1 == 6 || gen_match_2 == 6)"
-    elif boosted:
+    elif boosted_tau:
         if "mt" in channel:
             emb_veto = "!(boosted_gen_match_1==4 && boosted_gen_match_2==5)"
             ff_veto = "!(boosted_gen_match_2 == 6)"
@@ -510,25 +557,40 @@ def __get_ZL_cut(channel, boosted=False):
     return (emb_veto, ff_veto)
 
 
-def ZJ_process_selection(channel, boosted=False):
-    veto = __get_ZJ_cut(channel, boosted=False)
-    return Selection(name="ZJ", cuts=[(__get_ZJ_cut(channel), "dy_fakes")])
+def ZJ_process_selection(channel, boosted_tau=False):
+    veto = __get_ZJ_cut(channel, boosted_tau=False)
+    btag_weight = ""
+    if not boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.971493*btag_weight", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("0.988512*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("0.964894*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.928060*btag_weight_boosted", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(name="ZJ", cuts=[(__get_ZJ_cut(channel), "dy_fakes")], weights=[btag_weight])
 
 
-def ZJ_nlo_process_selection(channel, boosted=False):
-    veto = __get_ZJ_cut(channel, boosted=False)
+def ZJ_nlo_process_selection(channel, boosted_tau=False):
+    veto = __get_ZJ_cut(channel, boosted_tau=False)
     return Selection(name="ZJ_nlo", cuts=[(__get_ZJ_cut(channel), "dy_fakes")])
 
 
-def __get_ZJ_cut(channel, boosted=False):
-    if not boosted:
+def __get_ZJ_cut(channel, boosted_tau=False):
+    if not boosted_tau:
         if "mt" in channel or "et" in channel:
             return "gen_match_2 == 6"
         elif "tt" in channel:
             return "(gen_match_1 == 6 || gen_match_2 == 6)"
         else:
             return ""
-    elif boosted:
+    elif boosted_tau:
         if "mt" in channel or "et" in channel:
             return "boosted_gen_match_2 == 6"
         elif "tt" in channel:
@@ -536,135 +598,279 @@ def __get_ZJ_cut(channel, boosted=False):
         else:
             return ""
 
-def TTT_process_selection(channel, boosted=False):
+def TTT_process_selection(channel, boosted_tau=False):
     tt_cut = ""
-    if not boosted:
+    btag_weight = ""
+    if not boosted_tau:
         if "mt" in channel:
             tt_cut = "gen_match_1==4 && gen_match_2==5"
+            btag_weight = ("1.003354*btag_weight", "btagging_weight")
         elif "et" in channel:
             tt_cut = "gen_match_1==3 && gen_match_2==5"
+            btag_weight = ("1.001670*btag_weight", "btagging_weight")
         elif "tt" in channel:
             tt_cut = "gen_match_1==5 && gen_match_2==5"
-    elif boosted:
+            btag_weight = ("1.004327*btag_weight", "btagging_weight")
+    elif boosted_tau:
         if "mt" in channel:
             tt_cut = "boosted_gen_match_1==4 && boosted_gen_match_2==5"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
         elif "et" in channel:
             tt_cut = "boosted_gen_match_1==3 && boosted_gen_match_2==5"
+            btag_weight = ("0.964945*btag_weight_boosted", "btagging_weight")
         elif "tt" in channel:
             tt_cut = "boosted_gen_match_1==5 && boosted_gen_match_2==5"
-    return Selection(name="TTT", cuts=[(tt_cut, "ttt_cut")])
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(name="TTT", cuts=[(tt_cut, "ttt_cut")], weights=[btag_weight])
 
 
-def TTL_process_selection(channel, boosted=False):
+def TTL_process_selection(channel, boosted_tau=False):
     emb_veto = ""
     ff_veto = ""
-    if not boosted:
+    btag_weight = ""
+    if not boosted_tau:
         if "mt" in channel:
             emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
             ff_veto = "!(gen_match_2 == 6)"
+            btag_weight = ("1.003343*btag_weight", "btagging_weight")
         elif "et" in channel:
             emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
             ff_veto = "!(gen_match_2 == 6)"
+            btag_weight = ("1.002875*btag_weight", "btagging_weight")
         elif "tt" in channel:
             emb_veto = "!(gen_match_1==5 && gen_match_2==5)"
             ff_veto = "!(gen_match_1 == 6 || gen_match_2 == 6)"
-    elif boosted:
+            btag_weight = ("1.006854*btag_weight", "btagging_weight")
+    elif boosted_tau:
         if "mt" in channel:
             emb_veto = "!(boosted_gen_match_1==4 && boosted_gen_match_2==5)"
             ff_veto = "!(boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
         elif "et" in channel:
             emb_veto = "!(boosted_gen_match_1==3 && boosted_gen_match_2==5)"
             ff_veto = "!(boosted_gen_match_2 == 6)"
+            btag_weight = ("0.985751*btag_weight_boosted", "btagging_weight")
         elif "tt" in channel:
             emb_veto = "!(boosted_gen_match_1==5 && boosted_gen_match_2==5)"
             ff_veto = "!(boosted_gen_match_1 == 6 || boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
     return Selection(
         name="TTL",
         cuts=[
             ("{}".format(emb_veto), "tt_emb_veto"),
             ("{}".format(ff_veto), "ff_veto"),
         ],
+        weights=[btag_weight],
     )
 
 
-def TTJ_process_selection(channel, boosted=False):
+def TTJ_process_selection(channel, boosted_tau=False):
     ct = ""
-    if not boosted:
-        if "mt" in channel or "et" in channel:
+    btag_weight = ""
+    if not boosted_tau:
+        if "mt" in channel:
             ct = "(gen_match_2 == 6)"
+            btag_weight = ("0.996539*btag_weight", "btagging_weight")
+        elif "et" in channel:
+            ct = "(gen_match_2 == 6)"
+            btag_weight = ("0.997063*btag_weight", "btagging_weight")
         elif "tt" in channel:
             ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
-    elif boosted:
-        if "mt" in channel or "et" in channel:
+            btag_weight = ("0.999434*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "mt" in channel:
             ct = "(boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "et" in channel:
+            ct = "(boosted_gen_match_2 == 6)"
+            btag_weight = ("0.981112*btag_weight_boosted", "btagging_weight")
         elif "tt" in channel:
             ct = "(boosted_gen_match_1 == 6 || boosted_gen_match_2 == 6)"
-    return Selection(name="TTJ", cuts=[(ct, "tt_fakes")])
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(name="TTJ", cuts=[(ct, "tt_fakes")], weights=[btag_weight])
 
 
-def VVT_process_selection(channel, boosted=False):
+def STT_process_selection(channel, boosted_tau=False):
     tt_cut = ""
-    if not boosted:
+    btag_weight = ""
+    if not boosted_tau:
         if "mt" in channel:
             tt_cut = "gen_match_1==4 && gen_match_2==5"
+            btag_weight = ("1.002667*btag_weight", "btagging_weight")
         elif "et" in channel:
             tt_cut = "gen_match_1==3 && gen_match_2==5"
+            btag_weight = ("0.996035*btag_weight", "btagging_weight")
         elif "tt" in channel:
             tt_cut = "gen_match_1==5 && gen_match_2==5"
-    if boosted:
+            btag_weight = ("0.999741*btag_weight", "btagging_weight")
+    elif boosted_tau:
         if "mt" in channel:
             tt_cut = "boosted_gen_match_1==4 && boosted_gen_match_2==5"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
         elif "et" in channel:
             tt_cut = "boosted_gen_match_1==3 && boosted_gen_match_2==5"
+            btag_weight = ("1.111998*btag_weight_boosted", "btagging_weight")
         elif "tt" in channel:
             tt_cut = "boosted_gen_match_1==5 && boosted_gen_match_2==5"
-    return Selection(name="VVT", cuts=[(tt_cut, "vvt_cut")])
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(name="STT", cuts=[(tt_cut, "stt_cut")], weights=[btag_weight])
 
 
-def VVJ_process_selection(channel, boosted=False):
-    ct = ""
-    if not boosted:
-        if "mt" in channel or "et" in channel:
-            ct = "(gen_match_2 == 6)"
-        elif "tt" in channel:
-            ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
-    elif boosted:
-        if "mt" in channel or "et" in channel:
-            ct = "(boosted_gen_match_2 == 6)"
-        elif "tt" in channel:
-            ct = "(boosted_gen_match_1 == 6 || boosted_gen_match_2 == 6)"
-    return Selection(name="VVJ", cuts=[(ct, "vv_fakes")])
-
-
-def VVL_process_selection(channel, boosted=False):
+def STL_process_selection(channel, boosted_tau=False):
     emb_veto = ""
     ff_veto = ""
-    if not boosted:
+    btag_weight = ""
+    if not boosted_tau:
         if "mt" in channel:
             emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
             ff_veto = "!(gen_match_2 == 6)"
+            btag_weight = ("1.002659*btag_weight", "btagging_weight")
         elif "et" in channel:
             emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
             ff_veto = "!(gen_match_2 == 6)"
+            btag_weight = ("1.002656*btag_weight", "btagging_weight")
         elif "tt" in channel:
             emb_veto = "!(gen_match_1==5 && gen_match_2==5)"
             ff_veto = "!(gen_match_1 == 6 || gen_match_2 == 6)"
-    elif boosted:
+            btag_weight = ("1.018794*btag_weight", "btagging_weight")
+    elif boosted_tau:
         if "mt" in channel:
             emb_veto = "!(boosted_gen_match_1==4 && boosted_gen_match_2==5)"
             ff_veto = "!(boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
         elif "et" in channel:
             emb_veto = "!(boosted_gen_match_1==3 && boosted_gen_match_2==5)"
             ff_veto = "!(boosted_gen_match_2 == 6)"
+            btag_weight = ("0.995524*btag_weight_boosted", "btagging_weight")
         elif "tt" in channel:
             emb_veto = "!(boosted_gen_match_1==5 && boosted_gen_match_2==5)"
             ff_veto = "!(boosted_gen_match_1 == 6 || boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(
+        name="STL",
+        cuts=[
+            ("{}".format(emb_veto), "st_emb_veto"),
+            ("{}".format(ff_veto), "ff_veto"),
+        ],
+        weights=[btag_weight],
+    )
+
+
+def STJ_process_selection(channel, boosted_tau=False):
+    ct = ""
+    btag_weight = ""
+    if not boosted_tau:
+        if "mt" in channel:
+            ct = "(gen_match_2 == 6)"
+            btag_weight = ("1.003108*btag_weight", "btagging_weight")
+        elif "et" in channel:
+            ct = "(gen_match_2 == 6)"
+            btag_weight = ("1.000190*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
+            btag_weight = ("1.004701*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "mt" in channel:
+            ct = "(boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "et" in channel:
+            ct = "(boosted_gen_match_2 == 6)"
+            btag_weight = ("0.980138*btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            ct = "(boosted_gen_match_1 == 6 || boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(name="STJ", cuts=[(ct, "st_fakes")], weights=[btag_weight])
+
+
+def VVT_process_selection(channel, boosted_tau=False):
+    tt_cut = ""
+    btag_weight = ""
+    if not boosted_tau:
+        if "mt" in channel:
+            tt_cut = "gen_match_1==4 && gen_match_2==5"
+            btag_weight = ("0.988705*btag_weight", "btagging_weight")
+        elif "et" in channel:
+            tt_cut = "gen_match_1==3 && gen_match_2==5"
+            btag_weight = ("0.989048*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            tt_cut = "gen_match_1==5 && gen_match_2==5"
+            btag_weight = ("0.983496*btag_weight", "btagging_weight")
+    if boosted_tau:
+        if "mt" in channel:
+            tt_cut = "boosted_gen_match_1==4 && boosted_gen_match_2==5"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "et" in channel:
+            tt_cut = "boosted_gen_match_1==3 && boosted_gen_match_2==5"
+            btag_weight = ("0.937946*btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            tt_cut = "boosted_gen_match_1==5 && boosted_gen_match_2==5"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(name="VVT", cuts=[(tt_cut, "vvt_cut")], weights=[btag_weight])
+
+
+def VVJ_process_selection(channel, boosted_tau=False):
+    ct = ""
+    btag_weight = ""
+    if not boosted_tau:
+        if "mt" in channel:
+            ct = "(gen_match_2 == 6)"
+            btag_weight = ("0.998744*btag_weight", "btagging_weight")
+        elif "et" in channel:
+            ct = "(gen_match_2 == 6)"
+            btag_weight = ("0.994748*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
+            btag_weight = ("0.987639*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "mt" in channel:
+            ct = "(boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "et" in channel:
+            ct = "(boosted_gen_match_2 == 6)"
+            btag_weight = ("0.940127*btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            ct = "(boosted_gen_match_1 == 6 || boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    return Selection(name="VVJ", cuts=[(ct, "vv_fakes")], weights=[btag_weight])
+
+
+def VVL_process_selection(channel, boosted_tau=False):
+    emb_veto = ""
+    ff_veto = ""
+    btag_weight = ""
+    if not boosted_tau:
+        if "mt" in channel:
+            emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
+            ff_veto = "!(gen_match_2 == 6)"
+            btag_weight = ("0.993716*btag_weight", "btagging_weight")
+        elif "et" in channel:
+            emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
+            ff_veto = "!(gen_match_2 == 6)"
+            btag_weight = ("0.993561*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            emb_veto = "!(gen_match_1==5 && gen_match_2==5)"
+            ff_veto = "!(gen_match_1 == 6 || gen_match_2 == 6)"
+            btag_weight = ("0.995844*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "mt" in channel:
+            emb_veto = "!(boosted_gen_match_1==4 && boosted_gen_match_2==5)"
+            ff_veto = "!(boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "et" in channel:
+            emb_veto = "!(boosted_gen_match_1==3 && boosted_gen_match_2==5)"
+            ff_veto = "!(boosted_gen_match_2 == 6)"
+            btag_weight = ("0.947681*btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            emb_veto = "!(boosted_gen_match_1==5 && boosted_gen_match_2==5)"
+            ff_veto = "!(boosted_gen_match_1 == 6 || boosted_gen_match_2 == 6)"
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
     return Selection(
         name="VVL",
         cuts=[
-            ("{}".format(emb_veto), "tt_emb_veto"),
+            ("{}".format(emb_veto), "vv_emb_veto"),
             ("{}".format(ff_veto), "ff_veto"),
         ],
+        weights=[btag_weight],
     )
 
 
@@ -860,13 +1066,29 @@ def qqh_stitching_weight(era):
     return weight
 
 
-def ggH125_process_selection(channel, era):
+def ggH125_process_selection(channel, era, boosted_tau=False):
     ggH125_weights = HTT_base_process_selection(channel, era).weights + [
         # ("ggh_NNLO_weight", "gghNNLO"),
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         # ggh_stitching_weight(era),
     ]
+    btag_weight = ""
+    if not boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.994928*btag_weight", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("0.995716*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("0.993979*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.925884*btag_weight_boosted", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    ggH125_weights.append(btag_weight)
     ggH125_cuts = [
         # (
         #     "(HTXS_stage1_2_cat_pTjet30GeV>=100)&&(HTXS_stage1_2_cat_pTjet30GeV<=113)",
@@ -876,12 +1098,28 @@ def ggH125_process_selection(channel, era):
     return Selection(name="ggH125", weights=ggH125_weights, cuts=ggH125_cuts)
 
 
-def qqH125_process_selection(channel, era):
+def qqH125_process_selection(channel, era, boosted_tau=False):
     qqH125_weights = HTT_base_process_selection(channel, era).weights + [
         # qqh_stitching_weight(era)
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
     ]
+    btag_weight = ""
+    if not boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.986513*btag_weight", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("0.987531*btag_weight", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("0.982555*btag_weight", "btagging_weight")
+    elif boosted_tau:
+        if "et" in channel:
+            btag_weight = ("0.921058*btag_weight_boosted", "btagging_weight")
+        elif "mt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+        elif "tt" in channel:
+            btag_weight = ("btag_weight_boosted", "btagging_weight")
+    qqH125_weights.append(btag_weight)
     qqH125_cuts = [
         # (
         #     "(HTXS_stage1_2_cat_pTjet30GeV>=200)&&(HTXS_stage1_2_cat_pTjet30GeV<=210)",
@@ -897,6 +1135,7 @@ def NMSSM_process_selection(channel,era):
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
             ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+            ("btag_weight", "btagging_weight"),
         ]
     )
     return Selection(name="NMSSM", weights=NMSSM_weights)

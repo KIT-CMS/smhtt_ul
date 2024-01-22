@@ -63,10 +63,10 @@ common_files_2018 = {
     #     "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
     # ],
     "nmssm_Ybb": [
-        "NMSSM_XToYHTo2B2Tau_MX-2000_MY-250_TuneCP5_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X"
+        "NMSSM_XToYHTo2B2Tau_MX-800_MY-250_TuneCP5_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X"
     ],
     "nmssm_Ytautau": [
-        "NMSSM_XToYHTo2Tau2B_MX-2000_MY-250_TuneCP5_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X"
+        "NMSSM_XToYHTo2Tau2B_MX-800_MY-250_TuneCP5_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X"
     ],
 }
 
@@ -214,10 +214,14 @@ files = {
         "tt": dict(
             {
                 "data": [
-                    "Tau_Run2018A-UL2018",
-                    "Tau_Run2018B-UL2018",
-                    "Tau_Run2018C-UL2018",
-                    "Tau_Run2018D-UL2018",
+                    "Tau_Run2018A-UL2018_GT36",
+                    "Tau_Run2018B-UL2018_GT36",
+                    "Tau_Run2018C-UL2018_GT36",
+                    "Tau_Run2018D-UL2018_GT36",
+                    # "JetHT_Run2018A-UL2018",
+                    # "JetHT_Run2018B-UL2018",
+                    # "JetHT_Run2018C-UL2018",
+                    # "JetHT_Run2018D-UL2018",
                 ],
                 "EMB": [
                     "TauEmbedding-TauTauFinalState_Run2018A-UL2018",

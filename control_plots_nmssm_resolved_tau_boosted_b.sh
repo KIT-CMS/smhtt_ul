@@ -1,3 +1,4 @@
+
 source utils/setup_root.sh
 export PYTHONPATH=$PYTHONPATH:$PWD/Dumbledraw
 CHANNEL=$1
@@ -6,8 +7,7 @@ NTUPLETAG=$3
 TAG=$4
 MODE=$5
 
-#VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,mt_1,mt_2,mt_1_pf,mt_2_pf,pt_tt,pfmet,met,pzetamissvis,metphi,pt_dijet,deltaR_ditaupair,jet_hemisphere,pt_vis"
-VARIABLES="boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,boosted_mass_2,boosted_m_vis,boosted_iso_1,boosted_iso_2,boosted_tau_decaymode_2,boosted_deltaR_ditaupair,boosted_pt_vis,nboostedtaus,boosted_mt_1,boosted_mt_2,met,njets,nbtag,bpt_1,bpt_2,beta_1,beta_2,bphi_1,bphi_2,bpair_btag_value_1,bpair_btag_value_2"
+VARIABLES="iso_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mt_tot,mjj,njets,nbtag,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,pt_dijet,deltaR_ditaupair,tau_decaymode_2,jet_hemisphere,pt_vis,nfatjets,fj_Xbb_pt,fj_Xbb_eta,fj_Xbb_phi,fj_Xbb_mass,fj_Xbb_particleNet_XbbvsQCD,fj_Xbb_nsubjettiness_3over2,fj_Xbb_nsubjettiness_2over1,fj_Xbb_msoftdrop,sqrt_pt1_met,cos_deltaPhi_met_tau1,deltaPhi_met_tau1,sqrt_pt2_met,cos_deltaPhi_met_tau2,deltaPhi_met_tau2,deltaPhi_met_fatjet,deltaPhi_met_jet1,deltaPhi_jet1_fatjet,deltaR_jet1_fatjet,deltaR_tau1_fatjet,deltaR_tau2_fatjet,deltaR_jet2_fatjet,deltaR_jet1_jet2,balance_pT_fatjet_Z,deltaR_tau1_jet1,deltaR_tau2_jet1,deltaR_tau1_jet2,deltaR_tau2_jet2,deltaPhi_tau1_tau2,deltaEta_tau1_tau2,deltaPhi_jet1_jet2,deltaEta_jet1_jet2,deltaPT_jet1_jet2,deltaPhi_tau1_jet1,deltaEta_tau1_jet1,deltaPhi_tau1_fatjet,deltaEta_tau1_fatjet"
 
 ulimit -s unlimited
 source utils/setup_root.sh
@@ -30,7 +30,7 @@ if [[ $MODE == "XSEC" ]]; then
 
     echo "running xsec friends script"
     echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
-    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsxrootd-kit.gridka.de/$XSEC_FRIENDS --nthreads 20
+    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsxrootd-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
 fi
 
 if [[ $MODE == "SHAPES" ]]; then
@@ -50,7 +50,7 @@ if [[ $MODE == "SHAPES" ]]; then
         --optimization-level 1 --control-plots \
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
         --output-file $shapes_output \
-        --xrootd --validation-tag $TAG --boosted-analysis
+        --xrootd --validation-tag $TAG --boosted-b-analysis
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
@@ -64,8 +64,8 @@ if [[ $MODE == "PLOT" ]]; then
     echo "#     plotting                                      #"
     echo "##############################################################################################"
 
-    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --fake-factor
-    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding
-    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
-    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor
+    python3 plotting/plot_shapes_control_nmssm.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --embedding --fake-factor
+    python3 plotting/plot_shapes_control_nmssm.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --embedding
+    python3 plotting/plot_shapes_control_nmssm.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals
+    python3 plotting/plot_shapes_control_nmssm.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --fake-factor
 fi
