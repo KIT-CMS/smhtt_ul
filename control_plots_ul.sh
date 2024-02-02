@@ -6,8 +6,8 @@ NTUPLETAG=$3
 TAG=$4
 MODE=$5
 
-VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,mt_1,mt_2,mt_1_pf,mt_2_pf,pt_tt,pfmet,met,pzetamissvis,metphi,pt_dijet,deltaR_ditaupair,jet_hemisphere,pt_vis"
-
+# VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,pzetamissvis,deltaR_ditaupair,phi_1,phi_2,mt_1,mt_2,pt_vis,iso_1,iso_2"
+VARIABLES="m_vis,pt_2"
 ulimit -s unlimited
 source utils/setup_root.sh
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
@@ -42,14 +42,26 @@ if [[ $MODE == "SHAPES" ]]; then
         mkdir -p $shapes_output
     fi
 
-    python shapes/produce_shapes.py --channels $CHANNEL \
-        --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $XSEC_FRIENDS \
-        --era $ERA --num-processes 4 --num-threads 12 \
-        --optimization-level 1 --control-plots \
-        --control-plot-set ${VARIABLES} --skip-systematic-variations \
-        --output-file $shapes_output \
-        --xrootd --validation-tag $TAG
+    if $channels == "mt"; then
+        python shapes/produce_shapes.py --channels $CHANNEL \
+            --directory $NTUPLES \
+            --${CHANNEL}-friend-directory $XSEC_FRIENDS \
+            --era $ERA --num-processes 4 --num-threads 12 \
+            --optimization-level 1 --control-plots \
+            --control-plot-set ${VARIABLES} --skip-systematic-variations \
+            --output-file $shapes_output \
+            --xrootd --validation-tag $TAG \
+            --special-analysis "TauID" 
+    else
+        python shapes/produce_shapes.py --channels $CHANNEL \
+            --directory $NTUPLES \
+            --${CHANNEL}-friend-directory $XSEC_FRIENDS \
+            --era $ERA --num-processes 4 --num-threads 12 \
+            --optimization-level 1 --control-plots \
+            --control-plot-set ${VARIABLES} --skip-systematic-variations \
+            --output-file $shapes_output \
+            --xrootd --validation-tag $TAG
+    fi
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
@@ -68,7 +80,7 @@ if [[ $MODE == "PLOT" ]]; then
 
     # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --fake-factor
     python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding
-    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
+    # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
     # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor
 
     # python2 ~/tools/webgallery/gallery.py Run${ERA}_plots_emb_classic/
