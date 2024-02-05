@@ -41,7 +41,7 @@ if [[ $MODE == "SHAPES" ]]; then
     if [ ! -d "$shapes_output" ]; then
         mkdir -p $shapes_output
     fi
-    
+
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $XSEC_FRIENDS \
@@ -49,7 +49,9 @@ if [[ $MODE == "SHAPES" ]]; then
         --optimization-level 1 --control-plots \
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
         --output-file $shapes_output \
-        --xrootd --validation-tag $TAG
+        --xrootd --validation-tag $TAG \
+        --special-analysis "TauID" 
+
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"

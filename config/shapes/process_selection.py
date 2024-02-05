@@ -428,16 +428,12 @@ def ZTT_embedded_process_selection(channel, era):
                     ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
                     ("iso_wgt_mu_1", "isoweight"),
                     ("id_wgt_mu_1", "idweight"),
-                    # (
-                    #     "((pt_1>=23) * trg_wgt_single_mu22)",
-                    #     "trgweight",
-                    # ),
                     (
-                        "((gen_match_2==5)*id_wgt_tau_vsJet_medium_2 + (gen_match_2!=5))",
-                        "taubyIsoIdWeight",
+                        "((pt_1>=23) * trg_wgt_single_mu22)",
+                        "trgweight",
                     ),
                     (
-                        "((gen_match_2==5)*1 + (gen_match_2!=5))",
+                        "((gen_match_2==5)*id_wgt_tau_vsJet_medium_2 + (gen_match_2!=5))",
                         "taubyIsoIdWeight",
                     ),
                 ]
