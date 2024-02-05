@@ -204,11 +204,17 @@ def write_hists_per_category(cat_hists: tuple):
         if "dr1" in name_output:
             name_output = name_output.replace("dr1", "highdR")
         if f"{channel}__{args.era}" in name_output:
-            name_output = name_output.replace(f"{channel}__{args.era}", f"{channel}_{args.era}_")
+            name_output = name_output.replace(
+                f"{channel}__{args.era}", f"{channel}_{args.era}_"
+            )
         if f"Up_{channel}_{args.era}" in name_output:
-            name_output = name_output.replace(f"Up_{channel}_{args.era}", f"{channel}_{args.era}Up")
+            name_output = name_output.replace(
+                f"Up_{channel}_{args.era}", f"{channel}_{args.era}Up"
+            )
         if f"Down_{channel}_{args.era}" in name_output:
-            name_output = name_output.replace(f"Down_{channel}_{args.era}", f"{channel}_{args.era}Down")
+            name_output = name_output.replace(
+                f"Down_{channel}_{args.era}", f"{channel}_{args.era}Down"
+            )
         hist.SetTitle(name_output)
         hist.SetName(name_output)
         hist.Write()
@@ -241,6 +247,21 @@ def main(args):
                 if not "data" in split_name[0]
                 else "data_obs"
             )
+        # add the additional process of special analyses to the sync file
+        if args.special == "TauES" or args.special == "EleES":
+            if "emb" in split_name[0]:
+                if "jetFakes" in split_name[0]:
+                    process = "jetFakes_"
+                    split_name[0] = (
+                        split_name[0].replace("jetFakes", "").replace("emb", "")
+                    )
+                else:
+                    process = "EMB_"
+                    split_name[0] = split_name[0].replace("emb", "")
+                if "minus" in split_name[0]:
+                    process += "-"
+                    split_name[0] = split_name[0].replace("minus", "")
+                process += ".".join(split_name[0].split("p"))
             # Skip discriminant variables we do not want in the sync file.
             # This is necessary because the sync file only allows for one type of histogram.
             # A combination of the runs for different variables can then be used in separate files.

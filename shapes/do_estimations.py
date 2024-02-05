@@ -45,6 +45,7 @@ def parse_args():
         action="store_true",
         help="Add qqh procs estimations to file.",
     )
+    parser.add_argument("-s", "--special", help="Special selection.", default="")
     return parser.parse_args()
 
 
@@ -133,7 +134,10 @@ def parse_histograms_for_qcd(inputfile):
             key, "same_sign"
         )
         if channel is not None:
-            if channel in ["et", "mt", "em", "mm", "ee"] or "abcd_same_sign_anti_iso" in variation:
+            if (
+                channel in ["et", "mt", "em", "mm", "ee"]
+                or "abcd_same_sign_anti_iso" in variation
+            ):
                 add_input_to_inputdict(
                     qcd_inputs, channel, category, variable, variation, process
                 )
@@ -212,8 +216,23 @@ def parse_histograms_for_qqh(inputfile):
 
 def main(args):
     input_file = ROOT.TFile(args.input, "update")
-
     logger.info("Reading inputs from file {}".format(args.input))
+    tauES_names = []
+    eleES_names = []
+    if args.special == "TauES":
+        # we have to extend the _dataset_map and the _process_map to include the TauES variations
+        tauESvariations = [-2.5 + 0.1 * i for i in range(0, 52)]
+        for variation in tauESvariations:
+            name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
+            processname = f"emb{name}"
+            tauES_names.append(processname)
+    elif args.special == "EleES":
+        # we have to extend the _dataset_map and the _process_map to include the TauES variations
+        eleESvariations = [-1.5 + 0.05 * i for i in range(0, 51)]
+        for variation in eleESvariations:
+            name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
+            processname = f"emb{name}"
+            eleES_names.append(processname)
     # Loop over available ff inputs and do the estimations
     if args.do_ff:
         logger.info("Starting estimations for fake factors and their variations")
@@ -275,7 +294,7 @@ def main(args):
                     extrapolation_factor = 1.17
                 elif channel in ["em"]:
                     if "NbtagGt1" in category:
-                        if args.era == "2016":
+                        if "2016" in args.era:
                             extrapolation_factor = 0.71
                         elif args.era == "2017":
                             extrapolation_factor = 0.69
@@ -367,25 +386,48 @@ def main(args):
         for channel in emb_categories:
             for category in emb_categories[channel]:
                 logger.info("Do estimation for category %s", category)
-                for var in emb_categories[channel][category]:
-                    estimated_hist = emb_ttbar_contamination_estimation(
-                        input_file,
-                        channel,
-                        category,
-                        var,
-                        sub_scale=0.1,
-                        embname="EMB",
-                    )
-                    estimated_hist.Write()
-                    estimated_hist = emb_ttbar_contamination_estimation(
-                        input_file,
-                        channel,
-                        category,
-                        var,
-                        sub_scale=-0.1,
-                        embname="EMB",
-                    )
-                    estimated_hist.Write()
+                if args.special == "EleES":
+                    for embsignal in eleES_names:
+                        print(embsignal)
+                        var = emb_categories[channel][category][0]
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=0.1,
+                            embname=embsignal,
+                        )
+                        estimated_hist.Write()
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=-0.1,
+                            embname=embsignal,
+                        )
+                        estimated_hist.Write()
+                else:
+                    for var in emb_categories[channel][category]:
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=0.1,
+                            embname="EMB",
+                        )
+                        estimated_hist.Write()
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=-0.1,
+                            embname="EMB",
+                        )
+                        estimated_hist.Write()
 
     logger.info("Successfully finished estimations.")
     # Clean-up.

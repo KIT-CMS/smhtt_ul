@@ -1,34 +1,60 @@
 import logging
 import ROOT
 from .defaults import _name_string, _process_map, _dataset_map
+
 logger = logging.getLogger("")
+
 
 def emb_ttbar_contamination_estimation(
     rootfile, channel, category, variable, sub_scale=0.1, embname="EMB"
 ):
     procs_to_subtract = ["TTT"]
-    logger.debug(
-        "Trying to get object {}".format(
+    if embname == "EMB":
+        logger.debug(
+            "Trying to get object {}".format(
+                _name_string.format(
+                    dataset=_dataset_map[embname],
+                    channel=channel,
+                    process="-" + _process_map[embname],
+                    selection=category,
+                    variation="Nominal",
+                    variable=variable,
+                )
+            )
+        )
+        base_hist = rootfile.Get(
             _name_string.format(
                 dataset=_dataset_map[embname],
                 channel=channel,
                 process="-" + _process_map[embname],
-                selection=category,
+                selection="-" + category if category != "" else "",
                 variation="Nominal",
                 variable=variable,
             )
+        ).Clone()
+    else:
+        logger.debug(
+            "Trying to get object {}".format(
+                _name_string.format(
+                    dataset=embname,
+                    channel=channel,
+                    process="-Embedded",
+                    selection=category,
+                    variation="Nominal",
+                    variable=variable,
+                )
+            )
         )
-    )
-    base_hist = rootfile.Get(
-        _name_string.format(
-            dataset=_dataset_map[embname],
-            channel=channel,
-            process="-" + _process_map[embname],
-            selection="-" + category if category != "" else "",
-            variation="Nominal",
-            variable=variable,
-        )
-    ).Clone()
+        base_hist = rootfile.Get(
+            _name_string.format(
+                dataset=embname,
+                channel=channel,
+                process="-Embedded",
+                selection="-" + category if category != "" else "",
+                variation="Nominal",
+                variable=variable,
+            )
+        ).Clone()
     for proc in procs_to_subtract:
         logger.debug(
             "Trying to fetch root histogram {}".format(
