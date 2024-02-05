@@ -41,27 +41,15 @@ if [[ $MODE == "SHAPES" ]]; then
     if [ ! -d "$shapes_output" ]; then
         mkdir -p $shapes_output
     fi
-
-    if $channels == "mt"; then
-        python shapes/produce_shapes.py --channels $CHANNEL \
-            --directory $NTUPLES \
-            --${CHANNEL}-friend-directory $XSEC_FRIENDS \
-            --era $ERA --num-processes 4 --num-threads 12 \
-            --optimization-level 1 --control-plots \
-            --control-plot-set ${VARIABLES} --skip-systematic-variations \
-            --output-file $shapes_output \
-            --xrootd --validation-tag $TAG \
-            --special-analysis "TauID" 
-    else
-        python shapes/produce_shapes.py --channels $CHANNEL \
-            --directory $NTUPLES \
-            --${CHANNEL}-friend-directory $XSEC_FRIENDS \
-            --era $ERA --num-processes 4 --num-threads 12 \
-            --optimization-level 1 --control-plots \
-            --control-plot-set ${VARIABLES} --skip-systematic-variations \
-            --output-file $shapes_output \
-            --xrootd --validation-tag $TAG
-    fi
+    
+    python shapes/produce_shapes.py --channels $CHANNEL \
+        --directory $NTUPLES \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS \
+        --era $ERA --num-processes 4 --num-threads 12 \
+        --optimization-level 1 --control-plots \
+        --control-plot-set ${VARIABLES} --skip-systematic-variations \
+        --output-file $shapes_output \
+        --xrootd --validation-tag $TAG
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
