@@ -4,7 +4,7 @@ NTUPLETAG=$1
 ERA=$2
 
 KINGMAKER_BASEDIR="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
-KINGMAKER_BASEDIR_XROOTD="root://cmsxrootd-kit.gridka.de/${KINGMAKER_BASEDIR}"
+KINGMAKER_BASEDIR_XROOTD="root://cmsxrootd-kit-disk.gridka.de/${KINGMAKER_BASEDIR}"
 XSEC_FRIENDS="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
 
 if [[ $ERA == *"2016"* ]]; then

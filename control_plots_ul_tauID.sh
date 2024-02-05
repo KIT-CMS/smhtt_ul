@@ -29,7 +29,7 @@ echo "##########################################################################
 
     echo "running xsec friends script"
     echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
-    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsxrootd-kit.gridka.de/$XSEC_FRIENDS --nthreads 20
+    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsxrootd-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
 fi
 
 if [[ $MODE == "SHAPES" ]]; then
