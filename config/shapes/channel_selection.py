@@ -168,12 +168,14 @@ def channel_selection(channel, era, special=None):
                 )
             elif era == "2016postVFP" or era == "2016preVFP":
                 cuts.extend(
-                        [
-                            ("pt_2>10 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))", "trg_selection"),
-                            # ("m_vis>60 && m_vis < 120", "m_vis"),
-                            
-                        ]
-                        )
+                    [
+                        (
+                            "pt_2>10 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
+                            "trg_selection",
+                        ),
+                        # ("m_vis>60 && m_vis < 120", "m_vis"),
+                    ]
+                )
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="mm", cuts=cuts)
@@ -285,5 +287,41 @@ def channel_selection(channel, era, special=None):
         else:
             raise ValueError("Given era does not exist")
         return Selection(name="mt", cuts=cuts)
+    elif special == "EleES":
+        if channel != "ee":
+            raise ValueError("EleES measurement is done in the ee channel only")
+        cuts = [
+            ("extraelec_veto>0.5", "extraelec_veto"),
+            # ("extramuon_veto<0.5", "extramuon_veto"),
+            ("dimuon_veto<0.5", "dilepton_veto"),
+            ("q_1*q_2<0", "os"),
+            ("iso_1<0.1 && iso_2<0.1", "ele_iso"),
+            ("abs(eta_1)<2.1 && abs(eta_2)<2.1", "electron_eta"),
+            # ("met < 100", "met"),
+        ]
+        if era == "2018":
+            cuts.append(
+                (
+                    "pt_2>33 && pt_1>=33 && ( trg_single_ele32 == 1)",
+                    "trg_selection",
+                ),
+            )
+        elif era == "2017":
+            cuts.append(
+                (
+                    "pt_2>20 && (pt_1 >=36 && (trg_single_ele35==1))",
+                    "trg_selection",
+                ),
+            )
+        elif era in ["2016postVFP", "2016preVFP"]:
+            cuts.append(
+                (
+                    "pt_2>20 && ((pt_1>=26 && (trg_single_ele25 == 1)))",
+                    "trg_selection",
+                ),
+            )
+        else:
+            raise ValueError(f"Given era {era} does not exist")
+        return Selection(name="ee", cuts=cuts)
     else:
         raise ValueError("Given special selection does not exist")

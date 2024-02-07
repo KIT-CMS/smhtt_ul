@@ -510,7 +510,7 @@ def ZTT_embedded_process_selection(channel, era):
                     ("(gen_match_1==2 && gen_match_2==2)", "emb_gen_match"),
                     ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
                     ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
-                    ("trg_wgt_single_mu27", "trgweight")
+                    ("trg_wgt_single_mu27", "trgweight"),
                     # triggerweight_emb(channel, era),
                 ]
             )
@@ -521,7 +521,7 @@ def ZTT_embedded_process_selection(channel, era):
                     ("(gen_match_1==2 && gen_match_2==2)", "emb_gen_match"),
                     ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
                     ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
-                    ("trg_wgt_single_mu22", "trgweight")
+                    ("trg_wgt_single_mu22", "trgweight"),
                     # triggerweight_emb(channel, era),
                 ]
             )
@@ -533,7 +533,7 @@ def ZTT_embedded_process_selection(channel, era):
                     ("(gen_match_1==1 && gen_match_2==1)", "emb_gen_match"),
                     ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight"),
                     ("id_wgt_ele_1 * id_wgt_ele_2", "idweight"),
-                    ("trg_wgt_single_ele35", "trgweight")
+                    ("trg_wgt_single_ele35", "trgweight"),
                     # triggerweight_emb(channel, era),
                 ]
             )
@@ -544,7 +544,7 @@ def ZTT_embedded_process_selection(channel, era):
                     ("(gen_match_1==1 && gen_match_2==1)", "emb_gen_match"),
                     ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight"),
                     ("id_wgt_ele_1 * id_wgt_ele_2", "idweight"),
-                    ("trg_wgt_single_ele25", "trgweight")
+                    ("trg_wgt_single_ele25", "trgweight"),
                     # triggerweight_emb(channel, era),
                 ]
             )
@@ -595,10 +595,12 @@ def __get_ZL_cut(channel):
         emb_veto = "!(gen_match_1==3 && gen_match_2==4)"
         ff_veto = "(1.0)"
     elif "mm" in channel:
-        emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
+        emb_veto = "!(gen_match_1==2 && gen_match_2==2) && !(gen_match_1==4 && gen_match_2==4) "
         ff_veto = "(1.0)"
     elif "ee" in channel:
-        emb_veto = "!(gen_match_1==3 && gen_match_2==3)"
+        emb_veto = (
+            "!(gen_match_1==1 && gen_match_2==1) && !(gen_match_1==3 && gen_match_2==3)"
+        )
         ff_veto = "(1.0)"
     return (emb_veto, ff_veto)
 

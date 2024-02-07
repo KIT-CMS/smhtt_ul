@@ -173,6 +173,7 @@ def add_tauES_datasets(
     additional_emb_procS,
     validation_tag,
     xrootd=False,
+    shiftstring="EMBtauESshift",
 ):
     for variation in tauESvariations:
         name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
@@ -197,7 +198,7 @@ def add_tauES_datasets(
         nominals[era]["datasets"][channel][processname] = dataset
         updated_unit = []
         additional_emb_procS.add(f"emb{name}")
-        shiftname = f"EMBtauESshift_{name}"
+        shiftname = f"{shiftstring}_{name}"
         for category_selection, actions in categorization[channel]:
             full_selection = selections + [category_selection]
             new_selections = deepcopy(full_selection)
@@ -246,7 +247,12 @@ def add_tauES_datasets(
 
 
 def book_tauES_histograms(
-    manager, additional_emb_procS, datasets, variations, enable_check=False
+    manager,
+    additional_emb_procS,
+    datasets,
+    variations,
+    enable_check=False,
+    shiftstring="EMBtauESshift",
 ):
     def replace_expression(exp, quants):
         for quant in quants[shiftname]:
@@ -262,7 +268,7 @@ def book_tauES_histograms(
 
     for tau_es_shift in additional_emb_procS:
         logger.debug(f"Booking {tau_es_shift}")
-        shiftname = f"EMBtauESshift_{tau_es_shift.replace('emb', '')}"
+        shiftname = f"{shiftstring}_{tau_es_shift.replace('emb', '')}"
         updated_variations = deepcopy(variations)
         final_variations = []
         unitlist = datasets[tau_es_shift]
