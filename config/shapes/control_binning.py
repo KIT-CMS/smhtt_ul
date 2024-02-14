@@ -80,6 +80,19 @@ common_binning = {
 
 }
 
+common_bining_boost_htt = {
+    "m_vis": Histogram("m_vis", "m_vis", np.arange(0, 260, 10)),
+    "fj_XtmVsQCD_pt": Histogram("fj_XtmVsQCD_pt", "fj_XtmVsQCD_pt", np.arange(0, 1000, 20)),
+    "fj_Xtm_eta" : Histogram("fj_Xtm_eta", "fj_Xtm_eta", np.linspace(-2.5, 2.5, 50)),
+    "fj_Xtm_mass" : Histogram("fj_Xtm_mass", "fj_Xtm_mass", np.arange(20, 250, 10)),
+    "fj_Xtm_phi" : Histogram("fj_Xtm_phi", "fj_Xtm_phi", np.linspace(-3.14, 3.14, 50)),
+    "fj_Xtm_particleNet_XtmVsQCD" : Histogram("fj_Xtm_particleNet_XtmVsQCD", "fj_Xtm_particleNet_XtmVsQCD", np.arange(0, 1, 10)),
+}
+
 control_binning = {}
 for channel in ["et", "mt", "tt", "em", "ee", "mm"]:
     control_binning[channel] = common_binning
+
+control_binning_htt_boost = {}
+for channel in ["et", "mt", "tt", "em", "ee", "mm"]:
+    control_binning_htt_boost[channel] = common_bining_boost_htt
