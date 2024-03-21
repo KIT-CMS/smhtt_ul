@@ -327,7 +327,7 @@ def channel_selection(channel, era, special=None):
         raise ValueError("Given special selection does not exist")
     
 
-def tau_id_channel_selection(channel, era, vs_jet_wp=None, vs_ele_wp=None):
+def tau_id_channel_selection(channel, era, vs_jet_wp="tight", vs_ele_wp="vvloose"):
     # Specify general channel and era independent cuts.
     cuts = [
         ("extraelec_veto<0.5", "extraelec_veto"),
