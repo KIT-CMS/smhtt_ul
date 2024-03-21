@@ -202,6 +202,12 @@ def parse_arguments():
         help="Channels to be considered, seperated by a comma without space",
     )
     parser.add_argument(
+        "--vs-jet-wp", required=True, type=str, help="Tau ID WP."
+    )
+    parser.add_argument(
+        "--apply-tauid", action="store_true", help="Flag that specifies if we apply tau id scale factors or not"
+    )
+    parser.add_argument(
         "--directory", required=True, type=str, help="Directory with Artus outputs."
     )
     parser.add_argument(
@@ -338,7 +344,7 @@ def parse_arguments():
 
 
 def get_analysis_units(
-    channel, era, datasets, categorization, special_analysis, nn_shapes=False
+    channel, era, datasets, categorization, special_analysis, apply_tauid, vs_jet_wp, nn_shapes=False, 
 ):
     analysis_units = {}
 
@@ -360,6 +366,18 @@ def get_analysis_units(
         selections=[
             channel_selection(channel, era, special_analysis),
             DY_process_selection(channel, era),
+            ZL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="zl_nlo",
+        dataset=datasets["DYNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            DY_NLO_process_selection(channel, era),
             ZL_process_selection(channel),
         ],
         categorization=categorization,
@@ -397,7 +415,7 @@ def get_analysis_units(
             dataset=datasets["EMB"],
             selections=[
                 channel_selection(channel, era, special_analysis),
-                ZTT_embedded_process_selection(channel, era),
+                ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
             ],
             categorization=categorization,
             channel=channel,
@@ -410,6 +428,18 @@ def get_analysis_units(
             selections=[
                 channel_selection(channel, era, special_analysis),
                 DY_process_selection(channel, era),
+                ZTT_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="ztt_nlo",
+            dataset=datasets["DYNLO"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                DY_NLO_process_selection(channel, era),
                 ZTT_process_selection(channel),
             ],
             categorization=categorization,
@@ -446,6 +476,18 @@ def get_analysis_units(
             selections=[
                 channel_selection(channel, era, special_analysis),
                 DY_process_selection(channel, era),
+                ZJ_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="zj_nlo",
+            dataset=datasets["DYNLO"],
+            selections=[
+                channel_selection(channel, era, special_analysis),
+                DY_NLO_process_selection(channel, era),
                 ZJ_process_selection(channel),
             ],
             categorization=categorization,
@@ -562,11 +604,22 @@ def get_analysis_units(
         categorization=categorization,
         channel=channel,
     )
+    add_process(
+        analysis_units,
+        name="w_nlo",
+        dataset=datasets["WNLO"],
+        selections=[
+            channel_selection(channel, era, special_analysis),
+            W_process_selection(channel, era),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
     return analysis_units
 
 
 def get_control_units(
-    channel, era, datasets, special_analysis, variables, do_gofs=False, do_2dGofs=False
+    channel, era, datasets, special_analysis, variables, apply_tauid, vs_jet_wp, do_gofs=False, do_2dGofs=False
 ):
     control_units = {}
     control_binning = default_control_binning
@@ -621,7 +674,7 @@ def get_control_units(
         dataset=datasets["EMB"],
         selections=[
             channel_selection(channel, era, special_analysis),
-            ZTT_embedded_process_selection(channel, era),
+            ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
         ],
         channel=channel,
         binning=control_binning,
@@ -868,6 +921,9 @@ def main(args):
     um = UnitManager()
     do_check = args.enable_booking_check
     era = args.era
+    apply_tauid = args.apply_tauid
+    print("#### Apply tau ID", apply_tauid)
+    vs_jet_wp = args.vs_jet_wp
 
     nominals = {}
     nominals[era] = {}
@@ -887,6 +943,8 @@ def main(args):
                 nominals[era]["datasets"][channel],
                 special_analysis,
                 args.control_plot_set,
+                apply_tauid,
+                vs_jet_wp,
                 do_gofs=False,
             )
         elif args.gof_inputs:
@@ -896,6 +954,8 @@ def main(args):
                 nominals[era]["datasets"][channel],
                 special_analysis,
                 args.control_plot_set,
+                apply_tauid,
+                vs_jet_wp,
                 do_gofs=True,
                 do_2dGofs=args.do_2dGofs,
             )
@@ -906,10 +966,12 @@ def main(args):
                 nominals[era]["datasets"][channel],
                 categorization,
                 special_analysis,
+                apply_tauid,
+                vs_jet_wp
             )
         if special_analysis == "TauES":
             additional_emb_procS = set()
-            tauESvariations = [-1.2 + 0.05 * i for i in range(0, 47)]
+            tauESvariations = [-2.5 + 0.1 * i for i in range(0, 51)]
             add_tauES_datasets(
                 era,
                 channel,
@@ -920,7 +982,7 @@ def main(args):
                 tauESvariations,
                 [
                     channel_selection(channel, era, special_analysis),
-                    ZTT_embedded_process_selection(channel, era),
+                    ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
                 ],
                 categorization,
                 additional_emb_procS,
@@ -1033,6 +1095,7 @@ def main(args):
                 variations=[same_sign],
                 enable_check=do_check,
             )
+        # import pdb; pdb.set_trace()
         if channel in ["mt", "et"]:
             book_histograms(
                 um,
