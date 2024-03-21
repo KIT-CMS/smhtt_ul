@@ -206,6 +206,21 @@ common_files_2016postVFP = {
         "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
         "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
     ],
+    "VH": [
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_ext1_RunIISummer20UL16NanoAODv9-106X_ext1",
+        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "ZH": [
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_ext1_RunIISummer20UL16NanoAODv9-106X_ext1",
+    ],
+    "WH": [
+        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "ttH": [
+        "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X"
+    ],
 }
 common_files_2016preVFP = {
     "DY": [
@@ -228,6 +243,24 @@ common_files_2016preVFP = {
         "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
         "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "qqH": [
+        "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "VH": [
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "ZH": [
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "WH": [
+        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "ttH": [
+        "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X"
     ],
 }
 files = {
@@ -766,6 +799,38 @@ files = {
 
                 ],
             },
+            **common_files_2016preVFP
+        ),
+        "mt": dict(
+            {
+                "data": [
+                    "SingleMuon_Run2016B-ver1",
+                    "SingleMuon_Run2016B-ver2",
+                    "SingleMuon_Run2016C-HIPM",
+                    "SingleMuon_Run2016D-HIPM",
+                    "SingleMuon_Run2016E-HIPM",
+                    "SingleMuon_Run2016F-HIPM",
+                ],
+                "EMB": [
+                    "TauEmbedding-MuTauFinalState_Run2016-HIPM_B_ver1-UL2016",
+                    "TauEmbedding-MuTauFinalState_Run2016-HIPM_B_ver2-UL2016",
+                    "TauEmbedding-MuTauFinalState_Run2016-HIPM_C-UL2016",
+                    "TauEmbedding-MuTauFinalState_Run2016-HIPM_D-UL2016",
+                    "TauEmbedding-MuTauFinalState_Run2016-HIPM_E-UL2016",
+                    "TauEmbedding-MuTauFinalState_Run2016-HIPM_F-UL2016",
+                ],
+                "W": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+
+                ],
+                "WNLO": [
+
+                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+
+                ],
+            },
+            
             **common_files_2016preVFP
         ),
     },
