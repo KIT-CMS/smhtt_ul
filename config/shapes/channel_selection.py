@@ -1,7 +1,7 @@
 from ntuple_processor.utils import Selection
 
 
-def channel_selection(channel, era, special=None):
+def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="vvloose"):
     # Specify general channel and era independent cuts.
     cuts = [
         ("extraelec_veto<0.5", "extraelec_veto"),
@@ -9,6 +9,30 @@ def channel_selection(channel, era, special=None):
         ("dimuon_veto<0.5", "dilepton_veto"),
         ("q_1*q_2<0", "os"),
     ]
+    cuts = [
+        ("extraelec_veto<0.5", "extraelec_veto"),
+        ("extramuon_veto<0.5", "extramuon_veto"),
+        ("dimuon_veto<0.5", "dilepton_veto"),
+        ("q_1*q_2<0", "os"),
+    ]
+    wps_dict = {
+
+        "vvtight" : "VVTight",
+        "vtight" : "VVTight",
+        "tight" : "Tight",
+        "medium" : "Medium",
+        "loose" : "Loose",
+        "vloose" : "VLoose",
+        "vvloose" : "VVLoose",
+        "vvvloose" : "VVVLoose",
+    }
+
+    if vs_ele_wp not in wps_dict.keys():
+        print("This vs electron working point doen't exist. Please specify the correct vsEle discriminator ")
+    if vs_jet_wp not in wps_dict.keys():
+        print("This vs jet working point doen't exist. Please specify the correct vsEle discriminator ")
+    vs_ele_discr = wps_dict[vs_ele_wp]
+    vs_jet_discr = wps_dict[vs_jet_wp]
     if special is None:
         if "mt" in channel:
             #  Add channel specific cuts to the list of cuts.
@@ -222,8 +246,8 @@ def channel_selection(channel, era, special=None):
             cuts.extend(
                 [
                     ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                    ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
-                    ("id_tau_vsJet_Medium_2>0.5", "tau_iso"),
+                    ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
+                    ("id_tau_vsJet_"+vs_jet_discr+"_2>0.5", "tau_iso"),
                     ("iso_1<0.15", "muon_iso"),
                     ("pzetamissvis > -25", "pzetamissvis"),
                     ("mt_1 < 60", "mt_1"),
