@@ -70,6 +70,7 @@ from config.shapes.variations import (
     same_sign,
     same_sign_em,
     anti_iso_lt,
+    anti_iso_lt_no_ff,
     anti_iso_tt,
     anti_iso_tt_mcl,
     abcd_method,
@@ -1124,7 +1125,14 @@ def main(args):
                 um,
                 additional_emb_procS,
                 nominals[era]["units"][channel],
-                [same_sign, anti_iso_lt],
+                [same_sign, anti_iso_lt_no_ff],
+                do_check,
+            )
+            book_tauES_histograms(
+                um,
+                additional_emb_procS,
+                nominals[era]["units"][channel],
+                [trigger_eff_mt_emb],
                 do_check,
             )
         elif channel == "mt":
