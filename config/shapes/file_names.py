@@ -339,10 +339,10 @@ files = {
         "mm": dict(
             {
                 "data": [
-                    "DoubleMuon_Run2018A-UL2018",
-                    "DoubleMuon_Run2018B-UL2018",
-                    "DoubleMuon_Run2018C-UL2018",
-                    "DoubleMuon_Run2018D-UL2018",
+                    "SingleMuon_Run2018A-UL2018",
+                    "SingleMuon_Run2018B-UL2018",
+                    "SingleMuon_Run2018C-UL2018",
+                    "SingleMuon_Run2018D-UL2018",
                 ],
                 "DY": [
                     "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
