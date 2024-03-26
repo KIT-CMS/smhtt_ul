@@ -410,20 +410,19 @@ def get_analysis_units(
         categorization=categorization,
         channel=channel,
     )
+    # Embedding
+    add_process(
+        analysis_units,
+        name="emb",
+        dataset=datasets["EMB"],
+        selections=[
+            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+            ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
     if channel != "mm":
-        # Embedding
-        add_process(
-            analysis_units,
-            name="emb",
-            dataset=datasets["EMB"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-
         add_process(
             analysis_units,
             name="ztt",
