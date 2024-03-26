@@ -1001,6 +1001,26 @@ def main(args):
                 xrootd=args.xrootd,
                 validation_tag=args.validation_tag,
             )
+        if special_analysis == "TauID" and args.es:
+            additional_emb_procS = set()
+            tauESvariations = [-2.5 + 0.1 * i for i in range(0, 51)]
+            add_tauES_datasets(
+                era,
+                channel,
+                friend_directories,
+                files,
+                args.directory,
+                nominals,
+                tauESvariations,
+                [
+                    channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+                    ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
+                ],
+                categorization,
+                additional_emb_procS,
+                xrootd=args.xrootd,
+                validation_tag=args.validation_tag,
+            )
 
     if args.process_selection is None:
         procS = {
@@ -1090,6 +1110,15 @@ def main(args):
             enable_check=do_check,
         )
         if channel == "mt" and special_analysis == "TauES":
+            logger.info("Booking TauES")
+            book_tauES_histograms(
+                um,
+                additional_emb_procS,
+                nominals[era]["units"][channel],
+                [same_sign, anti_iso_lt],
+                do_check,
+            )
+        if channel == "mt" and args.es and special_analysis == "TauID":
             logger.info("Booking TauES")
             book_tauES_histograms(
                 um,
