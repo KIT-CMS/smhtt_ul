@@ -343,6 +343,11 @@ def parse_arguments():
         type=str,
         help="Tag to be used for the validation of the input samples",
     )
+    parser.add_argument(
+        "--es",
+        action="store_true",
+        help="Add tau ES variations.",
+    )
     return parser.parse_args()
 
 
@@ -1253,18 +1258,35 @@ def main(args):
             )
             # Book variations common to multiple channels.
             if channel in ["et", "mt", "tt"]:
-                book_histograms(
-                    um,
-                    processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        tau_es_3prong,
-                        tau_es_3prong1pizero,
-                        tau_es_1prong,
-                        tau_es_1prong1pizero,
-                    ],
-                    enable_check=do_check,
-                )
+                if not args.es:
+                    book_histograms(
+                        um,
+                        processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            tau_es_3prong,
+                            tau_es_3prong1pizero,
+                            tau_es_1prong,
+                            tau_es_1prong1pizero,
+                        ],
+                        enable_check=do_check,
+                    )
+                    book_histograms(
+                        um,
+                        processes=embS,
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            emb_tau_es_3prong,
+                            emb_tau_es_3prong1pizero,
+                            emb_tau_es_1prong,
+                            emb_tau_es_1prong1pizero,
+                            tau_es_3prong,
+                            tau_es_3prong1pizero,
+                            tau_es_1prong,
+                            tau_es_1prong1pizero,
+                        ],
+                        enable_check=do_check,
+                    )
                 book_histograms(
                     um,
                     processes=jetFakesDS[channel],
@@ -1274,70 +1296,55 @@ def main(args):
                     ],
                     enable_check=do_check,
                 )
-                book_histograms(
-                    um,
-                    processes=embS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        emb_tau_es_3prong,
-                        emb_tau_es_3prong1pizero,
-                        emb_tau_es_1prong,
-                        emb_tau_es_1prong1pizero,
-                        tau_es_3prong,
-                        tau_es_3prong1pizero,
-                        tau_es_1prong,
-                        tau_es_1prong1pizero,
-                    ],
-                    enable_check=do_check,
-                )
             if channel in ["et", "mt"]:
-                book_histograms(
-                    um,
-                    processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        tau_id_eff_lt,
-                    ],
-                    enable_check=do_check,
-                )
-                book_histograms(
-                    um,
-                    processes=dataS | embS | leptonFakesS | trueTauBkgS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        ff_variations_lt,
-                    ],
-                    enable_check=do_check,
-                )
+                if not args.es:
+                    book_histograms(
+                        um,
+                        processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            tau_id_eff_lt,
+                        ],
+                        enable_check=do_check,
+                    )
+                    book_histograms(
+                        um,
+                        processes=dataS | embS | leptonFakesS | trueTauBkgS,
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            ff_variations_lt,
+                        ],
+                        enable_check=do_check,
+                    )
 
-                book_histograms(
-                    um,
-                    processes=leptonFakesS | trueTauBkgS | embS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        ff_variations_tau_es_lt,
-                    ],
-                    enable_check=do_check,
-                )
-                book_histograms(
-                    um,
-                    processes=embS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        ff_variations_tau_es_emb_lt,
-                    ],
-                    enable_check=do_check,
-                )
-                book_histograms(
-                    um,
-                    processes=embS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        emb_tau_id_eff_lt,
-                        emb_tau_id_eff_lt_corr,
-                    ],
-                    enable_check=do_check,
-                )
+                    book_histograms(
+                        um,
+                        processes=leptonFakesS | trueTauBkgS | embS,
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            ff_variations_tau_es_lt,
+                        ],
+                        enable_check=do_check,
+                    )
+                    book_histograms(
+                        um,
+                        processes=embS,
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            ff_variations_tau_es_emb_lt,
+                        ],
+                        enable_check=do_check,
+                    )
+                    book_histograms(
+                        um,
+                        processes=embS,
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            emb_tau_id_eff_lt,
+                            emb_tau_id_eff_lt_corr,
+                        ],
+                        enable_check=do_check,
+                    )
             if channel in ["et", "em"]:
                 # TODO add eleES
                 # book_histograms(
