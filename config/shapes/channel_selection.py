@@ -284,6 +284,13 @@ def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="
                         "trg_selection",
                     ),
                 )
+            elif era in ["2016postVFP", "2016preVFP"]:
+                cuts.append(
+                    (
+                        "pt_2>23 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
+                        "trg_selection",
+                    ),
+                )
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="mm", cuts=cuts)
