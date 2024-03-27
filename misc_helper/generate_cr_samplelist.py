@@ -1,9 +1,10 @@
 import argparse
 import sys
 
-sys.path.insert(0, "../config")
+sys.path.insert(0, ".")  # if executed within smhtt_ul
+sys.path.insert(0, "..")  # if executed within smhtt_ul/misc_helper
 
-from shapes.file_names import files
+from config.shapes.file_names import files
 
 parser = argparse.ArgumentParser(description='Create a list of samples for SM HTT UL analysis')
 parser.add_argument('--channel', nargs='+', type=str, help='Channel(s): mm, mt, et, em, tt')
