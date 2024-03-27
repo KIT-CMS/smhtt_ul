@@ -1295,7 +1295,7 @@ def main(args):
             )
             # Book variations common to multiple channels.
             if channel in ["et", "mt", "tt"]:
-                if not args.es:
+                if not args.es and special_analysis != "TauID":
                     book_histograms(
                         um,
                         processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
@@ -1423,6 +1423,13 @@ def main(args):
                     processes=embS,
                     datasets=nominals[era]["units"][channel],
                     variations=[trigger_eff_mt_emb],
+                    enable_check=do_check,
+                )
+                book_histograms(
+                    um,
+                    processes=embS,
+                    datasets=nominals[era]["units"][channel],
+                    variations=[same_sign, anti_iso_lt_no_ff],
                     enable_check=do_check,
                 )
                 book_histograms(
