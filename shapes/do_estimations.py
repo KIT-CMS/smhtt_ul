@@ -379,7 +379,7 @@ def main(args):
                         )
                         estimated_hist.Write()
 
-    if args.do_emb_tt:
+    if args.do_emb_tt and channel != "mm":
         emb_categories = parse_histograms_for_emb_estimation(input_file)
         logger.info("Producing embedding ttbar variations.")
         logger.debug("%s", json.dumps(emb_categories, sort_keys=True, indent=4))
