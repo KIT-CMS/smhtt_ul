@@ -76,8 +76,7 @@ common_binning = {
     "npartons": Histogram("npartons", "npartons", [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]),
     "phi_1": Histogram("phi_1", "phi_1", np.linspace(-2.5, 2.5, 50)),
     "phi_2": Histogram("phi_2", "phi_2", np.linspace(-2.5, 2.5, 50)),
-
-
+    "q_1": Histogram("q_1", "q_1", [-3, 3]),  # for overall yield
 }
 
 control_binning = {}
