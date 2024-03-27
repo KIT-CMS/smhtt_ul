@@ -25,6 +25,62 @@ _process_map = {
     "QCD": "QCD",
 }
 
+tau_es_map = {
+
+    "embminus2p5": "-2.5",
+    "embminus2p4": "-2.4",
+    "embminus2p3": "-2.3",
+    "embminus2p2": "-2.2",
+    "embminus2p1": "-2.1",
+    "embminus2p0": "-2.0",
+    "embminus1p9": "-1.9",
+    "embminus1p8": "-1.8",
+    "embminus1p7": "-1.7",
+    "embminus1p6": "-1.6",
+    "embminus1p5": "-1.5",
+    "embminus1p4": "-1.4",
+    "embminus1p3": "-1.3",
+    "embminus1p2": "-1.2",
+    "embminus1p1": "-1.1",
+    "embminus1p0": "-1.0",
+    "embminus0p9": "-0.9",
+    "embminus0p8": "-0.8",
+    "embminus0p7": "-0.7",
+    "embminus0p6": "-0.6",
+    "embminus0p5": "-0.5",
+    "embminus0p4": "-0.4",
+    "embminus0p3": "-0.3",
+    "embminus0p2": "-0.2",
+    "embminus0p1": "-0.1",
+    # "emb0p0": "0.0",
+    "emb0p1": "0.1",
+    "emb0p2": "0.2",
+    "emb0p3": "0.3",
+    "emb0p4": "0.4",
+    "emb0p5": "0.5",
+    "emb0p6": "0.6",
+    "emb0p7": "0.7",
+    "emb0p8": "0.8",
+    "emb0p9": "0.9",
+    "emb1p0": "1.0",
+    "emb1p1": "1.1",
+    "emb1p2": "1.2",
+    "emb1p3": "1.3",
+    "emb1p4": "1.4",
+    "emb1p5": "1.5",
+    "emb1p6": "1.6",
+    "emb1p7": "1.7",
+    "emb1p8": "1.8",
+    "emb1p9": "1.9",
+    "emb2p0": "2.0",
+    "emb2p1": "2.1",
+    "emb2p2": "2.2",
+    "emb2p3": "2.3",
+    "emb2p4": "2.4",
+    "emb2p5": "2.5",
+
+}
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -215,6 +271,8 @@ def write_hists_per_category(cat_hists: tuple):
             name_output = name_output.replace(
                 f"Down_{channel}_{args.era}", f"{channel}_{args.era}Down"
             )
+        if category == "control_region":
+            name_output = name_output.replace("EMB", "MUEMB")
         hist.SetTitle(name_output)
         hist.SetName(name_output)
         hist.Write()
@@ -242,11 +300,17 @@ def main(args):
             )
         else:
             category = split_name[1].split("-")[-1]
-            process = (
-                "-".join(split_name[1].split("-")[1:-1])
-                if not "data" in split_name[0]
-                else "data_obs"
-            )
+
+            if "emb" not in  split_name[0]:
+                process = (
+                    "-".join(split_name[1].split("-")[1:-1])
+                    if not "data" in split_name[0]
+                    else "data_obs"
+                )
+            if "emb" in split_name[0] and split_name[0] !="emb0p0":
+                process = split_name[0]
+            if split_name[0] =="emb0p0":
+                pass
         # add the additional process of special analyses to the sync file
         if args.special == "TauES" or args.special == "EleES":
             if "emb" in split_name[0]:
@@ -306,6 +370,11 @@ def main(args):
                 else:
                     if not "emb" in process and not "jetFakes" in process:
                         process = _rev_process_map[process]
+
+        if "EMB" in process:
+            process  = "EMB_"+category+"_0.0"
+        if "emb" in process:
+            process = "EMB_"+category+"_0.0_"+tau_es_map[process]
         name_output = "{process}".format(process=process)
         # rename signal processes from ggH to ggH_htt
         if process in ["ggH125", "qqH125", "WH125", "ZH125", "ttH125"]:
