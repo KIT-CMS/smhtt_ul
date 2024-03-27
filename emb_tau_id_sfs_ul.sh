@@ -143,7 +143,7 @@ if [[ $MODE == "CONTROLREGION" ]]; then
 fi
 
 PROCESSES="emb"
-number="_emb_3"
+number="_emb_ssos"
 if [[ $MODE == "LOCAL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
@@ -157,7 +157,7 @@ if [[ $MODE == "LOCAL" ]]; then
         --process-selection $PROCESSES \
         --control-plot-set ${VARIABLES} \
         --optimization-level 1 \
-        --output-file $shapes_output$number --xrootd --validation-tag $TAG --es
+        --output-file $shapes_output$number --xrootd --validation-tag $TAG 
 fi
 
 if [[ $MODE == "CONDOR" ]]; then
@@ -167,4 +167,79 @@ if [[ $MODE == "CONDOR" ]]; then
     bash submit/submit_shape_production_ul.sh $ERA $CHANNEL \
         "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT "TauID" 0 $WP $VS_ELE_WP
     echo "[INFO] Jobs submitted"
+fi
+
+if [[ $MODE == "MERGE" ]]; then
+    source utils/setup_root.sh
+    echo "[INFO] Merging outputs located in ${CONDOR_OUTPUT}"
+    hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/*.root
+fi
+
+if [[ "${ERA}" == "2018"  ||  "${ERA}" == "2017" ]]; then 
+    datacard_era=${ERA}
+elif [[ "${ERA}" == "2016postVFP"  ||  "${ERA}" == "2016preVFP" ]]; then
+   datacard_era="2016"
+fi
+
+if [[ $MODE == "PLOT-CONTROL-ES" ]]; then
+    source utils/setup_root.sh
+    echo "##############################################################################################"
+    echo "#     plotting                                      #"
+    echo "##############################################################################################"
+    python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-emb-tt --do-qcd
+
+        for CATEGORY in "${dm_categories[@]}"
+    do
+        for es_sh in "${es_shifts[@]}"
+        do 
+            python3 plotting/plot_shapes_control_es_shifts.py -l --era Run${ERA} --input ${shapes_rootfile} \
+            --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category $CATEGORY --energy_scale --es_shift $es_sh
+        done
+    done
+fi
+
+if [[ $MODE == "SYNC" ]]; then
+    source utils/setup_root.sh
+    echo "##############################################################################################"
+    echo "#      Additional estimations                                      #"
+    echo "##############################################################################################"
+
+    python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-emb-tt --do-qcd
+
+    python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile_mm} --do-qcd
+
+    echo "##############################################################################################"
+    echo "#     plotting                                      #"
+    echo "##############################################################################################"
+
+
+
+    echo "##############################################################################################"
+    echo "#     synced shapes                                      #"
+    echo "##############################################################################################"
+
+    # if the output folder does not exist, create it
+    if [ ! -d "$shapes_output_synced" ]; then
+        mkdir -p $shapes_output_synced
+    fi
+
+    python shapes/convert_to_synced_shapes.py -e ${datacard_era} \
+        -i ${shapes_rootfile} \
+        -o ${shapes_output_synced} \
+        --variable-selection ${VARIABLES} \
+        -n 1
+
+    python shapes/convert_to_synced_shapes.py -e ${datacard_era} \
+        -i "${shapes_rootfile_mm}" \
+        -o "${shapes_output_synced}_mm" \
+        --variable-selection ${VARIABLES} \
+        -n 1
+
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${datacard_era}${POSTFIX}.root"
+    hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${datacard_era}-${CHANNEL}*.root
+
+    inputfile="htt_mm.inputs-sm-Run${datacard_era}${POSTFIX}.root"
+    hadd -f $shapes_output_synced/$inputfile ${shapes_output_synced}_mm/${datacard_era}-mm-*.root
+
+    exit 0
 fi
