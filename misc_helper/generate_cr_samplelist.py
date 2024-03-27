@@ -1,5 +1,9 @@
 import argparse
-from config.shapes.file_names import files
+import sys
+
+sys.path.insert(0, "../config")
+
+from shapes.file_names import files
 
 parser = argparse.ArgumentParser(description='Create a list of samples for SM HTT UL analysis')
 parser.add_argument('--channel', nargs='+', type=str, help='Channel(s): mm, mt, et, em, tt')
