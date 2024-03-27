@@ -75,6 +75,11 @@ def parse_arguments():
         type=str,
         default=None,
         help="Plot a special category instead of nominal")
+    parser.add_argument(
+        "--tag",
+        type=str,
+        default=None,
+        help="Tag that is added to the output file")
 
     return parser.parse_args()
 
@@ -540,7 +545,7 @@ def main(info):
     plot.legend(3).Draw()
 
     # draw additional labels
-    plot.DrawCMS(thesisstyle=True, preliminary=False)
+    plot.DrawCMS()
     if "2016postVFP" in args.era:
         plot.DrawLumi("16.8 fb^{-1} (2016UL postVFP, 13 TeV)")
     elif "2016preVFP" in args.era:
@@ -576,13 +581,13 @@ def main(info):
     if args.draw_jet_fake_variation is not None:
         postfix = postfix + "_" + args.draw_jet_fake_variation
 
-    if not os.path.exists("%s_plots_%s"%(args.era,postfix)):
-        os.mkdir("%s_plots_%s"%(args.era,postfix))
-    if not os.path.exists("%s_plots_%s/%s"%(args.era,postfix,channel)):
-        os.mkdir("%s_plots_%s/%s"%(args.era,postfix,channel))
+    if not os.path.exists("%s_plots_%s_%s"%(args.era, postfix, args.tag)):
+        os.mkdir("%s_plots_%s_%s"%(args.era, postfix, args.tag))
+    if not os.path.exists("%s_plots_%s_%s/%s"%(args.era, postfix, args.tag, channel)):
+        os.mkdir("%s_plots_%s_%s/%s"%(args.era,postfix, args.tag, channel))
     print("Trying to save the created plot")
-    plot.save("%s_plots_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, category, variable, "pdf"))
-    plot.save("%s_plots_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, channel, args.era, channel, category, variable, "png"))
+    plot.save("%s_plots_%s_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, args.tag, channel, args.era, channel, category, variable, "pdf"))
+    plot.save("%s_plots_%s_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, args.tag, channel, args.era, channel, category, variable, "png"))
 
 
 if __name__ == "__main__":
@@ -612,12 +617,11 @@ if __name__ == "__main__":
             postfix = "emb_ff_nlo"
         else:
             postfix = "emb_ff"
-
-    if not os.path.exists("%s_plots_%s"%(args.era,postfix)):
-        os.mkdir("%s_plots_%s"%(args.era,postfix))
+    if not os.path.exists("%s_plots_%s_%s"%(args.era,postfix,args.tag)):
+        os.mkdir("%s_plots_%s_%s"%(args.era,postfix,args.tag))
     for ch in channels:
-        if not os.path.exists("%s_plots_%s/%s"%(args.era,postfix,ch)):
-            os.mkdir("%s_plots_%s/%s"%(args.era,postfix,ch))
+        if not os.path.exists("%s_plots_%s_%s/%s"%(args.era, postfix,args.tag,ch)):
+            os.mkdir("%s_plots_%s_%s/%s"%(args.era,postfix,args.tag,ch))
         for v in variables:
             infolist.append({"args" : args, "channel" : ch, "variable" : v})
     pool = Pool(1)

@@ -9,6 +9,8 @@ NTUPLETAG=$6
 OUTPUT=$7
 SPECIAL=$8
 NNSCORE_FRIENDS=$9
+WP=${10} 
+VS_ELE_WP=${11}
 
 [[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4 && ! -z $5 ]] || (
     echo "[ERROR] Number of given parameters is too small."
@@ -25,22 +27,26 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 source utils/setup_root.sh
 source utils/bashFunctionCollection.sh
 
-PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w,ggh,qqh,zh,wh,tth"
-for PROC in ${PROCS_ARR[@]}; do
-    if [[ "$PROC" =~ "backgrounds" ]]; then
-        # BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
-        PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
-    elif [[ "$PROC" =~ "sm_signals" ]]; then
-        # SIG_PROCS="ggh,qqh,zh,wh,tth,gghww,qqhww,whww,zhww"
-        PROCESSES="ggh,qqh,zh,wh,tth"
-    else
-        echo "[INFO] Add selection of single process $PROC"
-        PROCESSES="$PROCESSES,$PROC"
-    fi
-done
-# # Remove introduced leading comma again.
-PROCESSES=$(sort_string ${PROCESSES#,})
+if [[ "$SPECIAL" == "TauID" ]]; then
+    PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
+else
+    PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w,ggh,qqh,zh,wh,tth"
+    for PROC in ${PROCS_ARR[@]}; do
+        if [[ "$PROC" =~ "backgrounds" ]]; then
+            # BKG_PROCS="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
+            PROCESSES="data,emb,ztt,zl,zj,ttt,ttl,ttj,vvt,vvl,vvj,w"
+        elif [[ "$PROC" =~ "sm_signals" ]]; then
+            # SIG_PROCS="ggh,qqh,zh,wh,tth,gghww,qqhww,whww,zhww"
+            PROCESSES="ggh,qqh,zh,wh,tth"
+        else
+            echo "[INFO] Add selection of single process $PROC"
+            PROCESSES="$PROCESSES,$PROC"
+        fi
+    done
+    # # Remove introduced leading comma again.
+fi
 
+ PROCESSES=$(sort_string ${PROCESSES#,})
 if [[ "$SUBMIT_MODE" == "multigraph" ]]; then
     echo "[ERROR] Not implemented yet."
     exit 1
@@ -53,14 +59,17 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
         python shapes/produce_shapes.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
-            --$CHANNEL-friend-directory $FRIENDS \
+            --${CHANNEL}-friend-directory $XSEC_FRIENDS \
             --era $ERA \
+            --vs-jet-wp $WP \
+            --vs-ele-wp ${VS_ELE_WP} \
             --optimization-level 1 \
             --special-analysis "TauID" \
             --process-selection $PROCESSES \
             --only-create-graphs \
             --graph-dir $OUTPUT \
-            $CONTROL_ARG
+            $CONTROL_ARG \
+            --xrootd --validation-tag $TAG --es
     elif [[ "$SPECIAL" == "TauES" ]]; then
         python shapes/produce_shapes.py --channels $CHANNEL \
             --output-file dummy.root \
@@ -110,6 +119,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "output = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).out" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "error = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).err" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "log = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).log" >>$OUTPUT/produce_shapes_cc7.jdl
+    echo "x509userproxy = /home/olavoryk/.globus/x509_proxy" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "queue a3,a2,a1 from $OUTPUT/arguments.txt" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>$OUTPUT/produce_shapes_cc7.jdl
 
@@ -129,6 +139,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "error = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).err" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "log = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).log" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
+    echo "x509userproxy = /home/olavoryk/.globus/x509_proxy" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "queue a3,a2,a4,a1 from $OUTPUT/arguments_multicore.txt" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
 
     # Assemble the arguments.txt file used in the submission

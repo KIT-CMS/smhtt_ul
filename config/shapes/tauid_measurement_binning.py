@@ -43,19 +43,19 @@ categories = {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "(decaymode_2 == 0) && (pt_2 >= 40)",
+            "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 40)",
         },
         "DM1": {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "(decaymode_2 == 1) && (pt_2 >= 40)",
+            "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 40)",
         },
         "DM10_11": {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "((decaymode_2 == 10) || (decaymode_2 == 11)) && (pt_2 >= 40)",
+            "cut": "((tau_decaymode_2 == 10) || (tau_decaymode_2 == 11)) && (pt_2 >= 40)",
         },
         "Inclusive": {
             "var": discriminator_variable,

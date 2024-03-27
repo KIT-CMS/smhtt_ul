@@ -289,7 +289,7 @@ def main(args):
         for channel in qcd_inputs:
             for category in qcd_inputs[channel]:
                 logger.info("Do estimation for category %s", category)
-                extrapolation_factor = 1.25
+                extrapolation_factor = 1.0
                 if channel in ["et", "mt"] and args.era == "2016":
                     extrapolation_factor = 1.17
                 elif channel in ["em"]:
@@ -378,7 +378,6 @@ def main(args):
                             input_file, channel, category, var, variation=variation
                         )
                         estimated_hist.Write()
-
     if args.do_emb_tt:
         emb_categories = parse_histograms_for_emb_estimation(input_file)
         logger.info("Producing embedding ttbar variations.")
