@@ -1334,7 +1334,7 @@ def main(args):
                     enable_check=do_check,
                 )
             if channel in ["et", "mt"]:
-                if not args.es:
+                if not args.es and special_analysis != "TauID":
                     book_histograms(
                         um,
                         processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
