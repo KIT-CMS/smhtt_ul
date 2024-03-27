@@ -1217,6 +1217,13 @@ def main(args):
                 variations=[same_sign],
                 enable_check=do_check,
             )
+            book_histograms(
+                um,
+                processes=embS,
+                datasets=nominals[era]["units"][channel],
+                variations=[trigger_eff_mt_emb],
+                enable_check=do_check,
+            )
         elif channel == "ee":
             book_histograms(
                 um,
