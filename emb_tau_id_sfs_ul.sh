@@ -243,3 +243,7 @@ if [[ $MODE == "SYNC" ]]; then
 
     exit 0
 fi
+
+if [[ $MODE == "INST_COMB" ]]; then
+    source utils/install_combine_tauid.sh
+fi
