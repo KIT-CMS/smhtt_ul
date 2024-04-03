@@ -247,3 +247,80 @@ fi
 if [[ $MODE == "INST_COMB" ]]; then
     source utils/install_combine_tauid.sh
 fi
+
+pt_categories=("Pt20to25" "Pt25to30" "Pt30to35" "Pt35to40" "PtGt40")
+if [[ $MODE == "DATACARD_COMB" ]]; then
+    source utils/setup_cmssw.sh
+    # # inputfile
+
+    for pt_cat in "${pt_categories[@]}"
+    do
+        inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+        # # for category in "pt_binned" "inclusive" "dm_binned"
+        $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \
+            --base_path=$PWD \
+            --input_folder_mt=$shapes_output_synced \
+            --input_folder_mm=$shapes_output_synced \
+            --real_data=true \
+            --classic_bbb=false \
+            --binomial_bbb=false \
+            --jetfakes=0 \
+            --embedding=1 \
+            --verbose=true \
+            --postfix=$POSTFIX \
+            --use_control_region=true \
+            --auto_rebin=true \
+            --categories=${pt_cat} \
+            --era=$datacard_era \
+            --output=$datacard_output
+        THIS_PWD=${PWD}
+        echo $THIS_PWD
+        cd output/$datacard_output/
+        # for FILE in cmb/*.txt; do
+        #     sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+        # done
+        cd $THIS_PWD
+
+        echo "[INFO] Create Workspace for datacard"
+        combineTool.py -M T2W -i output/$datacard_output/htt_mt_${pt_cat}/ -o workspace.root --parallel 4 -m 125
+    done
+
+    exit 0
+fi
+
+if [[ $MODE == "DATACARD_COMB1" ]]; then
+    source utils/setup_cmssw.sh
+    # # inputfile
+
+
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+    # # for category in "pt_binned" "inclusive" "dm_binned"
+    $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \
+        --base_path=$PWD \
+        --input_folder_mt=$shapes_output_synced \
+        --input_folder_mm=$shapes_output_synced \
+        --real_data=true \
+        --classic_bbb=false \
+        --binomial_bbb=false \
+        --jetfakes=0 \
+        --embedding=1 \
+        --verbose=true \
+        --postfix=$POSTFIX \
+        --use_control_region=true \
+        --auto_rebin=true \
+        --categories="all" \
+        --era=$datacard_era \
+        --output=$datacard_output
+    THIS_PWD=${PWD}
+    echo $THIS_PWD
+    cd output/$datacard_output/
+    # for FILE in cmb/*.txt; do
+    #     sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+    # done
+    cd $THIS_PWD
+
+    echo "[INFO] Create Workspace for datacard"
+    combineTool.py -M T2W -i output/$datacard_output/htt_mt_${pt_cat}/ -o workspace.root --parallel 4 -m 125
+
+    exit 0
+fi
