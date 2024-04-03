@@ -52,7 +52,7 @@ tau_es_map = {
     "embminus0p3": "-0.3",
     "embminus0p2": "-0.2",
     "embminus0p1": "-0.1",
-    # "emb0p0": "0.0",
+    "emb0p0": "0.00",
     "emb0p1": "0.1",
     "emb0p2": "0.2",
     "emb0p3": "0.3",
@@ -251,7 +251,7 @@ def write_hists_per_category(cat_hists: tuple):
             )
             hist.Write()
         if "Era" in name_output:
-            name_output = name_output.replace("Era", f"{args.era}")
+            name_output = name_output.replace("Era", f"Run{args.era}")
         if "Channel" in name_output:
             name_output = name_output.replace("Channel", channel)
         # rename dR0 and dr1 to lowdR and highdR
@@ -370,11 +370,15 @@ def main(args):
                 else:
                     if not "emb" in process and not "jetFakes" in process:
                         process = _rev_process_map[process]
+        if category != "control_region":
+            if "EMB" in process:
+                process  = "EMB_"+category+"_0.0"
+            if "emb" in process:
+                process = "EMB_"+category+"_"+tau_es_map[process]
+        elif category == "control_region":
+            if "EMB" in process:
+                process  = "EMB"
 
-        if "EMB" in process:
-            process  = "EMB_"+category+"_0.0"
-        if "emb" in process:
-            process = "EMB_"+category+"_0.0_"+tau_es_map[process]
         name_output = "{process}".format(process=process)
         # rename signal processes from ggH to ggH_htt
         if process in ["ggH125", "qqH125", "WH125", "ZH125", "ttH125"]:
