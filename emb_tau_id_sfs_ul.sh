@@ -288,39 +288,83 @@ if [[ $MODE == "DATACARD_COMB" ]]; then
     exit 0
 fi
 
-if [[ $MODE == "DATACARD_COMB1" ]]; then
-    source utils/setup_cmssw.sh
+
+dm_categories=("DM0" "DM1" "DM10_11")
+if [[ $MODE == "DATACARD_DM" ]]; then
+    source utils/setup_cmssw_tauid.sh
     # # inputfile
 
+    for dm_cat in "${dm_categories[@]}"
+    do
+        inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+        # # for category in "dm_binned"
+        $CMSSW_BASE/bin/slc7_amd64_gcc10/MorphingTauID2017 \
+            --base_path=$PWD \
+            --input_folder_mt=$shapes_output_synced \
+            --input_folder_mm=$shapes_output_synced \
+            --real_data=true \
+            --classic_bbb=false \
+            --binomial_bbb=false \
+            --jetfakes=0 \
+            --embedding=1 \
+            --verbose=true \
+            --postfix=$POSTFIX \
+            --use_control_region=true \
+            --auto_rebin=true \
+            --categories=${dm_cat} \
+            --era=$datacard_era \
+            --output=$datacard_output_dm
+        THIS_PWD=${PWD}
+        echo $THIS_PWD
+        cd output/$datacard_output_dm/
+    
+        cd $THIS_PWD
 
-    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
-    # # for category in "pt_binned" "inclusive" "dm_binned"
-    $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \
-        --base_path=$PWD \
-        --input_folder_mt=$shapes_output_synced \
-        --input_folder_mm=$shapes_output_synced \
-        --real_data=true \
-        --classic_bbb=false \
-        --binomial_bbb=false \
-        --jetfakes=0 \
-        --embedding=1 \
-        --verbose=true \
-        --postfix=$POSTFIX \
-        --use_control_region=true \
-        --auto_rebin=true \
-        --categories="all" \
-        --era=$datacard_era \
-        --output=$datacard_output
-    THIS_PWD=${PWD}
-    echo $THIS_PWD
-    cd output/$datacard_output/
-    # for FILE in cmb/*.txt; do
-    #     sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
-    # done
-    cd $THIS_PWD
-
-    echo "[INFO] Create Workspace for datacard"
-    combineTool.py -M T2W -i output/$datacard_output/htt_mt_${pt_cat}/ -o workspace.root --parallel 4 -m 125
+        echo "[INFO] Create Workspace for datacard"
+        combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat}/ -o workspace_dm.root --parallel 4 -m 125
+    done
 
     exit 0
 fi
+
+if [[ $MODE == "MULTIFIT" ]]; then
+    source utils/setup_cmssw_tauid.sh
+
+    echo "[INFO] Create Workspace for all the datacards"
+    combineTool.py -M T2W -i output/$datacard_output_dm/cmb \
+                -o out_multidim_dm.root \
+                --parallel 8 -m 125 \
+                -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+                --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,0.8,1.3]"' \
+                --PO '"map=^.*/EMB_DM1:r_EMB_DM_1[1,0.8,1.3]"' \
+                --PO '"map=^.*/EMB_DM10_11:r_EMB_DM_10_11[1,0.8,1.3]"'  
+
+    combineTool.py -M MultiDimFit -d output/$datacard_output_dm/cmb/out_multidim_dm.root \
+    --setParameters ES_DM0=0.0,ES_DM1=0.0,ES_DM10_11=0.0,r_EMB_DM_0=1.0,r_EMB_DM_1=1.0,r_EMB_DM_10_11=1.0 \
+    --setParameterRanges r_EMB_DM_0=0.8,1.2:r_EMB_DM_1=0.8,1.2:r_EMB_DM_10_11=0.8,1.2:ES_DM0=-2.5,2.5:ES_DM1=-2.5,2.5:ES_DM10_11=-2.5,2.5 \
+    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11 --floatOtherPOIs=1 \
+    --points=400 --algo singles
+
+fi
+
+
+if [[ $MODE == "SCAN" ]]; then
+    source utils/setup_cmssw_tauid.sh
+
+    echo "[INFO] Create 2D scan"
+    
+    combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_DM*/ -o ws.root
+
+    combineTool.py -M MultiDimFit -d output/$datacard_output_dm/htt_mt_DM0/ws.root \
+    --setParameters ES_DM0=0.2,r=0.9 --setParameterRanges r=0.8,1.0:ES_DM0=-1.1,1.1 \
+    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    --redefineSignalPOIs ES_DM0,r \
+    --floatOtherPOIs=1 --points=400 --algo grid
+
+fi
+
+
+
