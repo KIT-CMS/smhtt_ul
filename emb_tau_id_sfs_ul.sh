@@ -335,13 +335,13 @@ if [[ $MODE == "MULTIFIT" ]]; then
                 -o out_multidim_dm.root \
                 --parallel 8 -m 125 \
                 -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-                --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,0.8,1.3]"' \
-                --PO '"map=^.*/EMB_DM1:r_EMB_DM_1[1,0.8,1.3]"' \
-                --PO '"map=^.*/EMB_DM10_11:r_EMB_DM_10_11[1,0.8,1.3]"'  
+                --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,0.8,1.1]"' \
+                --PO '"map=^.*/EMB_DM1:r_EMB_DM_1[1,0.8,1.1]"' \
+                --PO '"map=^.*/EMB_DM10_11:r_EMB_DM_10_11[1,0.8,1.1]"'  
 
-    combineTool.py -M MultiDimFit -d output/$datacard_output_dm/cmb/out_multidim_dm.root \
+    combineTool.py -M MultiDimFit -n .comb_id_0.8_1.1_es_-1.2_1.2_dm -d output/$datacard_output_dm/cmb/out_multidim_dm.root \
     --setParameters ES_DM0=0.0,ES_DM1=0.0,ES_DM10_11=0.0,r_EMB_DM_0=1.0,r_EMB_DM_1=1.0,r_EMB_DM_10_11=1.0 \
-    --setParameterRanges r_EMB_DM_0=0.8,1.2:r_EMB_DM_1=0.8,1.2:r_EMB_DM_10_11=0.8,1.2:ES_DM0=-2.5,2.5:ES_DM1=-2.5,2.5:ES_DM10_11=-2.5,2.5 \
+    --setParameterRanges r_EMB_DM_0=0.8,1.1:r_EMB_DM_1=0.8,1.1:r_EMB_DM_10_11=0.8,1.1:ES_DM0=-1.2,1.2:ES_DM1=-1.2,1.2:ES_DM10_11=-1.2,1.2 \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11 --floatOtherPOIs=1 \
@@ -350,21 +350,28 @@ if [[ $MODE == "MULTIFIT" ]]; then
 fi
 
 
-if [[ $MODE == "SCAN" ]]; then
+
+if [[ $MODE == "SCAN_2D" ]]; then
     source utils/setup_cmssw_tauid.sh
 
     echo "[INFO] Create 2D scan"
-    
-    combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_DM*/ -o ws.root
 
-    combineTool.py -M MultiDimFit -d output/$datacard_output_dm/htt_mt_DM0/ws.root \
-    --setParameters ES_DM0=0.2,r=0.9 --setParameterRanges r=0.8,1.0:ES_DM0=-1.1,1.1 \
-    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-    --redefineSignalPOIs ES_DM0,r \
-    --floatOtherPOIs=1 --points=400 --algo grid
+        for dm_cat in "${dm_categories[@]}"
+    do
+    
+        combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat}/ -o ws_scan_${dm_cat}.root
+
+        combineTool.py -M MultiDimFit -n .nominal_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+        --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=0.8,1.0:ES_${dm_cat}=-1.1,1.1 \
+        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+        --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+        --redefineSignalPOIs ES_${dm_cat},r \
+        --floatOtherPOIs=1 --points=400 --algo grid
+
+        echo "[INFO] Plotting 2D scan ..."
+        python3 plot_2D_scan.py --name nominal_${dm_cat} --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname tau_id_${dm_cat}
+    done
 
 fi
-
 
 
