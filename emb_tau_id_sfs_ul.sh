@@ -361,8 +361,8 @@ if [[ $MODE == "SCAN_2D" ]]; then
         if [[ $dm_cat == "DM10_11" ]]; then
             min_id=0.9
             max_id=1.03
-            min_es=-1.4
-            max_es=1.2
+            min_es=-2
+            max_es=2
         fi
 
             combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_test_v1 -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
@@ -373,7 +373,7 @@ if [[ $MODE == "SCAN_2D" ]]; then
             --floatOtherPOIs=1 --points=400 --algo grid
 
         echo "[INFO] Plotting 2D scan ..."
-        python3 plot_2D_scan.py --name nominal_${dm_cat} --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname tau_id_${dm_cat}
+        python3 plot_2D_scan.py --name nominal_${dm_cat} --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname tau_id_${dm_cat}_8Apr_v2
     done
 
 fi
@@ -420,28 +420,38 @@ if [[ $MODE == "MULTIFIT" ]]; then
 fi
 
 
-# if [[ $MODE == "POSTFIT" ]]; then
-#     source utils/setup_cmssw_tauid.sh
+if [[ $MODE == "POSTFIT" ]]; then
+    source utils/setup_cmssw_tauid.sh
 
-#     # WORKSPACE=/work/olavoryk/DT25_smhtt/smhtt_ul/output/datacards/2022_07_v6-try_no_qqh_shape_v1/2018_tauid_medium/cmb/out_multidim.root
-#     WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm.root
-#     echo "[INFO] Printing fit result for category $(basename $RESDIR)"
-#     FILE=output/$datacard_output_dm/cmb/postfitshape.root
-#     FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
-#     combine \
-#         -n .$ERA \
-#         -M FitDiagnostics \
-#         -m 125 -d $WORKSPACE \
-#         --robustFit 1 -v1 \
-#         --robustHesse 1 \
-#         --X-rtd MINIMIZER_analytic \
-#         --cminDefaultMinimizerStrategy 0
-#     mv fitDiagnostics.${ERA}.root $FITFILE
-#     echo "[INFO] Building Prefit/Postfit shapes"
-#     PostFitShapesFromWorkspace -w ${WORKSPACE} \
-#         -m 125 -d output/$datacard_output_dm/cmb/combined.txt.cmb \
-#         -o ${FILE} \
-#         -f ${FITFILE}:fit_s --postfit
+    # WORKSPACE=/work/olavoryk/DT25_smhtt/smhtt_ul/output/datacards/2022_07_v6-try_no_qqh_shape_v1/2018_tauid_medium/cmb/out_multidim.root
+    WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm.root
+    echo "[INFO] Printing fit result for category $(basename $RESDIR)"
+    FILE=output/$datacard_output_dm/cmb/postfitshape.root
+    FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
+    combine \
+        -n .$ERA \
+        -M FitDiagnostics \
+        -m 125 -d $WORKSPACE \
+        --robustFit 1 -v1 \
+        --robustHesse 1 \
+        --X-rtd MINIMIZER_analytic \
+        --cminDefaultMinimizerStrategy 0 \
+        --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11
+    mv fitDiagnostics.${ERA}.root $FITFILE
+    echo "[INFO] Building Prefit/Postfit shapes"
+    PostFitShapesFromWorkspace -w ${WORKSPACE} \
+        -m 125 -d output/$datacard_output_dm/cmb/combined.txt.cmb \
+        -o ${FILE} \
+        -f ${FITFILE}:fit_s --postfit
 
-#     exit 0
-# fi
+    exit 0
+fi
+
+if [[ $MODE == "POI_CORRELATION" ]]; then
+    source utils/setup_root.sh
+    FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
+    
+    # python corr_plot.py $ERA $FITFILE
+    python poi_correlation.py $ERA $FITFILE
+
+fi
