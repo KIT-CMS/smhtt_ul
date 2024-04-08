@@ -327,29 +327,12 @@ if [[ $MODE == "DATACARD_DM" ]]; then
     exit 0
 fi
 
-if [[ $MODE == "MULTIFIT" ]]; then
-    source utils/setup_cmssw_tauid.sh
-
-    echo "[INFO] Create Workspace for all the datacards"
-    combineTool.py -M T2W -i output/$datacard_output_dm/cmb \
-                -o out_multidim_dm.root \
-                --parallel 8 -m 125 \
-                -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-                --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,0.8,1.1]"' \
-                --PO '"map=^.*/EMB_DM1:r_EMB_DM_1[1,0.8,1.1]"' \
-                --PO '"map=^.*/EMB_DM10_11:r_EMB_DM_10_11[1,0.8,1.1]"'  
-
-    combineTool.py -M MultiDimFit -n .comb_id_0.8_1.1_es_-1.2_1.2_dm -d output/$datacard_output_dm/cmb/out_multidim_dm.root \
-    --setParameters ES_DM0=0.0,ES_DM1=0.0,ES_DM10_11=0.0,r_EMB_DM_0=1.0,r_EMB_DM_1=1.0,r_EMB_DM_10_11=1.0 \
-    --setParameterRanges r_EMB_DM_0=0.8,1.1:r_EMB_DM_1=0.8,1.1:r_EMB_DM_10_11=0.8,1.1:ES_DM0=-1.2,1.2:ES_DM1=-1.2,1.2:ES_DM10_11=-1.2,1.2 \
-    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-    --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11 --floatOtherPOIs=1 \
-    --points=400 --algo singles
-
-fi
 
 
+min_id=0
+max_id=0
+min_es=0
+max_es=0
 
 if [[ $MODE == "SCAN_2D" ]]; then
     source utils/setup_cmssw_tauid.sh
@@ -361,12 +344,33 @@ if [[ $MODE == "SCAN_2D" ]]; then
     
         combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat}/ -o ws_scan_${dm_cat}.root
 
-        combineTool.py -M MultiDimFit -n .nominal_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
-        --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=0.8,1.0:ES_${dm_cat}=-1.1,1.1 \
-        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-        --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-        --redefineSignalPOIs ES_${dm_cat},r \
-        --floatOtherPOIs=1 --points=400 --algo grid
+        if [[ $dm_cat == "DM0" ]]; then
+            min_id=0.8
+            max_id=1.1
+            min_es=-1.2
+            max_es=1.2
+        fi
+
+        if [[ $dm_cat == "DM1" ]]; then
+            min_id=0.8
+            max_id=1.2
+            min_es=-1.2
+            max_es=1.2
+        fi
+
+        if [[ $dm_cat == "DM10_11" ]]; then
+            min_id=0.9
+            max_id=1.03
+            min_es=-1.4
+            max_es=1.2
+        fi
+
+            combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_test_v1 -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+            --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=${min_id},${max_id}:ES_${dm_cat}=-${min_es},${max_es} \
+            --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+            --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+            --redefineSignalPOIs ES_${dm_cat},r \
+            --floatOtherPOIs=1 --points=400 --algo grid
 
         echo "[INFO] Plotting 2D scan ..."
         python3 plot_2D_scan.py --name nominal_${dm_cat} --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname tau_id_${dm_cat}
@@ -375,3 +379,69 @@ if [[ $MODE == "SCAN_2D" ]]; then
 fi
 
 
+
+min_id_dm0=0.9
+max_id_dm0=1
+min_es_dm0=0
+max_es_dm0=0.6
+
+
+min_id_dm1=0.9
+max_id_dm1=1.1
+min_es_dm1=-0.6
+max_es_dm1=0.2
+
+
+min_id_dm10_11=0.9
+max_id_dm10_11=1.1
+min_es_dm10_11=0
+max_es_dm10_11=-1.1
+
+if [[ $MODE == "MULTIFIT" ]]; then
+    source utils/setup_cmssw_tauid.sh
+
+    echo "[INFO] Create Workspace for all the datacards"
+    combineTool.py -M T2W -i output/$datacard_output_dm/cmb \
+                -o out_multidim_dm_test.root \
+                --parallel 8 -m 125 \
+                -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+                --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,${min_id_dm0},${max_id_dm0}]"' \
+                --PO '"map=^.*/EMB_DM1:r_EMB_DM_1[1,${min_id_dm1},${max_id_dm1}]"' \
+                --PO '"map=^.*/EMB_DM10_11:r_EMB_DM_10_11[1,${min_id_dm10_11},${max_id_dm10_11}]"'  
+
+    combineTool.py -M MultiDimFit -n .comb_id_0.6_1.4_es_-1.8_1.8_dm -d output/$datacard_output_dm/cmb/out_multidim_dm.root \
+    --setParameters ES_DM0=0.0,ES_DM1=0.0,ES_DM10_11=0.0,r_EMB_DM_0=1.0,r_EMB_DM_1=1.0,r_EMB_DM_10_11=1.0 \
+    --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:r_EMB_DM_1=${min_id_dm1},${max_id_dm1}:r_EMB_DM_10_11=${min_id_dm10_11},${max_id_dm10_11}:ES_DM0=${min_es_dm0},${max_es_dm0}:ES_DM1=${min_es_dm1},${max_es_dm1}:ES_DM10_11=${min_es_dm10_11},${max_es_dm10_11} \
+    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11 --floatOtherPOIs=1 \
+    --points=400 --algo singles
+
+fi
+
+
+# if [[ $MODE == "POSTFIT" ]]; then
+#     source utils/setup_cmssw_tauid.sh
+
+#     # WORKSPACE=/work/olavoryk/DT25_smhtt/smhtt_ul/output/datacards/2022_07_v6-try_no_qqh_shape_v1/2018_tauid_medium/cmb/out_multidim.root
+#     WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm.root
+#     echo "[INFO] Printing fit result for category $(basename $RESDIR)"
+#     FILE=output/$datacard_output_dm/cmb/postfitshape.root
+#     FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
+#     combine \
+#         -n .$ERA \
+#         -M FitDiagnostics \
+#         -m 125 -d $WORKSPACE \
+#         --robustFit 1 -v1 \
+#         --robustHesse 1 \
+#         --X-rtd MINIMIZER_analytic \
+#         --cminDefaultMinimizerStrategy 0
+#     mv fitDiagnostics.${ERA}.root $FITFILE
+#     echo "[INFO] Building Prefit/Postfit shapes"
+#     PostFitShapesFromWorkspace -w ${WORKSPACE} \
+#         -m 125 -d output/$datacard_output_dm/cmb/combined.txt.cmb \
+#         -o ${FILE} \
+#         -f ${FITFILE}:fit_s --postfit
+
+#     exit 0
+# fi
