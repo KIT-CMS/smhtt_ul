@@ -20,8 +20,8 @@ t = f.Get("limit")
 
 # Number of points in interpolation
 n_points = 400
-x_range = [0.7, 1.05]
-y_range = [-1.15, 1.15]
+x_range = [0.80, 1.1]
+y_range = [-1.5, -0.5]
 
 # Number of bins in plot
 n_bins = 40
@@ -89,7 +89,7 @@ h2D.GetZaxis().SetTitle("-2 #Delta ln L")
 h2D.GetZaxis().SetTitleSize(0.05)
 h2D.GetZaxis().SetTitleOffset(0.8)
 
-h2D.SetMaximum(25)
+h2D.SetMaximum(50)
 
 # Make confidence interval contours
 # c68, c95 = h2D.Clone(), h2D.Clone()
@@ -146,7 +146,7 @@ leg.AddEntry(gBF, "Best fit", "P")
 leg.Draw()
 
 canv.Update()
-canv.SaveAs("scan_2D_"+args.outname+".png")
-canv.SaveAs("scan_2D_"+args.outname+".pdf")
+canv.SaveAs("scan_2D_"+args.outname+"_es.png")
+canv.SaveAs("scan_2D_"+args.outname+"_es.pdf")
 
 
