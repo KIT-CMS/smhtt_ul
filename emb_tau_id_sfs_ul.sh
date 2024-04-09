@@ -19,7 +19,7 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_dm_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_dm_test_v3_impr_fit/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
@@ -157,7 +157,7 @@ if [[ $MODE == "LOCAL" ]]; then
         --process-selection $PROCESSES \
         --control-plot-set ${VARIABLES} \
         --optimization-level 1 \
-        --output-file $shapes_output$number --xrootd --validation-tag $TAG 
+        --output-file $shapes_output$number --xrootd --validation-tag $TAG --es
 fi
 
 if [[ $MODE == "CONDOR" ]]; then
@@ -248,45 +248,45 @@ if [[ $MODE == "INST_COMB" ]]; then
     source utils/install_combine_tauid.sh
 fi
 
-pt_categories=("Pt20to25" "Pt25to30" "Pt30to35" "Pt35to40" "PtGt40")
-if [[ $MODE == "DATACARD_COMB" ]]; then
-    source utils/setup_cmssw.sh
-    # # inputfile
+# pt_categories=("Pt20to25" "Pt25to30" "Pt30to35" "Pt35to40" "PtGt40")
+# if [[ $MODE == "DATACARD_COMB" ]]; then
+#     source utils/setup_cmssw.sh
+#     # # inputfile
 
-    for pt_cat in "${pt_categories[@]}"
-    do
-        inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
-        # # for category in "pt_binned" "inclusive" "dm_binned"
-        $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \
-            --base_path=$PWD \
-            --input_folder_mt=$shapes_output_synced \
-            --input_folder_mm=$shapes_output_synced \
-            --real_data=true \
-            --classic_bbb=false \
-            --binomial_bbb=false \
-            --jetfakes=0 \
-            --embedding=1 \
-            --verbose=true \
-            --postfix=$POSTFIX \
-            --use_control_region=true \
-            --auto_rebin=true \
-            --categories=${pt_cat} \
-            --era=$datacard_era \
-            --output=$datacard_output
-        THIS_PWD=${PWD}
-        echo $THIS_PWD
-        cd output/$datacard_output/
-        # for FILE in cmb/*.txt; do
-        #     sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
-        # done
-        cd $THIS_PWD
+#     for pt_cat in "${pt_categories[@]}"
+#     do
+#         inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+#         # # for category in "pt_binned" "inclusive" "dm_binned"
+#         $CMSSW_BASE/bin/slc7_amd64_gcc700/MorphingTauID2017 \
+#             --base_path=$PWD \
+#             --input_folder_mt=$shapes_output_synced \
+#             --input_folder_mm=$shapes_output_synced \
+#             --real_data=true \
+#             --classic_bbb=false \
+#             --binomial_bbb=false \
+#             --jetfakes=0 \
+#             --embedding=1 \
+#             --verbose=true \
+#             --postfix=$POSTFIX \
+#             --use_control_region=true \
+#             --auto_rebin=true \
+#             --categories=${pt_cat} \
+#             --era=$datacard_era \
+#             --output=$datacard_output
+#         THIS_PWD=${PWD}
+#         echo $THIS_PWD
+#         cd output/$datacard_output/
+#         # for FILE in cmb/*.txt; do
+#         #     sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+#         # done
+#         cd $THIS_PWD
 
-        echo "[INFO] Create Workspace for datacard"
-        combineTool.py -M T2W -i output/$datacard_output/htt_mt_${pt_cat}/ -o workspace.root --parallel 4 -m 125
-    done
+#         echo "[INFO] Create Workspace for datacard"
+#         combineTool.py -M T2W -i output/$datacard_output/htt_mt_${pt_cat}/ -o workspace.root --parallel 4 -m 125
+#     done
 
-    exit 0
-fi
+#     exit 0
+# fi
 
 
 dm_categories=("DM0" "DM1" "DM10_11")
@@ -345,27 +345,27 @@ if [[ $MODE == "SCAN_2D" ]]; then
         combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat}/ -o ws_scan_${dm_cat}.root
 
         if [[ $dm_cat == "DM0" ]]; then
-            min_id=0.8
-            max_id=1.1
-            min_es=-1.2
-            max_es=1.2
+            min_id=0.5
+            max_id=1.5
+            min_es=-2.2
+            max_es=2.2
         fi
 
         if [[ $dm_cat == "DM1" ]]; then
-            min_id=0.8
-            max_id=1.2
-            min_es=-1.2
-            max_es=1.2
+            min_id=0.5
+            max_id=1.5
+            min_es=-2.5
+            max_es=2.5
         fi
 
         if [[ $dm_cat == "DM10_11" ]]; then
-            min_id=0.9
-            max_id=1.03
-            min_es=-2
-            max_es=2
+            min_id=0.5
+            max_id=1.5
+            min_es=-2.5
+            max_es=2.5
         fi
 
-            combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_test_v1 -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+            combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_test_9apr_v1 -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
             --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=${min_id},${max_id}:ES_${dm_cat}=-${min_es},${max_es} \
             --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
             --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
@@ -373,29 +373,35 @@ if [[ $MODE == "SCAN_2D" ]]; then
             --floatOtherPOIs=1 --points=400 --algo grid
 
         echo "[INFO] Plotting 2D scan ..."
-        python3 plot_2D_scan.py --name nominal_${dm_cat} --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname tau_id_${dm_cat}_8Apr_v2
+        python3 plot_2D_scan.py --name nominal_${dm_cat} --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname ${dm_cat}
     done
 
 fi
 
 
 
-min_id_dm0=0.9
-max_id_dm0=1
-min_es_dm0=0
-max_es_dm0=0.6
+min_id_dm0=0.8
+max_id_dm0=1.2
+min_es_dm0=-2
+max_es_dm0=2
+id_dm0=0.92
+es_dm0=0.2
 
 
-min_id_dm1=0.9
-max_id_dm1=1.1
-min_es_dm1=-0.6
-max_es_dm1=0.2
+min_id_dm1=0.8
+max_id_dm1=1.2
+min_es_dm1=-2
+max_es_dm1=2
+id_dm1=0.99
+es_dm1=-0.2
 
 
-min_id_dm10_11=0.9
-max_id_dm10_11=1.1
-min_es_dm10_11=0
-max_es_dm10_11=-1.1
+min_id_dm10_11=0.8
+max_id_dm10_11=1.2
+min_es_dm10_11=-2
+max_es_dm10_11=2
+id_dm10_11=0.99
+es_dm10_11=-1.1
 
 if [[ $MODE == "MULTIFIT" ]]; then
     source utils/setup_cmssw_tauid.sh
@@ -409,8 +415,8 @@ if [[ $MODE == "MULTIFIT" ]]; then
                 --PO '"map=^.*/EMB_DM1:r_EMB_DM_1[1,${min_id_dm1},${max_id_dm1}]"' \
                 --PO '"map=^.*/EMB_DM10_11:r_EMB_DM_10_11[1,${min_id_dm10_11},${max_id_dm10_11}]"'  
 
-    combineTool.py -M MultiDimFit -n .comb_id_0.6_1.4_es_-1.8_1.8_dm -d output/$datacard_output_dm/cmb/out_multidim_dm.root \
-    --setParameters ES_DM0=0.0,ES_DM1=0.0,ES_DM10_11=0.0,r_EMB_DM_0=1.0,r_EMB_DM_1=1.0,r_EMB_DM_10_11=1.0 \
+    combineTool.py -M MultiDimFit -n .comb_dm_no_mm_v2 -d output/$datacard_output_dm/cmb/out_multidim_dm_test.root \
+    --setParameters ES_DM0=${es_dm0},ES_DM1=${es_dm1},ES_DM10_11=${es_dm10_11},r_EMB_DM_0=${id_dm0},r_EMB_DM_1=${id_dm1},r_EMB_DM_10_11=${id_dm10_11} \
     --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:r_EMB_DM_1=${min_id_dm1},${max_id_dm1}:r_EMB_DM_10_11=${min_id_dm10_11},${max_id_dm10_11}:ES_DM0=${min_es_dm0},${max_es_dm0}:ES_DM1=${min_es_dm1},${max_es_dm1}:ES_DM10_11=${min_es_dm10_11},${max_es_dm10_11} \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
@@ -424,7 +430,7 @@ if [[ $MODE == "POSTFIT" ]]; then
     source utils/setup_cmssw_tauid.sh
 
     # WORKSPACE=/work/olavoryk/DT25_smhtt/smhtt_ul/output/datacards/2022_07_v6-try_no_qqh_shape_v1/2018_tauid_medium/cmb/out_multidim.root
-    WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm.root
+    WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm_test.root
     echo "[INFO] Printing fit result for category $(basename $RESDIR)"
     FILE=output/$datacard_output_dm/cmb/postfitshape.root
     FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
