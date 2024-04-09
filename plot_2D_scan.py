@@ -20,8 +20,8 @@ t = f.Get("limit")
 
 # Number of points in interpolation
 n_points = 400
-x_range = [0.80, 1.1]
-y_range = [-1.5, -0.5]
+x_range = [0.88, 1.005]
+y_range = [-1.1, 0.6]
 
 # Number of bins in plot
 n_bins = 40
@@ -75,7 +75,7 @@ yw = (y_range[1] - y_range[0]) / n_bins
 # Set histogram properties
 h2D.SetContour(999)
 h2D.SetTitle(args.outname)
-h2D.GetXaxis().SetTitle("#tau ID ES SF ")
+h2D.GetXaxis().SetTitle("#tau ID SF ")
 h2D.GetXaxis().SetTitleSize(0.05)
 h2D.GetXaxis().SetTitleOffset(0.9)
 h2D.GetXaxis().SetRangeUser(x_range[0], x_range[1] - xw)
@@ -89,14 +89,14 @@ h2D.GetZaxis().SetTitle("-2 #Delta ln L")
 h2D.GetZaxis().SetTitleSize(0.05)
 h2D.GetZaxis().SetTitleOffset(0.8)
 
-h2D.SetMaximum(50)
+h2D.SetMaximum(10)
 
 # Make confidence interval contours
-# c68, c95 = h2D.Clone(), h2D.Clone()
-# c68.SetContour(2)
-# c68.SetContourLevel(1, 2.3)
-# c68.SetLineWidth(3)
-# c68.SetLineColor(ROOT.kBlack)
+c68, c95 = h2D.Clone(), h2D.Clone()
+c68.SetContour(2)
+c68.SetContourLevel(1, 2.3)
+c68.SetLineWidth(3)
+c68.SetLineColor(ROOT.kBlack)
 # c95.SetContour(2)
 # c95.SetContourLevel(1, 5.99)
 # c95.SetLineWidth(3)
@@ -116,7 +116,7 @@ hline.SetLineColorAlpha(ROOT.kGray, 0.5)
 hline.Draw("Same")
 
 # Draw contours
-# c68.Draw("cont3same")
+c68.Draw("cont3same")
 # c95.Draw("cont3same")
 
 # Make best fit and sm points
@@ -140,13 +140,13 @@ leg = ROOT.TLegend(0.6, 0.67, 0.8, 0.87)
 leg.SetBorderSize(0)
 leg.SetFillColor(0)
 leg.AddEntry(gBF, "Best fit", "P")
-# leg.AddEntry(c68, "1#sigma CL", "L")
+leg.AddEntry(c68, "1#sigma CL", "L")
 # leg.AddEntry(c95, "2#sigma CL", "L")
 # leg.AddEntry(gSM, "SM", "P")
 leg.Draw()
 
 canv.Update()
-canv.SaveAs("scan_2D_"+args.outname+"_es.png")
-canv.SaveAs("scan_2D_"+args.outname+"_es.pdf")
+canv.SaveAs("scan_2D_"+args.outname+"_id_es.png")
+canv.SaveAs("scan_2D_"+args.outname+"_id_es.pdf")
 
 
