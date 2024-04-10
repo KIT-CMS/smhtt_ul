@@ -19,7 +19,7 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_dm_test_v3_impr_fit/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_dm_2d_likelihood_v1/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
@@ -325,15 +325,19 @@ if [[ $MODE == "SCAN_2D" ]]; then
             max_es=2.5
         fi
 
-            combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_test_9apr_v1 -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
-            --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=${min_id},${max_id}:ES_${dm_cat}=-${min_es},${max_es} \
+            combineTool.py -M MultiDimFit -n .nominal_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+            --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=${min_id},${max_id}:ES_${dm_cat}=${min_es},${max_es} \
             --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
             --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
             --redefineSignalPOIs ES_${dm_cat},r \
             --floatOtherPOIs=1 --points=400 --algo grid
 
+        echo "[INFO] Moving scan file to datacard folder ..."
+        mv higgsCombine.nominal_${dm_cat}.MultiDimFit.mH120.root output/$datacard_output_dm/htt_mt_${dm_cat}/
+
         echo "[INFO] Plotting 2D scan ..."
-        python3 plot_2D_scan.py --name nominal_${dm_cat} --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname ${dm_cat}
+        python3 plot_2D_scan.py --name nominal_${dm_cat} --in-path output/$datacard_output_dm/htt_mt_${dm_cat}/ \
+         --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname ${dm_cat} 
     done
 
 fi
