@@ -6,6 +6,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name',type=str, help='Name of the file')
+parser.add_argument('--in-path',type=str, help='Input path to the 2D scan file') 
 parser.add_argument('--tau-id-poi',type=str, help='Name of the tau ID POI')
 parser.add_argument('--tau-es-poi',type=str, help='Name of the tau ES POI')
 parser.add_argument('--outname',type=str, help='Name of the outputfile')
@@ -14,14 +15,14 @@ args = parser.parse_args()
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
-file_name = "higgsCombine."+args.name+".MultiDimFit.mH120.root"
+file_name = args.in_path+"higgsCombine."+args.name+".MultiDimFit.mH120.root"
 f = ROOT.TFile(file_name)
 t = f.Get("limit")
 
 # Number of points in interpolation
 n_points = 400
-x_range = [0.88, 1.005]
-y_range = [-1.1, 0.6]
+x_range = [-2.5, 2.5]
+y_range = [-0.5, 1.5]
 
 # Number of bins in plot
 n_bins = 40
