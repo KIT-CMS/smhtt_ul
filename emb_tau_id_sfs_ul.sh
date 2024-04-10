@@ -302,40 +302,41 @@ if [[ $MODE == "SCAN_2D" ]]; then
         for dm_cat in "${dm_categories[@]}"
     do
     
-        combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat}/ -o ws_scan_${dm_cat}.root
+        # combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat}/ -o ws_scan_${dm_cat}.root
 
-        if [[ $dm_cat == "DM0" ]]; then
-            min_id=0.5
-            max_id=1.5
-            min_es=-2.2
-            max_es=2.2
-        fi
+        # if [[ $dm_cat == "DM0" ]]; then
+        #     min_id=0.5
+        #     max_id=1.5
+        #     min_es=-2.2
+        #     max_es=2.2
+        # fi
 
-        if [[ $dm_cat == "DM1" ]]; then
-            min_id=0.5
-            max_id=1.5
-            min_es=-2.5
-            max_es=2.5
-        fi
+        # if [[ $dm_cat == "DM1" ]]; then
+        #     min_id=0.5
+        #     max_id=1.5
+        #     min_es=-2.5
+        #     max_es=2.5
+        # fi
 
-        if [[ $dm_cat == "DM10_11" ]]; then
-            min_id=0.5
-            max_id=1.5
-            min_es=-2.5
-            max_es=2.5
-        fi
+        # if [[ $dm_cat == "DM10_11" ]]; then
+        #     min_id=0.5
+        #     max_id=1.5
+        #     min_es=-2.5
+        #     max_es=2.5
+        # fi
 
-            combineTool.py -M MultiDimFit -n .nominal_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
-            --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=${min_id},${max_id}:ES_${dm_cat}=${min_es},${max_es} \
-            --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-            --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-            --redefineSignalPOIs ES_${dm_cat},r \
-            --floatOtherPOIs=1 --points=400 --algo grid
+        #     combineTool.py -M MultiDimFit -n .nominal_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+        #     --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=${min_id},${max_id}:ES_${dm_cat}=${min_es},${max_es} \
+        #     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+        #     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+        #     --redefineSignalPOIs ES_${dm_cat},r \
+        #     --floatOtherPOIs=1 --points=400 --algo grid
 
-        echo "[INFO] Moving scan file to datacard folder ..."
-        mv higgsCombine.nominal_${dm_cat}.MultiDimFit.mH120.root output/$datacard_output_dm/htt_mt_${dm_cat}/
+        # echo "[INFO] Moving scan file to datacard folder ..."
+        # mv higgsCombine.nominal_${dm_cat}.MultiDimFit.mH120.root output/$datacard_output_dm/htt_mt_${dm_cat}/
 
         echo "[INFO] Plotting 2D scan ..."
+        echo "[INFO] Input file: " output/$datacard_output_dm/htt_mt_${dm_cat}/higgsCombine.nominal_${dm_cat}.MultiDimFit.mH120.root
         python3 plot_2D_scan.py --name nominal_${dm_cat} --in-path output/$datacard_output_dm/htt_mt_${dm_cat}/ \
          --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname ${dm_cat} 
     done
