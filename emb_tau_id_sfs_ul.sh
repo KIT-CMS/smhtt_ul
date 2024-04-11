@@ -19,7 +19,7 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_dm_2d_likelihood_v1/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_dm_2d_likelihood_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
@@ -344,6 +344,41 @@ if [[ $MODE == "SCAN_2D" ]]; then
 fi
 
 
+fix_es=0.77
+fix_id=1.075
+
+probl_nuisance="CMS_eff_trigger_emb_mt_Run2016"
+
+probl_dm_categories=("DM0")
+
+if [[ $MODE == "PROBL_NUIS_SCAN" ]]; then
+
+    source utils/setup_cmssw_tauid.sh
+
+   echo "[INFO] Create 1D scan for problematic nuisance parameter ${probl_nuisance}"
+
+           for dm_cat in "${probl_dm_categories[@]}"
+    do
+
+    combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_check_poi -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+    --setParameters ES_${dm_cat}=${fix_es},r=${fix_id} --setParameterRanges r=-2,2:ES_${dm_cat}=-2.5,2.5 \
+    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    --redefineSignalPOIs ${probl_nuisance} \
+    --floatOtherPOIs=1 --points=400 --algo grid -v 2
+
+    echo "[INFO] Moving scan with problematic nuisance parameter file to datacard folder ..."
+
+    mv higgsCombine.nominal_${dm_cat}_check_poi.MultiDimFit.mH120.root output/$datacard_output_dm/htt_mt_${dm_cat}/
+
+    echo "[INFO] Plotting 1D scan ..."
+
+    python3 plot1DScan.py  output/$datacard_output_dm/htt_mt_${dm_cat}/higgsCombine.nominal_${dm_cat}_check_poi.MultiDimFit.mH120.root \
+     --POI $probl_nuisance --y-max 12 --output ${TAG}_${ERA}_${CHANNEL}_${WP}_${dm_cat}_${probl_nuisance}_scan
+
+    mv ${TAG}_${ERA}_${CHANNEL}_${WP}_${dm_cat}_${probl_nuisance}_scan.* output/$datacard_output_dm/htt_mt_${dm_cat}/
+    done
+fi
 
 min_id_dm0=0.8
 max_id_dm0=1.2
@@ -394,7 +429,6 @@ fi
 if [[ $MODE == "POSTFIT" ]]; then
     source utils/setup_cmssw_tauid.sh
 
-    # WORKSPACE=/work/olavoryk/DT25_smhtt/smhtt_ul/output/datacards/2022_07_v6-try_no_qqh_shape_v1/2018_tauid_medium/cmb/out_multidim.root
     WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm_test.root
     echo "[INFO] Printing fit result for category $(basename $RESDIR)"
     FILE=output/$datacard_output_dm/cmb/postfitshape.root
