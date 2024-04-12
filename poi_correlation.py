@@ -240,5 +240,5 @@ if __name__ == "__main__":
     c.Update()
 
     # c.SaveAs("{}_plot_poi_correlation_stage-0.pdf".format(era))
-    c.SaveAs("{}_DM_POIS_correlations_ID_ES.pdf".format(era))
-    c.SaveAs("{}_DM_POIS_correlations_ID_ES.png".format(era))
+    c.SaveAs("{}_DM_POIS_correlations_ID_ES_no_mm.pdf".format(era))
+    c.SaveAs("{}_DM_POIS_correlations_ID_ES_no_mm.png".format(era))
