@@ -1135,7 +1135,14 @@ def main(args):
                 [trigger_eff_mt_emb],
                 do_check,
             )
-        elif channel == "mt":
+            book_histograms(
+                um,
+                additional_emb_procS,
+                datasets=nominals[era]["units"][channel],
+                variations=[trigger_eff_mt_emb],
+                enable_check=do_check,
+            )
+        elif channel == "mt" and special_analysis != "TauID":
             book_histograms(
                 um,
                 processes=embS,
@@ -1144,7 +1151,6 @@ def main(args):
                 variations=[same_sign],
                 enable_check=do_check,
             )
-        # import pdb; pdb.set_trace()
         if channel in ["mt", "et"]:
             book_histograms(
                 um,
@@ -1157,6 +1163,13 @@ def main(args):
             book_histograms(
                 um,
                 processes=jetFakesDS[channel],
+                datasets=nominals[era]["units"][channel],
+                variations=[same_sign],
+                enable_check=do_check,
+            )
+            book_histograms(
+                um,
+                processes=embS,
                 datasets=nominals[era]["units"][channel],
                 variations=[same_sign],
                 enable_check=do_check,
