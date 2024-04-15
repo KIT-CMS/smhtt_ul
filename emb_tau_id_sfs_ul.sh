@@ -19,7 +19,7 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_dm_2d_likelihood_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_dm_2d_likelihood_mvis_90/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
@@ -384,24 +384,24 @@ min_id_dm0=0.8
 max_id_dm0=1.2
 min_es_dm0=-2
 max_es_dm0=2
-id_dm0=0.92
+id_dm0=0.95
 es_dm0=0.2
 
 
-min_id_dm1=0.8
+min_id_dm1=0.9
 max_id_dm1=1.2
 min_es_dm1=-2
-max_es_dm1=2
-id_dm1=0.99
-es_dm1=-0.2
+max_es_dm1=0.7
+id_dm1=1.05
+es_dm1=-1.4
 
 
-min_id_dm10_11=0.8
+min_id_dm10_11=0.9
 max_id_dm10_11=1.2
-min_es_dm10_11=-2
-max_es_dm10_11=2
-id_dm10_11=0.99
-es_dm10_11=-1.1
+min_es_dm10_11=-2.2
+max_es_dm10_11=1.5
+id_dm10_11=1.1
+es_dm10_11=-1.5
 
 if [[ $MODE == "MULTIFIT" ]]; then
     source utils/setup_cmssw_tauid.sh
@@ -436,7 +436,7 @@ if [[ $MODE == "POSTFIT" ]]; then
     combine \
         -n .$ERA \
         -M FitDiagnostics \
-        -m 125 -d $WORKSPACE \
+        -m 126 -d $WORKSPACE \
         --robustFit 1 -v1 \
         --robustHesse 1 \
         --X-rtd MINIMIZER_analytic \
@@ -445,8 +445,8 @@ if [[ $MODE == "POSTFIT" ]]; then
     mv fitDiagnostics.${ERA}.root $FITFILE
     echo "[INFO] Building Prefit/Postfit shapes"
     PostFitShapesFromWorkspace -w ${WORKSPACE} \
-        -m 125 -d output/$datacard_output_dm/cmb/combined.txt.cmb \
-        -o ${FILE} \
+        -m 126 -d output/$datacard_output_dm/cmb/combined.txt.cmb \
+        --output ${FILE} \
         -f ${FITFILE}:fit_s --postfit
 
     exit 0
