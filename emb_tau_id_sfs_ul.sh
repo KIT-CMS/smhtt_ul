@@ -250,6 +250,7 @@ fi
 
 
 dm_categories=("DM0" "DM1" "DM10_11")
+# dm_categories=("DM10_11")
 if [[ $MODE == "DATACARD_DM" ]]; then
     source utils/setup_cmssw_tauid.sh
     # # inputfile
@@ -347,7 +348,7 @@ fi
 fix_es=0.77
 fix_id=1.075
 
-probl_nuisance="CMS_eff_trigger_emb_mt_Run2016"
+probl_nuisance="ES_DM1"
 
 probl_dm_categories=("DM0")
 
@@ -390,8 +391,8 @@ es_dm0=0.2
 
 min_id_dm1=0.9
 max_id_dm1=1.2
-min_es_dm1=-2
-max_es_dm1=0.7
+min_es_dm1=-2.5
+max_es_dm1=0.5
 id_dm1=1.05
 es_dm1=-1.4
 
@@ -401,7 +402,7 @@ max_id_dm10_11=1.2
 min_es_dm10_11=-2.2
 max_es_dm10_11=1.5
 id_dm10_11=1.1
-es_dm10_11=-1.5
+es_dm10_11=-1
 
 if [[ $MODE == "MULTIFIT" ]]; then
     source utils/setup_cmssw_tauid.sh
