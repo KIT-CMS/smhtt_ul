@@ -305,7 +305,7 @@ max_es=0
 if [[ $MODE == "SCAN_2D" ]]; then
     source utils/setup_cmssw_tauid.sh
 
-    echo "[INFO] Create 2D scan"
+    # echo "[INFO] Create 2D scan"
 
         for dm_cat in "${dm_categories[@]}"
     do
@@ -315,22 +315,22 @@ if [[ $MODE == "SCAN_2D" ]]; then
         if [[ $dm_cat == "DM0" ]]; then
             min_id=0.5
             max_id=1.5
-            min_es=-2.2
-            max_es=2.2
+            min_es=-4.0
+            max_es=4.0
         fi
 
         if [[ $dm_cat == "DM1" ]]; then
             min_id=0.5
             max_id=1.5
-            min_es=-2.5
-            max_es=2.5
+            min_es=-4.0
+            max_es=4.0
         fi
 
         if [[ $dm_cat == "DM10_11" ]]; then
             min_id=0.5
             max_id=1.5
-            min_es=-2.5
-            max_es=2.5
+            min_es=-4.0
+            max_es=4.0
         fi
 
             combineTool.py -M MultiDimFit -n .nominal_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
@@ -398,7 +398,7 @@ es_dm0=0.2
 
 min_id_dm1=0.9
 max_id_dm1=1.2
-min_es_dm1=-2.5
+min_es_dm1=-3.8
 max_es_dm1=0.5
 id_dm1=1.05
 es_dm1=-1.4
@@ -406,9 +406,9 @@ es_dm1=-1.4
 
 min_id_dm10_11=0.9
 max_id_dm10_11=1.2
-min_es_dm10_11=-2.2
+min_es_dm10_11=-3
 max_es_dm10_11=1.5
-id_dm10_11=1.1
+id_dm10_11=1.02
 es_dm10_11=-1
 
 if [[ $MODE == "MULTIFIT" ]]; then
