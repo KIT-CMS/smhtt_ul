@@ -27,6 +27,21 @@ _process_map = {
 
 tau_es_map = {
 
+    "embminus4p0": "-4.0",
+    "embminus3p9": "-3.9",
+    "embminus3p8": "-3.8",
+    "embminus3p7": "-3.7",
+    "embminus3p6": "-3.6",
+    "embminus3p5": "-3.5",
+    "embminus3p4": "-3.4",
+    "embminus3p3": "-3.3",
+    "embminus3p2": "-3.2",
+    "embminus3p1": "-3.1",
+    "embminus3p0": "-3.0",
+    "embminus2p9": "-2.9",
+    "embminus2p8": "-2.8",
+    "embminus2p7": "-2.7",
+    "embminus2p6": "-2.6",
     "embminus2p5": "-2.5",
     "embminus2p4": "-2.4",
     "embminus2p3": "-2.3",
@@ -78,7 +93,21 @@ tau_es_map = {
     "emb2p3": "2.3",
     "emb2p4": "2.4",
     "emb2p5": "2.5",
-
+    "emb2p6": "2.6",
+    "emb2p7": "2.7",
+    "emb2p8": "2.8",
+    "emb2p9": "2.9",
+    "emb3p0": "3.0",
+    "emb3p1": "3.1",
+    "emb3p2": "3.2",
+    "emb3p3": "3.3",
+    "emb3p4": "3.4",
+    "emb3p5": "3.5",
+    "emb3p6": "3.6",
+    "emb3p7": "3.7",
+    "emb3p8": "3.8",
+    "emb3p9": "3.9",
+    "emb4p0": "4.0",
 }
 
 
