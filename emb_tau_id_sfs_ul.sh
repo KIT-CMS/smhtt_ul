@@ -352,12 +352,12 @@ if [[ $MODE == "SCAN_2D" ]]; then
 fi
 
 
-fix_es=0.77
-fix_id=1.075
+fix_es=-1.4
+fix_id=1.097
 
 probl_nuisance="ES_DM1"
 
-probl_dm_categories=("DM0")
+probl_dm_categories=("DM1")
 
 if [[ $MODE == "PROBL_NUIS_SCAN" ]]; then
 
@@ -369,7 +369,7 @@ if [[ $MODE == "PROBL_NUIS_SCAN" ]]; then
     do
 
     combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_check_poi -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
-    --setParameters ES_${dm_cat}=${fix_es},r=${fix_id} --setParameterRanges r=-2,2:ES_${dm_cat}=-2.5,2.5 \
+    --setParameters ES_${dm_cat}=${fix_es},r=${fix_id} --setParameterRanges r=0.5,1.5:ES_${dm_cat}=-4.0,4.0 \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs ${probl_nuisance} \
@@ -400,7 +400,7 @@ min_id_dm1=0.9
 max_id_dm1=1.2
 min_es_dm1=-3.8
 max_es_dm1=0.5
-id_dm1=1.05
+id_dm1=1.12
 es_dm1=-1.4
 
 
@@ -423,7 +423,7 @@ if [[ $MODE == "MULTIFIT" ]]; then
                 --PO '"map=^.*/EMB_DM1:r_EMB_DM_1[1,${min_id_dm1},${max_id_dm1}]"' \
                 --PO '"map=^.*/EMB_DM10_11:r_EMB_DM_10_11[1,${min_id_dm10_11},${max_id_dm10_11}]"'  
 
-    combineTool.py -M MultiDimFit -n .comb_dm_no_mm_v2 -d output/$datacard_output_dm/cmb/out_multidim_dm_test.root \
+    combineTool.py -M MultiDimFit -n .comb_dm_1_corr -d output/$datacard_output_dm/cmb/out_multidim_dm_test.root \
     --setParameters ES_DM0=${es_dm0},ES_DM1=${es_dm1},ES_DM10_11=${es_dm10_11},r_EMB_DM_0=${id_dm0},r_EMB_DM_1=${id_dm1},r_EMB_DM_10_11=${id_dm10_11} \
     --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:r_EMB_DM_1=${min_id_dm1},${max_id_dm1}:r_EMB_DM_10_11=${min_id_dm10_11},${max_id_dm10_11}:ES_DM0=${min_es_dm0},${max_es_dm0}:ES_DM1=${min_es_dm1},${max_es_dm1}:ES_DM10_11=${min_es_dm10_11},${max_es_dm10_11} \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
