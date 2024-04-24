@@ -1004,7 +1004,7 @@ def main(args):
             )
         if special_analysis == "TauID" and args.es:
             additional_emb_procS = set()
-            tauESvariations = [-2.5 + 0.1 * i for i in range(0, 51)]
+            tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
             add_tauES_datasets(
                 era,
                 channel,
