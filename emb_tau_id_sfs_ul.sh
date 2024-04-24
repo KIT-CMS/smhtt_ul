@@ -56,7 +56,14 @@ es_shifts=("embminus2p5" "embminus2p4" "embminus2p3" "embminus2p2" "embminus2p1"
    "emb1p7" "emb1p8" "emb1p9" "emb2p0" "emb2p1" "emb2p2" "emb2p3" "emb2p4" "emb2p5")
 
 # es_shifts=("embminus2p5" "embminus2p4" "embminus2p3")
-
+es_shifts4_0=("embminus4p0" "embminus3p9" "embminus3p8" "embminus3p7" "embminus3p6" "embminus3p5" "embminus3p4" "embminus3p3"\
+ "embminus3p2" "embminus3p1" "embminus3p0" "embminus2p9" "embminus2p8" "embminus2p7" "embminus2p6" "embminus2p5" "embminus2p4"\ 
+ "embminus2p3" "embminus2p2" "embminus2p1" "embminus2p0" "embminus1p9" "embminus1p8" "embminus1p7" "embminus1p6" "embminus1p5"\
+  "embminus1p4" "embminus1p3" "embminus1p2" "embminus1p1" "embminus1p0" "embminus0p9" "embminus0p8" "embminus0p7" "embminus0p6"\
+   "embminus0p5" "embminus0p4" "embminus0p3" "embminus0p2" "embminus0p1" "emb0p0" "emb0p1" "emb0p2" "emb0p3" "emb0p4" "emb0p5" "emb0p6"\
+    "emb0p7" "emb0p8" "emb0p9" "emb1p0" "emb1p1" "emb1p2" "emb1p3" "emb1p4" "emb1p5" "emb1p6" "emb1p7" "emb1p8" "emb1p9" "emb2p0" "emb2p1"\
+     "emb2p2" "emb2p3" "emb2p4" "emb2p5" "emb2p6" "emb2p7" "emb2p8" "emb2p9" "emb3p0" "emb3p1" "emb3p2" "emb3p3" "emb3p4" "emb3p5" "emb3p6"\
+      "emb3p7" "emb3p8" "emb3p9" "emb4p0")
 VS_ELE_WP="vvloose"
 
 
@@ -95,7 +102,7 @@ if [[ $MODE == "XSEC" ]]; then
     echo "##############################################################################################"
     echo "#      Checking xsec friends directory                                                       #"
     echo "##############################################################################################"
-    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsxrootd-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
+    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsdcache-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
     exit 0
 fi
 
@@ -186,11 +193,11 @@ if [[ $MODE == "PLOT-CONTROL-ES" ]]; then
     echo "##############################################################################################"
     echo "#     plotting                                      #"
     echo "##############################################################################################"
-    python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-emb-tt --do-qcd
+    # python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-emb-tt --do-qcd
 
         for CATEGORY in "${dm_categories[@]}"
     do
-        for es_sh in "${es_shifts[@]}"
+        for es_sh in "${es_shifts4_0[@]}"
         do 
             python3 plotting/plot_shapes_control_es_shifts.py -l --era Run${ERA} --input ${shapes_rootfile} \
             --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category $CATEGORY --energy_scale --es_shift $es_sh
