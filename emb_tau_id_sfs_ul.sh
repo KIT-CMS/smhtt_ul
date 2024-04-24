@@ -19,7 +19,7 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_dm_2d_likelihood_mvis_90/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_es_4_0/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
