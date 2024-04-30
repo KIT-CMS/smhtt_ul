@@ -19,7 +19,7 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_es_4_0/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_es_4_0_29Apr/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
@@ -305,7 +305,7 @@ max_es=0
 if [[ $MODE == "SCAN_2D" ]]; then
     source utils/setup_cmssw_tauid.sh
 
-    # echo "[INFO] Create 2D scan"
+    echo "[INFO] Create 2D scan"
 
         for dm_cat in "${dm_categories[@]}"
     do
@@ -393,7 +393,7 @@ max_id_dm0=1.2
 min_es_dm0=-2
 max_es_dm0=2
 id_dm0=0.95
-es_dm0=0.2
+es_dm0=-1
 
 
 min_id_dm1=0.9
@@ -435,25 +435,72 @@ if [[ $MODE == "MULTIFIT" ]]; then
 
 fi
 
+dm_categories_sep=("DM0")
+if [[ $MODE == "MULTIFIT_SEP" ]]; then
+    source utils/setup_cmssw_tauid.sh
 
-if [[ $MODE == "POSTFIT" ]]; then
+    echo "[INFO] Create Workspace for all the datacards"
+
+        for dm_cat in "${dm_categories_sep[@]}"
+    do
+
+    combineTool.py -M MultiDimFit -n .comb_dm_sep_fit_${dm_cat} -d output/$datacard_output_dm/cmb/out_multidim_dm_test.root \
+    --setParameters ES_DM0=${es_dm0},r_EMB_DM_0=${id_dm0} \
+    --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:ES_DM0=${min_es_dm0},${max_es_dm0} \
+    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    --redefineSignalPOIs ES_DM0,r_EMB_DM_0 --floatOtherPOIs=1 \
+    --points=400 --algo singles
+
+    mv higgsCombine.comb_dm_sep_fit_${dm_cat}.MultiDimFit.mH120.root output/$datacard_output_dm/cmb/
+ done
+fi
+
+
+min_id_dm0=0.8
+max_id_dm0=1.2
+min_es_dm0=-2
+max_es_dm0=2
+id_dm0=0.95
+es_dm0=-1
+
+
+min_id_dm1=0.9
+max_id_dm1=1.2
+min_es_dm1=-3.8
+max_es_dm1=0.5
+id_dm1=1.12
+es_dm1=-1.4
+
+
+min_id_dm10_11=0.9
+max_id_dm10_11=1.2
+min_es_dm10_11=-3
+max_es_dm10_11=1.5
+id_dm10_11=1.02
+es_dm10_11=-1
+
+mH=126
+
+if [[ $MODE == "POSTFIT_MULT" ]]; then
     source utils/setup_cmssw_tauid.sh
 
     WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm_test.root
     echo "[INFO] Printing fit result for category $(basename $RESDIR)"
     FILE=output/$datacard_output_dm/cmb/postfitshape.root
     FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
-    combine \
-        -n .$ERA \
-        -M FitDiagnostics \
-        -m 126 -d $WORKSPACE \
-        --robustFit 1 -v1 \
-        --robustHesse 1 \
-        --X-rtd MINIMIZER_analytic \
-        --cminDefaultMinimizerStrategy 0 \
-        --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11
-    mv fitDiagnostics.${ERA}.root $FITFILE
+   
+    combineTool.py -M FitDiagnostics  -d ${WORKSPACE} -m ${mH} \
+    --setParameters ES_DM0=${es_dm0},ES_DM1=${es_dm1},ES_DM10_11=${es_dm10_11},r_EMB_DM_0=${id_dm0},r_EMB_DM_1=${id_dm1},r_EMB_DM_10_11=${id_dm10_11} \
+    --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:r_EMB_DM_1=${min_id_dm1},${max_id_dm1}:r_EMB_DM_10_11=${min_id_dm10_11},${max_id_dm10_11}:ES_DM0=${min_es_dm0},${max_es_dm0}:ES_DM1=${min_es_dm1},${max_es_dm1}:ES_DM10_11=${min_es_dm10_11},${max_es_dm10_11} \
+    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11  \
+    --parallel 16   -v2 --robustHesse 1
+    mv fitDiagnostics.Test.root $FITFILE
+    mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/cmb/
     echo "[INFO] Building Prefit/Postfit shapes"
+    # PostFitShapesFromWorkspace --help
     PostFitShapesFromWorkspace -w ${WORKSPACE} \
         -m 126 -d output/$datacard_output_dm/cmb/combined.txt.cmb \
         --output ${FILE} \
@@ -470,7 +517,6 @@ if [[ $MODE == "POI_CORRELATION" ]]; then
     python poi_correlation.py $ERA $FITFILE
 
 fi
-
 
 min_id_dm0=0.8
 max_id_dm0=1.2
@@ -522,11 +568,3 @@ if [[ $MODE == "IMPACTS" ]]; then
     rm higgsCombine*.root
     exit 0
 fi
-
-# combineTool.py -M MultiDimFit -n .comb_dm_1_corr_v2 -d output/$datacard_output_dm/cmb/out_multidim_dm_test.root \
-# --setParameters ES_DM0=${es_dm0},ES_DM1=${es_dm1},ES_DM10_11=${es_dm10_11},r_EMB_DM_0=${id_dm0},r_EMB_DM_1=${id_dm1},r_EMB_DM_10_11=${id_dm10_11} \
-# --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:r_EMB_DM_1=${min_id_dm1},${max_id_dm1}:r_EMB_DM_10_11=${min_id_dm10_11},${max_id_dm10_11}:ES_DM0=${min_es_dm0},${max_es_dm0}:ES_DM1=${min_es_dm1},${max_es_dm1}:ES_DM10_11=${min_es_dm10_11},${max_es_dm10_11} \
-# --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-# --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-# --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11 --floatOtherPOIs=1 \
-# --points=400 --algo sin
