@@ -496,21 +496,20 @@ def main(info):
 
         plot.add_legend(width=0.6, height=0.15)
         for process in legend_bkg_processes:
-            if "mm" in channel:
-                if process == "EMB":
-                    plot.legend(i).add_entry(
-                    0,
-                    process,
-                    "#mu#rightarrow#mu embedded",
-                    'f',
-                    )
-                else:
-                    plot.legend(i).add_entry(
-                    0,
-                    process, 
-                    styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("_NLO","")], 
-                    'f'
-                    )
+            if "mm" in channel and process == "EMB":
+                plot.legend(i).add_entry(
+                0,
+                process,
+                "#mu#rightarrow#mu embedded",
+                'f',
+                )
+            else:
+                plot.legend(i).add_entry(
+                0,
+                process,
+                styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("_NLO","")],
+                'f'
+                )
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         if args.add_signals:
             plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s #times gg#rightarrowH"%str(int(ggH_scale)), 'l')
