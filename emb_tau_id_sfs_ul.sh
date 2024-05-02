@@ -19,7 +19,7 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_es_4_0_29Apr/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_es_4_0_29Apr_morph_v1/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
@@ -496,7 +496,7 @@ if [[ $MODE == "POSTFIT_MULT" ]]; then
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11  \
-    --parallel 16   -v2 --robustHesse 1
+    --parallel 16   -v2 --robustHesse 1 --saveShapes
     mv fitDiagnostics.Test.root $FITFILE
     mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/cmb/
     echo "[INFO] Building Prefit/Postfit shapes"
