@@ -496,7 +496,7 @@ if [[ $MODE == "POSTFIT_MULT" ]]; then
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11  \
-    --parallel 16   -v2 --robustHesse 1 --saveShapes
+    --parallel 16   -v2 --robustHesse 1 --saveShapes --saveWithUncertainties
     mv fitDiagnostics.Test.root $FITFILE
     mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/cmb/
     echo "[INFO] Building Prefit/Postfit shapes"
