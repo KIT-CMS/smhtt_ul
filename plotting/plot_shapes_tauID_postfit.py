@@ -303,7 +303,6 @@ def main(args):
             plot.subplot(0).normalizeByBinWidth()
             plot.subplot(1).normalizeByBinWidth()
 
-        # import pdb; pdb.set_trace()
         # set axes limits and labels
 
         gr = plot.subplot(0).get_graph("data_obs")[0]
