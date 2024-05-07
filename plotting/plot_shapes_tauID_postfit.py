@@ -172,7 +172,7 @@ def main(args):
 
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
 
-    bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
+    # bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
     if not args.fake_factor and args.embedding:
         bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
     if not args.embedding and args.fake_factor:
@@ -191,7 +191,7 @@ def main(args):
             "ZL",
             "ZTT",
         ]
-    # bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
+    bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB_"+str(args.single_category)]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -258,17 +258,25 @@ def main(args):
                 )
             except BaseException:
                 pass
-        data_obs = rootfile.get(era, channel, category, "data_obs")
-        plot.add_hist(data_obs, "data_obs")
 
-        total_bkg = rootfile.get(era, channel, category, "TotalBkg")
+        plot.setGraphStyle(
+                bkg_processes[-1], "hist", fillcolor=styles.color_dict["EMB"]
+            )
+        data_obs = rootfile.get(era, channel, category, "data_obs")
+        plot.add_graph(data_obs, "data_obs")
+
+        total_bkg = rootfile.get(era, channel, category, "total_background")
         plot.add_hist(total_bkg, "total_bkg")
 
-        total_sig = rootfile.get(era, channel, category, "TotalSig")
-        plot.add_hist(total_sig, "total_sig")
-
         model_total = plot.subplot(2).get_hist("total_bkg")
-        model_total.Add(plot.subplot(2).get_hist("total_sig"))
+        if category != "100":
+            total_sig = rootfile.get(era, channel, category, "total_signal")
+            plot.add_hist(total_sig, "total_sig")
+
+
+            model_total.Add(plot.subplot(2).get_hist("total_sig"))
+        else:
+            pass
         plot.add_hist(model_total, "model_total")
         plot.subplot(0).setGraphStyle("data_obs", "e0")
         plot.setGraphStyle(
@@ -295,11 +303,16 @@ def main(args):
             plot.subplot(0).normalizeByBinWidth()
             plot.subplot(1).normalizeByBinWidth()
 
+        # import pdb; pdb.set_trace()
         # set axes limits and labels
+
+        gr = plot.subplot(0).get_graph("data_obs")[0]
+        n = gr.GetN()
+        max_n = ROOT.TMath.MaxElement(n,gr.GetY())
         plot.subplot(0).setYlims(
             split_dict[channel],
             max(
-                2 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
+                2 * max_n,
                 split_dict[channel] * 2,
             ),
         )
@@ -357,6 +370,8 @@ def main(args):
                     )
                 except BaseException:
                     pass
+            if channel != "mm":
+                plot.legend(i).add_entry(0, legend_bkg_processes[0], "#tau  "+legend_bkg_processes[0], "f")
             plot.legend(i).add_entry(0, "total_bkg", "Bkg. unc.", "f")
             plot.legend(i).add_entry(0, "data_obs", "Data", "PE")
             plot.legend(i).setNColumns(3)
