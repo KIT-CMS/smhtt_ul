@@ -509,6 +509,39 @@ if [[ $MODE == "POSTFIT_MULT" ]]; then
     exit 0
 fi
 
+if [[ $MODE == "PLOT-MULTIPOSTFIT_DM" ]]; then
+    source utils/setup_root.sh
+
+    fit_categories=("DM0" "DM1" "DM10_11")
+
+
+
+    for RESDIR in "${fit_categories[@]}" 
+      do
+        
+        WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm.root
+
+
+        CATEGORY=$RESDIR
+        
+        # FILE=output/$datacard_output_dm/cmb/postfitshape.root
+        FILE=output/datacards_es_4_0_29Apr_morph_v1/2016postVFP_id_es_23Apr_es_4_0_v1-medium_vs_j_29Apr_v1/2016postVFP_tauid_medium/cmb/postfitshape.root
+
+        FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
+
+        # create output folder if it does not exist
+        if [ ! -d "output/postfitplots_emb_${TAG}_multifit/" ]; then
+            mkdir -p output/postfitplots_emb_${TAG}_multifit/${WP}
+        fi
+        echo "[INFO] Postfits plots for category $CATEGORY"
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots_emb_${TAG}_multifit/${WP} --prefit
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category $CATEGORY --categories "None" -o output/postfitplots_emb_${TAG}_multifit/${WP}
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots_emb_${TAG}_multifit/${WP} --prefit
+        python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category 100 --categories "None" -o output/postfitplots_emb_${TAG}_multifit/${WP}
+    done
+    exit 0
+fi
+
 if [[ $MODE == "POI_CORRELATION" ]]; then
     source utils/setup_root.sh
     FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
