@@ -410,8 +410,10 @@ def main(args):
 
         # draw additional labels
         plot.DrawCMS()
-        if "2016" in args.era:
-            plot.DrawLumi("35.9 fb^{-1} (2016, 13 TeV)", textsize=0.5)
+        if "2016postVFP" in args.era:
+            plot.DrawLumi("16.8 fb^{-1} (2016UL postVFP, 13 TeV)")
+        elif "2016preVFP" in args.era:
+            plot.DrawLumi("19.5 fb^{-1} (2016UL preVFP, 13 TeV)")
         elif "2017" in args.era:
             plot.DrawLumi("41.5 fb^{-1} (2017, 13 TeV)", textsize=0.5)
         elif "2018" in args.era:
