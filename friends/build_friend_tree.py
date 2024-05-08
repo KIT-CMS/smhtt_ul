@@ -1,6 +1,6 @@
 import ROOT
 import argparse
-import yaml
+import json
 import os
 import glob
 import shutil
@@ -36,8 +36,8 @@ def args_parser():
     parser.add_argument(
         "--dataset-config",
         type=str,
-        default="datasets/datasets.yaml",
-        help="path to the datasets.yaml",
+        default="datasets/datasets.json",
+        help="path to the datasets.json",
     )
     parser.add_argument(
         "--debug",
@@ -45,10 +45,10 @@ def args_parser():
         help="if set, debug mode will be enabled",
     )
     parser.add_argument(
-        '--tempdir',
+        "--tempdir",
         type=str,
-        default='tmp_dir',
-        help='Temporary directory to store intermediate files',
+        default="tmp_dir",
+        help="Temporary directory to store intermediate files",
     )
     return parser.parse_args()
 
@@ -82,9 +82,12 @@ def convert_to_xrootd(path):
 def job_wrapper(args):
     return friend_producer(*args)
 
+
 def check_file_exists_remote(serverpath, file_path):
     server_url = serverpath.split("store")[0][:-1]
-    file_path = "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
+    file_path = (
+        "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
+    )
     # print(f"Checking if {file_path} exists in {server_url}")
     myclient = client.FileSystem(server_url)
     status, listing = myclient.stat(file_path, DirListFlags.STAT)
@@ -95,7 +98,10 @@ def check_file_exists_remote(serverpath, file_path):
         # print(f"{file_path} does not exist")
         return False
 
-def friend_producer(inputfile, workdir, output_path, dataset_proc, era, channel, debug=False):
+
+def friend_producer(
+    inputfile, workdir, output_path, dataset_proc, era, channel, debug=False
+):
     temp_output_file = os.path.join(
         workdir, era, dataset_proc["nick"], channel, os.path.basename(inputfile)
     )
@@ -106,17 +112,21 @@ def friend_producer(inputfile, workdir, output_path, dataset_proc, era, channel,
         print(f"Processing {inputfile}")
         print(f"Outputting to {temp_output_file}")
     os.makedirs(os.path.dirname(temp_output_file), exist_ok=True)
-    if dataset_proc["sample_type"] == "data" or dataset_proc["sample_type"] == "embedding":
+    if (
+        dataset_proc["sample_type"] == "data"
+        or dataset_proc["sample_type"] == "embedding"
+    ):
         return
     if not is_file_empty(inputfile, debug):
         if not check_file_exists_remote(output_path, final_output_file):
-            rdf = build_rdf(inputfile, dataset_proc, temp_output_file)
+            build_rdf(inputfile, dataset_proc, temp_output_file)
             upload_file(output_path, temp_output_file, final_output_file)
     else:
         if not check_file_exists_remote(output_path, final_output_file):
             print(f"{inputfile} is empty, generating empty friend tree")
             generate_empty_friend_tree(temp_output_file)
             upload_file(output_path, temp_output_file, final_output_file)
+
 
 def is_file_empty(inputfile, debug=False):
     try:
@@ -132,6 +142,7 @@ def is_file_empty(inputfile, debug=False):
         return True
     rootfile.Close()
     return False
+
 
 def build_rdf(inputfile, dataset_proc, output_file):
     rootfile = ROOT.TFile.Open(inputfile, "READ")
@@ -164,6 +175,7 @@ def build_rdf(inputfile, dataset_proc, output_file):
     )
     rootfile.Close()
 
+
 def upload_file(redirector, input_file, output_file, max_retries=5):
     success = False
     n = 0
@@ -181,6 +193,7 @@ def upload_file(redirector, input_file, output_file, max_retries=5):
                 os.makedirs(os.path.dirname(output_file))
             os.system(f"mv {input_file} {output_file}")
             success = True
+
 
 def generate_empty_friend_tree(output_file):
     friend_tree = ROOT.TFile(output_file, "CREATE")
@@ -222,7 +235,7 @@ if __name__ == "__main__":
     base_path = os.path.join(args.basepath, "*/*/*/*.root")
     output_path = os.path.join(args.outputpath)
     workdir = os.path.join(args.tempdir)
-    dataset = yaml.safe_load(open(args.dataset_config))
+    dataset = json.load(open(args.dataset_config))
     print("Collecting ntuples from {}".format(base_path))
     if base_path.startswith("root://"):
         ntuples = xrdglob.glob(base_path)
@@ -241,7 +254,9 @@ if __name__ == "__main__":
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)
-    generate_friend_trees(dataset, ntuples_wo_data, nthreads, workdir, output_path, args.debug)
+    generate_friend_trees(
+        dataset, ntuples_wo_data, nthreads, workdir, output_path, args.debug
+    )
     # remove the temporary directory
     if os.path.exists(workdir):
         shutil.rmtree(workdir)
