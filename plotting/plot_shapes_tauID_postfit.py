@@ -278,7 +278,7 @@ def main(args):
         else:
             pass
         plot.add_hist(model_total, "model_total")
-        plot.subplot(0).setGraphStyle("data_obs", "e0")
+        plot.subplot(0).setGraphStyle("data_obs", "PE")
         plot.setGraphStyle(
             "model_total",
             "e2",
