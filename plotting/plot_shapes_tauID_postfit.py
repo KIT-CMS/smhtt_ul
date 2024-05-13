@@ -172,7 +172,7 @@ def main(args):
 
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
 
-    # bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
+    bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
     if not args.fake_factor and args.embedding:
         bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
     if not args.embedding and args.fake_factor:
@@ -191,6 +191,7 @@ def main(args):
             "ZL",
             "ZTT",
         ]
+    # bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
     bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB_"+str(args.single_category)]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -235,7 +236,7 @@ def main(args):
         elif channel == "em" and not args.embedding:
             bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
         elif channel == "mm":
-            bkg_processes = ["VVL", "W", "TTL", "ZL", "MUEMB"]
+            bkg_processes = ["VVL", "W", "TTL", "ZL"]
         else:
             bkg_processes = [b for b in all_bkg_processes]
         legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -263,22 +264,18 @@ def main(args):
                 bkg_processes[-1], "hist", fillcolor=styles.color_dict["EMB"]
             )
         data_obs = rootfile.get(era, channel, category, "data_obs")
-        plot.add_graph(data_obs, "data_obs")
+        plot.add_hist(data_obs, "data_obs")
 
         total_bkg = rootfile.get(era, channel, category, "total_background")
         plot.add_hist(total_bkg, "total_bkg")
 
+        total_sig = rootfile.get(era, channel, category, "total_signal")
+        plot.add_hist(total_sig, "total_sig")
+
         model_total = plot.subplot(2).get_hist("total_bkg")
-        if category != "100":
-            total_sig = rootfile.get(era, channel, category, "total_signal")
-            plot.add_hist(total_sig, "total_sig")
-
-
-            model_total.Add(plot.subplot(2).get_hist("total_sig"))
-        else:
-            pass
+        model_total.Add(plot.subplot(2).get_hist("total_sig"))
         plot.add_hist(model_total, "model_total")
-        plot.subplot(0).setGraphStyle("data_obs", "PE")
+        plot.subplot(0).setGraphStyle("data_obs", "e0")
         plot.setGraphStyle(
             "model_total",
             "e2",
@@ -304,14 +301,10 @@ def main(args):
             plot.subplot(1).normalizeByBinWidth()
 
         # set axes limits and labels
-
-        gr = plot.subplot(0).get_graph("data_obs")[0]
-        n = gr.GetN()
-        max_n = ROOT.TMath.MaxElement(n,gr.GetY())
         plot.subplot(0).setYlims(
             split_dict[channel],
             max(
-                2 * max_n,
+                2 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
                 split_dict[channel] * 2,
             ),
         )
@@ -371,7 +364,8 @@ def main(args):
                     pass
             if channel != "mm":
                 plot.legend(i).add_entry(0, legend_bkg_processes[0], "#tau  "+legend_bkg_processes[0], "f")
-            plot.legend(i).add_entry(0, "total_bkg", "Bkg. unc.", "f")
+            # plot.legend(i).add_entry(0, "total_bkg", "Bkg. unc.", "f")
+            plot.legend(i).add_entry(0, "model_total", "Bkg. unc.", "f")
             plot.legend(i).add_entry(0, "data_obs", "Data", "PE")
             plot.legend(i).setNColumns(3)
         plot.legend(0).Draw()
