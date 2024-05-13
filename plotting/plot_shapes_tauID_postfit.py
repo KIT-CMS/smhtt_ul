@@ -236,7 +236,7 @@ def main(args):
         elif channel == "em" and not args.embedding:
             bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
         elif channel == "mm":
-            bkg_processes = ["VVL", "W", "TTL", "ZL"]
+            bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "MUEMB"]
         else:
             bkg_processes = [b for b in all_bkg_processes]
         legend_bkg_processes = copy.deepcopy(bkg_processes)
