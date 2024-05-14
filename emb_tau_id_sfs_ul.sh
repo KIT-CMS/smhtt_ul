@@ -435,7 +435,19 @@ if [[ $MODE == "MULTIFIT" ]]; then
 
 fi
 
-dm_categories_sep=("DM0")
+min_id_sep=0
+max_id_sep=0
+
+min_es_sep=0
+max_es_sep=0
+
+cent_id_sep=0
+cent_es_sep=0
+
+id_fit_stri=""
+map_str=''
+
+dm_categories_sep=("DM10_11")
 if [[ $MODE == "MULTIFIT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
 
@@ -444,18 +456,66 @@ if [[ $MODE == "MULTIFIT_SEP" ]]; then
         for dm_cat in "${dm_categories_sep[@]}"
     do
 
+        if [[ $dm_cat == "DM0" ]]; then
+
+            min_id_sep=$min_id_dm0
+            max_id_sep=$max_id_dm0
+
+            min_es_sep=$min_es_dm0
+            max_es_sep=$max_es_dm0
+
+            cent_id_sep=$id_dm0
+            cent_es_sep=$es_dm0
+
+            id_fit_stri='DM_0'
+            map_str='"map=^.*/EMB_${dm_cat}:r_EMB_DM_0[1,${min_id_sep},${max_id_sep}]"'
+        fi
+
+        if [[ $dm_cat == "DM1" ]]; then
+
+            min_id_sep=$min_id_dm1
+            max_id_sep=$max_id_dm1
+
+            min_es_sep=$min_es_dm1
+            max_es_sep=$max_es_dm1
+
+            cent_id_sep=$id_dm1
+            cent_es_sep=$es_dm1
+
+            id_fit_stri=DM_1
+            map_str='"map=^.*/EMB_${dm_cat}:r_EMB_DM_1[1,${min_id_sep},${max_id_sep}]"'
+        fi
+
+        if [[ $dm_cat == "DM10_11" ]]; then
+
+            min_id_sep=$min_id_dm10_11
+            max_id_sep=$max_id_dm10_11
+
+            min_es_sep=$min_es_dm10_11
+            max_es_sep=$max_es_dm10_11
+
+            cent_id_sep=$id_dm10_11
+            cent_es_sep=$es_dm10_11
+
+            id_fit_stri=DM_10_11
+            map_str='"map=^.*/EMB_${dm_cat}:r_EMB_DM_10_11[1,${min_id_sep},${max_id_sep}]"'
+        fi
+    echo "My values"
+    echo ${id_fit_stri}
+    echo ${min_id_sep}, ${max_id_sep}
+
     combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat} \
         -o out_multidim_dm_${dm_cat}_sep_cat.root \
         --parallel 8 -m 128 \
         -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-        --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,${min_id_dm0},${max_id_dm0}]"' \
+        --PO ${map_str} \
 
     combineTool.py -M MultiDimFit -n .comb_dm_sep_fit_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/out_multidim_dm_${dm_cat}_sep_cat.root \
-    --setParameters ES_DM0=${es_dm0},r_EMB_DM_0=${id_dm0} \
-    --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:ES_DM0=${min_es_dm0},${max_es_dm0} \
+    --setParameters ES_${dm_cat}=${cent_es_sep},r_EMB_${id_fit_stri}=${cent_id_sep} \
+    --setParameterRanges r_EMB_${id_fit_stri}=${min_id_sep},${max_id_sep}:ES_${dm_cat}=${min_es_sep},${max_es_sep} \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-    --redefineSignalPOIs ES_DM0,r_EMB_DM_0 --floatOtherPOIs=1 \
+    --redefineSignalPOIs ES_${dm_cat},r_EMB_${id_fit_stri} --floatOtherPOIs=1 \
     --points=400 --algo singles -m 128
 
     mv higgsCombine.comb_dm_sep_fit_${dm_cat}.MultiDimFit.mH128.root output/$datacard_output_dm/htt_mt_${dm_cat}/
