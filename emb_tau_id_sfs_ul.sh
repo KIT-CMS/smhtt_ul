@@ -439,20 +439,26 @@ dm_categories_sep=("DM0")
 if [[ $MODE == "MULTIFIT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
 
-    echo "[INFO] Create Workspace for all the datacards"
+    echo "[INFO] Create Workspace for all the datacards (fitting separately in every DM category)"    
 
         for dm_cat in "${dm_categories_sep[@]}"
     do
 
-    combineTool.py -M MultiDimFit -n .comb_dm_sep_fit_${dm_cat} -d output/$datacard_output_dm/cmb/out_multidim_dm_test.root \
+    combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat} \
+        -o out_multidim_dm_${dm_cat}_sep_cat.root \
+        --parallel 8 -m 128 \
+        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+        --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,${min_id_dm0},${max_id_dm0}]"' \
+
+    combineTool.py -M MultiDimFit -n .comb_dm_sep_fit_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/out_multidim_dm_${dm_cat}_sep_cat.root \
     --setParameters ES_DM0=${es_dm0},r_EMB_DM_0=${id_dm0} \
     --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:ES_DM0=${min_es_dm0},${max_es_dm0} \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs ES_DM0,r_EMB_DM_0 --floatOtherPOIs=1 \
-    --points=400 --algo singles
+    --points=400 --algo singles -m 128
 
-    mv higgsCombine.comb_dm_sep_fit_${dm_cat}.MultiDimFit.mH120.root output/$datacard_output_dm/cmb/
+    mv higgsCombine.comb_dm_sep_fit_${dm_cat}.MultiDimFit.mH128.root output/$datacard_output_dm/htt_mt_${dm_cat}/
  done
 fi
 
