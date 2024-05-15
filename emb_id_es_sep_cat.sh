@@ -141,6 +141,8 @@ cent_es_sep=0
 id_fit_stri=""
 map_str=''
 
+mH=126
+
 dm_categories_sep=("DM0" "DM1" "DM10_11")
 if [[ $MODE == "MULTIFIT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
@@ -200,7 +202,7 @@ if [[ $MODE == "MULTIFIT_SEP" ]]; then
 
     combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_${dm_cat} \
         -o out_multidim_dm_${dm_cat}_sep_cat.root \
-        --parallel 8 -m 128 \
+        --parallel 8 -m ${mH} \
         -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
         --PO ${map_str} \
 
@@ -210,8 +212,104 @@ if [[ $MODE == "MULTIFIT_SEP" ]]; then
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs ES_${dm_cat},r_EMB_${id_fit_stri} --floatOtherPOIs=1 \
-    --points=400 --algo singles -m 128
+    --points=400 --algo singles -m ${mH}
 
-    mv higgsCombine.comb_dm_sep_fit_${dm_cat}.MultiDimFit.mH128.root output/$datacard_output_dm/htt_mt_${dm_cat}/
+    mv higgsCombine.comb_dm_sep_fit_${dm_cat}.MultiDimFit.mH${mH}.root output/$datacard_output_dm/htt_mt_${dm_cat}/
  done
+fi
+
+
+
+min_id_sep_pf=0
+max_id_sep_pf=0
+
+min_es_sep_pf=0
+max_es_sep_pf=0
+
+cent_id_sep_pf=0
+cent_es_sep_pf=0
+
+id_var=""
+
+if [[ $MODE == "POSTFIT_MULT_SEP" ]]; then
+    source utils/setup_cmssw_tauid.sh
+    
+        for dm_cat in "${dm_categories_sep[@]}"
+    do
+
+    RESDIR=output/$datacard_output_dm/htt_mt_${dm_cat}
+    WORKSPACE=${RESDIR}/out_multidim_dm_${dm_cat}_sep_cat.root
+    echo "[INFO] Printing fit result for category $(basename $RESDIR)"
+    FITFILE=${RESDIR}/fitDiagnostics.${ERA}.root
+
+        if [[ $dm_cat == "DM0" ]]; then
+
+            min_id_sep_pf=$min_id_dm0
+            max_id_sep_pf=$max_id_dm0
+
+            min_es_sep_pf=$min_es_dm0
+            max_es_sep_pf=$max_es_dm0
+
+            cent_id_sep_pf=$id_dm0
+            cent_es_sep_pf=$es_dm0
+
+            id_var="DM_0"
+
+        fi
+
+        if [[ $dm_cat == "DM1" ]]; then
+
+            min_id_sep_pf=$min_id_dm1
+            max_id_sep_pf=$max_id_dm1
+
+            min_es_sep_pf=$min_es_dm1
+            max_es_sep_pf=$max_es_dm1
+
+            cent_id_sep_pf=$id_dm1
+            cent_es_sep_pf=$es_dm1
+
+            id_var="DM_1"
+
+        fi
+
+        if [[ $dm_cat == "DM10_11" ]]; then
+
+            min_id_sep_pf=$min_id_dm10_11
+            max_id_sep_pf=$max_id_dm10_11
+
+            min_es_sep_pf=$min_es_dm10_11
+            max_es_sep_pf=$max_es_dm10_11
+
+            cent_id_sep_pf=$id_dm10_11
+            cent_es_sep_pf=$es_dm10_11
+
+            id_var="DM_10_11"
+
+        fi
+
+    combineTool.py -M FitDiagnostics  -d ${WORKSPACE} -m ${mH} \
+    --setParameters ES_DM0=${cent_es_sep_pf},r_EMB_${id_var}=${cent_id_sep_pf} \
+    --setParameterRanges r_EMB_${id_var}=${min_id_sep_pf},${max_id_sep_pf}:ES_${dm_cat}=${min_es_sep_pf},${max_es_sep_pf} \
+    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    --redefineSignalPOIs ES_${dm_cat},r_EMB_${id_var}  \
+    --parallel 16   -v2 --robustHesse 1 --saveShapes --saveWithUncertainties
+
+
+    mv fitDiagnostics.Test.root $FITFILE
+    mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/htt_mt_${dm_cat}/
+
+    done
+   
+    # combineTool.py -M FitDiagnostics  -d ${WORKSPACE} -m ${mH} \
+    # --setParameters ES_DM0=${es_dm0},ES_DM1=${es_dm1},ES_DM10_11=${es_dm10_11},r_EMB_DM_0=${id_dm0},r_EMB_DM_1=${id_dm1},r_EMB_DM_10_11=${id_dm10_11} \
+    # --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:r_EMB_DM_1=${min_id_dm1},${max_id_dm1}:r_EMB_DM_10_11=${min_id_dm10_11},${max_id_dm10_11}:ES_DM0=${min_es_dm0},${max_es_dm0}:ES_DM1=${min_es_dm1},${max_es_dm1}:ES_DM10_11=${min_es_dm10_11},${max_es_dm10_11} \
+    # --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    # --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    # --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11  \
+    # --parallel 16   -v2 --robustHesse 1 --saveShapes --saveWithUncertainties
+    # mv fitDiagnostics.Test.root $FITFILE
+    # mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/cmb/
+
+    exit 0
 fi
