@@ -143,7 +143,9 @@ map_str=''
 
 mH=126
 
-dm_categories_sep=("DM0" "DM1" "DM10_11")
+# dm_categories_sep=("DM0" "DM1" "DM10_11")
+dm_categories_sep=("DM1")
+
 if [[ $MODE == "MULTIFIT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
 
@@ -288,28 +290,68 @@ if [[ $MODE == "POSTFIT_MULT_SEP" ]]; then
         fi
 
     combineTool.py -M FitDiagnostics  -d ${WORKSPACE} -m ${mH} \
-    --setParameters ES_DM0=${cent_es_sep_pf},r_EMB_${id_var}=${cent_id_sep_pf} \
+    --setParameters ES_${dm_cat}=${cent_es_sep_pf},r_EMB_${id_var}=${cent_id_sep_pf} \
     --setParameterRanges r_EMB_${id_var}=${min_id_sep_pf},${max_id_sep_pf}:ES_${dm_cat}=${min_es_sep_pf},${max_es_sep_pf} \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs ES_${dm_cat},r_EMB_${id_var}  \
-    --parallel 16   -v2 --robustHesse 1 --saveShapes --saveWithUncertainties
+    --parallel 16   -v1 --robustHesse 1 --saveShapes --saveWithUncertainties
 
 
     mv fitDiagnostics.Test.root $FITFILE
     mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/htt_mt_${dm_cat}/
 
     done
-   
-    # combineTool.py -M FitDiagnostics  -d ${WORKSPACE} -m ${mH} \
-    # --setParameters ES_DM0=${es_dm0},ES_DM1=${es_dm1},ES_DM10_11=${es_dm10_11},r_EMB_DM_0=${id_dm0},r_EMB_DM_1=${id_dm1},r_EMB_DM_10_11=${id_dm10_11} \
-    # --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:r_EMB_DM_1=${min_id_dm1},${max_id_dm1}:r_EMB_DM_10_11=${min_id_dm10_11},${max_id_dm10_11}:ES_DM0=${min_es_dm0},${max_es_dm0}:ES_DM1=${min_es_dm1},${max_es_dm1}:ES_DM10_11=${min_es_dm10_11},${max_es_dm10_11} \
-    # --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-    # --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-    # --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11  \
-    # --parallel 16   -v2 --robustHesse 1 --saveShapes --saveWithUncertainties
-    # mv fitDiagnostics.Test.root $FITFILE
-    # mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/cmb/
 
+    exit 0
+fi
+
+
+
+
+if [[ $MODE == "IMPACTS_WS" ]]; then
+    source utils/setup_cmssw_tauid.sh
+
+    combineTool.py -M T2W -i output/$datacard_output_dm/htt_mt_DM0 \
+    -o out_multidim_dm_DM0_impct_ws.root \
+    --parallel 8 -m ${mH} \
+    -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,${min_id_dm0},${max_id_dm0}]"' \
+    --PO '"map=^.*/ES_DM0:ES_DM0[1,${min_es_dm0},${max_es_dm0}]"'
+
+fi
+
+
+
+
+
+
+if [[ $MODE == "IMPACTS" ]]; then
+    source utils/setup_cmssw_tauid.sh
+    WORKSPACE_IMP=output/$datacard_output_dm/htt_mt_DM0/out_multidim_dm_DM0_impct_ws.root
+
+    fit_categories=("DM0" "DM1" "DM10_11")
+    
+    combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 125 \
+        --setParameters ES_DM0=${es_dm0},r_EMB_DM_0=${id_dm0} \
+        --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:ES_DM0=${min_es_dm0},${max_es_dm0} \
+        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+        --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+        -P ES_DM0 -P r_EMB_DM_0  \
+        --parallel 16 --doInitialFit --robustHesse 1
+
+    combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 125 \
+        --setParameters ES_DM0=${es_dm0},r_EMB_DM_0=${id_dm0} \
+        --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:ES_DM0=${min_es_dm0},${max_es_dm0} \
+        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+        --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+        -P ES_DM0 -P r_EMB_DM_0  \
+        --parallel 16 --doFits 
+
+    combineTool.py -M Impacts -d $WORKSPACE_IMP -m 125 -o tauid_${WP}_impacts_DM0.json -P ES_DM0 -P r_EMB_DM_0
+    plotImpacts.py -i tauid_${WP}_impacts_DM0.json -o tauid_${WP}_DM0_es_impacts --POI ES_DM0
+    plotImpacts.py -i tauid_${WP}_impacts_DM0.json -o tauid_${WP}_DM0_id_impacts --POI r_EMB_DM_0
+    # cleanup the fit files
+    rm higgsCombine_paramFit*.root
     exit 0
 fi
