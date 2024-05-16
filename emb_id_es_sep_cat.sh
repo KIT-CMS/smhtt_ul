@@ -362,24 +362,26 @@ if [[ $MODE == "IMPACTS_ID" ]]; then
     WORKSPACE_IMP=output/$datacard_output_dm/htt_mt_DM0/out_multidim_dm_DM0_sep_cat.root
 
     fit_categories=("DM0" "DM1" "DM10_11")
+
+    imp_es_dm0=-1
     
     combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 123 \
-        --setParameters ES_DM0=${es_dm0},r_EMB_DM_0=${id_dm0} \
+        --setParameters ES_DM0=${imp_es_dm0},r_EMB_DM_0=${id_dm0} \
         --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:ES_DM0=${min_es_dm0},${max_es_dm0} \
         --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
         --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
         --parallel 16 --doInitialFit 
 
     combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 123 \
-        --setParameters ES_DM0=${es_dm0},r_EMB_DM_0=${id_dm0} \
+        --setParameters ES_DM0=${imp_es_dm0},r_EMB_DM_0=${id_dm0} \
         --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:ES_DM0=${min_es_dm0},${max_es_dm0} \
         --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
         --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
         --parallel 16 --doFits 
 
-    combineTool.py -M Impacts -d $WORKSPACE_IMP -m 123 -o tauid_${WP}_impacts_r_DM0_v2.json  
+    combineTool.py -M Impacts -d $WORKSPACE_IMP -m 123 -o tauid_${WP}_impacts_r_DM0_v4.json  
 
-    plotImpacts.py -i tauid_${WP}_impacts_r_DM0_v2.json -o tauid_${WP}_DM0_r_impacts_v2 
+    plotImpacts.py -i tauid_${WP}_impacts_r_DM0_v4.json -o tauid_${WP}_DM0_r_impacts_v4 
     # # cleanup the fit files
     rm higgsCombine_paramFit*.root
     # rm robustHesse_paramFit*.root
