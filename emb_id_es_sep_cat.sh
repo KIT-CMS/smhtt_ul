@@ -144,7 +144,7 @@ map_str=''
 mH=126
 
 # dm_categories_sep=("DM0" "DM1" "DM10_11")
-dm_categories_sep=("DM1")
+dm_categories_sep=("DM10_11")
 
 if [[ $MODE == "MULTIFIT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
@@ -315,6 +315,11 @@ if [[ $MODE == "IMPACTS_ID" ]]; then
     fit_categories=("DM0" "DM1" "DM10_11")
 
     imp_es_dm0=-1
+
+    if [ ! -d "$impact_path/${ERA}/${CHANNEL}/${WP}" ]; then
+        mkdir -p  $impact_path/${ERA}/${CHANNEL}/${WP}
+    fi
+
     
     combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 123 \
         --setParameters ES_DM0=${imp_es_dm0},r_EMB_DM_0=${id_dm0} \
@@ -332,9 +337,10 @@ if [[ $MODE == "IMPACTS_ID" ]]; then
 
     combineTool.py -M Impacts -d $WORKSPACE_IMP -m 123 -o tauid_${WP}_impacts_r_DM0_v4.json  
 
-    plotImpacts.py -i tauid_${WP}_impacts_r_DM0_v4.json -o tauid_${WP}_DM0_r_impacts_v4 
+    plotImpacts.py -i tauid_${WP}_impacts_r_DM0_v4.json -o tauid_${WP}_impacts_r_DM0_v4
     # # cleanup the fit files
     rm higgsCombine_paramFit*.root
     # rm robustHesse_paramFit*.root
+    mv tauid_${WP}_impacts_r_DM0_v4* $impact_path/${ERA}/${CHANNEL}/${WP}
     exit 0
 fi
