@@ -19,11 +19,11 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_es_4_0_29Apr_morph_v1/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_es_4_0_27May_tau_pt20/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-impact_path="impacts_test_v3"
+impact_path="impacts_test_v5"
 
 output_shapes="tauid_shapes-${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
@@ -211,7 +211,7 @@ if [[ $MODE == "SYNC" ]]; then
     echo "#      Additional estimations                                      #"
     echo "##############################################################################################"
 
-    python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-emb-tt --do-qcd
+    python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-qcd
 
     python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile_mm} --do-qcd
 
@@ -447,7 +447,7 @@ cent_es_sep=0
 id_fit_stri=""
 map_str=''
 
-dm_categories_sep=("DM10_11")
+dm_categories_sep=("DM0" "DM1" "DM10_11")
 if [[ $MODE == "MULTIFIT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
 
