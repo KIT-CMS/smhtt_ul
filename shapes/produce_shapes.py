@@ -1128,20 +1128,20 @@ def main(args):
                 [same_sign, anti_iso_lt_no_ff],
                 do_check,
             )
-            book_tauES_histograms(
-                um,
-                additional_emb_procS,
-                nominals[era]["units"][channel],
-                [trigger_eff_mt_emb],
-                do_check,
-            )
-            book_histograms(
-                um,
-                additional_emb_procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[trigger_eff_mt_emb],
-                enable_check=do_check,
-            )
+            # book_tauES_histograms(
+            #     um,
+            #     additional_emb_procS,
+            #     nominals[era]["units"][channel],
+            #     [trigger_eff_mt_emb],
+            #     do_check,
+            # )
+            # book_histograms(
+            #     um,
+            #     additional_emb_procS,
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[trigger_eff_mt_emb],
+            #     enable_check=do_check,
+            # )
         elif channel == "mt" and special_analysis != "TauID":
             book_histograms(
                 um,
@@ -1230,13 +1230,13 @@ def main(args):
                 variations=[same_sign],
                 enable_check=do_check,
             )
-            book_histograms(
-                um,
-                processes=embS,
-                datasets=nominals[era]["units"][channel],
-                variations=[trigger_eff_mt_emb],
-                enable_check=do_check,
-            )
+            # book_histograms(
+            #     um,
+            #     processes=embS,
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[trigger_eff_mt_emb],
+            #     enable_check=do_check,
+            # )
         elif channel == "ee":
             book_histograms(
                 um,
@@ -1438,13 +1438,13 @@ def main(args):
                     variations=[trigger_eff_mt],
                     enable_check=do_check,
                 )
-                book_histograms(
-                    um,
-                    processes=embS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[trigger_eff_mt_emb],
-                    enable_check=do_check,
-                )
+                # book_histograms(
+                #     um,
+                #     processes=embS,
+                #     datasets=nominals[era]["units"][channel],
+                #     variations=[trigger_eff_mt_emb],
+                #     enable_check=do_check,
+                # )
                 book_histograms(
                     um,
                     processes=embS,
