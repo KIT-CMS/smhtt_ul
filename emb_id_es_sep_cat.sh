@@ -23,7 +23,7 @@ datacard_output_dm="datacards_es_4_0_29Apr_morph_v1/${NTUPLETAG}-${TAG}/${ERA}_t
 
 datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-impact_path="impacts_test_v3"
+impact_path="impacts_test_v4"
 
 output_shapes="tauid_shapes-${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
@@ -143,8 +143,8 @@ map_str=''
 
 mH=126
 
-# dm_categories_sep=("DM0" "DM1" "DM10_11")
-dm_categories_sep=("DM10_11")
+dm_categories_sep=("DM0" "DM1" "DM10_11")
+# dm_categories_sep=("DM10_11")
 
 if [[ $MODE == "MULTIFIT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
