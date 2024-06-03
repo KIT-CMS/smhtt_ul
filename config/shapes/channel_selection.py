@@ -249,7 +249,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="
                     ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
                     ("id_tau_vsJet_"+vs_jet_discr+"_2>0.5", "tau_iso"),
                     ("iso_1<0.15", "muon_iso"),
-                    ("pzetamissvis > -25", "pzetamissvis"),
+                    # ("pzetamissvis > -25", "pzetamissvis"),
                     ("mt_1 < 60", "mt_1"),
                 ]
             )
@@ -396,7 +396,7 @@ def tau_id_channel_selection(channel, era, vs_jet_wp="tight", vs_ele_wp="vvloose
                 ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
                 ("id_tau_vsJet_"+vs_jet_discr+"_2>0.5", "tau_iso"),
                 ("iso_1<0.15", "muon_iso"),
-                ("pzetamissvis > -25", "pzetamissvis"),
+                # ("pzetamissvis > -25", "pzetamissvis"),
                 ("mt_1 < 60", "mt_1"),
             ]
         )
