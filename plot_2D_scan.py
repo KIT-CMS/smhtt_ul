@@ -21,8 +21,8 @@ t = f.Get("limit")
 
 # Number of points in interpolation
 n_points = 400
-x_range = [-2.5, 2.5]
-y_range = [-0.5, 1.5]
+x_range = [0.55, 1.5]
+y_range = [-3.8, 4]
 
 # Number of bins in plot
 n_bins = 40
@@ -49,6 +49,7 @@ grid_vals = grid_vals[grid_vals == grid_vals]
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Define Profile2D histogram
+# h2D = ROOT.TProfile2D("h", "h", n_bins, x_range[0], x_range[1], n_bins, y_range[0], y_range[1], -10, 400, "h")
 h2D = ROOT.TProfile2D("h", "h", n_bins, x_range[0], x_range[1], n_bins, y_range[0], y_range[1])
 
 for i in range(len(grid_vals)):
@@ -81,7 +82,7 @@ h2D.GetXaxis().SetTitleSize(0.05)
 h2D.GetXaxis().SetTitleOffset(0.9)
 h2D.GetXaxis().SetRangeUser(x_range[0], x_range[1] - xw)
 
-h2D.GetYaxis().SetTitle("#tau ES shift ")
+h2D.GetYaxis().SetTitle("#tau ES shift %")
 h2D.GetYaxis().SetTitleSize(0.05)
 h2D.GetYaxis().SetTitleOffset(0.9)
 h2D.GetYaxis().SetRangeUser(y_range[0], y_range[1] - yw)
@@ -90,7 +91,7 @@ h2D.GetZaxis().SetTitle("-2 #Delta ln L")
 h2D.GetZaxis().SetTitleSize(0.05)
 h2D.GetZaxis().SetTitleOffset(0.8)
 
-h2D.SetMaximum(10)
+# h2D.SetMaximum(400)
 
 # Make confidence interval contours
 c68, c95 = h2D.Clone(), h2D.Clone()
@@ -98,11 +99,12 @@ c68.SetContour(2)
 c68.SetContourLevel(1, 2.3)
 c68.SetLineWidth(3)
 c68.SetLineColor(ROOT.kBlack)
-# c95.SetContour(2)
-# c95.SetContourLevel(1, 5.99)
-# c95.SetLineWidth(3)
-# c95.SetLineStyle(2)
-# c95.SetLineColor(ROOT.kBlack)
+# c68.SetLineColor(ROOT.kRed)
+c95.SetContour(2)
+c95.SetContourLevel(1, 5.99)
+c95.SetLineWidth(3)
+c95.SetLineStyle(2)
+c95.SetLineColor(ROOT.kBlack)
 
 # Draw histogram and contours
 h2D.Draw("COLZ")
@@ -118,7 +120,8 @@ hline.Draw("Same")
 
 # Draw contours
 c68.Draw("cont3same")
-# c95.Draw("cont3same")
+# c68.Draw()
+c95.Draw("cont3same")
 
 # Make best fit and sm points
 gBF = ROOT.TGraph()
@@ -142,10 +145,11 @@ leg.SetBorderSize(0)
 leg.SetFillColor(0)
 leg.AddEntry(gBF, "Best fit", "P")
 leg.AddEntry(c68, "1#sigma CL", "L")
-# leg.AddEntry(c95, "2#sigma CL", "L")
+leg.AddEntry(c95, "2#sigma CL", "L")
 # leg.AddEntry(gSM, "SM", "P")
 leg.Draw()
 
+# canv.SetLogz()
 canv.Update()
 canv.SaveAs("scan_2D_"+args.outname+"_id_es.png")
 canv.SaveAs("scan_2D_"+args.outname+"_id_es.pdf")
