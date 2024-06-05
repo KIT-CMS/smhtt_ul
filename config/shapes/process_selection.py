@@ -154,24 +154,24 @@ def prefiring_weight(era):
 
 
 def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    wps_dict = {
+    wps_dict = [
 
-        "vvtight" : "VVTight",
-        "vtight" : "VVTight",
-        "tight" : "Tight",
-        "medium" : "Medium",
-        "loose" : "Loose",
-        "vloose" : "VLoose",
-        "vvloose" : "VVLoose",
-        "vvvloose" : "VVVLoose",
-    }
+        "VVTight",
+        "VVTight",
+        "Tight",
+        "Medium",
+        "Loose",
+        "VLoose",
+        "VVLoose",
+        "VVVLoose",
+    ]
 
-    if vs_ele_wp not in wps_dict.keys():
+    if vs_ele_wp not in wps_dict:
         print("This vs electron working point doen't exist. Please specify the correct vsEle discriminator ")
-    if vs_jet_wp not in wps_dict.keys():
-        print("This vs jet working point doen't exist. Please specify the correct vsEle discriminator ")
-    vs_ele_discr = wps_dict[vs_ele_wp]
-    vs_jet_discr = wps_dict[vs_jet_wp]
+    if vs_jet_wp not in wps_dict:
+        print("This vs jet working point doen't exist. Please specify the correct vsJet discriminator ")
+    vs_ele_discr = vs_ele_wp
+    vs_jet_discr = vs_jet_wp
     if channel == "em":
         isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
         idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
@@ -198,10 +198,10 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
     elif channel == "mt":
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
-        tauidweight = (
-            "((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
-            "taubyIsoIdWeight",
-        )
+        # tauidweight = (
+        #     "((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
+        #     "taubyIsoIdWeight",
+        # )
         tauidweight = None
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
         vsele_weight = ("id_wgt_tau_vsEle_"+vs_ele_discr+"_2", "vseleweight")
@@ -519,21 +519,21 @@ def __get_ZTT_cut(channel):
 
 
 def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp):
-    wps_dict = {
+    wps_dict = [
 
-        "vvtight" : "VVTight",
-        "vtight" : "VVTight",
-        "tight" : "Tight",
-        "medium" : "Medium",
-        "loose" : "Loose",
-        "vloose" : "VLoose",
-        "vvloose" : "VVLoose",
-        "vvvloose" : "VVVLoose",
-    }
+        "VVTight",
+        "VVTight",
+        "Tight",
+        "Medium",
+        "Loose",
+        "VLoose",
+        "VVLoose",
+        "VVVLoose",
+    ]
 
-    if vs_jet_wp not in wps_dict.keys():
-        print("This vs jet working point doen't exist. Please specify the correct vsEle discriminator ")
-    vs_jet_discr = wps_dict[vs_jet_wp]
+    if vs_jet_wp not in wps_dict:
+        print("This vs jet working point doen't exist. Please specify the correct vsJet discriminator ")
+    vs_jet_discr = vs_jet_wp
     ztt_embedded_weights = [
         ("emb_genweight", "emb_genweight"),
         ("emb_idsel_wgt_1*emb_idsel_wgt_2*emb_triggersel_wgt", "emb_selection_weight"),
