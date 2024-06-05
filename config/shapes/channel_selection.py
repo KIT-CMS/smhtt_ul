@@ -9,7 +9,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="
         ("dimuon_veto<0.5", "dilepton_veto"),
         ("q_1*q_2<0", "os"),
     ]
-    
+
     wps_dict = {
 
         "vvtight" : "VVTight",
@@ -241,8 +241,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="
             cuts.extend(
                 [
                     ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                    ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
-                    ("id_tau_vsJet_"+vs_jet_discr+"_2>0.5", "tau_iso"),
+                    ("id_tau_vsEle_%s_2>0.5" % (vs_ele_discr), "againstElectronDiscriminator"),
+                    ("id_tau_vsJet_%s_2>0.5" % (vs_jet_discr), "tau_iso"),
                     ("iso_1<0.15", "muon_iso"),
                     # ("pzetamissvis > -25", "pzetamissvis"),
                     ("mt_1 < 60", "mt_1"),
@@ -353,87 +353,4 @@ def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="
         raise ValueError("Given special selection does not exist")
     
 
-def tau_id_channel_selection(channel, era, vs_jet_wp="tight", vs_ele_wp="vvloose"):
-    # Specify general channel and era independent cuts.
-    cuts = [
-        ("extraelec_veto<0.5", "extraelec_veto"),
-        ("extramuon_veto<0.5", "extramuon_veto"),
-        ("dimuon_veto<0.5", "dilepton_veto"),
-        ("q_1*q_2<0", "os"),
-    ]
-    wps_dict = {
-
-        "vvtight" : "VVTight",
-        "vtight" : "VVTight",
-        "tight" : "Tight",
-        "medium" : "Medium",
-        "loose" : "Loose",
-        "vloose" : "VLoose",
-        "vvloose" : "VVLoose",
-        "vvvloose" : "VVVLoose",
-    }
-
-    if vs_ele_wp not in wps_dict.keys():
-        print("This vs electron working point doen't exist. Please specify the correct vsEle discriminator ")
-    if vs_jet_wp not in wps_dict.keys():
-        print("This vs jet working point doen't exist. Please specify the correct vsEle discriminator ")
-    vs_ele_discr = wps_dict[vs_ele_wp]
-    vs_jet_discr = wps_dict[vs_jet_wp]
-
-    if channel != "mt" and channel != "mm":
-        raise ValueError(
-            "TauID measurement is only available for mt (with mm control region)"
-        )
-    if channel == "mt":
-        cuts.extend(
-            [
-                ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                ("id_tau_vsEle_"+vs_ele_discr+"_2>0.5", "againstElectronDiscriminator"),
-                ("id_tau_vsJet_"+vs_jet_discr+"_2>0.5", "tau_iso"),
-                ("iso_1<0.15", "muon_iso"),
-                # ("pzetamissvis > -25", "pzetamissvis"),
-                ("mt_1 < 60", "mt_1"),
-            ]
-        )
-        if era == "2018":
-            cuts.append(
-                (
-                    "pt_2>20 && pt_1>=28 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))",
-                    "trg_selection",
-                ),
-            )
-        elif era == "2016preVFP" or era == "2016postVFP":
-            cuts.append(
-                (
-                    "pt_2>20 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
-                    "trg_selection",
-                ),
-            )
-        else:
-            raise ValueError("Given era does not exist")
-        return Selection(name="mt", cuts=cuts)
-    # for mm we just need the control region between 60 and 120 GeV as a single bin
-    if channel == "mm":
-        cuts = [
-            ("q_1*q_2<0", "os"),
-            ("m_vis>50", "m_vis"),
-            ("iso_1<0.15 && iso_2<0.15", "muon_iso"),
-        ]
-        if era == "2018":
-            cuts.append(
-                (
-                    "pt_2>20 && pt_1>=28 && ((trg_single_mu27 == 1) || (trg_single_mu24 == 1))",
-                    "trg_selection",
-                ),
-            )
-        elif era in ["2016postVFP", "2016preVFP"]:
-                cuts.append(
-                    (
-                        "pt_2>23 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
-                        "trg_selection",
-                    ),
-                )
-        else:
-            raise ValueError("Given era does not exist")
-        return Selection(name="mm", cuts=cuts)
 
