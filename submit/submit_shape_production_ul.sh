@@ -119,7 +119,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "output = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).out" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "error = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).err" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "log = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).log" >>$OUTPUT/produce_shapes_cc7.jdl
-    echo "x509userproxy = /home/olavoryk/.globus/x509_proxy" >>$OUTPUT/produce_shapes_cc7.jdl
+    echo "x509userproxy = /home/${USER}/.globus/x509_proxy" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "queue a3,a2,a1 from $OUTPUT/arguments.txt" >>$OUTPUT/produce_shapes_cc7.jdl
     echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>$OUTPUT/produce_shapes_cc7.jdl
 
@@ -139,7 +139,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "error = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).err" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "log = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).log" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
-    echo "x509userproxy = /home/olavoryk/.globus/x509_proxy" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
+    echo "x509userproxy = /home/${USER}/.globus/x509_proxy" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
     echo "queue a3,a2,a4,a1 from $OUTPUT/arguments_multicore.txt" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
 
     # Assemble the arguments.txt file used in the submission
