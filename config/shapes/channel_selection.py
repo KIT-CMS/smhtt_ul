@@ -1,7 +1,7 @@
 from ntuple_processor.utils import Selection
 
 
-def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="vvloose"):
+def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose"):
     # Specify general channel and era independent cuts.
     cuts = [
         ("extraelec_veto<0.5", "extraelec_veto"),
@@ -10,24 +10,24 @@ def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="
         ("q_1*q_2<0", "os"),
     ]
 
-    wps_dict = {
+    wps_dict = [
 
-        "vvtight" : "VVTight",
-        "vtight" : "VVTight",
-        "tight" : "Tight",
-        "medium" : "Medium",
-        "loose" : "Loose",
-        "vloose" : "VLoose",
-        "vvloose" : "VVLoose",
-        "vvvloose" : "VVVLoose",
-    }
+        "VVTight",
+        "VVTight",
+        "Tight",
+        "Medium",
+        "Loose",
+        "VLoose",
+        "VVLoose",
+        "VVVLoose",
+     ]
 
-    if vs_ele_wp not in wps_dict.keys():
+    if vs_ele_wp not in wps_dict:
         print("This vs electron working point doen't exist. Please specify the correct vsEle discriminator ")
-    if vs_jet_wp not in wps_dict.keys():
-        print("This vs jet working point doen't exist. Please specify the correct vsEle discriminator ")
-    vs_ele_discr = wps_dict[vs_ele_wp]
-    vs_jet_discr = wps_dict[vs_jet_wp]
+    if vs_jet_wp not in wps_dict:
+        print("This vs jet working point doen't exist. Please specify the correct vsJet discriminator ")
+    vs_ele_discr = vs_ele_wp
+    vs_jet_discr = vs_jet_wp
     if special is None:
         if "mt" in channel:
             #  Add channel specific cuts to the list of cuts.
