@@ -42,14 +42,14 @@ if [[ $MODE == "SHAPES" ]]; then
         mkdir -p $shapes_output
     fi
     
-    python shapes/produce_shapes.py --channels $CHANNEL \
+    python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $XSEC_FRIENDS \
         --era $ERA --num-processes 4 --num-threads 12 \
         --optimization-level 1 --control-plots \
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
         --output-file $shapes_output \
-        --xrootd --validation-tag $TAG --vs-jet-wp medium --vs-ele-wp vvloose --special-analysis "TauID" 
+        --xrootd --validation-tag $TAG --vs-jet-wp Medium --vs-ele-wp VVLoose --special-analysis "TauID" 
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
