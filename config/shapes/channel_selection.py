@@ -9,12 +9,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="tight", vs_ele_wp="
         ("dimuon_veto<0.5", "dilepton_veto"),
         ("q_1*q_2<0", "os"),
     ]
-    cuts = [
-        ("extraelec_veto<0.5", "extraelec_veto"),
-        ("extramuon_veto<0.5", "extramuon_veto"),
-        ("dimuon_veto<0.5", "dilepton_veto"),
-        ("q_1*q_2<0", "os"),
-    ]
+    
     wps_dict = {
 
         "vvtight" : "VVTight",
