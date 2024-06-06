@@ -573,4 +573,98 @@ if [[ $MODE == "POI_CORRELATION" ]]; then
 fi
 
 
+min_id_sep_imp=0
+max_id_sep_imp=0
 
+min_es_sep_imp=0
+max_es_sep_imp=0
+
+cent_id_sep_imp=0
+cent_es_sep_imp=0
+
+id_var_imp=""
+
+if [[ $MODE == "IMPACTS_ALL" ]]; then
+    source utils/setup_cmssw_tauid.sh
+
+    if [ ! -d "$impact_path/${ERA}/${CHANNEL}/${WP}" ]; then
+        mkdir -p  $impact_path/${ERA}/${CHANNEL}/${WP}
+    fi
+    
+
+    fit_categories_imp=("DM0" "DM1" "DM10_11")
+            for dm_cat in "${fit_categories_imp[@]}"
+    do
+      WORKSPACE_IMP=output/$datacard_output_dm/htt_mt_${dm_cat}/out_multidim_dm_${dm_cat}_sep_cat.root
+
+        if [[ $dm_cat == "DM0" ]]; then
+
+            min_id_sep_imp=$min_id_dm0
+            max_id_sep_imp=$max_id_dm0
+
+            min_es_sep_imp=$min_es_dm0
+            max_es_sep_imp=$max_es_dm0
+
+            cent_id_sep_imp=$id_dm0
+            cent_es_sep_imp=$es_dm0
+
+            id_var_imp="DM_0"
+
+        fi
+
+        if [[ $dm_cat == "DM1" ]]; then
+
+            min_id_sep_imp=$min_id_dm1
+            max_id_sep_imp=$max_id_dm1
+
+            min_es_sep_imp=$min_es_dm1
+            max_es_sep_imp=$max_es_dm1
+
+            cent_id_sep_imp=$id_dm1
+            cent_es_sep_imp=$es_dm1
+
+            id_var_imp="DM_1"
+
+        fi
+
+        if [[ $dm_cat == "DM10_11" ]]; then
+
+            min_id_sep_imp=$min_id_dm10_11
+            max_id_sep_imp=$max_id_dm10_11
+
+            min_es_sep_imp=$min_es_dm10_11
+            max_es_sep_imp=$max_es_dm10_11
+
+            cent_id_sep_imp=$id_dm10_11
+            cent_es_sep_imp=$es_dm10_11
+
+            id_var_imp="DM_10_11"
+
+
+        fi
+
+    combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 123 \
+        --setParameters ES_${dm_cat}=${cent_es_sep_imp},r_EMB_${id_var_imp}=${cent_id_sep_imp} \
+        --setParameterRanges r_EMB_${id_var_imp}=${min_id_sep_imp},${max_id_sep_imp}:ES_${dm_cat}=${min_es_sep_imp},${max_es_sep_imp} \
+        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+        --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+        --parallel 16 --doInitialFit 
+
+    combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 123 \
+        --setParameters ES_${dm_cat}=${cent_es_sep_imp},r_EMB_${id_var_imp}=${cent_id_sep_imp} \
+        --setParameterRanges r_EMB_${id_var_imp}=${min_id_sep_imp},${max_id_sep_imp}:ES_${dm_cat}=${min_es_sep_imp},${max_es_sep_imp} \
+        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+        --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+        --parallel 16 --doFits 
+
+    combineTool.py -M Impacts -d $WORKSPACE_IMP -m 123 -o tauid_${WP}_impacts_r_${dm_cat}.json  
+
+    plotImpacts.py -i tauid_${WP}_impacts_r_${dm_cat}.json -o tauid_${WP}_impacts_r_${dm_cat}
+    # # cleanup the fit files
+    rm higgsCombine_paramFit*.root
+    # rm robustHesse_paramFit*.root
+    mv tauid_${WP}_impacts_r_${dm_cat}* $impact_path/${ERA}/${CHANNEL}/${WP}
+    done
+
+    exit 0
+fi
