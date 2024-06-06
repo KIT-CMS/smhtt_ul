@@ -47,6 +47,7 @@ else
 fi
 
  PROCESSES=$(sort_string ${PROCESSES#,})
+ SUBM_FRIENDS=$XSEC_FRIENDS $NNSCORE_FRIENDS
 if [[ "$SUBMIT_MODE" == "multigraph" ]]; then
     echo "[ERROR] Not implemented yet."
     exit 1
@@ -56,10 +57,10 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "[INFO] Using friends $FRIENDS $NNSCORE_FRIENDS"
     [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
     if [[ "$SPECIAL" == "TauID" ]]; then
-        python shapes/produce_shapes.py --channels $CHANNEL \
+        python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
-            --${CHANNEL}-friend-directory $XSEC_FRIENDS \
+            --${CHANNEL}-friend-directory ${SUBM_FRIENDS} \
             --era $ERA \
             --vs-jet-wp $WP \
             --vs-ele-wp ${VS_ELE_WP} \
@@ -71,10 +72,10 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             $CONTROL_ARG \
             --xrootd --validation-tag $TAG --es
     elif [[ "$SPECIAL" == "TauES" ]]; then
-        python shapes/produce_shapes.py --channels $CHANNEL \
+        python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
-            --$CHANNEL-friend-directory $FRIENDS \
+            --$CHANNEL-friend-directory ${SUBM_FRIENDS} \
             --era $ERA \
             --optimization-level 1 \
             --special-analysis "TauES" \
@@ -83,10 +84,10 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             --graph-dir $OUTPUT \
             $CONTROL_ARG
     else
-        python shapes/produce_shapes.py --channels $CHANNEL \
+        python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
-            --$CHANNEL-friend-directory $FRIENDS $NNSCORE_FRIENDS \
+            --$CHANNEL-friend-directory ${SUBM_FRIENDS} \
             --era $ERA \
             --optimization-level 1 \
             --process-selection $PROCESSES \
