@@ -396,42 +396,22 @@ if [[ $MODE == "PROBL_NUIS_SCAN" ]]; then
     done
 fi
 
-min_id_dm0=0.8
-max_id_dm0=1.2
-min_es_dm0=-2
-max_es_dm0=2
-id_dm0=0.95
-es_dm0=-1
 
-
-min_id_dm1=0.9
-max_id_dm1=1.2
-min_es_dm1=-3.8
-max_es_dm1=0.5
-id_dm1=1.12
-es_dm1=-1.4
-
-
-min_id_dm10_11=0.9
-max_id_dm10_11=1.2
-min_es_dm10_11=-3
-max_es_dm10_11=1.5
-id_dm10_11=1.02
-es_dm10_11=-1
+. tau_id_es_measurement/tau_id_es_sim_fit_conf.sh
 
 if [[ $MODE == "MULTIFIT" ]]; then
     source utils/setup_cmssw_tauid.sh
 
     echo "[INFO] Create Workspace for all the datacards"
     combineTool.py -M T2W -i output/$datacard_output_dm/cmb \
-                -o out_multidim_dm_test.root \
+                -o out_multidim_dm.root \
                 --parallel 8 -m 125 \
                 -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
                 --PO '"map=^.*/EMB_DM0:r_EMB_DM_0[1,${min_id_dm0},${max_id_dm0}]"' \
                 --PO '"map=^.*/EMB_DM1:r_EMB_DM_1[1,${min_id_dm1},${max_id_dm1}]"' \
                 --PO '"map=^.*/EMB_DM10_11:r_EMB_DM_10_11[1,${min_id_dm10_11},${max_id_dm10_11}]"'  
 
-    combineTool.py -M MultiDimFit -n .comb_dm_1_corr_v2 -d output/$datacard_output_dm/cmb/out_multidim_dm_test.root \
+    combineTool.py -M MultiDimFit -n .comb_dm_fit -d output/$datacard_output_dm/cmb/out_multidim_dm.root \
     --setParameters ES_DM0=${es_dm0},ES_DM1=${es_dm1},ES_DM10_11=${es_dm10_11},r_EMB_DM_0=${id_dm0},r_EMB_DM_1=${id_dm1},r_EMB_DM_10_11=${id_dm10_11} \
     --setParameterRanges r_EMB_DM_0=${min_id_dm0},${max_id_dm0}:r_EMB_DM_1=${min_id_dm1},${max_id_dm1}:r_EMB_DM_10_11=${min_id_dm10_11},${max_id_dm10_11}:ES_DM0=${min_es_dm0},${max_es_dm0}:ES_DM1=${min_es_dm1},${max_es_dm1}:ES_DM10_11=${min_es_dm10_11},${max_es_dm10_11} \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
@@ -439,7 +419,7 @@ if [[ $MODE == "MULTIFIT" ]]; then
     --redefineSignalPOIs ES_DM0,ES_DM1,ES_DM10_11,r_EMB_DM_0,r_EMB_DM_1,r_EMB_DM_10_11 --floatOtherPOIs=1 \
     --points=400 --algo singles
 
-    mv higgsCombine.comb_dm_1_corr_v2.MultiDimFit.mH120.root output/$datacard_output_dm/cmb/
+    mv higgsCombine.comb_dm_fit.MultiDimFit.mH120.root output/$datacard_output_dm/cmb/
 
 fi
 
