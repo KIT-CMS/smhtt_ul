@@ -296,6 +296,10 @@ max_id=0
 min_es=0
 max_es=0
 
+mH=120
+
+scan_2D_plot_path="scan_2D_"${TAG}
+
 if [[ $MODE == "SCAN_2D" ]]; then
     source utils/setup_cmssw_tauid.sh
 
@@ -327,20 +331,27 @@ if [[ $MODE == "SCAN_2D" ]]; then
             max_es=4.0
         fi
 
-            combineTool.py -M MultiDimFit -n .nominal_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+            combineTool.py -M MultiDimFit -n .scan_2D_${dm_cat} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
             --setParameters ES_${dm_cat}=0.2,r=0.9 --setParameterRanges r=${min_id},${max_id}:ES_${dm_cat}=${min_es},${max_es} \
             --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
             --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
             --redefineSignalPOIs ES_${dm_cat},r \
-            --floatOtherPOIs=1 --points=400 --algo grid
+            --floatOtherPOIs=1 --points=400 --algo grid -m ${mH}
 
         echo "[INFO] Moving scan file to datacard folder ..."
-        mv higgsCombine.nominal_${dm_cat}.MultiDimFit.mH120.root output/$datacard_output_dm/htt_mt_${dm_cat}/
+        mv higgsCombine.scan_2D_${dm_cat}.MultiDimFit.mH${mH}.root output/$datacard_output_dm/htt_mt_${dm_cat}/
 
         echo "[INFO] Plotting 2D scan ..."
-        echo "[INFO] Input file: " output/$datacard_output_dm/htt_mt_${dm_cat}/higgsCombine.nominal_${dm_cat}.MultiDimFit.mH120.root
-        python3 plot_2D_scan.py --name nominal_${dm_cat} --in-path output/$datacard_output_dm/htt_mt_${dm_cat}/ \
-         --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname ${dm_cat} 
+        echo "[INFO] Input file: " output/$datacard_output_dm/htt_mt_${dm_cat}/higgsCombine.scan_2D_${dm_cat}.MultiDimFit.mH${mH}.root
+        echo "But before we create a folder for 2D scans"
+
+        if [ ! -d "${scan_2D_plot_path}" ]; then
+            mkdir -p  ${scan_2D_plot_path}
+        fi
+
+        python3 tau_id_es_measurement/plot_2D_scan.py --name scan_2D_${dm_cat} --in-path output/$datacard_output_dm/htt_mt_${dm_cat}/ \
+         --tau-id-poi ${dm_cat} --tau-es-poi ES_${dm_cat} --outname ${dm_cat}
+        mv scan_2D_${dm_cat}* ${scan_2D_plot_path}
     done
 
 fi
@@ -362,7 +373,7 @@ if [[ $MODE == "PROBL_NUIS_SCAN" ]]; then
            for dm_cat in "${probl_dm_categories[@]}"
     do
 
-    combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_check_poi -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+    combineTool.py -M MultiDimFit -n .scan_2D${dm_cat}_check_poi -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
     --setParameters ES_${dm_cat}=${fix_es},r=${fix_id} --setParameterRanges r=0.5,1.5:ES_${dm_cat}=-4.0,4.0 \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
