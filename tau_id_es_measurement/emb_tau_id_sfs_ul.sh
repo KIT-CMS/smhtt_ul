@@ -17,18 +17,18 @@ source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 # Datacard Setup
 
-datacard_output="datacards_test_pt_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output="datacards_pt_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_dm="datacards_es_4_0_27May_tau_pt20/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_dm="datacards_dm_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-datacard_output_incl="datacards_incl_test_v3/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
+datacard_output_incl="datacards_incl_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
-impact_path="impacts_test_v5"
+impact_path="impacts_${TAG}"
 
 output_shapes="tauid_shapes-${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
-CONDOR_OUTPUT=output/condor_shapes/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
-shapes_output=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
-shapes_output_synced=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
+CONDOR_OUTPUT=../output/condor_shapes/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
+shapes_output=../output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
+shapes_output_synced=../output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
 shapes_rootfile_mm=${shapes_output}_mm.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
@@ -46,16 +46,10 @@ echo "XSEC: ${XSEC_FRIENDS}"
 
 categories=("Pt20to25" "Pt25to30" "Pt30to35" "PtGt40" "DM0" "DM1" "DM10_11" "Inclusive")
 dm_categories=("DM0" "DM1" "DM10_11")
-# dm_categories=("DM0")
 printf -v categories_string '%s,' "${categories[@]}"
 echo "Using Cateogires ${categories_string%,}"
 
-es_shifts=("embminus2p5" "embminus2p4" "embminus2p3" "embminus2p2" "embminus2p1" "embminus2p0" "embminus1p9" "embminus1p8" "embminus1p7" "embminus1p6" "embminus1p5" "embminus1p4" "embminus1p3"\
- "embminus1p2" "embminus1p1" "embminus1p0" "embminus0p9" "embminus0p8" "embminus0p7" "embminus0p6" "embminus0p5" "embminus0p4" "embminus0p3" "embminus0p2" "embminus0p1" "emb0p0" "emb0p1"\
-  "emb0p2" "emb0p3" "emb0p4" "emb0p5" "emb0p6" "emb0p7" "emb0p8" "emb0p9" "emb1p0" "emb1p1" "emb1p2" "emb1p3" "emb1p4" "emb1p5" "emb1p6"\
-   "emb1p7" "emb1p8" "emb1p9" "emb2p0" "emb2p1" "emb2p2" "emb2p3" "emb2p4" "emb2p5")
 
-# es_shifts=("embminus2p5" "embminus2p4" "embminus2p3")
 es_shifts4_0=("embminus4p0" "embminus3p9" "embminus3p8" "embminus3p7" "embminus3p6" "embminus3p5" "embminus3p4" "embminus3p3"\
  "embminus3p2" "embminus3p1" "embminus3p0" "embminus2p9" "embminus2p8" "embminus2p7" "embminus2p6" "embminus2p5" "embminus2p4"\ 
  "embminus2p3" "embminus2p2" "embminus2p1" "embminus2p0" "embminus1p9" "embminus1p8" "embminus1p7" "embminus1p6" "embminus1p5"\
@@ -64,7 +58,7 @@ es_shifts4_0=("embminus4p0" "embminus3p9" "embminus3p8" "embminus3p7" "embminus3
     "emb0p7" "emb0p8" "emb0p9" "emb1p0" "emb1p1" "emb1p2" "emb1p3" "emb1p4" "emb1p5" "emb1p6" "emb1p7" "emb1p8" "emb1p9" "emb2p0" "emb2p1"\
      "emb2p2" "emb2p3" "emb2p4" "emb2p5" "emb2p6" "emb2p7" "emb2p8" "emb2p9" "emb3p0" "emb3p1" "emb3p2" "emb3p3" "emb3p4" "emb3p5" "emb3p6"\
       "emb3p7" "emb3p8" "emb3p9" "emb4p0")
-VS_ELE_WP="vvloose"
+VS_ELE_WP="VVLoose"
 
 
 if [[ $MODE == "COPY" ]]; then
@@ -138,7 +132,7 @@ fi
 
 if [[ $MODE == "CONTROLREGION" ]]; then
     source utils/setup_root.sh
-    python shapes/produce_shapes.py --channels mm \
+    python shapes/produce_shapes_tauid_es.py --channels mm \
         --directory $NTUPLES \
         --mm-friend-directory $XSEC_FRIENDS \
         --era $ERA --num-processes 3 --num-threads 9 \
