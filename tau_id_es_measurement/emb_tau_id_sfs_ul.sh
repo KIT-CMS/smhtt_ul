@@ -147,7 +147,7 @@ PROCESSES="emb"
 number="_emb_ssos"
 if [[ $MODE == "LOCAL" ]]; then
     source utils/setup_root.sh
-    python shapes/produce_shapes.py --channels $CHANNEL \
+    python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $XSEC_FRIENDS \
         --era $ERA --num-processes 3 --num-threads 9 \
@@ -166,7 +166,7 @@ if [[ $MODE == "CONDOR" ]]; then
     echo "[INFO] Running on Condor"
     echo "[INFO] Condor output folder: ${CONDOR_OUTPUT}"
     bash submit/submit_shape_production_ul.sh $ERA $CHANNEL \
-        "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT "TauID" 0 $WP $VS_ELE_WP
+        "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT "TauID" "" $WP $VS_ELE_WP
     echo "[INFO] Jobs submitted"
 fi
 
