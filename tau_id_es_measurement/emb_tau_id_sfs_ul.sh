@@ -182,22 +182,6 @@ elif [[ "${ERA}" == "2016postVFP"  ||  "${ERA}" == "2016preVFP" ]]; then
    datacard_era="2016"
 fi
 
-if [[ $MODE == "PLOT-CONTROL-ES" ]]; then
-    source utils/setup_root.sh
-    echo "##############################################################################################"
-    echo "#     plotting                                      #"
-    echo "##############################################################################################"
-    # python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-emb-tt --do-qcd
-
-        for CATEGORY in "${dm_categories[@]}"
-    do
-        for es_sh in "${es_shifts4_0[@]}"
-        do 
-            python3 plotting/plot_shapes_control_es_shifts.py -l --era Run${ERA} --input ${shapes_rootfile} \
-            --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category $CATEGORY --energy_scale --es_shift $es_sh
-        done
-    done
-fi
 
 if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
@@ -243,6 +227,22 @@ if [[ $MODE == "SYNC" ]]; then
     hadd -f $shapes_output_synced/$inputfile ${shapes_output_synced}_mm/${datacard_era}-mm-*.root
 
     exit 0
+fi
+
+if [[ $MODE == "PLOT-CONTROL-ES" ]]; then
+    source utils/setup_root.sh
+    echo "##############################################################################################"
+    echo "#     plotting                                      #"
+    echo "##############################################################################################"
+
+        for CATEGORY in "${dm_categories[@]}"
+    do
+        for es_sh in "${es_shifts4_0[@]}"
+        do 
+            python3 plotting/plot_shapes_control_es_shifts.py -l --era Run${ERA} --input ${shapes_rootfile} \
+            --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category $CATEGORY --energy_scale --es_shift $es_sh
+        done
+    done
 fi
 
 if [[ $MODE == "INST_COMB" ]]; then
