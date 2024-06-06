@@ -26,9 +26,9 @@ datacard_output_incl="datacards_incl_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${W
 impact_path="impacts_${TAG}"
 
 output_shapes="tauid_shapes-${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
-CONDOR_OUTPUT=../output/condor_shapes/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
-shapes_output=../output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
-shapes_output_synced=../output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
+CONDOR_OUTPUT=output/condor_shapes/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
+shapes_output=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
+shapes_output_synced=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
 shapes_rootfile_mm=${shapes_output}_mm.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
@@ -118,7 +118,7 @@ echo "${shapes_output}_mm"
 
 if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
-    python shapes/produce_shapes.py --channels $CHANNEL \
+    python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $XSEC_FRIENDS \
         --era $ERA --num-processes 3 --num-threads 9 \
