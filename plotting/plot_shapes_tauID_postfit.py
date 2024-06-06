@@ -363,7 +363,7 @@ def main(args):
                 except BaseException:
                     pass
             if channel != "mm":
-                plot.legend(i).add_entry(0, legend_bkg_processes[0], "#tau  "+legend_bkg_processes[0], "f")
+                plot.legend(i).add_entry(0, legend_bkg_processes[0], "#tau  %s" % (legend_bkg_processes[0]), "f")
             # plot.legend(i).add_entry(0, "total_bkg", "Bkg. unc.", "f")
             plot.legend(i).add_entry(0, "model_total", "Bkg. unc.", "f")
             plot.legend(i).add_entry(0, "data_obs", "Data", "PE")
