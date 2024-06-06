@@ -511,35 +511,10 @@ if [[ $MODE == "MULTIFIT_SEP" ]]; then
 fi
 
 
-min_id_dm0=0.8
-max_id_dm0=1.2
-min_es_dm0=-2
-max_es_dm0=2
-id_dm0=0.95
-es_dm0=-1
-
-
-min_id_dm1=0.9
-max_id_dm1=1.2
-min_es_dm1=-3.8
-max_es_dm1=0.5
-id_dm1=1.12
-es_dm1=-1.4
-
-
-min_id_dm10_11=0.9
-max_id_dm10_11=1.2
-min_es_dm10_11=-3
-max_es_dm10_11=1.5
-id_dm10_11=1.02
-es_dm10_11=-1
-
-mH=126
-
 if [[ $MODE == "POSTFIT_MULT" ]]; then
     source utils/setup_cmssw_tauid.sh
 
-    WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm_test.root
+    WORKSPACE=output/$datacard_output_dm/cmb/out_multidim_dm.root
     echo "[INFO] Printing fit result for category $(basename $RESDIR)"
     FILE=output/$datacard_output_dm/cmb/postfitshape.root
     FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
@@ -553,13 +528,8 @@ if [[ $MODE == "POSTFIT_MULT" ]]; then
     --parallel 16   -v2 --robustHesse 1 --saveShapes --saveWithUncertainties
     mv fitDiagnostics.Test.root $FITFILE
     mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/cmb/
-    echo "[INFO] Building Prefit/Postfit shapes"
-    # PostFitShapesFromWorkspace --help
-    PostFitShapesFromWorkspace -w ${WORKSPACE} \
-        -m 126 -d output/$datacard_output_dm/cmb/combined.txt.cmb \
-        --output ${FILE} \
-        -f ${FITFILE}:fit_s --postfit
-
+    echo "[INFO] Already built Prefit/Postfit shapes"
+    
     exit 0
 fi
 
