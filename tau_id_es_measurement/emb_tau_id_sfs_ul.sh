@@ -289,6 +289,9 @@ if [[ $MODE == "DATACARD_DM" ]]; then
     exit 0
 fi
 
+#  2D likelihood scan for tau ID + ES, we vary ID from 0.5 to 1.5 abd ES from -4.0 % to +4.0%
+
+# That's reflected in min/max_id and min/max_es parameters that have corresponding ranges
 
 
 min_id=0
