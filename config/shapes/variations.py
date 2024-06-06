@@ -796,16 +796,6 @@ emb_e_es = [
 # ]
 
 
-# prefiring = [
-#     ReplaceWeight(
-#         "CMS_prefiringUp", "prefireWeight", Weight("prefiringweightup", "prefireWeight")
-#     ),
-#     ReplaceWeight(
-#         "CMS_prefiringDown",
-#         "prefireWeight",
-#         Weight("prefiringweightdown", "prefireWeight"),
-#     ),
-# ]
 prefiring = [
     ReplaceWeight(
         "CMS_prefiringUp", "prefireWeight", Weight("prefiring_wgt__prefiringUp", "prefireWeight")
