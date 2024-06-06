@@ -529,7 +529,7 @@ if [[ $MODE == "POSTFIT_MULT" ]]; then
     mv fitDiagnostics.Test.root $FITFILE
     mv higgsCombine.Test.FitDiagnostics.mH${mH}.root output/$datacard_output_dm/cmb/
     echo "[INFO] Already built Prefit/Postfit shapes"
-    
+
     exit 0
 fi
 
@@ -568,7 +568,7 @@ if [[ $MODE == "POI_CORRELATION" ]]; then
     FITFILE=output/$datacard_output_dm/cmb/fitDiagnostics.${ERA}.root
     
     # python corr_plot.py $ERA $FITFILE
-    python poi_correlation.py $ERA $FITFILE
+    python tau_id_es_measurement/poi_correlation.py $ERA $FITFILE
 
 fi
 
