@@ -1,5 +1,5 @@
-fix_es_dm0=-0.999
-fix_id_dm0=0.995
+fix_es_dm0=-0.6
+fix_id_dm0=0.97
 min_id_dm0=0.8
 max_id_dm0=1.2
 min_es_dm0=-2
