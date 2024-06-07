@@ -2,7 +2,7 @@ min_id_dm0=0.8
 max_id_dm0=1.2
 min_es_dm0=-2
 max_es_dm0=2
-id_dm0=0.95
+id_dm0=0.999
 es_dm0=-1
 
 
