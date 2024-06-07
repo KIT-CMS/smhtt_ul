@@ -139,3 +139,6 @@ dmypy.json
 *.png
 *.pdf
 *.html
+
+# Log files
+*.out
