@@ -15,6 +15,12 @@ categories=("DM0" "DM1" "DM10_11")
 fix_es=0
 fix_id=0
 
+id_min=0
+id_max=0
+
+es_min=0
+es_max=0
+
 datacard_output_dm="datacards_dm_sim_fit_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 
 mH=127
@@ -32,16 +38,31 @@ for dm_cat in ${categories[@]}; do
     if [[ $dm_cat == "DM0" ]]; then
         fix_es=${fix_es_dm0}
         fix_id=${fix_id_dm0}
+
+        id_min=${min_id_dm0}
+        id_max=${max_id_dm0}
+        es_min=${min_es_dm0}
+        es_max=${max_es_dm0}
     fi
 
     if [[ $dm_cat == "DM1" ]]; then
         fix_es=${fix_es_dm1}
         fix_id=${fix_id_dm1}
+
+        id_min=${min_id_dm1}
+        id_max=${max_id_dm1}
+        es_min=${min_es_dm1}
+        es_max=${max_es_dm1}
     fi
 
     if [[ $dm_cat == "DM10_11" ]]; then
         fix_es=${fix_es_dm10_11}
         fix_id=${fix_id_dm10_11}
+
+        id_min=${min_id_dm10_11}
+        id_max=${max_id_dm10_11}
+        es_min=${min_es_dm10_11}
+        es_max=${max_es_dm10_11}
     fi
 
                                                    
@@ -53,14 +74,14 @@ for dm_cat in ${categories[@]}; do
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs r \
-    --setParameterRanges r=0.5,1.5 --setParameters r=${fix_id} \
+    --setParameterRanges r=${id_min},${id_max} --setParameters r=${fix_id},ES_${dm_cat}=${fix_es} \
     --floatOtherPOIs=1 --points=400 --algo grid -v 2 -m ${mH}
 
     combineTool.py -M MultiDimFit -n .${fit_name_es} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
     --redefineSignalPOIs ES_${dm_cat} \
-    --setParameterRanges ES_${dm_cat}=-4.0,4.0 --setParameters ES_${dm_cat}=${fix_es} \
+    --setParameterRanges ES_${dm_cat}=${es_min},${es_max} --setParameters ES_${dm_cat}=${fix_es},r=${fix_id} \
     --floatOtherPOIs=1 --points=400 --algo grid -v 2 -m ${mH}
     
     # moving the output (tau ID) to the correct folder
