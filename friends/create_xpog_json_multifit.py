@@ -482,4 +482,4 @@ correction_dm.generate_dm_scheme()
 
 correctionset.add_correction(correction_pt)
 correctionset.add_correction(correction_dm)
-correctionset.write_json("Tau_"+str(args.wp)+"_"+str(args.era)+"UL_"+str(args.channel)+"_"+str(args.user_out_tag)+"_v1.json")
+correctionset.write_json("Tau_%(work_p)_%(era)_+UL_%(channel)_%(tag).json" % {"work_p": args.wp, "era": args.era, "channel": args.channel, "tag": args.user_out_tag})
