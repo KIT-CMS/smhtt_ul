@@ -45,23 +45,35 @@ for dm_cat in ${categories[@]}; do
     fi
 
                                                    
-    fit_name=nominal_${dm_cat}_check_poi
+    fit_name_id=nominal_${dm_cat}_check_poi_id
+    fit_name_es=nominal_${dm_cat}_check_poi_es
    
-    
-    combineTool.py -M MultiDimFit -n .nominal_${dm_cat}_check_poi -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
-    --setParameters ES_${dm_cat}=${fix_es},r=${fix_id} --setParameterRanges r=0.5,1.5:ES_${dm_cat}=-4.0,4.0 \
+
+    combineTool.py -M MultiDimFit -n .${fit_name_id} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
     --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
     --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-    --redefineSignalPOIs ES_${dm_cat},r \
+    --redefineSignalPOIs r \
+    --setParameterRanges r=0.5,1.5 --setParameters r=${fix_id} \
+    --floatOtherPOIs=1 --points=400 --algo grid -v 2 -m ${mH}
+
+    combineTool.py -M MultiDimFit -n .${fit_name_es} -d output/$datacard_output_dm/htt_mt_${dm_cat}/ws_scan_${dm_cat}.root \
+    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+    --redefineSignalPOIs ES_${dm_cat} \
+    --setParameterRanges ES_${dm_cat}=-4.0,4.0 --setParameters ES_${dm_cat}=${fix_es} \
     --floatOtherPOIs=1 --points=400 --algo grid -v 2 -m ${mH}
     
-    
-    python3  tau_id_es_measurement/plot1DScan_comb.py  higgsCombine.${fit_name}.MultiDimFit.mH${mH}.root --POI r \
+    # moving the output (tau ID) to the correct folder
+    python3  tau_id_es_measurement/plot1DScan_comb.py  higgsCombine.${fit_name_id}.MultiDimFit.mH${mH}.root --POI r \
     --y-max 12 --output ${TAG}_${ERA}_${CHANNEL}_${WP}_${cat}_r_${dm_cat}
-    python3  tau_id_es_measurement/plot1DScan_comb.py  higgsCombine.${fit_name}.MultiDimFit.mH${mH}.root --POI ES_${dm_cat} \
-     --y-max 12 --output ${TAG}_${ERA}_${CHANNEL}_${WP}_${cat}_es_${dm_cat}
     mv ${TAG}_${ERA}_${CHANNEL}_${WP}_${cat}*  lscan/${TAG}/${ERA}/${CHANNEL}/${WP}/${dm_cat}/
-    mv higgsCombine.${fit_name}.MultiDimFit.mH${mH}.root lscan/${TAG}/${ERA}/${CHANNEL}/${WP}/${dm_cat}/
+    mv higgsCombine.${fit_name_id}.MultiDimFit.mH${mH}.root lscan/${TAG}/${ERA}/${CHANNEL}/${WP}/${dm_cat}/
+
+    # moving the output (tau ES) to the correct folder
+    python3  tau_id_es_measurement/plot1DScan_comb.py  higgsCombine.${fit_name_es}.MultiDimFit.mH${mH}.root --POI ES_${dm_cat} \
+    --y-max 12 --output ${TAG}_${ERA}_${CHANNEL}_${WP}_${cat}_es_${dm_cat}
+    mv ${TAG}_${ERA}_${CHANNEL}_${WP}_${cat}_es_${dm_cat}*  lscan/${TAG}/${ERA}/${CHANNEL}/${WP}/${dm_cat}/
+    mv higgsCombine.${fit_name_es}.MultiDimFit.mH${mH}.root lscan/${TAG}/${ERA}/${CHANNEL}/${WP}/${dm_cat}/
 done
 # exit 0
 
