@@ -11,6 +11,7 @@ SPECIAL=$8
 NNSCORE_FRIENDS=$9
 WP=${10} 
 VS_ELE_WP=${11}
+ID_SUBM=${12}
 
 [[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4 && ! -z $5 ]] || (
     echo "[ERROR] Number of given parameters is too small."
@@ -56,7 +57,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     echo "[INFO] Using tag $TAG"
     echo "[INFO] Using friends $FRIENDS $NNSCORE_FRIENDS"
     [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
-    if [[ "$SPECIAL" == "TauID" ]]; then
+    if [[  "$SPECIAL" == "TauID"  &&  ${ID_SUBM} == 1 ]]; then
         python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
@@ -84,7 +85,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
             --graph-dir $OUTPUT \
             $CONTROL_ARG
     else
-        python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
+        python shapes/produce_shapes.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
             --$CHANNEL-friend-directory ${SUBM_FRIENDS} \
