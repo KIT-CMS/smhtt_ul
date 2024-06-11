@@ -78,7 +78,7 @@ def parse_arguments():
     parser.add_argument(
         "--tag",
         type=str,
-        default=str,
+        default="",
         help="Tag that is added to the output file")
 
     return parser.parse_args()
