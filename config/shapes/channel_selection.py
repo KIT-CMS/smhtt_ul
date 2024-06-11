@@ -26,8 +26,6 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         print("This vs electron working point doen't exist. Please specify the correct vsEle discriminator ")
     if vs_jet_wp not in wps_dict:
         print("This vs jet working point doen't exist. Please specify the correct vsJet discriminator ")
-    vs_ele_discr = vs_ele_wp
-    vs_jet_discr = vs_jet_wp
     if special is None:
         if "mt" in channel:
             #  Add channel specific cuts to the list of cuts.
@@ -241,8 +239,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts.extend(
                 [
                     ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                    ("id_tau_vsEle_%s_2>0.5" % (vs_ele_discr), "againstElectronDiscriminator"),
-                    ("id_tau_vsJet_%s_2>0.5" % (vs_jet_discr), "tau_iso"),
+                    ("id_tau_vsEle_%s_2>0.5" % (vs_ele_wp), "againstElectronDiscriminator"),
+                    ("id_tau_vsJet_%s_2>0.5" % (vs_jet_wp), "tau_iso"),
                     ("iso_1<0.15", "muon_iso"),
                     # ("pzetamissvis > -25", "pzetamissvis"),
                     ("mt_1 < 60", "mt_1"),
