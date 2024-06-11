@@ -239,8 +239,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts.extend(
                 [
                     ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                    ("id_tau_vsEle_%s_2>0.5" % (vs_ele_wp), "againstElectronDiscriminator"),
-                    ("id_tau_vsJet_%s_2>0.5" % (vs_jet_wp), "tau_iso"),
+                    (f"id_tau_vsEle_{vs_ele_wp}_2>0.5", "againstElectronDiscriminator"),
+                    (f"id_tau_vsJet_{vs_jet_wp}_2>0.5", "tau_iso"),
                     ("iso_1<0.15", "muon_iso"),
                     # ("pzetamissvis > -25", "pzetamissvis"),
                     ("mt_1 < 60", "mt_1"),
@@ -294,8 +294,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         cuts.extend(
             [
                 ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
-                ("id_tau_vsEle_VLoose_2>0.5", "againstElectronDiscriminator"),
-                ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
+                (f"id_tau_vsEle_{vs_ele_wp}_2>0.5", "againstElectronDiscriminator"),
+                (f"id_tau_vsJet_{vs_jet_wp}_2>0.5", "tau_iso"),
                 ("iso_1<0.15", "muon_iso"),
                 ("pzetamissvis > -25", "pzetamissvis"),
                 ("mt_1 < 60", "mt_1"),
