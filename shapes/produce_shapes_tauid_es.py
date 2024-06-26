@@ -525,61 +525,6 @@ def get_analysis_units(
             categorization=categorization,
             channel=channel,
         )
-        add_process(
-            analysis_units,
-            name="ggh",
-            dataset=datasets["ggH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="qqh",
-            dataset=datasets["qqH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="wh",
-            dataset=datasets["WH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                WH_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="zh",
-            dataset=datasets["ZH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ZH_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="tth",
-            dataset=datasets["ttH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ttH_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
     # "gghww"  : [Unit(
     #             datasets["ggHWW"], [
     #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
@@ -848,30 +793,6 @@ def get_control_units(
     if channel != "mm":
         add_control_process(
             control_units,
-            name="qqh",
-            dataset=datasets["qqH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
-        add_control_process(
-            control_units,
-            name="ggh",
-            dataset=datasets["ggH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
-        add_control_process(
-            control_units,
             name="w_nlo",
             dataset=datasets["WNLO"],
             selections=[
@@ -1041,10 +962,6 @@ def main(args):
             "vvj",
             "w",
             "w_nlo",
-            "ggh",
-            "qqh",
-            # "zh",
-            # "wh",
         }
         # if "et" in args.channels:
         #     procS = procS - {"w"}
@@ -1089,7 +1006,7 @@ def main(args):
     } & procS
     signalsS = sm_signalsS
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
-        signalsS = signalsS & {"ggh", "qqh"}
+        pass
 
     simulatedProcsDS = {
         chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
@@ -1255,20 +1172,6 @@ def main(args):
             # um.book([unit for d in {"ggh"} & procS for unit in nominals[era]['units'][channel][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
             # um.book([unit for d in {"qqh"} & procS for unit in nominals[era]['units'][channel][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
             # TODO add signal uncertainties
-            book_histograms(
-                um,
-                processes={"ggh"} & procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[ggh_acceptance],
-                enable_check=do_check,
-            )
-            book_histograms(
-                um,
-                processes={"qqh"} & procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[qqh_acceptance],
-                enable_check=do_check,
-            )
             book_histograms(
                 um,
                 processes=simulatedProcsDS[channel],
