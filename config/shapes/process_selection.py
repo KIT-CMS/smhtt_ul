@@ -198,11 +198,11 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
     elif channel == "mt":
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
-        # tauidweight = (
-        #     "((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
-        #     "taubyIsoIdWeight",
-        # )
-        tauidweight = None
+        tauidweight = (
+            "((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
+            "taubyIsoIdWeight",
+        )
+        # tauidweight = None
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
         vsele_weight = ("id_wgt_tau_vsEle_"+vs_ele_discr+"_2", "vseleweight")
         if era == "2016preVFP" or era == "2016postVFP":
