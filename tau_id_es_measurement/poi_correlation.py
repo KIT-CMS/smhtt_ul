@@ -210,6 +210,17 @@ if __name__ == "__main__":
     m.SetContour(10000)
     m.Draw("colz text")
 
+    era_lumi = ""
+
+    if era == "2016preVFP":
+        era_lumi = "19.7"
+    elif era == "2016postVFP":
+        era_lumi = "16.8"
+    elif era == "2017":
+        era_lumi = "41.5"
+    elif era == "2018":
+        era_lumi = "59.7"
+
     tex = ROOT.TLatex()
     tex.SetNDC()
     tex.SetLineWidth(2)
@@ -218,7 +229,7 @@ if __name__ == "__main__":
     tex.SetTextSize(25)
     tex.SetTextFont(43)
     tex.DrawLatex(0.30, 0.955, "CMS")
-    tex.DrawLatex(0.65, 0.955, "16.8 fb^{-1} (13 TeV)")
+    tex.DrawLatex(0.65, 0.955, era_lumi+" fb^{-1} (13 TeV)")
     tex.SetTextFont(53)
     tex.DrawLatex(0.40, 0.955, "Internal")
     for i in range(num_pois):
