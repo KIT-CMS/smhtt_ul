@@ -14,8 +14,11 @@ VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis"
 ulimit -s unlimited
 source utils/setup_root.sh
 
-KINGMAKER_BASEDIR="/ceph/mmolch/CROWN/ntuples/${NTUPLETAG}/CROWNRun"
-XSEC_FRIENDS="/ceph/mmolch/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec"
+KINGMAKER_BASEDIR="/store/user/qli/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+KINGMAKER_BASEDIR_XROOTD="root://cmsxrootd-kit-disk.gridka.de/${KINGMAKER_BASEDIR}"
+XSEC_FRIENDS="/store/user/qli/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
+#FF_FRIENDS="/store/user/nshadskiy/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/fake_factors_v1/"
+#RECO_FRIENDS="/store/user/nshadskiy/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/mass_reco_v1/"
 
 if [[ $ERA == *"2016"* ]]; then
     NTUPLES=$KINGMAKER_BASEDIR
@@ -43,7 +46,7 @@ if [[ $MODE == "XSEC" ]]; then
 
     echo "running xsec friends script"
     echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
-    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
+    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsxrootd-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
 fi
 
 if [[ $MODE == "SHAPES" ]]; then
