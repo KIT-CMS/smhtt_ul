@@ -13,7 +13,7 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
         cuts = [
             ("boosted_q_1*boosted_q_2<0", "os"),
             ("(boosted_tau_decaymode_2==0 || boosted_tau_decaymode_2==1 || boosted_tau_decaymode_2==10)", "tau_decay_mode"),
-            ("boosted_deltaR_ditaupair<=0.8", "boosted_deltaR"),
+            ("(boosted_deltaR_ditaupair<=0.8 && boosted_deltaR_ditaupair>=0.1)", "boosted_deltaR"),
         ]
     
     if not boosted_b:
@@ -36,16 +36,16 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
         if not boosted_tau:
             cuts.extend(
                 [
-                    ("(abs(fj_Xbb_eta)<=2.5 && fj_Xbb_pt>=200 && jpt_1<200 &&mt_1<40)", "bb_fatjet"),
-                    # ("((bpair_btag_value_2<0.049 && nbtag==1) || (nbtag==0))", "resolved_bb_restriction"),
-                    ("nbtag==0", "btag"),
+                    ("(bpair_pt_1>=20 && bpair_pt_2>=20 && nbtag>=1 && bpair_btag_value_2>0.049 && abs(bpair_eta_2)<=2.5&&fj_Xbb_pt<0) || (fj_Xbb_particleNet_XbbvsQCD>=0.6&&abs(fj_Xbb_eta)<=2.5&&fj_Xbb_pt>=250&&fj_Xbb_msoftdrop>=30&&bpair_pt_1<0) || (bpair_pt_1>=20 && bpair_pt_2>=20 && nbtag>=1 && bpair_btag_value_2>0.049 && abs(bpair_eta_2)<=2.5&&fj_Xbb_particleNet_XbbvsQCD>=0.6&&abs(fj_Xbb_eta)<=2.5&&fj_Xbb_pt>=250&&fj_Xbb_msoftdrop>=30)", "bb_fatjet"),
+                    # ("(fj_Xbb_particleNet_XbbvsQCD>=0.6 && abs(fj_Xbb_eta)<=2.5 && fj_Xbb_pt>=250)", "bb_fatjet"),
+                    # ("nbtag>=2", "btag"),
                 ]
             )
         if boosted_tau:
             cuts.extend(
                 [
-                    ("(fj_Xbb_particleNet_XbbvsQCD_boosted>=0.0 && abs(fj_Xbb_eta_boosted)<=2.5 && fj_Xbb_pt_boosted>=200)", "bb_fatjet"), 
-                    ("((bpair_btag_value_2_boosted<0.049 && nbtag_boosted==1) || (nbtag_boosted==0))", "resolved_bb_restriction"),
+                    ("(bpair_pt_1_boosted>=20 && bpair_pt_2_boosted>=20 && nbtag_boosted>=1 && bpair_btag_value_2_boosted>0.049 && abs(bpair_eta_2_boosted)<=2.5&&fj_Xbb_pt_boosted<0) || (fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6&&abs(fj_Xbb_eta_boosted)<=2.5&&fj_Xbb_pt_boosted>=250&&fj_Xbb_msoftdrop_boosted>=30&&bpair_pt_1_boosted<0) || (bpair_pt_1_boosted>=20 && bpair_pt_2_boosted>=20 && nbtag_boosted>=1 && bpair_btag_value_2_boosted>0.049 && abs(bpair_eta_2_boosted)<=2.5&&fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6&&abs(fj_Xbb_eta_boosted)<=2.5&&fj_Xbb_pt_boosted>=250&&fj_Xbb_msoftdrop_boosted>=30)", "bb_fatjet"),
+                    # ("(fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6 && abs(fj_Xbb_eta_boosted)<=2.5 && fj_Xbb_pt_boosted>=200)", "bb_fatjet"),  
                 ]
             )
 
@@ -96,7 +96,7 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
                 elif boosted_tau:
                     cuts.append(
                         (
-                            "boosted_pt_2>40 && (((trg_single_mu50_boosted > 0.5) && (boosted_pt_1 >= 55)) || ((trg_single_mu27_boosted > 0.5) && (boosted_iso_1 < 0.3) && (boosted_pt_1 > 28) && (boosted_pt_1 < 55)))",
+                            "boosted_pt_2>40 && (((trg_single_mu50_boosted > 0.5 || trg_single_oldMu100_boosted > 0.5 || trg_single_tkmu100_boosted > 0.5) && (boosted_pt_1 >= 55)) || ((trg_single_mu24_boosted > 0.5) && (boosted_iso_1 < 0.3) && (boosted_pt_1 > 25) && (boosted_pt_1 < 55)))",
                             "trg_selection",
                         ),  # TODO add nonHPS Triggerflag for also MC
                     )
@@ -147,7 +147,7 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
                 elif boosted_tau:
                     cuts.append(
                         (
-                            "boosted_pt_2>40 && (((trg_single_ele115_boosted > 0.5) && (boosted_pt_1 >= 120)) || ((trg_single_ele35_boosted > 0.5) && (boosted_iso_1 < 0.3) && (boosted_pt_1 > 38) && (boosted_pt_1 < 120)))", # || (boosted_pt_1<118 && boosted_pt_1>=35 && boosted_iso_1<0.3 && met>30&& trg_single_ele32_boosted==1))",
+                            "boosted_pt_2>40 && (((trg_single_ele115_boosted > 0.5 || trg_single_photon200_boosted > 0.5) && (boosted_pt_1 >= 120)) || ((trg_single_ele32_boosted > 0.5) && (boosted_iso_1 < 0.3) && (boosted_pt_1 > 33) && (boosted_pt_1 < 120)))", 
                             "trg_selection",
                         ),
                     )
@@ -159,6 +159,7 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
             if not boosted_tau:
                 cuts.extend(
                     [
+                        ("(tau_decaymode_1==0 || tau_decaymode_1==1 || tau_decaymode_1==10 || tau_decaymode_1==11)", "tau_decay_mode"),
                         ("extraelec_veto<0.5", "extraelec_veto"),
                         ("extramuon_veto<0.5", "extramuon_veto"),
                         (
@@ -173,12 +174,12 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
                             "id_tau_vsJet_Medium_1>0.5 && id_tau_vsJet_Medium_2>0.5",
                             "tau_iso",
                         ),
-                        ("m_fastmtt>60 && m_fastmtt<140", "mvis_veto"),
                     ]
                 )
             elif boosted_tau:
                 cuts.extend(
-                    [
+                    [   
+                        ("(boosted_tau_decaymode_1==0 || boosted_tau_decaymode_1==1 || boosted_tau_decaymode_1==10)", "tau_decay_mode"),
                         ("extraelec_veto<0.5", "extraelec_veto"),
                         ("extramuon_veto<0.5", "extramuon_veto"),
                         # (
@@ -201,7 +202,7 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
                         [
                             ("pt_1 > 40 && pt_2 > 40", "pt_selection"),
                             (
-                                "((trg_double_tau35_tightiso_tightid > 0.5) || (trg_double_tau35_mediumiso_hps > 0.5) || (trg_double_tau40_mediumiso_tightid > 0.5) || (trg_double_tau40_tightiso > 0.5))",
+                                "((is_data>0.5) && ((run>=317509 && trg_double_tau35_mediumiso_hps>0.5) || (run<317509 && ((trg_double_tau35_tightiso_tightid>0.5) || (trg_double_tau40_mediumiso_tightid>0.5) || (trg_double_tau40_tightiso>0.5))))) || (is_data<0.5 && trg_double_tau35_mediumiso_hps>0.5)",
                                 "trg_selection",
                             ),
                         ]
@@ -211,7 +212,7 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
                         [
                             ("boosted_pt_1 > 40 && boosted_pt_2 > 40", "pt_selection"),
                             (
-                                "((trg_ak8jet400_trimmass30 > 0.5) || (trg_ht500_met100_mht100_tightid > 0.5))", 
+                                "((trg_ak8pfjet400_trimmass30 > 0.5) || (trg_pfht500_pfmet100_pfmht100_idtight > 0.5))", 
                                 "trg_selection",
                             ),
                         ]

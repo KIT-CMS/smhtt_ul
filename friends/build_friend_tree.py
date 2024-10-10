@@ -1,6 +1,6 @@
 import ROOT
 import argparse
-import yaml
+import json
 import os
 import glob
 import shutil
@@ -36,8 +36,8 @@ def args_parser():
     parser.add_argument(
         "--dataset-config",
         type=str,
-        default="datasets/datasets.yaml",
-        help="path to the datasets.yaml",
+        default="datasets/datasets.json",
+        help="path to the datasets.json",
     )
     parser.add_argument(
         "--debug",
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     base_path = os.path.join(args.basepath, "*/*/*/*.root")
     output_path = os.path.join(args.outputpath)
     workdir = os.path.join(args.tempdir)
-    dataset = yaml.safe_load(open(args.dataset_config))
+    dataset = json.load(open(args.dataset_config))
     print("Collecting ntuples from {}".format(base_path))
     if base_path.startswith("root://"):
         ntuples = xrdglob.glob(base_path)

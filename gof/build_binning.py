@@ -82,6 +82,27 @@ def parse_arguments():
         required=True,
         help="folder name where the output will be stored",
     )
+    parser.add_argument(
+        "--xrootd",
+        action="store_true",
+        help="Read input ntuples and friends via xrootd from gridka dCache",
+    )
+    parser.add_argument(
+        "--validation-tag",
+        default="default",
+        type=str,
+        help="Tag to be used for the validation of the input samples",
+    )
+    parser.add_argument(
+        "--boosted-tau-analysis",
+        action="store_true",
+        help="Can be set to a switch to a boosted tau analysis selection.",
+    )
+    parser.add_argument(
+        "--boosted-b-analysis",
+        action="store_true",
+        help="Can be set to a switch to a boosted bjet analysis selection.",
+    )
     return parser.parse_args()
 
 
@@ -125,7 +146,7 @@ def get_data_selection(era, channel, name, unit, categorization, basedir, friend
             for friendfile in [x.path for x in unit[0].dataset.ntuples[0].friends]:
                 if friend_dir in friendfile and friend_dir not in friend_paths:
                     friend_paths.append(f"{friend_dir}/")
-    files = [ntuple.path.replace(basedir, "") for ntuple in unit[0].dataset.ntuples]
+    files = [ntuple.path for ntuple in unit[0].dataset.ntuples]
     for selection in unit[0].selections:
         cutstring = " && ".join(
             [
@@ -170,10 +191,10 @@ def build_chain(dict_):
     for d in friend_paths:
         friendchains[d] = ROOT.TChain(dict_["tree_path"])
     for i, f in enumerate(dict_["files"]):
-        filename = f"{dict_['base_path']}/{f}"
+        filename = f #f"{dict_['base_path']}/{f}"
         chain.AddFile(filename)
         for friendchain in friendchains:
-            friendfile = f"{d}/{f}"
+            friendfile = f.replace("CROWNRun", f"CROWNFriends/{friendchain.split('/')[-3]}") #f"{d}/{f}"
             friendchains[friendchain].AddFile(friendfile)
 
     chain_numentries = chain.GetEntries()
@@ -218,8 +239,14 @@ def get_1d_binning(channel, chain, variables, percentiles):
     binning = {}
     for i, v in enumerate(variables):
         binning[v] = {}
+        logger.info(f"{v} has {len(values[i])} events")
         if len(values[i]) > 0:
-            borders = [float(x) for x in np.percentile(values[i], percentiles)]
+            if len(values[i]) > 400:
+                borders = [float(x) for x in np.percentile(values[i], percentiles)]
+            elif len(values[i]) > 200:
+                borders = [float(x) for x in np.percentile(values[i], [0.0, 20.0, 40.0, 60.0, 80.0, 100.0])]
+            else:
+                borders = [float(x) for x in np.percentile(values[i], [0.0, 50.0, 100.0])]
             # remove duplicates in bins for integer binning
             borders = sorted(list(set(borders)))
             # epsilon offset for integer variables to make it more stable
@@ -321,7 +348,8 @@ def main(args):
         variables = args.variables
     logger.info("Variables: {}".format(variables))
     nominals[era]["datasets"][channel] = get_nominal_datasets(
-        era, channel, friend_directories, files, args.directory
+        era, channel, friend_directories, files, args.directory,
+        xrootd=args.xrootd, validation_tag=args.validation_tag
     )
     logger.info("Found {} datasets".format(len(nominals[era]["datasets"][channel])))
     logger.info("Creating analysis units")
@@ -331,6 +359,8 @@ def main(args):
         nominals[era]["datasets"][channel],
         set_dummy_categorization(),
         None,
+        boosted_tau=args.boosted_tau_analysis, 
+        boosted_b=args.boosted_b_analysis,
     )
     data_selection = get_data_selection(
         era,
@@ -344,16 +374,16 @@ def main(args):
 
     percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
 
-    outputfile = os.path.join(args.output_folder, f"binning_{era}_{channel}.yaml")
-    outputfile2d = os.path.join(args.output_folder, f"binning_{era}_{channel}_2D.yaml")
+    outputfile = os.path.join(args.output_folder, f"nmssm_boosted_gof_binning_{era}_{channel}.yaml")
+    # outputfile2d = os.path.join(args.output_folder, f"binning_{era}_{channel}_2D.yaml")
     chain = build_chain(data_selection)
     binning = get_1d_binning(channel, chain, variables, percentiles)
     with open(outputfile, "w") as f:
         yaml.dump(binning, f, default_flow_style=False)
 
-    binning = add_2d_unrolled_binning(variables, binning)
-    with open(outputfile2d, "w") as f:
-        yaml.dump(binning, f, default_flow_style=False)
+    # binning = add_2d_unrolled_binning(variables, binning)
+    # with open(outputfile2d, "w") as f:
+    #     yaml.dump(binning, f, default_flow_style=False)
 
 
 if __name__ == "__main__":

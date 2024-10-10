@@ -5,14 +5,18 @@ import os
 import json
 import yaml
 import numpy as np
-import seaborn as sns
+# import seaborn as sns
 
 import matplotlib as mpl
-mpl.use('Agg')
-mpl.rcParams['font.size'] = 16
+import mplhep as hep
+
+# mpl.use('Agg')
+# mpl.rcParams['font.size'] = 16
 import matplotlib.pyplot as plt
-from matplotlib import cm
-sns.set_style("ticks")
+# fromcno matplotlib import cm
+# sns.set_style("ticks")
+# hep.style.use("CMS")
+hep.style.use({"font.size": 16})
 
 import logging
 logger = logging.getLogger("plot_gof")
@@ -24,60 +28,127 @@ logger.addHandler(handler)
 
 # TODO: Update label dict
 labeldict = {
-    'pt_1' : '$p_{T}(\\tau_1$)',
+    'pt_1' : '$p_{T}(\\tau_1)$',
     'pt_2' : '$p_{T}(\\tau_2)$',
+    'eta_1': '$\\eta(\\tau_1$)',
+    'eta_2': '$\\eta(\\tau_2$)',
+    'phi_1': '$\\phi(\\tau_1$)',
+    'phi_2': '$\\phi(\\tau_2$)',
     'iso_1' : 'iso($\\tau_1$)',
     'iso_2' : 'iso($\\tau_2$)',
-    'jeta_1': 'Leading jet $\\eta$',
-    'jeta_2': 'Subleading jet $\\eta$',
-    'jpt_1' : 'Leading jet $p_T$',
-    'jpt_2' : 'Sub-leading jet $p_T$',
-    'bpt_1' : 'Leading b-jet $p_T$',
-    'bpt_2' : 'Sub-leading b-jet $p_T$',
-    'njets' : 'number of jets',
-    'nbtag' : 'number of b-jets',
-    'm_sv' : 'di-$\\tau$ mass',
+    'mass_1' : 'mass($\\tau_1$)',
+    'mass_2' : 'mass($\\tau_2$)',
+    'tau_decaymode_1': 'decay mode 1',
+    'tau_decaymode_2': 'decay mode 2',
     'mt_1' : '$m_{T}(\\tau_1,MET)$',
-    'mt_1_pf': '$m_{T}(\\tau_1,PFMET)$',
     'mt_2' : '$m_{T}(\\tau_2,MET)$',
+    'deltaR_ditaupair': '$\Delta$R $(\\tau_1, \\tau_2)$',
+    'm_vis' : 'visible di-$\\tau$ mass',
+    'm_fastmtt': 'fastMTT di-$\\tau$ mass',
+    'pt_fastmtt': 'fastMTT $p_{T}(\\tau\\tau)$',
+    'eta_fastmtt': 'fastMTT $\\eta(\\tau\\tau)$',
+    'phi_fastmtt': 'fastMTT $\phi(\\tau\\tau)$',
+    'boosted_pt_1': '$p_{T}(\\tau_1)$',
+    'boosted_pt_2': '$p_{T}(\\tau_2)$',
+    'boosted_eta_1': '$\\eta(\\tau_1$)',
+    'boosted_eta_2': '$\\eta(\\tau_2$)',
+    'boosted_phi_1': '$\\phi(\\tau_1$)',
+    'boosted_phi_2': '$\\phi(\\tau_2$)',
+    'boosted_iso_1' : 'iso($\\tau_1$)',
+    'boosted_iso_2' : 'iso($\\tau_2$)',
+    'boosted_mass_1' : 'mass($\\tau_1$)',
+    'boosted_mass_2' : 'mass($\\tau_2$)',
+    'boosted_tau_decaymode_1': 'decay mode 1',
+    'boosted_tau_decaymode_2': 'decay mode 2',
+    'boosted_mt_1' : '$m_{T}(\\tau_1,MET)$',
+    'boosted_mt_2' : '$m_{T}(\\tau_2,MET)$',
+    'boosted_deltaR_ditaupair': '$\Delta$R $(\\tau_1, \\tau_2)$',
+    'boosted_m_vis' : 'visible di-$\\tau$ mass',
+    'boosted_m_fastmtt': 'fastMTT di-$\\tau$ mass',
+    'boosted_pt_fastmtt': 'fastMTT $p_{T}(\\tau\\tau)$',
+    'boosted_eta_fastmtt': 'fastMTT $\\eta(\\tau\\tau)$',
+    'boosted_phi_fastmtt': 'fastMTT $\phi(\\tau\\tau)$',
+    'bpair_pt_1' : 'Leading b-jet $p_T$',
+    'bpair_pt_2' : 'Sub-leading b-jet $p_T$',
+    'bpair_eta_1' : 'Leading b-jet $\\eta$',
+    'bpair_eta_2' : 'Sub-leading b-jet $\\eta$',
+    'bpair_phi_1' : 'Leading b-jet $\\phi$',
+    'bpair_phi_2' : 'Sub-leading b-jet $\\phi$',
+    'bpair_btag_value_1' : 'Leading b-jet b-tag score',
+    'bpair_btag_value_2' : 'Sub-leading b-jet b-tag score',
+    'bpair_m_inv': 'di-b mass',
+    'bpair_pt_dijet': 'di-b $p_T$',
+    'bpair_deltaR': '$\Delta$R $(b_1, b_2)$',
+    'bpair_pt_1_boosted' : 'Leading b-jet $p_T$',
+    'bpair_pt_2_boosted' : 'Sub-leading b-jet $p_T$',
+    'bpair_eta_1_boosted' : 'Leading b-jet $\\eta$',
+    'bpair_eta_2_boosted' : 'Sub-leading b-jet $\\eta$',
+    'bpair_phi_1_boosted' : 'Leading b-jet $\\phi$',
+    'bpair_phi_2_boosted' : 'Sub-leading b-jet $\\phi$',
+    'bpair_btag_value_1_boosted' : 'Leading b-jet b-tag score',
+    'bpair_btag_value_2_boosted' : 'Sub-leading b-jet b-tag score',
+    'bpair_m_inv_boosted': 'di-b mass',
+    'bpair_pt_dijet_boosted': 'di-b $p_T$',
+    'bpair_deltaR_boosted': '$\Delta$R $(b_1, b_2)$',
+    'fj_Xbb_pt': 'X(bb)-tagged fatjet $p_T$',
+    'fj_Xbb_eta': 'X(bb)-tagged fatjet $\\eta$',
+    'fj_Xbb_phi': 'X(bb)-tagged fatjet $\\phi$',
+    'fj_Xbb_msoftdrop': 'X(bb)-tagged fatjet softdrop mass',
+    'fj_Xbb_nsubjettiness_2over1': 'X(bb)-tagged fatjet nsubjettiness 2/1',
+    'fj_Xbb_nsubjettiness_3over2': 'X(bb)-tagged fatjet nsubjettiness 3/2',
+    'fj_Xbb_pt_boosted': 'X(bb)-tagged fatjet $p_T$',
+    'fj_Xbb_eta_boosted': 'X(bb)-tagged fatjet $\\eta$',
+    'fj_Xbb_phi_boosted': 'X(bb)-tagged fatjet $\\phi$',
+    'fj_Xbb_msoftdrop_boosted': 'X(bb)-tagged fatjet softdrop mass',
+    'fj_Xbb_nsubjettiness_2over1_boosted': 'X(bb)-tagged fatjet nsubjettiness 2/1',
+    'fj_Xbb_nsubjettiness_3over2_boosted': 'X(bb)-tagged fatjet nsubjettiness 3/2',
+    'mass_tautaubb': 'bb+$\\tau\\tau$ mass',
+    'pt_tautaubb': 'bb+$\\tau\\tau$ $p_T$',
+    'kinfit_mX': 'kinfit X mass',
+    'kinfit_mY': 'kinfit Y mass',
+    'kinfit_chi2': 'kinfit $\\chi^2$',
+    'njets' : 'number of jets',
+    'nfatjets' : 'number of fatjets',
+    'nbtag' : 'number of b-jets',
+    'boosted_mass_tautaubb': 'bb+$\\tau\\tau$ mass',
+    'boosted_pt_tautaubb': 'bb+$\\tau\\tau$ $p_T$',
+    'kinfit_mX_boosted': 'kinfit X mass',
+    'kinfit_mY_boosted': 'kinfit Y mass',
+    'kinfit_chi2_boosted': 'kinfit $\\chi^2$',
+    'njets_boosted' : 'number of jets',
+    'nfatjets_boosted' : 'number of fatjets',
+    'nbtag_boosted' : 'number of b-jets',
+    'met' : 'MET',
+    'metphi' : '$\phi_{MET}$',
+    'met_boosted' : 'MET',
+    'metphi_boosted' : '$\phi_{MET}$',
+    
+    'm_sv' : 'di-$\\tau$ mass',
+    'mt_1_pf': '$m_{T}(\\tau_1,PFMET)$',
     'mt_2_pf': '$m_{T}(\\tau_2,PFMET)$',
     'ptvis' : 'visible $p_T(\\tau\\tau)$',
     'pt_tt' : '$p_T(\\tau\\tau)$',
     'pt_tt_pf': '$p_T(\\tau\\tau)$ (PF)',
     'mjj' : 'di-jet mass',
     'jdeta' : '$\Delta\eta_{jj}$',
-    'm_vis' : 'visible di-$\\tau$ mass',
     'dijetpt' : '$p_T(jj)$',
-    'met' : 'MET (PUPPI)',
     'pfmet': 'MET (PF)',
-    'metphi' : '$\phi_{MET}$',
     'pfmetphi': '$\phi_{PFMET}$',
     'm_sv_puppi': 'di-$\\tau$ mass (Puppi)',
     'pt_tt_puppi': '$p_{T}(\\tau\\tau)$ (Puppi)',
     'ME_q2v1': 'MELA $Q^{2}(^{}V_{1}$)',
     'ME_q2v2': 'MELA $Q^{2}(^{}V_{2}$)',
-    'eta_1': '$\\eta(\\tau_1$)',
-    'eta_2': '$\\eta(\\tau_2$)',
     'mTdileptonMET_puppi': '$m_{T}(\\tau_1+\\tau_2, MET)$ (Puppi)',
-    'deltaR_ditaupair': '$\Delta$R $(\\tau_1, \\tau_2)$',
     'pzetamissvis': '$p_{Z}^{miss} - p_{Z}^{vis}$',
     'pzetamissvis_pf': '$p_{Z}^{miss} - p_{Z}^{vis}$ (PF)',
-    'm_fastmtt': 'di-$\\tau$ mass (Puppi)',
-    'pt_fastmtt': '$p_{T}(\\tau\\tau)$ (Puppi)',
-    'eta_fastmtt': '$\\eta(\\tau\\tau)$ (Puppi)',
-    'phi_fastmtt': '$\phi(\\tau\\tau)$ (Puppi)',
     'pt_dijet': '$p_{T}(jj)$',
-    'decaymode_2': 'decay mode 2',
-    'decaymode_1': 'decay mode 1',
     'mt_tot': '$m_{T}(\\tau_1+\\tau_2, MET)$',
     "jet_hemisphere": 'jet hemisphere',
     "pt_vis": 'visible $p_T(\\tau\\tau)$',
-
-
-
-
-
-
+    'jeta_1': 'Leading jet $\\eta$',
+    'jeta_2': 'Subleading jet $\\eta$',
+    'jpt_1' : 'Leading jet $p_T$',
+    'jpt_2' : 'Sub-leading jet $p_T$',
 }
 
 def parse_arguments():
@@ -189,25 +260,28 @@ def parse_arguments():
 #     plt.savefig(filename+".pdf", bbox_inches="tight")
 
 def plot_1d(variables, results, filename):
-    plt.figure(figsize=(8.0, len(variables) * 0.5))
+    # now plots the results
+    # sns.set_style("ticks")
+    # sns.set_context("paper", font_scale=2.0, rc={"lines.linewidth": 2.5})
+    fig, ax = plt.subplots(1, 1, figsize=(12, 12))
+    ax.set_xlim(-0.05, 1.05)
     x = np.array(results)
     y = np.array(range(len(x)))
-    plt.plot(x, y, '+', mew=4, ms=16)
-    plt.xlim((-0.05, 1.05))
-    plt.ylim((-0.5, len(x) - 0.5))
-    plt.yticks(y, [labeldict[x] for x in variables],)
-    plt.axvline(x=0.05, linewidth=3, color='r')
+    plt.ylim((-0.5, len(results) - 0.5))
+    ax.set_xlabel('Saturated GoF p-value', labelpad=20)
+    plt.plot(x, y, '1', mew=4, ms=16)
+    plt.yticks(y, [labeldict[x] for x in variables])
+    plt.axvspan(-1, 0.05, color='red', alpha=0.5, lw=0)
+    plt.axvline(x=0.05, linewidth=1, color='black', linestyle='--')
     for i, res in enumerate(x):
-        if res < 0.05:
-            plt.text(0.9, i, "{:.3f}".format(res),horizontalalignment="center", verticalalignment="center")
-    plt.xlabel('Saturated GoF p-value', labelpad=20)
-    ax = plt.gca()
-    ax.fill_between(y, 0, 1, where=x > 0.05,
-                color='red', alpha=0.5, transform=ax.get_yaxis_transform())
-    # ax.yaxis.grid()
-    sns.despine()
-    plt.savefig(filename+".png", bbox_inches="tight")
-    plt.savefig(filename+".pdf", bbox_inches="tight")
+        plt.text(0.92, i, "{:.3f}".format(res),horizontalalignment="center", verticalalignment="center", color='k', alpha=0.5)
+        ax.axhline(i-0.5, linestyle='--', color='k', linewidth=0.2)
+    hep.cms.label(ax=ax, label="Private work", data=True, fontsize=22, lumi=59.83, year=2018)
+    plt.tight_layout()
+    plt.show()
+    fig.savefig(filename+".png", bbox_inches="tight")
+    fig.savefig(filename+".pdf", bbox_inches="tight")
+
 
 
 def search_results_1d(path, channel, era, variables):
@@ -226,7 +300,7 @@ def search_results_1d(path, channel, era, variables):
             variable, channel)
 
         p_value = json.load(open(filename))
-        results.append(p_value["125.0"]["p"])
+        results.append(p_value["250.0"]["p"])
 
     return missing, results
 
@@ -270,8 +344,8 @@ def main(args):
     variables = args.variables.split(",")
     missing_1d, results_1d = search_results_1d(args.path, args.channel, args.era,
                                                variables)
-    logger.debug("Missing variables for 1D plot in channel %s:", args.channel)
     for variable in missing_1d:
+        logger.debug("Missing variables for 1D plot in channel %s:", args.channel)
         print("{} {} {}".format(args.era, args.channel, variable))
 
     plot_1d(variables, results_1d, "{}/{}_{}_gof_1d".format(args.path, args.era, args.channel))

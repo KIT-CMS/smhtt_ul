@@ -75,12 +75,12 @@ def qcd_estimation(
     logger.debug("extrapolation_factor: %s", extrapolation_factor)
     logger.debug("sub_scale: %s", sub_scale)
     if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W", "STL", "STJ"]
+        procs_to_subtract = ["EMB", "ZL_NLO", "ZJ_NLO", "TTL", "TTJ", "VVL", "VVJ", "W", "STL", "STJ"]
     else:
         procs_to_subtract = [
-            "ZTT",
-            "ZL",
-            "ZJ",
+            "ZTT_NLO",
+            "ZL_NLO",
+            "ZJ_NLO",
             "TTT",
             "TTL",
             "TTJ",
@@ -195,12 +195,12 @@ def abcd_estimation(
         # add abcd_ on the front of the variation
         variation = "abcd_" + variation
     if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
+        procs_to_subtract = ["EMB", "ZL_NLO", "ZJ_NLO", "TTL", "TTJ", "VVL", "VVJ", "W"]
     else:
         procs_to_subtract = [
-            "ZTT",
-            "ZL",
-            "ZJ",
+            "ZTT_NLO",
+            "ZL_NLO",
+            "ZJ_NLO",
             "TTT",
             "TTL",
             "TTJ",
