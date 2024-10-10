@@ -75,6 +75,15 @@ def parse_arguments():
         type=str,
         default=None,
         help="Plot a special category instead of nominal")
+    parser.add_argument("--blinded",
+        action="store_true",
+        help="Do not draw data.")
+    parser.add_argument("--tt-boosted",
+        action="store_true",
+        help="Boosted tautau analysis is processes.")
+    parser.add_argument("--control-plots",
+        action="store_true",
+        help="Producing control or analysis plots.")
 
     return parser.parse_args()
 
@@ -111,21 +120,22 @@ def main(info):
 
     split_dict = {c: split_value for c in ["et", "mt", "tt"]}
 
+    nlo="_NLO"
+    # nlo=""
     bkg_processes = [
-        # "jetFakesEMB", "VVL", "TTL", "ZL", "EMB", "STL", "ggH125", "qqH125"
-        "VVL", "TTL", "ZL", "STL", "jetFakesEMB", "EMB", "ggH125", "qqH125"
+        "VVL", "TTL", "ZL"+nlo, "STL", "jetFakesEMB", "EMB", "H_tt", "H_bb" #, "EWK"
     ]
     if not args.fake_factor and args.embedding: 
         bkg_processes = [
-            "VVL", "TTL", "ZL", "STL", "QCDEMB", "W", "VVJ", "TTJ", "ZJ", "STJ", "EMB", "ggH125", "qqH125"
+            "VVL", "TTL", "ZL"+nlo, "STL", "QCDEMB", "W", "VVJ", "TTJ", "ZJ"+nlo, "STJ", "EMB", "H_tt", "H_bb" #, "EWK"
         ]
     if not args.embedding and args.fake_factor:
         bkg_processes = [
-            "VVL", "TTL", "ZL", "STL", "jetFakes", "VVT", "TTT", "ZTT", "STT", "ggH125", "qqH125"
+            "VVL", "TTL", "ZL"+nlo, "STL", "jetFakes", "VVT", "TTT", "ZTT"+nlo, "STT", "H_tt", "H_bb" #, "EWK"
         ]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
-            "VVL", "TTL", "ZL", "STL", "QCD", "W", "VVJ", "TTJ", "ZJ", "STJ", "VVT", "TTT", "ZTT", "STT", "ggH125", "qqH125"
+            "VVL", "TTL", "ZL"+nlo, "STL", "QCD", "W", "VVJ", "TTJ", "ZJ"+nlo, "STJ", "VVT", "TTT", "ZTT"+nlo, "STT", "H_tt", "H_bb" #, "EWK"
         ]
     if args.draw_jet_fake_variation is not None: # TODO needs to be checked
         bkg_processes = [
@@ -158,7 +168,7 @@ def main(info):
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
 
-    rootfile = rootfile_parser.Rootfile_parser(args.input, variable)
+    rootfile = rootfile_parser.Rootfile_parser(args.input, variable, args.tt_boosted)
     bkg_processes = [b for b in all_bkg_processes]
 
     # create plot
@@ -179,16 +189,42 @@ def main(info):
         stype = "Nominal"
         cat = args.category
 
-    for index,process in enumerate(bkg_processes):
-        if index == 0:
-            total_bkg = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
-        else:
-            total_bkg.Add(rootfile.get(channel, process, category=cat, shape_type=stype))
+    if args.control_plots:
+        analysis_plots = False
+    else:
+        analysis_plots = True
         
-        plot.add_hist(
-            rootfile.get(channel, process, category=cat, shape_type=stype), process, "bkg")
+    for index, process in enumerate(bkg_processes):
+        if process == "H_tt":
+            Htt = rootfile.get(channel, "ggH_tt", category=cat, shape_type=stype, analysis_plots=analysis_plots).Clone()
+            Htt.Add(rootfile.get(channel, "qqH_tt", category=cat, shape_type=stype, analysis_plots=analysis_plots))
+            Htt.Add(rootfile.get(channel, "VH_tt", category=cat, shape_type=stype, analysis_plots=analysis_plots))
+            plot.add_hist(Htt, process, "bkg")
+        elif process == "H_bb":
+            Hbb = rootfile.get(channel, "ggH_bb", category=cat, shape_type=stype, analysis_plots=analysis_plots).Clone()
+            Hbb.Add(rootfile.get(channel, "qqH_bb", category=cat, shape_type=stype, analysis_plots=analysis_plots))
+            Hbb.Add(rootfile.get(channel, "VH_bb", category=cat, shape_type=stype, analysis_plots=analysis_plots))
+            plot.add_hist(Hbb, process, "bkg")
+        else:
+            plot.add_hist(
+                rootfile.get(channel, process, category=cat, shape_type=stype, analysis_plots=analysis_plots), process, "bkg")
         plot.setGraphStyle(
             process, "hist", fillcolor=styles.color_dict[process])
+        
+        if index == 0:
+            if process == "H_tt":
+                total_bkg = Htt
+            elif process == "H_bb":
+                total_bkg = Hbb
+            else:
+                total_bkg = rootfile.get(channel, process, category=cat, shape_type=stype, analysis_plots=analysis_plots).Clone()
+        else:
+            if process == "H_tt":
+                total_bkg.Add(Htt)
+            elif process == "H_bb":
+                total_bkg.Add(Hbb)
+            else:
+                total_bkg.Add(rootfile.get(channel, process, category=cat, shape_type=stype, analysis_plots=analysis_plots))
 
 
     plot.add_hist(total_bkg, "total_bkg")
@@ -199,11 +235,11 @@ def main(info):
         fillcolor=styles.color_dict["unc"],
         linecolor=0)
 
-    plot.add_hist(rootfile.get(channel, "data", category=cat, shape_type=stype), "data_obs")
+    plot.add_hist(rootfile.get(channel, "data", category=cat, shape_type=stype, analysis_plots=analysis_plots), "data_obs")
     # data_norm = plot.subplot(0).get_hist("data_obs").Integral()
     plot.subplot(0).get_hist("data_obs").GetXaxis().SetMaxDigits(4)
     plot.subplot(0).setGraphStyle("data_obs", "e0")
-    plot.subplot(0).setGraphStyle("data_obs", "e0")
+    # plot.subplot(0).setGraphStyle("data_obs", "e0")
     if args.linear:
         pass
     else:
@@ -213,15 +249,15 @@ def main(info):
     plot_idx_to_add_signal = [0,2] if args.linear else [1,2]
     if args.add_signals:
         for i in plot_idx_to_add_signal:
-            nmssm_Ybb = rootfile.get(channel, "nmssm_Ybb",category=cat).Clone()
-            nmssm_Ytautau = rootfile.get(channel, "nmssm_Ytautau",category=cat).Clone()
+            nmssm_Ybb = rootfile.get(channel, "nmssm_Ybb",category=cat, analysis_plots=analysis_plots).Clone()
+            nmssm_Ytautau = rootfile.get(channel, "nmssm_Ytautau",category=cat, analysis_plots=analysis_plots).Clone()
 
             if nmssm_Ybb.Integral() > 0:
-                nmssm_Ybb_scale = 10.
+                nmssm_Ybb_scale = 1
             else:
                 nmssm_Ybb_scale = 0.0
             if nmssm_Ytautau.Integral() > 0:
-                nmssm_Ytautau_scale = 10.
+                nmssm_Ytautau_scale = 1
             else:
                 nmssm_Ytautau_scale = 0.0
 
@@ -247,32 +283,35 @@ def main(info):
         bkg_nmssm_Ytautau = plot.subplot(2).get_hist("nmssm_Ytautau")
         bkg_nmssm_Ybb.Add(plot.subplot(2).get_hist("total_bkg"))
         bkg_nmssm_Ytautau.Add(plot.subplot(2).get_hist("total_bkg"))
-        plot.subplot(2).add_hist(bkg_nmssm_Ybb, "bkg_nmssm_Ybb")
+        # plot.subplot(2).add_hist(bkg_nmssm_Ybb, "bkg_nmssm_Ybb")
         #plot.subplot(2).add_hist(bkg_nmssm_Ybb, "bkg_nmssm_Ybb_top")
-        plot.subplot(2).add_hist(bkg_nmssm_Ytautau, "bkg_nmssm_Ytautau")
+        # plot.subplot(2).add_hist(bkg_nmssm_Ytautau, "bkg_nmssm_Ytautau")
         #plot.subplot(2).add_hist(bkg_nmssm_Ytautau, "bkg_nmssm_Ytautau_top")
-        plot.subplot(2).setGraphStyle(
-            "bkg_nmssm_Ybb",
-            "hist",
-            linecolor=styles.color_dict["nmssm_Ybb"],
-            linewidth=3)
+        # plot.subplot(2).setGraphStyle(
+        #     "bkg_nmssm_Ybb",
+        #     "hist",
+        #     linecolor=styles.color_dict["nmssm_Ybb"],
+        #     linewidth=3)
         #plot.subplot(2).setGraphStyle("bkg_nmssm_Ybb_top", "hist", linecolor=0)
-        plot.subplot(2).setGraphStyle(
-            "bkg_nmssm_Ytautau",
-            "hist",
-            linecolor=styles.color_dict["nmssm_Ytautau"],
-            linewidth=3)
+        # plot.subplot(2).setGraphStyle(
+        #     "bkg_nmssm_Ytautau",
+        #     "hist",
+        #     linecolor=styles.color_dict["nmssm_Ytautau"],
+        #     linewidth=3)
         #plot.subplot(2).setGraphStyle("bkg_nmssm_Ytautau_top", "hist", linecolor=0)
 
     if args.add_signals:
         to_draw = [
-            "total_bkg", "bkg_nmssm_Ybb", "bkg_nmssm_Ytautau",
+            "total_bkg", # "bkg_nmssm_Ybb", "bkg_nmssm_Ytautau",
             "data_obs"
         ]
     else:
         to_draw = [
             "total_bkg", "data_obs"
         ]
+    if args.blinded:
+        to_draw.remove("data_obs")
+        
     plot.subplot(2).normalize(to_draw, "total_bkg")
 
     # stack background processes
@@ -286,17 +325,17 @@ def main(info):
     # set axes limits and labels
     plot.subplot(0).setYlims(
         split_dict[channel],
-        max(1.6 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
+        max(2.0 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
             split_dict[channel] * 2))
 
-    log_quantities = ["bpair_btag_value_1", "bpair_btag_value_2", "fj_particleNet_XbbvsQCD_1", "fj_Xbb_particleNet_XbbvsQCD"]
+    log_quantities = ["bpair_btag_value_1", "bpair_btag_value_2", "fj_particleNet_XbbvsQCD_1", "fj_Xbb_particleNet_XbbvsQCD", "fj_Xbb_particleNet_XbbvsQCD_boosted"]
     if variable in log_quantities:
         plot.subplot(0).setLogY()
         plot.subplot(0).setYlims(
             1.0,
             1000 * plot.subplot(0).get_hist("data_obs").GetMaximum())
 
-    plot.subplot(2).setYlims(0.55, 1.45)
+    plot.subplot(2).setYlims(0.4, 1.6)
 
     if args.linear != True:
         plot.subplot(1).setYlims(0.1, split_dict[channel])
@@ -340,6 +379,9 @@ def main(info):
         procs_to_draw = ["stack", "total_bkg", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
     if args.draw_jet_fake_variation is not None:
         procs_to_draw = ["stack", "total_bkg", "data_obs"]
+    if args.blinded:
+        procs_to_draw.remove("data_obs")
+        
     plot.subplot(0).Draw(procs_to_draw)
     if args.linear != True:
         if args.add_signals:
@@ -352,10 +394,15 @@ def main(info):
                 "stack", "total_bkg", "data_obs"
             ])
     if args.draw_jet_fake_variation is None:
-        plot.subplot(2).Draw([
-            "total_bkg", "bkg_nmssm_Ybb", "bkg_nmssm_Ytautau",
-            "data_obs"
-        ])
+        if args.blinded:
+            plot.subplot(2).Draw([
+                "total_bkg", "bkg_nmssm_Ybb", "bkg_nmssm_Ytautau"
+            ])
+        else:
+            plot.subplot(2).Draw([
+                "total_bkg", "bkg_nmssm_Ybb", "bkg_nmssm_Ytautau",
+                "data_obs"
+            ])
     else:
         plot.subplot(2).Draw([
             "total_bkg", "data_obs"
@@ -371,10 +418,11 @@ def main(info):
                 0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("_NLO","")], 'f')
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         if args.add_signals:
-            plot.legend(i).add_entry(0 if args.linear else 1, "nmssm_Ybb%s" % suffix[i], "%s #times Y(bb)H(#tau#tau)"%str(int(nmssm_Ybb_scale)), 'l')
-            plot.legend(i).add_entry(0 if args.linear else 1, "nmssm_Ytautau%s" % suffix[i], "%s #times Y(#tau#tau)H(bb)"%str(int(nmssm_Ytautau_scale)), 'l')
+            plot.legend(i).add_entry(0 if args.linear else 1, "nmssm_Ybb%s" % suffix[i], "%s #times Y(bb)H(#tau#tau)"%str(nmssm_Ybb_scale), 'l')
+            plot.legend(i).add_entry(0 if args.linear else 1, "nmssm_Ytautau%s" % suffix[i], "%s #times Y(#tau#tau)H(bb)"%str(nmssm_Ytautau_scale), 'l')
         
-        plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
+        if not args.blinded:
+            plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(3)
     plot.legend(0).Draw()
     # plot.legend(1).setAlpha(0.0)
@@ -409,7 +457,7 @@ def main(info):
 
     posChannelCategoryLabelLeft = None
     plot.DrawChannelCategoryLabel(
-        "%s, %s" % (channel_dict[channel], "inclusive"),
+        "%s, %s" % (channel_dict[channel], "bb inclusive"),
         begin_left=posChannelCategoryLabelLeft)
 
     # save plot

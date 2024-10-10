@@ -13,9 +13,15 @@ _process_map = {
     "ZTT": "DY-ZTT",
     "ZL": "DY-ZL",
     "ZJ": "DY-ZJ",
+    "ZTT_NLO": "DY_NLO-ZTT",
+    "ZL_NLO": "DY_NLO-ZL",
+    "ZJ_NLO": "DY_NLO-ZJ",
     "TTT": "TT-TTT",
     "TTL": "TT-TTL",
     "TTJ": "TT-TTJ",
+    "STT": "ST-STT",
+    "STL": "ST-STL",
+    "STJ": "ST-STJ",
     "VVT": "VV-VVT",
     "VVL": "VV-VVL",
     "VVJ": "VV-VVJ",
@@ -206,9 +212,9 @@ def write_hists_per_category(cat_hists: tuple):
         if f"{channel}__{args.era}" in name_output:
             name_output = name_output.replace(f"{channel}__{args.era}", f"{channel}_{args.era}_")
         if f"Up_{channel}_{args.era}" in name_output:
-            name_output = name_output.replace(f"Up_{channel}_{args.era}", f"{channel}_{args.era}Up")
+            name_output = name_output.replace(f"Up_{channel}_{args.era}", f"_{channel}_{args.era}Up")
         if f"Down_{channel}_{args.era}" in name_output:
-            name_output = name_output.replace(f"Down_{channel}_{args.era}", f"{channel}_{args.era}Down")
+            name_output = name_output.replace(f"Down_{channel}_{args.era}", f"_{channel}_{args.era}Down")
         hist.SetTitle(name_output)
         hist.SetName(name_output)
         hist.Write()
@@ -234,6 +240,8 @@ def main(args):
                 if not "data" in split_name[0]
                 else "data_obs"
             )
+            if process in ["ggH125", "qqH125", "VH125"]:
+               process = (split_name[0]) 
         else:
             category = split_name[1].split("-")[-1]
             process = (
@@ -241,6 +249,8 @@ def main(args):
                 if not "data" in split_name[0]
                 else "data_obs"
             )
+            if process in ["ggH125", "qqH125", "VH125"]:
+               process = (split_name[0]) 
             # Skip discriminant variables we do not want in the sync file.
             # This is necessary because the sync file only allows for one type of histogram.
             # A combination of the runs for different variables can then be used in separate files.
@@ -287,8 +297,8 @@ def main(args):
                         process = _rev_process_map[process]
         name_output = "{process}".format(process=process)
         # rename signal processes from ggH to ggH_htt
-        if process in ["ggH125", "qqH125", "WH125", "ZH125", "ttH125"]:
-            name_output = process.replace("125", "_htt125")
+        # if process in ["ggH125", "qqH125", "WH125", "ZH125", "ttH125"]:
+        #     name_output = process.replace("125", "_htt125")
         if "Nominal" not in variation:
             name_output += "_" + variation
         logging.debug(
