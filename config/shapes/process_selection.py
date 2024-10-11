@@ -161,9 +161,9 @@ def DY_process_selection(channel, era, boosted_tau=False):
         xsec_events_weight = ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight")
     DY_process_weights.extend(
         [
-            # gen_events_weight,
-            # xsec_events_weight,
-            dy_stitching_weight(era), 
+            gen_events_weight,
+            xsec_events_weight,
+            #dy_stitching_weight(era), 
             ("ZPtMassReweightWeight", "ZPtMassReweightWeight"),
         ]
     )
@@ -249,7 +249,7 @@ def W_process_selection(channel, era, boosted_tau=False):
     #         ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
     #     ]
     # )
-    W_process_weights.append(W_stitching_weight(era)) 
+    #W_process_weights.append(W_stitching_weight(era)) 
     btag_weight = ""
     if not boosted_tau:
         if "et" in channel:
