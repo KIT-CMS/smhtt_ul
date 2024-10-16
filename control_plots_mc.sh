@@ -14,9 +14,9 @@ VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis"
 ulimit -s unlimited
 source utils/setup_root.sh
 
-KINGMAKER_BASEDIR="/store/user/qli/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
-KINGMAKER_BASEDIR_XROOTD="root://cmsxrootd-kit-disk.gridka.de/${KINGMAKER_BASEDIR}"
-XSEC_FRIENDS="/store/user/qli/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
+KINGMAKER_BASEDIR="/store/user/mmolch/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+KINGMAKER_BASEDIR_XROOTD="root://cmsdcache-kit-disk.gridka.de/${KINGMAKER_BASEDIR}"
+XSEC_FRIENDS="/store/user/mmolch/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
 #FF_FRIENDS="/store/user/nshadskiy/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/fake_factors_v1/"
 #RECO_FRIENDS="/store/user/nshadskiy/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/mass_reco_v1/"
 
@@ -46,7 +46,7 @@ if [[ $MODE == "XSEC" ]]; then
 
     echo "running xsec friends script"
     echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
-    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsxrootd-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
+    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsdcache-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
 fi
 
 if [[ $MODE == "SHAPES" ]]; then
@@ -59,14 +59,14 @@ if [[ $MODE == "SHAPES" ]]; then
         mkdir -p $shapes_output
     fi
 
-    python shapes/produce_shapes.py --channels $CHANNEL \
+    python shapes/produce_shapes_mc.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $XSEC_FRIENDS $FF_FRIENDS $RECO_FRIENDS \
-        --era $ERA --num-processes 4 --num-threads 12 \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS \
+        --era $ERA --num-processes 1 --num-threads 1 \
         --optimization-level 1 --control-plots \
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
         --output-file $shapes_output \
-        --xrootd --validation-tag $TAG 
+        --xrootd --validation-tag $TAG --massX 1000 --massY 250
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
@@ -80,8 +80,5 @@ if [[ $MODE == "PLOT" ]]; then
     echo "#     plotting                                      #"
     echo "##############################################################################################"
 
-    python3 plotting/plot_shapes_control_nmssm.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --embedding --fake-factor
-    python3 plotting/plot_shapes_control_nmssm.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --embedding
-    python3 plotting/plot_shapes_control_nmssm.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals
-    python3 plotting/plot_shapes_control_nmssm.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --fake-factor
+    python3 plotting/plot_shapes_control_nmssm_mc.py -l --control-plots --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals
 fi
