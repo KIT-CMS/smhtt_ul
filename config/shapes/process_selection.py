@@ -155,7 +155,9 @@ def dy_stitching_weight(era):
 def DY_process_selection(channel, era, boosted_tau=False):
     DY_process_weights = MC_base_process_selection(channel, era, boosted_tau).weights
     if era == "2017":
-        gen_events_weight = ("(1./203729540)*(genbosonmass >= 50.0) + (genbosonmass < 50.0)*numberGeneratedEventsWeight", "numberGeneratedEventsWeight")
+        #gen_events_weight = ("(1./203729540)*(genbosonmass >= 50.0) + (genbosonmass < 50.0)*numberGeneratedEventsWeight", "numberGeneratedEventsWeight")
+        gen_events_weight = ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight")
+        xsec_events_weight = ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight")
     elif era == "2018":
         gen_events_weight = ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight")
         xsec_events_weight = ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight")
@@ -243,12 +245,12 @@ def W_stitching_weight(era):
 
 def W_process_selection(channel, era, boosted_tau=False):
     W_process_weights = MC_base_process_selection(channel, era, boosted_tau).weights
-    # W_process_weights.extend(
-    #     [
-    #         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-    #         ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
-    #     ]
-    # )
+    W_process_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+        ]
+    )
     #W_process_weights.append(W_stitching_weight(era)) 
     btag_weight = ""
     if not boosted_tau:
