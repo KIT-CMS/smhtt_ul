@@ -217,6 +217,29 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
                             ),
                         ]
                     )
+
+            elif era == "2017":
+                if not boosted_tau:
+                    cuts.extend(
+                        [
+                            ("pt_1 > 40 && pt_2 > 40", "pt_selection"),
+                            (
+                                "(trg_double_tau35_tightiso_tightid > 0.5) || (trg_double_tau40_mediumiso_tightid > 0.5) || (trg_double_tau40_tightiso > 0.5)",
+                                "trg_selection"
+                            ),
+                        ]
+                    )
+                elif boosted_tau:
+                    cuts.extend(
+                        [
+                            ("boosted_pt_1 > 40 && boosted_pt_2 > 40", "pt_selection"),
+                            (
+                                "((trg_ak8pfjet400_trimmass30 > 0.5) || (trg_pfht500_pfmet100_pfmht100_idtight > 0.5))", 
+                                "trg_selection",
+                            ),
+                        ]
+                    )
+                pass
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="tt", cuts=cuts)
