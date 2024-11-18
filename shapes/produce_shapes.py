@@ -26,7 +26,7 @@ from ntuple_processor import (
 )
 from ntuple_processor.utils import Selection
 
-from config.shapes.channel_selection import channel_selection, tau_id_channel_selection
+from config.shapes.channel_selection import channel_selection #, tau_id_channel_selection
 from config.shapes.file_names import files
 from config.shapes.process_selection import (
     # Data_base_process_selection,
@@ -681,8 +681,8 @@ def get_control_units(
         name="emb",
         dataset=datasets["EMB"],
         selections=[
-            # channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            tau_id_channel_selection(channel, era, vs_jet_wp),
+            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+            # tau_id_channel_selection(channel, era, vs_jet_wp),
             ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
         ],
         channel=channel,
