@@ -6,8 +6,7 @@ NTUPLETAG=$3
 TAG=$4
 MODE=$5
 
-VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,pzetamissvis,deltaR_ditaupair,phi_1,phi_2,mt_1,mt_2,pt_vis,iso_1,iso_2,q_1"
-# VARIABLES="m_vis,pt_2"
+VARIABLES="phi_2,phi_1,q_1,mjj,iso_2,iso_1,mjj,pt_dijet,pt_tt,pt_vis,mt_2,mt_1,tau_decaymode_1,tau_decaymode_2,nbtag,njets,jphi_2,jphi_1,jeta_2,jeta_1,jpt_2,jpt_1,eta_1,eta_2,pt_2,pt_1,mt_tot,met,metphi,m_vis,deltaR_ditaupair,pzetamissvis"
 ulimit -s unlimited
 source utils/setup_root.sh
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
@@ -29,7 +28,7 @@ echo "##########################################################################
 
     echo "running xsec friends script"
     echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
-    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsdcache-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
+    nice -n 19 python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsdcache-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
 fi
 
 if [[ $MODE == "SHAPES" ]]; then
@@ -42,10 +41,10 @@ if [[ $MODE == "SHAPES" ]]; then
         mkdir -p $shapes_output
     fi
     
-    python shapes/produce_shapes.py --channels $CHANNEL \
+    nice -n 19 python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $XSEC_FRIENDS \
-        --era $ERA --num-processes 4 --num-threads 12 \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS $FF_FRIENDS \
+        --era $ERA --num-processes 25 --num-threads 50 \
         --optimization-level 1 --control-plots \
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
         --output-file $shapes_output \
@@ -56,9 +55,9 @@ if [[ $MODE == "SHAPES" ]]; then
     echo "#      Additional estimations                                      #"
     echo "##############################################################################################"
     if [[ $CHANNEL == "mm" ]]; then
-        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
+        nice -n 19 python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
     else
-        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-qcd
+        nice -n 19 python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-qcd --do-ff
     fi
 fi
 
@@ -67,10 +66,10 @@ if [[ $MODE == "PLOT" ]]; then
     echo "#     plotting                                      #"
     echo "##############################################################################################"
 
-    # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --fake-factor
-    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --tag ${TAG}
-    # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
-    # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor
+    nice -n 19 python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --embedding --fake-factor
+    nice -n 19 python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --embedding
+    nice -n 19 python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --fake-factor
+    nice -n 19 python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG}
 
     # python2 ~/tools/webgallery/gallery.py Run${ERA}_plots_emb_classic/
 fi

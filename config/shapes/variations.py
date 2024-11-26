@@ -53,7 +53,7 @@ anti_iso_lt = ReplaceCutAndAddWeight(
     "tau_iso",
     Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
     # Weight("1.0", "fake_factor"),
-    Weight("ff2_nom", "fake_factor"),
+    Weight("fake_factor", "fake_factor"),
 )
 anti_iso_lt_no_ff = ReplaceCutAndAddWeight(
     "anti_iso",
@@ -72,7 +72,7 @@ anti_iso_tt_mcl = ReplaceMultipleCutsAndAddWeight(
         Cut("gen_match_1 != 6", "tau_anti_iso"),
     ],
     # Weight("1.0", "fake_factor"),
-    Weight("ff2_nom", "fake_factor"),
+    Weight("fake_factor_2", "fake_factor"),
 )
 
 anti_iso_tt = ReplaceCutAndAddWeight(
@@ -83,7 +83,7 @@ anti_iso_tt = ReplaceCutAndAddWeight(
         "tau_anti_iso"
     ),
     # Weight("1.0", "fake_factor"),
-    Weight("0.5 * ff1_nom * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * ff2_nom * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
+    Weight("0.5 * fake_factor_1 * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * fake_factor_2 * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
 )
 
 
@@ -199,9 +199,7 @@ jet_es = [
     ReplaceVariable("CMS_scale_j_RelativeBalUp", "jesUncRelativeBalUp"),
     ReplaceVariable("CMS_scale_j_RelativeBalDown", "jesUncRelativeBalDown"),
     ReplaceVariable("CMS_scale_j_RelativeSample_EraUp", "jesUncRelativeSampleYearUp"),
-    ReplaceVariable(
-        "CMS_scale_j_RelativeSample_EraDown", "jesUncRelativeSampleYearDown"
-    ),
+    ReplaceVariable("CMS_scale_j_RelativeSample_EraDown", "jesUncRelativeSampleYearDown"),
     ReplaceVariable("CMS_res_j_EraUp", "jerUncUp"),
     ReplaceVariable("CMS_res_j_EraDown", "jerUncDown"),
 ]
@@ -244,30 +242,16 @@ recoil_response = [
 # Eta binned uncertainty
 ele_fake_es_1prong = [
     ReplaceVariable("CMS_ZLShape_et_1prong_barrel_EraUp", "tauEleFakeEs1prongBarrelUp"),
-    ReplaceVariable(
-        "CMS_ZLShape_et_1prong_barrel_EraDown", "tauEleFakeEs1prongBarrelDown"
-    ),
+    ReplaceVariable("CMS_ZLShape_et_1prong_barrel_EraDown", "tauEleFakeEs1prongBarrelDown"),
     ReplaceVariable("CMS_ZLShape_et_1prong_endcap_EraUp", "tauEleFakeEs1prongEndcapUp"),
-    ReplaceVariable(
-        "CMS_ZLShape_et_1prong_endcap_EraDown", "tauEleFakeEs1prongEndcapDown"
-    ),
+    ReplaceVariable("CMS_ZLShape_et_1prong_endcap_EraDown", "tauEleFakeEs1prongEndcapDown"),
 ]
 
 ele_fake_es_1prong1pizero = [
-    ReplaceVariable(
-        "CMS_ZLShape_et_1prong1pizero_barrel_EraUp", "tauEleFakeEs1prong1pizeroBarrelUp"
-    ),
-    ReplaceVariable(
-        "CMS_ZLShape_et_1prong1pizero_barrel_EraDown",
-        "tauEleFakeEs1prong1pizeroBarrelDown",
-    ),
-    ReplaceVariable(
-        "CMS_ZLShape_et_1prong1pizero_endcap_EraUp", "tauEleFakeEs1prong1pizeroEndcapUp"
-    ),
-    ReplaceVariable(
-        "CMS_ZLShape_et_1prong1pizero_endcap_EraDown",
-        "tauEleFakeEs1prong1pizeroEndcapDown",
-    ),
+    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_barrel_EraUp", "tauEleFakeEs1prong1pizeroBarrelUp"),
+    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_barrel_EraDown", "tauEleFakeEs1prong1pizeroBarrelDown"),
+    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_endcap_EraUp", "tauEleFakeEs1prong1pizeroEndcapUp"),
+    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_endcap_EraDown", "tauEleFakeEs1prong1pizeroEndcapDown"),
 ]
 
 ele_fake_es = ele_fake_es_1prong + ele_fake_es_1prong1pizero
@@ -861,6 +845,8 @@ ff_variations_lt = [
     for syst in _ff_variations_lt
 ]
 
+# TODO: Check if variations are applied
+
 # # Propagation of tau ES systematics on jetFakes process
 ff_variations_tau_es_lt = [
     ReplaceVariableReplaceCutAndAddWeight(
@@ -868,56 +854,56 @@ ff_variations_tau_es_lt = [
         "tauEs1prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong_EraUp",
         "tauEs1prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong1pizero_EraDown",
         "tauEs1prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong1pizero_EraUp",
         "tauEs1prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong_EraDown",
         "tauEs3prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong_EraUp",
         "tauEs3prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong1pizero_EraDown",
         "tauEs3prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong1pizero_EraUp",
         "tauEs3prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
 ]
 
@@ -928,89 +914,89 @@ ff_variations_tau_es_emb_lt = [
         "tauEs1prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong_EraUp",
         "tauEs1prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong1pizero_EraDown",
         "tauEs1prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong1pizero_EraUp",
         "tauEs1prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong_EraDown",
         "tauEs3prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong_EraUp",
         "tauEs3prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong1pizero_EraDown",
         "tauEs3prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong1pizero_EraUp",
         "tauEs3prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight("ff2_nom", "fake_factor"),
+        Weight("fake_factor", "fake_factor"),
     ),
 ]
 
 # _ff_variations_tt = [
-#     "ff2_nom_qcd_stat_njet0_jet_pt_low_unc1{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet0_jet_pt_low_unc2{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet0_jet_pt_low_unc3{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet0_jet_pt_med_unc1{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet0_jet_pt_med_unc2{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet0_jet_pt_med_unc3{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet0_jet_pt_high_unc1{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet0_jet_pt_high_unc2{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet0_jet_pt_high_unc3{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_low_unc1{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_low_unc2{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_low_unc3{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_med_unc1{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_med_unc2{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_med_unc3{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_high_unc1{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_high_unc2{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_njet1_jet_pt_high_unc3{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_dR_unc1{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_dR_unc2{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_pt_unc1{ch}{era}{shift}",
-#     "ff2_nom_qcd_stat_pt_unc2{ch}{era}{shift}",
-#     "ff2_nom_qcd_syst{ch}{era}{shift}",
-#     "ff2_nom_ttbar_syst{ch}{era}{shift}",
-#     "ff2_nom_wjets_syst{ch}{era}{shift}",
-#     "ff2_nom_qcd_syst_dr_closure{ch}{era}{shift}",
-#     "ff2_nom_qcd_syst_pt_2_closure{ch}{era}{shift}",
-#     "ff2_nom_qcd_syst_met_closure{ch}{era}{shift}",
-#     "ff2_nom_syst_alt_func{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_low_unc1{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_low_unc2{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_low_unc3{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_med_unc1{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_med_unc2{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_med_unc3{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_high_unc1{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_high_unc2{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet0_jet_pt_high_unc3{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_low_unc1{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_low_unc2{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_low_unc3{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_med_unc1{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_med_unc2{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_med_unc3{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_high_unc1{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_high_unc2{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_njet1_jet_pt_high_unc3{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_dR_unc1{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_dR_unc2{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_pt_unc1{ch}{era}{shift}",
+#     "fake_factor_qcd_stat_pt_unc2{ch}{era}{shift}",
+#     "fake_factor_qcd_syst{ch}{era}{shift}",
+#     "fake_factor_ttbar_syst{ch}{era}{shift}",
+#     "fake_factor_wjets_syst{ch}{era}{shift}",
+#     "fake_factor_qcd_syst_dr_closure{ch}{era}{shift}",
+#     "fake_factor_qcd_syst_pt_2_closure{ch}{era}{shift}",
+#     "fake_factor_qcd_syst_met_closure{ch}{era}{shift}",
+#     "fake_factor_syst_alt_func{ch}{era}{shift}",
 # ]
 # ff_variations_tt = [
 #     ReplaceCutAndAddWeight(
@@ -1062,7 +1048,7 @@ ff_variations_tau_es_emb_lt = [
 #             "(id_tau_vsJet_Tight_2>0.5&&id_tau_vsJet_Medium_1<0.5&&id_tau_vsJet_VVVLoose_1>0.5)",
 #             "tau_anti_iso",
 #         ),
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ReplaceVariableReplaceCutAndAddWeight(
 #         "anti_iso_CMS_scale_t_1prong_EraUp",
@@ -1072,7 +1058,7 @@ ff_variations_tau_es_emb_lt = [
 #             "(id_tau_vsJet_Tight_2>0.5&&id_tau_vsJet_Medium_1<0.5&&id_tau_vsJet_VVVLoose_1>0.5)",
 #             "tau_anti_iso",
 #         ),
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ReplaceVariableReplaceCutAndAddWeight(
 #         "anti_iso_CMS_scale_t_1prong1pizero_EraDown",
@@ -1082,7 +1068,7 @@ ff_variations_tau_es_emb_lt = [
 #             "(id_tau_vsJet_Tight_2>0.5&&id_tau_vsJet_Medium_1<0.5&&id_tau_vsJet_VVVLoose_1>0.5)",
 #             "tau_anti_iso",
 #         ),
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ReplaceVariableReplaceCutAndAddWeight(
 #         "anti_iso_CMS_scale_t_1prong1pizero_EraUp",
@@ -1092,7 +1078,7 @@ ff_variations_tau_es_emb_lt = [
 #             "(id_tau_vsJet_Tight_2>0.5&&id_tau_vsJet_Medium_1<0.5&&id_tau_vsJet_VVVLoose_1>0.5)",
 #             "tau_anti_iso",
 #         ),
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ReplaceVariableReplaceCutAndAddWeight(
 #         "anti_iso_CMS_scale_t_3prong_EraDown",
@@ -1102,7 +1088,7 @@ ff_variations_tau_es_emb_lt = [
 #             "(id_tau_vsJet_Tight_2>0.5&&id_tau_vsJet_Medium_1<0.5&&id_tau_vsJet_VVVLoose_1>0.5)",
 #             "tau_anti_iso",
 #         ),
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ReplaceVariableReplaceCutAndAddWeight(
 #         "anti_iso_CMS_scale_t_3prong_EraUp",
@@ -1112,7 +1098,7 @@ ff_variations_tau_es_emb_lt = [
 #             "(id_tau_vsJet_Tight_2>0.5&&id_tau_vsJet_Medium_1<0.5&&id_tau_vsJet_VVVLoose_1>0.5)",
 #             "tau_anti_iso",
 #         ),
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ReplaceVariableReplaceCutAndAddWeight(
 #         "anti_iso_CMS_scale_t_3prong1pizero_EraDown",
@@ -1122,7 +1108,7 @@ ff_variations_tau_es_emb_lt = [
 #             "(id_tau_vsJet_Tight_2>0.5&&id_tau_vsJet_Medium_1<0.5&&id_tau_vsJet_VVVLoose_1>0.5)",
 #             "tau_anti_iso",
 #         ),
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ReplaceVariableReplaceCutAndAddWeight(
 #         "anti_iso_CMS_scale_t_3prong1pizero_EraUp",
@@ -1132,7 +1118,7 @@ ff_variations_tau_es_emb_lt = [
 #             "(id_tau_vsJet_Tight_2>0.5&&id_tau_vsJet_Medium_1<0.5&&id_tau_vsJet_VVVLoose_1>0.5)",
 #             "tau_anti_iso",
 #         ),
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 # ]
 
@@ -1149,7 +1135,7 @@ ff_variations_tau_es_emb_lt = [
 #             ),
 #             Cut("gen_match_1 != 6", "tau_anti_iso"),
 #         ],
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ChangeDatasetReplaceMultipleCutsAndAddWeight(
 #         "anti_iso_CMS_scale_t_1prong_EraUp",
@@ -1162,7 +1148,7 @@ ff_variations_tau_es_emb_lt = [
 #             ),
 #             Cut("gen_match_1 != 6", "tau_anti_iso"),
 #         ],
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ChangeDatasetReplaceMultipleCutsAndAddWeight(
 #         "anti_iso_CMS_scale_t_1prong1pizero_EraDown",
@@ -1175,7 +1161,7 @@ ff_variations_tau_es_emb_lt = [
 #             ),
 #             Cut("gen_match_1 != 6", "tau_anti_iso"),
 #         ],
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ChangeDatasetReplaceMultipleCutsAndAddWeight(
 #         "anti_iso_CMS_scale_t_1prong1pizero_EraUp",
@@ -1188,7 +1174,7 @@ ff_variations_tau_es_emb_lt = [
 #             ),
 #             Cut("gen_match_1 != 6", "tau_anti_iso"),
 #         ],
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ChangeDatasetReplaceMultipleCutsAndAddWeight(
 #         "anti_iso_CMS_scale_t_3prong_EraDown",
@@ -1201,7 +1187,7 @@ ff_variations_tau_es_emb_lt = [
 #             ),
 #             Cut("gen_match_1 != 6", "tau_anti_iso"),
 #         ],
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ChangeDatasetReplaceMultipleCutsAndAddWeight(
 #         "anti_iso_CMS_scale_t_3prong_EraUp",
@@ -1214,7 +1200,7 @@ ff_variations_tau_es_emb_lt = [
 #             ),
 #             Cut("gen_match_1 != 6", "tau_anti_iso"),
 #         ],
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ChangeDatasetReplaceMultipleCutsAndAddWeight(
 #         "anti_iso_CMS_scale_t_3prong1pizero_EraDown",
@@ -1227,7 +1213,7 @@ ff_variations_tau_es_emb_lt = [
 #             ),
 #             Cut("gen_match_1 != 6", "tau_anti_iso"),
 #         ],
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 #     ChangeDatasetReplaceMultipleCutsAndAddWeight(
 #         "anti_iso_CMS_scale_t_3prong1pizero_EraUp",
@@ -1240,7 +1226,7 @@ ff_variations_tau_es_emb_lt = [
 #             ),
 #             Cut("gen_match_1 != 6", "tau_anti_iso"),
 #         ],
-#         Weight("ff2_nom", "fake_factor"),
+#         Weight("fake_factor", "fake_factor"),
 #     ),
 # ]
 

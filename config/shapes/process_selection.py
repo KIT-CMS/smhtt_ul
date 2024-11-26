@@ -1163,8 +1163,9 @@ def FF_training_process_selection(channel, era):
         cuts = [
             ("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         ]
-        weights = [("ff2_nom", "fake_factor")]
+        weights = [("fake_factor", "fake_factor")]
     elif channel == "tt":
+        # TODO
         raise NotImplementedError("FF training not implemented for tt")
     elif channel == "em":
         raise NotImplementedError("FF training not implemented for em")

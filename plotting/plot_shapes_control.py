@@ -268,12 +268,10 @@ def main(info):
         else:
             total_bkg.Add(rootfile.get(channel, process, category=cat, shape_type=stype))
         if process in ["jetFakesEMB", "jetFakes"] and channel == "tt":
-            total_bkg.Add(rootfile.get(channel, "wFakes", category=cat, shape_type=stype))
+            # total_bkg.Add(rootfile.get(channel, "wFakes", category=cat, shape_type=stype))
             jetfakes_hist = rootfile.get(channel, process, category=cat, shape_type=stype)
-            jetfakes_hist.Add(
-                rootfile.get(channel, "wFakes", category=cat, shape_type=stype))
-            plot.add_hist(
-                jetfakes_hist, process, "bkg")
+            # jetfakes_hist.Add(rootfile.get(channel, "wFakes", category=cat, shape_type=stype))
+            plot.add_hist(jetfakes_hist, process, "bkg")
         else:
             plot.add_hist(
                 rootfile.get(channel, process, category=cat, shape_type=stype), process, "bkg")
@@ -623,5 +621,7 @@ if __name__ == "__main__":
             os.mkdir("%s_plots_%s_%s/%s"%(args.era,postfix,args.tag,ch))
         for v in variables:
             infolist.append({"args" : args, "channel" : ch, "variable" : v})
-    pool = Pool(1)
-    pool.map(main, infolist)
+    # pool = Pool(1)
+    # pool.map(main, infolist)
+    for info in infolist:
+        main(info)

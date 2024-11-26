@@ -1142,13 +1142,13 @@ def main(args):
             #     variations=[trigger_eff_mt_emb],
             #     enable_check=do_check,
             # )
-        elif channel == "mt" and special_analysis != "TauID":
+        elif channel in ["mt", "et"] and special_analysis != "TauID":
             book_histograms(
                 um,
                 processes=embS,
                 datasets=nominals[era]["units"][channel],
-                # variations=[same_sign, anti_iso_lt],
-                variations=[same_sign],
+                variations=[same_sign, anti_iso_lt],  # this
+                # variations=[same_sign],
                 enable_check=do_check,
             )
         if channel in ["mt", "et"]:
@@ -1156,8 +1156,8 @@ def main(args):
                 um,
                 processes=dataS | trueTauBkgS | leptonFakesS,
                 datasets=nominals[era]["units"][channel],
-                # variations=[same_sign, anti_iso_lt],
-                variations=[same_sign],
+                variations=[same_sign, anti_iso_lt],  # this
+                # variations=[same_sign],
                 enable_check=do_check,
             )
             book_histograms(
@@ -1180,7 +1180,7 @@ def main(args):
                 um,
                 processes=dataS | embS | trueTauBkgS,
                 datasets=nominals[era]["units"][channel],
-                variations=[abcd_method],
+                variations=[abcd_method, same_sign, anti_iso_tt],
                 enable_check=do_check,
             )
 
@@ -1188,7 +1188,7 @@ def main(args):
                 um,
                 processes=jetFakesDS[channel],
                 datasets=nominals[era]["units"][channel],
-                variations=[abcd_method],
+                variations=[abcd_method, same_sign, anti_iso_tt],
                 enable_check=do_check,
             )
             # TODO add anti_iso_tt_mcl
@@ -1196,9 +1196,10 @@ def main(args):
                 um,
                 processes=leptonFakesS,
                 datasets=nominals[era]["units"][channel],
-                variations=[wfakes_tt, abcd_method],
+                variations=[wfakes_tt, abcd_method, same_sign, anti_iso_tt],
                 enable_check=do_check,
             )
+
             book_histograms(
                 um,
                 processes={"w"} & procS,
@@ -1206,6 +1207,7 @@ def main(args):
                 variations=[wfakes_w_tt],
                 enable_check=do_check,
             )
+
         elif channel == "em":
             book_histograms(
                 um,
