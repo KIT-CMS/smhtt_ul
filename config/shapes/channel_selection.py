@@ -256,7 +256,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             elif era == "2016preVFP" or era == "2016postVFP":
                 cuts.append(
                     (
-                        "pt_2>20 && pt_1>=23 && ((trg_single_mu22 == 1) || (trg_single_mu22_tk == 1)  || (trg_single_mu22_eta2p1 == 1)  || (trg_single_mu22_tk_eta2p1 == 1))",
+                        "pt_2>40 && pt_1>=23 && ((trg_single_mu22 > 0.5) || (trg_single_mu22_tk > 0.5)  || (trg_single_mu22_eta2p1 > 0.5)  || (trg_single_mu22_tk_eta2p1 > 0.5))",
                         "trg_selection",
                     ),
                 )
