@@ -351,7 +351,7 @@ def parse_arguments():
     )
     return parser.parse_args()
 
-
+# Contains NLOs, we want those ???
 def get_analysis_units(
     channel, era, datasets, categorization, special_analysis, apply_tauid, vs_jet_wp, vs_ele_wp, nn_shapes=False, 
 ):
@@ -905,7 +905,7 @@ def main(args):
             )
         if special_analysis == "TauES":
             additional_emb_procS = set()
-            tauESvariations = [-2.5 + 0.1 * i for i in range(0, 51)]
+            tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
             add_tauES_datasets(
                 era,
                 channel,
@@ -1033,7 +1033,7 @@ def main(args):
                 um,
                 additional_emb_procS,
                 nominals[era]["units"][channel],
-                [same_sign, anti_iso_lt],
+                [same_sign, anti_iso_lt], # ???
                 do_check,
             )
         if channel == "mt" and args.es and special_analysis == "TauID":
@@ -1042,7 +1042,7 @@ def main(args):
                 um,
                 additional_emb_procS,
                 nominals[era]["units"][channel],
-                [same_sign, anti_iso_lt_no_ff],
+                [same_sign],# anti_iso_lt_no_ff],  # !!! anti_iso needs id_tau_vsJet_VLoose_2 which your nTuples might not have...
                 do_check,
             )
             # book_tauES_histograms(
@@ -1352,7 +1352,7 @@ def main(args):
                     um,
                     processes=embS,
                     datasets=nominals[era]["units"][channel],
-                    variations=[same_sign, anti_iso_lt_no_ff],
+                    variations=[same_sign],#, anti_iso_lt_no_ff], # !!! anti_iso needs id_tau_vsJet_VLoose_2 which your nTuples might not have...
                     enable_check=do_check,
                 )
                 book_histograms(

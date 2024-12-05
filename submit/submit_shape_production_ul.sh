@@ -134,7 +134,8 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     else
         sed -i '/^RequestMemory/c\RequestMemory = 10000' $OUTPUT/produce_shapes_cc7_multicore.jdl
     fi
-    sed -i '/^RequestCpus/c\RequestCpus = 8' $OUTPUT/produce_shapes_cc7_multicore.jdl
+    # CPU request usually 8 !!!
+    sed -i '/^RequestCpus/c\RequestCpus = 1' $OUTPUT/produce_shapes_cc7_multicore.jdl
     sed -i '/^arguments/c\arguments = $(a1) $(a2) $(a3) $(a4)' ${OUTPUT}/produce_shapes_cc7_multicore.jdl
     # Add log file locations to output file.
     echo "output = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).out" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
@@ -147,7 +148,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     # Assemble the arguments.txt file used in the submission
     python submit/prepare_args_file.py --graph-file $GRAPH_FILE --output-dir $OUTPUT --pack-multiple-pipelines 10
     echo "[INFO] Submit shape production with 'condor_submit $OUTPUT/produce_shapes_cc7.jdl' and 'condor_submit $OUTPUT/produce_shapes_cc7_multicore.jdl'"
-    condor_submit $OUTPUT/produce_shapes_cc7.jdl
+    # condor_submit $OUTPUT/produce_shapes_cc7.jdl # not necessary?
     condor_submit $OUTPUT/produce_shapes_cc7_multicore.jdl
 else
     echo "[ERROR] Given mode $SUBMIT_MODE is not supported. Aborting..."

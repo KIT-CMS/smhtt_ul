@@ -8,7 +8,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         ("extramuon_veto<0.5", "extramuon_veto"),
         ("dimuon_veto<0.5", "dilepton_veto"),
         ("q_1*q_2<0", "os"),
-    ]
+    ] # correct cuts ???
 
     wps_dict = [
 

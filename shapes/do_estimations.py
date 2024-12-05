@@ -12,6 +12,8 @@ from shapes.estimations.qcd import qcd_estimation, abcd_estimation
 from shapes.estimations.ttbar_emb import emb_ttbar_contamination_estimation
 from shapes.estimations.wfakes import wfakes_estimation
 
+from numpy import arange
+from numpy import round as np_round
 
 logger = logging.getLogger("")
 
@@ -221,7 +223,8 @@ def main(args):
     eleES_names = []
     if args.special == "TauES":
         # we have to extend the _dataset_map and the _process_map to include the TauES variations
-        tauESvariations = [-2.5 + 0.1 * i for i in range(0, 52)]
+        # tauESvariations = [-2.5 + 0.1 * i for i in range(0, 52)]
+        tauESvariations = np_round(arange(-4, 4.1, 0.1),2)
         for variation in tauESvariations:
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
             processname = f"emb{name}"
@@ -312,6 +315,7 @@ def main(args):
                         if channel in ["et", "mt", "em", "mm", "ee"]:
                             for use_emb in [True, False]:
                                 for use_nlo in [False]:
+                                    # import pdb; pdb.set_trace()
                                     estimated_hist = qcd_estimation(
                                         input_file,
                                         channel,

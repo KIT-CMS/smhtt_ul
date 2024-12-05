@@ -199,9 +199,10 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
         tauidweight = (
-            "((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
+            # "((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
+            "((gen_match_2==5)*1 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
-        )
+        ) # Change the id_wgt to 1 when plotting without SFs !!!
         # tauidweight = None
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
         vsele_weight = ("id_wgt_tau_vsEle_"+vs_ele_discr+"_2", "vseleweight")
@@ -591,7 +592,8 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp):
             if apply_wps:
                 ztt_embedded_weights.extend(
                 [
-                    ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    ("((gen_match_2==5) * 1 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    # ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight") # Change the id_wgt to 1 for plotting w/o SFs !!!
                 ]
                 )
             if not apply_wps:
@@ -729,7 +731,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp):
         (
             "((gen_match_1>2 && gen_match_1<6) && (gen_match_2>2 && gen_match_2<6))",
             "dy_genuine_tau",
-        )
+        ) # Cuts correct ???
     ]
 
     return Selection(
@@ -754,7 +756,7 @@ def ZL_nlo_process_selection(channel):
         cuts=[("{}".format(veto[0]), "dy_emb_veto"), ("{}".format(veto[1]), "ff_veto")],
     )
 
-
+# Correct cuts ???
 def __get_ZL_cut(channel):
     emb_veto = ""
     ff_veto = ""

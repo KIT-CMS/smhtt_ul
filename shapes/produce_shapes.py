@@ -6,6 +6,8 @@ import pickle
 import re
 import yaml
 from itertools import combinations
+from numpy import arange
+from numpy import round as np_round
 
 from shapes.utils import (
     add_process,
@@ -984,7 +986,8 @@ def main(args):
             )
         if special_analysis == "TauES":
             additional_emb_procS = set()
-            tauESvariations = [-2.5 + 0.1 * i for i in range(0, 51)]
+            # tauESvariations = [-2.5 + 0.1 * i for i in range(0, 51)]
+            tauESvariations = np_round(arange(-4, 4.1, 0.1),2)
             add_tauES_datasets(
                 era,
                 channel,
@@ -1004,7 +1007,8 @@ def main(args):
             )
         if special_analysis == "TauID" and args.es:
             additional_emb_procS = set()
-            tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
+            # tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
+            tauESvariations = np_round(arange(-4, 4.1, 0.1),2)
             add_tauES_datasets(
                 era,
                 channel,
@@ -1116,7 +1120,7 @@ def main(args):
                 um,
                 additional_emb_procS,
                 nominals[era]["units"][channel],
-                [same_sign, anti_iso_lt],
+                [same_sign, anti_iso_lt], # ???
                 do_check,
             )
         if channel == "mt" and args.es and special_analysis == "TauID":
@@ -1127,7 +1131,7 @@ def main(args):
                 nominals[era]["units"][channel],
                 [same_sign, anti_iso_lt_no_ff],
                 do_check,
-            )
+            ) # take out anti_iso_... ???
             # book_tauES_histograms(
             #     um,
             #     additional_emb_procS,
@@ -1449,7 +1453,7 @@ def main(args):
                     um,
                     processes=embS,
                     datasets=nominals[era]["units"][channel],
-                    variations=[same_sign, anti_iso_lt_no_ff],
+                    variations=[same_sign, anti_iso_lt_no_ff], # ???
                     enable_check=do_check,
                 )
                 book_histograms(

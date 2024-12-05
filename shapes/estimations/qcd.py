@@ -75,7 +75,7 @@ def qcd_estimation(
     logger.debug("extrapolation_factor: %s", extrapolation_factor)
     logger.debug("sub_scale: %s", sub_scale)
     if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
+        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"] # Naming scheme not EMB anymore???
         if is_nlo:
             procs_to_subtract = ["EMB", "ZL_NLO", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W_NLO"]
         if "em" in channel:
@@ -162,6 +162,7 @@ def qcd_estimation(
                 )
             )
         )
+        # import pdb; pdb.set_trace()
         hist = rootfile.Get(
                 _name_string.format(
                     dataset=_dataset_map[proc],

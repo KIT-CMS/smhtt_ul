@@ -204,10 +204,10 @@ def add_tauES_datasets(
             new_selections = deepcopy(full_selection)
             new_actions = deepcopy(actions)
             list_of_quants = dataset.quantities_per_vars
-            quants = set(list_of_quants[shiftname])
             if shiftname not in list_of_quants.keys():
                 logger.critical(f"{shiftname} not in list_of_quants.keys()")
             else:
+                quants = set(list_of_quants[shiftname])
                 # for quant in :
                 for sel_obj in new_selections:
                     for cut in sel_obj.cuts:

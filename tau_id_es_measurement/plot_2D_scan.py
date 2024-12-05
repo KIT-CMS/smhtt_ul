@@ -53,7 +53,7 @@ grid_vals = grid_vals[grid_vals == grid_vals]
 h2D = ROOT.TProfile2D("h", "h", n_bins, x_range[0], x_range[1], n_bins, y_range[0], y_range[1])
 
 for i in range(len(grid_vals)):
-    # Factor of 2 comes from 2*NLL
+    # Factor of 2 comes from 2*NLLn_bins
     h2D.Fill(grid_x[i], grid_y[i], 2 * grid_vals[i])
 
 # Loop over bins: if content = 0 then set 999
@@ -70,6 +70,7 @@ canv.SetTickx()
 canv.SetTicky()
 canv.SetLeftMargin(0.115)
 canv.SetBottomMargin(0.115)
+# canv.SetRightMargin(0.155)
 # Extract binwidth
 xw = (x_range[1] - x_range[0]) / n_bins
 yw = (y_range[1] - y_range[0]) / n_bins
@@ -141,6 +142,7 @@ gBF.Draw("P")
 
 # Add legend
 leg = ROOT.TLegend(0.6, 0.67, 0.8, 0.87)
+# leg = ROOT.TLegend(0.68, 0.75, 0.83, 0.9)
 leg.SetBorderSize(0)
 leg.SetFillColor(0)
 leg.AddEntry(gBF, "Best fit", "P")

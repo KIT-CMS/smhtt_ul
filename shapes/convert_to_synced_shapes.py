@@ -156,7 +156,7 @@ def setup_logging(output_file, level=logging.INFO):
 
 
 def correct_nominal_shape(hist, name, integral):
-    if integral >= 0:
+    if integral > 0:
         # if integral is larger than 0, everything is fine
         sf = 1.0
     elif integral == 0.0:
