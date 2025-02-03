@@ -11,7 +11,6 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     ]
 
     wps_dict = [
-
         "VVTight",
         "VVTight",
         "Tight",
@@ -20,7 +19,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         "VLoose",
         "VVLoose",
         "VVVLoose",
-     ]
+    ]
 
     if vs_ele_wp not in wps_dict:
         print("This vs electron working point doen't exist. Please specify the correct vsEle discriminator ")
@@ -33,7 +32,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                 [
                     ("id_tau_vsMu_Tight_2>0.5", "againstMuonDiscriminator"),
                     ("id_tau_vsEle_VVLoose_2>0.5", "againstElectronDiscriminator"),
-                    ("id_tau_vsJet_Medium_2>0.5", "tau_iso"),
+                    ("id_tau_vsJet_Tight_2>0.5", "tau_iso"),
                     ("iso_1<0.15", "muon_iso"),
                     ("mt_1 < 70", "mt_cut"),
                 ]
@@ -63,7 +62,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                 # )
                 cuts.append(
                     (
-                        "pt_2>30 && ( (pt_1>=28 && (trg_single_mu27 == 1)) || (pt_1>=25 && pt_1 < 28 && (trg_single_mu24 == 1)))",
+                        "(pt_2 > 30) && ((pt_1 > 25) && ((trg_single_mu27 > 0.5) || (trg_single_mu24 > 0.5)))",
                         "trg_selection",
                     ),  # TODO add nonHPS Triggerflag for also MC
                 )
@@ -95,7 +94,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                     #     "trg_selection",
                     # ),
                     (
-                        "pt_2>30 && (pt_1 >=33 && ((trg_single_ele35==1) || (trg_single_ele32==1)))",
+                        "pt_2 > 30 && (pt_1 > 33 && ((trg_single_ele35 > 0.5) || (trg_single_ele32 > 0.5)))",
                         "trg_selection",
                     ),
                 )
@@ -107,15 +106,15 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts.extend(
                 [
                     (
-                        "id_tau_vsMu_VLoose_1>0.5 && id_tau_vsMu_VLoose_2>0.5",
+                        "(id_tau_vsMu_VLoose_1 > 0.5) && (id_tau_vsMu_VLoose_2 > 0.5)",
                         "againstMuonDiscriminator",
                     ),
                     (
-                        "id_tau_vsEle_VVLoose_1>0.5 && id_tau_vsEle_VVLoose_1>0.5",
+                        "(id_tau_vsEle_VVLoose_1 > 0.5) && (id_tau_vsEle_VVLoose_2 > 0.5)",  # TODO: possible typo
                         "againstElectronDiscriminator",
                     ),
                     (
-                        "id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2>0.5",
+                        "(id_tau_vsJet_Tight_1 > 0.5) && (id_tau_vsJet_Tight_2 > 0.5)",
                         "tau_iso",
                     ),
                 ]
@@ -126,11 +125,11 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                 )
                 cuts.append(
                     (
-                        "((trg_double_tau35_mediumiso_hps==1) || (trg_double_tau40_tightiso==1))",
+                        "((trg_double_tau35_tightiso_tightid > 0.5) || (trg_double_tau35_mediumiso_hps > 0.5) || (trg_double_tau40_mediumiso_tightid > 0.5) || (trg_double_tau40_tightiso > 0.5))",
                         "trg_selection",
                     ),
                 )
-                print("No triggers atm ...")
+                # print("No triggers atm ...")
             else:
                 raise ValueError("Given era does not exist")
             return Selection(name="tt", cuts=cuts)
