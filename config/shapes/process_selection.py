@@ -319,7 +319,7 @@ def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
                 "crossSectionPerEventWeight",
             ),
             # dy_stitching_weight(era),  # TODO add stitching weight
-            ("ZPtMassReweightWeight", "zPtReweightWeight"),
+            # ("ZPtMassReweightWeight", "zPtReweightWeight"),
         ]
     )
     return Selection(name="DY", weights=DY_process_weights)

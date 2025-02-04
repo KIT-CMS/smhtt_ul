@@ -76,6 +76,11 @@ def parse_arguments():
         type=str,
         default=None,
         help="The value of the energy scale shift in %.")
+    parser.add_argument(
+        "--tag",
+        type=str,
+        default=None,
+        help="SFs user tag.")
 
     return parser.parse_args()
 
@@ -222,7 +227,15 @@ def main(info):
         if index == 0:
             total_bkg = rootfile.get(channel, process, cat, shape_type=stype).Clone()
         else:
-            total_bkg.Add(rootfile.get(channel, process, cat, shape_type=stype))
+            # total_bkg.Add(rootfile.get(channel, process, cat, shape_type=stype))
+            try:    
+                total_bkg.Add(rootfile.get(channel, process, cat, shape_type=stype))
+            except KeyError:
+                print(process,"\n smhtt_ul/Dumbledraw/Dumbledraw/rootfile_parser_ntuple_processor_inputshapes.py probably has wrong/missing keys, so look there first. Also deactivate pool and use the loop at the end of this script to use the following pdb. \n")
+                import pdb; pdb.set_trace()
+            finally:
+                pass
+        
         if process in ["jetFakesEMB", "jetFakes"] and channel == "tt":
             total_bkg.Add(rootfile.get(channel, "wFakes",cat, shape_type=stype))
             jetfakes_hist = rootfile.get(channel, process, cat, shape_type=stype)
@@ -233,8 +246,15 @@ def main(info):
         else:
             plot.add_hist(
                 rootfile.get(channel, process, cat, shape_type=stype), process, "bkg")
-        plot.setGraphStyle(
-            process, "hist", fillcolor=styles.color_dict[process])
+        # Colors do not contain embXpY yet, this is a temporary workaround!!!
+        if "emb" in process:
+            #warnings.warn("\n\n\n\n\n Colors do not contain embXpY yet, this is a temporary workaround!!!\n\n\n\n\n", UserWarning)
+            print("\n\n\n\n\n !!!Colors do not contain embXpY yet, this is a temporary workaround!!!\n\n\n\n\n")
+            plot.setGraphStyle(
+                process, "hist", fillcolor=styles.color_dict["EMB"])
+        else:
+            plot.setGraphStyle(
+                process, "hist", fillcolor=styles.color_dict[process])
 
 
     plot.add_hist(total_bkg, "total_bkg")
@@ -356,8 +376,16 @@ def main(info):
 
         plot.add_legend(width=0.6, height=0.15)
         for process in legend_bkg_processes:
-            plot.legend(i).add_entry(
-                0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')
+            # Temporary workaround (I hope...)
+            if "emb" in process:
+                print("\n\n\n Again a workaround for the missing labels of embXpY !!!\n\n\n")
+                process = "EMB"
+                # plot.legend(i).add_entry(
+                #     0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')
+            else:
+                plot.legend(i).add_entry(
+                    0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')
+        
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(3)
@@ -406,10 +434,8 @@ def main(info):
     if args.draw_jet_fake_variation is not None:
         postfix = postfix + "_" + args.draw_jet_fake_variation
 
-    if not os.path.exists("%s_plots_%s"%(args.era,postfix)):
-        os.mkdir("%s_plots_%s"%(args.era,postfix))
-    if not os.path.exists("%s_plots_%s/%s/%s"%(args.era,postfix,channel,cat)):
-        os.mkdir("%s_plots_%s/%s/%s"%(args.era,postfix,channel,cat))
+    os.makedirs(f"{args.era}_plots_{postfix}_{args.tag}", exist_ok=True)
+    os.makedirs(f"{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}",exist_ok=True)
     shiftanme = ""
     for i in range(len(bkg_processes)):
         if "emb" in bkg_processes[i]:
@@ -417,8 +443,9 @@ def main(info):
         else:
             shiftanme = ""
     print("Trying to save the created plot")
-    plot.save("%s_plots_%s/%s/%s/%s_%s_%s_%s_%s.%s" % (args.era, postfix, channel,cat, args.era, channel, variable,cat,shiftanme, "pdf"))
-    plot.save("%s_plots_%s/%s/%s/%s_%s_%s_%s_%s.%s" % (args.era, postfix, channel,cat, args.era, channel, variable,cat,shiftanme, "png"))
+    # plot.save(f"{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.pdf")
+    plot.save(f"{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png")
+    print(f"\n{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png\n")
 
 
 if __name__ == "__main__":
@@ -437,12 +464,15 @@ if __name__ == "__main__":
     if args.embedding and args.fake_factor:
         postfix = "emb_ff"
 
-    if not os.path.exists("%s_plots_%s"%(args.era,postfix)):
-        os.mkdir("%s_plots_%s"%(args.era,postfix))
+    if not os.path.exists(f"{args.era}_plots_{postfix}_{args.tag}"):
+        os.mkdir(f"{args.era}_plots_{postfix}_{args.tag}")
     for ch in channels:
-        if not os.path.exists("%s_plots_%s/%s"%(args.era,postfix,ch)):
-            os.mkdir("%s_plots_%s/%s"%(args.era,postfix,ch))
+        if not os.path.exists(f"{args.era}_plots_{postfix}_{args.tag}/{ch}"):
+            os.mkdir(f"{args.era}_plots_{postfix}_{args.tag}/{ch}")
         for v in variables:
             infolist.append({"args" : args, "channel" : ch, "variable" : v})
-    pool = Pool(1)
-    pool.map(main, infolist)
+    #pool = Pool(8)
+    with Pool(8) as pool:
+        pool.map(main, infolist)
+    # for item in infolist:
+    #     main(item)

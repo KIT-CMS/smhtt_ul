@@ -134,7 +134,7 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     else
         sed -i '/^RequestMemory/c\RequestMemory = 10000' $OUTPUT/produce_shapes_cc7_multicore.jdl
     fi
-    sed -i '/^RequestCpus/c\RequestCpus = 8' $OUTPUT/produce_shapes_cc7_multicore.jdl
+    sed -i '/^RequestCpus/c\RequestCpus = 4' $OUTPUT/produce_shapes_cc7_multicore.jdl
     sed -i '/^arguments/c\arguments = $(a1) $(a2) $(a3) $(a4)' ${OUTPUT}/produce_shapes_cc7_multicore.jdl
     # Add log file locations to output file.
     echo "output = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).out" >>$OUTPUT/produce_shapes_cc7_multicore.jdl

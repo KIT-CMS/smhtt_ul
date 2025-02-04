@@ -7,6 +7,8 @@ import re
 import yaml
 from itertools import combinations
 
+from copy import deepcopy
+
 from shapes.utils import (
     add_process,
     book_histograms,
@@ -380,18 +382,18 @@ def get_analysis_units(
         categorization=categorization,
         channel=channel,
     )
-    add_process(
-        analysis_units,
-        name="zl_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZL_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
+    # add_process(
+    #     analysis_units,
+    #     name="zl_nlo",
+    #     dataset=datasets["DYNLO"],
+    #     selections=[
+    #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+    #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+    #         ZL_process_selection(channel),
+    #     ],
+    #     categorization=categorization,
+    #     channel=channel,
+    # )
     add_process(
         analysis_units,
         name="ttl",
@@ -441,18 +443,18 @@ def get_analysis_units(
             categorization=categorization,
             channel=channel,
         )
-        add_process(
-            analysis_units,
-            name="ztt_nlo",
-            dataset=datasets["DYNLO"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                ZTT_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
+        # add_process(
+        #     analysis_units,
+        #     name="ztt_nlo",
+        #     dataset=datasets["DYNLO"],
+        #     selections=[
+        #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+        #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+        #         ZTT_process_selection(channel),
+        #     ],
+        #     categorization=categorization,
+        #     channel=channel,
+        # )
         add_process(
             analysis_units,
             name="vvt",
@@ -489,18 +491,18 @@ def get_analysis_units(
             categorization=categorization,
             channel=channel,
         )
-        add_process(
-            analysis_units,
-            name="zj_nlo",
-            dataset=datasets["DYNLO"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                ZJ_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
+        # add_process(
+        #     analysis_units,
+        #     name="zj_nlo",
+        #     dataset=datasets["DYNLO"],
+        #     selections=[
+        #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+        #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+        #         ZJ_process_selection(channel),
+        #     ],
+        #     categorization=categorization,
+        #     channel=channel,
+        # )
         add_process(
             analysis_units,
             name="vvj",
@@ -673,45 +675,45 @@ def get_control_units(
         binning=control_binning,
         variables=variable_set,
     )
-    add_control_process(
-        control_units,
-        name="ztt_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZTT_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="zl_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZL_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="zj_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZJ_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
+    # add_control_process(
+    #     control_units,
+    #     name="ztt_nlo",
+    #     dataset=datasets["DYNLO"],
+    #     selections=[
+    #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+    #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+    #         ZTT_process_selection(channel),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
+    # add_control_process(
+    #     control_units,
+    #     name="zl_nlo",
+    #     dataset=datasets["DYNLO"],
+    #     selections=[
+    #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+    #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+    #         ZL_process_selection(channel),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
+    # add_control_process(
+    #     control_units,
+    #     name="zj_nlo",
+    #     dataset=datasets["DYNLO"],
+    #     selections=[
+    #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+    #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+    #         ZJ_process_selection(channel),
+    #     ],
+    #     channel=channel,
+    #     binning=control_binning,
+    #     variables=variable_set,
+    # )
     add_control_process(
         control_units,
         name="ttl",
@@ -862,7 +864,15 @@ def main(args):
     nominals[era]["units"] = {}
 
     # Step 1: create units and book actions
+    # Define in my_files the available proceses. Otherwise all defined in file_names.py will be used:
+    my_files = ["data", "DY", "TT", "VV", "W", "EMB", "WNLO", ]
+    
     for channel in args.channels:
+        
+        for file_name in deepcopy(files)[era][channel]:
+            if file_name not in my_files:
+                files[era][channel].pop(file_name)
+            
         nominals[era]["datasets"][channel] = get_nominal_datasets(
             era, channel, friend_directories, files, args.directory,
             xrootd=args.xrootd, validation_tag=args.validation_tag
@@ -951,9 +961,9 @@ def main(args):
             "ztt",
             "zl",
             "zj",
-            "ztt_nlo",
-            "zl_nlo",
-            "zj_nlo",
+            # "ztt_nlo",
+            # "zl_nlo",
+            # "zj_nlo",
             "ttt",
             "ttl",
             "ttj",
@@ -975,7 +985,7 @@ def main(args):
         procS = {
             "data",
             "zl",
-            "zl_nlo",
+            # "zl_nlo",
             "ttl",
             "vvl",
             "w",
@@ -986,13 +996,21 @@ def main(args):
     dataS = {"data"} & procS
     embS = {"emb"} & procS
     jetFakesDS = {
-        "et": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
-        "mt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
+        "et": {"zj", "ttj", "vvj", "w",
+            #    "zj_nlo",
+               "w_nlo"} & procS,
+        "mt": {"zj", "ttj", "vvj", "w",
+            #    "zj_nlo",
+               "w_nlo"} & procS,
         "tt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
         "em": {"w", "w_nlo"} & procS,
     }
-    leptonFakesS = {"zl", "ttl", "vvl", "zl_nlo"} & procS
-    trueTauBkgS = {"ztt", "ttt", "vvt", "ztt_nlo"} & procS
+    leptonFakesS = {"zl", "ttl", "vvl", 
+                    # "zl_nlo"
+                    } & procS
+    trueTauBkgS = {"ztt", "ttt", "vvt", 
+                #    "ztt_nlo"
+                   } & procS
     sm_signalsS = {
         "ggh",
         "qqh",
@@ -1033,7 +1051,7 @@ def main(args):
                 um,
                 additional_emb_procS,
                 nominals[era]["units"][channel],
-                [same_sign, anti_iso_lt],
+                [same_sign], #, anti_iso_lt],
                 do_check,
             )
         if channel == "mt" and args.es and special_analysis == "TauID":
@@ -1042,7 +1060,7 @@ def main(args):
                 um,
                 additional_emb_procS,
                 nominals[era]["units"][channel],
-                [same_sign, anti_iso_lt_no_ff],
+                [same_sign],# anti_iso_lt_no_ff],
                 do_check,
             )
             # book_tauES_histograms(
@@ -1202,13 +1220,13 @@ def main(args):
                 enable_check=do_check,
             )
 
-            book_histograms(
-                um,
-                processes={"ztt", "zl", "zj"} & procS,
-                datasets=nominals[era]["units"][channel],
-                variations=[zpt],
-                enable_check=do_check,
-            )
+            # book_histograms(
+            #     um,
+            #     processes={"ztt", "zl", "zj"} & procS,
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[zpt],
+            #     enable_check=do_check,
+            # )
             book_histograms(
                 um,
                 processes={"ttt", "ttl", "ttj"} & procS,
@@ -1352,7 +1370,7 @@ def main(args):
                     um,
                     processes=embS,
                     datasets=nominals[era]["units"][channel],
-                    variations=[same_sign, anti_iso_lt_no_ff],
+                    variations=[same_sign], # anti_iso_lt_no_ff],
                     enable_check=do_check,
                 )
                 book_histograms(
