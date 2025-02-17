@@ -62,12 +62,15 @@ class CustomFormatter(logging.Formatter):
                 for line in wrapped_first[1:]:
                     pad = avail_mid - len(line)
                     rest_first.append(f"{indent}{line}{' ' * pad}")
-            # For subsequent lines, we prefer to honor the original line breaks.
+            # For subsequent lines, we now prepend left_len padding.
             subsequent_lines = []
-            if len(raw_lines[0]) > avail_mid and wrapped_first[1:]:
-                subsequent_lines.extend(rest_first)
-            # Append the remaining original lines without further left/right padding.
-            subsequent_lines.extend(raw_lines[1:])
+            if "\n" in raw_message:
+                # If we wrapped the first line, add the wrapped leftovers.
+                if len(raw_lines[0]) > avail_mid and wrapped_first[1:]:
+                    subsequent_lines.extend(rest_first)
+                # Then for any remaining original lines, add left_part padding.
+                for line in raw_lines[1:]:
+                    subsequent_lines.append(" " * left_len + line)
             formatted = "\n".join([line1] + subsequent_lines)
         else:
             # Default handling: wrap the message automatically.

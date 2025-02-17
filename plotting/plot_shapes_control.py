@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
+import copy
+import itertools as itt
+import logging
+import os
+from multiprocessing import Pool, Process
+
+import ROOT
+import yaml
+from process_ordering import ControlShapeBkgProcesses, sorted_bkg_processes
+
 import Dumbledraw.dumbledraw as dd
 import Dumbledraw.rootfile_parser_ntuple_processor_inputshapes as rootfile_parser
 import Dumbledraw.styles as styles
-import ROOT
+from config.logging_setup_configs import setup_logging
 
-import argparse
-import copy
-import yaml
-import os
-
-import logging
-logger = logging.getLogger("")
-from multiprocessing import Pool
-from multiprocessing import Process
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -76,25 +78,19 @@ def parse_arguments():
         default=None,
         help="Plot a special category instead of nominal")
     parser.add_argument(
+        "--ff-DR",
+        type=str,
+        choices=["wjet", "qcr", "ttbar"],
+        default=None,
+        help="Draw variation of jetFakes or QCD in determination region.",
+    )
+    parser.add_argument(
         "--tag",
         type=str,
         default="",
         help="Tag that is added to the output file")
 
     return parser.parse_args()
-
-
-def setup_logging(output_file, level=logging.DEBUG):
-    logger.setLevel(level)
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    file_handler = logging.FileHandler(output_file, "w")
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
 
 
 def main(info):
@@ -109,7 +105,7 @@ def main(info):
         "mt": "#mu#tau_{#font[42]{h}}",
         "tt": "#tau_{#font[42]{h}}#tau_{#font[42]{h}}"
     }
-    if args.linear == True:
+    if args.linear:
         split_value = 0.1
     else:
         if args.normalize_by_bin_width:
@@ -119,67 +115,14 @@ def main(info):
 
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm", "ee"]}
 
-    bkg_processes = [
-        "VVL", "TTL", "ZL", "jetFakesEMB", "EMB"
-    ]
-    if not args.fake_factor and args.embedding:
-        if args.nlo:
-            bkg_processes = [
-                "QCDEMB", "VVL", "VVJ", "W_NLO", "TTL", "TTJ", "ZJ_NLO", "ZL_NLO", "EMB"  # TODO: Also use NLO version of QCD estimate?
-            ]
-        else:
-            bkg_processes = [
-                "VVL", "TTL", "ZL", "QCDEMB", "VVJ", "W","TTJ", "ZJ", "EMB"
-            ]
-    if not args.embedding and args.fake_factor:
-        if args.nlo:
-            bkg_processes = [
-                "VVT", "VVL", "TTT", "TTL", "ZL_NLO", "jetFakes", "ZTT_NLO",  # TODO jetFakes NLO
-            ]
-        else:
-            bkg_processes = [
-                "VVT", "VVL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
-            ]
-    if not args.embedding and not args.fake_factor:
-        if args.nlo:
-            bkg_processes = [
-                "QCD_NLO", "VVT", "VVL", "VVJ", "W_NLO", "TTT", "TTL", "TTJ", "ZJ_NLO", "ZL_NLO", "ZTT_NLO"    # if now QCD_NLO or W_NLO is available, use QCD and W instead
-            ]
-        else:
-            bkg_processes = [
-                "QCD", "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
-            ]
-    if args.draw_jet_fake_variation is not None:
-        bkg_processes = [
-            "VVL", "TTL", "ZL", "EMB"
-        ]
-        if not args.fake_factor and args.embedding:
-            bkg_processes = [
-                "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
-            ]
-        if not args.embedding and args.fake_factor:
-            bkg_processes = [
-                "VVT", "VVL", "TTT", "TTL", "ZL", "ZTT"
-            ]
-        if not args.embedding and not args.fake_factor:
-            bkg_processes = [
-                "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
-            ]
-
-    # qcd
-    to_add = ["W", "TTJ"]  # TODO: ONLY DETERMINATION REGION PLOTS
-    # wjet
-    # to_add = ["TTJ", "QCD"]  # TODO: ONLY DETERMINATION REGION PLOTS
-    # # ttbar
-    # to_add = ["W", "QCD"]  # TODO: ONLY DETERMINATION REGION PLOTS
-    for item in to_add:
-        if item not in bkg_processes:
-            bkg_processes.append(item)
-
-
-    all_bkg_processes = [b for b in bkg_processes]
-    legend_bkg_processes = copy.deepcopy(bkg_processes)
-    legend_bkg_processes.reverse()
+    bkg_processes = ControlShapeBkgProcesses(
+        embedding=args.embedding,
+        fake_factor=args.fake_factor,
+        channel=channel,
+        nlo=args.nlo,
+        ff_DR=args.ff_DR,
+        draw_jet_fake_variation=args.draw_jet_fake_variation,
+    )()
 
     if "2016postVFP" in args.era:
         era = "Run2016postVFP"
@@ -193,66 +136,9 @@ def main(info):
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
 
-    # category = "_".join([channel, variable])
-    # if args.category_postfix is not None:
-    #     category += "_%s"%args.category_postfix
     rootfile = rootfile_parser.Rootfile_parser(args.input, variable, )
-    bkg_processes = [b for b in all_bkg_processes]
-    if "em" in channel:
-        if not args.embedding:
-            if args.nlo:
-                bkg_processes = [
-                    "QCD_NLO", "VVT", "VVL", "W_NLO", "TTT", "TTL", "ZL_NLO", "ZTT_NLO"
-                ]
-            else:
-                bkg_processes = [
-                    "QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"
-                ]
-        if args.embedding:
-            if args.nlo:
-                bkg_processes = [
-                    "QCDEMB_NLO", "VVL", "W_NLO", "TTL", "ZL_NLO", "EMB"
-                ]
-            else:
-                bkg_processes = [
-                    "QCDEMB", "VVL", "W", "TTL", "ZL", "EMB"
-                ]
-        if args.draw_jet_fake_variation is not None:
-            if not args.embedding:
-                bkg_processes = [
-                    "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"
-                ]
-            if args.embedding:
-                bkg_processes = [
-                    "VVL", "W", "TTL", "ZL", "EMB"
-                ]
 
-    if "mm" in channel or "ee" in channel:
-        if args.embedding:
-            if args.nlo:
-                bkg_processes = [
-                    "QCDEMB_NLO", "W_NLO", "EMB"
-                ]
-            else:
-                bkg_processes = [
-                    "QCDEMB", "W", "EMB",
-                ]
-        else:
-            if args.nlo:
-                bkg_processes = [
-                    "QCD_NLO", "VVL", "W_NLO", "TTL", "ZL_NLO"
-                ]
-            else:
-                bkg_processes = [
-                    "QCDEMB", "VVL", "W", "TTL", "ZL"
-                ]
-    # TODO Remove QCD from list of shapes for now
-    # for i, elem in enumerate(bkg_processes):
-    #     if elem.startswith("QCD"):
-    #         to_remove = i
-    #         break
-    # bkg_processes.pop(to_remove)
-
+    bkg_processes = sorted_bkg_processes(bkg_processes)
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
 
@@ -574,68 +460,33 @@ def main(info):
         "%s, %s" % (channel_dict[channel], "inclusive"),
         begin_left=posChannelCategoryLabelLeft)
 
-    # save plot
-    if args.category is not None:
-        category = args.category
-    else:
-        category = "Nominal"
-    if not args.embedding and not args.fake_factor:
-        postfix = "fully_classic"
-    if args.embedding and not args.fake_factor:
-        postfix = "emb_classic"
-    if not args.embedding and args.fake_factor:
-        postfix = "classic_ff"
-    if args.embedding and args.fake_factor:
-        postfix = "emb_ff"
-    if args.nlo:
-        postfix = "_".join([postfix, "nlo"])
-    if args.draw_jet_fake_variation is not None:
-        postfix = postfix + "_" + args.draw_jet_fake_variation
-
-    if not os.path.exists("%s_plots_%s_%s"%(args.era, postfix, args.tag)):
-        os.mkdir("%s_plots_%s_%s"%(args.era, postfix, args.tag))
-    if not os.path.exists("%s_plots_%s_%s/%s"%(args.era, postfix, args.tag, channel)):
-        os.mkdir("%s_plots_%s_%s/%s"%(args.era,postfix, args.tag, channel))
     print("Trying to save the created plot")
-    plot.save("%s_plots_%s_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, args.tag, channel, args.era, channel, category, variable, "pdf"))
-    plot.save("%s_plots_%s_%s/%s/%s_%s_%s_%s.%s" % (args.era, postfix, args.tag, channel, args.era, channel, category, variable, "png"))
+    _path = os.path.join(f"{args.era}_plots_{postfix}_{args.tag}", channel)
+    if not os.path.exists(_path):
+        os.makedirs(_path, exist_ok=True)
+    for _ext in ["pdf", "png"]:
+        plot.save(os.path.join(_path, f"{args.era}_{channel}_{args.category or ''}_{variable}.{_ext}"))
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    setup_logging("{}_plot_shapes.log".format(args.era), logging.DEBUG)
-    variables = args.variables.split(",")
-    channels = args.channels.split(",")
-    infolist = []
+    logger = logging.getLogger(__name__)
+    logger = setup_logging(f"{args.era}_plot_shapes.log", logger, logging.DEBUG)
+    variables, channels = args.variables.split(","), args.channels.split(",")
 
     if not args.embedding and not args.fake_factor:
-        if args.nlo:
-            postfix = "fully_classic_nlo"
-        else:
-            postfix = "fully_classic"
-    if args.embedding and not args.fake_factor:
-        if args.nlo:
-            postfix = "emb_classic_nlo"
-        else:
-            postfix = "emb_classic"
-    if not args.embedding and args.fake_factor:
-        if args.nlo:
-            postfix = "classic_ff_nlo"
-        else:
-            postfix = "classic_ff"
-    if args.embedding and args.fake_factor:
-        if args.nlo:
-            postfix = "emb_ff_nlo"
-        else:
-            postfix = "emb_ff"
-    if not os.path.exists("%s_plots_%s_%s"%(args.era,postfix,args.tag)):
-        os.mkdir("%s_plots_%s_%s"%(args.era,postfix,args.tag))
-    for ch in channels:
-        if not os.path.exists("%s_plots_%s_%s/%s"%(args.era, postfix,args.tag,ch)):
-            os.mkdir("%s_plots_%s_%s/%s"%(args.era,postfix,args.tag,ch))
-        for v in variables:
-            infolist.append({"args" : args, "channel" : ch, "variable" : v})
-    # pool = Pool(1)
-    # pool.map(main, infolist)
+        postfix = "fully_classic"
+    else:
+        a = "emb" if args.embedding else "classic"
+        b = "ff" if args.fake_factor else "classic"
+        postfix = f"{a}_{b}"
+    if args.nlo:
+        postfix = f"{postfix}_nlo"
+    if args.draw_jet_fake_variation is not None:
+        postfix = f"{postfix}_{args.draw_jet_fake_variation}"
+
+    args.postfix = postfix
+
+    infolist = [{"args": args, "channel": ch, "variable": v} for ch, v in itt.product(channels, variables)]
     for info in infolist:
         main(info)
