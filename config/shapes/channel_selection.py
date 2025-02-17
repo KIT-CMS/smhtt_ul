@@ -5,7 +5,7 @@ from config.logging_setup_configs import setup_logging
 
 
 logger = logging.getLogger(__name__)
-logger = setup_logging("", logger, logging.INFO)
+logger = setup_logging("booking.log", logger, logging.INFO)
 
 
 def modify_for_ff_DR(channel=None, region=None):
@@ -73,7 +73,7 @@ def modify_for_ff_DR(channel=None, region=None):
     return cuts
 
 
-def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose", ff_DR=None):
+def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose", ff_DR=None, **kwargs):
 
     cuts = WarnDict()
     cuts["extraelec_veto"] = "(extraelec_veto < 0.5)"

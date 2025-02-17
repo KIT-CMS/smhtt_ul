@@ -6,6 +6,7 @@ import pickle
 import re
 import yaml
 from itertools import combinations
+from functools import partial
 
 from shapes.utils import (
     add_process,
@@ -26,35 +27,9 @@ from ntuple_processor import (
 )
 from ntuple_processor.utils import Selection
 
-from config.shapes.channel_selection import channel_selection #, tau_id_channel_selection
+from config.shapes.channel_selection import channel_selection
 from config.shapes.file_names import files
-from config.shapes.process_selection import (
-    # Data_base_process_selection,
-    DY_process_selection,
-    DY_NLO_process_selection,
-    TT_process_selection,
-    VV_process_selection,
-    W_process_selection,
-    ZTT_process_selection,
-    ZL_process_selection,
-    ZJ_process_selection,
-    TTT_process_selection,
-    TTL_process_selection,
-    TTJ_process_selection,
-    VVT_process_selection,
-    VVJ_process_selection,
-    VVL_process_selection,
-    ggH125_process_selection,
-    qqH125_process_selection,
-    ZTT_embedded_process_selection,
-    ZH_process_selection,
-    WH_process_selection,
-    ggHWW_process_selection,
-    qqHWW_process_selection,
-    ZHWW_process_selection,
-    WHWW_process_selection,
-    ttH_process_selection,
-)
+import config.shapes.process_selection as selection
 
 # from config.shapes.category_selection import categorization
 from config.shapes.category_selection import categorization as default_categorization
@@ -174,21 +149,7 @@ from config.shapes.variations import (
 
 from config.shapes.control_binning import control_binning as default_control_binning
 from config.shapes.gof_binning import load_gof_binning
-
-logger = logging.getLogger("")
-
-
-def setup_logging(output_file, level=logging.DEBUG):
-    logger.setLevel(level)
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    file_handler = logging.FileHandler(output_file, "w")
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+from config.logging_setup_configs import setup_logging
 
 
 def parse_arguments():
@@ -349,285 +310,105 @@ def parse_arguments():
         action="store_true",
         help="Add tau ES variations.",
     )
+    parser.add_argument(
+        "--ff-DR",
+        help="Set to the DR used for the fake factor estimation.",
+        choices=["wjet", "qcd", "ttbar"],
+        default=None,
+    )
     return parser.parse_args()
 
 
+def add_processes(
+    add_fn: callable,
+    datasets: dict,
+    select_fn: callable,
+    channel: str,
+) -> None:
+
+    add_fn(name="data", dataset=datasets["data"], selections=select_fn())
+    add_fn(name="emb", dataset=datasets["EMB"], selections=select_fn(selection.ZTT_embedded))
+    add_fn(name="ztt", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZTT))
+    add_fn(name="zl", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZL))
+    add_fn(name="zj", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZJ))
+    add_fn(name="ztt_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZTT))
+    add_fn(name="zl_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZL))
+    add_fn(name="zj_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZJ))
+    add_fn(name="ttl", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTL))
+    add_fn(name="ttt", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTT))
+    add_fn(name="ttj", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTJ))
+    add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVL))
+    add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVT))
+    add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVJ))
+    if channel != "mm":
+        add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
+        add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
+        # add_fn(name="w_nlo", dataset=datasets["WNLO"], selections=select_fn(selection.W))
+    add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
+
+
 def get_analysis_units(
-    channel, era, datasets, categorization, special_analysis, apply_tauid, vs_jet_wp, vs_ele_wp, nn_shapes=False, 
+    channel,
+    era,
+    datasets,
+    categorization,
+    special_analysis,
+    apply_tauid,
+    vs_jet_wp,
+    vs_ele_wp,
+    nn_shapes=False,
+    ff_DR=None,
 ):
+
+    _selection_kwargs = dict(
+        channel=channel,
+        era=era,
+        special=special_analysis,
+        vs_jet_wp=vs_jet_wp,
+        vs_ele_wp=vs_ele_wp,
+        ff_DR=ff_DR,
+        apply_wps=apply_tauid,  # for ZTT_embedded
+    )
+    _selection_memo = {}
+    _channel_selection = channel_selection(**_selection_kwargs)
+
+    def select(*args):
+        _selection = [_channel_selection]
+        for _process in args:
+            if _process.__name__ not in _selection_memo:
+                _selection_memo[_process.__name__] = _process(**_selection_kwargs)
+            _selection.append(_selection_memo[_process.__name__])
+        return _selection
+
     analysis_units = {}
 
-    add_process(
-        analysis_units,
-        name="data",
-        dataset=datasets["data"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            # Data_base_process_selection(era, channel),
-        ],
-        categorization=categorization,
+    add_processes(
+        add_fn=partial(
+            add_process,
+            analysis_unit=analysis_units,
+            categorization=categorization,
+            channel=channel,
+        ),
+        datasets=datasets,
+        select_fn=select,
         channel=channel,
     )
-    add_process(
-        analysis_units,
-        name="zl",
-        dataset=datasets["DY"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZL_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="zl_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZL_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="ttl",
-        dataset=datasets["TT"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            TTL_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="vvl",
-        dataset=datasets["VV"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            VVL_process_selection(channel),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    # Embedding
-    add_process(
-        analysis_units,
-        name="emb",
-        dataset=datasets["EMB"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    if channel != "mm":
-        add_process(
-            analysis_units,
-            name="ztt",
-            dataset=datasets["DY"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                ZTT_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ztt_nlo",
-            dataset=datasets["DYNLO"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                ZTT_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="vvt",
-            dataset=datasets["VV"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                VVT_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ttt",
-            dataset=datasets["TT"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                TTT_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="zj",
-            dataset=datasets["DY"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                ZJ_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="zj_nlo",
-            dataset=datasets["DYNLO"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                ZJ_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="vvj",
-            dataset=datasets["VV"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                VVJ_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ttj",
-            dataset=datasets["TT"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-                TTJ_process_selection(channel),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="ggh",
-            dataset=datasets["ggH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="qqh",
-            dataset=datasets["qqH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="wh",
-            dataset=datasets["WH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                WH_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="zh",
-            dataset=datasets["ZH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ZH_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-        add_process(
-            analysis_units,
-            name="tth",
-            dataset=datasets["ttH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ttH_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            categorization=categorization,
-            channel=channel,
-        )
-    # "gghww"  : [Unit(
-    #             datasets["ggHWW"], [
-    #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #                 ggHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-    # "qqhww"  : [Unit(
-    #             datasets["qqHWW"], [
-    #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #                 qqHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-    # "zhww"  : [Unit(
-    #             datasets["ZHWW"], [
-    #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #                 ZHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-    # "whww"  : [Unit(
-    #             datasets["WHWW"], [
-    #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #                 WHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
 
-    add_process(
-        analysis_units,
-        name="w",
-        dataset=datasets["W"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            W_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="w_nlo",
-        dataset=datasets["WNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            W_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
     return analysis_units
 
 
 def get_control_units(
-    channel, era, datasets, special_analysis, variables, apply_tauid, vs_jet_wp, vs_ele_wp, do_gofs=False, do_2dGofs=False
+    channel,
+    era,
+    datasets,
+    special_analysis,
+    variables,
+    apply_tauid,
+    vs_jet_wp,
+    vs_ele_wp,
+    do_gofs=False,
+    do_2dGofs=False,
+    ff_DR=None,
 ):
     control_units = {}
     control_binning = default_control_binning
@@ -637,20 +418,15 @@ def get_control_units(
         # also build all aviailable 2D variables from the 1D variables
         if do_2dGofs:
             variables_2d = []
-            for var1 in variables:
-                for var2 in variables:
-                    if var1 == var2:
-                        continue
-                    elif f"{var1}_{var2}" in control_binning[channel]:
-                        variables_2d.append(f"{var1}_{var2}")
-                    elif f"{var2}_{var1}" in control_binning[channel]:
-                        variables_2d.append(f"{var2}_{var1}")
-                    else:
-                        raise ValueError(
-                            "No binning found for 2D variable from {} and {}".format(
-                                var1, var2
-                            )
-                        )
+            for var1, var2 in combinations(variables, 2):
+                if f"{var1}_{var2}" in control_binning[channel]:
+                    variables_2d.append(f"{var1}_{var2}")
+                elif f"{var2}_{var1}" in control_binning[channel]:
+                    variables_2d.append(f"{var2}_{var1}")
+                else:
+                    raise ValueError(
+                        f"No binning found for 2D variable from {var1} and {var2}"
+                    )
             variables.extend(variables_2d)
             logger.info(
                 "Will run GoFs for {} variables, indluding {} 2D variables".format(
@@ -667,233 +443,38 @@ def get_control_units(
             variable_set.add(variable)
     # variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
     logger.info("[INFO] Running control plots for variables: {}".format(variable_set))
-    add_control_process(
-        control_units,
-        name="data",
-        dataset=datasets["data"],
-        selections=channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="emb",
-        dataset=datasets["EMB"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            # tau_id_channel_selection(channel, era, vs_jet_wp),
-            ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="ztt",
-        dataset=datasets["DY"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZTT_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="zl",
-        dataset=datasets["DY"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZL_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="zj",
-        dataset=datasets["DY"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZJ_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="ztt_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZTT_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="zl_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZL_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="zj_nlo",
-        dataset=datasets["DYNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ZJ_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="ttl",
-        dataset=datasets["TT"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            TTL_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="ttt",
-        dataset=datasets["TT"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            TTT_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="ttj",
-        dataset=datasets["TT"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            TTJ_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="vvl",
-        dataset=datasets["VV"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            VVL_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="vvt",
-        dataset=datasets["VV"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            VVT_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    add_control_process(
-        control_units,
-        name="vvj",
-        dataset=datasets["VV"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            VVJ_process_selection(channel),
-        ],
-        channel=channel,
-        binning=control_binning,
-        variables=variable_set,
-    )
-    if channel != "mm":
-        add_control_process(
-            control_units,
-            name="qqh",
-            dataset=datasets["qqH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
-        add_control_process(
-            control_units,
-            name="ggh",
-            dataset=datasets["ggH"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
-        # add_control_process(
-        #     control_units,
-        #     name="w_nlo",
-        #     dataset=datasets["WNLO"],
-        #     selections=[
-        #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-        #         W_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-        #     ],
-        #     channel=channel,
-        #     binning=control_binning,
-        #     variables=variable_set,
-        # )
 
-    add_control_process(
-        control_units,
-        name="w",
-        dataset=datasets["W"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            W_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-        ],
+    _selection_kwargs = dict(
         channel=channel,
-        binning=control_binning,
-        variables=variable_set,
+        era=era,
+        special=special_analysis,
+        vs_jet_wp=vs_jet_wp,
+        vs_ele_wp=vs_ele_wp,
+        ff_DR=ff_DR,
+        apply_wps=apply_tauid,  # for ZTT_embedded
+    )
+    _selection_memo = {}
+    _channel_selection = channel_selection(**_selection_kwargs)
+
+    def select(*args):
+        _selection = [_channel_selection]
+        for _process in args:
+            if _process.__name__ not in _selection_memo:
+                _selection_memo[_process.__name__] = _process(**_selection_kwargs)
+            _selection.append(_selection_memo[_process.__name__])
+        return _selection
+
+    add_processes(
+        add_fn=partial(
+            add_control_process,
+            analysis_unit=control_units,
+            channel=channel,
+            binning=control_binning,
+            variables=variable_set,
+        ),
+        datasets=datasets,
+        select_fn=select,
+        channel=channel,
     )
 
     return control_units
@@ -902,9 +483,9 @@ def get_control_units(
 def prepare_special_analysis(special):
     if special is None:
         return default_categorization
-    elif special and special == "TauID":
+    elif special == "TauID":
         return tauid_categorization
-    elif special and special == "TauES":
+    elif special == "TauES":
         return taues_categorization
     else:
         raise ValueError("Unknown special analysis: {}".format(special))
@@ -995,7 +576,7 @@ def main(args):
                 tauESvariations,
                 [
                     channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                    ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
+                    selection.ZTT_embedded(channel, era, apply_tauid, vs_jet_wp),
                 ],
                 categorization,
                 additional_emb_procS,
@@ -1015,7 +596,7 @@ def main(args):
                 tauESvariations,
                 [
                     channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                    ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
+                    selection.ZTT_embedded(channel, era, apply_tauid, vs_jet_wp),
                 ],
                 categorization,
                 additional_emb_procS,
@@ -1583,5 +1164,6 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.INFO)
+    logger = logging.getLogger(__name__)
+    logger = setup_logging(log_file, logger, logging.DEBUG)
     main(args)
