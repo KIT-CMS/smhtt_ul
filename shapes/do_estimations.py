@@ -11,9 +11,7 @@ from shapes.estimations.fakefactors import fake_factor_estimation
 from shapes.estimations.qcd import qcd_estimation, abcd_estimation
 from shapes.estimations.ttbar_emb import emb_ttbar_contamination_estimation
 from shapes.estimations.wfakes import wfakes_estimation
-
-
-logger = logging.getLogger("")
+from config.logging_setup_configs import setup_logging
 
 
 def parse_args():
@@ -47,20 +45,6 @@ def parse_args():
     )
     parser.add_argument("-s", "--special", help="Special selection.", default="")
     return parser.parse_args()
-
-
-def setup_logging(output_file, level=logging.INFO):
-    logger.setLevel(level)
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    file_handler = logging.FileHandler(output_file, "w")
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    return
 
 
 def parse_process_name(name, variation_key):
@@ -436,5 +420,6 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    setup_logging("do_estimations.log", level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger = setup_logging("do_estimations.log", logger, level=logging.INFO)
     main(args)
