@@ -15,6 +15,19 @@ def fake_factor_estimation(
     special="",
     doTauES=False,
 ):
+
+    # ff_tests = None
+    # ff_tests = "wjets_dr"
+    # additional_prcesses = []
+    # if ff_tests == "wjets_dr":
+    #     additional_prcesses = ["TTJ", "ZJ"]
+    # elif ff_tests == "qcd_dr":
+    #     additional_prcesses = ["TTJ", "W"]
+    # elif ff_tests == "ttbar_dr":
+    #     additional_prcesses = ["W", "ZJ"]
+    # else:
+    #     raise ValueError("No FF test specified")
+
     if is_embedding:
         if doTauES:
             procs_to_subtract = [special, "ZL", "TTL", "VVL"]

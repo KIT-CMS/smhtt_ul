@@ -870,18 +870,18 @@ def get_control_units(
             binning=control_binning,
             variables=variable_set,
         )
-        add_control_process(
-            control_units,
-            name="w_nlo",
-            dataset=datasets["WNLO"],
-            selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                W_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-            ],
-            channel=channel,
-            binning=control_binning,
-            variables=variable_set,
-        )
+        # add_control_process(
+        #     control_units,
+        #     name="w_nlo",
+        #     dataset=datasets["WNLO"],
+        #     selections=[
+        #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+        #         W_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+        #     ],
+        #     channel=channel,
+        #     binning=control_binning,
+        #     variables=variable_set,
+        # )
 
     add_control_process(
         control_units,
@@ -1040,7 +1040,7 @@ def main(args):
             "vvl",
             "vvj",
             "w",
-            "w_nlo",
+            # "w_nlo",
             "ggh",
             "qqh",
             # "zh",
@@ -1148,7 +1148,6 @@ def main(args):
                 processes=embS,
                 datasets=nominals[era]["units"][channel],
                 variations=[same_sign, anti_iso_lt],  # this
-                # variations=[same_sign],
                 enable_check=do_check,
             )
         if channel in ["mt", "et"]:
@@ -1157,7 +1156,6 @@ def main(args):
                 processes=dataS | trueTauBkgS | leptonFakesS,
                 datasets=nominals[era]["units"][channel],
                 variations=[same_sign, anti_iso_lt],  # this
-                # variations=[same_sign],
                 enable_check=do_check,
             )
             book_histograms(
@@ -1167,13 +1165,13 @@ def main(args):
                 variations=[same_sign],
                 enable_check=do_check,
             )
-            book_histograms(
-                um,
-                processes=embS,
-                datasets=nominals[era]["units"][channel],
-                variations=[same_sign],
-                enable_check=do_check,
-            )
+            # book_histograms(
+            #     um,
+            #     processes=embS,
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[same_sign],
+            #     enable_check=do_check,
+            # )  ' DUPLICATE
         elif channel == "tt":
             # TODO add anti_iso_tt
             book_histograms(

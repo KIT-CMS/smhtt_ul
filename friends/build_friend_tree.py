@@ -243,14 +243,25 @@ if __name__ == "__main__":
         ntuples = glob.glob(base_path)
     print("Found {} ntuples".format(len(ntuples)))
     # Remove data and embedded samples from ntuple list as friends are not needed for these
-    ntuples_wo_data = list(
-        filter(
-            lambda ntuple: dataset[parse_filepath(ntuple)["nick"]]["sample_type"]
-            != "data"
-            and dataset[parse_filepath(ntuple)["nick"]]["sample_type"] != "embedding",
-            ntuples,
-        )
-    )
+
+    ntuples_wo_data = []
+    for ntuple in ntuples:
+        parsed_filepath = parse_filepath(ntuple)
+        try:
+            if dataset[parsed_filepath["nick"]]["sample_type"] != "data" and dataset[parsed_filepath["nick"]]["sample_type"] != "embedding":
+                ntuples_wo_data.append(ntuple)
+        except KeyError:
+            print(f"Sample {parsed_filepath['nick']} not found in dataset configuration")
+            print("Skipping")
+
+    # ntuples_wo_data = list(
+    #     filter(
+    #         lambda ntuple: dataset[parse_filepath(ntuple)["nick"]]["sample_type"]
+    #         != "data"
+    #         and dataset[parse_filepath(ntuple)["nick"]]["sample_type"] != "embedding",
+    #         ntuples,
+    #     )
+    # )
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)

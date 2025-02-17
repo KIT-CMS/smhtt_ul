@@ -165,6 +165,18 @@ def main(info):
             bkg_processes = [
                 "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
             ]
+
+    # qcd
+    to_add = ["W", "TTJ"]  # TODO: ONLY DETERMINATION REGION PLOTS
+    # wjet
+    # to_add = ["TTJ", "QCD"]  # TODO: ONLY DETERMINATION REGION PLOTS
+    # # ttbar
+    # to_add = ["W", "QCD"]  # TODO: ONLY DETERMINATION REGION PLOTS
+    for item in to_add:
+        if item not in bkg_processes:
+            bkg_processes.append(item)
+
+
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -277,7 +289,6 @@ def main(info):
                 rootfile.get(channel, process, category=cat, shape_type=stype), process, "bkg")
         plot.setGraphStyle(
             process, "hist", fillcolor=styles.color_dict[process])
-
 
     # if "mm" not in channel:
     #     # add VH, ttH & HWW to total bkg histogram
@@ -415,6 +426,9 @@ def main(info):
             split_dict[channel] * 2))
 
     log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
+
+    log_quantities += variables
+
     if variable in log_quantities:
         plot.subplot(0).setLogY()
         plot.subplot(0).setYlims(
