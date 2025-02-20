@@ -80,7 +80,7 @@ def parse_arguments():
     parser.add_argument(
         "--selection-option",
         type=str,
-        choices=["CR", "DR;ff;wjet", "DR;ff;qcr", "DR;ff;ttbar"],
+        choices=["CR", "DR;ff;wjet", "DR;ff;qcd", "DR;ff;ttbar"],
         default="CR",
         help="Selection option for the plot",
     )
