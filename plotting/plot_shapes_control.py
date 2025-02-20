@@ -314,7 +314,7 @@ def main(info):
 
     log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
 
-    log_quantities += variables
+    # log_quantities += variables
 
     if variable in log_quantities:
         plot.subplot(0).setLogY()
