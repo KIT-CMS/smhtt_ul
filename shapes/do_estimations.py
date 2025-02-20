@@ -4,6 +4,7 @@ import logging
 import json
 
 import ROOT
+from functools import partial
 
 # import the estimation functions
 from shapes.estimations.additionals import qqH_merge_estimation
@@ -42,6 +43,12 @@ def parse_args():
         "--do-qqh-procs",
         action="store_true",
         help="Add qqh procs estimations to file.",
+    )
+    parser.add_argument(
+        "--selection-option",
+        help="Set to the DR used for the fake factor estimation.",
+        choices=["CR", "DR;ff;wjet", "DR;ff;qcd", "DR;ff;ttbar"],
+        default="CR",
     )
     parser.add_argument("-s", "--special", help="Special selection.", default="")
     return parser.parse_args()
@@ -119,7 +126,7 @@ def parse_histograms_for_qcd(inputfile):
         )
         if channel is not None:
             if (
-                channel in ["et", "mt", "em", "mm", "ee"]
+                channel in ["et", "mt", "em", "tt", "mm", "ee"]
                 or "abcd_same_sign_anti_iso" in variation
             ):
                 add_input_to_inputdict(
@@ -227,15 +234,19 @@ def main(args):
                 logger.info("Do estimation for category %s", cat)
                 for var in ff_inputs[ch][cat]:
                     for variation in ff_inputs[ch][cat][var]:
-                        estimated_hist = fake_factor_estimation(
-                            input_file, ch, cat, var, variation=variation
+                        _fake_factor_estimation = partial(
+                            fake_factor_estimation,
+                            rootfile=input_file,
+                            channel=ch,
+                            selection=cat,
+                            variable=var,
+                            selection_option=args.selection_option,
+                        )
+                        estimated_hist = _fake_factor_estimation(
+                            variation=variation,
                         )
                         estimated_hist.Write()
-                        estimated_hist = fake_factor_estimation(
-                            input_file,
-                            ch,
-                            cat,
-                            var,
+                        estimated_hist = _fake_factor_estimation(
                             variation=variation,
                             is_embedding=False,
                         )
@@ -247,20 +258,12 @@ def main(args):
                             ],
                             [0.9, 1.1],
                         ):
-                            estimated_hist = fake_factor_estimation(
-                                input_file,
-                                ch,
-                                cat,
-                                var,
+                            estimated_hist = _fake_factor_estimation(
                                 variation=variation,
                                 sub_scale=scale,
                             )
                             estimated_hist.Write()
-                            estimated_hist = fake_factor_estimation(
-                                input_file,
-                                ch,
-                                cat,
-                                var,
+                            estimated_hist = _fake_factor_estimation(
                                 variation=variation,
                                 is_embedding=False,
                                 sub_scale=scale,
@@ -291,6 +294,10 @@ def main(args):
                                 args.era,
                             )
                             extrapolation_factor = 1.0
+                elif channel in ["tt"]:
+                    extrapolation_factor = 1.0  # 1.37
+                else:
+                    pass
                 for var in qcd_inputs[channel][category]:
                     for variation in qcd_inputs[channel][category][var]:
                         if channel in ["et", "mt", "em", "mm", "ee"]:

@@ -73,18 +73,18 @@ class ControlShapeBkgProcesses:
         fake_factor: bool,
         nlo: bool = False,
         channel: Literal["em", "mm", "ee", "mt", "et", "tt", None] = None,
-        ff_DR: Literal["wjet", "qcd", "tt", None] = None,
+        selection_option: Literal["CR", "DR;ff;wjet", "DR;ff;qcd", "DR;ff;ttbar"] = "SR",
         draw_jet_fake_variation: Union[str, None] = None,
     ) -> None:
         self._embedding = embedding,
         self._fake_factor = fake_factor
         self._nlo = nlo
         self._channel = channel
-        self._ff_DR = ff_DR.lower() if ff_DR is not None else None
+        self._selection_option = selection_option
         self._draw_jet_fake_variation = draw_jet_fake_variation
 
         self._pipe = [
-            self.ff_DR_modification,
+            self.selection_option_modification,
             self.channel_modification,
             self.lo_to_nlo_replacement,
         ]
@@ -131,27 +131,28 @@ class ControlShapeBkgProcesses:
                 bkg_processes = ["QCDEMB", "W", "EMB"]
             return bkg_processes
 
-    def ff_DR_modification(self, bkg_processes: List[str], /) -> List[str]:
-        if not self._fake_factor or self._ff_DR is None:
+    def selection_option_modification(self, bkg_processes: List[str], /) -> List[str]:
+        if self._selection_option == "CR":
+            return bkg_processes
+
+        if not self._fake_factor:
             return bkg_processes
 
         _QCD = "QCDEMB" if self._embedding else "QCD"
-        ff_processes = ['ZJ', 'VVJ', 'TTJ', _QCD, 'W']
-        if self._channel in {"mt", "et"}:
-            if self._ff_DR == "qcd":
-                ff_processes.remove(_QCD)
-            elif self._ff_DR == "wjet":
-                ff_processes.remove("W")
-            elif self._ff_DR == "ttbar":
-                ff_processes.remove("TTJ")
+        ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'TTJ', _QCD, 'W']
+        if self._channel in {"mt", "et"} and "DR;ff" in self._selection_option:
+            if "qcd" in self._selection_option:
+                ff_processes_covered_by_mc.remove(_QCD)
+            elif "wjet" in self._selection_option:
+                ff_processes_covered_by_mc.remove("W")
+            elif "ttbar" in self._selection_option:
+                ff_processes_covered_by_mc.remove("TTJ")
             else:
-                raise NotImplementedError(f"DR for {self._ff_DR} not implemented")
-        elif self._channel in {"tt"}:
-            raise NotImplementedError(f"DR for {self._channel} not implemented")
+                raise NotImplementedError(f"DR for {self._selection_option} not implemented")
         else:
             raise NotImplementedError(f"Channel {self._channel} not implemented")
 
-        return list(set(bkg_processes + ff_processes))
+        return list(set(bkg_processes + ff_processes_covered_by_mc))
 
     def __call__(self) -> List[str]:
         if self._is_fully_classic:

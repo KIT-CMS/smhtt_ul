@@ -42,11 +42,11 @@ def modify_for_ff_DR(channel=None, region=None):
     # channel specific DR cuts
     if channel == "mt":
         logger.info(f"Applying DR cuts for {channel}")
-        if region == "wjets_dr":
+        if region == "wjet":
             cuts["nbtag"] = "(nbtag == 0)"
             cuts["mt_cut"] = "(mt_1 > 70)"
             logger.info(f"{region}: nbtag cut changed to {cuts['nbtag']}, mt cut changed to {cuts['mt_cut']}")
-        elif region == "qcd_dr":
+        elif region == "qcd":
             cuts["muon_iso"] = "((iso_1 > 0.05) && (iso_1 < 0.15))"
             cuts["mt_cut"] = "(mt_1 < 50)"
             cuts["btag_veto"] = "(nbtag >= 0)"
@@ -54,7 +54,7 @@ def modify_for_ff_DR(channel=None, region=None):
                 f"{region}: muon iso cut changed to {cuts['muon_iso']}, mt cut changed to "
                 f"{cuts['mt_cut']}, btag veto cut changed to {cuts['btag_veto']}",
             )
-        elif region == "ttbar_dr":
+        elif region == "ttbar":
             cuts["btag_veto"] = "(nbtag >= 0)"
             logger.info(f"{region}: btag veto cut changed to {cuts['btag_veto']}")
         else:
@@ -73,7 +73,7 @@ def modify_for_ff_DR(channel=None, region=None):
     return cuts
 
 
-def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose", ff_DR=None, **kwargs):
+def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose", selection_option="CR", **kwargs):
 
     cuts = WarnDict()
     cuts["extraelec_veto"] = "(extraelec_veto < 0.5)"
@@ -81,7 +81,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts["dilepton_veto"] = "(dimuon_veto < 0.5)"
     cuts["os"] = "((q_1 * q_2) < 0)"
 
-    cuts.update(modify_for_ff_DR(None, ff_DR))
+    if "DR;ff" in selection_option:
+        cuts.update(modify_for_ff_DR(None, None))
 
     wps_dict = {"VVTight", "VVTight", "Tight", "Medium", "Loose", "VLoose", "VVLoose", "VVVLoose"}
     try:
@@ -104,7 +105,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["muon_iso"] = "(iso_1 < 0.15)"
             cuts["mt_cut"] = "(mt_1 < 70)"
 
-            cuts.update(modify_for_ff_DR(channel, ff_DR))
+            if "DR;ff" in selection_option:
+                cuts.update(modify_for_ff_DR(channel, selection_option.split(";")[-1]))
 
             if era == "2016preVFP" or era == "2016postVFP":
                 cuts["trg_selection"] = """(
@@ -148,7 +150,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["ele_iso"] = "(iso_1 < 0.15)"
             cuts["mt_cut"] = "(mt_1 < 70)"
 
-            cuts.update(modify_for_ff_DR(channel, ff_DR))
+            if "DR;ff" in selection_option:
+                cuts.update(modify_for_ff_DR(channel, selection_option.split(";")[-1]))
 
             if era == "2016preVFP" or era == "2016postVFP":
                 print(f" *** No triggers for {era} implemented yet ***")
@@ -188,7 +191,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["againstElectronDiscriminator"] = "(id_tau_vsEle_VVLoose_1 > 0.5) && (id_tau_vsEle_VVLoose_2 > 0.5)"
             cuts["tau_iso"] = "(id_tau_vsJet_Tight_1 > 0.5) && (id_tau_vsJet_Tight_2 > 0.5)"
 
-            cuts.update(modify_for_ff_DR(channel, ff_DR))
+            if "DR;ff" in selection_option:
+                cuts.update(modify_for_ff_DR(channel, selection_option.split(";")[-1]))
 
             if era == "2016preVFP" or era == "2016postVFP":
                 print(f" *** No triggers for {era} implemented yet ***")

@@ -78,17 +78,18 @@ def parse_arguments():
         default=None,
         help="Plot a special category instead of nominal")
     parser.add_argument(
-        "--ff-DR",
+        "--selection-option",
         type=str,
-        choices=["wjet", "qcr", "ttbar"],
-        default=None,
-        help="Draw variation of jetFakes or QCD in determination region.",
+        choices=["CR", "DR;ff;wjet", "DR;ff;qcr", "DR;ff;ttbar"],
+        default="CR",
+        help="Selection option for the plot",
     )
     parser.add_argument(
         "--tag",
         type=str,
         default="",
-        help="Tag that is added to the output file")
+        help="Tag that is added to the output file"
+    )
 
     return parser.parse_args()
 
@@ -120,7 +121,7 @@ def main(info):
         fake_factor=args.fake_factor,
         channel=channel,
         nlo=args.nlo,
-        ff_DR=args.ff_DR,
+        selection_option=args.selection_option,
         draw_jet_fake_variation=args.draw_jet_fake_variation,
     )()
 
