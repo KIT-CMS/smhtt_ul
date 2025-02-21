@@ -311,7 +311,7 @@ if [[ $MODE == "SCAN_2D" ]]; then
             --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
             --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
             --redefineSignalPOIs ES_${cat},r \
-            --floatOtherPOIs=1 --points=400 --algo grid -m ${mH}
+            --floatOtherPOIs=1 --points=400 --algo grid -m ${mH} --alignEdges=1
 
         echo "[INFO] Moving scan file to datacard folder ..."
         mv higgsCombine.scan_2D_${cat}.MultiDimFit.mH${mH}.root output/$datacard_output/htt_mt_${cat}/
@@ -327,6 +327,7 @@ if [[ $MODE == "SCAN_2D" ]]; then
         python3 tau_id_es_measurement/plot_2D_scan.py --name scan_2D_${cat} --in-path output/$datacard_output/htt_mt_${cat}/ \
         --tau-id-poi ${cat} --tau-es-poi ES_${cat} --outname ${cat}
         mv scan_2D_${cat}* ${scan_2D_plot_path}
+        mv 1D_projections_2Dscan_${cat}* ${scan_2D_plot_path}
     done
 
 fi
