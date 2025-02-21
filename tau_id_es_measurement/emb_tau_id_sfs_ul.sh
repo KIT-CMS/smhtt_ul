@@ -11,7 +11,7 @@ echo $NTUPLETAG
 echo $WP
 
 VARIABLES="m_vis"
-POSTFIX="-ML"
+POSTFIX="-TauID_ES"
 ulimit -s unlimited
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
@@ -32,7 +32,6 @@ CONDOR_OUTPUT=output/condor_shapes/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
 shapes_output=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
 shapes_output_synced=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
-shapes_rootfile_mm=${shapes_output}_mm.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
 echo "MY WP is: " ${WP}
@@ -50,9 +49,6 @@ categories=("DM0" "DM1" "DM10_11")
 all_categories=("Pt20to25" "Pt25to30" "Pt30to35" "Pt35to40" "PtGt40" "DM0" "DM1" "DM10_11")
 dm_categories=("DM0" "DM1" "DM10_11")
 pt_categories=("Pt20to25" "Pt25to30" "Pt30to35" "Pt35to40" "PtGt40")
-printf -v categories_string '%s,' "${categories[@]}"
-echo "Using Cateogires ${categories_string%,}"
-
 
 es_shifts4_0=("embminus4p0" "embminus3p9" "embminus3p8" "embminus3p7" "embminus3p6" "embminus3p5" "embminus3p4" "embminus3p3"\
  "embminus3p2" "embminus3p1" "embminus3p0" "embminus2p9" "embminus2p8" "embminus2p7" "embminus2p6" "embminus2p5" "embminus2p4"\ 
@@ -62,8 +58,6 @@ es_shifts4_0=("embminus4p0" "embminus3p9" "embminus3p8" "embminus3p7" "embminus3
     "emb0p7" "emb0p8" "emb0p9" "emb1p0" "emb1p1" "emb1p2" "emb1p3" "emb1p4" "emb1p5" "emb1p6" "emb1p7" "emb1p8" "emb1p9" "emb2p0" "emb2p1"\
      "emb2p2" "emb2p3" "emb2p4" "emb2p5" "emb2p6" "emb2p7" "emb2p8" "emb2p9" "emb3p0" "emb3p1" "emb3p2" "emb3p3" "emb3p4" "emb3p5" "emb3p6"\
       "emb3p7" "emb3p8" "emb3p9" "emb4p0")
-
-VS_ELE_WP="VVLoose"
 
 
 if [[ $MODE == "COPY" ]]; then
@@ -81,7 +75,7 @@ if [[ $MODE == "COPY" ]]; then
         echo "Copying ntuples to ceph"
         rsync -avhPl $KINGMAKER_BASEDIR$ERA/ $BASEDIR$ERA/
     fi
-    exit 0
+
 elif [[ $MODE == "COPY_XROOTD" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
@@ -93,8 +87,8 @@ elif [[ $MODE == "COPY_XROOTD" ]]; then
         mkdir -p $BASEDIR/$ERA
     fi
     xrdcp -r $KINGMAKER_BASEDIR_XROOTD$ERA $BASEDIR
-    exit 0
 fi
+
 
 if [[ $MODE == "XSEC" ]]; then
     source utils/setup_root.sh
@@ -102,13 +96,9 @@ if [[ $MODE == "XSEC" ]]; then
     echo "#      Checking xsec friends directory                                                       #"
     echo "##############################################################################################"
     python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsdcache-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
-    exit 0
 fi
 
 
-echo "##############################################################################################"
-echo "#      Producing shapes for ${CHANNEL}-${ERA}-${NTUPLETAG}                                         #"
-echo "##############################################################################################"
 echo "##############################################################################################"
 echo "#      Producing shapes for ${CHANNEL}-${ERA}-${NTUPLETAG}                                         #"
 echo "##############################################################################################"
@@ -116,38 +106,24 @@ echo "##########################################################################
 # if the output folder does not exist, create it
 if [ ! -d "$shapes_output" ]; then
     mkdir -p $shapes_output
-    mkdir -p "${shapes_output}_mm"
 fi
 
-echo "${shapes_output}_mm"
 
 if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
         --directory $NTUPLES \
         --${CHANNEL}-friend-directory $XSEC_FRIENDS \
-        --era $ERA --num-processes 3 --num-threads 9 \
+        --era $ERA --num-processes 4 --num-threads 8 \
         --vs-jet-wp $WP \
-        --vs-ele-wp ${VS_ELE_WP} \
         --optimization-level 1 --skip-systematic-variations \
-        --special-analysis "TauID" \
+        --special-analysis "TauID_ES" \
         --control-plot-set ${VARIABLES} \
         --output-file $shapes_output  --xrootd  --validation-tag $TAG 
 fi
 
-if [[ $MODE == "CONTROLREGION" ]]; then
-    source utils/setup_root.sh
-    python shapes/produce_shapes_tauid_es.py --channels mm \
-        --directory $NTUPLES \
-        --mm-friend-directory $XSEC_FRIENDS \
-        --era $ERA --num-processes 3 --num-threads 9 \
-        --vs-jet-wp $WP \
-        --vs-ele-wp ${VS_ELE_WP} \
-        --optimization-level 1 --skip-systematic-variations \
-        --special-analysis "TauID" \
-        --output-file "${shapes_output}_mm"  --xrootd --validation-tag $TAG
-fi
 
+# TODO: check this LOCAL part
 PROCESSES="emb"
 number="_emb_ssos"
 if [[ $MODE == "LOCAL" ]]; then
@@ -157,7 +133,6 @@ if [[ $MODE == "LOCAL" ]]; then
         --${CHANNEL}-friend-directory $XSEC_FRIENDS \
         --era $ERA --num-processes 3 --num-threads 9 \
         --vs-jet-wp $WP \
-        --vs-ele-wp ${VS_ELE_WP} \
         --optimization-level 1 \
         --special-analysis "TauID" \
         --process-selection $PROCESSES \
@@ -166,25 +141,21 @@ if [[ $MODE == "LOCAL" ]]; then
         --output-file $shapes_output$number --xrootd --validation-tag $TAG --es
 fi
 
+
 if [[ $MODE == "CONDOR" ]]; then
     source utils/setup_root.sh
     echo "[INFO] Running on Condor"
     echo "[INFO] Condor output folder: ${CONDOR_OUTPUT}"
-    bash submit/submit_shape_production_ul.sh $ERA $CHANNEL \
-        "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT "TauID" "" $WP $VS_ELE_WP 1
+    bash submit/submit_shape_production_tauid_es.sh $ERA $CHANNEL \
+        "singlegraph" $TAG 0 $NTUPLETAG $CONDOR_OUTPUT "TauID_ES" $WP
     echo "[INFO] Jobs submitted"
 fi
+
 
 if [[ $MODE == "MERGE" ]]; then
     source utils/setup_root.sh
     echo "[INFO] Merging outputs located in ${CONDOR_OUTPUT}"
     hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/*.root
-fi
-
-if [[ "${ERA}" == "2018"  ||  "${ERA}" == "2017" ]]; then 
-    datacard_era=${ERA}
-elif [[ "${ERA}" == "2016postVFP"  ||  "${ERA}" == "2016preVFP" ]]; then
-   datacard_era="2016"
 fi
 
 
@@ -194,15 +165,12 @@ if [[ $MODE == "SYNC" ]]; then
     echo "#      Additional estimations                                      #"
     echo "##############################################################################################"
 
-    python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-qcd
-
-    python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile_mm} --do-qcd
-
-    echo "##############################################################################################"
-    echo "#     plotting                                      #"
-    echo "##############################################################################################"
-
-
+    if [[ $CHANNEL != "mm" ]]; then
+        python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-qcd --do-emb-tt -s TauID_ES
+    fi
+    if [[ $CHANNEL == "mm" ]]; then
+        python shapes/do_estimations.py -e $ERA -i ${shapes_rootfile} --do-qcd -s TauID_ES
+    fi
 
     echo "##############################################################################################"
     echo "#     synced shapes                                      #"
@@ -213,26 +181,16 @@ if [[ $MODE == "SYNC" ]]; then
         mkdir -p $shapes_output_synced
     fi
 
-    python shapes/convert_to_synced_shapes.py -e ${datacard_era} \
+    python shapes/convert_to_synced_shapes.py -e $ERA \
         -i ${shapes_rootfile} \
         -o ${shapes_output_synced} \
         --variable-selection ${VARIABLES} \
         -n 1
 
-    python shapes/convert_to_synced_shapes.py -e ${datacard_era} \
-        -i "${shapes_rootfile_mm}" \
-        -o "${shapes_output_synced}_mm" \
-        --variable-selection ${VARIABLES} \
-        -n 1
-
-    inputfile="htt_${CHANNEL}.inputs-sm-Run${datacard_era}${POSTFIX}.root"
-    hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${datacard_era}-${CHANNEL}*.root
-
-    inputfile="htt_mm.inputs-sm-Run${datacard_era}${POSTFIX}.root"
-    hadd -f $shapes_output_synced/$inputfile ${shapes_output_synced}_mm/${datacard_era}-mm-*.root
-
-    exit 0
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+    hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${ERA}-${CHANNEL}*.root
 fi
+
 
 if [[ $MODE == "PLOT-CONTROL-ES" ]]; then
     source utils/setup_root.sh
@@ -240,7 +198,7 @@ if [[ $MODE == "PLOT-CONTROL-ES" ]]; then
     echo "#     plotting                                      #"
     echo "##############################################################################################"
 
-        for CATEGORY in "${categories[@]}"
+        for CATEGORY in "${dm_categories[@]}"
     do
         for es_sh in "${es_shifts4_0[@]}"
         do 
@@ -250,31 +208,25 @@ if [[ $MODE == "PLOT-CONTROL-ES" ]]; then
     done
 fi
 
-if [[ $MODE == "INST_COMB" ]]; then
-    source utils/install_combine_tauid.sh
-fi
-
+# For the next steps combine need to be installed (if not already done)
+# via e.g. source utils/install_combine_tauid.sh
 
 if [[ $MODE == "DATACARD" ]]; then
     source utils/setup_cmssw_tauid.sh
     
-    for cat in "${categories[@]}"
+    for cat in "${dm_categories[@]}"
     do
-        export cat
+        # for category in "dm_binned"
         if [[ " ${dm_categories[@]} " =~ " $cat " ]]; then
           datacard_output=$datacard_output_dm
         fi
-        if [[ " ${pt_categories[@]} " =~ " $cat " ]]; then
-          datacard_output=$datacard_output_pt
-        fi
 
-        # inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
-        # # for category in "dm_binned"
-        # set gcc900 instead of gcc10
-        $CMSSW_BASE/bin/slc7_amd64_gcc900/MorphingTauID2017 \
+        inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+        
+        $CMSSW_BASE/bin/el9_amd64_gcc12/MorphingTauID2017 \
             --base_path=$PWD \
             --input_folder_mt=$shapes_output_synced \
-            --input_folder_mm=$shapes_output_synced \
+            --input_folder_mm="output/${WP}-${ERA}-mm-${NTUPLETAG}-${TAG}/synced" \
             --real_data=true \
             --classic_bbb=false \
             --binomial_bbb=false \
@@ -285,23 +237,34 @@ if [[ $MODE == "DATACARD" ]]; then
             --use_control_region=true \
             --auto_rebin=true \
             --categories=${cat} \
-            --era=$datacard_era \
-            --output=$datacard_output
-        
+            --era=$ERA \
+            --output=$datacard_output   
+    done
+fi
+
+
+if  [[ $MODE == "WORKSPACE" ]]; then 
+    source utils/setup_cmssw_tauid.sh
+    
+    for cat in "${dm_categories[@]}"
+    do
+        # for category in "dm_binned"
+        if [[ " ${dm_categories[@]} " =~ " $cat " ]]; then
+          datacard_output=$datacard_output_dm
+        fi
         THIS_PWD=${PWD}
         echo $THIS_PWD
         if [ ! -d "output/${datacard_output}" ]; then
             mkdir -p  output/${datacard_output}
         fi
-        cd output/$datacard_output/
-    
-        cd $THIS_PWD
 
         echo "[INFO] Create Workspace for datacard"
-        combineTool.py -M T2W -i output/$datacard_output/htt_mt_${cat}/ -o workspace_${cat}.root --parallel 4 -m 125
+        combineTool.py -M T2W -i output/$datacard_output/htt_mt_${cat}/ \
+            -o workspace_${cat}.root --parallel 4 -m 125 \
+            -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+            --PO "map=^.*/EMB_${cat}:r_EMB_${cat}[1,0.5,1.5]" \
+            --PO "map=^.*/MUEMB:r_EMB_${cat}[1,0.5,1.5]"
     done
-
-    exit 0
 fi
 
 #  2D likelihood scan for tau ID + ES, we vary ID from 0.5 to 1.5 abd ES from -4.0 % to +4.0%
@@ -323,27 +286,27 @@ if [[ $MODE == "SCAN_2D" ]]; then
 
     echo "[INFO] Create 2D scan"
 
-        for cat in "${categories[@]}"
+    for cat in "${categories[@]}"
     do
         if [[ " ${dm_categories[@]} " =~ " $cat " ]]; then
-          datacard_output=$datacard_output_dm
-          min_id=0.5
-          max_id=1.5
-          min_es=-4.0
-          max_es=4.0
+            datacard_output=$datacard_output_dm
+            min_id=0.5
+            max_id=1.5
+            min_es=-4.0
+            max_es=4.0
         fi
         if [[ " ${pt_categories[@]} " =~ " $cat " ]]; then
-          datacard_output=$datacard_output_pt
-          min_id=0.5
-          max_id=1.5
-          min_es=-4.0
-          max_es=4.0
+            datacard_output=$datacard_output_pt
+            min_id=0.5
+            max_id=1.5
+            min_es=-4.0
+            max_es=4.0
         fi
-    
+
         combineTool.py -M T2W -i output/$datacard_output/htt_mt_${cat}/ -o ws_scan_${cat}.root
         
 
-            combineTool.py -M MultiDimFit -n .scan_2D_${cat} -d output/$datacard_output/htt_mt_${cat}/ws_scan_${cat}.root \
+        combineTool.py -M MultiDimFit -n .scan_2D_${cat} -d output/$datacard_output/htt_mt_${cat}/ws_scan_${cat}.root \
             --setParameters ES_${cat}=0.2,r=0.9 --setParameterRanges r=${min_id},${max_id}:ES_${cat}=${min_es},${max_es} \
             --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
             --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
@@ -362,7 +325,7 @@ if [[ $MODE == "SCAN_2D" ]]; then
         fi
 
         python3 tau_id_es_measurement/plot_2D_scan.py --name scan_2D_${cat} --in-path output/$datacard_output/htt_mt_${cat}/ \
-         --tau-id-poi ${cat} --tau-es-poi ES_${cat} --outname ${cat}
+        --tau-id-poi ${cat} --tau-es-poi ES_${cat} --outname ${cat}
         mv scan_2D_${cat}* ${scan_2D_plot_path}
     done
 

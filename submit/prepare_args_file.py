@@ -37,7 +37,7 @@ def write_file(output_dir, graph_file, job_nums, workdir):
 
 
 def write_file_multicore(output_dir, graph_file, num_jobs, workdir):
-    tmp_string = "{directory} {job_num} 8 {file}\n"
+    tmp_string = "{directory} {job_num} 4 {file}\n"
     with open(os.path.join(output_dir, "arguments_multicore.txt"), "w") as f:
         for job_num in num_jobs:
             f.write(

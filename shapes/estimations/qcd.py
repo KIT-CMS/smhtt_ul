@@ -75,7 +75,7 @@ def qcd_estimation(
     logger.debug("extrapolation_factor: %s", extrapolation_factor)
     logger.debug("sub_scale: %s", sub_scale)
     if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
+        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "STL", "STJ", "W"]
         if is_nlo:
             procs_to_subtract = ["EMB", "ZL_NLO", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W_NLO"]
         if "em" in channel:
@@ -100,6 +100,9 @@ def qcd_estimation(
             "VVT",
             "VVL",
             "VVJ",
+            "STT",
+            "STL",
+            "STJ",
             "W",
         ]
         if is_nlo:
@@ -113,6 +116,9 @@ def qcd_estimation(
                 "VVT",
                 "VVL",
                 "VVJ",
+                "STT",
+                "STL",
+                "STJ",
                 "W_NLO",
             ]
         if "em" in channel:
@@ -162,16 +168,6 @@ def qcd_estimation(
                 )
             )
         )
-        hist = rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation="same_sign" if "subtrMC" in variation else variation,
-                    variable=variable,
-                )
-            )
         base_hist.Add(
             rootfile.Get(
                 _name_string.format(

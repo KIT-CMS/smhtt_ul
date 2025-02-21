@@ -33,8 +33,8 @@ from config.shapes.file_names import files
 from config.shapes.process_selection import (
     # Data_base_process_selection,
     DY_process_selection,
-    DY_NLO_process_selection,
     TT_process_selection,
+    ST_process_selection,
     VV_process_selection,
     W_process_selection,
     ZTT_process_selection,
@@ -43,6 +43,9 @@ from config.shapes.process_selection import (
     TTT_process_selection,
     TTL_process_selection,
     TTJ_process_selection,
+    STT_process_selection,
+    STL_process_selection,
+    STJ_process_selection,
     VVT_process_selection,
     VVJ_process_selection,
     VVL_process_selection,
@@ -72,9 +75,7 @@ from config.shapes.variations import (
     same_sign,
     same_sign_em,
     anti_iso_lt,
-    anti_iso_lt_no_ff,
     anti_iso_tt,
-    anti_iso_tt_mcl,
     abcd_method,
 )
 
@@ -208,9 +209,6 @@ def parse_arguments():
         "--vs-jet-wp", required=True, type=str, help="Tau ID WP."
     )
     parser.add_argument(
-        "--vs-ele-wp", required=True, type=str, help="Vs Mu Fake rate WP."
-    )
-    parser.add_argument(
         "--apply-tauid", action="store_true", help="Flag that specifies if we apply tau id scale factors or not"
     )
     parser.add_argument(
@@ -332,7 +330,7 @@ def parse_arguments():
     parser.add_argument(
         "--special-analysis",
         help="Can be set to a special analysis name to only run that analysis.",
-        choices=["TauID", "TauES"],
+        choices=["TauID", "TauES", "TauID_ES"],
         default=None,
     )
     parser.add_argument(
@@ -346,16 +344,11 @@ def parse_arguments():
         type=str,
         help="Tag to be used for the validation of the input samples",
     )
-    parser.add_argument(
-        "--es",
-        action="store_true",
-        help="Add tau ES variations.",
-    )
     return parser.parse_args()
 
 
 def get_analysis_units(
-    channel, era, datasets, categorization, special_analysis, apply_tauid, vs_jet_wp, vs_ele_wp, nn_shapes=False, 
+    channel, era, datasets, categorization, special_analysis, apply_tauid, vs_jet_wp,
 ):
     analysis_units = {}
 
@@ -364,8 +357,7 @@ def get_analysis_units(
         name="data",
         dataset=datasets["data"],
         selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            # Data_base_process_selection(era, channel),
+            channel_selection(channel, era, special_analysis, vs_jet_wp),
         ],
         categorization=categorization,
         channel=channel,
@@ -375,32 +367,20 @@ def get_analysis_units(
         name="zl",
         dataset=datasets["DY"],
         selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+            channel_selection(channel, era, special_analysis, vs_jet_wp),
+            DY_process_selection(channel, era, vs_jet_wp),
             ZL_process_selection(channel),
         ],
         categorization=categorization,
         channel=channel,
     )
-    # add_process(
-    #     analysis_units,
-    #     name="zl_nlo",
-    #     dataset=datasets["DYNLO"],
-    #     selections=[
-    #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #         ZL_process_selection(channel),
-    #     ],
-    #     categorization=categorization,
-    #     channel=channel,
-    # )
     add_process(
         analysis_units,
         name="ttl",
         dataset=datasets["TT"],
         selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+            channel_selection(channel, era, special_analysis, vs_jet_wp),
+            TT_process_selection(channel, era, vs_jet_wp),
             TTL_process_selection(channel),
         ],
         categorization=categorization,
@@ -411,9 +391,32 @@ def get_analysis_units(
         name="vvl",
         dataset=datasets["VV"],
         selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+            channel_selection(channel, era, special_analysis, vs_jet_wp),
+            VV_process_selection(channel, era, vs_jet_wp),
             VVL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="stl",
+        dataset=datasets["ST"],
+        selections=[
+            channel_selection(channel, era, special_analysis, vs_jet_wp),
+            ST_process_selection(channel, era, vs_jet_wp),
+            STL_process_selection(channel),
+        ],
+        categorization=categorization,
+        channel=channel,
+    )
+    add_process(
+        analysis_units,
+        name="w",
+        dataset=datasets["W"],
+        selections=[
+            channel_selection(channel, era, special_analysis, vs_jet_wp),
+            W_process_selection(channel, era, vs_jet_wp),
         ],
         categorization=categorization,
         channel=channel,
@@ -424,7 +427,7 @@ def get_analysis_units(
         name="emb",
         dataset=datasets["EMB"],
         selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+            channel_selection(channel, era, special_analysis, vs_jet_wp),
             ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
         ],
         categorization=categorization,
@@ -436,32 +439,20 @@ def get_analysis_units(
             name="ztt",
             dataset=datasets["DY"],
             selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+                channel_selection(channel, era, special_analysis, vs_jet_wp),
+                DY_process_selection(channel, era, vs_jet_wp),
                 ZTT_process_selection(channel),
             ],
             categorization=categorization,
             channel=channel,
         )
-        # add_process(
-        #     analysis_units,
-        #     name="ztt_nlo",
-        #     dataset=datasets["DYNLO"],
-        #     selections=[
-        #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-        #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-        #         ZTT_process_selection(channel),
-        #     ],
-        #     categorization=categorization,
-        #     channel=channel,
-        # )
         add_process(
             analysis_units,
             name="vvt",
             dataset=datasets["VV"],
             selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+                channel_selection(channel, era, special_analysis, vs_jet_wp),
+                VV_process_selection(channel, era, vs_jet_wp),
                 VVT_process_selection(channel),
             ],
             categorization=categorization,
@@ -472,9 +463,21 @@ def get_analysis_units(
             name="ttt",
             dataset=datasets["TT"],
             selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+                channel_selection(channel, era, special_analysis, vs_jet_wp),
+                TT_process_selection(channel, era, vs_jet_wp),
                 TTT_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
+        add_process(
+            analysis_units,
+            name="stt",
+            dataset=datasets["ST"],
+            selections=[
+                channel_selection(channel, era, special_analysis, vs_jet_wp),
+                ST_process_selection(channel, era, vs_jet_wp),
+                STT_process_selection(channel),
             ],
             categorization=categorization,
             channel=channel,
@@ -484,32 +487,20 @@ def get_analysis_units(
             name="zj",
             dataset=datasets["DY"],
             selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+                channel_selection(channel, era, special_analysis, vs_jet_wp),
+                DY_process_selection(channel, era, vs_jet_wp),
                 ZJ_process_selection(channel),
             ],
             categorization=categorization,
             channel=channel,
         )
-        # add_process(
-        #     analysis_units,
-        #     name="zj_nlo",
-        #     dataset=datasets["DYNLO"],
-        #     selections=[
-        #         channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-        #         DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-        #         ZJ_process_selection(channel),
-        #     ],
-        #     categorization=categorization,
-        #     channel=channel,
-        # )
         add_process(
             analysis_units,
             name="vvj",
             dataset=datasets["VV"],
             selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+                channel_selection(channel, era, special_analysis, vs_jet_wp),
+                VV_process_selection(channel, era, vs_jet_wp),
                 VVJ_process_selection(channel),
             ],
             categorization=categorization,
@@ -520,56 +511,26 @@ def get_analysis_units(
             name="ttj",
             dataset=datasets["TT"],
             selections=[
-                channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-                TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
+                channel_selection(channel, era, special_analysis, vs_jet_wp),
+                TT_process_selection(channel, era, vs_jet_wp),
                 TTJ_process_selection(channel),
             ],
             categorization=categorization,
             channel=channel,
         )
-    # "gghww"  : [Unit(
-    #             datasets["ggHWW"], [
-    #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #                 ggHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-    # "qqhww"  : [Unit(
-    #             datasets["qqHWW"], [
-    #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #                 qqHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-    # "zhww"  : [Unit(
-    #             datasets["ZHWW"], [
-    #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #                 ZHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
-    # "whww"  : [Unit(
-    #             datasets["WHWW"], [
-    #                 channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-    #                 WHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-    #                 category_selection], actions) for category_selection, actions in categorization[channel]],
+        add_process(
+            analysis_units,
+            name="stj",
+            dataset=datasets["ST"],
+            selections=[
+                channel_selection(channel, era, special_analysis, vs_jet_wp),
+                ST_process_selection(channel, era, vs_jet_wp),
+                STJ_process_selection(channel),
+            ],
+            categorization=categorization,
+            channel=channel,
+        )
 
-    add_process(
-        analysis_units,
-        name="w",
-        dataset=datasets["W"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            W_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
-    add_process(
-        analysis_units,
-        name="w_nlo",
-        dataset=datasets["WNLO"],
-        selections=[
-            channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
-            W_process_selection(channel, era, vs_jet_wp, vs_ele_wp),
-        ],
-        categorization=categorization,
-        channel=channel,
-    )
     return analysis_units
 
 
@@ -829,6 +790,8 @@ def prepare_special_analysis(special):
         return tauid_categorization
     elif special and special == "TauES":
         return taues_categorization
+    elif special and special == "TauID_ES":
+        return tauid_categorization
     else:
         raise ValueError("Unknown special analysis: {}".format(special))
 
@@ -856,7 +819,6 @@ def main(args):
     apply_tauid = args.apply_tauid
     print("#### Apply tau ID", apply_tauid)
     vs_jet_wp = args.vs_jet_wp
-    vs_ele_wp = args.vs_ele_wp
 
     nominals = {}
     nominals[era] = {}
@@ -864,14 +826,13 @@ def main(args):
     nominals[era]["units"] = {}
 
     # Step 1: create units and book actions
-    # Define in my_files the available proceses. Otherwise all defined in file_names.py will be used:
-    my_files = ["data", "DY", "TT", "VV", "W", "EMB", "WNLO", ]
+    # Define in used_processes the processes that should be processed. Otherwise all defined in file_names.py will be used:
+    used_processes = ["data", "DY", "TT", "VV", "ST", "W", "EMB"]
     
-    for channel in args.channels:
-        
-        for file_name in deepcopy(files)[era][channel]:
-            if file_name not in my_files:
-                files[era][channel].pop(file_name)
+    for channel in args.channels: 
+        for processes in deepcopy(files)[era][channel]:
+            if processes not in used_processes:
+                files[era][channel].pop(processes)
             
         nominals[era]["datasets"][channel] = get_nominal_datasets(
             era, channel, friend_directories, files, args.directory,
@@ -886,7 +847,6 @@ def main(args):
                 args.control_plot_set,
                 apply_tauid,
                 vs_jet_wp,
-                vs_ele_wp,
                 do_gofs=False,
             )
         elif args.gof_inputs:
@@ -898,7 +858,6 @@ def main(args):
                 args.control_plot_set,
                 apply_tauid,
                 vs_jet_wp,
-                vs_ele_wp,
                 do_gofs=True,
                 do_2dGofs=args.do_2dGofs,
             )
@@ -911,7 +870,6 @@ def main(args):
                 special_analysis,
                 apply_tauid,
                 vs_jet_wp,
-                vs_ele_wp,
             )
         if special_analysis == "TauES":
             additional_emb_procS = set()
@@ -925,7 +883,7 @@ def main(args):
                 nominals,
                 tauESvariations,
                 [
-                    channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+                    channel_selection(channel, era, special_analysis, vs_jet_wp),
                     ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
                 ],
                 categorization,
@@ -933,7 +891,7 @@ def main(args):
                 xrootd=args.xrootd,
                 validation_tag=args.validation_tag,
             )
-        if special_analysis == "TauID" and args.es:
+        if channel == "mt" and special_analysis in ["TauID", "TauID_ES"]:
             additional_emb_procS = set()
             tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
             add_tauES_datasets(
@@ -945,13 +903,13 @@ def main(args):
                 nominals,
                 tauESvariations,
                 [
-                    channel_selection(channel, era, special_analysis,  vs_jet_wp, vs_ele_wp),
+                    channel_selection(channel, era, special_analysis, vs_jet_wp),
                     ZTT_embedded_process_selection(channel, era, apply_tauid, vs_jet_wp),
                 ],
                 categorization,
                 additional_emb_procS,
-                xrootd=args.xrootd,
                 validation_tag=args.validation_tag,
+                xrootd=args.xrootd,
             )
 
     if args.process_selection is None:
@@ -961,56 +919,41 @@ def main(args):
             "ztt",
             "zl",
             "zj",
-            # "ztt_nlo",
-            # "zl_nlo",
-            # "zj_nlo",
             "ttt",
             "ttl",
             "ttj",
+            "stt",
+            "stl",
+            "stj",
             "vvt",
             "vvl",
             "vvj",
             "w",
-            "w_nlo",
         }
-        # if "et" in args.channels:
-        #     procS = procS - {"w"}
-        # procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
-        #          "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
-        #         | set("ggh{}".format(mass) for mass in susy_masses[era]["ggH"]) \
-        #         | set("bbh{}".format(mass) for mass in susy_masses[era]["bbH"])
     else:
         procS = args.process_selection
     if "mm" in args.channels or "ee" in args.channels:
         procS = {
             "data",
             "zl",
-            # "zl_nlo",
             "ttl",
+            "stl",
             "vvl",
             "w",
-            # "w_nlo",
             "emb",
         } & procS
 
     dataS = {"data"} & procS
     embS = {"emb"} & procS
     jetFakesDS = {
-        "et": {"zj", "ttj", "vvj", "w",
-            #    "zj_nlo",
-               "w_nlo"} & procS,
-        "mt": {"zj", "ttj", "vvj", "w",
-            #    "zj_nlo",
-               "w_nlo"} & procS,
-        "tt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
+        "et": {"zj", "ttj", "stj", "vvj", "w"} & procS,
+        "mt": {"zj", "ttj", "stj", "vvj", "w"} & procS,
+        "tt": {"zj", "ttj", "stj", "vvj", "w"} & procS,
         "em": {"w", "w_nlo"} & procS,
+        "mm": set() & procS,
     }
-    leptonFakesS = {"zl", "ttl", "vvl", 
-                    # "zl_nlo"
-                    } & procS
-    trueTauBkgS = {"ztt", "ttt", "vvt", 
-                #    "ztt_nlo"
-                   } & procS
+    leptonFakesS = {"zl", "ttl", "stl", "vvl"} & procS
+    trueTauBkgS = {"ztt", "ttt", "stl", "vvt"} & procS
     sm_signalsS = {
         "ggh",
         "qqh",
@@ -1023,12 +966,10 @@ def main(args):
         "whww",
     } & procS
     signalsS = sm_signalsS
-    if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
-        pass
 
     simulatedProcsDS = {
         chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
-        for chname_ in ["et", "mt", "tt", "em"]
+        for chname_ in ["et", "mt", "tt", "em", "mm"]
     }
     logger.info(f"Processes to be computed: {procS}")
     logger.info(f"Simulated processes: {simulatedProcsDS}")
@@ -1038,6 +979,7 @@ def main(args):
     logger.info(f"Lepton fakes processes: {leptonFakesS}")
     logger.info(f"True tau bkg processes: {trueTauBkgS}")
     logger.info(f"signals: {signalsS}")
+    
     for channel in args.channels:
         book_histograms(
             um,
@@ -1045,8 +987,8 @@ def main(args):
             datasets=nominals[era]["units"][channel],
             enable_check=do_check,
         )
-        if channel == "mt" and special_analysis == "TauES":
-            logger.info("Booking TauES")
+        if channel == "mt" and special_analysis in ["TauID", "TauID_ES"]:
+            logger.info("Booking TauID_ES")
             book_tauES_histograms(
                 um,
                 additional_emb_procS,
@@ -1054,30 +996,7 @@ def main(args):
                 [same_sign], #, anti_iso_lt],
                 do_check,
             )
-        if channel == "mt" and args.es and special_analysis == "TauID":
-            logger.info("Booking TauES")
-            book_tauES_histograms(
-                um,
-                additional_emb_procS,
-                nominals[era]["units"][channel],
-                [same_sign],# anti_iso_lt_no_ff],
-                do_check,
-            )
-            # book_tauES_histograms(
-            #     um,
-            #     additional_emb_procS,
-            #     nominals[era]["units"][channel],
-            #     [trigger_eff_mt_emb],
-            #     do_check,
-            # )
-            # book_histograms(
-            #     um,
-            #     additional_emb_procS,
-            #     datasets=nominals[era]["units"][channel],
-            #     variations=[trigger_eff_mt_emb],
-            #     enable_check=do_check,
-            # )
-        elif channel == "mt" and special_analysis != "TauID":
+        elif channel == "mt" and special_analysis not in ["TauID", "TauID_ES"]:
             book_histograms(
                 um,
                 processes=embS,
@@ -1086,6 +1005,7 @@ def main(args):
                 variations=[same_sign],
                 enable_check=do_check,
             )
+            
         if channel in ["mt", "et"]:
             book_histograms(
                 um,
@@ -1165,13 +1085,6 @@ def main(args):
                 variations=[same_sign],
                 enable_check=do_check,
             )
-            # book_histograms(
-            #     um,
-            #     processes=embS,
-            #     datasets=nominals[era]["units"][channel],
-            #     variations=[trigger_eff_mt_emb],
-            #     enable_check=do_check,
-            # )
         elif channel == "ee":
             book_histograms(
                 um,
@@ -1236,7 +1149,7 @@ def main(args):
             )
             # Book variations common to multiple channels.
             if channel in ["et", "mt", "tt"]:
-                if not args.es and special_analysis != "TauID":
+                if special_analysis not in ["TauID", "TauID_ES"]:
                     book_histograms(
                         um,
                         processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
@@ -1265,6 +1178,19 @@ def main(args):
                         ],
                         enable_check=do_check,
                     )
+                elif special_analysis == "TauID_ES":
+                    book_histograms(
+                        um,
+                        processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            tau_es_3prong,
+                            tau_es_3prong1pizero,
+                            tau_es_1prong,
+                            tau_es_1prong1pizero,
+                        ],
+                        enable_check=do_check,
+                    )
                 book_histograms(
                     um,
                     processes=jetFakesDS[channel],
@@ -1274,8 +1200,9 @@ def main(args):
                     ],
                     enable_check=do_check,
                 )
+                
             if channel in ["et", "mt"]:
-                if not args.es and special_analysis != "TauID":
+                if special_analysis not in ["TauID", "TauID_ES"]:
                     book_histograms(
                         um,
                         processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
@@ -1323,6 +1250,17 @@ def main(args):
                         ],
                         enable_check=do_check,
                     )
+                elif special_analysis == "TauID_ES":
+                    book_histograms(
+                        um,
+                        processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
+                        datasets=nominals[era]["units"][channel],
+                        variations=[
+                            tau_id_eff_lt,
+                        ],
+                        enable_check=do_check,
+                    )
+                    
             if channel in ["et", "em"]:
                 # TODO add eleES
                 # book_histograms(
@@ -1366,13 +1304,6 @@ def main(args):
                 #     variations=[trigger_eff_mt_emb],
                 #     enable_check=do_check,
                 # )
-                book_histograms(
-                    um,
-                    processes=embS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[same_sign], # anti_iso_lt_no_ff],
-                    enable_check=do_check,
-                )
                 book_histograms(
                     um,
                     processes={"zl"} & procS,
@@ -1459,7 +1390,7 @@ def main(args):
             #     enable_check=do_check,
             # )
             # Book era dependent uncertainty shapes
-            if "2016" in era or "2017" in era:
+            if era in ["2016preVFP", "2016postVFP", "2017"]:
                 book_histograms(
                     um,
                     processes=simulatedProcsDS[channel],
@@ -1477,12 +1408,12 @@ def main(args):
 
     if args.only_create_graphs:
         if args.control_plots or args.gof_inputs:
-            graph_file_name = "control_unit_graphs-{}-{}-{}.pkl".format(
-                era, ",".join(args.channels), ",".join(sorted(procS))
+            graph_file_name = "control_unit_graphs-{}-{}.pkl".format(
+                era, ",".join(args.channels)
             )
         else:
-            graph_file_name = "analysis_unit_graphs-{}-{}-{}.pkl".format(
-                era, ",".join(args.channels), ",".join(sorted(procS))
+            graph_file_name = "analysis_unit_graphs-{}-{}.pkl".format(
+                era, ",".join(args.channels)
             )
         if args.graph_dir is not None:
             graph_file = os.path.join(args.graph_dir, graph_file_name)

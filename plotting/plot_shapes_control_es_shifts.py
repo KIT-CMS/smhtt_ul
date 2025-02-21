@@ -163,19 +163,6 @@ def main(info):
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
 
-    if "2016" in args.era:
-        era = "Run2016"
-    elif "2017" in args.era:
-        era = "Run2017"
-    elif "2018" in args.era:
-        era = "Run2018"
-    else:
-        logger.critical("Era {} is not implemented.".format(args.era))
-        raise Exception
-
-    # category = "_".join([channel, variable])
-    # if args.category_postfix is not None:
-    #     category += "_%s"%args.category_postfix
     rootfile = rootfile_parser.Rootfile_parser(args.input, variable, )
     bkg_processes = [b for b in all_bkg_processes]
     if "em" in channel:
@@ -227,14 +214,7 @@ def main(info):
         if index == 0:
             total_bkg = rootfile.get(channel, process, cat, shape_type=stype).Clone()
         else:
-            # total_bkg.Add(rootfile.get(channel, process, cat, shape_type=stype))
-            try:    
-                total_bkg.Add(rootfile.get(channel, process, cat, shape_type=stype))
-            except KeyError:
-                print(process,"\n smhtt_ul/Dumbledraw/Dumbledraw/rootfile_parser_ntuple_processor_inputshapes.py probably has wrong/missing keys, so look there first. Also deactivate pool and use the loop at the end of this script to use the following pdb. \n")
-                import pdb; pdb.set_trace()
-            finally:
-                pass
+            total_bkg.Add(rootfile.get(channel, process, cat, shape_type=stype))
         
         if process in ["jetFakesEMB", "jetFakes"] and channel == "tt":
             total_bkg.Add(rootfile.get(channel, "wFakes",cat, shape_type=stype))
@@ -246,10 +226,7 @@ def main(info):
         else:
             plot.add_hist(
                 rootfile.get(channel, process, cat, shape_type=stype), process, "bkg")
-        # Colors do not contain embXpY yet, this is a temporary workaround!!!
         if "emb" in process:
-            #warnings.warn("\n\n\n\n\n Colors do not contain embXpY yet, this is a temporary workaround!!!\n\n\n\n\n", UserWarning)
-            print("\n\n\n\n\n !!!Colors do not contain embXpY yet, this is a temporary workaround!!!\n\n\n\n\n")
             plot.setGraphStyle(
                 process, "hist", fillcolor=styles.color_dict["EMB"])
         else:
@@ -305,8 +282,7 @@ def main(info):
 
     if args.linear != True:
         plot.subplot(1).setYlims(0.1, split_dict[channel])
-        plot.subplot(1).setYlabel(
-            "")  # otherwise number labels are not drawn on axis
+        plot.subplot(1).setYlabel("")  # otherwise number labels are not drawn on axis
         plot.subplot(1).setLogY()
     # Check if variables should be plotted with log x axis
     log_x_variables = ["puppimet"]
@@ -324,7 +300,7 @@ def main(info):
     else:
         plot.subplot(2).setXlabel("NN output")
     if args.normalize_by_bin_width:
-        plot.subplot(0).setYlabel("dN/d(NN output)")
+        plot.subplot(0).setYlabel("N_{events} / bin width")
     else:
         plot.subplot(0).setYlabel("N_{events}")
 
@@ -369,19 +345,17 @@ def main(info):
             "total_bkg", "data_obs"
         ])
 
-
     # create legends
     suffix = ["", "_top"]
     for i in range(2):
 
         plot.add_legend(width=0.6, height=0.15)
         for process in legend_bkg_processes:
-            # Temporary workaround (I hope...)
             if "emb" in process:
-                print("\n\n\n Again a workaround for the missing labels of embXpY !!!\n\n\n")
-                process = "EMB"
-                # plot.legend(i).add_entry(
-                #     0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')
+                tes_variation = process.split("emb")[1].replace("minus", "-").replace("p", ".")
+                emb_label = f"#tau embedded {tes_variation}%"
+                plot.legend(i).add_entry(
+                    0, process, emb_label, 'f')
             else:
                 plot.legend(i).add_entry(
                     0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')
@@ -406,9 +380,9 @@ def main(info):
     # draw additional labels
     plot.DrawCMS()
     if "2016postVFP" in args.era:
-            plot.DrawLumi("16.8 fb^{-1} (2016UL postVFP, 13 TeV)")
+            plot.DrawLumi("16.8 fb^{-1} (2016postVFP, 13 TeV)")
     elif "2016preVFP" in args.era:
-            plot.DrawLumi("19.5 fb^{-1} (2016UL preVFP, 13 TeV)")
+            plot.DrawLumi("19.5 fb^{-1} (2016preVFP, 13 TeV)")
     elif "2017" in args.era:
         plot.DrawLumi("41.5 fb^{-1} (2017, 13 TeV)")
     elif "2018" in args.era:
@@ -434,8 +408,8 @@ def main(info):
     if args.draw_jet_fake_variation is not None:
         postfix = postfix + "_" + args.draw_jet_fake_variation
 
-    os.makedirs(f"{args.era}_plots_{postfix}_{args.tag}", exist_ok=True)
-    os.makedirs(f"{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}",exist_ok=True)
+    os.makedirs(f"output/{args.era}_plots_{postfix}_{args.tag}", exist_ok=True)
+    os.makedirs(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}",exist_ok=True)
     shiftanme = ""
     for i in range(len(bkg_processes)):
         if "emb" in bkg_processes[i]:
@@ -443,9 +417,9 @@ def main(info):
         else:
             shiftanme = ""
     print("Trying to save the created plot")
-    # plot.save(f"{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.pdf")
-    plot.save(f"{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png")
-    print(f"\n{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png\n")
+    plot.save(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.pdf")
+    plot.save(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png")
+    print(f"\noutput/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png\n")
 
 
 if __name__ == "__main__":
@@ -471,8 +445,6 @@ if __name__ == "__main__":
             os.mkdir(f"{args.era}_plots_{postfix}_{args.tag}/{ch}")
         for v in variables:
             infolist.append({"args" : args, "channel" : ch, "variable" : v})
-    #pool = Pool(8)
+    
     with Pool(8) as pool:
         pool.map(main, infolist)
-    # for item in infolist:
-    #     main(item)

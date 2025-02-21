@@ -215,15 +215,11 @@ def add_tauES_datasets(
                         for quant in quants & get_quantities_from_expression(
                             cut.expression
                         ):
-                            # cut.expression = cut.expression.replace(
-                            #     quant,
-                            #     "{quant}__{var}".format(quant=quant, var=shiftname),
-                            # )
                             cut.expression = re.sub(
                                 rf"\b({quant})\b",
                                 f"{quant}__{shiftname}",
                                 cut.expression,
-                        )
+                            )
                             logger.debug(
                                 f"Replaced {quant} in {cut.expression} ( quant: {quant}, var: {shiftname})"
                             )
@@ -233,7 +229,7 @@ def add_tauES_datasets(
                         ):
                             weight.expression = weight.expression.replace(
                                 quant,
-                                "{quant}__{var}".format(quant=quant, var=shiftname),
+                                f"{quant}__{shiftname}",
                             )
                             logger.debug(
                                 f"Replaced weight {quant} with {weight.expression} ( quant: {quant}, var: {shiftname})"
@@ -242,7 +238,7 @@ def add_tauES_datasets(
                     for quant in quants & get_quantities_from_expression(act.variable):
                         act.variable = act.variable.replace(
                             quant,
-                            "{quant}__{var}".format(quant=act.variable, var=shiftname),
+                            f"{act.variable}__{shiftname}",
                         )
                         logger.debug(
                             f"Replaced action {quant} with {act.variable} ( quant: {quant}, var: {shiftname})"
@@ -258,19 +254,7 @@ def book_tauES_histograms(
     variations,
     enable_check=False,
     shiftstring="EMBtauESshift",
-):
-    # def replace_expression(exp, quants):
-    #     for quant in quants[shiftname]:
-    #         if quant in exp:
-    #             exp = exp.replace(
-    #                 quant,
-    #                 "{quant}__{var}".format(quant=quant, var=shiftname),
-    #             )
-    #             logger.debug(
-    #                 f"Replaced {quant} in {exp} ( quant: {quant}, var: {shiftname}"
-    #             )
-    #     return exp
-    
+):  
     def replace_expression(exp, quants):
         quant_string = set(quants[shiftname])
         for quant in quant_string & get_quantities_from_expression(exp):
@@ -283,6 +267,7 @@ def book_tauES_histograms(
                     f"Replaced {quant} in {exp} ( quant: {quant}, var: {shiftname}"
                 )
         return exp
+    
     for tau_es_shift in additional_emb_procS:
         logger.debug(f"Booking {tau_es_shift}")
         shiftname = f"{shiftstring}_{tau_es_shift.replace('emb', '')}"
@@ -314,9 +299,9 @@ def book_tauES_histograms(
                         subvariation.add_weight.weight.expression, quants
                     )
                 else:
-                    # logger.critical(f"Unknown variation {subvariation}")
-                    # raise ValueError(f"Unknown variation {subvariation}")
-                    pass
+                    logger.critical(f"Unknown variation {subvariation}")
+                    raise ValueError(f"Unknown variation {subvariation}")
+                
                 final_variations.append(subvariation)
         logger.warning(f"final_variations: {final_variations}")
         manager.book(

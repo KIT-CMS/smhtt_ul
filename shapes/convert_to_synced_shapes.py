@@ -16,6 +16,9 @@ _process_map = {
     "TTT": "TT-TTT",
     "TTL": "TT-TTL",
     "TTJ": "TT-TTJ",
+    "STT": "ST-STT",
+    "STL": "ST-STL",
+    "STJ": "ST-STJ",
     "VVT": "VV-VVT",
     "VVL": "VV-VVL",
     "VVJ": "VV-VVJ",
@@ -26,7 +29,6 @@ _process_map = {
 }
 
 tau_es_map = {
-
     "embminus4p0": "-4.0",
     "embminus3p9": "-3.9",
     "embminus3p8": "-3.8",
@@ -330,7 +332,7 @@ def main(args):
         else:
             category = split_name[1].split("-")[-1]
 
-            if "emb" not in  split_name[0]:
+            if "emb" not in split_name[0]:
                 process = (
                     "-".join(split_name[1].split("-")[1:-1])
                     if not "data" in split_name[0]
@@ -341,7 +343,7 @@ def main(args):
             if split_name[0] =="emb0p0":
                 pass
         # add the additional process of special analyses to the sync file
-        if args.special == "TauES" or args.special == "EleES":
+        if args.special in ["TauES", "EleES"]:
             if "emb" in split_name[0]:
                 if "jetFakes" in split_name[0]:
                     process = "jetFakes_"
@@ -408,7 +410,7 @@ def main(args):
             if "EMB" in process:
                 process  = "EMB"
 
-        name_output = "{process}".format(process=process)
+        name_output = process
         # rename signal processes from ggH to ggH_htt
         if process in ["ggH125", "qqH125", "WH125", "ZH125", "ttH125"]:
             name_output = process.replace("125", "_htt125")

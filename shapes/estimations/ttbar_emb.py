@@ -83,11 +83,11 @@ def emb_ttbar_contamination_estimation(
         )
         if sub_scale > 0:
             variation_name = base_hist.GetName().replace(
-                "Nominal", "CMS_htt_emb_ttbar_EraDown"
+                "Nominal", "CMS_emb_ttbar_contamination_EraDown"
             )
         else:
             variation_name = base_hist.GetName().replace(
-                "Nominal", "CMS_htt_emb_ttbar_EraUp"
+                "Nominal", "CMS_emb_ttbar_contamination_EraUp"
             )
         base_hist.SetName(variation_name)
         base_hist.SetTitle(variation_name)

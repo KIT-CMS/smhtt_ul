@@ -175,14 +175,17 @@ common_files_2017 = {
     #     "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X"
     # ],
 }
+
 common_files_2016postVFP = {
-    # "DY": [
-    #     "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
-    #     "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
-    # ],
     "DY": [
+        # "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        # "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
         "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
         "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "W": [
+        # "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
+        "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
     ],
     "TT": [
         "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
@@ -192,6 +195,8 @@ common_files_2016postVFP = {
     "VV": [
         "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
         "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_RunIISummer20UL16NanoAODv9-106X",
+    ],
+    "ST": [
         "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODv9-106X",
         "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODv9-106X",
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X",
@@ -222,14 +227,17 @@ common_files_2016postVFP = {
         "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X"
     ],
 }
+
 common_files_2016preVFP = {
-    # "DY": [
-    #     "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
-    #     "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
-    # ],
     "DY": [
+        # "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        # "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
         "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
         "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "W": [
+        # "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+        "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
     ],
     "TT": [
         "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
@@ -239,6 +247,8 @@ common_files_2016preVFP = {
     "VV": [
         "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
         "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
+    ],
+    "ST": [
         "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
         "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
@@ -263,6 +273,7 @@ common_files_2016preVFP = {
         "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X"
     ],
 }
+
 files = {
     "2018": {
         "et": dict(
@@ -667,17 +678,8 @@ files = {
                     "ElectronEmbedding_Run2016G-UL2016",
                     "ElectronEmbedding_Run2016H-UL2016",
                 ],
-                "W": [
-                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X"
-                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                ],
-                **common_files_2016postVFP,
-            }
+            },
+            **common_files_2016postVFP,
         ),
         "mm": dict(
             {
@@ -690,16 +692,6 @@ files = {
                     "MuonEmbedding_Run2016F-UL2016",
 		            "MuonEmbedding_Run2016G-UL2016",
                     "MuonEmbedding_Run2016H-UL2016",
-
-                ],
-                "W": [
-
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
-
-                ],
-                "WNLO": [
-
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
 
                 ],
             },
@@ -718,18 +710,7 @@ files = {
                     "TauEmbedding-MuTauFinalState_Run2016H-UL2016",
 
                 ],
-                "W": [
-
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL16NanoAODv9-106X",
-
-                ],
-                "WNLO": [
-
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODv9-106X",
-
-                ],
             },
-            
             **common_files_2016postVFP
         ),
     },
@@ -751,18 +732,9 @@ files = {
                     "ElectronEmbedding_Run2016-HIPM_D-UL2016",
                     "ElectronEmbedding_Run2016-HIPM_E-UL2016",
                     "ElectronEmbedding_Run2016-HIPM_F-UL2016",
-                ],
-                "W": [
-                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X"
-                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                ],
-                **common_files_2016preVFP,
-            }
+                ],       
+            },
+            **common_files_2016preVFP,
         ),
 
         "mm": dict(
@@ -774,10 +746,7 @@ files = {
                     "SingleMuon_Run2016D-HIPM",
                     "SingleMuon_Run2016E-HIPM",
                     "SingleMuon_Run2016F-HIPM",
-                    
-                    
                 ],
-
                 "EMB": [
 
                     "MuonEmbedding_Run2016-HIPM_B_ver1-UL2016",
@@ -786,17 +755,6 @@ files = {
                     "MuonEmbedding_Run2016-HIPM_D-UL2016",
                     "MuonEmbedding_Run2016-HIPM_E-UL2016",
                     "MuonEmbedding_Run2016-HIPM_F-UL2016",
-                ],
-
-                "W": [
-
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",  #NLO because LO was not in the database
-
-                ],
-                "WNLO": [
-
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
-
                 ],
             },
             **common_files_2016preVFP
@@ -819,18 +777,7 @@ files = {
                     "TauEmbedding-MuTauFinalState_Run2016-HIPM_E-UL2016",
                     "TauEmbedding-MuTauFinalState_Run2016-HIPM_F-UL2016",
                 ],
-                "W": [
-
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X", #NLO because LO was not in the database
-
-                ],
-                "WNLO": [
-
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL16NanoAODAPVv9-106X",
-
-                ],
             },
-            
             **common_files_2016preVFP
         ),
     },

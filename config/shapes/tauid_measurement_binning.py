@@ -43,19 +43,73 @@ categories = {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 40)",
+            "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 20)",
         },
         "DM1": {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 40)",
+            "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 20)",
         },
-        "DM10_11": {
+        "DM10": {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "((tau_decaymode_2 == 10) || (tau_decaymode_2 == 11)) && (pt_2 >= 40)",
+            "cut": "(tau_decaymode_2 == 10) && (pt_2 >= 20)",
+        },
+        "DM11": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 11) && (pt_2 >= 20)",
+        },
+        "DM0_PT20_40": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 20) && (pt_2 < 40)",
+        },
+        "DM1_PT20_40": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 20) && (pt_2 < 40)",
+        },
+        "DM10_PT20_40": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 10) && (pt_2 >= 20) && (pt_2 < 40)",
+        },
+        "DM11_PT20_40": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 11) && (pt_2 >= 20) && (pt_2 < 40)",
+        },
+        "DM0_PT40_200": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 40) && (pt_2 <= 200)",
+        },
+        "DM1_PT40_200": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 40) && (pt_2 <= 200)",
+        },
+        "DM10_PT40_200": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 10) && (pt_2 >= 40) && (pt_2 <= 200)",
+        },
+        "DM11_PT40_200": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 11) && (pt_2 >= 40) && (pt_2 <= 200)",
         },
         "Inclusive": {
             "var": discriminator_variable,
@@ -84,8 +138,8 @@ categorization = {
     ],
     "mm": [
         (
-            Selection(name="control_region", cuts=[("m_vis > 60 && m_vis < 120", "category_selection")]),
-            [ Histogram("m_vis", "m_vis", [60,120])],
+            Selection(name="control_region", cuts=[("m_vis > 70 && m_vis < 110", "category_selection")]),
+            [Histogram("m_vis", "m_vis", [70,110])],
         )
     ]
 }

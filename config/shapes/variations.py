@@ -209,19 +209,19 @@ jet_es = [
 
 # MET variations.
 met_unclustered = [
-    ReplaceVariable("CMS_scale_met_unclustered_EraUp", "metUnclusteredEnUp"),
-    ReplaceVariable("CMS_scale_met_unclustered_EraDown", "metUnclusteredEnDown"),
+    ReplaceVariable("CMS_scale_met_unclustered_energy_EraUp", "metUnclusteredEnUp"),
+    ReplaceVariable("CMS_scale_met_unclustered_energy_EraDown", "metUnclusteredEnDown"),
 ]
 
 # Recoil correction uncertainties
 recoil_resolution = [
-    ReplaceVariable("CMS_htt_boson_res_met_EraUp", "metRecoilResolutionUp"),
-    ReplaceVariable("CMS_htt_boson_res_met_EraDown", "metRecoilResolutionDown"),
+    ReplaceVariable("CMS_res_met_EraUp", "metRecoilResolutionUp"),
+    ReplaceVariable("CMS_res_met_EraDown", "metRecoilResolutionDown"),
 ]
 
 recoil_response = [
-    ReplaceVariable("CMS_htt_boson_scale_met_EraUp", "metRecoilResponseUp"),
-    ReplaceVariable("CMS_htt_boson_scale_met_EraDown", "metRecoilResponseDown"),
+    ReplaceVariable("CMS_scale_met_EraUp", "metRecoilResponseUp"),
+    ReplaceVariable("CMS_scale_met_EraDown", "metRecoilResponseDown"),
 ]
 
 # # fake met scaling in embedded samples
@@ -284,8 +284,8 @@ ele_fake_es = ele_fake_es_1prong + ele_fake_es_1prong1pizero
 #         ]
 
 mu_fake_es_inc = [
-    ReplaceVariable("CMS_ZLShape_mt_EraUp", "tauMuFakeEsUp"),
-    ReplaceVariable("CMS_ZLShape_mt_EraDown", "tauMuFakeEsDown"),
+    ReplaceVariable("CMS_scale_fake_m_EraUp", "tauMuFakeEsUp"),
+    ReplaceVariable("CMS_scale_fake_m_EraDown", "tauMuFakeEsDown"),
 ]
 
 # # B-tagging uncertainties.
@@ -313,8 +313,9 @@ tau_id_eff_lt = [
     ReplaceVariable("CMS_eff_t_40-500_EraDown", "vsJetTau40to500Down"),
     ReplaceVariable("CMS_eff_t_500-1000_EraUp", "vsJetTau500to1000Up"),
     ReplaceVariable("CMS_eff_t_500-1000_EraDown", "vsJetTau500to1000Down"),
+    ReplaceVariable("CMS_eff_t_1000-Inf_EraUp", "vsJetTau1000toInfUp"),
+    ReplaceVariable("CMS_eff_t_1000-Inf_EraDown", "vsJetTau1000toInfDown"),
 ]
-
 emb_tau_id_eff_lt = [
     ReplaceVariable("CMS_eff_t_emb_30-35_EraUp", "vsJetTau30to35Up"),
     ReplaceVariable("CMS_eff_t_emb_30-35_EraDown", "vsJetTau30to35Down"),
@@ -359,11 +360,11 @@ emb_tau_id_eff_tt = [
 # Jet to tau fake rate.
 jet_to_tau_fake = [
     AddWeight(
-        "CMS_htt_fake_j_EraUp",
+        "CMS_fake_j_EraUp",
         Weight("max(1.0-pt_2*0.002, 0.6)", "jetToTauFake_weight"),
     ),
     AddWeight(
-        "CMS_htt_fake_j_EraDown",
+        "CMS_fake_j_EraDown",
         Weight("min(1.0+pt_2*0.002, 1.4)", "jetToTauFake_weight"),
     ),
 ]
@@ -388,21 +389,21 @@ zll_mt_fake_rate = zll_mt_fake_rate_up + zll_mt_fake_rate_down
 
 # # Trigger efficiency uncertainties.
 trigger_eff_mt = [
-    ReplaceVariable("CMS_eff_trigger_mt_EraUp", "singleMuonTriggerSFUp"),
-    ReplaceVariable("CMS_eff_trigger_mt_EraDown", "singleMuonTriggerSFDown"),
+    ReplaceVariable("CMS_eff_m_trigger_EraUp", "singleMuonTriggerSFUp"),
+    ReplaceVariable("CMS_eff_m_trigger_EraDown", "singleMuonTriggerSFDown"),
 ]
 trigger_eff_mt_emb = [
-    ReplaceVariable("CMS_eff_trigger_emb_mt_EraUp", "singleMuonTriggerSFUp"),
-    ReplaceVariable("CMS_eff_trigger_emb_mt_EraDown", "singleMuonTriggerSFDown"),
+    ReplaceVariable("CMS_eff_m_trigger_emb_EraUp", "singleMuonTriggerSFUp"),
+    ReplaceVariable("CMS_eff_m_trigger_emb_EraDown", "singleMuonTriggerSFDown"),
 ]
 
 trigger_eff_et = [
-    ReplaceVariable("CMS_eff_trigger_et_EraUp", "singleElectronTriggerSFUp"),
-    ReplaceVariable("CMS_eff_trigger_et_EraDown", "singleElectronTriggerSFDown"),
+    ReplaceVariable("CMS_eff_e_trigger_EraUp", "singleElectronTriggerSFUp"),
+    ReplaceVariable("CMS_eff_e_trigger_EraDown", "singleElectronTriggerSFDown"),
 ]
 trigger_eff_et_emb = [
-    ReplaceVariable("CMS_eff_trigger_emb_et_EraUp", "singleElectronTriggerSFUp"),
-    ReplaceVariable("CMS_eff_trigger_emb_et_EraDown", "singleElectronTriggerSFDown"),
+    ReplaceVariable("CMS_eff_e_trigger_emb_EraUp", "singleElectronTriggerSFUp"),
+    ReplaceVariable("CMS_eff_e_trigger_emb_EraDown", "singleElectronTriggerSFDown"),
 ]
 # TODO cross triggers
 # trigger_eff_mt = [
@@ -813,8 +814,8 @@ zpt = [
 ]
 
 top_pt = [
-    SquareWeight("CMS_htt_ttbarShapeUp", "topPtReweightWeight"),
-    RemoveWeight("CMS_htt_ttbarShapeDown", "topPtReweightWeight"),
+    SquareWeight("CMS_top_pt_reweightingUp", "topPtReweightWeight"),
+    RemoveWeight("CMS_top_pt_reweightingDown", "topPtReweightWeight"),
 ]
 
 # TODO add fake factors

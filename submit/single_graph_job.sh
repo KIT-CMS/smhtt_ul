@@ -1,11 +1,14 @@
 #!/bin/bash
 ulimit -s unlimited
 
-INPUT=$1
-GRAPH=$2
-PROC_DIR=$3
+source /cvmfs/grid.cern.ch/alma9-ui-test/etc/profile.d/setup-alma9-test.sh
+
+export X509_USER_PROXY=$1
+INPUT=$2
+GRAPH=$3
+PROC_DIR=$4
 THREAD_ARG="--num-threads 1"
-[[ -z $4 ]] || THREAD_ARG="--num-threads $4"
+[[ -z $5 ]] || THREAD_ARG="--num-threads $5"
 
 echo "INPUT: $INPUT"
 echo "GRAPH: $GRAPH"

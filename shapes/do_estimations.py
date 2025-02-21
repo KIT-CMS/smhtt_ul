@@ -226,6 +226,13 @@ def main(args):
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
             processname = f"emb{name}"
             tauES_names.append(processname)
+    if args.special == "TauID_ES":
+        # we have to extend the _dataset_map and the _process_map to include the TauES variations
+        tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
+        for variation in tauESvariations:
+            name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
+            processname = f"emb{name}"
+            tauES_names.append(processname)
     elif args.special == "EleES":
         # we have to extend the _dataset_map and the _process_map to include the TauES variations
         eleESvariations = [-1.5 + 0.05 * i for i in range(0, 51)]
@@ -387,6 +394,28 @@ def main(args):
                 logger.info("Do estimation for category %s", category)
                 if args.special == "EleES":
                     for embsignal in eleES_names:
+                        print(embsignal)
+                        var = emb_categories[channel][category][0]
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=0.1,
+                            embname=embsignal,
+                        )
+                        estimated_hist.Write()
+                        estimated_hist = emb_ttbar_contamination_estimation(
+                            input_file,
+                            channel,
+                            category,
+                            var,
+                            sub_scale=-0.1,
+                            embname=embsignal,
+                        )
+                        estimated_hist.Write()
+                if args.special == "TauID_ES" and channel != "mm":
+                    for embsignal in tauES_names:
                         print(embsignal)
                         var = emb_categories[channel][category][0]
                         estimated_hist = emb_ttbar_contamination_estimation(
