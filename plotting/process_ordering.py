@@ -76,7 +76,7 @@ class ControlShapeBkgProcesses:
         selection_option: Literal["CR", "DR;ff;wjet", "DR;ff;qcd", "DR;ff;ttbar"] = "SR",
         draw_jet_fake_variation: Union[str, None] = None,
     ) -> None:
-        self._embedding = embedding,
+        self._embedding = embedding
         self._fake_factor = fake_factor
         self._nlo = nlo
         self._channel = channel
