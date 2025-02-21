@@ -26,47 +26,37 @@ shapes_rootfile=${shapes_output}${POSTFIX}.root
 shapes_rootfile_boosted=${shapes_output_boosted}${POSTFIX}.root
 shapes_rootfile_synced=${shapes_output_synced}${POSTFIX}_synced.root
 
-VARS_TAUS="iso_1,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
-VARS_TAU_PAIR="m_vis,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,deltaR_ditaupair,pt_vis"
-VARS_JETS="jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mjj,njets,pt_dijet,jet_hemisphere"
-VARS_BJETS="nbtag,bpair_pt_1,bpair_pt_2,bpair_eta_1,bpair_eta_2,bpair_phi_1,bpair_phi_2,bpair_btag_value_1,bpair_btag_value_2,bpair_m_inv,bpair_pt_dijet,bpair_deltaR"
-VARS_FATJETS="nfatjets,fj_Xbb_pt,fj_Xbb_eta,fj_Xbb_phi,fj_Xbb_mass,fj_Xbb_particleNet_XbbvsQCD,fj_Xbb_nsubjettiness_3over2,fj_Xbb_nsubjettiness_2over1,fj_Xbb_msoftdrop"
-VARS_DISTANCES="deltaPhi_met_tau1,deltaPhi_met_tau2,deltaPhi_met_fatjet,deltaPhi_met_bjet1,deltaPhi_met_bjet2,deltaR_tau1_fatjet,deltaR_tau2_fatjet,balance_pT_fatjet_Z,deltaR_bjet1_fatjet,deltaR_bjet2_fatjet,deltaR_tau1_bjet1,deltaR_tau1_bjet2,deltaR_tau2_bjet1,deltaR_tau2_bjet2"
-VARS_BBTT="mt_tot,pt_tautaubb,mass_tautaubb"
-VARS_KINFIT="kinfit_mX,kinfit_mY,kinfit_chi2,kinfit_convergence,kinfit_mX_YToBB,kinfit_mY_YToBB,kinfit_chi2_YToBB,kinfit_convergence_YToBB,kinfit_mX_YToTauTau,kinfit_mY_YToTauTau,kinfit_chi2_YToTauTau,kinfit_convergence_YToTauTau"
-VARS_FASTMTT="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
 
-BOOST_VARS_TAUS="boosted_iso_1,boosted_mass_1,boosted_mass_2,boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,boosted_tau_decaymode_1,boosted_tau_decaymode_2"
-BOOST_VARS_TAU_PAIR="boosted_m_vis,boosted_mt_1,boosted_mt_2,pfmet_boosted,met_boosted,metphi_boosted,boosted_deltaR_ditaupair,boosted_pt_vis"
-BOOST_VARS_BJETS="njets_boosted,nbtag_boosted,bpair_pt_1_boosted,bpair_pt_2_boosted,bpair_eta_1_boosted,bpair_eta_2_boosted,bpair_phi_1_boosted,bpair_phi_2_boosted,bpair_btag_value_1_boosted,bpair_btag_value_2_boosted,bpair_m_inv_boosted,bpair_pt_dijet_boosted,bpair_deltaR_boosted"
-BOOST_VARS_FATJETS="nfatjets_boosted,fj_Xbb_pt_boosted,fj_Xbb_eta_boosted,fj_Xbb_phi_boosted,fj_Xbb_mass_boosted,fj_Xbb_particleNet_XbbvsQCD_boosted,fj_Xbb_nsubjettiness_3over2_boosted,fj_Xbb_nsubjettiness_2over1_boosted,fj_Xbb_msoftdrop_boosted"
-BOOST_VARS_DISTANCES="deltaPhi_met_t1,deltaPhi_met_t2,deltaPhi_met_fj,deltaPhi_met_b1,deltaPhi_met_b2,deltaR_t1_fj,deltaR_t2_fj,deltaR_b1_t1,deltaR_b1_t2,deltaR_b2_t1,deltaR_b2_t2,deltaR_b1_fj,deltaR_b2_fj"
-BOOST_VARS_BBTT="boosted_pt_tautaubb,boosted_mass_tautaubb"
-BOOST_VARS_KINFIT="kinfit_mX_boosted,kinfit_mY_boosted,kinfit_chi2_boosted,kinfit_convergence_boosted,kinfit_mX_YToBB_boosted,kinfit_mY_YToBB_boosted,kinfit_chi2_YToBB_boosted,kinfit_convergence_YToBB_boosted,kinfit_mX_YToTauTau_boosted,kinfit_mY_YToTauTau_boosted,kinfit_chi2_YToTauTau_boosted,kinfit_convergence_YToTauTau_boosted"
-BOOST_VARS_FASTMTT="boosted_m_fastmtt,boosted_pt_fastmtt,boosted_eta_fastmtt,boosted_phi_fastmtt"
+VARIABLES="iso_1,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
 
-if [[ $CHANNEL == "et" ]]; then
-    VARS_TAUS="iso_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_2"
-    BOOST_VARS_TAUS="boosted_iso_1,boosted_mass_2,boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,boosted_tau_decaymode_2"
-    VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_FATJETS},${VARS_DISTANCES},${VARS_BBTT},${VARS_KINFIT},${VARS_FASTMTT}"
-    BOOST_VARIABLES="${BOOST_VARS_TAUS},${BOOST_VARS_TAU_PAIR},${BOOST_VARS_BJETS},${BOOST_VARS_FATJETS},${BOOST_VARS_DISTANCES},${BOOST_VARS_BBTT},${BOOST_VARS_KINFIT},${BOOST_VARS_FASTMTT}"
-fi
-if [[ $CHANNEL == "mt" ]]; then
-    VARS_TAUS="iso_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_2"
-    BOOST_VARS_TAUS="boosted_iso_1,boosted_mass_2,boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,boosted_tau_decaymode_2"
-    VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_FATJETS},${VARS_DISTANCES},${VARS_BBTT},${VARS_KINFIT},${VARS_FASTMTT}"
-    BOOST_VARIABLES="${BOOST_VARS_TAUS},${BOOST_VARS_TAU_PAIR},${BOOST_VARS_BJETS},${BOOST_VARS_FATJETS},${BOOST_VARS_DISTANCES},${BOOST_VARS_BBTT},${BOOST_VARS_KINFIT},${BOOST_VARS_FASTMTT}"
-fi
-if [[ $CHANNEL == "tt" ]]; then
-    VARS_TAUS="mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
-    BOOST_VARS_TAUS="boosted_mass_1,boosted_mass_2,boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,boosted_tau_decaymode_1,boosted_tau_decaymode_2"
-    VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_FATJETS},${VARS_DISTANCES},${VARS_BBTT},${VARS_KINFIT},${VARS_FASTMTT}"
-    BOOST_VARIABLES="${BOOST_VARS_TAUS},${BOOST_VARS_TAU_PAIR},${BOOST_VARS_BJETS},${BOOST_VARS_FATJETS},${BOOST_VARS_DISTANCES},${BOOST_VARS_BBTT},${BOOST_VARS_KINFIT},${BOOST_VARS_FASTMTT}"
-fi
+# VARS_TAUS="iso_1,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
+# VARS_TAU_PAIR="m_vis,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,deltaR_ditaupair,pt_vis"
+# VARS_JETS="jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mjj,njets,pt_dijet,jet_hemisphere"
+# VARS_BJETS="nbtag,bpair_pt_1,bpair_pt_2,bpair_eta_1,bpair_eta_2,bpair_phi_1,bpair_phi_2,bpair_btag_value_1,bpair_btag_value_2,bpair_m_inv,bpair_pt_dijet,bpair_deltaR"
+# VARS_FATJETS="nfatjets,fj_Xbb_pt,fj_Xbb_eta,fj_Xbb_phi,fj_Xbb_mass,fj_Xbb_particleNet_XbbvsQCD,fj_Xbb_nsubjettiness_3over2,fj_Xbb_nsubjettiness_2over1,fj_Xbb_msoftdrop"
+# VARS_DISTANCES="deltaPhi_met_tau1,deltaPhi_met_tau2,deltaPhi_met_fatjet,deltaPhi_met_bjet1,deltaPhi_met_bjet2,deltaR_tau1_fatjet,deltaR_tau2_fatjet,balance_pT_fatjet_Z,deltaR_bjet1_fatjet,deltaR_bjet2_fatjet,deltaR_tau1_bjet1,deltaR_tau1_bjet2,deltaR_tau2_bjet1,deltaR_tau2_bjet2"
+# VARS_BBTT="mt_tot,pt_tautaubb,mass_tautaubb"
+# VARS_KINFIT="kinfit_mX,kinfit_mY,kinfit_chi2,kinfit_convergence,kinfit_mX_YToBB,kinfit_mY_YToBB,kinfit_chi2_YToBB,kinfit_convergence_YToBB,kinfit_mX_YToTauTau,kinfit_mY_YToTauTau,kinfit_chi2_YToTauTau,kinfit_convergence_YToTauTau"
+# VARS_FASTMTT="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
 
-VARIABLES="njets,nbtag,nfatjets,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,bpair_pt_1,bpair_pt_2,bpair_eta_1,bpair_eta_2,bpair_phi_1,bpair_phi_2,bpair_btag_value_1,bpair_btag_value_2,deltaR_ditaupair,m_vis,bpair_m_inv,bpair_deltaR,bpair_pt_dijet,fj_Xbb_pt,fj_Xbb_eta,fj_Xbb_phi,fj_Xbb_msoftdrop,fj_Xbb_nsubjettiness_2over1,met,metphi,mt_1,m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt,kinfit_mX,kinfit_mY,kinfit_chi2"
-BOOST_VARIABLES="njets_boosted,nbtag_boosted,nfatjets_boosted,boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,bpair_pt_1_boosted,bpair_pt_2_boosted,bpair_eta_1_boosted,bpair_eta_2_boosted,bpair_phi_1_boosted,bpair_phi_2_boosted,bpair_btag_value_1_boosted,bpair_btag_value_2_boosted,boosted_deltaR_ditaupair,boosted_m_vis,bpair_m_inv_boosted,bpair_deltaR_boosted,bpair_pt_dijet_boosted,fj_Xbb_pt_boosted,fj_Xbb_eta_boosted,fj_Xbb_phi_boosted,fj_Xbb_msoftdrop_boosted,fj_Xbb_nsubjettiness_2over1_boosted,met_boosted,metphi_boosted,boosted_mt_1,boosted_m_fastmtt,boosted_pt_fastmtt,boosted_eta_fastmtt,boosted_phi_fastmtt,kinfit_mX_boosted,kinfit_mY_boosted,kinfit_chi2_boosted"
-
+# if [[ $CHANNEL == "et" ]]; then
+#     VARS_TAUS="iso_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_2"
+#     BOOST_VARS_TAUS="boosted_iso_1,boosted_mass_2,boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,boosted_tau_decaymode_2"
+#     VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_FATJETS},${VARS_DISTANCES},${VARS_BBTT},${VARS_KINFIT},${VARS_FASTMTT}"
+#     BOOST_VARIABLES="${BOOST_VARS_TAUS},${BOOST_VARS_TAU_PAIR},${BOOST_VARS_BJETS},${BOOST_VARS_FATJETS},${BOOST_VARS_DISTANCES},${BOOST_VARS_BBTT},${BOOST_VARS_KINFIT},${BOOST_VARS_FASTMTT}"
+# fi
+# if [[ $CHANNEL == "mt" ]]; then
+#     VARS_TAUS="iso_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_2"
+#     BOOST_VARS_TAUS="boosted_iso_1,boosted_mass_2,boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,boosted_tau_decaymode_2"
+#     VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_FATJETS},${VARS_DISTANCES},${VARS_BBTT},${VARS_KINFIT},${VARS_FASTMTT}"
+#     BOOST_VARIABLES="${BOOST_VARS_TAUS},${BOOST_VARS_TAU_PAIR},${BOOST_VARS_BJETS},${BOOST_VARS_FATJETS},${BOOST_VARS_DISTANCES},${BOOST_VARS_BBTT},${BOOST_VARS_KINFIT},${BOOST_VARS_FASTMTT}"
+# fi
+# if [[ $CHANNEL == "tt" ]]; then
+#     VARS_TAUS="mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
+#     BOOST_VARS_TAUS="boosted_mass_1,boosted_mass_2,boosted_pt_1,boosted_pt_2,boosted_eta_1,boosted_eta_2,boosted_phi_1,boosted_phi_2,boosted_tau_decaymode_1,boosted_tau_decaymode_2"
+#     VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_FATJETS},${VARS_DISTANCES},${VARS_BBTT},${VARS_KINFIT},${VARS_FASTMTT}"
+#     BOOST_VARIABLES="${BOOST_VARS_TAUS},${BOOST_VARS_TAU_PAIR},${BOOST_VARS_BJETS},${BOOST_VARS_FATJETS},${BOOST_VARS_DISTANCES},${BOOST_VARS_BBTT},${BOOST_VARS_KINFIT},${BOOST_VARS_FASTMTT}"
+# fi
 
 # if the output folder does not exist, create it
 if [ ! -d "$shapes_output" ]; then
@@ -140,7 +130,7 @@ if [[ $MODE == "CONTROL" ]]; then
         --optimization-level 1 --skip-systematic-variations \
         --output-file $shapes_output
 
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
+    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
 
     # now plot the shapes by looping over the categories
     for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
