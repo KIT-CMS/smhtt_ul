@@ -16,7 +16,7 @@ def modify_for_ff_DR(channel=None, region=None):
 
     # general DR cuts
     if channel is None:
-        logger.info(f"No channel specified, applying general DR cuts")
+        logger.info("No channel specified, applying general DR cuts")
         if region == "wjet":
             logger.info(f"{region}: no additional cuts")
             pass
@@ -40,7 +40,7 @@ def modify_for_ff_DR(channel=None, region=None):
             raise ValueError(f"{region} does not exist")
 
     # channel specific DR cuts
-    if channel == "mt":
+    elif channel == "mt":
         logger.info(f"Applying DR cuts for {channel}")
         if region == "wjet":
             cuts["btag_veto"] = "(nbtag == 0)"
