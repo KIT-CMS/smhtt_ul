@@ -63,28 +63,6 @@ FF_OPTIONS = {
     },
 }
 
-# current options
-# "fake_factor_2"
-# "qcd_DR_SR_correction_2"
-# "qcd_correction_wo_DR_SR_2"
-# "qcd_fake_factor_2"
-# "qcd_fake_factor_correction_2"
-# "qcd_fake_factor_fraction_2"
-# "raw_fake_factor_2"
-# "raw_qcd_fake_factor_2"
-# "raw_ttbar_fake_factor_2"
-# "raw_wjets_fake_factor_2"
-# "ttbar_DR_SR_correction_2"
-# "ttbar_correction_wo_DR_SR_2"
-# "ttbar_fake_factor_2"
-# "ttbar_fake_factor_correction_2"
-# "ttbar_fake_factor_fraction_2"
-# "wjets_DR_SR_correction_2"
-# "wjets_correction_wo_DR_SR_2"
-# "wjets_fake_factor_2"
-# "wjets_fake_factor_correction_2"
-# "wjets_fake_factor_fraction_2"
-
 
 def set_ff_type(ff_type):
     if ff_type not in FF_OPTIONS:
@@ -92,11 +70,11 @@ def set_ff_type(ff_type):
         raise KeyError(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
 
     logger.info(f"Setting fake factor option to {ff_type}= {FF_OPTIONS[ff_type]}")
-    Used.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
+    RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
     logger.info("Skipping tt_1 and tt_2 for now.")
 
 
-class Used(object):
+class RuntimeVariables(object):
     """
     A singleton-like container class holding several variables that can be adjusted in time.
 
@@ -117,9 +95,9 @@ class Used(object):
     FF_name_tt_1 = FF_OPTIONS["fake_factor"]["tt_1"]
     FF_name_tt_2 = FF_OPTIONS["fake_factor"]["tt_2"]
 
-    def __new__(cls) -> "Used":
+    def __new__(cls) -> "RuntimeVariables":
         if not hasattr(cls, "instance"):
-            cls.instance = super(Used, cls).__new__(cls)
+            cls.instance = super(RuntimeVariables, cls).__new__(cls)
             return cls.instance
 
 
