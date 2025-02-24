@@ -1,4 +1,5 @@
 from copy import deepcopy
+from functools import partial
 import logging
 import ROOT
 from .defaults import _name_string, _process_map, _dataset_map
@@ -57,45 +58,38 @@ def fake_factor_estimation(
 
     if special == "TauES":
         logger.debug("TauES special selection")
-    _string = _name_string.format(
-        dataset="data",
+
+    _common_name_string = partial(
+        _name_string.format,
         channel=channel,
-        process="",
-        selection="-" + selection if selection != "" else "",
-        variation="anti_iso"
-        if "scale_t" in variation or "sub_syst" in variation
-        else variation,
         variable=variable,
+        selection="-" + selection if selection != "" else "",
+    )
+
+    _string = _common_name_string(
+        dataset="data",
+        process="",
+        variation="anti_iso" if "scale_t" in variation or "sub_syst" in variation else variation,
     )
     logger.debug(f"Trying to get object {_string}")
     base_hist = rootfile.Get(_string).Clone()
     for proc in procs_to_subtract:
         if "anti_iso_CMS_scale_t_emb" in variation and proc != "EMB":
-            _string = _name_string.format(
+            _string = _common_name_string(
                 dataset=_dataset_map[proc],
-                channel=channel,
                 process="-" + _process_map[proc],
-                selection="-" + selection if selection != "" else "",
-                variation=variation.replace("anti_iso_CMS_scale_t_emb","anti_iso_CMS_scale_t") if not "sub_syst" in variation else "anti_iso",
-                variable=variable,
+                variation=variation.replace("anti_iso_CMS_scale_t_emb", "anti_iso_CMS_scale_t") if not "sub_syst" in variation else "anti_iso",
             )
             logger.debug(f"Trying to get object {_string}")
             base_hist.Add(rootfile.Get(_string), -sub_scale)
         else:
-            _string = _name_string.format(
+            _string = _common_name_string(
                 dataset=_dataset_map[proc],
-                channel=channel,
                 process="-" + _process_map[proc],
-                selection="-" + selection if selection != "" else "",
                 variation=variation if not "sub_syst" in variation else "anti_iso",
-                variable=variable,
             )
             logger.debug(f"Trying to get object {_string}")
-            try:
-                base_hist.Add(rootfile.Get(_string), -sub_scale)
-            except TypeError as e:
-                print(_process_map[proc])
-                import pdb; pdb.set_trace()
+            base_hist.Add(rootfile.Get(_string), -sub_scale)
     proc_name = "jetFakes" if is_embedding else "jetFakesMC"
     if doTauES:
         proc_name = "jetFakes{}".format(special)

@@ -53,10 +53,11 @@ def sorted_bkg_processes(x: List[str], /):
 
 
 class ControlShapeBkgProcesses:
+    #                                    | FF-processes -------------->| EMB-processes --->|
     FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT']
-    EMB_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCDEMB', 'W', 'EMB']
     EMB_FF = ['VVL', 'TTL', 'ZL', 'jetFakesEMB', 'EMB']
     CLASSIC_FF = ['VVL', 'TTL', 'ZL', 'jetFakes', 'VVT', 'TTT', 'ZTT']
+    EMB_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCDEMB', 'W', 'EMB']
 
     LO_NLO_PROCESSES = {
         "ZTT": "ZTT_NLO",
