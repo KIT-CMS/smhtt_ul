@@ -1237,6 +1237,19 @@ def NMSSM_Ytt_process_selection(channel, era, boosted_tau=False):
     NMSSM_weights.append(btag_weight)
     return Selection(name="NMSSM_Ytt", weights=NMSSM_weights)
 
+def HH2B2Tau_process_selection(channel, era, boosted_tau=False):
+    HH2B2Tau_weights = MC_base_process_selection(channel, era, boosted_tau).weights
+    HH2B2Tau_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight * 0.1", "crossSectionPerEventWeight"),
+        ]
+    )
+    # TODO: Makes this sense?
+    btag_weight = ("btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    HH2B2Tau_weights.append(btag_weight)
+    return Selection(name="HH2B2Tau", weights=HH2B2Tau_weights)
+
 
 def FF_training_process_selection(channel, era):
     cuts = []

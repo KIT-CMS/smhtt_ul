@@ -14,7 +14,7 @@ small_files_2018 = {
         "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_1734539918-00000000000000000000000000000000",
         "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_Ext1_1736873492-00000000000000000000000000000000"
     ],
-    "WJets": [ # to add
+    "W": [
         "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_aakhmets-mc_2018UL_wjets_WJetsToLNu_1729599421-00000000000000000000000000000000",
         "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_Ext1_1734539918-00000000000000000000000000000000"
     ],
@@ -73,7 +73,7 @@ large_files_2018 = {
         "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018C_1730057166-00000000000000000000000000000000",
         "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018D_1729599421-00000000000000000000000000000000"
     ],
-    "HH2B2Tau": [ # to add
+    "HH2B2Tau": [
         "GluGluToHHTo2B2Tau_TuneCP5_PSWeights_node_SM_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_gghh2b2tau_GluGluToHHTo2B2Tau_Node_SM_1733315721-00000000000000000000000000000000"
     ],
     "DY": [
@@ -87,7 +87,7 @@ large_files_2018 = {
         "DYJetsToLL_M-50_HT-70to100_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-70to100_1736873492-00000000000000000000000000000000",
         "DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-800to1200_1734539918-00000000000000000000000000000000"
     ],
-    "WJets": [ # to add
+    "W": [
         "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-100To200_1737472169-00000000000000000000000000000000",
         "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-100To200_Ext1_1734539918-00000000000000000000000000000000",
         "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-1200To2500_1734539918-00000000000000000000000000000000",
@@ -149,7 +149,7 @@ large_files_2018 = {
         "ZZTo2Q2Nu_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_ZZ_ZZTo2Q2Nu_1734539918-00000000000000000000000000000000",
         "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_aakhmets-mc_2018UL_diboson_ZZTo4L_1729599421-00000000000000000000000000000000"
     ],
-    "VVV": [
+    "VVV": [ # to add
         "WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WWW_1734539918-00000000000000000000000000000000",
         "WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WWW_Ext1_1737472169-00000000000000000000000000000000",
         "WWZJetsTo4L2Nu_4F_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WWZJetsTo4L2Nu_1734539918-00000000000000000000000000000000",
@@ -170,7 +170,7 @@ large_files_2018 = {
         "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZH_HToBB_ZToLL_1736873492-00000000000000000000000000000000",
         "ZH_HToBB_ZToQQ_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZH_HToBB_ZToQQ_1734539918-00000000000000000000000000000000"
     ],
-    "TTV": [
+    "TTV": [ # to add
         "TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_sdaigler-mc_2018UL_Other_TTWJetsToLNu_1734539918-00000000000000000000000000000000",
         "TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_sdaigler-mc_2018UL_Other_TTWJetsToQQ_1734539918-00000000000000000000000000000000",
         "TTWH_TuneCP5_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_Other_TTWH_1736873492-00000000000000000000000000000000",
