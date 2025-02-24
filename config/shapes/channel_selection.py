@@ -82,7 +82,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts["os"] = "((q_1 * q_2) < 0)"
 
     if "DR;ff" in selection_option:
-        cuts.update(modify_for_ff_DR(None, None))
+        cuts.update(modify_for_ff_DR(None, selection_option.split(";")[-1]))
 
     wps_dict = {"VVTight", "VVTight", "Tight", "Medium", "Loose", "VLoose", "VVLoose", "VVVLoose"}
     try:
