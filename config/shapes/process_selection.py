@@ -517,14 +517,14 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                     (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight"),
                 ]
             )
-            # if apply_wps:
-            #     ztt_embedded_weights.extend(
-            #     [
-            #         ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-            #     ]
-            #     )
-            # if not apply_wps:
-            #     pass
+            if apply_wps:
+                ztt_embedded_weights.extend(
+                    [
+                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    ]
+                )
+            if not apply_wps:
+                pass
         elif era == "2016preVFP" or era == "2016postVFP":
             ztt_embedded_weights.extend(
                 [
