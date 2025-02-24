@@ -218,7 +218,7 @@ anti_iso_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
         "anti_iso",
         "tau_iso",
         Cut("(id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     )
 )
 anti_iso_lt_no_ff = LazyVariable(
@@ -240,7 +240,7 @@ anti_iso_tt_mcl = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt
             ),
             Cut("gen_match_1 != 6", "tau_anti_iso"),
         ],
-        Weight(Used.FF_name_tt_2, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_tt_2, "fake_factor"),
     )
 )
 anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
@@ -251,7 +251,7 @@ anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
             "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5))",
             "tau_anti_iso"
         ),
-        Weight(f"0.5 * {Used.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {Used.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
+        Weight(f"0.5 * {RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
     )
 )
 wfakes_tt = ReplaceCut(
