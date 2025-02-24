@@ -1547,7 +1547,51 @@ ff_variations_tau_es_emb_lt = [
 # collections for ordering
 
 
-class FakeProcessEstimationVariations:
+__doc__ = """
+Usage Example for Variation Collections
+
+This module defines several systematic variation collections that group different
+systematic adjustments such as fake process estimations, energy scale shifts, MET variations,
+efficiency corrections, fake rate variations, trigger efficiencies, and additional uncertainties.
+Each collection can be applied at once using `<VariationCollection>.unrolled()` that returns a 
+list of all variations defined within that collection.
+
+For example, instead of fetching each variation individually this would be possible:
+
+    from config.shapes import variations
+
+    # Retrieve and loop over all fake process estimation variations
+    variations = [
+        tau_es_3prong,
+        tau_es_3prong1pizero,
+        tau_es_1prong,
+        tau_es_1prong1pizero,
+        ...
+    ]
+    # Or use
+    variations = variations.EnergyScaleVariations.unrolled()
+    # Or another collection you might seems be more fitting i.e. process wise.
+
+This pattern applies similarly to other collections. Thus, you only need to import the corresponding
+variation collection and call its `unrolled()` method to obtain a list of all variations, making the 
+application of systematics both concise and consistent.
+
+The individual Application either trough variations.tau_es_3prong or variations.EnergyScaleVariations.tau_es_3prong
+is still possible.
+"""
+
+
+class _VariationCollection:
+    @classmethod
+    def unrolled(cls):
+        results = []
+        for name, value in cls.__dict__.items():
+            if not name.startswith("__"):
+                results.append(value)
+        return results
+
+
+class FakeProcessEstimationVariations(_VariationCollection):
     same_sign = same_sign
     same_sign_em = same_sign_em
     anti_iso_lt = anti_iso_lt
@@ -1557,7 +1601,7 @@ class FakeProcessEstimationVariations:
     abcd_method = abcd_method
 
 
-class EnergyScaleVariations:
+class EnergyScaleVariations(_VariationCollection):
     tau_es_3prong = tau_es_3prong
     tau_es_3prong1pizero = tau_es_3prong1pizero
     tau_es_1prong = tau_es_1prong
@@ -1580,13 +1624,13 @@ class EnergyScaleVariations:
     # ele_fake_es = ele_fake_es
 
 
-class METVariations:
+class METVariations(_VariationCollection):
     met_unclustered = met_unclustered
     recoil_resolution = recoil_resolution
     recoil_response = recoil_response
 
 
-class EffifiencyVariations:
+class EffifiencyVariations(_VariationCollection):
     tau_id_eff_lt = tau_id_eff_lt
     tau_id_eff_tt = tau_id_eff_tt
     emb_tau_id_eff_lt = emb_tau_id_eff_lt
@@ -1594,13 +1638,13 @@ class EffifiencyVariations:
     emb_tau_id_eff_lt_corr = emb_tau_id_eff_lt_corr
 
 
-class FakeRateVariations:
+class FakeRateVariations(_VariationCollection):
     jet_to_tau_fake = jet_to_tau_fake
     zll_et_fake_rate = zll_et_fake_rate
     zll_mt_fake_rate = zll_mt_fake_rate
 
 
-class TriggerEfficiencyVariations:
+class TriggerEfficiencyVariations(_VariationCollection):
     # TODO add trigger efficiency uncertainties
     # tau_trigger_eff_tt = tau_trigger_eff_tt
     # tau_trigger_eff_tt_emb = tau_trigger_eff_tt_emb
@@ -1611,7 +1655,7 @@ class TriggerEfficiencyVariations:
 
 
 # Additional uncertainties
-class AdditionalVariations:
+class AdditionalVariations(_VariationCollection):
     prefiring = prefiring
     zpt = zpt
     top_pt = top_pt
@@ -1623,7 +1667,7 @@ class AdditionalVariations:
     # emb_decay_mode_eff_tt = emb_decay_mode_eff_tt
 
 
-class JetFakeVariations:
+class JetFakeVariations(_VariationCollection):
     # TODO add jetfake uncertainties
     wfakes_tt = wfakes_tt
     wfakes_w_tt = wfakes_w_tt
@@ -1635,4 +1679,3 @@ class JetFakeVariations:
     # qcd_variations_em = qcd_variations_em
     # ff_variations_tau_es_tt = ff_variations_tau_es_tt
     # ff_variations_tau_es_tt_mcl = ff_variations_tau_es_tt_mcl
-
