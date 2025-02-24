@@ -125,17 +125,17 @@ if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS  \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS  \
         --era $ERA --num-processes 4 --num-threads 6 \
         --optimization-level 1 --skip-systematic-variations \
         --output-file $shapes_output
 
     python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
 
-    # now plot the shapes by looping over the categories
-    for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
-        python3 plotting/plot_ml_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --channel ${CHANNEL} --embedding --fake-factor --category ${category} --output-dir output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/controlplots --normalize-by-bin-width
-    done
+    # # now plot the shapes by looping over the categories
+    # for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
+    #     python3 plotting/plot_ml_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --channel ${CHANNEL} --category ${category} --output-dir output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/controlplots --normalize-by-bin-width 
+    # done
 fi
 
 if [[ $MODE == "LOCAL" ]]; then
