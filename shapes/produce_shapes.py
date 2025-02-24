@@ -429,6 +429,8 @@ def main(args):
         )
 
         common_kwargs = dict(
+            era=args.era,
+            channel=channel,
             datasets=nominals[args.era]["datasets"][channel],
             special_analysis=args.special_analysis,
             apply_tauid=args.apply_tauid,
