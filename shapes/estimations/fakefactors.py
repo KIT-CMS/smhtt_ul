@@ -38,14 +38,12 @@ def fake_factor_estimation(
             procs_to_subtract.extend(ff_processes_covered_by_mc)
             logger.info(f"DR;ff;qcd selection, subtracting {ff_processes_covered_by_mc}")
         elif "wjet" in selection_option:
-            _processes = deepcopy(ff_processes_covered_by_mc)
-            _processes.remove("W")
-            procs_to_subtract.extend(_processes)
+            ff_processes_covered_by_mc.remove("W")
+            procs_to_subtract.extend(ff_processes_covered_by_mc)
             logger.info(f"DR;ff;wjet selection, subtracting {procs_to_subtract}")
         elif "ttbar" in selection_option:
-            _processes = deepcopy(ff_processes_covered_by_mc)
-            _processes.remove("TTJ")
-            procs_to_subtract.extend(_processes)
+            ff_processes_covered_by_mc.remove("TTJ")
+            procs_to_subtract.extend(ff_processes_covered_by_mc)
             logger.info(f"DR;ff;ttbar selection, subtracting {procs_to_subtract}")
         else:
             msg = f"Unknown selection option for fake factor estimation: {selection_option}"
