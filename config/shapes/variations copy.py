@@ -1,8 +1,3 @@
-import inspect
-import logging
-from typing import Any, Callable
-from collections import defaultdict
-
 from ntuple_processor.utils import Cut
 from ntuple_processor.utils import Weight
 
@@ -20,192 +15,50 @@ from ntuple_processor.variations import ReplaceMultipleCutsAndAddWeight
 from ntuple_processor.variations import ReplaceVariableReplaceCutAndAddWeight
 from ntuple_processor.variations import ChangeDatasetReplaceMultipleCutsAndAddWeight
 
-from config.logging_setup_configs import setup_logging
+fake_factor_name = "raw_fake_factor"  # "fake_factor" or "raw_fake_factor"
 
 
-logger = logging.getLogger(__name__)
-logger = setup_logging("variations", logger, logging.DEBUG)
-
-FF_OPTIONS = {
-    "fake_factor": {
-        "lt": "fake_factor_2",
-        "tt_1": "fake_factor_1",
-        "tt_2": "fake_factor_2",
-    },
-    "raw_fake_factor": {
-        "lt": "raw_fake_factor_2",
-        "tt_1": "raw_fake_factor_1",
-        "tt_2": "raw_fake_factor_2",
-    },
-    "fake_factor_without_DR_SR": {
-        "lt": """(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2 * qcd_correction_wo_DR_SR_2 + raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2 * wjets_correction_wo_DR_SR_2 + raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2 * ttbar_correction_wo_DR_SR_2)""",
-    },
-    "fake_factor_with_DR_SR_without_correction": {
-        "lt": """(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2 * qcd_DR_SR_correction_2 + raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2 * wjets_DR_SR_correction_2 + raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)""",
-    },
-    "raw_qcd_fake_factor_with_fraction": {
-        "lt": "(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2)",
-    },
-    "raw_qcd_fake_factor": {
-        "lt": "raw_qcd_fake_factor_2",
-    },
-    "raw_wjets_fake_factor_with_fraction": {
-        "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)",
-    },
-    "raw_wjets_fake_factor": {
-        "lt": "raw_wjets_fake_factor_2",
-    },
-    "raw_ttbar_fake_factor_with_fraction": {
-        "lt": "(raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)",
-    },
-    "raw_ttbar_fake_factor": {
-        "lt": "raw_ttbar_fake_factor_2",
-    },
-}
-
-# current options
-# "fake_factor_2"
-# "qcd_DR_SR_correction_2"
-# "qcd_correction_wo_DR_SR_2"
-# "qcd_fake_factor_2"
-# "qcd_fake_factor_correction_2"
-# "qcd_fake_factor_fraction_2"
-# "raw_fake_factor_2"
-# "raw_qcd_fake_factor_2"
-# "raw_ttbar_fake_factor_2"
-# "raw_wjets_fake_factor_2"
-# "ttbar_DR_SR_correction_2"
-# "ttbar_correction_wo_DR_SR_2"
-# "ttbar_fake_factor_2"
-# "ttbar_fake_factor_correction_2"
-# "ttbar_fake_factor_fraction_2"
-# "wjets_DR_SR_correction_2"
-# "wjets_correction_wo_DR_SR_2"
-# "wjets_fake_factor_2"
-# "wjets_fake_factor_correction_2"
-# "wjets_fake_factor_fraction_2"
+from dataclasses import dataclass
 
 
-def set_ff_type(ff_type):
-    if ff_type not in FF_OPTIONS:
-        logger.error(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
-        raise KeyError(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
+class FlagObject:
+    def __init__(self, name: str):
+        self.name = name
 
-    logger.info(f"Setting fake factor option to {ff_type}= {FF_OPTIONS[ff_type]}")
-    Used.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
-    logger.info("Skipping tt_1 and tt_2 for now.")
+    def __call__(self, value):
+        if isinstance(value, str):
+            if "{wp}" in self.name:
+                return self.__class__(self.name.format(wp=value))
+            elif value in self.name:
+                return self.__class__(self.name)
+            else:
+                raise ValueError(f"Cannot trigger value for flag object with value {value}")
+        elif isinstance(value, int):
+            if "{wp}" in self.name:
+                raise ValueError("Cannot trigger value for flag object with wild card")
+            return self.trigger if value == 1 else self.not_trigger
 
+    @property
+    def trigger(self):
+        return f"({self.name} > 0.5)"
 
-class Used(object):
-    """
-    A singleton-like container class holding several variables that can be adjusted in time.
-
-    Attributes:
-        FF_name_lt (str): Fake factor name for the "lt" channel.
-        FF_name_tt_1 (str): Fake factor name for the first "tt" channel.
-        FF_name_tt_2 (str): Fake factor name for the second "tt" channel.
-
-    Usage:
-        >>> used = Used()
-        >>> print(used.FF_name_lt)
-
-    Note:
-        This class implements a singleton-like pattern by returning the same instance
-        on every instantiation.
-    """
-    FF_name_lt = FF_OPTIONS["fake_factor"]["lt"]
-    FF_name_tt_1 = FF_OPTIONS["fake_factor"]["tt_1"]
-    FF_name_tt_2 = FF_OPTIONS["fake_factor"]["tt_2"]
-
-    def __new__(cls) -> "Used":
-        if not hasattr(cls, "instance"):
-            cls.instance = super(Used, cls).__new__(cls)
-            return cls.instance
+    @property
+    def not_trigger(self):
+        return f"({self.name} < 0.5)"
 
 
-class LazyVariable:
-    """
-    A lazy evaluation wrapper for variables whose underlying value may change over time.
+@dataclass
+class Names:
+    id_tau_vsjet_1: FlagObject = FlagObject("id_tau_vsJet_{wp}_1")
+    id_tau_vsjet_2: FlagObject = FlagObject("id_tau_vsJet_{wp}_2")
 
-    This class accepts a factory callable that produces the actual instance to use.
-    Any attribute access or string representation is delegated to the instance returned
-    by the factory at call time, ensuring that modifications to the underlying variable
-    are reflected immediately.
 
-    Usage:
-        >>> def my_factory() -> SomeClass:
-        ...     return SomeClass()
-        >>> lazy_var = LazyVariable(my_factory)
-        >>> # Any attribute access on lazy_var is delegated to the instance returned by my_factory.
-        >>> value = lazy_var.some_attribute
-    """
-
-    def __init__(self, factory: Callable[[], Any]) -> None:
-        """
-        Initializes a LazyVariable with a factory callable.
-
-        Args:
-            factory (Callable[[], Any]): A callable that returns the actual variable instance.
-        """
-        self.factory: Callable[[], Any] = factory
-        try:
-            caller = inspect.stack()[1]
-            logger.debug(f"LazyVariable created at {caller.filename}:{caller.lineno} with {inspect.getsource(factory)}")
-        except NameError:  # logger or inspect not defined
-            pass
-
-    def __getattr__(self, name: str) -> Any:
-        """
-        Delegates attribute access to the instance returned by the factory.
-
-        Args:
-            name (str): The name of the attribute to access.
-
-        Returns:
-            Any: The attribute value from the instantiated object.
-        """
-        instance = self.factory()
-        try:
-            caller = inspect.stack()[1]
-            logger.debug(f"LazyVariable __getattr__: '{name}' called from {caller.filename}:{caller.lineno}, returning {instance}")
-        except NameError:  # logger or inspect not defined
-            pass
-        return getattr(instance, name)
-
-    def __repr__(self) -> str:
-        """
-        Returns the official string representation of the LazyVariable.
-
-        Returns:
-            str: The string representation of the object returned by the factory.
-        """
-        result = repr(self.factory())
-        try:
-            caller = inspect.stack()[1]
-            logger.debug(f"LazyVariable __repr__: called from {caller.filename}:{caller.lineno}, returning {result}")
-        except NameError:  # logger or inspect not defined
-            pass
-        return result
-
-    def __str__(self) -> str:
-        """
-        Returns the informal string representation of the LazyVariable.
-
-        Returns:
-            str: The string representation of the object returned by the factory.
-        """
-        result = str(self.factory())
-        try:
-            caller = inspect.stack()[1]
-            logger.debug(f"LazyVariable __str__: called from {caller.filename}:{caller.lineno}, returning {result}")
-        except NameError:  # logger or inspect not defined
-            pass
-        return result
-
+names = Names()
 
 #  Variations needed for the various jet background estimations.
-# TODO: In order to properly use this variation friend trees with the correct weights need to be created.
 same_sign = ReplaceCut("same_sign", "os", Cut("q_1*q_2>0", "ss"))
+
+# TODO: In order to properly use this variation friend trees with the correct weights need to be created.
 same_sign_em = ReplaceCutAndAddWeight(
     "same_sign",
     "os",
@@ -218,7 +71,8 @@ abcd_method = [
         "abcd_anti_iso",
         "tau_iso",
         Cut(
-            "(id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+            # "(id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+            f'({names.id_tau_vsjet_1("Tight")(1)} && {names.id_tau_vsjet_2("Tight")(0)} && {names.id_tau_vsjet_2("VLoose")(1)})',
             "tau_anti_iso",
         ),
     ),
@@ -235,47 +89,45 @@ abcd_method = [
     ),
 ]
 
-anti_iso_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-    lambda: ReplaceCutAndAddWeight(
-        "anti_iso",
-        "tau_iso",
-        Cut("(id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
-    )
+anti_iso_lt = ReplaceCutAndAddWeight(
+    "anti_iso",
+    "tau_iso",
+    Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+    # Weight("1.0", "fake_factor"),
+    Weight(fake_factor_name, "fake_factor"),
 )
-anti_iso_lt_no_ff = LazyVariable(
-    lambda: ReplaceCutAndAddWeight(
-        "anti_iso",
-        "tau_iso",
-        Cut("(id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
-        Weight("1.0", "fake_factor"),
-    )
+anti_iso_lt_no_ff = ReplaceCutAndAddWeight(
+    "anti_iso",
+    "tau_iso",
+    Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+    Weight("1.0", "fake_factor"),
 )
-anti_iso_tt_mcl = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-    lambda: ReplaceMultipleCutsAndAddWeight(
-        "anti_iso",
-        ["tau_iso", "ff_veto"],
-        [
-            Cut(
-                "(id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5)",
-                "tau_anti_iso",
-            ),
-            Cut("gen_match_1 != 6", "tau_anti_iso"),
-        ],
-        Weight(Used.FF_name_tt_2, "fake_factor"),
-    )
-)
-anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-    lambda: ReplaceCutAndAddWeight(
-        "anti_iso",
-        "tau_iso",
+anti_iso_tt_mcl = ReplaceMultipleCutsAndAddWeight(
+    "anti_iso",
+    ["tau_iso", "ff_veto"],
+    [
         Cut(
-            "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5))",
-            "tau_anti_iso"
+            "(id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5)",
+            "tau_anti_iso",
         ),
-        Weight(f"0.5 * {Used.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {Used.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
-    )
+        Cut("gen_match_1 != 6", "tau_anti_iso"),
+    ],
+    # Weight("1.0", "fake_factor"),
+    Weight(f"{fake_factor_name}_2", "fake_factor"),
 )
+
+anti_iso_tt = ReplaceCutAndAddWeight(
+    "anti_iso",
+    "tau_iso",
+    Cut(
+        "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5))",
+        "tau_anti_iso"
+    ),
+    # Weight("1.0", "fake_factor"),
+    Weight(f"0.5 * {fake_factor_name}_1 * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {fake_factor_name}_2 * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
+)
+
+
 wfakes_tt = ReplaceCut(
     "wfakes", "ff_veto", Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut")
 )
@@ -1043,56 +895,56 @@ ff_variations_tau_es_lt = [
         "tauEs1prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong_EraUp",
         "tauEs1prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong1pizero_EraDown",
         "tauEs1prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong1pizero_EraUp",
         "tauEs1prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong_EraDown",
         "tauEs3prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong_EraUp",
         "tauEs3prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong1pizero_EraDown",
         "tauEs3prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong1pizero_EraUp",
         "tauEs3prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
 ]
 
@@ -1103,56 +955,56 @@ ff_variations_tau_es_emb_lt = [
         "tauEs1prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong_EraUp",
         "tauEs1prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong1pizero_EraDown",
         "tauEs1prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong1pizero_EraUp",
         "tauEs1prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong_EraDown",
         "tauEs3prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong_EraUp",
         "tauEs3prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong1pizero_EraDown",
         "tauEs3prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong1pizero_EraUp",
         "tauEs3prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(fake_factor_name, "fake_factor"),
     ),
 ]
 
@@ -1541,98 +1393,3 @@ ff_variations_tau_es_emb_lt = [
 #         Weight("em_qcd_extrap_down_Weight", "qcd_weight"),
 #     ),
 # ]
-
-
-# ------------------------------------------------------------------------------------------
-# collections for ordering
-
-
-class FakeProcessEstimationVariations:
-    same_sign = same_sign
-    same_sign_em = same_sign_em
-    anti_iso_lt = anti_iso_lt
-    anti_iso_lt_no_ff = anti_iso_lt_no_ff
-    anti_iso_tt = anti_iso_tt
-    anti_iso_tt_mcl = anti_iso_tt_mcl
-    abcd_method = abcd_method
-
-
-class EnergyScaleVariations:
-    tau_es_3prong = tau_es_3prong
-    tau_es_3prong1pizero = tau_es_3prong1pizero
-    tau_es_1prong = tau_es_1prong
-    tau_es_1prong1pizero = tau_es_1prong1pizero
-    mu_fake_es_inc = mu_fake_es_inc
-    ele_fake_es = ele_fake_es
-    emb_tau_es_3prong = emb_tau_es_3prong
-    emb_tau_es_3prong1pizero = emb_tau_es_3prong1pizero
-    emb_tau_es_1prong = emb_tau_es_1prong
-    emb_tau_es_1prong1pizero = emb_tau_es_1prong1pizero
-    jet_es = jet_es
-    # TODO add missing ES
-    # mu_fake_es_1prong = mu_fake_es_1prong
-    # mu_fake_es_1prong1pizero = mu_fake_es_1prong1pizero
-    # ele_es = ele_es
-    # ele_res = ele_res
-    emb_e_es,
-    # ele_fake_es_1prong = ele_fake_es_1prong
-    # ele_fake_es_1prong1pizero = ele_fake_es_1prong1pizero
-    # ele_fake_es = ele_fake_es
-
-
-class METVariations:
-    met_unclustered = met_unclustered
-    recoil_resolution = recoil_resolution
-    recoil_response = recoil_response
-
-
-class EffifiencyVariations:
-    tau_id_eff_lt = tau_id_eff_lt
-    tau_id_eff_tt = tau_id_eff_tt
-    emb_tau_id_eff_lt = emb_tau_id_eff_lt
-    emb_tau_id_eff_tt = emb_tau_id_eff_tt
-    emb_tau_id_eff_lt_corr = emb_tau_id_eff_lt_corr
-
-
-class FakeRateVariations:
-    jet_to_tau_fake = jet_to_tau_fake
-    zll_et_fake_rate = zll_et_fake_rate
-    zll_mt_fake_rate = zll_mt_fake_rate
-
-
-class TriggerEfficiencyVariations:
-    # TODO add trigger efficiency uncertainties
-    # tau_trigger_eff_tt = tau_trigger_eff_tt
-    # tau_trigger_eff_tt_emb = tau_trigger_eff_tt_emb
-    trigger_eff_mt = trigger_eff_mt
-    trigger_eff_et = trigger_eff_et
-    trigger_eff_et_emb = trigger_eff_et_emb
-    trigger_eff_mt_emb = trigger_eff_mt_emb
-
-
-# Additional uncertainties
-class AdditionalVariations:
-    prefiring = prefiring
-    zpt = zpt
-    top_pt = top_pt
-    pileup_reweighting = pileup_reweighting
-    # TODO add missing uncertainties
-    # btag_eff = btag_eff
-    # mistag_eff = mistag_eff
-    # emb_decay_mode_eff_lt = emb_decay_mode_eff_lt
-    # emb_decay_mode_eff_tt = emb_decay_mode_eff_tt
-
-
-class JetFakeVariations:
-    # TODO add jetfake uncertainties
-    wfakes_tt = wfakes_tt
-    wfakes_w_tt = wfakes_w_tt
-    ff_variations_lt = ff_variations_lt
-    ff_variations_tau_es_lt = ff_variations_tau_es_lt
-    ff_variations_tau_es_emb_lt = ff_variations_tau_es_emb_lt
-    # ff_variations_tt = ff_variations_tt
-    # ff_variations_tt_mcl = ff_variations_tt_mcl
-    # qcd_variations_em = qcd_variations_em
-    # ff_variations_tau_es_tt = ff_variations_tau_es_tt
-    # ff_variations_tau_es_tt_mcl = ff_variations_tau_es_tt_mcl
-

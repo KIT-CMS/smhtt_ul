@@ -9,6 +9,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 impacts*/
+*.bak
 
 # C extensions
 *.so

@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 import ROOT
 from .defaults import _name_string, _process_map, _dataset_map
 logger = logging.getLogger("")
@@ -74,117 +75,42 @@ def qcd_estimation(
     logger.debug("is_embedding: %s", is_embedding)
     logger.debug("extrapolation_factor: %s", extrapolation_factor)
     logger.debug("sub_scale: %s", sub_scale)
-    if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
-        if is_nlo:
-            procs_to_subtract = ["EMB", "ZL_NLO", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W_NLO"]
-        if "em" in channel:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
-            if is_nlo:
-                procs_to_subtract = ["EMB", "ZL_NLO", "TTL", "VVL", "W_NLO"]
-        elif channel in ["mm", "ee"]:
-            if is_nlo:
-                procs_to_subtract = ["EMB", "W_NLO"]
-            else:
-                procs_to_subtract = ["EMB", "W"]
-        # elif "et" in channel:
-        #     procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ"]
-    else:
-        procs_to_subtract = [
-            "ZTT",
-            "ZL",
-            "ZJ",
-            "TTT",
-            "TTL",
-            "TTJ",
-            "VVT",
-            "VVL",
-            "VVJ",
-            "W",
-        ]
-        if is_nlo:
-            procs_to_subtract = [
-                "ZTT_NLO",
-                "ZL_NLO",
-                "ZJ_NLO",
-                "TTT",
-                "TTL",
-                "TTJ",
-                "VVT",
-                "VVL",
-                "VVJ",
-                "W_NLO",
-            ]
-        if "em" in channel:
-            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
-            if is_nlo:
-                procs_to_subtract = ["ZTT_NLO", "ZL_NLO", "TTT", "TTL", "VVT", "VVL", "W_NLO"]
-        elif channel in ["mm", "ee"]:
-            if is_nlo:
-                procs_to_subtract = ["ZL_NLO", "W_NLO", "VVL", "TTL"]
-            else:
-                procs_to_subtract = ["ZL", "W", "VVL", "TTL"]
-        # elif "et" in channel:
-        #     procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
 
-    logger.debug(
-        "Trying to get object {}".format(
-            _name_string.format(
-                dataset="data",
-                channel=channel,
-                process="",
-                selection="-" + selection if selection != "" else "",
-                variation="same_sign" if "subtrMC" in variation else variation,
-                variable=variable,
-            )
-        )
+    # Found a bug with ZJ/ZJ_NLO in the previous solution. This fixes it.
+    LO_NLO_PROCESSES = {"ZTT": "ZTT_NLO", "W": "W_NLO", "ZL": "ZL_NLO", "ZJ": "ZJ_NLO"}
+
+    procs_to_subtract = ["W"]  # all cases have at least this
+    procs_to_subtract.extend(["EMB"] if is_embedding else ["ZTT", "TTT", "VVT"])  # EMB or MC
+
+    if channel in {"et", "mt", "tt"}:  # semi-leptonic and fully-hadronic
+        procs_to_subtract.extend(["ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ"])
+    else:  # fully-leptonic - a bunch of extra cases... TODO: can this be removed?
+        if "em" in channel:
+            procs_to_subtract.extend(["ZL", "TTL", "VVL"])
+        elif channel in {"mm", "ee"} and not is_embedding:
+            procs_to_subtract = ["ZL", "W", "VVL", "TTL"]  # caution: replaced! no EMB or EMB MC equivalent
+
+    if is_nlo:
+        for lo, nlo in LO_NLO_PROCESSES.items():
+            if lo in procs_to_subtract:
+                procs_to_subtract.remove(lo)
+                procs_to_subtract.append(nlo)
+
+    _common_name_string = partial(
+        _name_string.format,
+        channel=channel,
+        variable=variable,
+        variation="same_sign" if "subtrMC" in variation else variation,
+        selection="-" + selection if selection != "" else "",
     )
-    base_hist = rootfile.Get(
-        _name_string.format(
-            dataset="data",
-            channel=channel,
-            process="",
-            selection="-" + selection if selection != "" else "",
-            variation="same_sign" if "subtrMC" in variation else variation,
-            variable=variable,
-        )
-    ).Clone()
+
+    _string = _common_name_string(dataset="data", process="")
+    logger.debug(f"Trying to get object {_string}")
+    base_hist = rootfile.Get(_string).Clone()
     for proc in procs_to_subtract:
-        logger.debug(
-            "Trying to get object {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation="same_sign" if "subtrMC" in variation else variation,
-                    variable=variable,
-                )
-            )
-        )
-        hist = rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation="same_sign" if "subtrMC" in variation else variation,
-                    variable=variable,
-                )
-            )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation="same_sign" if "subtrMC" in variation else variation,
-                    variable=variable,
-                )
-            ),
-            -sub_scale,
-        )
+        _string = _common_name_string(dataset=_dataset_map[proc], process="-" + _process_map[proc])
+        logger.debug(f"Trying to get object {_string}")
+        base_hist.Add(rootfile.Get(_string), -sub_scale)
 
     proc_name = "QCD" if is_embedding else "QCDMC"
     if is_nlo:
@@ -193,24 +119,16 @@ def qcd_estimation(
         qcd_variation = "Nominal"
     else:
         qcd_variation = variation.replace("same_sign_", "")
-    logger.debug(
-        "Use extrapolation_factor factor with value %.2f to scale from ss to os region.",
-        extrapolation_factor,
-    )
+    logger.debug(f"Use extrapolation_factor factor with value {extrapolation_factor} to scale from ss to os region.")
     if base_hist.Integral() > 0.0:
         base_hist.Scale(extrapolation_factor)
     else:
-        logger.warning(
-            "No data in same-sign region for histogram %s. Setting extrapolation factor to 0.0",
-            base_hist.GetName(),
-        )
+        logger.warning(f"No data in same-sign region for histogram {base_hist.GetName()}. Setting extrapolation factor to 0.0")
         base_hist.Scale(0.0)
     variation_name = (
         base_hist.GetName()
         .replace("data", proc_name)
-        .replace(
-            variation if "subtrMC" not in variation else "same_sign", qcd_variation
-        )
+        .replace(variation if "subtrMC" not in variation else "same_sign", qcd_variation)
         .replace(channel, "-".join([channel, proc_name]), 1)
     )
     base_hist.SetName(variation_name)
@@ -227,6 +145,7 @@ def abcd_estimation(
     variation="Nominal",
     is_embedding=True,
     transposed=False,
+    is_nlo=False,
 ):
     logger.debug("Parameters for abcd estimation")
     logger.debug("channel: %s", channel)
@@ -238,130 +157,83 @@ def abcd_estimation(
     if variation != "Nominal" and not variation.startswith("abcd_"):
         # add abcd_ on the front of the variation
         variation = "abcd_" + variation
-    if is_embedding:
-        procs_to_subtract = ["EMB", "ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"]
+
+    LO_NLO_PROCESSES = {"ZTT": "ZTT_NLO", "W": "W_NLO", "ZL": "ZL_NLO", "ZJ": "ZJ_NLO"}
+    procs_to_subtract = []
+    procs_to_subtract.extend(["EMB"] if is_embedding else ["ZTT", "TTT", "VVT"])  # EMB or MC
+    if channel in {"et", "mt", "tt"}:  # semi-leptonic and fully-hadronic
+        procs_to_subtract.extend(["ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "W"])
+    else:  # fully-leptonic - a bunch of extra cases... TODO: can this be removed?
         if "em" in channel:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "W"]
-    else:
-        procs_to_subtract = [
-            "ZTT",
-            "ZL",
-            "ZJ",
-            "TTT",
-            "TTL",
-            "TTJ",
-            "VVT",
-            "VVL",
-            "VVJ",
-            "W",
-        ]
-        if "em" in channel:
-            procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL", "W"]
+            procs_to_subtract.extend(["ZL", "TTL", "VVL", "W"])
+
+    if is_nlo:
+        for lo, nlo in LO_NLO_PROCESSES.items():
+            if lo in procs_to_subtract:
+                procs_to_subtract.remove(lo)
+                procs_to_subtract.append(nlo)
+
+    _common_name_string = partial(
+        _name_string.format,
+        channel=channel,
+        variable=variable,
+    )
 
     # Get the shapes from region B.
-    logger.debug(
-        "Trying to get object {}".format(
-            _name_string.format(
-                dataset="data",
-                channel=channel,
-                process="",
-                selection="-" + selection if selection != "" else "",
-                variation=variation.replace("same_sign_anti_iso", "same_sign")
-                if transposed
-                else variation.replace("same_sign_anti_iso", "anti_iso"),
-                variable=variable,
-            )
-        )
+    _string = _common_name_string(
+        dataset="data",
+        process="",
+        selection="-" + selection if selection != "" else "",
+        variation=variation.replace("same_sign_anti_iso", "same_sign") if transposed else variation.replace("same_sign_anti_iso", "anti_iso"),
     )
-    base_hist = rootfile.Get(
-        _name_string.format(
-            dataset="data",
-            channel=channel,
-            process="",
-            selection="-" + selection if selection != "" else "",
-            variation=variation.replace("same_sign_anti_iso", "same_sign")
-            if transposed
-            else variation.replace("same_sign_anti_iso", "anti_iso"),
-            variable=variable,
-        )
-    ).Clone()
+    logger.debug(f"Trying to get object {_string}")
+    base_hist = rootfile.Get(_string).Clone()
+
     for proc in procs_to_subtract:
-        logger.debug(
-            "Trying to get object {}".format(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation.replace("same_sign_anti_iso", "same_sign")
-                    if transposed
-                    else variation.replace("same_sign_anti_iso", "anti_iso"),
-                    variable=variable,
-                )
-            )
+        _string = _common_name_string(
+            dataset=_dataset_map[proc],
+            process="-" + _process_map[proc],
+            selection="-" + selection if selection != "" else "",
+            variation=variation.replace("same_sign_anti_iso", "same_sign") if transposed else variation.replace("same_sign_anti_iso", "anti_iso"),
         )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation=variation.replace("same_sign_anti_iso", "same_sign")
-                    if transposed
-                    else variation.replace("same_sign_anti_iso", "anti_iso"),
-                    variable=variable,
-                )
-            ),
-            -1.0,
-        )
+        logger.debug(f"Trying to get object {_string}")
+        base_hist.Add(rootfile.Get(_string), -1.0)
+
     # Calculate extrapolation_factor from regions C and D.
     data_yield_C = rootfile.Get(
-        _name_string.format(
+        _common_name_string(
             dataset="data",
-            channel=channel,
             process="",
             selection="-" + selection if selection != "" else "",
-            variation=variation.replace("same_sign_anti_iso", "anti_iso")
-            if transposed
-            else variation.replace("same_sign_anti_iso", "same_sign"),
-            variable=variable,
+            variation=variation.replace("same_sign_anti_iso", "anti_iso") if transposed else variation.replace("same_sign_anti_iso", "same_sign"),
         )
     ).Integral()
     bkg_yield_C = sum(
         rootfile.Get(
-            _name_string.format(
+            _common_name_string(
                 dataset=_dataset_map[proc],
-                channel=channel,
                 process="-" + _process_map[proc],
                 selection="-" + selection if selection != "" else "",
-                variation=variation.replace("same_sign_anti_iso", "anti_iso")
-                if transposed
-                else variation.replace("same_sign_anti_iso", "same_sign"),
-                variable=variable,
+                variation=variation.replace("same_sign_anti_iso", "anti_iso") if transposed else variation.replace("same_sign_anti_iso", "same_sign"),
             )
         ).Integral()
         for proc in procs_to_subtract
     )
     data_yield_D = rootfile.Get(
-        _name_string.format(
+        _common_name_string(
             dataset="data",
-            channel=channel,
             process="",
             selection="-" + selection if selection != "" else "",
             variation=variation,
-            variable=variable,
         )
     ).Integral()
     bkg_yield_D = sum(
         rootfile.Get(
-            _name_string.format(
+            _common_name_string(
                 dataset=_dataset_map[proc],
-                channel=channel,
                 process="-" + _process_map[proc],
                 selection="-" + selection if selection != "" else "",
                 variation=variation,
-                variable=variable,
             )
         ).Integral()
         for proc in procs_to_subtract

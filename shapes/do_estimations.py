@@ -4,6 +4,7 @@ import logging
 import json
 
 import ROOT
+from functools import partial
 
 # import the estimation functions
 from shapes.estimations.additionals import qqH_merge_estimation
@@ -11,9 +12,7 @@ from shapes.estimations.fakefactors import fake_factor_estimation
 from shapes.estimations.qcd import qcd_estimation, abcd_estimation
 from shapes.estimations.ttbar_emb import emb_ttbar_contamination_estimation
 from shapes.estimations.wfakes import wfakes_estimation
-
-
-logger = logging.getLogger("")
+from config.logging_setup_configs import setup_logging
 
 
 def parse_args():
@@ -45,22 +44,14 @@ def parse_args():
         action="store_true",
         help="Add qqh procs estimations to file.",
     )
+    parser.add_argument(
+        "--selection-option",
+        help="Set to the DR used for the fake factor estimation.",
+        choices=["CR", "DR;ff;wjet", "DR;ff;qcd", "DR;ff;ttbar"],
+        default="CR",
+    )
     parser.add_argument("-s", "--special", help="Special selection.", default="")
     return parser.parse_args()
-
-
-def setup_logging(output_file, level=logging.INFO):
-    logger.setLevel(level)
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    file_handler = logging.FileHandler(output_file, "w")
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    return
 
 
 def parse_process_name(name, variation_key):
@@ -135,7 +126,7 @@ def parse_histograms_for_qcd(inputfile):
         )
         if channel is not None:
             if (
-                channel in ["et", "mt", "em", "mm", "ee"]
+                channel in ["et", "mt", "em", "tt", "mm", "ee"]
                 or "abcd_same_sign_anti_iso" in variation
             ):
                 add_input_to_inputdict(
@@ -233,55 +224,8 @@ def main(args):
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
             processname = f"emb{name}"
             eleES_names.append(processname)
-    # Loop over available ff inputs and do the estimations
-    if args.do_ff:
-        logger.info("Starting estimations for fake factors and their variations")
-        ff_inputs = parse_histograms_for_ff(input_file)
-        logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
-        for ch in ff_inputs:
-            for cat in ff_inputs[ch]:
-                logger.info("Do estimation for category %s", cat)
-                for var in ff_inputs[ch][cat]:
-                    for variation in ff_inputs[ch][cat][var]:
-                        estimated_hist = fake_factor_estimation(
-                            input_file, ch, cat, var, variation=variation
-                        )
-                        estimated_hist.Write()
-                        estimated_hist = fake_factor_estimation(
-                            input_file,
-                            ch,
-                            cat,
-                            var,
-                            variation=variation,
-                            is_embedding=False,
-                        )
-                        estimated_hist.Write()
-                        for variation, scale in zip(
-                            [
-                                "CMS_ff_total_sub_syst_Channel_EraUp",
-                                "CMS_ff_total_sub_syst_Channel_EraDown",
-                            ],
-                            [0.9, 1.1],
-                        ):
-                            estimated_hist = fake_factor_estimation(
-                                input_file,
-                                ch,
-                                cat,
-                                var,
-                                variation=variation,
-                                sub_scale=scale,
-                            )
-                            estimated_hist.Write()
-                            estimated_hist = fake_factor_estimation(
-                                input_file,
-                                ch,
-                                cat,
-                                var,
-                                variation=variation,
-                                is_embedding=False,
-                                sub_scale=scale,
-                            )
-                            estimated_hist.Write()
+    else:
+        pass
     if args.do_qcd:
         qcd_inputs = parse_histograms_for_qcd(input_file)
         logger.info("Starting estimations for the QCD mulitjet process.")
@@ -307,16 +251,23 @@ def main(args):
                                 args.era,
                             )
                             extrapolation_factor = 1.0
+                elif channel in ["tt"]:
+                    extrapolation_factor = 1.0  # 1.37
+                else:
+                    pass
                 for var in qcd_inputs[channel][category]:
+                    common_kwargs = dict(
+                        rootfile=input_file,
+                        channel=channel,
+                        selection=category,
+                        variable=var,
+                    )
                     for variation in qcd_inputs[channel][category][var]:
                         if channel in ["et", "mt", "em", "mm", "ee"]:
                             for use_emb in [True, False]:
                                 for use_nlo in [False]:
                                     estimated_hist = qcd_estimation(
-                                        input_file,
-                                        channel,
-                                        category,
-                                        var,
+                                        **common_kwargs,
                                         variation=variation,
                                         is_embedding=use_emb,
                                         is_nlo=use_nlo,
@@ -326,10 +277,7 @@ def main(args):
                         else:
                             for use_emb in [True, False]:
                                 estimated_hist = abcd_estimation(
-                                    input_file,
-                                    channel,
-                                    category,
-                                    var,
+                                    **common_kwargs,
                                     variation=variation,
                                     is_embedding=use_emb,
                                 )
@@ -340,10 +288,7 @@ def main(args):
                         ):
                             for use_emb in [True, False]:
                                 estimated_hist = qcd_estimation(
-                                    input_file,
-                                    channel,
-                                    category,
-                                    var,
+                                    **common_kwargs,
                                     variation=variation,
                                     is_embedding=use_emb,
                                     extrapolation_factor=extrapolation_factor,
@@ -427,6 +372,51 @@ def main(args):
                             embname="EMB",
                         )
                         estimated_hist.Write()
+    # Loop over available ff inputs and do the estimations
+    if args.do_ff:
+        logger.info("Starting estimations for fake factors and their variations")
+        ff_inputs = parse_histograms_for_ff(input_file)
+        logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
+        for ch in ff_inputs:
+            for cat in ff_inputs[ch]:
+                logger.info("Do estimation for category %s", cat)
+                for var in ff_inputs[ch][cat]:
+                    for variation in ff_inputs[ch][cat][var]:
+                        _fake_factor_estimation = partial(
+                            fake_factor_estimation,
+                            rootfile=input_file,
+                            channel=ch,
+                            selection=cat,
+                            variable=var,
+                            selection_option=args.selection_option,
+                        )
+                        estimated_hist = _fake_factor_estimation(
+                            variation=variation,
+                        )
+                        estimated_hist.Write()
+                        estimated_hist = _fake_factor_estimation(
+                            variation=variation,
+                            is_embedding=False,
+                        )
+                        estimated_hist.Write()
+                        for variation, scale in zip(
+                            [
+                                "CMS_ff_total_sub_syst_Channel_EraUp",
+                                "CMS_ff_total_sub_syst_Channel_EraDown",
+                            ],
+                            [0.9, 1.1],
+                        ):
+                            estimated_hist = _fake_factor_estimation(
+                                variation=variation,
+                                sub_scale=scale,
+                            )
+                            estimated_hist.Write()
+                            estimated_hist = _fake_factor_estimation(
+                                variation=variation,
+                                is_embedding=False,
+                                sub_scale=scale,
+                            )
+                            estimated_hist.Write()
 
     logger.info("Successfully finished estimations.")
     # Clean-up.
@@ -436,5 +426,6 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    setup_logging("do_estimations.log", level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger = setup_logging("do_estimations.log", logger, level=logging.INFO)
     main(args)
