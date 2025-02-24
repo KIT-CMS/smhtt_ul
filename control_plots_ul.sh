@@ -49,7 +49,8 @@ if [[ $MODE == "SHAPES" ]]; then
         --optimization-level 1 --control-plots \
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
         --output-file $shapes_output \
-        --xrootd --validation-tag $TAG
+        --xrootd --validation-tag $TAG \
+        --vs-jet-wp "Tight" --vs-ele-wp "VVLoose"
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
