@@ -17,7 +17,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts["os"] = "((q_1 * q_2) < 0)"
 
     if "DR;ff" in selection_option:
-        cuts.update(modify_for_ff_DR(None, None))
+        cuts.update(modify_for_ff_DR(None, selection_option.split(";")[-1]))
 
     wps_dict = {"VVTight", "VVTight", "Tight", "Medium", "Loose", "VLoose", "VVLoose", "VVVLoose"}
     try:
@@ -442,7 +442,7 @@ def modify_for_ff_DR(channel=None, region=None):
     if channel == "mt":
         logger.info(f"Applying DR cuts for {channel}")
         if region == "wjet":
-            cuts["nbtag"] = "(nbtag == 0)"
+            cuts["btag_veto"] = "(nbtag == 0)"
             cuts["mt_cut"] = "(mt_1 > 70)"
             logger.info(f"{region}: nbtag cut changed to {cuts['nbtag']}, mt cut changed to {cuts['mt_cut']}")
         elif region == "qcd":
