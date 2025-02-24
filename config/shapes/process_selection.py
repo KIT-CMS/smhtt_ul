@@ -282,7 +282,7 @@ def DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
                 """,
                 "crossSectionPerEventWeight",
             ),
-            dy_stitching_weight(era),  # TODO add stitching weight
+            # dy_stitching_weight(era),  # TODO add stitching weight
         ]
     )
     return Selection(name="DY_NLO", weights=DY_process_weights)
@@ -513,18 +513,17 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                     ("iso_wgt_mu_1", "isoweight"),
                     ("id_wgt_mu_1", "idweight"),
                     ("(trg_wgt_single_mu24ormu27)", "trgweight"),
-                    # ("((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)", "trgweight"),
                     (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight"),
                 ]
             )
-            # if apply_wps:
-            #     ztt_embedded_weights.extend(
-            #     [
-            #         ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-            #     ]
-            #     )
-            # if not apply_wps:
-            #     pass
+            if apply_wps:
+                ztt_embedded_weights.extend(
+                    [
+                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    ]
+                )
+            if not apply_wps:
+                pass
         elif era == "2016preVFP" or era == "2016postVFP":
             ztt_embedded_weights.extend(
                 [
