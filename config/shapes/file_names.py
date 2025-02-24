@@ -1,357 +1,202 @@
 # Input files used accross all channels in 2018.
-common_files_2018 = {
-    # "DY": [
-    #     "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "DY1JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "DY2JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "DY3JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "DY4JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    # ],
-    "DYNLO": [
-        "DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "DYJetsToLL_LHEFilterPtZ-50To100_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "DYJetsToLL_LHEFilterPtZ-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "DYJetsToLL_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "DYJetsToLL_LHEFilterPtZ-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "DYJetsToLL_LHEFilterPtZ-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
+small_files_2018 = {
+    "data": [
+        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018A_1729863731-00000000000000000000000000000000",
+        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018B_1729599421-00000000000000000000000000000000",
+        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018C_1730057166-00000000000000000000000000000000",
+        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018D_1729599421-00000000000000000000000000000000"
     ],
-    # "EWK": [
-    #     "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "EWKZ2Jets_ZToNuNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    # ],
-    "TT": [
-        "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
+    "HH2B2Tau": [ # to add
+        "GluGluToHHTo2B2Tau_TuneCP5_PSWeights_node_SM_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_gghh2b2tau_GluGluToHHTo2B2Tau_Node_SM_1733315721-00000000000000000000000000000000"
     ],
-    "VV": [
-        "WW_TuneCP5_13TeV-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "WZ_TuneCP5_13TeV-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "ZZ_TuneCP5_13TeV-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        # "WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        # "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        # "ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        # "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_RunIISummer20UL18NanoAODv9-106X",
+    "DY": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_M-10to50_1734539918-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_1734539918-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_Ext1_1736873492-00000000000000000000000000000000"
+    ],
+    "WJets": [ # to add
+        "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_aakhmets-mc_2018UL_wjets_WJetsToLNu_1729599421-00000000000000000000000000000000",
+        "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_Ext1_1734539918-00000000000000000000000000000000"
     ],
     "ST": [
-        "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        "ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_antitop_1734539918-00000000000000000000000000000000",
+        "ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_top_1734539918-00000000000000000000000000000000",
+        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_singletop_ST_tW_antitop_5f_inclusiveDecays_1729599421-00000000000000000000000000000000",
+        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_singletop_ST_tW_top_5f_inclusiveDecays_1729599421-00000000000000000000000000000000"
     ],
     "ggH_tt": [
-        "GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    ],
-    "ggH_bb": [
-        "GluGluHToBB_M-125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
+        "GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_GluGluHToTauTau_1736873492-00000000000000000000000000000000",
     ],
     "qqH_tt": [
-        "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    ],
-    "qqH_bb": [
-        "VBFHToBB_M-125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    ],
-    "VH_tt": [
-        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    ],
-    "VH_bb": [
-        "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    ],
-    # "ttH": [
-    #     "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    #     "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X",
-    # ],
-    "nmssm_Ybb": [
-        "NMSSM_XToYHTo2B2Tau_MX-MASSX_MY-MASSY_TuneCP5_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X"
-    ],
-    "nmssm_Ytautau": [
-        "NMSSM_XToYHTo2Tau2B_MX-MASSX_MY-MASSY_TuneCP5_13TeV-madgraph-pythia8_RunIISummer20UL18NanoAODv9-106X"
-    ],
-}
-
-common_files_2017 = {
-    "DY": [
-        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X_ext1",
-        # "DY1JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "DY2JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "DY3JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "DY4JetsToLL_M-50_MatchEWPDG20_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "EWKZ2Jets_ZToNuNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-    ],
-    "DYNLO": [
-        "DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "EWKZ2Jets_ZToNuNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_VBFHToTauTau_1736873492-00000000000000000000000000000000",
     ],
     "TT": [
-        "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_ttbar_TTTo2L2Nu_1729599001-00000000000000000000000000000000",
+        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_ttbar_TTToHadronic_1729599001-00000000000000000000000000000000",
+        "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_ttbar_TTToSemiLeptonic_1729530171-00000000000000000000000000000000"
+    ],
+    "ttH": [
+        "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ttHToNonbb_1736873492-00000000000000000000000000000000",
+        "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ttHToTauTau_1736873492-00000000000000000000000000000000",
+        "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ttHTobb_1736873492-00000000000000000000000000000000"
     ],
     "VV": [
-        # "WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",  # ToDo: Samples were missing in ntuple production, to be uncommented
-        "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",  # ToDo: Samples were missing in ntuple production, to be uncommented
-        "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+        "WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_WW_WWTo1L1Nu2Q_1736873492-00000000000000000000000000000000",
+        "WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_WW_WWTo2L2Nu_1736873492-00000000000000000000000000000000",
+        "WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_WW_WWTo4Q_1736873492-00000000000000000000000000000000",
+        "WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_WZ_WZTo1L1Nu2Q_1736873492-00000000000000000000000000000000",
+        "WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_WZ_WZTo1L3Nu_1736873492-00000000000000000000000000000000",
+        "WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_aakhmets-mc_2018UL_diboson_WZTo2Q2L_1729599421-00000000000000000000000000000000",
+        "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_aakhmets-mc_2018UL_diboson_WZTo3LNu_1729599421-00000000000000000000000000000000",
+        "WZTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_sdaigler-mc_2018UL_WZ_WZTo4Q_1736873492-00000000000000000000000000000000",
+        "ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8_sdaigler-mc_2018UL_ZZ_ZZTo2L2Nu_1736873492-00000000000000000000000000000000",
+        "ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_aakhmets-mc_2018UL_diboson_ZZTo2Q2L_1729599421-00000000000000000000000000000000",
+        "ZZTo2Q2Nu_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_ZZ_ZZTo2Q2Nu_1734539918-00000000000000000000000000000000",
+        "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_aakhmets-mc_2018UL_diboson_ZZTo4L_1729599421-00000000000000000000000000000000"
     ],
-    "ggH": [
-        "GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "ggZHHToTauTauZToQQM125_RunIIAutumn17MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin101M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v2",
-        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin104to105M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin106M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v2",
-        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin107to109M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-        # "GluGluHToTauTauHTXSFilterSTXS1p1Bin110to113M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v2",
+    "VH_tt": [
+        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_WminusHToTauTau_1737472169-00000000000000000000000000000000",
+        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_WplusHToTauTau_1737472169-00000000000000000000000000000000",
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_ext1_sdaigler-mc_2018UL_Higgs_ZHToTauTau_Ext1_1736873492-00000000000000000000000000000000",
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZHToTauTau_1736873492-00000000000000000000000000000000"
     ],
-    "qqH": [
-        "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # # "VBFHToTauTauHTXSFilterSTXS1p1Bin203to205M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-        # # "VBFHToTauTauHTXSFilterSTXS1p1Bin206M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-        # # "VBFHToTauTauHTXSFilterSTXS1p1Bin207to210M125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-        # # "VBFHToTauTauM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_ext1-v1",
-        # "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-        # "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
+    "VH_bb": [
+        "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZH_HToBB_ZToLL_1736873492-00000000000000000000000000000000",
+        "ZH_HToBB_ZToQQ_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZH_HToBB_ZToQQ_1734539918-00000000000000000000000000000000"
     ],
-    # "VH": [
-    #     # "ggZHHToTauTauZToLLM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    #     # "ggZHHToTauTauZToNuNuM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    #     "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-    #     "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-    #     "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-    # ],
-    # "ZH": [
-    #     "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-    #     # "ggZHHToTauTauZToLLM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    #     # "ggZHHToTauTauZToNuNuM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    # ],
-    # "WH": [
-    #     "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-    #     "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X",
-    # ],
-    # "ggHWW": [
-    #     # "GluGluHToWWTo2L2NuM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    # ],
-    # "qqHWW": [
-    #     # "VBFHToWWTo2L2NuM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    # ],
-    # "WHWW": [
-    #     # "HWminusJHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    #     # "HWplusJHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    # ],
-    # "ZHWW": [
-    #     # "HZJHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    #     # "GluGluZHHToWWM125_RunIIAutumn18MiniAOD_102X_13TeV_MINIAOD_powheg-pythia8_v1",
-    # ],
-    # "ttH": [
-    #     "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL17NanoAODv9-106X"
-    # ],
 }
 
-files = {
+large_files_2018 = {
+    "data": [
+        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018A_1729863731-00000000000000000000000000000000",
+        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018B_1729599421-00000000000000000000000000000000",
+        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018C_1730057166-00000000000000000000000000000000",
+        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018D_1729599421-00000000000000000000000000000000"
+    ],
+    "HH2B2Tau": [ # to add
+        "GluGluToHHTo2B2Tau_TuneCP5_PSWeights_node_SM_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_gghh2b2tau_GluGluToHHTo2B2Tau_Node_SM_1733315721-00000000000000000000000000000000"
+    ],
+    "DY": [
+        "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_M-10to50_1734539918-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-100to200_1736873492-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_HT-1200to2500_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-1200to2500_1736873492-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-200to400_1736873492-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-2500toInf_1736873492-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-400to600_1734539918-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_HT-600to800_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-600to800_1734539918-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_HT-70to100_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-70to100_1736873492-00000000000000000000000000000000",
+        "DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_HT-800to1200_1734539918-00000000000000000000000000000000"
+    ],
+    "WJets": [ # to add
+        "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-100To200_1737472169-00000000000000000000000000000000",
+        "WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-100To200_Ext1_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-1200To2500_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-1200To2500_Ext1_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-1200To2500_Ext2_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-200To400_1736873492-00000000000000000000000000000000",
+        "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-200To400_Ext1_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-2500ToInf_1736873492-00000000000000000000000000000000",
+        "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-2500ToInf_Ext1_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-2500ToInf_Ext2_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-400To600_1736873492-00000000000000000000000000000000",
+        "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-400To600_Ext1_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-400To600_Ext2_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-600To800_1736873492-00000000000000000000000000000000",
+        "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-600To800_Ext1_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-600To800_Ext2_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-800To1200_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-800To1200_Ext1_1734539918-00000000000000000000000000000000",
+        "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_HT-800To1200_Ext2_1734539918-00000000000000000000000000000000"
+    ],
+    "EWK": [
+        "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_EWK_EWKWMinus2Jets_1737472169-00000000000000000000000000000000",
+        "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_EWK_EWKWPlus2Jets_1734539918-00000000000000000000000000000000",
+        "EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_EWK_EWKZ2Jets_1734539918-00000000000000000000000000000000"
+    ],
+    "ST": [
+        "ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_antitop_1734539918-00000000000000000000000000000000",
+        "ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_top_1734539918-00000000000000000000000000000000",
+        "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_singletop_ST_tW_antitop_5f_inclusiveDecays_1729599421-00000000000000000000000000000000",
+        "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_singletop_ST_tW_top_5f_inclusiveDecays_1729599421-00000000000000000000000000000000"
+    ],
+    "ggH_tt": [
+        "GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_GluGluHToTauTau_1736873492-00000000000000000000000000000000",
+    ],
+    "qqH_tt": [
+        "VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_VBFHToTauTau_1736873492-00000000000000000000000000000000",
+    ],
+    "TT": [
+        "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_ttbar_TTTo2L2Nu_1729599001-00000000000000000000000000000000",
+        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_ttbar_TTToHadronic_1729599001-00000000000000000000000000000000",
+        "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_ttbar_TTToSemiLeptonic_1729530171-00000000000000000000000000000000"
+    ],
+    "ttH": [
+        "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ttHToNonbb_1736873492-00000000000000000000000000000000",
+        "ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ttHToTauTau_1736873492-00000000000000000000000000000000",
+        "ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ttHTobb_1736873492-00000000000000000000000000000000"
+    ],
+    "VV": [
+        "WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_WW_WWTo1L1Nu2Q_1736873492-00000000000000000000000000000000",
+        "WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_WW_WWTo2L2Nu_1736873492-00000000000000000000000000000000",
+        "WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_WW_WWTo4Q_1736873492-00000000000000000000000000000000",
+        "WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_WZ_WZTo1L1Nu2Q_1736873492-00000000000000000000000000000000",
+        "WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_WZ_WZTo1L3Nu_1736873492-00000000000000000000000000000000",
+        "WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_aakhmets-mc_2018UL_diboson_WZTo2Q2L_1729599421-00000000000000000000000000000000",
+        "WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_aakhmets-mc_2018UL_diboson_WZTo3LNu_1729599421-00000000000000000000000000000000",
+        "WZTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_sdaigler-mc_2018UL_WZ_WZTo4Q_1736873492-00000000000000000000000000000000",
+        "ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8_sdaigler-mc_2018UL_ZZ_ZZTo2L2Nu_1736873492-00000000000000000000000000000000",
+        "ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_aakhmets-mc_2018UL_diboson_ZZTo2Q2L_1729599421-00000000000000000000000000000000",
+        "ZZTo2Q2Nu_TuneCP5_13TeV-amcatnloFXFX-pythia8_sdaigler-mc_2018UL_ZZ_ZZTo2Q2Nu_1734539918-00000000000000000000000000000000",
+        "ZZTo4L_TuneCP5_13TeV_powheg_pythia8_aakhmets-mc_2018UL_diboson_ZZTo4L_1729599421-00000000000000000000000000000000"
+    ],
+    "VVV": [
+        "WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WWW_1734539918-00000000000000000000000000000000",
+        "WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WWW_Ext1_1737472169-00000000000000000000000000000000",
+        "WWZJetsTo4L2Nu_4F_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WWZJetsTo4L2Nu_1734539918-00000000000000000000000000000000",
+        "WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WWZ_1734539918-00000000000000000000000000000000",
+        "WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WWZ_Ext1_1736873492-00000000000000000000000000000000",
+        "WZZ_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WZZ_1737472169-00000000000000000000000000000000",
+        "WZZ_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_WZZ_Ext1_1734539918-00000000000000000000000000000000",
+        "ZZZ_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_ZZZ_1736873492-00000000000000000000000000000000",
+        "ZZZ_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_TriBoson_ZZZ_Ext1_1736873492-00000000000000000000000000000000"
+    ],
+    "VH_tt": [
+        "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_WminusHToTauTau_1737472169-00000000000000000000000000000000",
+        "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_WplusHToTauTau_1737472169-00000000000000000000000000000000",
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_ext1_sdaigler-mc_2018UL_Higgs_ZHToTauTau_Ext1_1736873492-00000000000000000000000000000000",
+        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZHToTauTau_1736873492-00000000000000000000000000000000"
+    ],
+    "VH_bb": [
+        "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZH_HToBB_ZToLL_1736873492-00000000000000000000000000000000",
+        "ZH_HToBB_ZToQQ_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZH_HToBB_ZToQQ_1734539918-00000000000000000000000000000000"
+    ],
+    "TTV": [
+        "TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_sdaigler-mc_2018UL_Other_TTWJetsToLNu_1734539918-00000000000000000000000000000000",
+        "TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_sdaigler-mc_2018UL_Other_TTWJetsToQQ_1734539918-00000000000000000000000000000000",
+        "TTWH_TuneCP5_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_Other_TTWH_1736873492-00000000000000000000000000000000",
+        "TTWW_TuneCP5_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_Other_TTWW_1737472169-00000000000000000000000000000000",
+        "TTWW_TuneCP5_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_Other_TTWW_Ext1_1734539918-00000000000000000000000000000000",
+        "TTWZ_TuneCP5_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_Other_TTWZ_1734539918-00000000000000000000000000000000",
+        "TTZH_TuneCP5_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_Other_TTZH_1736873492-00000000000000000000000000000000",
+        "TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8_sdaigler-mc_2018UL_Other_TTZToLLNuNu_1734539918-00000000000000000000000000000000",
+        "TTZToQQ_TuneCP5_13TeV_amcatnlo-pythia8_sdaigler-mc_2018UL_Other_TTZToQQ_1734539918-00000000000000000000000000000000",
+        "TTZZ_TuneCP5_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_Other_TTZZ_1736873492-00000000000000000000000000000000"
+    ]
+}
 
+# set small or large file-set
+files_2018 = small_files_2018
+
+files = {
     "2018": {
         "et": dict(
-            {
-                "data": [
-                    "EGamma_Run2018A-UL2018",
-                    "EGamma_Run2018B-UL2018",
-                    "EGamma_Run2018C-UL2018",
-                    "EGamma_Run2018D-UL2018",
-                ],
-                "EMB": [
-                    "TauEmbedding-ElTauFinalState_Run2018A-UL2018",
-                    "TauEmbedding-ElTauFinalState_Run2018B-UL2018",
-                    "TauEmbedding-ElTauFinalState_Run2018C-UL2018",
-                    "TauEmbedding-ElTauFinalState_Run2018D-UL2018",
-                ],
-                "W": [
-                    "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                ],
-            },
-            **common_files_2018
+            **files_2018
         ),
         "mt": dict(
-            {
-                "data": [
-                    "SingleMuon_Run2018A-UL2018_GT36",
-                    "SingleMuon_Run2018B-UL2018_GT36",
-                    "SingleMuon_Run2018C-UL2018_GT36",
-                    "SingleMuon_Run2018D-UL2018_GT36",
-                ],
-                "EMB": [
-                    "TauEmbedding-MuTauFinalState_Run2018A-UL2018",
-                    "TauEmbedding-MuTauFinalState_Run2018B-UL2018",
-                    "TauEmbedding-MuTauFinalState_Run2018C-UL2018",
-                    "TauEmbedding-MuTauFinalState_Run2018D-UL2018",
-                ],
-                "W": [
-                    "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                ],
-            },
-            **common_files_2018
+            **files_2018
         ),
         "tt": dict(
-            {
-                "data": [
-                    # "Tau_Run2018A-UL2018_GT36",
-                    # "Tau_Run2018B-UL2018_GT36",
-                    # "Tau_Run2018C-UL2018_GT36",
-                    # "Tau_Run2018D-UL2018_GT36",
-                    "JetHT_Run2018A-UL2018",
-                    "JetHT_Run2018B-UL2018",
-                    "JetHT_Run2018C-UL2018",
-                    "JetHT_Run2018D-UL2018",
-                ],
-                "EMB": [
-                    "TauEmbedding-TauTauFinalState_Run2018A-UL2018",
-                    "TauEmbedding-TauTauFinalState_Run2018B-UL2018",
-                    "TauEmbedding-TauTauFinalState_Run2018C-UL2018",
-                    "TauEmbedding-TauTauFinalState_Run2018D-UL2018",
-                ],
-                "W": [
-                    "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL18NanoAODv9-106X",
-                ],
-            },
-            **common_files_2018
-        ),
-    },
-    "2017": {
-        "et": dict(
-            {
-                "data": [
-                    "SingleElectron_Run2017B-UL2017",
-                    "SingleElectron_Run2017C-UL2017",
-                    "SingleElectron_Run2017D-UL2017",
-                    "SingleElectron_Run2017E-UL2017",
-                    "SingleElectron_Run2017F-UL2017",
-                ],
-                "EMB": [
-                    "TauEmbedding-ElTauFinalState_Run2017B-UL2017",
-                    "TauEmbedding-ElTauFinalState_Run2017C-UL2017",
-                    "TauEmbedding-ElTauFinalState_Run2017D-UL2017",
-                    "TauEmbedding-ElTauFinalState_Run2017E-UL2017",
-                    "TauEmbedding-ElTauFinalState_Run2017F-UL2017",
-                ],
-                "W": [
-                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                ],
-                "WNLO": [
-                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                ],
-            },
-            **common_files_2017
-        ),
-        "mt": dict(
-            {
-                "data": [
-                    "SingleMuon_Run2017B-UL2017",
-                    "SingleMuon_Run2017C-UL2017",
-                    "SingleMuon_Run2017D-UL2017",
-                    "SingleMuon_Run2017E-UL2017",
-                    "SingleMuon_Run2017F-UL2017",
-                ],
-                "EMB": [
-                    "TauEmbedding-MuTauFinalState_Run2017B-UL2017",
-                    "TauEmbedding-MuTauFinalState_Run2017C-UL2017",
-                    "TauEmbedding-MuTauFinalState_Run2017D-UL2017",
-                    "TauEmbedding-MuTauFinalState_Run2017E-UL2017",
-                    "TauEmbedding-MuTauFinalState_Run2017F-UL2017",
-                ],
-                "W": [
-                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                ],
-                "WNLO": [
-                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                ],
-            },
-            **common_files_2017
-        ),
-        "tt": dict(
-            {
-                "data": [
-                    "Tau_Run2017B-UL2017",
-                    "Tau_Run2017C-UL2017",
-                    "Tau_Run2017D-UL2017",
-                    "Tau_Run2017E-UL2017",
-                    "Tau_Run2017F-UL2017",
-                ],
-                "EMB": [
-                    "TauEmbedding-TauTauFinalState_Run2017B-UL2017",
-                    "TauEmbedding-TauTauFinalState_Run2017C-UL2017",
-                    "TauEmbedding-TauTauFinalState_Run2017D-UL2017",
-                    "TauEmbedding-TauTauFinalState_Run2017E-UL2017",
-                    "TauEmbedding-TauTauFinalState_Run2017F-UL2017",
-                ],
-                "W": [
-                    # "W1JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W2JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W3JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                ],
-                "WNLO": [
-                    # "WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    "WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                    # "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_RunIISummer20UL17NanoAODv9-106X",
-                ],
-            },
-            **common_files_2017
+            **files_2018
         ),
     },
 }
