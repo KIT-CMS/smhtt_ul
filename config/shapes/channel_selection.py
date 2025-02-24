@@ -43,7 +43,7 @@ def modify_for_ff_DR(channel=None, region=None):
     if channel == "mt":
         logger.info(f"Applying DR cuts for {channel}")
         if region == "wjet":
-            cuts["nbtag"] = "(nbtag == 0)"
+            cuts["btag_veto"] = "(nbtag == 0)"
             cuts["mt_cut"] = "(mt_1 > 70)"
             logger.info(f"{region}: nbtag cut changed to {cuts['nbtag']}, mt cut changed to {cuts['mt_cut']}")
         elif region == "qcd":
