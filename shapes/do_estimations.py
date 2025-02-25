@@ -294,7 +294,7 @@ def main(args):
                 for var in qcd_inputs[channel][category]:
                     for variation in qcd_inputs[channel][category][var]:
                         if channel in ["et", "mt", "tt", "em", "mm", "ee"]:
-                            for use_emb in [True, False]:
+                            for use_emb in [False]: # [True, False]:
                                 for use_nlo in [False]:
                                     estimated_hist = qcd_estimation(
                                         input_file,
@@ -308,7 +308,7 @@ def main(args):
                                     )
                                     estimated_hist.Write()
                         else:
-                            for use_emb in [True, False]:
+                            for use_emb in [False]: # [True, False]:
                                 estimated_hist = abcd_estimation(
                                     input_file,
                                     channel,
@@ -322,7 +322,7 @@ def main(args):
                         for variation, scale in zip(
                             ["subtrMCUp", "subtrMCDown"], [0.8, 1.2]
                         ):
-                            for use_emb in [True, False]:
+                            for use_emb in [False]: # [True, False]:
                                 estimated_hist = qcd_estimation(
                                     input_file,
                                     channel,

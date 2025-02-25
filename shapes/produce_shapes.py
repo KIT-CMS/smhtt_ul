@@ -81,7 +81,7 @@ from config.shapes.variations import (
     anti_iso_lt,
     # boosted_same_sign,
     # boosted_anti_iso_lt,
-    anti_iso_tt,
+    # anti_iso_tt,
     # boosted_anti_iso_tt,
     # abcd_method,
 )
@@ -169,18 +169,18 @@ from config.shapes.variations import (
     particleNet_Xbb,
     LHE_scale_norm,
 )
-from config.shapes.signal_variations import (
-    ggh_acceptance,
-    qqh_acceptance,
-)
+# from config.shapes.signal_variations import (
+#     ggh_acceptance,
+#     qqh_acceptance,
+# )
 
 # jet fake uncertainties
-from config.shapes.variations import (
-    ff_variations_lt,
-    ff_variations_tt,
-    # ff_variations_tau_es_lt,
-    # ff_variations_tau_es_emb_lt,
-)
+# from config.shapes.variations import (
+#     ff_variations_lt,
+#     ff_variations_tt,
+#     # ff_variations_tau_es_lt,
+#     # ff_variations_tau_es_emb_lt,
+# )
 
 from config.shapes.control_binning import control_binning as default_control_binning
 from config.shapes.gof_binning import load_gof_binning
@@ -347,18 +347,18 @@ def parse_arguments():
         action="store_true",
         help="Can be set to a switch to a boosted bjet analysis selection.",
     )
-    parser.add_argument(
-        "--massX",
-        required=True,
-        type=str,
-        help="Mass value of X to be used for NMSSM samples.",
-    )
-    parser.add_argument(
-        "--massY",
-        required=True,
-        type=str,
-        help="Mass value of Y to be used for NMSSM samples.",
-    )
+    # parser.add_argument(
+    #     "--massX",
+    #     required=True,
+    #     type=str,
+    #     help="Mass value of X to be used for NMSSM samples.",
+    # )
+    # parser.add_argument(
+    #     "--massY",
+    #     required=True,
+    #     type=str,
+    #     help="Mass value of Y to be used for NMSSM samples.",
+    # )
     parser.add_argument(
         "--xrootd",
         action="store_true",
@@ -462,7 +462,7 @@ def get_analysis_units(
         channel=channel,
     )
     if IS_LARGE_DATASET:
-        add_control_process(
+        add_process(
             analysis_units,
             name="vvvl",
             dataset=datasets["VVV"],
@@ -474,7 +474,7 @@ def get_analysis_units(
             categorization=categorization,
             channel=channel,
         )
-        add_control_process(
+        add_process(
             analysis_units,
             name="vvvt",
             dataset=datasets["VVV"],
@@ -486,7 +486,7 @@ def get_analysis_units(
             categorization=categorization,
             channel=channel,
         )
-        add_control_process(
+        add_process(
             analysis_units,
             name="vvvj",
             dataset=datasets["VVV"],
@@ -753,7 +753,7 @@ def get_analysis_units(
     )
 
     if IS_LARGE_DATASET:
-        add_control_process(
+        add_process(
             analysis_units,
             name="ewk",
             dataset=datasets["EWK"],
@@ -788,7 +788,7 @@ def get_analysis_units(
     #     channel=channel,
     # )
 
-    add_control_process(
+    add_process(
         analysis_units,
         name="hh2b2tau",
         dataset=datasets["HH2B2Tau"],
@@ -957,7 +957,7 @@ def get_control_units(
             binning=control_binning,
             variables=variable_set,
         )
-    add_process(
+    add_control_process(
         control_units,
         name="tth",
         dataset=datasets["ttH"],
@@ -1293,8 +1293,10 @@ def main(args):
     boosted_tau_analysis = False
     boosted_b_analysis = False
 
-    massX = args.massX
-    massY = args.massY
+    # Set massX and massY to 0 
+    massX = 0
+    massY = 0
+
     categorization = prepare_special_analysis(special_analysis, massX, massY, boosted_tau_analysis)
     um = UnitManager()
     do_check = args.enable_booking_check
@@ -1412,7 +1414,7 @@ def main(args):
 
     logger.info(f"Processes to be computed: {procS}")
     dataS = {"data"} & procS
-    embS = {"emb"} & procS
+    # embS = {"emb"} & procS
     jetFakesDS = {
         "et": {"zj", "ttj", "vvj", "w", "stj"} & procS,
         "mt": {"zj", "ttj", "vvj", "w", "stj"} & procS,
@@ -1436,7 +1438,7 @@ def main(args):
     logger.info(f"Simulated processes: {simulatedProcsDS}")
     logger.info(f"SM Higgs processes: {smHiggsBkgS}")
     logger.info(f"Data processes: {dataS}")
-    logger.info(f"Embedded processes: {embS}")
+    # logger.info(f"Embedded processes: {embS}")
     logger.info(f"Jet fakes processes: {jetFakesDS}")
     logger.info(f"Lepton fakes processes: {leptonFakesS}")
     logger.info(f"True tau bkg processes: {trueTauBkgS}")
@@ -1486,7 +1488,7 @@ def main(args):
                 um,
                 processes=dataS | leptonFakesS| trueTauBkgS | smHiggsBkgS,
                 datasets=nominals[era]["units"][channel],
-                variations=[same_sign, anti_iso_tt],
+                variations=[same_sign], # anti_iso_tt],
                 enable_check=do_check,
             )
             book_histograms(
@@ -1496,13 +1498,13 @@ def main(args):
                 variations=[same_sign],
                 enable_check=do_check,
             )
-            book_histograms(
-                um,
-                processes=embS,
-                datasets=nominals[era]["units"][channel],
-                variations=[same_sign, anti_iso_tt],
-                enable_check=do_check,
-            )
+            # book_histograms(
+            #     um,
+            #     processes=embS,
+            #     datasets=nominals[era]["units"][channel],
+            #     variations=[same_sign], # anti_iso_tt],
+            #     enable_check=do_check,
+            # )
 
         ##################################
         # SYSTEMATICS
@@ -1642,15 +1644,15 @@ def main(args):
                     ],
                     enable_check=do_check,
                 )
-                book_histograms(
-                    um,
-                    processes=dataS | embS | leptonFakesS | trueTauBkgS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        ff_variations_lt,
-                    ],
-                    enable_check=do_check,
-                )
+                # book_histograms(
+                #     um,
+                #     processes=dataS | embS | leptonFakesS | trueTauBkgS,
+                #     datasets=nominals[era]["units"][channel],
+                #     variations=[
+                #         ff_variations_lt,
+                #     ],
+                #     enable_check=do_check,
+                # )
 
                 # book_histograms(
                 #     um,
@@ -1782,13 +1784,13 @@ def main(args):
                 #     enable_check=do_check,
                 # )
                 # TODO add fake factor variations
-                book_histograms(
-                    um,
-                    processes=dataS | embS | leptonFakesS | trueTauBkgS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[ff_variations_tt],
-                    enable_check=do_check,
-                )
+                # book_histograms(
+                #     um,
+                #     processes=dataS | embS | leptonFakesS | trueTauBkgS,
+                #     datasets=nominals[era]["units"][channel],
+                #     variations=[ff_variations_tt],
+                #     enable_check=do_check,
+                # )
                 # TODO add fake factor variations for lepton fakes
                 # book_histograms(
                 #     um,

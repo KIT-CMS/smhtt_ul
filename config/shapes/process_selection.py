@@ -50,7 +50,7 @@ def MC_base_process_selection(channel, era, boosted_tau=False):
                 trgweight = ("((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)", "trgweight")
             elif era == "2018":
                 trgweight = ("trg_wgt_single_ele32orele35", "trgweight")
-            pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD>=0.6) * pNet_Xbb_weight + (fj_Xbb_particleNet_XbbvsQCD<0.6)", "particleNetWeight")
+            # pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD>=0.6) * pNet_Xbb_weight + (fj_Xbb_particleNet_XbbvsQCD<0.6)", "particleNetWeight")
         else:
             isoweight = ("iso_wgt_ele_boosted_1", "isoweight")
             idweight = ("id_wgt_ele_boosted_1", "idweight")
@@ -61,7 +61,7 @@ def MC_base_process_selection(channel, era, boosted_tau=False):
             vsmu_weight = None # ("id_wgt_boostedtau_antiMu_Loose_2", "vsmuweight")
             vsele_weight = ("id_wgt_boostedtau_antiEle_Loose_2", "vseleweight")
             trgweight = ("trg_wgt_single_ele_boosted", "trgweight")
-            pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6) * pNet_Xbb_weight_boosted + (fj_Xbb_particleNet_XbbvsQCD_boosted<0.6)", "particleNetWeight")
+            # pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6) * pNet_Xbb_weight_boosted + (fj_Xbb_particleNet_XbbvsQCD_boosted<0.6)", "particleNetWeight")
     elif channel == "mt":
         if not boosted_tau:
             isoweight = ("iso_wgt_mu_1", "isoweight")
@@ -76,7 +76,7 @@ def MC_base_process_selection(channel, era, boosted_tau=False):
                 trgweight = ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
             elif era == "2018":
                 trgweight = ("trg_wgt_single_mu24ormu27", "trgweight")
-            pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD>=0.6) * pNet_Xbb_weight + (fj_Xbb_particleNet_XbbvsQCD<0.6)", "particleNetWeight")
+            # pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD>=0.6) * pNet_Xbb_weight + (fj_Xbb_particleNet_XbbvsQCD<0.6)", "particleNetWeight")
         else:
             isoweight = ("iso_wgt_mu_boosted_1", "isoweight")
             idweight = ("id_wgt_mu_boosted_1", "idweight")
@@ -87,7 +87,7 @@ def MC_base_process_selection(channel, era, boosted_tau=False):
             vsmu_weight = ("id_wgt_boostedtau_antiMu_Loose_2", "vsmuweight")
             vsele_weight = ("id_wgt_boostedtau_antiEle_VLoose_2", "vseleweight")
             trgweight = ("trg_wgt_single_mu50_boosted * (boosted_pt_1 >= 55) + trg_wgt_single_mu24_boosted * ((boosted_pt_1 >= 25) && (boosted_pt_1 < 55))", "trgweight")
-            pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6) * pNet_Xbb_weight_boosted + (fj_Xbb_particleNet_XbbvsQCD_boosted<0.6)", "particleNetWeight")
+            # pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6) * pNet_Xbb_weight_boosted + (fj_Xbb_particleNet_XbbvsQCD_boosted<0.6)", "particleNetWeight")
     elif channel == "tt":
         if not boosted_tau:
             isoweight = None
@@ -99,7 +99,7 @@ def MC_base_process_selection(channel, era, boosted_tau=False):
             vsmu_weight = ("id_wgt_tau_vsMu_VLoose_1 * id_wgt_tau_vsMu_VLoose_2", "vsmuweight")
             vsele_weight = ("id_wgt_tau_vsEle_VVLoose_1 * id_wgt_tau_vsEle_VVLoose_2", "vseleweight")
             trgweight = ("trg_wgt_double_tau_1 * trg_wgt_double_tau_2", "trgweight")
-            pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD>=0.6) * pNet_Xbb_weight + (fj_Xbb_particleNet_XbbvsQCD<0.6)", "particleNetWeight")
+            # pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD>=0.6) * pNet_Xbb_weight + (fj_Xbb_particleNet_XbbvsQCD<0.6)", "particleNetWeight")
         else:
             isoweight = None
             idweight = None
@@ -116,7 +116,7 @@ def MC_base_process_selection(channel, era, boosted_tau=False):
             #     "vseleweight",
             # )
             trgweight = ("(trg_wgt_fatjet * (trg_ak8pfjet400_trimmass30 > 0.5) + (trg_ak8pfjet400_trimmass30 < 0.5))", "trgweight")
-            pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6) * pNet_Xbb_weight_boosted + (fj_Xbb_particleNet_XbbvsQCD_boosted<0.6)", "particleNetWeight")
+            # pNet_weight = ("(fj_Xbb_particleNet_XbbvsQCD_boosted>=0.6) * pNet_Xbb_weight_boosted + (fj_Xbb_particleNet_XbbvsQCD_boosted<0.6)", "particleNetWeight")
     else:
         raise ValueError("Given channel {} not defined.".format(channel))
     MC_base_process_weights = [
@@ -127,7 +127,7 @@ def MC_base_process_selection(channel, era, boosted_tau=False):
         vsmu_weight,
         vsele_weight,
         trgweight,
-        pNet_weight,
+        # pNet_weight,
         lumi_weight(era),
     ]
     return Selection(name="MC base", weights=[weight for weight in MC_base_process_weights if weight is not None])

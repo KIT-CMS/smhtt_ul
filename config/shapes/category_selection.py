@@ -237,6 +237,7 @@ def get_categorization(massX, massY, boosted_tt=False):
                         )
                     ],
                 )
+                print("Selection", f"max_index_{massX}_{massY} == {category_mapping[channel][category]['index']}")
                 categorization[channel].append(selection)
     else:
         for channel in ["et", "mt", "tt"]:

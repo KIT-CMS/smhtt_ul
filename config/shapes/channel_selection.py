@@ -6,7 +6,7 @@ def channel_selection(channel, era, special=None, boosted_tau=False, boosted_b=F
     if not boosted_tau:
         cuts = [
             ("q_1*q_2<0", "os"),
-            ("((boosted_deltaR_ditaupair > 0.8) || (boosted_deltaR_ditaupair < 0.1))", "boosted_tau_restriction"),
+            # ("((boosted_deltaR_ditaupair > 0.8) || (boosted_deltaR_ditaupair < 0.1))", "boosted_tau_restriction"),
             ("(tau_decaymode_2==0 || tau_decaymode_2==1 || tau_decaymode_2==10 || tau_decaymode_2==11)", "tau_decay_mode"),
         ]
     elif boosted_tau:
