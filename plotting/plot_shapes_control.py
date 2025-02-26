@@ -10,7 +10,7 @@ from multiprocessing import Pool, Process
 
 import ROOT
 import yaml
-from process_ordering import ControlShapeBkgProcesses, sorted_bkg_processes
+from process_ordering import ControlShapeBkgProcesses
 
 import Dumbledraw.dumbledraw as dd
 import Dumbledraw.rootfile_parser_ntuple_processor_inputshapes as rootfile_parser
