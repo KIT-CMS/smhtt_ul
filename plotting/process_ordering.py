@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import List, Union, Literal
 
-GLOBAL_BKG_ORDERING_IMPORTANCE_TO_PROCESS = {  # importance ordering
+IMPORTANCE_TO_PROCESS = {  # importance ordering
     # --- Embedding ---
     0.00: "EMB",
     # --- MC Embedding equivalent ---
@@ -35,19 +35,20 @@ GLOBAL_BKG_ORDERING_IMPORTANCE_TO_PROCESS = {  # importance ordering
     6.00: "VVL",
 }
 
-GLOBAL_BKG_ORDERING_PROCESS_TO_IMPORTANCE = dict(
-    map(
-        reversed,
-        GLOBAL_BKG_ORDERING_IMPORTANCE_TO_PROCESS.items(),
-    ),
-)
+PROCESS_TO_IMPORTANCE = dict(map(reversed, IMPORTANCE_TO_PROCESS.items()))
 
 
-def sorted_bkg_processes(x: List[str], /):
+def sorted_bkg_processes(x: List[str], /, *, ordering: Union[None, dict[float, str]] = None) -> List[str]:
     assert isinstance(x, list), "Only implemented for list"
+    if ordering is None:
+        ordering = PROCESS_TO_IMPORTANCE
+    elif ordering is not None and all(isinstance(k, float) for k in ordering):
+        ordering = dict(map(reversed, deepcopy(ordering).items()))
+    else:
+        raise ValueError("ordering must be None or dict[float, str] or dict[str, float]")
     return sorted(
         deepcopy(x),
-        key=lambda p: GLOBAL_BKG_ORDERING_PROCESS_TO_IMPORTANCE.get(p, 999),
+        key=lambda p: ordering.get(p, 999),
         reverse=True,
     )
 
@@ -89,6 +90,8 @@ class ControlShapeBkgProcesses:
             self.channel_modification,
             self.lo_to_nlo_replacement,
         ]
+
+        self.ordering = deepcopy(IMPORTANCE_TO_PROCESS)
 
     @property
     def _is_fully_classic(self) -> bool:
@@ -141,13 +144,17 @@ class ControlShapeBkgProcesses:
 
         _QCD = "QCDEMB" if self._embedding else "QCD"
         ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'TTJ', _QCD, 'W']
+        _jetFakes = self.ordering.pop(1.00 if self._embedding else 1.10)
         if self._channel in {"mt", "et"} and "DR;ff" in self._selection_option:
             if "qcd" in self._selection_option:
                 ff_processes_covered_by_mc.remove(_QCD)
+                self.ordering[1.30] = _jetFakes
             elif "wjet" in self._selection_option:
                 ff_processes_covered_by_mc.remove("W")
+                self.ordering[1.20] = _jetFakes
             elif "ttbar" in self._selection_option:
                 ff_processes_covered_by_mc.remove("TTJ")
+                self.ordering[1.40] = _jetFakes
             else:
                 raise NotImplementedError(f"DR for {self._selection_option} not implemented")
         else:
@@ -168,4 +175,7 @@ class ControlShapeBkgProcesses:
         for modify in self._pipe:
             bkg_processes = modify(bkg_processes)
 
-        return sorted_bkg_processes(bkg_processes)
+        return sorted_bkg_processes(
+            deepcopy(bkg_processes),
+            ordering=self.ordering,
+        )

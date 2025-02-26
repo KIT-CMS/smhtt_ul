@@ -8,71 +8,6 @@ logger = logging.getLogger(__name__)
 logger = setup_logging("booking.log", logger, logging.INFO)
 
 
-def modify_for_ff_DR(channel=None, region=None):
-    cuts = WarnDict()
-
-    if region is None:
-        return cuts
-
-    # general DR cuts
-    if channel is None:
-        logger.info("No channel specified, applying general DR cuts")
-        if region == "wjet":
-            logger.info(f"{region}: no additional cuts")
-            pass
-        elif region == "qcd":
-            cuts["os"] = "((q_1 * q_2) > 0)"  # fake ss
-            logger.info(f"{region}: os cut changed {cuts['os']}")
-        elif region == "ttbar":
-            cuts.pop("extraelec_veto")
-            cuts.pop("extramuon_veto")
-            cuts.pop("dimuon_veto")
-            cuts["lepton_veto"] = """(
-                !(
-                    (extramuon_veto < 0.5) &&
-                    (extraelec_veto < 0.5) &&
-                    (dimuon_veto < 0.5)
-                )
-            )"""
-            logger.info(f"{region}: extra lepton veto cut changed to {cuts['lepton_veto']}")
-        else:
-            logger.error(f"{region} does not exist")
-            raise ValueError(f"{region} does not exist")
-
-    # channel specific DR cuts
-    elif channel == "mt":
-        logger.info(f"Applying DR cuts for {channel}")
-        if region == "wjet":
-            cuts["btag_veto"] = "(nbtag == 0)"
-            cuts["mt_cut"] = "(mt_1 > 70)"
-            logger.info(f"{region}: nbtag cut changed to {cuts['nbtag']}, mt cut changed to {cuts['mt_cut']}")
-        elif region == "qcd":
-            cuts["muon_iso"] = "((iso_1 > 0.05) && (iso_1 < 0.15))"
-            cuts["mt_cut"] = "(mt_1 < 50)"
-            cuts["btag_veto"] = "(nbtag >= 0)"
-            logger.info(
-                f"{region}: muon iso cut changed to {cuts['muon_iso']}, mt cut changed to "
-                f"{cuts['mt_cut']}, btag veto cut changed to {cuts['btag_veto']}",
-            )
-        elif region == "ttbar":
-            cuts["btag_veto"] = "(nbtag >= 0)"
-            logger.info(f"{region}: btag veto cut changed to {cuts['btag_veto']}")
-        else:
-            logger.error(f"{region} does not exist")
-            raise ValueError(f"{region} does not exist")
-    elif channel == "et":
-        logger.error(f"{channel} not implemented yet")
-        raise NotImplementedError(f"{channel} not implemented yet")
-    elif channel == "tt":
-        logger.error(f"{channel} not implemented yet")
-        raise NotImplementedError(f"{channel} not implemented yet")
-    else:
-        logger.error(f"{channel} does not exist")
-        raise ValueError(f"{channel} does not exist")
-
-    return cuts
-
-
 def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose", selection_option="CR", **kwargs):
 
     cuts = WarnDict()
@@ -82,7 +17,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts["os"] = "((q_1 * q_2) < 0)"
 
     if "DR;ff" in selection_option:
-        cuts.update(modify_for_ff_DR(None, selection_option.split(";")[-1]))
+        modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=None)
 
     wps_dict = {"VVTight", "VVTight", "Tight", "Medium", "Loose", "VLoose", "VVLoose", "VVVLoose"}
     try:
@@ -106,7 +41,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["mt_cut"] = "(mt_1 < 70)"
 
             if "DR;ff" in selection_option:
-                cuts.update(modify_for_ff_DR(channel, selection_option.split(";")[-1]))
+                modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=channel)
 
             if era == "2016preVFP" or era == "2016postVFP":
                 cuts["trg_selection"] = """(
@@ -151,7 +86,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["mt_cut"] = "(mt_1 < 70)"
 
             if "DR;ff" in selection_option:
-                cuts.update(modify_for_ff_DR(channel, selection_option.split(";")[-1]))
+                modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=channel)
 
             if era == "2016preVFP" or era == "2016postVFP":
                 print(f" *** No triggers for {era} implemented yet ***")
@@ -192,7 +127,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["tau_iso"] = "(id_tau_vsJet_Tight_1 > 0.5) && (id_tau_vsJet_Tight_2 > 0.5)"
 
             if "DR;ff" in selection_option:
-                cuts.update(modify_for_ff_DR(channel, selection_option.split(";")[-1]))
+                modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=channel)
 
             if era == "2016preVFP" or era == "2016postVFP":
                 print(f" *** No triggers for {era} implemented yet ***")
@@ -470,3 +405,60 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     else:
         logger.error(f"Given special selection: {special} does not exist")
         raise ValueError(f"Given special selection: {special} does not exist")
+
+
+def modify_for_ff_DR(obj, region, channel=None):
+    # general DR cuts
+    if channel is None:
+        logger.info("No channel specified, applying general DR cuts")
+        if region == "wjet":
+            logger.info(f"{region}: no additional cuts")
+        elif region == "qcd":
+            obj["os"] = "((q_1 * q_2) > 0)"  # fake ss
+            logger.info(f"{region}: os cut changed {obj['os']}")
+        elif region == "ttbar":
+            obj.pop("extraelec_veto")
+            obj.pop("extramuon_veto")
+            obj.pop("dilepton_veto")
+            obj["lepton_veto"] = """(
+                !(
+                    (extramuon_veto < 0.5) &&
+                    (extraelec_veto < 0.5) &&
+                    (dimuon_veto < 0.5)
+                )
+            )"""
+            logger.info(f"{region}: extra lepton veto cut changed to {obj['lepton_veto']}")
+        else:
+            logger.error(f"{region} does not exist")
+            raise ValueError(f"{region} does not exist")
+
+    # channel specific DR cuts
+    elif channel == "mt":
+        logger.info(f"Applying DR cuts for {channel}")
+        if region == "wjet":
+            obj["btag_veto"] = "(nbtag == 0)"
+            obj["mt_cut"] = "(mt_1 > 70)"
+            logger.info(f"{region}: nbtag cut changed to {obj['btag_veto']}, mt cut changed to {obj['mt_cut']}")
+        elif region == "qcd":
+            obj["muon_iso"] = "((iso_1 > 0.05) && (iso_1 < 0.15))"
+            obj["mt_cut"] = "(mt_1 < 50)"
+            obj["btag_veto"] = "(nbtag >= 0)"
+            logger.info(
+                f"{region}: muon iso cut changed to {obj['muon_iso']}, mt cut changed to "
+                f"{obj['mt_cut']}, btag veto cut changed to {obj['btag_veto']}",
+            )
+        elif region == "ttbar":
+            obj["btag_veto"] = "(nbtag >= 0)"
+            logger.info(f"{region}: btag veto cut changed to {obj['btag_veto']}")
+        else:
+            logger.error(f"{region} does not exist")
+            raise ValueError(f"{region} does not exist")
+    elif channel == "et":
+        logger.error(f"{channel} not implemented yet")
+        raise NotImplementedError(f"{channel} not implemented yet")
+    elif channel == "tt":
+        logger.error(f"{channel} not implemented yet")
+        raise NotImplementedError(f"{channel} not implemented yet")
+    else:
+        logger.error(f"{channel} does not exist")
+        raise ValueError(f"{channel} does not exist")

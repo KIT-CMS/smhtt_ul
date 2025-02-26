@@ -139,13 +139,12 @@ def main(info):
 
     rootfile = rootfile_parser.Rootfile_parser(args.input, variable, )
 
-    bkg_processes = sorted_bkg_processes(bkg_processes)
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
 
     # create plot
     width = 600
-    if args.linear == True:
+    if args.linear:
         plot = dd.Plot(
             [0.3, [0.3, 0.28]], "ModTDR", r=0.04, l=0.14, width=width)
     else:
@@ -161,27 +160,16 @@ def main(info):
         stype = "Nominal"
         cat = args.category
 
-    for index,process in enumerate(bkg_processes):
-        if index == 0:
-            total_bkg = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
-        else:
-            total_bkg.Add(rootfile.get(channel, process, category=cat, shape_type=stype))
-        if process in ["jetFakesEMB", "jetFakes"] and channel == "tt":
-            # total_bkg.Add(rootfile.get(channel, "wFakes", category=cat, shape_type=stype))
-            jetfakes_hist = rootfile.get(channel, process, category=cat, shape_type=stype)
-            # jetfakes_hist.Add(rootfile.get(channel, "wFakes", category=cat, shape_type=stype))
-            plot.add_hist(jetfakes_hist, process, "bkg")
-        else:
-            plot.add_hist(
-                rootfile.get(channel, process, category=cat, shape_type=stype), process, "bkg")
-        plot.setGraphStyle(
-            process, "hist", fillcolor=styles.color_dict[process])
+    for index, process in enumerate(bkg_processes):
+        _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
 
-    # if "mm" not in channel:
-    #     # add VH, ttH & HWW to total bkg histogram
-    #     total_bkg.Add(rootfile.get(channel, "VH125"))
-    #     total_bkg.Add(rootfile.get(channel, "ttH125"))
-    #     total_bkg.Add(rootfile.get(channel, "HWW"))
+        if index == 0:
+            total_bkg = _hist
+        else:
+            total_bkg.Add(_hist)
+
+        plot.add_hist(_hist, process, "bkg")
+        plot.setGraphStyle(process, "hist", fillcolor=styles.color_dict[process])
 
     plot.add_hist(total_bkg, "total_bkg")
     plot.setGraphStyle(
