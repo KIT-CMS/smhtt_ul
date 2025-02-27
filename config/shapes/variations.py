@@ -1,30 +1,26 @@
 import inspect
 import logging
 from typing import Any, Callable
-from collections import defaultdict
 
-from ntuple_processor.utils import Cut
-from ntuple_processor.utils import Weight
+from ntuple_processor.utils import Cut, Weight
+from ntuple_processor.variations import (
+    AddCut,
+    AddWeight,
+    ChangeDatasetReplaceMultipleCutsAndAddWeight,
+    RemoveCut,
+    RemoveWeight,
+    ReplaceCut,
+    ReplaceCutAndAddWeight,
+    ReplaceMultipleCuts,
+    ReplaceMultipleCutsAndAddWeight,
+    ReplaceVariable,
+    ReplaceVariableReplaceCutAndAddWeight,
+    ReplaceWeight,
+    SquareWeight,
+)
 
-from ntuple_processor.variations import ReplaceVariable
-from ntuple_processor.variations import ReplaceCut
-from ntuple_processor.variations import ReplaceWeight
-from ntuple_processor.variations import RemoveCut
-from ntuple_processor.variations import RemoveWeight
-from ntuple_processor.variations import AddCut
-from ntuple_processor.variations import AddWeight
-from ntuple_processor.variations import SquareWeight
-from ntuple_processor.variations import ReplaceCutAndAddWeight
-from ntuple_processor.variations import ReplaceMultipleCuts
-from ntuple_processor.variations import ReplaceMultipleCutsAndAddWeight
-from ntuple_processor.variations import ReplaceVariableReplaceCutAndAddWeight
-from ntuple_processor.variations import ChangeDatasetReplaceMultipleCutsAndAddWeight
+logger = logging.getLogger("")
 
-from config.logging_setup_configs import setup_logging
-
-
-logger = logging.getLogger(__name__)
-logger = setup_logging("variations", logger, logging.DEBUG)
 
 FF_OPTIONS = {
     "fake_factor": {
@@ -32,58 +28,113 @@ FF_OPTIONS = {
         "tt_1": "fake_factor_1",
         "tt_2": "fake_factor_2",
     },
+    "fake_factor_without_DR_SR": {
+        "lt": """(
+                    (
+                        raw_qcd_fake_factor_2 *
+                        qcd_fake_factor_fraction_2 *
+                        qcd_correction_wo_DR_SR_2
+                    ) +
+                    (
+                        raw_wjets_fake_factor_2 * 
+                        wjets_fake_factor_fraction_2 * 
+                        wjets_correction_wo_DR_SR_2
+                    ) +
+                    (
+                        raw_ttbar_fake_factor_2 *
+                        ttbar_fake_factor_fraction_2 *
+                        ttbar_correction_wo_DR_SR_2
+                    )
+                )"""
+    },
+    "fake_factor_with_DR_SR_without_correction": {
+        "lt": """(
+                    (
+                        raw_qcd_fake_factor_2 *
+                        qcd_fake_factor_fraction_2 *
+                        qcd_DR_SR_correction_2
+                    ) +
+                    (
+                        raw_wjets_fake_factor_2 *
+                        wjets_fake_factor_fraction_2 *
+                        wjets_DR_SR_correction_2
+                    ) +
+                    (
+                        raw_ttbar_fake_factor_2 *
+                        ttbar_fake_factor_fraction_2
+                    )
+                )""",
+    },
+    # --------------------------------------------------------------------------------------
     "raw_fake_factor": {
         "lt": "raw_fake_factor_2",
         "tt_1": "raw_fake_factor_1",
         "tt_2": "raw_fake_factor_2",
     },
-    "fake_factor_without_DR_SR": {
-        "lt": """(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2 * qcd_correction_wo_DR_SR_2 + raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2 * wjets_correction_wo_DR_SR_2 + raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2 * ttbar_correction_wo_DR_SR_2)""",
-    },
-    "fake_factor_with_DR_SR_without_correction": {
-        "lt": """(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2 * qcd_DR_SR_correction_2 + raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2 * wjets_DR_SR_correction_2 + raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)""",
-    },
+    # --------------------------------------------------------------------------------------
     "raw_qcd_fake_factor_with_fraction": {
         "lt": "(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2)",
     },
     "raw_qcd_fake_factor": {
         "lt": "raw_qcd_fake_factor_2",
     },
+    "raw_qcd_fake_factor_with_bias_correction": {
+        "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2)",
+    },
+    "raw_qcd_fake_factor_with_DR_SR_correction": {
+        "lt": "(raw_qcd_fake_factor_2 * qcd_DR_SR_correction_2)",
+    },
+    "raw_qcd_fake_factor_with_DR_SR_correction_and_bias_correction": {
+        "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2 * qcd_DR_SR_correction_2)",
+    },
+    # --------------------------------------------------------------------------------------
     "raw_wjets_fake_factor_with_fraction": {
-        "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)",
+        "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)", 
     },
     "raw_wjets_fake_factor": {
         "lt": "raw_wjets_fake_factor_2",
     },
+    # --------------------------------------------------------------------------------------
     "raw_ttbar_fake_factor_with_fraction": {
         "lt": "(raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)",
     },
     "raw_ttbar_fake_factor": {
         "lt": "raw_ttbar_fake_factor_2",
     },
+    # --------------------------------------------------------------------------------------
 }
 
-# current options
-# "fake_factor_2"
-# "qcd_DR_SR_correction_2"
-# "qcd_correction_wo_DR_SR_2"
-# "qcd_fake_factor_2"
-# "qcd_fake_factor_correction_2"
-# "qcd_fake_factor_fraction_2"
-# "raw_fake_factor_2"
-# "raw_qcd_fake_factor_2"
-# "raw_ttbar_fake_factor_2"
-# "raw_wjets_fake_factor_2"
-# "ttbar_DR_SR_correction_2"
-# "ttbar_correction_wo_DR_SR_2"
-# "ttbar_fake_factor_2"
-# "ttbar_fake_factor_correction_2"
-# "ttbar_fake_factor_fraction_2"
-# "wjets_DR_SR_correction_2"
-# "wjets_correction_wo_DR_SR_2"
-# "wjets_fake_factor_2"
-# "wjets_fake_factor_correction_2"
-# "wjets_fake_factor_fraction_2"
+FF_OPTIONS.__doc__ = """
+    Different implementation of accessing full (FF_OPTIONS["fake_factor"]) and raw fake factors
+    (FF_OPTIONS["raw_fake_factor"]) and their individual combinations with different corrections
+    this can be set to a default value in RuntimeVariables or via set_ff_type function.
+
+    In case of usage: This is mainly intendet to investigate individual contributions of the fake factors
+    and their corrections to the SR in the DR region. Make sure that the corresponding components
+    that are specified are also present in the produced ntuples!
+
+    possible options based on https://github.com/KIT-CMS/TauAnalysis-CROWN/commit/d73463bfdf5a7023b6b032a0c2d05b00f88e4150
+      - "fake_factor_2"
+      - "qcd_DR_SR_correction_2"
+      - "qcd_correction_wo_DR_SR_2"
+      - "qcd_fake_factor_2"
+      - "qcd_fake_factor_correction_2"
+      - "qcd_fake_factor_fraction_2"
+      - "raw_fake_factor_2"
+      - "raw_qcd_fake_factor_2"
+      - "raw_ttbar_fake_factor_2"
+      - "raw_wjets_fake_factor_2"
+      - "ttbar_DR_SR_correction_2"
+      - "ttbar_correction_wo_DR_SR_2"
+      - "ttbar_fake_factor_2"
+      - "ttbar_fake_factor_correction_2"
+      - "ttbar_fake_factor_fraction_2"
+      - "wjets_DR_SR_correction_2"
+      - "wjets_correction_wo_DR_SR_2"
+      - "wjets_fake_factor_2"
+      - "wjets_fake_factor_correction_2"
+      - "wjets_fake_factor_fraction_2"
+"""
 
 
 def set_ff_type(ff_type):
@@ -92,11 +143,17 @@ def set_ff_type(ff_type):
         raise KeyError(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
 
     logger.info(f"Setting fake factor option to {ff_type}= {FF_OPTIONS[ff_type]}")
-    Used.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
-    logger.info("Skipping tt_1 and tt_2 for now.")
+    RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
+    logger.warning(
+        """
+            Setting fake factor option for tt_1 and tt_2 is in parts not implemented yet.
+            Will not change the fake factor for tt_1 and tt_2 for now, only for lt.
+            Please make sure to set the fake factor for tt_1 and tt_2 accordingly if needed.
+        """
+    )
 
 
-class Used(object):
+class RuntimeVariables(object):
     """
     A singleton-like container class holding several variables that can be adjusted in time.
 
@@ -117,9 +174,9 @@ class Used(object):
     FF_name_tt_1 = FF_OPTIONS["fake_factor"]["tt_1"]
     FF_name_tt_2 = FF_OPTIONS["fake_factor"]["tt_2"]
 
-    def __new__(cls) -> "Used":
+    def __new__(cls) -> "RuntimeVariables":
         if not hasattr(cls, "instance"):
-            cls.instance = super(Used, cls).__new__(cls)
+            cls.instance = super(RuntimeVariables, cls).__new__(cls)
             return cls.instance
 
 
@@ -235,12 +292,25 @@ abcd_method = [
     ),
 ]
 
+same_sign_anti_iso_lt = ReplaceMultipleCuts(
+    "same_sign_anti_iso",
+    ["os", "tau_iso"],
+    [
+        Cut("q_1*q_2>0", "ss"),
+        Cut(
+            "(id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+            "tau_anti_iso",
+        ),
+    ]
+)
+
+
 anti_iso_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
     lambda: ReplaceCutAndAddWeight(
         "anti_iso",
         "tau_iso",
         Cut("(id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     )
 )
 anti_iso_lt_no_ff = LazyVariable(
@@ -262,7 +332,7 @@ anti_iso_tt_mcl = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt
             ),
             Cut("gen_match_1 != 6", "tau_anti_iso"),
         ],
-        Weight(Used.FF_name_tt_2, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_tt_2, "fake_factor"),
     )
 )
 anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
@@ -270,10 +340,21 @@ anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
         "anti_iso",
         "tau_iso",
         Cut(
-            "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5))",
+            """(
+                    (
+                        (id_tau_vsJet_Tight_1 < 0.5) &&
+                        (id_tau_vsJet_Tight_2 > 0.5) &&
+                        (id_tau_vsJet_VLoose_1 > 0.5)
+                    ) ||
+                    (
+                        (id_tau_vsJet_Tight_1 > 0.5) &&
+                        (id_tau_vsJet_Tight_2 < 0.5) &&
+                        (id_tau_vsJet_VLoose_2 > 0.5)
+                    )
+                )""",
             "tau_anti_iso"
         ),
-        Weight(f"0.5 * {Used.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {Used.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
+        Weight(f"0.5 * {RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
     )
 )
 wfakes_tt = ReplaceCut(
@@ -282,27 +363,6 @@ wfakes_tt = ReplaceCut(
 wfakes_w_tt = AddCut(
     "wfakes", Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut")
 )
-
-# anti_iso_split_lt = [
-#     ReplaceCutAndAddWeight(
-#         "anti_iso_w",
-#         "tau_iso",
-#         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-#         Weight("ff_lt_wjets", "fake_factor"),
-#     ),
-#     ReplaceCutAndAddWeight(
-#         "anti_iso_qcd",
-#         "tau_iso",
-#         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-#         Weight("ff_lt_qcd", "fake_factor"),
-#     ),
-#     ReplaceCutAndAddWeight(
-#         "anti_iso_tt",
-#         "tau_iso",
-#         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-#         Weight("ff_lt_ttbar", "fake_factor"),
-#     ),
-# ]
 # Pileup reweighting
 pileup_reweighting = [
     ReplaceVariable("CMS_PileUpUp", "PileUpUp"),
@@ -1043,56 +1103,56 @@ ff_variations_tau_es_lt = [
         "tauEs1prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong_EraUp",
         "tauEs1prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong1pizero_EraDown",
         "tauEs1prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong1pizero_EraUp",
         "tauEs1prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong_EraDown",
         "tauEs3prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong_EraUp",
         "tauEs3prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong1pizero_EraDown",
         "tauEs3prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong1pizero_EraUp",
         "tauEs3prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
 ]
 
@@ -1103,56 +1163,56 @@ ff_variations_tau_es_emb_lt = [
         "tauEs1prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong_EraUp",
         "tauEs1prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong1pizero_EraDown",
         "tauEs1prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong1pizero_EraUp",
         "tauEs1prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong_EraDown",
         "tauEs3prong0pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong_EraUp",
         "tauEs3prong0pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong1pizero_EraDown",
         "tauEs3prong1pizeroDown",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong1pizero_EraUp",
         "tauEs3prong1pizeroUp",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(Used.FF_name_lt, "fake_factor"),
+        Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
 ]
 
@@ -1547,7 +1607,65 @@ ff_variations_tau_es_emb_lt = [
 # collections for ordering
 
 
-class FakeProcessEstimationVariations:
+__doc__ = """
+Usage Example for Variation Collections
+
+This module defines several systematic variation collections that group different
+systematic adjustments such as fake process estimations, energy scale shifts, MET variations,
+efficiency corrections, fake rate variations, trigger efficiencies, and additional uncertainties.
+Each collection can be applied at once using `<VariationCollection>.unrolled()` that returns a 
+list of all variations defined within that collection.
+
+For example, instead of fetching each variation individually this would be possible:
+
+    from config.shapes import variations
+
+    # Retrieve and loop over all fake process estimation variations
+    variations = [
+        tau_es_3prong,
+        tau_es_3prong1pizero,
+        tau_es_1prong,
+        tau_es_1prong1pizero,
+        ...
+    ]
+    # Or use
+    variations = variations.EnergyScaleVariations.unrolled()
+    # Or another collection you might seems be more fitting i.e. process wise.
+
+This pattern applies similarly to other collections. Thus, you only need to import the corresponding
+variation collection and call its `unrolled()` method to obtain a list of all variations, making the 
+application of systematics both concise and consistent.
+
+The individual Application either trough variations.tau_es_3prong or variations.EnergyScaleVariations.tau_es_3prong
+is still possible.
+"""
+
+
+class _VariationCollection:
+    @classmethod
+    def unrolled(cls):
+        results = []
+        for name, value in cls.__dict__.items():
+            if not name.startswith("__"):
+                results.append(value)
+        return results
+
+
+class SemiLeptonicFFEstimations(_VariationCollection):
+    same_sign = same_sign
+    anti_iso_lt = anti_iso_lt
+    same_sign_anti_iso_lt = same_sign_anti_iso_lt
+
+
+class FullyHadronicFFEstimations(_VariationCollection):
+    abcd_method = abcd_method
+    same_sign = same_sign
+    anti_iso_tt = anti_iso_tt
+
+
+# ------------------------------------------------------------------------------------------
+
+class FakeProcessEstimationVariations(_VariationCollection):
     same_sign = same_sign
     same_sign_em = same_sign_em
     anti_iso_lt = anti_iso_lt
@@ -1557,7 +1675,7 @@ class FakeProcessEstimationVariations:
     abcd_method = abcd_method
 
 
-class EnergyScaleVariations:
+class EnergyScaleVariations(_VariationCollection):
     tau_es_3prong = tau_es_3prong
     tau_es_3prong1pizero = tau_es_3prong1pizero
     tau_es_1prong = tau_es_1prong
@@ -1580,13 +1698,13 @@ class EnergyScaleVariations:
     # ele_fake_es = ele_fake_es
 
 
-class METVariations:
+class METVariations(_VariationCollection):
     met_unclustered = met_unclustered
     recoil_resolution = recoil_resolution
     recoil_response = recoil_response
 
 
-class EffifiencyVariations:
+class EffifiencyVariations(_VariationCollection):
     tau_id_eff_lt = tau_id_eff_lt
     tau_id_eff_tt = tau_id_eff_tt
     emb_tau_id_eff_lt = emb_tau_id_eff_lt
@@ -1594,13 +1712,13 @@ class EffifiencyVariations:
     emb_tau_id_eff_lt_corr = emb_tau_id_eff_lt_corr
 
 
-class FakeRateVariations:
+class FakeRateVariations(_VariationCollection):
     jet_to_tau_fake = jet_to_tau_fake
     zll_et_fake_rate = zll_et_fake_rate
     zll_mt_fake_rate = zll_mt_fake_rate
 
 
-class TriggerEfficiencyVariations:
+class TriggerEfficiencyVariations(_VariationCollection):
     # TODO add trigger efficiency uncertainties
     # tau_trigger_eff_tt = tau_trigger_eff_tt
     # tau_trigger_eff_tt_emb = tau_trigger_eff_tt_emb
@@ -1611,7 +1729,7 @@ class TriggerEfficiencyVariations:
 
 
 # Additional uncertainties
-class AdditionalVariations:
+class AdditionalVariations(_VariationCollection):
     prefiring = prefiring
     zpt = zpt
     top_pt = top_pt
@@ -1623,7 +1741,7 @@ class AdditionalVariations:
     # emb_decay_mode_eff_tt = emb_decay_mode_eff_tt
 
 
-class JetFakeVariations:
+class JetFakeVariations(_VariationCollection):
     # TODO add jetfake uncertainties
     wfakes_tt = wfakes_tt
     wfakes_w_tt = wfakes_w_tt
@@ -1635,4 +1753,3 @@ class JetFakeVariations:
     # qcd_variations_em = qcd_variations_em
     # ff_variations_tau_es_tt = ff_variations_tau_es_tt
     # ff_variations_tau_es_tt_mcl = ff_variations_tau_es_tt_mcl
-

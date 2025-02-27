@@ -3,49 +3,24 @@ import argparse
 import logging
 import os
 import pickle
-import re
-import yaml
-from itertools import combinations
 from functools import partial
+from itertools import combinations
+from typing import Union
 
-from shapes.utils import (
-    add_process,
-    book_histograms,
-    add_control_process,
-    get_nominal_datasets,
-    filter_friends,
-    add_tauES_datasets,
-    book_tauES_histograms,
-)
-from ntuple_processor.variations import ReplaceVariable
-from ntuple_processor import Histogram
-from ntuple_processor import (
-    Unit,
-    UnitManager,
-    GraphManager,
-    RunManager,
-)
-from ntuple_processor.utils import Selection
-
-from config.shapes.channel_selection import channel_selection
-from config.shapes.file_names import files
 import config.shapes.process_selection as selection
-
-# from config.shapes.category_selection import categorization
-from config.shapes.category_selection import categorization as default_categorization
-from config.shapes.tauid_measurement_binning import (
-    categorization as tauid_categorization,
-)
-from config.shapes.taues_measurement_binning import (
-    categorization as taues_categorization,
-)
-
-import config.shapes.variations as variations
 import config.shapes.signal_variations as signal_variations  # TODO: Unify this?
-
-from config.shapes.control_binning import control_binning as default_control_binning
-from config.shapes.gof_binning import load_gof_binning
+import config.shapes.variations as variations
 from config.logging_setup_configs import setup_logging
+
+from config.shapes.category_selection import categorization as default_categorization
+from config.shapes.channel_selection import channel_selection
+from config.shapes.control_binning import control_binning as default_control_binning
+from config.shapes.file_names import files
+from config.shapes.gof_binning import load_gof_binning
+from config.shapes.taues_measurement_binning import categorization as taues_categorization
+from config.shapes.tauid_measurement_binning import categorization as tauid_categorization
+from ntuple_processor import GraphManager, RunManager, UnitManager
+import shapes.utils as shape_utils
 
 
 def parse_arguments():
@@ -249,17 +224,16 @@ def add_processes(
 
 
 def get_analysis_units(
-    channel,
-    era,
-    datasets,
-    categorization,
-    special_analysis,
-    apply_tauid,
-    vs_jet_wp,
-    vs_ele_wp,
-    selection_option="CR",
-    nn_shapes=False,
-):
+    channel: str,
+    era: str,
+    datasets: dict,
+    categorization: dict,
+    special_analysis: Union[str, None],
+    apply_tauid: bool,
+    vs_jet_wp: str,
+    vs_ele_wp: str,
+    selection_option: str = "CR",
+) -> dict:
 
     _selection_kwargs = dict(
         channel=channel,
@@ -285,7 +259,7 @@ def get_analysis_units(
 
     add_processes(
         add_fn=partial(
-            add_process,
+            shape_utils.add_process,
             analysis_unit=analysis_units,
             categorization=categorization,
             channel=channel,
@@ -299,17 +273,17 @@ def get_analysis_units(
 
 
 def get_control_units(
-    channel,
-    era,
-    datasets,
-    special_analysis,
-    variables,
-    apply_tauid,
-    vs_jet_wp,
-    vs_ele_wp,
-    selection_option="CR",
-    do_gofs=False,
-    do_2dGofs=False,
+    channel: str,
+    era: str,
+    datasets: dict,
+    special_analysis: Union[str, None],,
+    variables: list[str],
+    apply_tauid: bool,
+    vs_jet_wp: str,
+    vs_ele_wp: str,
+    selection_option: str = "CR",
+    do_gofs: bool = False,
+    do_2dGofs: bool = False,
 ):
     control_units = {}
     control_binning = default_control_binning
@@ -367,7 +341,7 @@ def get_control_units(
 
     add_processes(
         add_fn=partial(
-            add_control_process,
+            shape_utils.add_control_process,
             analysis_unit=control_units,
             channel=channel,
             binning=control_binning,
@@ -390,6 +364,49 @@ def prepare_special_analysis(special):
         return taues_categorization
     else:
         raise ValueError("Unknown special analysis: {}".format(special))
+
+
+def TauES_TauID_histogram_booking(
+    channel,
+    processes,
+    unit_manager,
+    args,
+    datasets,
+):
+    if channel == "mt" and args.special_analysis == "TauES":
+        logger.info("Booking TauES")
+        shape_utils.book_tauES_histograms(
+            manager=unit_manager,
+            additional_emb_procS=processes,
+            datasets=datasets,
+            variations=[variations.same_sign, variations.anti_iso_lt],
+            enable_check=args.enable_booking_check,
+        )
+    elif channel == "mt" and args.es and args.special_analysis == "TauID":
+        logger.info("Booking TauES")
+        shape_utils.book_tauES_histograms(
+            manager=unit_manager,
+            additional_emb_procS=processes,
+            datasets=datasets,
+            variations=[variations.same_sign, variations.anti_iso_lt_no_ff],
+            enable_check=args.enable_booking_check,
+        )
+        # book_tauES_histograms(
+        #     um,
+        #     additional_emb_procS,
+        #     nominals[args.era]["units"][channel],
+        #     [trigger_eff_mt_emb],
+        #     args.enable_booking_check,
+        # )
+        # book_histograms(
+        #     um,
+        #     additional_emb_procS,
+        #     datasets=nominals[args.era]["units"][channel],
+        #     variations=[trigger_eff_mt_emb],
+        #     enable_check=args.enable_booking_check,
+        # )
+    else:
+        raise ValueError("Unknown special analysis: {}".format(args.special_analysis))
 
 
 def main(args):
@@ -418,7 +435,7 @@ def main(args):
 
     # Step 1: create units and book actions
     for channel in args.channels:
-        nominals[args.era]["datasets"][channel] = get_nominal_datasets(
+        nominals[args.era]["datasets"][channel] = shape_utils.get_nominal_datasets(
             era=args.era,
             channel=channel,
             friend_directories=friend_directories,
@@ -460,7 +477,7 @@ def main(args):
         if args.special_analysis == "TauES":
             additional_emb_procS = set()
             tauESvariations = [-2.5 + 0.1 * i for i in range(0, 51)]
-            add_tauES_datasets(
+            shape_utils.add_tauES_datasets(
                 args.era,
                 channel,
                 friend_directories,
@@ -480,7 +497,7 @@ def main(args):
         if args.special_analysis == "TauID" and args.es:
             additional_emb_procS = set()
             tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
-            add_tauES_datasets(
+            shape_utils.add_tauES_datasets(
                 args.era,
                 channel,
                 friend_directories,
@@ -580,7 +597,7 @@ def main(args):
     logger.info(f"signals: {signalsS}")
 
     _book_histogram = partial(
-        book_histograms,
+        shape_utils.book_histograms,
         manager=unit_manager,
         datasets=nominals[args.era]["units"][channel],
         enable_check=args.enable_booking_check,
@@ -588,72 +605,26 @@ def main(args):
 
     for channel in args.channels:
         _book_histogram(processes=signalsS)
-        if channel == "mt" and args.special_analysis == "TauES":
-            logger.info("Booking TauES")
-            book_tauES_histograms(
-                unit_manager,
-                additional_emb_procS,
-                nominals[args.era]["units"][channel],
-                [variations.same_sign, variations.anti_iso_lt],
-                args.enable_booking_check,
+        if channel == "mt" and args.special_analysis in {"TauES", "TauID"}:
+            TauES_TauID_histogram_booking(
+                channel=channel,
+                processes=additional_emb_procS,
+                unit_manager=unit_manager,
+                args=args,
+                datasets=nominals[args.era]["units"][channel],
             )
-        if channel == "mt" and args.es and args.special_analysis == "TauID":
-            logger.info("Booking TauES")
-            book_tauES_histograms(
-                unit_manager,
-                additional_emb_procS,
-                nominals[args.era]["units"][channel],
-                [variations.same_sign, variations.anti_iso_lt_no_ff],
-                args.enable_booking_check,
-            )
-            # book_tauES_histograms(
-            #     um,
-            #     additional_emb_procS,
-            #     nominals[args.era]["units"][channel],
-            #     [trigger_eff_mt_emb],
-            #     args.enable_booking_check,
-            # )
-            # book_histograms(
-            #     um,
-            #     additional_emb_procS,
-            #     datasets=nominals[args.era]["units"][channel],
-            #     variations=[trigger_eff_mt_emb],
-            #     enable_check=args.enable_booking_check,
-            # )
-        elif channel in ["mt", "et"] and args.special_analysis != "TauID":
-            _book_histogram(
-                processes=embS,
-                variations=[variations.same_sign, variations.anti_iso_lt],
-            )  # this
         if channel in ["mt", "et"]:
-            _book_histogram(
-                processes=dataS | trueTauBkgS | leptonFakesS,
-                variations=[variations.same_sign, variations.anti_iso_lt],
-            )  # this
-            _book_histogram(
-                processes=jetFakesDS[channel],
-                variations=[variations.same_sign, variations.anti_iso_lt],
-            )
-            # _book_histogram(processes=embS, variations=[variations.same_sign])  # DUPLICATE
+            for procs in [embS, dataS | trueTauBkgS | leptonFakesS, jetFakesDS[channel]]:
+                _book_histogram(
+                    processes=procs,
+                    variations=variations.SemiLeptonicFFEstimations.unrolled(),
+                )
         elif channel == "tt":
-            # TODO add anti_iso_tt
-            # TODO add anti_iso_tt_mcl
-            _book_histogram(
-                processes=dataS | embS | trueTauBkgS,
-                variations=[variations.abcd_method, variations.same_sign, variations.anti_iso_tt],
-            )
-            _book_histogram(
-                processes=jetFakesDS[channel],
-                variations=[variations.abcd_method, variations.same_sign, variations.anti_iso_tt],
-            )
-            _book_histogram(
-                processes=leptonFakesS,
-                variations=[variations.wfakes_tt, variations.abcd_method, variations.same_sign, variations.anti_iso_tt],
-            )
-            _book_histogram(
-                processes={"w"} & procS,
-                variations=[variations.wfakes_w_tt],
-            )
+            for procs in [dataS | embS | trueTauBkgS, leptonFakesS, jetFakesDS[channel]]:
+                _book_histogram(
+                    processes=procs,
+                    variations=variations.FullyHadronicFFEstimations.unrolled(),
+                )
         elif channel == "em":
             _book_histogram(
                 processes=dataS | embS | simulatedProcsDS[channel] - signalsS,

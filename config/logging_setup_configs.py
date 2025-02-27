@@ -1,6 +1,8 @@
 import logging
 import shutil
 import textwrap
+from contextlib import contextmanager
+from functools import Generator, Union
 
 GRAY = "\x1b[38;21m"
 WHITE = "\x1b[38;5;15m"
@@ -12,7 +14,7 @@ RESET = "\x1b[0m"
 
 class CustomFormatter(logging.Formatter):
     """Logging colored formatter, adapted from https://stackoverflow.com/a/56944256/3638629"""
-    def __init__(self, use_color=True):
+    def __init__(self, use_color: bool = True) -> None:
         super().__init__()
         self.use_color = use_color
         self.FORMATS = {
@@ -23,7 +25,7 @@ class CustomFormatter(logging.Formatter):
             logging.CRITICAL: lambda fmt: f"{BOLD_RED}{fmt}{RESET}" if use_color else fmt,
         }
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         # Build the fixed parts.
         asctime = self.formatTime(record)
         left_part = f"{asctime} | {record.name} | "
@@ -92,7 +94,31 @@ class CustomFormatter(logging.Formatter):
         return self.FORMATS[record.levelno](formatted) if self.use_color else formatted
 
 
-def setup_logging(output_file, logger, level=logging.DEBUG) -> logging.Logger:
+class _DuplicateFilter(object):
+    def __init__(self) -> None:
+        self.msgs = set()
+
+    def filter(self, record: logging.LogRecord) -> logging.LogRecord:
+        rv = record.msg not in self.msgs
+        self.msgs.add(record.msg)
+        return rv
+
+
+@contextmanager
+def duplicate_filter_context(logger: logging.Logger) -> Generator[None, None, None]:
+    dup_filter = _DuplicateFilter()
+    logger.addFilter(dup_filter)
+    try:
+        yield
+    finally:
+        logger.removeFilter(dup_filter)
+
+
+def setup_logging(
+    output_file: Union[str, None] = None,
+    logger: logging.Logger = logging.getLogger(""),
+    level: int = logging.INFO,
+) -> logging.Logger:
     logger.setLevel(level)
 
     console_formatter = CustomFormatter(use_color=True)
@@ -100,9 +126,10 @@ def setup_logging(output_file, logger, level=logging.DEBUG) -> logging.Logger:
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 
-    file_formatter = CustomFormatter(use_color=False)
-    file_handler = logging.FileHandler(output_file, "w")
-    file_handler.setFormatter(file_formatter)
-    logger.addHandler(file_handler)
+    if output_file is not None:
+        file_formatter = CustomFormatter(use_color=False)
+        file_handler = logging.FileHandler(output_file, "w")
+        file_handler.setFormatter(file_formatter)
+        logger.addHandler(file_handler)
 
     return logger

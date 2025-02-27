@@ -382,6 +382,13 @@ def main(args):
                 logger.info("Do estimation for category %s", cat)
                 for var in ff_inputs[ch][cat]:
                     for variation in ff_inputs[ch][cat][var]:
+
+                        if "same_sign_anti_iso" in variation:
+                            # Skip same sign anti iso variations since this is only used
+                            # for the qcd estimation of anti iso region for DR ff.
+                            # and is accessible via QCD#anti_iso# variation
+                            continue
+
                         _fake_factor_estimation = partial(
                             fake_factor_estimation,
                             rootfile=input_file,
