@@ -32,36 +32,113 @@ FF_OPTIONS = {
         "tt_1": "fake_factor_1",
         "tt_2": "fake_factor_2",
     },
+    "fake_factor_without_DR_SR": {
+        "lt": """(
+                    (
+                        raw_qcd_fake_factor_2 *
+                        qcd_fake_factor_fraction_2 *
+                        qcd_correction_wo_DR_SR_2
+                    ) +
+                    (
+                        raw_wjets_fake_factor_2 * 
+                        wjets_fake_factor_fraction_2 * 
+                        wjets_correction_wo_DR_SR_2
+                    ) +
+                    (
+                        raw_ttbar_fake_factor_2 *
+                        ttbar_fake_factor_fraction_2 *
+                        ttbar_correction_wo_DR_SR_2
+                    )
+                )"""
+    },
+    "fake_factor_with_DR_SR_without_correction": {
+        "lt": """(
+                    (
+                        raw_qcd_fake_factor_2 *
+                        qcd_fake_factor_fraction_2 *
+                        qcd_DR_SR_correction_2
+                    ) +
+                    (
+                        raw_wjets_fake_factor_2 *
+                        wjets_fake_factor_fraction_2 *
+                        wjets_DR_SR_correction_2
+                    ) +
+                    (
+                        raw_ttbar_fake_factor_2 *
+                        ttbar_fake_factor_fraction_2
+                    )
+                )""",
+    },
+    # --------------------------------------------------------------------------------------
     "raw_fake_factor": {
         "lt": "raw_fake_factor_2",
         "tt_1": "raw_fake_factor_1",
         "tt_2": "raw_fake_factor_2",
     },
-    "fake_factor_without_DR_SR": {
-        "lt": """(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2 * qcd_correction_wo_DR_SR_2 + raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2 * wjets_correction_wo_DR_SR_2 + raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2 * ttbar_correction_wo_DR_SR_2)""",
-    },
-    "fake_factor_with_DR_SR_without_correction": {
-        "lt": """(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2 * qcd_DR_SR_correction_2 + raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2 * wjets_DR_SR_correction_2 + raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)""",
-    },
+    # --------------------------------------------------------------------------------------
     "raw_qcd_fake_factor_with_fraction": {
         "lt": "(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2)",
     },
     "raw_qcd_fake_factor": {
         "lt": "raw_qcd_fake_factor_2",
     },
+    "raw_qcd_fake_factor_with_bias_correction": {
+        "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2)",
+    },
+    "raw_qcd_fake_factor_with_DR_SR_correction": {
+        "lt": "(raw_qcd_fake_factor_2 * qcd_DR_SR_correction_2)",
+    },
+    "raw_qcd_fake_factor_with_DR_SR_correction_and_bias_correction": {
+        "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2 * qcd_DR_SR_correction_2)",
+    },
+    # --------------------------------------------------------------------------------------
     "raw_wjets_fake_factor_with_fraction": {
-        "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)",
+        "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)", 
     },
     "raw_wjets_fake_factor": {
         "lt": "raw_wjets_fake_factor_2",
     },
+    # --------------------------------------------------------------------------------------
     "raw_ttbar_fake_factor_with_fraction": {
         "lt": "(raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)",
     },
     "raw_ttbar_fake_factor": {
         "lt": "raw_ttbar_fake_factor_2",
     },
+    # --------------------------------------------------------------------------------------
 }
+
+__FF_OPTION_info__ = """
+    Different implementation of accessing full (FF_OPTIONS["fake_factor"]) and raw fake factors
+    (FF_OPTIONS["raw_fake_factor"]) and their individual combinations with different corrections
+    this can be set to a default value in RuntimeVariables or via set_ff_type function.
+
+    In case of usage: This is mainly intendet to investigate individual contributions of the fake factors
+    and their corrections to the SR in the DR region. Make sure that the corresponding components
+    that are specified are also present in the produced ntuples!
+
+    possible options based on https://github.com/KIT-CMS/TauAnalysis-CROWN/commit/d73463bfdf5a7023b6b032a0c2d05b00f88e4150
+      - "fake_factor_2"
+      - "qcd_DR_SR_correction_2"
+      - "qcd_correction_wo_DR_SR_2"
+      - "qcd_fake_factor_2"
+      - "qcd_fake_factor_correction_2"
+      - "qcd_fake_factor_fraction_2"
+      - "raw_fake_factor_2"
+      - "raw_qcd_fake_factor_2"
+      - "raw_ttbar_fake_factor_2"
+      - "raw_wjets_fake_factor_2"
+      - "ttbar_DR_SR_correction_2"
+      - "ttbar_correction_wo_DR_SR_2"
+      - "ttbar_fake_factor_2"
+      - "ttbar_fake_factor_correction_2"
+      - "ttbar_fake_factor_fraction_2"
+      - "wjets_DR_SR_correction_2"
+      - "wjets_correction_wo_DR_SR_2"
+      - "wjets_fake_factor_2"
+      - "wjets_fake_factor_correction_2"
+      - "wjets_fake_factor_fraction_2"
+"""
 
 
 def set_ff_type(ff_type):
