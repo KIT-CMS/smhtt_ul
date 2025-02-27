@@ -10,7 +10,6 @@ common_binning = {
     "m_sv_puppi": Histogram("m_sv_puppi", "m_sv_puppi", np.arange(0, 225, 5)),
     "pt_sv_puppi": Histogram("pt_sv_puppi", "pt_sv_puppi", np.arange(0, 160, 5)),
     "eta_sv_puppi": Histogram("eta_sv_puppi", "eta_sv_puppi", np.linspace(-2.5, 2.5, 50)),
-    # "m_vis": Histogram("m_vis", "m_vis", np.arange(0, 260, 10)), # or use "m_vis" : Histogram("m_vis", "m_vis", [10, 260]), for one bin only
     "m_vis": Histogram("m_vis", "m_vis", np.linspace(50, 200, 50)),
     "ME_q2v1": Histogram("ME_q2v1", "ME_q2v1", np.arange(0, 300000, 6000)),
     "ME_q2v2": Histogram("ME_q2v1", "ME_q2v1", np.arange(0, 300000, 6000)),
@@ -24,7 +23,8 @@ common_binning = {
     "mt_tot": Histogram("mt_tot", "mt_tot", np.arange(0, 400, 8)),
     "mt_tot_puppi": Histogram("mt_tot_puppi", "mt_tot_puppi", np.arange(0, 400, 8)),
     "pt_1": Histogram("pt_1", "pt_1", np.append(np.array([0]) ,np.arange(20, 140, 5))),
-    "pt_2": Histogram("pt_2", "pt_2", np.append(np.array([0]) ,np.arange(20, 140, 5))),
+    # "pt_2": Histogram("pt_2", "pt_2", np.append(np.array([0]) ,np.arange(20, 140, 5))),
+    "pt_2": Histogram("pt_2", "pt_2", [0, 40, 50, 60, 70, 100, 140]),
     "eta_1": Histogram("eta_1", "eta_1", np.linspace(-2.5, 2.5, 50)),
     "eta_2": Histogram("eta_2", "eta_2", np.linspace(-2.5, 2.5, 50)),
     "jpt_1": Histogram("jpt_1", "jpt_1", np.append(np.array([0]) ,np.arange(20, 160, 5))),
