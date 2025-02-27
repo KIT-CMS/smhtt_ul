@@ -37,8 +37,9 @@ def fake_factor_estimation(
             logger.info(f"CR selection, subtracting {procs_to_subtract}")
     elif "DR;ff" in selection_option:
         _QCD = "QCD" if is_embedding else "QCDMC"
-        ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'TTJ', 'W', _QCD]
+        ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'TTJ', 'W']
 
+        ff_processes_covered_by_mc.remove(_QCD)
         logger.warning(
             """
                 Current implementation will not consider QCD due to the lack of a proper 
