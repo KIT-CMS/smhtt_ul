@@ -282,7 +282,7 @@ def DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
                 """,
                 "crossSectionPerEventWeight",
             ),
-            dy_stitching_weight(era),  # TODO add stitching weight
+            # dy_stitching_weight(era),  # TODO add stitching weight
         ]
     )
     return Selection(name="DY_NLO", weights=DY_process_weights)

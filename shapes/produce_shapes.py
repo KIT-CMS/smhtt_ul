@@ -189,7 +189,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--ff-type",
-        help="Set to the type of fake factor used.",
+        help=f"Set to the type of fake factor used.\n{variations.__FF_OPTION_info__}",
         default="fake_factor"
     )
     return parser.parse_args()
