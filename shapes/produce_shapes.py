@@ -276,7 +276,7 @@ def get_control_units(
     channel: str,
     era: str,
     datasets: dict,
-    special_analysis: Union[str, None],,
+    special_analysis: Union[str, None],
     variables: list[str],
     apply_tauid: bool,
     vs_jet_wp: str,
