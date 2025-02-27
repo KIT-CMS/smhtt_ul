@@ -1,7 +1,10 @@
 import logging
 import ROOT
 from .defaults import _name_string, _process_map, _dataset_map
-logger = logging.getLogger("")
+from config.logging_setup_configs import setup_logging
+
+logger = logging.getLogger(__name__)
+setup_logging(logger=logger, level=logging.INFO)
 
 
 def wfakes_estimation(

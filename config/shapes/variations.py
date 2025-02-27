@@ -1,30 +1,28 @@
 import inspect
 import logging
 from typing import Any, Callable
-from collections import defaultdict
 
-from ntuple_processor.utils import Cut
-from ntuple_processor.utils import Weight
-
-from ntuple_processor.variations import ReplaceVariable
-from ntuple_processor.variations import ReplaceCut
-from ntuple_processor.variations import ReplaceWeight
-from ntuple_processor.variations import RemoveCut
-from ntuple_processor.variations import RemoveWeight
-from ntuple_processor.variations import AddCut
-from ntuple_processor.variations import AddWeight
-from ntuple_processor.variations import SquareWeight
-from ntuple_processor.variations import ReplaceCutAndAddWeight
-from ntuple_processor.variations import ReplaceMultipleCuts
-from ntuple_processor.variations import ReplaceMultipleCutsAndAddWeight
-from ntuple_processor.variations import ReplaceVariableReplaceCutAndAddWeight
-from ntuple_processor.variations import ChangeDatasetReplaceMultipleCutsAndAddWeight
-
+from ntuple_processor.utils import Cut, Weight
+from ntuple_processor.variations import (
+    AddCut,
+    AddWeight,
+    ChangeDatasetReplaceMultipleCutsAndAddWeight,
+    RemoveCut,
+    RemoveWeight,
+    ReplaceCut,
+    ReplaceCutAndAddWeight,
+    ReplaceMultipleCuts,
+    ReplaceMultipleCutsAndAddWeight,
+    ReplaceVariable,
+    ReplaceVariableReplaceCutAndAddWeight,
+    ReplaceWeight,
+    SquareWeight,
+)
 from config.logging_setup_configs import setup_logging
 
-
 logger = logging.getLogger(__name__)
-logger = setup_logging("variations", logger, logging.DEBUG)
+setup_logging(logger=logger, level=logging.INFO)
+
 
 FF_OPTIONS = {
     "fake_factor": {
@@ -148,7 +146,13 @@ def set_ff_type(ff_type):
 
     logger.info(f"Setting fake factor option to {ff_type}= {FF_OPTIONS[ff_type]}")
     RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
-    logger.info("Skipping tt_1 and tt_2 for now.")
+    logger.warning(
+        """
+            Setting fake factor option for tt_1 and tt_2 is in parts not implemented yet.
+            Will not change the fake factor for tt_1 and tt_2 for now, only for lt.
+            Please make sure to set the fake factor for tt_1 and tt_2 accordingly if needed.
+        """
+    )
 
 
 class RuntimeVariables(object):
@@ -290,6 +294,19 @@ abcd_method = [
     ),
 ]
 
+same_sign_anti_iso_lt = ReplaceMultipleCuts(
+    "same_sign_anti_iso",
+    ["os", "tau_iso"],
+    [
+        Cut("q_1*q_2>0", "ss"),
+        Cut(
+            "(id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+            "tau_anti_iso",
+        ),
+    ]
+)
+
+
 anti_iso_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
     lambda: ReplaceCutAndAddWeight(
         "anti_iso",
@@ -325,7 +342,18 @@ anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
         "anti_iso",
         "tau_iso",
         Cut(
-            "((id_tau_vsJet_Tight_2>0.5 && id_tau_vsJet_Tight_1<0.5 && id_tau_vsJet_VLoose_1>0.5) || (id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5))",
+            """(
+                    (
+                        (id_tau_vsJet_Tight_1 < 0.5) &&
+                        (id_tau_vsJet_Tight_2 > 0.5) &&
+                        (id_tau_vsJet_VLoose_1 > 0.5)
+                    ) ||
+                    (
+                        (id_tau_vsJet_Tight_1 > 0.5) &&
+                        (id_tau_vsJet_Tight_2 < 0.5) &&
+                        (id_tau_vsJet_VLoose_2 > 0.5)
+                    )
+                )""",
             "tau_anti_iso"
         ),
         Weight(f"0.5 * {RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
@@ -337,27 +365,6 @@ wfakes_tt = ReplaceCut(
 wfakes_w_tt = AddCut(
     "wfakes", Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut")
 )
-
-# anti_iso_split_lt = [
-#     ReplaceCutAndAddWeight(
-#         "anti_iso_w",
-#         "tau_iso",
-#         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-#         Weight("ff_lt_wjets", "fake_factor"),
-#     ),
-#     ReplaceCutAndAddWeight(
-#         "anti_iso_qcd",
-#         "tau_iso",
-#         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-#         Weight("ff_lt_qcd", "fake_factor"),
-#     ),
-#     ReplaceCutAndAddWeight(
-#         "anti_iso_tt",
-#         "tau_iso",
-#         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-#         Weight("ff_lt_ttbar", "fake_factor"),
-#     ),
-# ]
 # Pileup reweighting
 pileup_reweighting = [
     ReplaceVariable("CMS_PileUpUp", "PileUpUp"),
@@ -1645,6 +1652,20 @@ class _VariationCollection:
                 results.append(value)
         return results
 
+
+class SemiLeptonicFFEstimations(_VariationCollection):
+    same_sign = same_sign
+    anti_iso_lt = anti_iso_lt
+    same_sign_anti_iso_lt = same_sign_anti_iso_lt
+
+
+class FullyHadronicFFEstimations(_VariationCollection):
+    abcd_method = abcd_method
+    same_sign = same_sign
+    anti_iso_tt = anti_iso_tt
+
+
+# ------------------------------------------------------------------------------------------
 
 class FakeProcessEstimationVariations(_VariationCollection):
     same_sign = same_sign

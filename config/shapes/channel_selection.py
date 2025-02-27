@@ -3,9 +3,8 @@ import logging
 from ntuple_processor.utils import Selection, WarnDict
 from config.logging_setup_configs import setup_logging
 
-
 logger = logging.getLogger(__name__)
-logger = setup_logging("booking.log", logger, logging.INFO)
+logger = setup_logging(logger=logger, level=logging.INFO)
 
 
 def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose", selection_option="CR", **kwargs):
@@ -18,6 +17,19 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
 
     if "DR;ff" in selection_option:
         modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=None)
+
+    wps_dict = {"VVTight", "VVTight", "Tight", "Medium", "Loose", "VLoose", "VVLoose", "VVVLoose"}
+    try:
+        assert vs_ele_wp in wps_dict, f"{vs_ele_wp} is not a valid vsEle discriminator"
+    except AssertionError as e:
+        logger.error(e)
+        raise e
+
+    try:
+        assert vs_jet_wp in wps_dict, f"{vs_jet_wp} is not a valid vsJet discriminator"
+    except AssertionError as e:
+        logger.error(e)
+        raise e
 
     wps_dict = {"VVTight", "VVTight", "Tight", "Medium", "Loose", "VLoose", "VVLoose", "VVVLoose"}
     try:

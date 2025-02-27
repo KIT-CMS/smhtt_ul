@@ -538,9 +538,9 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             )
             if apply_wps:
                 ztt_embedded_weights.extend(
-                [
-                    ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-                ]
+                    [
+                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    ]
                 )
             if not apply_wps:
                 pass
@@ -565,9 +565,9 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             )
             if apply_wps:
                 ztt_embedded_weights.extend(
-                [
-                    ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-                ]
+                    [
+                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    ]
                 )
             if not apply_wps:
                 pass
@@ -582,9 +582,9 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             )
             if apply_wps:
                 ztt_embedded_weights.extend(
-                [
-                    ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-                ]
+                    [
+                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    ]
                 )
             if not apply_wps:
                 pass
@@ -607,11 +607,11 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
         )
         if apply_wps:
             ztt_embedded_weights.extend(
-            [
-                (
-                    "((gen_match_1==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
-                )
-            ]
+                [
+                    (
+                        "((gen_match_1==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
+                    )
+                ]
             )
         if not apply_wps:
             pass
