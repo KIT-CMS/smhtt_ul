@@ -18,8 +18,10 @@ from ntuple_processor.variations import (
     ReplaceWeight,
     SquareWeight,
 )
+from config.logging_setup_configs import setup_logging
 
-logger = logging.getLogger("")
+logger = logging.getLogger(__name__)
+setup_logging(logger=logger, level=logging.INFO)
 
 
 FF_OPTIONS = {
@@ -104,7 +106,7 @@ FF_OPTIONS = {
     # --------------------------------------------------------------------------------------
 }
 
-FF_OPTIONS.__doc__ = """
+__FF_OPTION_info__ = """
     Different implementation of accessing full (FF_OPTIONS["fake_factor"]) and raw fake factors
     (FF_OPTIONS["raw_fake_factor"]) and their individual combinations with different corrections
     this can be set to a default value in RuntimeVariables or via set_ff_type function.

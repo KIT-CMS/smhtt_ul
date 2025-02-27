@@ -853,6 +853,6 @@ if __name__ == "__main__":
     else:
         log_file = "{}.log".format(args.output_file)
     logger = logging.getLogger(__name__)
-    logger = setup_logging(log_file, logger, logging.DEBUG)
+    logger = setup_logging(log_file, logger, logging.INFO)
     variations.set_ff_type(args.ff_type)
     main(args)

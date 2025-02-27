@@ -2,7 +2,7 @@ import logging
 import shutil
 import textwrap
 from contextlib import contextmanager
-from functools import Generator, Union
+from typing import Generator, Union
 
 GRAY = "\x1b[38;21m"
 WHITE = "\x1b[38;5;15m"
@@ -94,24 +94,28 @@ class CustomFormatter(logging.Formatter):
         return self.FORMATS[record.levelno](formatted) if self.use_color else formatted
 
 
-class _DuplicateFilter(object):
+class _DuplicateFilter:
     def __init__(self) -> None:
         self.msgs = set()
 
-    def filter(self, record: logging.LogRecord) -> logging.LogRecord:
-        rv = record.msg not in self.msgs
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.msg in self.msgs:
+            return False
         self.msgs.add(record.msg)
-        return rv
+        return True
 
 
 @contextmanager
 def duplicate_filter_context(logger: logging.Logger) -> Generator[None, None, None]:
-    dup_filter = _DuplicateFilter()
-    logger.addFilter(dup_filter)
-    try:
+    if any(isinstance(f, _DuplicateFilter) for f in logger.filters):
         yield
-    finally:
-        logger.removeFilter(dup_filter)
+    else:
+        dup_filter = _DuplicateFilter()
+        logger.addFilter(dup_filter)
+        try:
+            yield
+        finally:
+            logger.removeFilter(dup_filter)
 
 
 def setup_logging(
@@ -131,5 +135,9 @@ def setup_logging(
         file_handler = logging.FileHandler(output_file, "w")
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
+
+    # Install the duplicate filter permanently if not already present.
+    if not any(isinstance(f, _DuplicateFilter) for f in logger.filters):
+        logger.addFilter(_DuplicateFilter())
 
     return logger
