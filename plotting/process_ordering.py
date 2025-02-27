@@ -42,8 +42,10 @@ def sorted_bkg_processes(x: List[str], /, *, ordering: Union[None, dict[float, s
     assert isinstance(x, list), "Only implemented for list"
     if ordering is None:
         ordering = PROCESS_TO_IMPORTANCE
-    elif ordering is not None and all(isinstance(k, float) for k in ordering):
+    elif ordering is not None and all(isinstance(k, float) for k in ordering) and all(isinstance(v, str) for v in ordering.values()):
         ordering = dict(map(reversed, deepcopy(ordering).items()))
+    elif not (all(isinstance(k, str) for k in ordering) and all(isinstance(v, float) for v in ordering.values())):
+        pass
     else:
         raise ValueError("ordering must be None or dict[float, str] or dict[str, float]")
     return sorted(
