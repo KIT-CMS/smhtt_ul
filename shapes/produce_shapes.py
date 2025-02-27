@@ -367,11 +367,11 @@ def prepare_special_analysis(special):
 
 
 def TauES_TauID_histogram_booking(
-    channel,
-    processes,
-    unit_manager,
-    args,
-    datasets,
+    channel: str,
+    processes: str,
+    unit_manager: UnitManager,
+    args: argparse.Namespace,
+    datasets: dict,
 ):
     if channel == "mt" and args.special_analysis == "TauES":
         logger.info("Booking TauES")
