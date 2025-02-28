@@ -3,10 +3,11 @@ from functools import partial
 import logging
 import ROOT
 from .defaults import _name_string, _process_map, _dataset_map
+from config.logging_setup_configs import duplicate_filter_context
+
 from config.logging_setup_configs import setup_logging
 
-logger = logging.getLogger("")
-logger = setup_logging("fakefactors_estimations", logger, logging.INFO)
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 
 def fake_factor_estimation(
@@ -33,22 +34,47 @@ def fake_factor_estimation(
     if selection_option == "CR":
         logger.info(f"CR selection, subtracting {procs_to_subtract}")
     elif "DR;ff" in selection_option:
-        ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'TTJ', 'W']  # No QCD (for now) since only minor contribution
+        _QCD = "QCD" if is_embedding else "QCDMC"
+        ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'TTJ', 'W', _QCD]
+
+        ff_processes_covered_by_mc.remove(_QCD)
+        logger.warning(
+            """
+                Current implementation will not consider QCD due to the lack of a proper 
+                QCD estimation in same_sign_anti_iso region.
+            """
+        )
+
         if "qcd" in selection_option:
-            procs_to_subtract.extend(ff_processes_covered_by_mc)
-            logger.info(f"DR;ff;qcd selection, subtracting {ff_processes_covered_by_mc}")
+            try:  # in case _QCD will be at some point in the future in ff_processes_covered_by_mc
+                ff_processes_covered_by_mc.remove(_QCD)
+            except ValueError:
+                pass
+            logger.info(f"DR;ff;qcd selection, adding for subtraction {ff_processes_covered_by_mc}")
         elif "wjet" in selection_option:
             ff_processes_covered_by_mc.remove("W")
-            procs_to_subtract.extend(ff_processes_covered_by_mc)
-            logger.info(f"DR;ff;wjet selection, subtracting {procs_to_subtract}")
+            logger.info(f"DR;ff;wjet selection, adding for subtraction {ff_processes_covered_by_mc}")
         elif "ttbar" in selection_option:
             ff_processes_covered_by_mc.remove("TTJ")
-            procs_to_subtract.extend(ff_processes_covered_by_mc)
-            logger.info(f"DR;ff;ttbar selection, subtracting {procs_to_subtract}")
+            logger.info(f"DR;ff;ttbar selection, adding for subtraction {ff_processes_covered_by_mc}")
         else:
             msg = f"Unknown selection option for fake factor estimation: {selection_option}"
             logger.error(msg)
             raise ValueError(msg)
+
+        procs_to_subtract += ff_processes_covered_by_mc
+        logger.info(f"DR;ff selection, subtracting {procs_to_subtract}")
+
+        processes_in_root_file = set([str(key.GetName()).split("#")[0] for key in rootfile.GetListOfKeys()])
+
+        if _QCD in processes_in_root_file and _QCD in procs_to_subtract:
+            logger.info("QCD process found in root file, will be used for fake factor estimation.")
+            global _dataset_map, _process_map
+            _dataset_map = deepcopy(_dataset_map)
+            _process_map = deepcopy(_process_map)
+            _dataset_map[_QCD] = _QCD
+            _process_map[_QCD] = _QCD
+
     else:
         msg = f"Unknown selection option for fake factor estimation: {selection_option}"
         logger.error(msg)
@@ -78,16 +104,14 @@ def fake_factor_estimation(
                 process="-" + _process_map[proc],
                 variation=variation.replace("anti_iso_CMS_scale_t_emb", "anti_iso_CMS_scale_t") if not "sub_syst" in variation else "anti_iso",
             )
-            logger.debug(f"Trying to get object {_string}")
-            base_hist.Add(rootfile.Get(_string), -sub_scale)
         else:
             _string = _common_name_string(
                 dataset=_dataset_map[proc],
                 process="-" + _process_map[proc],
                 variation=variation if not "sub_syst" in variation else "anti_iso",
             )
-            logger.debug(f"Trying to get object {_string}")
-            base_hist.Add(rootfile.Get(_string), -sub_scale)
+        logger.debug(f"Trying to get object {_string}")
+        base_hist.Add(rootfile.Get(_string), -sub_scale)
     proc_name = "jetFakes" if is_embedding else "jetFakesMC"
     if doTauES:
         proc_name = "jetFakes{}".format(special)
@@ -99,9 +123,7 @@ def fake_factor_estimation(
         base_hist.GetName()
         .replace("data", proc_name)
         .replace(
-            variation
-            if "scale_t" not in variation and "sub_syst" not in variation
-            else "anti_iso",
+            variation if "scale_t" not in variation and "sub_syst" not in variation else "anti_iso",
             ff_variation,
         )
         .replace("#" + channel, "#" + "-".join([channel, proc_name]), 1)

@@ -2,7 +2,9 @@ import logging
 from functools import partial
 import ROOT
 from .defaults import _name_string, _process_map, _dataset_map
-logger = logging.getLogger("")
+from config.logging_setup_configs import setup_logging
+
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 
 def replace_negative_entries_and_renormalize(histogram, tolerance):
