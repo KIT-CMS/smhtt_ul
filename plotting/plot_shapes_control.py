@@ -459,8 +459,7 @@ def main(info):
 
 if __name__ == "__main__":
     args = parse_arguments()
-    logger = logging.getLogger(__name__)
-    logger = setup_logging(f"{args.era}_plot_shapes.log", logger, logging.DEBUG)
+    logger = setup_logging(logger=logging.getLogger(__name__))
     variables, channels = args.variables.split(","), args.channels.split(",")
 
     if not args.embedding and not args.fake_factor:
