@@ -13,8 +13,7 @@ import itertools
 
 from config.logging_setup_configs import setup_logging
 
-logger = logging.getLogger(__name__)
-setup_logging(logger=logger, level=logging.INFO)
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 # def add_process(analysis_unit, name, dataset, selections, categorization, channel):
 #     """

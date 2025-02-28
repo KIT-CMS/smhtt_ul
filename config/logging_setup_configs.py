@@ -4,6 +4,10 @@ import textwrap
 from contextlib import contextmanager
 from typing import Generator, Union
 
+
+__LOG_FILENAME__ = "routine_output.log"
+__LOG_LEVEL__ = logging.INFO
+
 GRAY = "\x1b[38;21m"
 WHITE = "\x1b[38;5;15m"
 YELLOW = "\x1b[38;5;226m"
@@ -121,8 +125,13 @@ def duplicate_filter_context(logger: logging.Logger) -> Generator[None, None, No
 def setup_logging(
     output_file: Union[str, None] = None,
     logger: logging.Logger = logging.getLogger(""),
-    level: int = logging.INFO,
+    level: Union[int, None] = logging.INFO,
 ) -> logging.Logger:
+    if output_file is None:
+        output_file = __LOG_FILENAME__
+    if level is None:
+        level = __LOG_LEVEL__
+
     logger.setLevel(level)
 
     console_formatter = CustomFormatter(use_color=True)
@@ -130,11 +139,10 @@ def setup_logging(
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 
-    if output_file is not None:
-        file_formatter = CustomFormatter(use_color=False)
-        file_handler = logging.FileHandler(output_file, "w")
-        file_handler.setFormatter(file_formatter)
-        logger.addHandler(file_handler)
+    file_formatter = CustomFormatter(use_color=False)
+    file_handler = logging.FileHandler(output_file, "w")
+    file_handler.setFormatter(file_formatter)
+    logger.addHandler(file_handler)
 
     # Install the duplicate filter permanently if not already present.
     if not any(isinstance(f, _DuplicateFilter) for f in logger.filters):

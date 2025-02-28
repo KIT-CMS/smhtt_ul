@@ -20,9 +20,8 @@ from ntuple_processor.variations import (
 )
 from config.logging_setup_configs import setup_logging
 
-logger = logging.getLogger(__name__)
-logger = setup_logging(logger=logger, level=logging.INFO)
 
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 FF_OPTIONS = {
     "fake_factor": {
@@ -38,8 +37,8 @@ FF_OPTIONS = {
                         qcd_correction_wo_DR_SR_2
                     ) +
                     (
-                        raw_wjets_fake_factor_2 * 
-                        wjets_fake_factor_fraction_2 * 
+                        raw_wjets_fake_factor_2 *
+                        wjets_fake_factor_fraction_2 *
                         wjets_correction_wo_DR_SR_2
                     ) +
                     (
@@ -91,7 +90,7 @@ FF_OPTIONS = {
     },
     # --------------------------------------------------------------------------------------
     "raw_wjets_fake_factor_with_fraction": {
-        "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)", 
+        "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)",
     },
     "raw_wjets_fake_factor": {
         "lt": "raw_wjets_fake_factor_2",
@@ -299,10 +298,7 @@ same_sign_anti_iso_lt = ReplaceMultipleCuts(
     ["os", "tau_iso"],
     [
         Cut("q_1*q_2>0", "ss"),
-        Cut(
-            "(id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
-            "tau_anti_iso",
-        ),
+        Cut("(id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
     ]
 )
 
@@ -311,7 +307,7 @@ anti_iso_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
     lambda: ReplaceCutAndAddWeight(
         "anti_iso",
         "tau_iso",
-        Cut("(id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
+        Cut("(id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     )
 )
@@ -358,12 +354,6 @@ anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
         ),
         Weight(f"0.5 * {RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
     )
-)
-wfakes_tt = ReplaceCut(
-    "wfakes", "ff_veto", Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut")
-)
-wfakes_w_tt = AddCut(
-    "wfakes", Cut("(gen_match_1!=6 && gen_match_2 == 6)", "wfakes_cut")
 )
 # Pileup reweighting
 pileup_reweighting = [
@@ -1615,7 +1605,7 @@ Usage Example for Variation Collections
 This module defines several systematic variation collections that group different
 systematic adjustments such as fake process estimations, energy scale shifts, MET variations,
 efficiency corrections, fake rate variations, trigger efficiencies, and additional uncertainties.
-Each collection can be applied at once using `<VariationCollection>.unrolled()` that returns a 
+Each collection can be applied at once using `<VariationCollection>.unrolled()` that returns a
 list of all variations defined within that collection.
 
 For example, instead of fetching each variation individually this would be possible:
@@ -1635,7 +1625,7 @@ For example, instead of fetching each variation individually this would be possi
     # Or another collection you might seems be more fitting i.e. process wise.
 
 This pattern applies similarly to other collections. Thus, you only need to import the corresponding
-variation collection and call its `unrolled()` method to obtain a list of all variations, making the 
+variation collection and call its `unrolled()` method to obtain a list of all variations, making the
 application of systematics both concise and consistent.
 
 The individual Application either trough variations.tau_es_3prong or variations.EnergyScaleVariations.tau_es_3prong
@@ -1745,8 +1735,6 @@ class AdditionalVariations(_VariationCollection):
 
 class JetFakeVariations(_VariationCollection):
     # TODO add jetfake uncertainties
-    wfakes_tt = wfakes_tt
-    wfakes_w_tt = wfakes_w_tt
     ff_variations_lt = ff_variations_lt
     ff_variations_tau_es_lt = ff_variations_tau_es_lt
     ff_variations_tau_es_emb_lt = ff_variations_tau_es_emb_lt

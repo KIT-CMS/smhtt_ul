@@ -4,8 +4,7 @@ import ROOT
 from .defaults import _name_string, _process_map, _dataset_map
 from config.logging_setup_configs import setup_logging
 
-logger = logging.getLogger(__name__)
-setup_logging(logger=logger, level=logging.INFO)
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 
 def replace_negative_entries_and_renormalize(histogram, tolerance):

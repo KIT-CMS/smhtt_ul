@@ -7,8 +7,7 @@ from config.logging_setup_configs import duplicate_filter_context
 
 from config.logging_setup_configs import setup_logging
 
-logger = logging.getLogger(__name__)
-logger = setup_logging(logger=logger, level=logging.INFO)
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 
 def fake_factor_estimation(
@@ -124,9 +123,7 @@ def fake_factor_estimation(
         base_hist.GetName()
         .replace("data", proc_name)
         .replace(
-            variation
-            if "scale_t" not in variation and "sub_syst" not in variation
-            else "anti_iso",
+            variation if "scale_t" not in variation and "sub_syst" not in variation else "anti_iso",
             ff_variation,
         )
         .replace("#" + channel, "#" + "-".join([channel, proc_name]), 1)
