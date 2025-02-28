@@ -32,8 +32,7 @@ def fake_factor_estimation(
         procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
 
     if selection_option == "CR":
-        with duplicate_filter_context(logger):
-            logger.info(f"CR selection, subtracting {procs_to_subtract}")
+        logger.info(f"CR selection, subtracting {procs_to_subtract}")
     elif "DR;ff" in selection_option:
         _QCD = "QCD" if is_embedding else "QCDMC"
         ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'TTJ', 'W', _QCD]
@@ -99,9 +98,6 @@ def fake_factor_estimation(
     logger.debug(f"Trying to get object {_string}")
     base_hist = rootfile.Get(_string).Clone()
     for proc in procs_to_subtract:
-        if "QCD" in proc and variation == "same_sign_anti_iso":
-            variation = "anti_iso"  # QCD estimated for anti_iso from same_sign_anti_iso
-
         if "anti_iso_CMS_scale_t_emb" in variation and proc != "EMB":
             _string = _common_name_string(
                 dataset=_dataset_map[proc],
