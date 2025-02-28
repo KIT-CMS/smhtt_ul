@@ -31,19 +31,6 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         logger.error(e)
         raise e
 
-    wps_dict = {"VVTight", "VVTight", "Tight", "Medium", "Loose", "VLoose", "VVLoose", "VVVLoose"}
-    try:
-        assert vs_ele_wp in wps_dict, f"{vs_ele_wp} is not a valid vsEle discriminator"
-    except AssertionError as e:
-        logger.error(e)
-        raise e
-
-    try:
-        assert vs_jet_wp in wps_dict, f"{vs_jet_wp} is not a valid vsJet discriminator"
-    except AssertionError as e:
-        logger.error(e)
-        raise e
-
     if special is None:
         if "mt" in channel:
             cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_Tight_2 > 0.5)"
