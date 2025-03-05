@@ -20,6 +20,9 @@ shapes_output_synced=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
+# TODO: How to use this variables?
+VARIABLES="iso_1,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
+
 # if the output folder does not exist, create it
 if [ ! -d "$shapes_output" ]; then
     mkdir -p $shapes_output
@@ -79,9 +82,11 @@ elif [[ $MODE == "XSEC_XROOTD" ]]; then
     source utils/setup_root.sh
     # if the xsec friends directory does not exist, create it
     if [ ! -d "$XSEC_FRIENDS" ]; then
+        echo "Creating xsec friends directory"
         mkdir -p $XSEC_FRIENDS
     fi
     # if th xsec friends dir is empty, run the xsec friends script
+    # TODO: This if statement is not working (root://cmsdcache-kit-disk.gridka.de/...), condition always returns false
     if [ "$(ls -A $XSEC_FRIENDS)" ]; then
         echo "xsec friends dir already exists"
     else
@@ -96,16 +101,16 @@ if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS  \
+        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS --xrootd \
         --era $ERA --num-processes 4 --num-threads 6 \
         --optimization-level 1 --skip-systematic-variations \
-        --output-file $shapes_output
+        --output-file $shapes_output --control-plots --control-plot-set pt_1
 
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
+    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd # --do-emb-tt --do-ff 
 
     # now plot the shapes by looping over the categories
     for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
-        python3 plotting/plot_ml_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --channel ${CHANNEL} --embedding --fake-factor --category ${category} --output-dir output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/controlplots --normalize-by-bin-width
+        python3 plotting/plot_ml_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --channel ${CHANNEL} --category ${category} --output-dir output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/controlplots --normalize-by-bin-width # --embedding --fake-factor 
     done
 fi
 
