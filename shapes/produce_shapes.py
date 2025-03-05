@@ -92,8 +92,8 @@ from config.shapes.variations import (
     tau_es_3prong1pizero,
     tau_es_1prong,
     tau_es_1prong1pizero,
-    mu_fake_es_inc,
-    ele_fake_es,
+    # mu_fake_es_inc,
+    # ele_fake_es,
     # emb_tau_es_3prong,
     # emb_tau_es_3prong1pizero,
     # emb_tau_es_1prong,
@@ -143,7 +143,7 @@ from config.shapes.variations import (
 )
 
 # fake rate uncertainties
-from config.shapes.variations import jet_to_tau_fake, zll_et_fake_rate, zll_mt_fake_rate #, jet_to_tau_fake_boosted
+# from config.shapes.variations import jet_to_tau_fake, zll_et_fake_rate, zll_mt_fake_rate #, jet_to_tau_fake_boosted
 
 # trigger efficiencies
 from config.shapes.variations import (
@@ -1609,15 +1609,15 @@ def main(args):
                     ],
                     enable_check=do_check,
                 )
-                book_histograms(
-                    um,
-                    processes=jetFakesDS[channel],
-                    datasets=nominals[era]["units"][channel],
-                    variations=[
-                        jet_to_tau_fake,
-                    ],
-                    enable_check=do_check,
-                )
+                # book_histograms(
+                #    um,
+                #    processes=jetFakesDS[channel],
+                #    datasets=nominals[era]["units"][channel],
+                #    variations=[
+                #        jet_to_tau_fake,
+                #    ],
+                #    enable_check=do_check,
+                #)
                 # book_histograms(
                 #     um,
                 #     processes=embS,
@@ -1684,13 +1684,13 @@ def main(args):
                 # )
             # Book channel independent variables.
             if channel == "mt":
-                book_histograms(
-                    um,
-                    processes={"zl"} & procS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[mu_fake_es_inc],
-                    enable_check=do_check,
-                )
+                # book_histograms(
+                #     um,
+                #     processes={"zl"} & procS,
+                #     datasets=nominals[era]["units"][channel],
+                #     variations=[mu_fake_es_inc],
+                #     enable_check=do_check,
+                # )
                 book_histograms(
                     um,
                     processes=simulatedProcsDS[channel],
@@ -1705,13 +1705,13 @@ def main(args):
                 #     variations=[trigger_eff_mt_emb],
                 #     enable_check=do_check,
                 # )
-                book_histograms(
-                    um,
-                    processes={"zl"} & procS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[zll_mt_fake_rate],
-                    enable_check=do_check,
-                )
+                # book_histograms(
+                #     um,
+                #     processes={"zl"} & procS,
+                #     datasets=nominals[era]["units"][channel],
+                #     variations=[zll_mt_fake_rate],
+                #     enable_check=do_check,
+                # )
             if channel == "et":
                 book_histograms(
                     um,
@@ -1731,13 +1731,13 @@ def main(args):
                 #     variations=[emb_e_es],
                 #     enable_check=do_check,
                 # )
-                book_histograms(
-                    um,
-                    processes={"zl"} & procS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[ele_fake_es],
-                    enable_check=do_check,
-                )
+                # book_histograms(
+                #     um,
+                #     processes={"zl"} & procS,
+                #     datasets=nominals[era]["units"][channel],
+                #     variations=[ele_fake_es],
+                #     enable_check=do_check,
+                # )
                 book_histograms(
                     um,
                     processes=simulatedProcsDS[channel],
@@ -1752,13 +1752,13 @@ def main(args):
                 #     variations=[trigger_eff_et_emb],
                 #     enable_check=do_check,
                 # )
-                book_histograms(
-                    um,
-                    processes={"zl"} & procS,
-                    datasets=nominals[era]["units"][channel],
-                    variations=[zll_et_fake_rate],
-                    enable_check=do_check,
-                )
+                # book_histograms(
+                #     um,
+                #     processes={"zl"} & procS,
+                #     datasets=nominals[era]["units"][channel],
+                #     variations=[zll_et_fake_rate],
+                #     enable_check=do_check,
+                # )
             if channel == "tt":
                 book_histograms(
                     um,
@@ -2040,5 +2040,5 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = "{}.log".format(args.output_file)
-    setup_logging(log_file, logging.INFO)
+    setup_logging(log_file, logging.DEBUG)
     main(args)

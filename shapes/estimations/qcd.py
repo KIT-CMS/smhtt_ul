@@ -61,7 +61,7 @@ def qcd_estimation(
     selection,
     variable,
     variation="Nominal",
-    is_embedding=True,
+    is_embedding=False,
     is_nlo=False,
     extrapolation_factor=1.0,
     sub_scale=1.0,
@@ -78,9 +78,12 @@ def qcd_estimation(
         procs_to_subtract = ["EMB", "ZL_NLO", "ZJ_NLO", "TTL", "TTJ", "VVL", "VVJ", "W", "STL", "STJ"]
     else:
         procs_to_subtract = [
-            "ZTT_NLO",
-            "ZL_NLO",
-            "ZJ_NLO",
+            # "ZTT_NLO",
+            # "ZL_NLO",
+            # "ZJ_NLO",
+            "ZTT",
+            "ZL",
+            "ZJ",
             "TTT",
             "TTL",
             "TTJ",
