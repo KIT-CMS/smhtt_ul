@@ -96,7 +96,7 @@ if [[ $MODE == "XSEC" ]]; then
     echo "##############################################################################################"
     echo "#      Checking xsec friends directory                                                       #"
     echo "##############################################################################################"
-    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsdcache-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
+    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath $XSEC_FRIENDS --nthreads 20
     exit 0
 fi
 
