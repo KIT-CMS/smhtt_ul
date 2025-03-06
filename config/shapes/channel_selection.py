@@ -3,9 +3,7 @@ import logging
 from ntuple_processor.utils import Selection, WarnDict
 from config.logging_setup_configs import setup_logging
 
-
-logger = logging.getLogger(__name__)
-logger = setup_logging("booking.log", logger, logging.INFO)
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 
 def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose", selection_option="CR", **kwargs):
