@@ -344,7 +344,7 @@ anti_iso_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
     lambda: ReplaceCutAndAddWeight(
         "anti_iso",
         "tau_iso",
-        Cut("(id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
+        Cut("(id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     )
 )
@@ -369,19 +369,19 @@ anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
         Cut(
             """(
                     (
-                        (id_tau_vsJet_Tight_1 < 0.5) &&
-                        (id_tau_vsJet_Tight_2 > 0.5) &&
-                        (id_tau_vsJet_VLoose_1 > 0.5)
+                        (id_tau_vsJet_Medium_1 < 0.5) &&
+                        (id_tau_vsJet_Medium_2 > 0.5) &&
+                        (id_tau_vsJet_VVVLoose_1 > 0.5)
                     ) ||
                     (
-                        (id_tau_vsJet_Tight_1 > 0.5) &&
-                        (id_tau_vsJet_Tight_2 < 0.5) &&
-                        (id_tau_vsJet_VLoose_2 > 0.5)
+                        (id_tau_vsJet_Medium_1 > 0.5) &&
+                        (id_tau_vsJet_Medium_2 < 0.5) &&
+                        (id_tau_vsJet_VVVLoose_2 > 0.5)
                     )
                 )""",
             "tau_anti_iso"
         ),
-        Weight(f"0.5 * {RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5) + 0.5 * {RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5)", "fake_factor"),
+        Weight(f"0.5 * {RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Medium_1 < 0.5) + 0.5 * {RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Medium_2 < 0.5)", "fake_factor"),
     )
 )
 # Pileup reweighting

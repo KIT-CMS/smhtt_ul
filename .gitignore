@@ -143,3 +143,6 @@ dmypy.json
 
 # Log files
 *.out
+
+# IntelliJ
+*.idea

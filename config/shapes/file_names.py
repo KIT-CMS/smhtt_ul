@@ -1,5 +1,8 @@
 # Input files used accross all channels in 2018.
 small_files_2018 = {
+    # et: EGamma
+    # mt: SingleMuon
+    # tt: Tau
     "data": [
         "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018A_1729863731-00000000000000000000000000000000",
         "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018B_1729599421-00000000000000000000000000000000",
@@ -12,11 +15,11 @@ small_files_2018 = {
     "DY": [
         "DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_M-10to50_1734539918-00000000000000000000000000000000",
         "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_1734539918-00000000000000000000000000000000",
-        "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_Ext1_1736873492-00000000000000000000000000000000"
+        # "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_DY_DYJetsToLL_Ext1_1736873492-00000000000000000000000000000000"
     ],
     "W": [
         "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_aakhmets-mc_2018UL_wjets_WJetsToLNu_1729599421-00000000000000000000000000000000",
-        "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_Ext1_1734539918-00000000000000000000000000000000"
+        # "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_Ext1_1734539918-00000000000000000000000000000000"
     ],
     "ST": [ # to add
         "ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_antitop_1734539918-00000000000000000000000000000000",
@@ -57,7 +60,7 @@ small_files_2018 = {
     "VH": [
         "WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_WminusHToTauTau_1737472169-00000000000000000000000000000000",
         "WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_WplusHToTauTau_1737472169-00000000000000000000000000000000",
-        "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_ext1_sdaigler-mc_2018UL_Higgs_ZHToTauTau_Ext1_1736873492-00000000000000000000000000000000",
+        # "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_ext1_sdaigler-mc_2018UL_Higgs_ZHToTauTau_Ext1_1736873492-00000000000000000000000000000000",
         "ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZHToTauTau_1736873492-00000000000000000000000000000000",
         "ZH_HToBB_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZH_HToBB_ZToLL_1736873492-00000000000000000000000000000000",
         "ZH_HToBB_ZToQQ_M125_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_Higgs_ZH_HToBB_ZToQQ_1734539918-00000000000000000000000000000000"
