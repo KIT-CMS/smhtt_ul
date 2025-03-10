@@ -30,7 +30,7 @@ echo "##########################################################################
 
     echo "running xsec friends script"
     echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
-    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath $XSEC_FRIENDS --nthreads 20
+    python3 friends/build_friend_tree.py --basepath $KINGMAKER_BASEDIR_XROOTD --outputpath root://cmsdcache-kit-disk.gridka.de/$XSEC_FRIENDS --nthreads 20
 fi
 
 if [[ $MODE == "SHAPES" ]]; then
@@ -51,7 +51,7 @@ if [[ $MODE == "SHAPES" ]]; then
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
         --output-file $shapes_output \
         --xrootd --validation-tag $TAG \
-        --vs-jet-wp "Tight" --vs-ele-wp "VVLoose"
+        --vs-jet-wp "Medium" --vs-ele-wp "VVLoose"
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
@@ -59,7 +59,7 @@ if [[ $MODE == "SHAPES" ]]; then
     if [[ $CHANNEL == "mm" ]]; then
         python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
     else
-        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-qcd
+        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
     fi
 fi
 
@@ -69,8 +69,8 @@ if [[ $MODE == "PLOT" ]]; then
     echo "##############################################################################################"
 
     # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --fake-factor
-    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --tag ${TAG}
-    # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
+    # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --tag ${TAG}
+    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL}
     # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor
 
     # python2 ~/tools/webgallery/gallery.py Run${ERA}_plots_emb_classic/

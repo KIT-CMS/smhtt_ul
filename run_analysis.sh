@@ -101,10 +101,11 @@ if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS --xrootd \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS --xrootd \
         --era $ERA --num-processes 4 --num-threads 6 \
         --optimization-level 1 --skip-systematic-variations \
-        --output-file $shapes_output --control-plots --control-plot-set pt_1
+        --output-file $shapes_output --control-plots --control-plot-set pt_1 \
+        --vs-jet-wp Medium --vs-ele-wp VVLoose --validation-tag $TAG
 
     python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd # --do-emb-tt --do-ff 
 

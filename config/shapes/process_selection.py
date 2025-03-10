@@ -262,19 +262,19 @@ def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         )
     DY_process_weights.extend(
         [
-            # gen_events_weight,
-            # (
-            #     """(
-            #         crossSectionPerEventWeight * (
-            #             (1.0 / negative_events_fraction) * (
-            #                 ((genWeight < 0) * (-1)) +
-            #                 ((genWeight >= 0) * 1)
-            #             )
-            #         )
-            #     )""",
-            #     "crossSectionPerEventWeight",
-            # ),
-            dy_stitching_weight(era),  # TODO add stitching weight
+            gen_events_weight,
+            (
+                """(
+                    crossSectionPerEventWeight * (
+                        (1.0 / negative_events_fraction) * (
+                            ((genWeight < 0) * (-1)) +
+                            ((genWeight >= 0) * 1)
+                        )
+                    )
+                )""",
+                "crossSectionPerEventWeight",
+            ),
+            # dy_stitching_weight(era),  # TODO add stitching weight
             ("ZPtMassReweightWeight", "zPtReweightWeight"),
         ]
     )
@@ -367,16 +367,16 @@ def W_stitching_weight(era, **kwargs):
 
 def W_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     W_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
-    # W_process_weights.extend(
-    #     [
-    #         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-    #         (
-    #             "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
-    #             "crossSectionPerEventWeight",
-    #         ),
-    #     ]
-    # )
-    W_process_weights.append(W_stitching_weight(era))  # TODO add W stitching weight in when npartons is available
+    W_process_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            (
+                "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
+                "crossSectionPerEventWeight",
+            ),
+        ]
+    )
+    # W_process_weights.append(W_stitching_weight(era))  # TODO add W stitching weight in when npartons is available
     return Selection(name="W", weights=W_process_weights)
 
 
