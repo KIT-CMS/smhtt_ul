@@ -195,6 +195,20 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     )
 
 
+def HH2B2Tau_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
+    HH2B2Tau_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+    HH2B2Tau_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight * 0.1", "crossSectionPerEventWeight"),
+        ]
+    )
+    # TODO: Makes this sense?
+    btag_weight = ("btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    HH2B2Tau_weights.append(btag_weight)
+    return Selection(name="HH2B2Tau", weights=HH2B2Tau_weights)
+
+
 def dy_stitching_weight(era, **kwargs):
     if era == "2017":
         weight = (
@@ -809,6 +823,73 @@ def TTJ_process_selection(channel, **kwargs):
     return Selection(name="TTJ", cuts=[(f"({ct})", "tt_fakes")])
 
 
+def ST_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
+    ST_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+    ST_process_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+        ]
+    )
+    return Selection(name="ST", weights=ST_process_weights)
+
+
+def STT_process_selection(channel, **kwargs):
+    tt_cut = ""
+    btag_weight = ""
+    if "mt" in channel:
+        tt_cut = "gen_match_1==4 && gen_match_2==5"
+        btag_weight = ("1.002108*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    elif "et" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==5"
+        btag_weight = ("0.996391*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    elif "tt" in channel:
+        tt_cut = "gen_match_1==5 && gen_match_2==5"
+        btag_weight = ("0.999864*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    return Selection(name="STT", cuts=[(tt_cut, "stt_cut")], weights=[btag_weight])
+
+
+def STL_process_selection(channel, **kwargs):
+    emb_veto = ""
+    ff_veto = ""
+    btag_weight = ""
+    if "mt" in channel:
+        emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
+        ff_veto = "!(gen_match_2 == 6)"
+        btag_weight = ("1.002703*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    elif "et" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
+        ff_veto = "!(gen_match_2 == 6)"
+        btag_weight = ("1.002547*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    elif "tt" in channel:
+        emb_veto = "!(gen_match_1==5 && gen_match_2==5)"
+        ff_veto = "!(gen_match_1 == 6 || gen_match_2 == 6)"
+        btag_weight = ("1.017508*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    return Selection(
+        name="STL",
+        cuts=[
+            ("{}".format(emb_veto), "st_emb_veto"),
+            ("{}".format(ff_veto), "ff_veto"),
+        ],
+        weights=[btag_weight],
+    )
+
+
+def STJ_process_selection(channel, **kwargs):
+    ct = ""
+    btag_weight = ""
+    if "mt" in channel:
+        ct = "(gen_match_2 == 6)"
+        btag_weight = ("1.004332*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    elif "et" in channel:
+        ct = "(gen_match_2 == 6)"
+        btag_weight = ("1.000362*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    elif "tt" in channel:
+        ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
+        btag_weight = ("1.005110*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
+    return Selection(name="STJ", cuts=[(ct, "st_fakes")], weights=[btag_weight])
+
+
 def VVT_process_selection(channel, **kwargs):
     tt_cut = ""
     if "mt" in channel:
@@ -1087,6 +1168,7 @@ def FF_training_process_selection(channel, era, **kwargs):
 
 # --- Process selections aliases ---
 MC_base = MC_base_process_selection
+HH2B2Tau = HH2B2Tau_process_selection
 DY = DY_process_selection
 DY_NLO = DY_NLO_process_selection
 TT = TT_process_selection
@@ -1107,6 +1189,10 @@ ZJ_nlo = ZJ_nlo_process_selection
 TTT = TTT_process_selection
 TTL = TTL_process_selection
 TTJ = TTJ_process_selection
+ST = ST_process_selection
+STT = STT_process_selection
+STL = STL_process_selection
+STJ = STJ_process_selection
 VVT = VVT_process_selection
 VVL = VVL_process_selection
 VVJ = VVJ_process_selection
