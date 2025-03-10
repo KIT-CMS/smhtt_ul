@@ -384,7 +384,7 @@ def TauES_TauID_histogram_booking(
             manager=unit_manager,
             additional_emb_procS=processes,
             datasets=datasets,
-            variations=[variations.same_sign, variations.anti_iso_lt],
+            variations=[variations.same_sign], # , variations.anti_iso_lt
             enable_check=args.enable_booking_check,
         )
     elif channel == "mt" and args.es and args.special_analysis == "TauID":
@@ -613,13 +613,15 @@ def main(args):
             for procs in [dataS | trueTauBkgS | leptonFakesS, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
-                    variations=variations.SemiLeptonicFFEstimations.unrolled(),
+                    variations=[variations.same_sign],
+                    # variations=variations.SemiLeptonicFFEstimations.unrolled(),
                 )
         elif channel == "tt":
             for procs in [dataS | trueTauBkgS, leptonFakesS, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
-                    variations=variations.FullyHadronicFFEstimations.unrolled(),
+                    variations=[variations.same_sign],
+                    # variations=variations.FullyHadronicFFEstimations.unrolled(),
                 )
         elif channel == "em":
             _book_histogram(

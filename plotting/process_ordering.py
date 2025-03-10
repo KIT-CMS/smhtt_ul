@@ -25,6 +25,10 @@ IMPORTANCE_TO_PROCESS = {  # importance ordering
     # --- JetFakes: TT ---
     1.40: "JetFakesTT",
     1.41: "TTJ",
+    # --- ST ---
+    1.50: "STT",
+    1.51: "STJ",
+    1.52: "STL",
     # --- Other ---
     2.00: "VVJ",
     3.00: "ZJ",
@@ -57,7 +61,7 @@ def sorted_bkg_processes(x: List[str], /, *, ordering: Union[None, dict[float, s
 
 class ControlShapeBkgProcesses:
     #                                    | FF-processes -------------->| EMB-processes --->|
-    FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT']
+    FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT'] # TODO: 'STT', 'STJ', 'STL'
     EMB_FF = ['VVL', 'TTL', 'ZL', 'jetFakesEMB', 'EMB']
     CLASSIC_FF = ['VVL', 'TTL', 'ZL', 'jetFakes', 'VVT', 'TTT', 'ZTT']
     EMB_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCDEMB', 'W', 'EMB']

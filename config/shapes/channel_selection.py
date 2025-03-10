@@ -34,7 +34,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         if "mt" in channel:
             cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_Tight_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = "(id_tau_vsEle_VVLoose_2 > 0.5)"
-            cuts["tau_iso"] = "(id_tau_vsJet_Tight_2 > 0.5)"
+            cuts["tau_iso"] = "(id_tau_vsJet_Medium_2 > 0.5)"
             cuts["muon_iso"] = "(iso_1 < 0.15)"
             cuts["mt_cut"] = "(mt_1 < 70)"
 
@@ -79,7 +79,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         if "et" in channel:
             cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_VLoose_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = "(id_tau_vsEle_Tight_2 > 0.5)"
-            cuts["tau_iso"] = "(id_tau_vsJet_Tight_2 > 0.5)"
+            cuts["tau_iso"] = "(id_tau_vsJet_Medium_2 > 0.5)"
             cuts["ele_iso"] = "(iso_1 < 0.15)"
             cuts["mt_cut"] = "(mt_1 < 70)"
 
@@ -122,7 +122,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         if "tt" in channel:
             cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_VLoose_1 > 0.5) && (id_tau_vsMu_VLoose_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = "(id_tau_vsEle_VVLoose_1 > 0.5) && (id_tau_vsEle_VVLoose_2 > 0.5)"
-            cuts["tau_iso"] = "(id_tau_vsJet_Tight_1 > 0.5) && (id_tau_vsJet_Tight_2 > 0.5)"
+            cuts["tau_iso"] = "(id_tau_vsJet_Medium_1 > 0.5) && (id_tau_vsJet_Medium_2 > 0.5)"
 
             if "DR;ff" in selection_option:
                 modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=channel)
