@@ -399,7 +399,7 @@ def main(info):
                 plot.legend(i).add_entry(
                 0,
                 process,
-                styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("_NLO","")],
+                styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("STJ", "ST").replace("_NLO","")],
                 'f'
                 )
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')

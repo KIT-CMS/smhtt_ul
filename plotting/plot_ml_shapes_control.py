@@ -114,17 +114,20 @@ def main(args):
 
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
 
-    bkg_processes = ["VVL", "TTL", "ZL", "jetFakesEMB", "EMB"]
+    bkg_processes = ["VVL", "STL","TTL", "ZL", "jetFakesEMB", "EMB"]
     if not args.fake_factor and args.embedding:
-        bkg_processes = ["QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"]
+        bkg_processes = ["QCDEMB", "VVL", "STL","VVJ", "STJ","W", "TTL", "TTJ", "ZJ", "ZL", "EMB"]
     if not args.embedding and args.fake_factor:
-        bkg_processes = ["VVT", "VVL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"]
+        bkg_processes = ["VVT", "STT","VVL", "STL","TTT", "TTL", "ZL", "jetFakes", "ZTT"]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
             "QCD",
             "VVT",
             "VVL",
             "VVJ",
+            "STT",
+            "STL",
+            "STJ",
             "W",
             "TTT",
             "TTL",
@@ -134,16 +137,19 @@ def main(args):
             "ZTT",
         ]
     if args.draw_jet_fake_variation is not None:
-        bkg_processes = ["VVL", "TTL", "ZL", "EMB"]
+        bkg_processes = ["VVL", "STL","TTL", "ZL", "EMB"]
         if not args.fake_factor and args.embedding:
-            bkg_processes = ["VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"]
+            bkg_processes = ["VVL", "STL","VVJ", "STJ","W", "TTL", "TTJ", "ZJ", "ZL", "EMB"]
         if not args.embedding and args.fake_factor:
-            bkg_processes = ["VVT", "VVL", "TTT", "TTL", "ZL", "ZTT"]
+            bkg_processes = ["VVT", "STT","VVL", "STL","TTT", "TTL", "ZL", "ZTT"]
         if not args.embedding and not args.fake_factor:
             bkg_processes = [
                 "VVT",
                 "VVL",
                 "VVJ",
+                "STT",
+                "STL",
+                "STJ",
                 "W",
                 "TTT",
                 "TTL",
@@ -170,14 +176,14 @@ def main(args):
     bkg_processes = [b for b in all_bkg_processes]
     if "em" in channel:
         if not args.embedding:
-            bkg_processes = ["QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"]
+            bkg_processes = ["QCD", "VVT", "STT", "VVL", "STL", "W", "TTT", "TTL", "ZL", "ZTT"]
         if args.embedding:
-            bkg_processes = ["QCDEMB", "VVL", "W", "TTL", "ZL", "EMB"]
+            bkg_processes = ["QCDEMB", "VVL", "STL", "W", "TTL", "ZL", "EMB"]
         if args.draw_jet_fake_variation is not None:
             if not args.embedding:
-                bkg_processes = ["VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"]
+                bkg_processes = ["VVT", "STT", "VVL", "STL", "W", "TTT", "TTL", "ZL", "ZTT"]
             if args.embedding:
-                bkg_processes = ["VVL", "W", "TTL", "ZL", "EMB"]
+                bkg_processes = ["VVL", "STL", "W", "TTL", "ZL", "EMB"]
 
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -448,7 +454,7 @@ def main(args):
                 0,
                 process,
                 styles.legend_label_dict[
-                    process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO", "")
+                    process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO", "").replace("STL", "ST")
                 ],
                 "f",
             )

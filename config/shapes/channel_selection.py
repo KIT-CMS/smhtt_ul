@@ -11,7 +11,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts = WarnDict()
     cuts["extraelec_veto"] = "(extraelec_veto < 0.5)"
     cuts["extramuon_veto"] = "(extramuon_veto < 0.5)"
-    cuts["dilepton_veto"] = "(dimuon_veto < 0.5)"
+    cuts["dilepton_veto"] = "(dilepton_veto < 0.5)"
     cuts["os"] = "((q_1 * q_2) < 0)"
 
     if "DR;ff" in selection_option:
@@ -365,7 +365,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
 
         cuts["extraelec_veto"] = "(extraelec_veto > 0.5)"
         # cuts["extramuon_veto"] = "(extramuon_veto < 0.5)"
-        cuts["dilepton_veto"] = "(dimuon_veto < 0.5)"
+        cuts["dilepton_veto"] = "(dilepton_veto < 0.5)"
         cuts["os"] = "((q_1 * q_2) < 0)"
         cuts["ele_iso"] = "((iso_1 < 0.1) && (iso_2 < 0.1))"
         cuts["electron_eta"] = "((abs(eta_1) < 2.1) && (abs(eta_2) < 2.1))"
@@ -422,7 +422,7 @@ def modify_for_ff_DR(obj, region, channel=None):
                 !(
                     (extramuon_veto < 0.5) &&
                     (extraelec_veto < 0.5) &&
-                    (dimuon_veto < 0.5)
+                    (dilepton_veto < 0.5)
                 )
             )"""
             logger.info(f"{region}: extra lepton veto cut changed to {obj['lepton_veto']}")

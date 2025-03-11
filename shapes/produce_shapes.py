@@ -557,6 +557,7 @@ def main(args):
             "zl_nlo",
             "ttl",
             "vvl",
+            "stl",
             "w",
             # "w_nlo",
             # "emb",
@@ -565,13 +566,13 @@ def main(args):
     dataS = {"data"} & procS
     # embS = {"emb"} & procS
     jetFakesDS = {
-        "et": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
-        "mt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
-        "tt": {"zj", "ttj", "vvj", "w", "zj_nlo", "w_nlo"} & procS,
+        "et": {"zj", "ttj", "vvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
+        "mt": {"zj", "ttj", "vvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
+        "tt": {"zj", "ttj", "vvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
         "em": {"w", "w_nlo"} & procS,
     }
-    leptonFakesS = {"zl", "ttl", "vvl", "zl_nlo"} & procS
-    trueTauBkgS = {"ztt", "ttt", "vvt", "ztt_nlo"} & procS
+    leptonFakesS = {"zl", "ttl", "vvl", "stl", "zl_nlo"} & procS
+    trueTauBkgS = {"ztt", "ttt", "vvt", "stt", "ztt_nlo"} & procS
     sm_signalsS = {
         "hh2b2tau",
     } & procS
