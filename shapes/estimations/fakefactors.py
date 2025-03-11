@@ -25,17 +25,17 @@ def fake_factor_estimation(
 
     if is_embedding:
         if doTauES:
-            procs_to_subtract = [special, "ZL", "TTL", "VVL"]
+            procs_to_subtract = [special, "ZL", "TTL", "VVL", "STL"]
         else:
-            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL"]
+            procs_to_subtract = ["EMB", "ZL", "TTL", "VVL", "STL"]
     else:
-        procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "VVL"]
+        procs_to_subtract = ["ZTT", "ZL", "TTT", "TTL", "VVT", "STT", "VVL", "STL"]
 
     if selection_option == "CR":
         logger.info(f"CR selection, subtracting {procs_to_subtract}")
     elif "DR;ff" in selection_option:
         _QCD = "QCD" if is_embedding else "QCDMC"
-        ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'TTJ', 'W', _QCD]
+        ff_processes_covered_by_mc = ['ZJ', 'VVJ', 'STJ', 'TTJ', 'W', _QCD]
 
         ff_processes_covered_by_mc.remove(_QCD)
         logger.warning(

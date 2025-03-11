@@ -172,17 +172,20 @@ def main(args):
 
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm", "ee"]}
 
-    bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
+    bkg_processes = ["VVL", "STL", "TTL", "ZL", "jetFakes", "EMB"]
     if not args.fake_factor and args.embedding:
-        bkg_processes = ["QCD", "VVJ", "W", "TTJ", "ZJ", "ZL", "EMB"]
+        bkg_processes = ["QCD", "VVJ", "STJ", "W", "TTJ", "ZJ", "ZL", "EMB"]
     if not args.embedding and args.fake_factor:
-        bkg_processes = ["VVT", "VVJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"]
+        bkg_processes = ["VVT", "STT", "VVJ", "STJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
             "QCD",
             "VVT",
             "VVL",
             "VVJ",
+            "STT",
+            "STL",
+            "STJ",
             "W",
             "TTT",
             "TTL",
@@ -191,7 +194,7 @@ def main(args):
             "ZL",
             "ZTT",
         ]
-    bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
+    bkg_processes = ["QCD", "VVJ", "STJ", "VVL", "STL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()

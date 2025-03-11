@@ -61,7 +61,7 @@ def sorted_bkg_processes(x: List[str], /, *, ordering: Union[None, dict[float, s
 
 class ControlShapeBkgProcesses:
     #                                    | FF-processes -------------->| EMB-processes --->|
-    FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT'] # TODO: 'STT', 'STJ', 'STL'
+    FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT', 'STT', 'STJ', 'STL'] # TODO: 'STT', 'STJ', 'STL'
     EMB_FF = ['VVL', 'TTL', 'ZL', 'jetFakesEMB', 'EMB']
     CLASSIC_FF = ['VVL', 'TTL', 'ZL', 'jetFakes', 'VVT', 'TTT', 'ZTT']
     EMB_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCDEMB', 'W', 'EMB']
@@ -128,15 +128,15 @@ class ControlShapeBkgProcesses:
 
         if self._channel == "em":
             if not self._embedding:
-                return ["QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"]
+                return ["QCD", "VVT", "STT", "VVL", "STL", "W", "TTT", "TTL", "ZL", "ZTT"]
             if self._embedding:
-                return ["QCDEMB", "VVL", "W", "TTL", "ZL", "EMB"]
+                return ["QCDEMB", "VVL", "STL", "W", "TTL", "ZL", "EMB"]
             if self._draw_jet_fake_variation is not None and not self._embedding:
-                return ["VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"]
+                return ["VVT", "STT", "VVL", "STL", "W", "TTT", "TTL", "ZL", "ZTT"]
             if self._draw_jet_fake_variation is not None and self._embedding:    
-                return ["VVL", "W", "TTL", "ZL", "EMB"]
+                return ["VVL", "STL", "W", "TTL", "ZL", "EMB"]
         if self._channel in {"mm", "ee"}:
-            bkg_processes = ["QCD", "VVL", "W", "TTL", "ZL"]
+            bkg_processes = ["QCD", "VVL", "STL", "W", "TTL", "ZL"]
             if self._is_emb_classic:
                 bkg_processes = ["QCDEMB", "W", "EMB"]
             return bkg_processes

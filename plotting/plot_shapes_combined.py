@@ -1634,13 +1634,15 @@ class plotConfigurator:
                     rootfile_parser.Rootfile_parser(self.inputfile),
                 )
 
-                bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
+                bkg_processes = ["VVL", "STL", "TTL", "ZL", "jetFakes", "EMB"]
                 if not self.settings["fake_factor"] and self.settings["embedding"]:
-                    bkg_processes = ["QCD", "VVJ", "W", "TTJ", "ZJ", "ZL", "EMB"]
+                    bkg_processes = ["QCD", "VVJ", "STJ", "W", "TTJ", "ZJ", "ZL", "EMB"]
                 if not self.settings["embedding"] and self.settings["fake_factor"]:
                     bkg_processes = [
                         "VVT",
                         "VVJ",
+                        "STJ",
+                        "STT",
                         "TTT",
                         "TTJ",
                         "ZJ",
@@ -1654,6 +1656,9 @@ class plotConfigurator:
                         "VVT",
                         "VVL",
                         "VVJ",
+                        "STJ",
+                        "STT",
+                        "STL",
                         "W",
                         "TTT",
                         "TTL",
@@ -1663,11 +1668,11 @@ class plotConfigurator:
                         "ZTT",
                     ]
                 if channel == "em" and self.settings["embedding"]:
-                    bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
+                    bkg_processes = ["VVL", "STL", "W", "TTL", "ZL", "QCD", "EMB"]
                 elif channel == "em" and not self.settings["embedding"]:
                     bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
                 elif channel == "cmb":
-                    bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB", "jetFakes"]
+                    bkg_processes = ["VVL", "STL", "W", "TTL", "ZL", "QCD", "EMB", "jetFakes"]
                 if self.settings["combine_backgrounds"] and self.settings["combine_signals"]:
                     single_plot.add_background(
                         "jetFakesCMB",

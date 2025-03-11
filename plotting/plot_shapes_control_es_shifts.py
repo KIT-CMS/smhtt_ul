@@ -116,43 +116,43 @@ def main(info):
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
 
     bkg_processes = [
-        "VVL", "TTL", "ZL", "jetFakesEMB", "EMB"
+        "VVL", "STL", "TTL", "ZL", "jetFakesEMB", "EMB"
     ]
     if not args.fake_factor and args.embedding and not args.energy_scale:
         bkg_processes = [
-            "QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
+            "QCDEMB", "VVL", "STL", "VVJ", "STJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
         ]
     if not args.fake_factor and args.embedding and  args.energy_scale:
         bkg_processes = [
-            "QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", args.es_shift
+            "QCDEMB", "VVL", "STL", "VVJ", "STJ", "W", "TTL", "TTJ", "ZJ", "ZL", args.es_shift
         ]
     if not args.embedding and args.fake_factor:
         bkg_processes = [
-            "VVT", "VVL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
+            "VVT", "STT", "VVL", "STL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
         ]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
-            "QCD", "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
+            "QCD", "VVT", "STT", "VVL", "STL", "VVJ", "STJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
         ]
     if args.draw_jet_fake_variation is not None:
         bkg_processes = [
-            "VVL", "TTL", "ZL", "EMB"
+            "VVL", "STL", "TTL", "ZL", "EMB"
         ]
         if not args.fake_factor and args.embedding and not args.energy_scale:
             bkg_processes = [
-                "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
+                "VVL", "STL", "VVJ", "STJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
             ]
         if not args.fake_factor and args.embedding and args.energy_scale:
             bkg_processes = [
-                "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "embminus2p5",
+                "VVL", "STL", "VVJ", "STJ", "W", "TTL", "TTJ", "ZJ", "ZL", "embminus2p5",
             ]
         if not args.embedding and args.fake_factor:
             bkg_processes = [
-                "VVT", "VVL", "TTT", "TTL", "ZL", "ZTT"
+                "VVT", "STT", "VVL", "STL", "TTT", "TTL", "ZL", "ZTT"
             ]
         if not args.embedding and not args.fake_factor:
             bkg_processes = [
-                "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
+                "VVT", "STT", "VVL", "STL", "VVJ", "STJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
             ]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -176,25 +176,25 @@ def main(info):
     if "em" in channel:
         if not args.embedding:
             bkg_processes = [
-                "QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"
+                "QCD", "VVT", "STT", "VVL", "STL", "W", "TTT", "TTL", "ZL", "ZTT"
             ]
         if args.embedding:
             bkg_processes = [
-                "QCDEMB", "VVL", "W", "TTL", "ZL", "EMB"
+                "QCDEMB", "VVL", "STL", "W", "TTL", "ZL", "EMB"
             ]
         if args.draw_jet_fake_variation is not None:
             if not args.embedding:
                 bkg_processes = [
-                    "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"
+                    "VVT", "STT", "VVL", "STL", "W", "TTT", "TTL", "ZL", "ZTT"
                 ]
             if args.embedding:
                 bkg_processes = [
-                    "VVL", "W", "TTL", "ZL", "EMB"
+                    "VVL", "STL", "W", "TTL", "ZL", "EMB"
                 ]
 
     if "mm" in channel:
         bkg_processes = [
-            "QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZTT", "ZL"
+            "QCD", "VVT", "STT", "VVL", "STL", "W", "TTT", "TTL", "ZTT", "ZL"
         ]
 
     legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -357,7 +357,7 @@ def main(info):
         plot.add_legend(width=0.6, height=0.15)
         for process in legend_bkg_processes:
             plot.legend(i).add_entry(
-                0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')
+                0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","").replace("STL", "ST")], 'f')
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(3)

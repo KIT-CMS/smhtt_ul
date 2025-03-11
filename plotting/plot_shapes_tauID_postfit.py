@@ -172,17 +172,20 @@ def main(args):
 
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
 
-    bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
+    bkg_processes = ["VVL", "STL", "TTL", "ZL", "jetFakes", "EMB"]
     if not args.fake_factor and args.embedding:
-        bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
+        bkg_processes = ["QCD", "VVJ", "STJ", "VVL", "STL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
     if not args.embedding and args.fake_factor:
-        bkg_processes = ["VVT", "VVJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"]
+        bkg_processes = ["VVT", "STT", "VVJ", "STJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
             "QCD",
             "VVT",
             "VVL",
             "VVJ",
+            "STT",
+            "STL",
+            "STJ",
             "W",
             "TTT",
             "TTL",
@@ -191,8 +194,8 @@ def main(args):
             "ZL",
             "ZTT",
         ]
-    # bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
-    bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB_"+str(args.single_category)]
+    # bkg_processes = ["QCD", "VVJ", "STJ", "VVL", "STL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
+    bkg_processes = ["QCD", "VVJ", "STJ", "VVL", "STL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB_"+str(args.single_category)]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
@@ -232,11 +235,11 @@ def main(args):
     for category in categories:
         rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit)
         if channel == "em" and args.embedding:
-            bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
+            bkg_processes = ["VVL", "STL", "W", "TTL", "ZL", "QCD", "EMB"]
         elif channel == "em" and not args.embedding:
-            bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
+            bkg_processes = ["VVL", "STL", "W", "TTL", "ZL", "QCD", "ZTT"]
         elif channel == "mm":
-            bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "MUEMB"]
+            bkg_processes = ["VVL", "STL", "W", "TTL", "ZL", "QCD", "MUEMB"]
         else:
             bkg_processes = [b for b in all_bkg_processes]
         legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -356,7 +359,7 @@ def main(args):
                         0,
                         process,
                         styles.legend_label_dict[
-                            process.replace("TTL", "TT").replace("VVL", "VV")
+                            process.replace("TTL", "TT").replace("VVL", "VV").replace("STL", "ST")
                         ],
                         "f",
                     )

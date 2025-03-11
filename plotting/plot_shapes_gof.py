@@ -207,7 +207,7 @@ def main(args):
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em"]}
 
     bkg_processes = [
-        "VVL", "TTL", "ZL", "jetFakes", "EMB"
+        "VVL", "STL", "TTL", "ZL", "jetFakes", "EMB"
     ]
     if not args.fake_factor and args.embedding:
         bkg_processes = [
@@ -215,11 +215,11 @@ def main(args):
         ]
     if not args.embedding and args.fake_factor:
         bkg_processes = [
-            "VVT", "VVL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
+            "VVT", "STT", "VVL", "STL", "TTT", "TTL", "ZL", "jetFakes", "ZTT"
         ]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
-            "QCD", "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
+            "QCD", "VVT", "STT", "VVL", "STL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
         ]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -241,9 +241,9 @@ def main(args):
             print "Plot for category: ",category
             rootfile = rootfile_parser.Rootfile_parser(args.input)
             if channel == "em" and args.embedding:
-                bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
+                bkg_processes = ["VVL", "STL", "W", "TTL", "ZL", "QCD", "EMB"]
             elif channel == "em" and not args.embedding:
-                bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
+                bkg_processes = ["VVL", "STL", "W", "TTL", "ZL", "QCD", "ZTT"]
             else:
                 bkg_processes = [b for b in all_bkg_processes]
             legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -482,7 +482,7 @@ def main(args):
                 for process in legend_bkg_processes:
                     try:
                         plot.legend(i).add_entry(
-                            0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV")], 'f')
+                            0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("STL", "ST")], 'f')
                     except:
                         pass
                 plot.legend(i).add_entry(0, "total_bkg", "Bkg. unc.", 'f')

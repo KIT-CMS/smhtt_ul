@@ -56,11 +56,9 @@ if [[ $MODE == "SHAPES" ]]; then
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
     echo "##############################################################################################"
-    if [[ $CHANNEL == "mm" ]]; then
-        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
-    else
-        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
-    fi
+
+    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
+
 fi
 
 if [[ $MODE == "PLOT" ]]; then
