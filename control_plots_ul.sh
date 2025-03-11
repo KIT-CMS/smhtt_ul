@@ -6,7 +6,8 @@ NTUPLETAG=$3
 TAG=$4
 MODE=$5
 
-VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,pzetamissvis,deltaR_ditaupair,phi_1,phi_2,mt_1,mt_2,pt_vis,iso_1,iso_2"
+# VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,pzetamissvis,deltaR_ditaupair,phi_1,phi_2,mt_1,mt_2,pt_vis,iso_1,iso_2"
+VARIABLES="pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,m_vis,iso_1,iso_2,jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mt_tot,mjj,njets,nbtag,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,pt_dijet,deltaR_ditaupair,tau_decaymode_2,jet_hemisphere,pt_vis"
 # VARIABLES="m_vis,pt_2"
 ulimit -s unlimited
 export COLUMNS=$(tput cols)
