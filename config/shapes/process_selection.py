@@ -442,6 +442,9 @@ List of other processes meant to be put on top of base processes:
     - VVT_process_selection
     - VVJ_process_selection
     - VVL_process_selection
+    - STT_process_selection
+    - STL_process_selection
+    - STJ_process_selection
     - VH_process_selection
     - WH_process_selection
     - ZH_process_selection

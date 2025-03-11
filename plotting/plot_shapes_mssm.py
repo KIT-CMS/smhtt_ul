@@ -198,20 +198,20 @@ def main(args):
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em"]}
 
     bkg_processes = [
-        "VVL", "TTL", "ZL", "jetFakes", "EMB"
+        "VVL", "STL", "TTL", "ZL", "jetFakes", "EMB"
     ]
     if not args.fake_factor and args.embedding:
         bkg_processes = [
-            "QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"
+            "QCD", "VVJ", "STJ", "VVL", "STL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"
         ]
     if not args.embedding and args.fake_factor:
         bkg_processes = [
-            "VVT", "VVJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"
+            "VVT", "STT", "VVJ", "STJ", "TTT", "TTJ", "ZJ", "ZL", "jetFakes", "ZTT"
         ]
     if not args.embedding and not args.fake_factor:
         bkg_processes = [
-            "QCD", "W", "VVJ", "VVL", "VVT", "TTJ", "TTL", "TTT", "ZJ", "ZL", "ZTT"
-#            "QCD", "VVT", "VVJ", "W", "TTT", "TTJ", "ZJ", "ZL", "ZTT"
+            "QCD", "W", "VVJ", "STJ", "VVL", "STL", "VVT", "STT", "TTJ", "TTL", "TTT", "ZJ", "ZL", "ZTT"
+#            "QCD", "VVT", "STT", "VVJ", "STJ", "W", "TTT", "TTJ", "ZJ", "ZL", "ZTT"
         ]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -232,11 +232,11 @@ def main(args):
         if "em" in channel:
             if not args.embedding:
                 bkg_processes = [
-                    "QCDMC", "VVT", "VVL", "W", "TTT", "TTL", "ZL", "ZTT"
+                    "QCDMC", "VVT", "STT", "VVL", "STL", "W", "TTT", "TTL", "ZL", "ZTT"
                 ]
             if args.embedding:
                 bkg_processes = [
-                    "QCD", "VVL", "W", "TTL", "ZL", "EMB"
+                    "QCD", "VVL", "STL", "W", "TTL", "ZL", "EMB"
                 ]
 
         for category in channel_categories[channel]:
@@ -486,7 +486,7 @@ def main(args):
                 # plot.add_legend(width=0.6, height=0.15)
                 for process in legend_bkg_processes:
                     plot.legend(i).add_entry(
-                        0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV")], 'f')
+                        0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("STL", "ST")], 'f')
                 plot.legend(i).add_entry(0, "total_bkg", "Bkg. unc.", 'f')
                 if args.control_region and category == "1":
                     # plot.legend(i).add_entry(0 if args.linear else 1, "mssm_sig%s" % suffix[i], "#splitline{H #rightarrow #tau#tau}{(m_{H}=1200 GeV)}", 'l')
