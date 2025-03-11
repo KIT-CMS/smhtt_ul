@@ -1,15 +1,6 @@
 # Input files used accross all channels in 2018.
 small_files_2018 = {
-    # et: EGamma
-    # mt: SingleMuon
-    # tt: Tau
-    "data": [
-        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018A_1729863731-00000000000000000000000000000000",
-        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018B_1729599421-00000000000000000000000000000000",
-        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018C_1730057166-00000000000000000000000000000000",
-        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018D_1729599421-00000000000000000000000000000000"
-    ],
-    "HH2B2Tau": [ # to add
+    "HH2B2Tau": [
         "GluGluToHHTo2B2Tau_TuneCP5_PSWeights_node_SM_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_gghh2b2tau_GluGluToHHTo2B2Tau_Node_SM_1733315721-00000000000000000000000000000000"
     ],
     "DY": [
@@ -21,7 +12,7 @@ small_files_2018 = {
         "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_aakhmets-mc_2018UL_wjets_WJetsToLNu_1729599421-00000000000000000000000000000000",
         # "WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_sdaigler-mc_2018UL_WJetsToLNu_WJetsToLNu_Ext1_1734539918-00000000000000000000000000000000"
     ],
-    "ST": [ # to add
+    "ST": [
         "ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_antitop_1734539918-00000000000000000000000000000000",
         "ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_top_1734539918-00000000000000000000000000000000",
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_singletop_ST_tW_antitop_5f_inclusiveDecays_1729599421-00000000000000000000000000000000",
@@ -69,13 +60,7 @@ small_files_2018 = {
 
 # TODO: Extra Category for EWK?
 large_files_2018 = {
-    "data": [
-        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018A_1729863731-00000000000000000000000000000000",
-        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018B_1729599421-00000000000000000000000000000000",
-        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018C_1730057166-00000000000000000000000000000000",
-        "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018D_1729599421-00000000000000000000000000000000"
-    ],
-    "HH2B2Tau": [ # to add
+    "HH2B2Tau": [
         "GluGluToHHTo2B2Tau_TuneCP5_PSWeights_node_SM_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_gghh2b2tau_GluGluToHHTo2B2Tau_Node_SM_1733315721-00000000000000000000000000000000"
     ],
     "DY": [
@@ -113,7 +98,7 @@ large_files_2018 = {
         "EWKWMinus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_EWK_EWKWMinus2Jets_1737472169-00000000000000000000000000000000",
         "EWKWPlus2Jets_WToLNu_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8_sdaigler-mc_2018UL_EWK_EWKWPlus2Jets_1734539918-00000000000000000000000000000000"
     ],
-    "ST": [ # To add
+    "ST": [
         "ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_antitop_1734539918-00000000000000000000000000000000",
         "ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_sdaigler-mc_2018UL_ST_ST_t-channel_top_1734539918-00000000000000000000000000000000",
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8_aakhmets-mc_2018UL_singletop_ST_tW_antitop_5f_inclusiveDecays_1729599421-00000000000000000000000000000000",
@@ -187,13 +172,37 @@ files_2018 = small_files_2018
 
 files = {
     "2018": {
-        "et": dict(
+        "et": dict( 
+            {
+                "data": [
+                    "EGamma_aakhmets-data_2018UL_singleelectron_EGamma_Run2018A_1732626664-00000000000000000000000000000000",
+                    "EGamma_aakhmets-data_2018UL_singleelectron_EGamma_Run2018B_1732626664-00000000000000000000000000000000",
+                    "EGamma_aakhmets-data_2018UL_singleelectron_EGamma_Run2018C_1732626664-00000000000000000000000000000000",
+                    "EGamma_aakhmets-data_2018UL_singleelectron_EGamma_Run2018D_1734519534-00000000000000000000000000000000"
+                ],
+            },
             **files_2018
         ),
         "mt": dict(
+            {
+                "data": [
+                    "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018A_1729863731-00000000000000000000000000000000",
+                    "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018B_1729599421-00000000000000000000000000000000",
+                    "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018C_1730057166-00000000000000000000000000000000",
+                    "SingleMuon_aakhmets-data_2018UL_singlemuon_SingleMuon_Run2018D_1729599421-00000000000000000000000000000000"
+                ],
+            },
             **files_2018
         ),
         "tt": dict(
+            {
+                "data": [
+                    "Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000",
+                    "Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000",
+                    "Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000",
+                    "Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000"
+                ],
+            },
             **files_2018
         ),
     },
