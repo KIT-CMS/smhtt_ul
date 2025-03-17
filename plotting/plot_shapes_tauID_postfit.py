@@ -23,7 +23,7 @@ def parse_arguments():
         "-l", "--linear", action="store_true", help="Enable linear x-axis"
     )
     parser.add_argument(
-        "-c", "--channel", nargs="+", type=str, required=True, help="Channels"
+        "-c", "--channel", type=str, required=True, help="Channels"
     )
     parser.add_argument("-e", "--era", type=str, required=True, help="Era")
     parser.add_argument(
@@ -133,12 +133,12 @@ def main(args):
     else:
         channel_categories = {
             "mt": ["1", "2", "3", "4", "5", "6", "7"],
-            "mt": [ "6", "7", "8", "10", "11"],
         }
 
-        signalcats = []
-        for channel in ["mt"]:
-            channel_categories[channel] += signalcats
+        # signalcats = []
+        # for channel in ["mt"]:
+        #     channel_categories[channel] += signalcats
+    
     channel_dict = {
         "ee": "ee",
         "em": "e#mu",
@@ -162,6 +162,8 @@ def main(args):
         "11": "DM11",
         "100": "Control Region"
     }
+    inv_category_dict = {v: k for k, v in category_dict.items()}
+    
     if args.linear:
         split_value = 0
     else:
@@ -191,14 +193,14 @@ def main(args):
             "ZL",
             "ZTT",
         ]
-    # bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
-    bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB_"+str(args.single_category)]
-    all_bkg_processes = [b for b in bkg_processes]
-    legend_bkg_processes = copy.deepcopy(bkg_processes)
-    legend_bkg_processes.reverse()
 
     if "2016" in args.era:
-        era = "Run2016"
+        if "pre" in args.era:
+            era = "Run2016preVFP"
+        elif "post" in args.era:
+            era = "Run2016postVFP"
+        else:
+            era = "Run2016"
     elif "2017" in args.era:
         era = "Run2017"
     elif "2018" in args.era:
@@ -206,39 +208,34 @@ def main(args):
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
-    logger.debug("Channel Categories: {}".format(channel_categories))
+    # logger.debug("Channel Categories: {}".format(channel_categories))
     plots = []
-    channel = args.channel[0]
-    categories = []
-    if args.single_category != "":
+    channel = args.channel
+    if args.single_category in category_dict.values():
         logger.debug(f"channel {channel}")
         logger.warning("Selected category: {}".format(args.single_category))
-        logger.warning("Available categories: {}".format(category_dict))
-        catname = args.single_category.replace("htt_mt_", "")
-        if catname in category_dict.values():
-            categories = list(category_dict.keys())[
-                list(category_dict.values()).index(catname)
-            ]
-        if catname == "100" and channel == "mm":
-            categories =["100"]
-        # categories = set(channel_categories[channel]).intersection(
-        #     set([args.single_category])
-        # )
+        logger.warning("Available categories: {}".format(category_dict))            
+        
+        catname = args.single_category
+        categories = inv_category_dict[catname]
     else:
-        categories = channel_categories[channel]
-    logger.warning("Categories: {}".format(categories))
+        raise NameError("Wrong category name!\
+                        \n Also multi category NOT possible atm. Only single categories are expected!")
+        # categories = channel_categories[channel]
+    logger.warning(f"Categories: {categories}")
     if not isinstance(categories, list):
         categories = [categories]
     for category in categories:
         rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit)
-        if channel == "em" and args.embedding:
-            bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
-        elif channel == "em" and not args.embedding:
-            bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
+        if channel == "em":
+            if args.embedding:
+                bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
+            else:
+                bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "ZTT"]
         elif channel == "mm":
-            bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "MUEMB"]
+            bkg_processes = ["W", "QCD", "MUEMB"]
         else:
-            bkg_processes = [b for b in all_bkg_processes]
+            bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", f"EMB_{category_dict[category]}"]
         legend_bkg_processes = copy.deepcopy(bkg_processes)
         legend_bkg_processes.reverse()
         # create plot
@@ -258,22 +255,29 @@ def main(args):
                     process, "hist", fillcolor=styles.color_dict[process]
                 )
             except BaseException:
-                pass
+                if "EMB" in process:
+                    plot.setGraphStyle(
+                        bkg_processes[-1], "hist", fillcolor=styles.color_dict["EMB"]
+                    )
+                    pass
+                else:
+                    print(f""" \n Something went wrong in creating hist and style for process: {process} \n""")
+                    # import pdb; pdb.set_trace()
+                    pass
 
-        plot.setGraphStyle(
-                bkg_processes[-1], "hist", fillcolor=styles.color_dict["EMB"]
-            )
+        
         data_obs = rootfile.get(era, channel, category, "data_obs")
         plot.add_hist(data_obs, "data_obs")
 
         total_bkg = rootfile.get(era, channel, category, "total_background")
         plot.add_hist(total_bkg, "total_bkg")
-
-        total_sig = rootfile.get(era, channel, category, "total_signal")
-        plot.add_hist(total_sig, "total_sig")
+        if channel != "mm":
+            total_sig = rootfile.get(era, channel, category, "total_signal")
+            plot.add_hist(total_sig, "total_sig")
 
         model_total = plot.subplot(2).get_hist("total_bkg")
-        model_total.Add(plot.subplot(2).get_hist("total_sig"))
+        if channel != "mm":
+            model_total.Add(plot.subplot(2).get_hist("total_sig"))
         plot.add_hist(model_total, "model_total")
         plot.subplot(0).setGraphStyle("data_obs", "e0")
         plot.setGraphStyle(
@@ -440,17 +444,17 @@ def main(args):
                 "png",
             )
         )
-        plot.save(
-            "%s/%s_%s_%s_%s.%s"
-            % (
-                args.outputfolder,
-                args.era,
-                channel,
-                args.gof_variable if args.gof_variable is not None else category,
-                postfix,
-                "pdf",
-            )
-        )
+        # plot.save(
+        #     "%s/%s_%s_%s_%s.%s"
+        #     % (
+        #         args.outputfolder,
+        #         args.era,
+        #         channel,
+        #         args.gof_variable if args.gof_variable is not None else category,
+        #         postfix,
+        #         "pdf",
+        #     )
+        # )
         # work around to have clean up seg faults only at the end of the
         # script
         plots.append(plot)

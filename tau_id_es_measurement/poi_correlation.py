@@ -151,11 +151,19 @@ if __name__ == "__main__":
 
         "r_EMB_DM_0" : "EMB_DM_0", 
         "r_EMB_DM_1" : "EMB_DM_1", 
-        "r_EMB_DM_10_11" : "EMB_DM_10_11", 
+        "r_EMB_DM_10_11" : "EMB_DM_10_11",
+        
+        "r_EMB_DM0" : "EMB_DM_0",
+        "r_EMB_DM1" : "EMB_DM_1", 
+        "r_EMB_DM10_11" : "EMB_DM_10_11",
 
         "ES_DM0" : "ES_DM0",
         "ES_DM1" : "ES_DM1",
         "ES_DM10_11" : "ES_DM10_11",
+        
+        "r_DY_incl_DM0":"r_DY_incl_DM0",
+        "r_DY_incl_DM1":"r_DY_incl_DM1",
+        "r_DY_incl_DM10_11":"r_DY_incl_DM10_11",
 
     }
     label_list = [
@@ -173,6 +181,10 @@ if __name__ == "__main__":
 
     filename = sys.argv[2]
     print("[INFO] Plot POI correlations from file {}.".format(filename))
+    
+    category= sys.argv[3]
+    print("[INFO] Plot POI for category {}.".format(category))
+    
     f = ROOT.TFile(filename)
     if f == None:
         raise Exception("[ERROR] File {} not found.".format(filename))
@@ -187,7 +199,7 @@ if __name__ == "__main__":
         name = params[i].GetName()
         if name.startswith("r") or name.startswith("ES"):
             pois.append(name)
-    print("[INFO] Identified POIs with names {}.".format(pois))
+    print(f"[INFO] Identified POIs with names {pois}.")
 
 
     num_pois = len(pois)
@@ -251,5 +263,5 @@ if __name__ == "__main__":
     c.Update()
 
     # c.SaveAs("{}_plot_poi_correlation_stage-0.pdf".format(era))
-    c.SaveAs("{}_DM_POIS_correlations_ID_ES.pdf".format(era))
-    c.SaveAs("{}_DM_POIS_correlations_ID_ES.png".format(era))
+    # c.SaveAs(f"{era}_{category}_POIS_correlations_ID_ES.pdf")
+    c.SaveAs(f"{era}_{category}_POIS_correlations_ID_ES.png")

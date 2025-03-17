@@ -181,7 +181,7 @@ from config.shapes.gof_binning import load_gof_binning
 logger = logging.getLogger("")
 
 
-def setup_logging(output_file, level=logging.DEBUG):
+def setup_logging(output_file, level=logging.DEBUG): # remove if new logging by artur is used
     logger.setLevel(level)
     formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
 
@@ -783,14 +783,14 @@ def get_control_units(
     return control_units
 
 
-def prepare_special_analysis(special):
+def prepare_special_analysis(special: str) -> dict:
     if special is None:
         return default_categorization
-    elif special and special == "TauID":
+    elif special == "TauID":
         return tauid_categorization
-    elif special and special == "TauES":
+    elif special == "TauES":
         return taues_categorization
-    elif special and special == "TauID_ES":
+    elif special == "TauID_ES":
         return tauid_categorization
     else:
         raise ValueError("Unknown special analysis: {}".format(special))
@@ -893,7 +893,7 @@ def main(args):
             )
         if channel == "mt" and special_analysis in ["TauID", "TauID_ES"]:
             additional_emb_procS = set()
-            tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
+            tauESvariations = [-8.0 + 0.1 * i for i in range(0, 121)]
             add_tauES_datasets(
                 era,
                 channel,
@@ -953,7 +953,7 @@ def main(args):
         "mm": set() & procS,
     }
     leptonFakesS = {"zl", "ttl", "stl", "vvl"} & procS
-    trueTauBkgS = {"ztt", "ttt", "stl", "vvt"} & procS
+    trueTauBkgS = {"ztt", "ttt", "stt", "vvt"} & procS
     sm_signalsS = {
         "ggh",
         "qqh",
@@ -1436,4 +1436,7 @@ if __name__ == "__main__":
     else:
         log_file = "{}.log".format(args.output_file)
     setup_logging(log_file, logging.INFO)
+    # Arturs new logging:
+    # from config.logging_setup_configs import setup_logging as setup_log
+    # logger = setup_log(logger = logging.getLogger(__name__))
     main(args)

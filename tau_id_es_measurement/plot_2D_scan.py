@@ -1,7 +1,8 @@
 import ROOT
-from scipy.interpolate import griddata
+# from scipy.interpolate import griddata
 import numpy as np
-
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -10,6 +11,7 @@ parser.add_argument('--in-path',type=str, help='Input path to the 2D scan file')
 parser.add_argument('--tau-id-poi',type=str, help='Name of the tau ID POI')
 parser.add_argument('--tau-es-poi',type=str, help='Name of the tau ES POI')
 parser.add_argument('--outname',type=str, help='Name of the outputfile')
+parser.add_argument('--nbins',type=int, help='Number of bins per axis')
 args = parser.parse_args()
 title = args.outname
 if "DM" in title:
@@ -21,21 +23,21 @@ else:
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
-file_name = args.in_path+"higgsCombine."+args.name+".MultiDimFit.mH120.root"
+file_name = args.in_path+"higgsCombine."+args.name+".MultiDimFit.mH125.root"
 f = ROOT.TFile(file_name)
 t = f.Get("limit")
 
 # Number of points in interpolation
-n_points = 400
+# n_points = 
 x_range = [0.5, 1.5]
-y_range = [-4.0, 4]
+y_range = [-8.0, 4]
 
 # Number of bins in plot
-n_bins = 20
+n_bins = args.nbins
 
 x, y, deltaNLL = [], [], []
 for ev in t:
-    x.append(getattr(ev, "r"))
+    x.append(getattr(ev, f"r_EMB_{title}"))
     y.append(getattr(ev, args.tau_es_poi))
     deltaNLL.append(getattr(ev, "deltaNLL"))
 # print(deltaNLL, len(deltaNLL), y, len(y), x, len(x)
@@ -58,7 +60,142 @@ for ev in t:
 # Define Profile2D histogram
 # h2D = ROOT.TProfile2D("h", "h", n_bins, x_range[0], x_range[1], n_bins, y_range[0], y_range[1], -10, 400, "h")
 h2D = ROOT.TProfile2D("h", title_name, n_bins, x_range[0], x_range[1], n_bins, y_range[0], y_range[1])
+x_np_0 = np.array(x)
+y_np_0 = np.array(y)
+deltaNLL_np_0 = np.array(deltaNLL)
+bestfit_np = np.array([x_np_0[0], y_np_0[0], deltaNLL_np_0[0]])
+print(f"Best fit value for {title}: {bestfit_np}")
+x_np = np.delete(x_np_0, 0)
+y_np = np.delete(y_np_0, 0)
+deltaNLL_np = np.delete(deltaNLL_np_0, 0)
 
+# Check if there are missing values:
+loss_flag = False
+points_lost = n_bins **2 - len(x_np)
+if len(x_np) != len(y_np) or len(x_np) != len(deltaNLL_np):
+    print("Lengths of x, y, and deltaNLL arrays are not equal!")
+    exit(1)
+elif len(x_np) != n_bins **2:
+    loss_flag = True
+
+# If values are missing, find index and fill the gaps, deltaNLL gaps get -1.0 values:
+if loss_flag:
+    set_x = set(x_np)
+    set_y = set(y_np)
+    sequence_x = [i for i in set_x]
+    sequence_y = [i for i in set_y]
+    if len(sequence_x) != n_bins or len(sequence_y) != n_bins:
+        print("Could not find a sequence! there are a lot of missing values! If you still want to multifit, use max parameter ranges.")
+        print(f"This many points have failed: {points_lost}")
+        print(f"Check if number of bins was set correctly. It should be the sqrt of number of grid points used! n_bins is set to {n_bins}")
+        exit(1)
+    
+    
+    missing_indices = []
+    seq_x = np.array(sequence_x)
+    seq_x.sort()
+    x_np_full = np.tile(seq_x, n_bins)
+    x_np_cp = x_np.copy()
+    while len(missing_indices) != points_lost:
+        for i,val in enumerate(x_np_cp):  
+            if val != x_np_full[i]:
+                missing_indices.append(i)
+                x_np_cp = np.insert(x_np_cp, i, x_np_full[i])
+                break
+        # Finished?
+        if len(missing_indices) == points_lost:
+            print("Found all missing indices, now fixing the arrays")
+            break
+    
+    y_np_fu = np.array(sequence_y)
+    y_np_full = np.tile(y_np_fu, n_bins)
+    y_np_full.sort()
+    deltaNLL_full = list(deltaNLL_np.copy())
+    for i in missing_indices:
+        deltaNLL_full.insert(i, np.nan)
+    deltaNLL_np_full = np.array(deltaNLL_full)
+    
+    #CHECK:
+    if len(x_np_cp) != len(y_np_full) != len(deltaNLL_full) != n_bins **2:
+        print("Lengths of x, y, and deltaNLL arrays are not equal or unequal n_bins^2!")
+        print(f"Lengths: x:{len(x_np_cp)}, y:{len(y_np_full)}, deltaNLL:{len(deltaNLL_full)}")
+        import pdb; pdb.set_trace()
+        
+    
+else:
+    x_np_full = x_np.copy()
+    y_np_full = y_np.copy()
+    deltaNLL_np_full = deltaNLL_np.copy()
+
+
+# Get the smallest value per axis for profiling curves:
+x_profile = []
+y_profile = []
+profile_y_np = [np.array_split(x_np_full, n_bins), np.array_split(y_np, n_bins), np.array_split(deltaNLL_np_full, n_bins)]
+profile_x_np = [[[] for _ in range(n_bins)],[[] for _ in range(n_bins)],[[] for _ in range(n_bins)]]
+
+for i,val in enumerate(x_np_full):
+    profile_x_np[0][i % n_bins].append(val)
+for i,val in enumerate(y_np_full):
+    profile_x_np[1][i % n_bins].append(val)
+for i,val in enumerate(deltaNLL_np_full):
+    profile_x_np[2][i % n_bins].append(val)
+
+nan_falgs_x = []
+nan_falgs_y = []
+for i in range(n_bins):
+    nan_mask_x = np.isnan(profile_x_np[2][i])
+    nan_mask_y = np.isnan(profile_y_np[2][i])
+    dNLL_min_x = np.nanmin(profile_x_np[2][i])
+    dNLL_min_y = np.nanmin(profile_y_np[2][i])
+    if nan_mask_x.any():
+        nan_falgs_x += (i,)
+    else:
+        nan_falgs_x += (-1,)
+    if nan_mask_y.any():
+        nan_falgs_y += (i,)
+    else:
+        nan_falgs_y += (-1,)
+    index_dNLL_min_y = np.where(profile_y_np[2][i] == dNLL_min_y)[0][0]
+    index_dNLL_min_x = np.where(profile_x_np[2][i] == dNLL_min_x)[0][0]
+    y_profile += ([profile_y_np[0][i][index_dNLL_min_y], profile_y_np[1][i][0], dNLL_min_y * 2], )
+    x_profile += ([profile_x_np[0][i][0], profile_x_np[1][i][index_dNLL_min_x], dNLL_min_x * 2], )
+
+# Plot the 1D profiles:
+fig = plt.figure()
+
+ax_x , ax_y = fig.subplots(1,2)
+for nan_flag,i in zip(nan_falgs_x,range(n_bins)):
+    if nan_flag == -1:
+        ax_x.scatter(x_profile[i][0], x_profile[i][2], marker='_', color='k')
+    else:
+        ax_x.scatter(x_profile[i][0], x_profile[i][2], marker='_', color='r', lw=3)
+
+
+ax_x.vlines(bestfit_np[0],0,1, colors='b', linestyles='dashed', transform=ax_x.get_xaxis_transform(), label='Best fit')
+ax_x.set(xlabel='tau ID SF', ylabel='-2 $\Delta\\ln\\mathcal{L}$')
+ax_x.legend()
+for nan_flag,i in zip(nan_falgs_y,range(n_bins)):
+    if nan_flag == -1:
+        ax_y.scatter(y_profile[i][1], y_profile[i][2], marker='_', color='k')
+    else:
+        ax_y.scatter(y_profile[i][1], y_profile[i][2], marker='_', color='r', lw=3)
+
+
+ax_y.set(xlabel='tau ES shift %', ylabel='-2 $\Delta\\ln\\mathcal{L}$')
+ax_y.xaxis.set_ticks(np.arange(y_range[0], y_range[-1]+1, 2))
+ax_y.vlines(bestfit_np[1],0,1, colors='b', linestyles='dashed', transform=ax_y.get_xaxis_transform(), label='Best fit')
+ax_x.hlines(0, 0, 1, colors='k', linestyles='solid', transform=ax_x.get_yaxis_transform())
+ax_y.hlines(0, 0, 1, colors='k', linestyles='solid', transform=ax_y.get_yaxis_transform())
+ax_y.legend()
+fig.suptitle(title_name)
+fig.text(0.95, 0.95, f"# points lost:{points_lost}", ha='right', va='top', fontsize=12,
+        bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
+fig.tight_layout(pad=3.0)
+plt.savefig("1D_profiles_2Dscan_"+args.outname+"_id_es_tests.png")
+plt.close(fig)
+
+# Fill the 2D histogram
 # for i in range(len(grid_vals)):
 for i in range(len(deltaNLL)):
     # Factor of 2 comes from 2*NLL
@@ -73,13 +210,18 @@ for i in range(len(deltaNLL)):
 #             yc = h2D.GetYaxis().GetBinCenter(jbin)
 #             h2D.Fill(xc, yc, 999)
 
+# Calc Pearson correlation coeffs from profiles:
+prof_x = [x_profile[i][2] for i in range(n_bins)]
+prof_y = [y_profile[i][2] for i in range(n_bins)]
+cov_np = np.corrcoef(prof_x, prof_y)
+corr_det = np.linalg.det(cov_np)
+
 # Calc Pearson correlation:
 projX = h2D.ProjectionX("tauID SF")
 projY = h2D.ProjectionY("TES shift")
 
 meanX = projX.GetMean()
 meanY = projY.GetMean()
-
 # Calculate covariance
 covariance = 0
 nBinsX = projX.GetNbinsX()
@@ -98,8 +240,8 @@ stdDevX = projX.GetRMS()
 stdDevY = projY.GetRMS()
 
 # => Correlation coefficient:
-corr_xy = covariance / (stdDevX * stdDevY)
-corr_xy_str = f"Corr.:{corr_xy:.2f}"
+corr_xy = covariance / ((stdDevX * stdDevY) + 0.0000001)
+corr_xy_str = f"Corr.:{corr_xy:.3f}"
 
 # Set up canvas
 canv = ROOT.TCanvas("canv", "canv", 680, 600)
@@ -108,6 +250,8 @@ canv.SetTicky()
 canv.SetLeftMargin(0.115)
 canv.SetRightMargin(0.170)
 canv.SetBottomMargin(0.115)
+# canv.SetLogz()
+
 # Extract binwidth
 xw = (x_range[1] - x_range[0]) / n_bins
 yw = (y_range[1] - y_range[0]) / n_bins
@@ -130,19 +274,21 @@ h2D.GetZaxis().SetTitleSize(0.05)
 h2D.GetZaxis().SetTitleOffset(0.8)
 
 # h2D.SetMaximum(400)
-ROOT.gStyle.SetPalette(ROOT.kCool)
+# ROOT.gStyle.SetPalette(ROOT.kCool)
+ROOT.gStyle.SetPalette(ROOT.kBird)
+# ROOT.gStyle.SetPalette(ROOT.kLivid)
 # Make confidence interval contours
 c68, c95 = h2D.Clone(), h2D.Clone()
 c68.SetContour(2)
 c68.SetContourLevel(1, 2.3)
 c68.SetLineWidth(3)
-c68.SetLineColor(ROOT.kBlack)
+c68.SetLineColor(ROOT.kWhite)
 # c68.SetLineColor(ROOT.kRed)
 c95.SetContour(2)
 c95.SetContourLevel(1, 5.99)
 c95.SetLineWidth(3)
 c95.SetLineStyle(2)
-c95.SetLineColor(ROOT.kBlack)
+c95.SetLineColor(ROOT.kWhite)
 
 # Draw histogram and contours
 h2D.Draw("COLZ")
@@ -163,10 +309,11 @@ c95.Draw("cont3same")
 
 # Make best fit and sm points
 gBF = ROOT.TGraph()
-gBF.SetPoint(0, grid_x[np.argmin(grid_vals)], grid_y[np.argmin(grid_vals)])
+# gBF.SetPoint(0, grid_x[np.argmin(grid_vals)], grid_y[np.argmin(grid_vals)])
+gBF.SetPoint(0, x[np.argmin(deltaNLL)], y[np.argmin(deltaNLL)])
 gBF.SetMarkerStyle(34)
 gBF.SetMarkerSize(2)
-gBF.SetMarkerColor(ROOT.kBlack)
+gBF.SetMarkerColor(ROOT.kWhite)
 gBF.Draw("P")
 
 # gSM = ROOT.TGraph()
@@ -178,14 +325,15 @@ gBF.Draw("P")
 
 
 # Add legend
-leg = ROOT.TLegend(0.6, 0.67, 0.8, 0.87)
+leg = ROOT.TLegend(0.57, 0.67, 0.8, 0.87)
 leg.SetTextSize(0.04)
 leg.SetBorderSize(0)
-leg.SetFillColor(0)
+leg.SetFillColor(ROOT.kGray)
 leg.AddEntry(gBF, "Best fit", "P")
 leg.AddEntry(c68, "1#sigma CL", "L")
 leg.AddEntry(c95, "2#sigma CL", "L")
 leg.AddEntry(h2D, corr_xy_str, "")
+leg.AddEntry(h2D, f"Corr.:{corr_det:.3f}", "")
 
 # leg.AddEntry(gSM, "SM", "P")
 leg.Draw()
@@ -218,3 +366,17 @@ proj_Y.Draw()
 c1.Update()
 c1.SaveAs("1D_projections_2Dscan_"+args.outname+"_id_es_tests.png")
 
+# Plot the 1D profiles: does not work if any bin failed and thus the # of bins is not the same!
+# prof_X = h2D.ProfileX("tauID SF profile")
+# prof_Y = h2D.ProfileY("TES shift profile")
+
+# # Create a single canvas
+# c2 = ROOT.TCanvas("c2", "Profiles", 800, 600)
+# c2.SetTitle(title_name)
+# c2.Divide(2, 1)
+# c2.cd(1)
+# prof_X.Draw()
+# c2.cd(2)
+# prof_Y.Draw()
+# c2.Update()
+# c2.SaveAs("1D_profiles_2Dscan_"+args.outname+"_id_es_tests.png")

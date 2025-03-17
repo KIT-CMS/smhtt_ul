@@ -228,7 +228,7 @@ def main(args):
             tauES_names.append(processname)
     if args.special == "TauID_ES":
         # we have to extend the _dataset_map and the _process_map to include the TauES variations
-        tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
+        tauESvariations = [-8.0 + 0.1 * i for i in range(0, 121)]
         for variation in tauESvariations:
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
             processname = f"emb{name}"

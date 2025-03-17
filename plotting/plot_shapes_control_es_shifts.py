@@ -186,7 +186,7 @@ def main(info):
 
     if "mm" in channel:
         bkg_processes = [
-            "QCD", "VVT", "VVL", "W", "TTT", "TTL", "ZTT", "ZL"
+            "QCD", "W", "EMB"
         ]
 
     legend_bkg_processes = copy.deepcopy(bkg_processes)
@@ -277,8 +277,9 @@ def main(info):
 
     plot.subplot(2).setYlims(0.75, 1.45)
     if channel == "mm":
-        plot.subplot(0).setLogY()
-        plot.subplot(0).setYlims(1, 10**10)
+        # plot.subplot(0).setLogY()
+        # plot.subplot(0).setYlims(1, 10**10)
+        pass
 
     if args.linear != True:
         plot.subplot(1).setYlims(0.1, split_dict[channel])

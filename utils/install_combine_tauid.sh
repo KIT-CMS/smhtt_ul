@@ -19,7 +19,7 @@ git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 cd CombineHarvester
 git checkout v3.0.0
 scram b -j 8
-git clone git@github.com:KIT-CMS/SMRun2Legacy.git -b ul
-git clone git@github.com:conformist89/TauIDSFMeasurement.git -b combined-fit
+# git clone git@github.com:KIT-CMS/SMRun2Legacy.git -b ul
+git clone git@github.com:KIT-CMS/TauIDSFMeasurement.git -b tauID_ES
 scram b -j 8
 cd ../../..

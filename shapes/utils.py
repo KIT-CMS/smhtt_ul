@@ -10,6 +10,7 @@ import re
 from copy import deepcopy
 import logging
 import itertools
+from typing import List, Dict, Union, Any, Set
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +58,8 @@ def add_process(
 
 
 def add_control_process(
-    analysis_unit, name, dataset, selections, channel, binning, variables
-):
+    analysis_unit: Dict, name: str, dataset: Any, selections: List, channel: str, binning: Dict, variables: Set
+) -> None:
     """Function used to add control plots of various variables to the analysis unit.
 
     Args:
@@ -122,8 +123,8 @@ def filter_friends(dataset, friend):
 
 
 def get_nominal_datasets(
-    era, channel, friend_directories, files, directory, validation_tag, xrootd=False
-):
+    era: str, channel: str, friend_directories: Dict[str, str], files: Dict[str, Dict], directory: str, validation_tag: str, xrootd=False
+) -> Dict:
     datasets = dict()
     if friend_directories is not None:
         for key, names in files[era][channel].items():

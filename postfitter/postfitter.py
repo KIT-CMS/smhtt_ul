@@ -20,12 +20,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--input', '-in', type=str, required=True, help='path to input file fitDiagnostics.$ERA.root')
 parser.add_argument('--output', '-out', type=str, required=True, help='path to output folder')
 parser.add_argument('--era', type=str, required=True, help='Used ERA')
+parser.add_argument('--category', type=str, default="", help='Used Category')
 args = parser.parse_args()
 
 inp_file = args.input
 out_fold = args.output
 era = args.era
-
+cat = args.category
 file_inp = ROOT.TFile(inp_file)
 
 
@@ -47,7 +48,10 @@ for i in range(len(postfit_keys)):
 
 postfit_in_folders_names
 
-new_file = ROOT.TFile(out_fold+f"postfitshape.{era}.root", "recreate")
+if cat != "":
+    new_file = ROOT.TFile(out_fold+f"postfitshape.{cat}.{era}.root", "recreate")
+else:
+    new_file = ROOT.TFile(out_fold+f"postfitshape.{era}.root", "recreate")
 
 for i in range(len(prefit_in_folders_names)):
     print(prefit_in_folders_names[i])
@@ -88,7 +92,11 @@ for i in range(len(prefit_in_folders_names)):
 
 new_file.Close()
 
-new_file1 = ROOT.TFile(out_fold+f"postfitshape.{era}.root", "update")
+
+if cat != "":
+    new_file1 = ROOT.TFile(out_fold+f"postfitshape.{cat}.{era}.root", "update")
+else:
+    new_file1 = ROOT.TFile(out_fold+f"postfitshape.{era}.root", "update")
 
 for i in range(len(postfit_in_folders_names)):
     hist_list  = file_inp.Get(postfit_folder+"/"+postfit_in_folders_names[i]).GetListOfKeys()
