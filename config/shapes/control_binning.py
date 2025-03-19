@@ -130,7 +130,7 @@ common_binning = HistogramBuildingDict(
         "m_sv_puppi": np.arange(0, 225, 5),
         "pt_sv_puppi": np.arange(0, 160, 5),
         "eta_sv_puppi": np.linspace(-2.5, 2.5, 50),
-        "m_vis": np.linspace(50, 200, 50),
+        "m_vis": np.arange(0, 202, 3),
         "ME_q2v1": np.arange(0, 300000, 6000),
         "ME_q2v2": np.arange(0, 300000, 6000),
         "ME_costheta1": np.linspace(-1, 1, 50),
