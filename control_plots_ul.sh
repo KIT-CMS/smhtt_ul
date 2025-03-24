@@ -6,9 +6,25 @@ NTUPLETAG=$3
 TAG=$4
 MODE=$5
 
+# Basic variables
 # VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,pzetamissvis,deltaR_ditaupair,phi_1,phi_2,mt_1,mt_2,pt_vis,iso_1,iso_2"
-VARIABLES="pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,m_vis,iso_1,iso_2,jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mt_tot,mjj,njets,nbtag,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,pt_dijet,deltaR_ditaupair,tau_decaymode_2,jet_hemisphere,pt_vis"
-# VARIABLES="m_vis,pt_2"
+
+# Extended variables
+# VARIABLES="pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,m_vis,iso_1,iso_2,jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mt_tot,mjj,njets,nbtag,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,pt_dijet,deltaR_ditaupair,tau_decaymode_2,jet_hemisphere,pt_vis"
+
+
+VARS_TAUS="iso_1,iso_2,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
+VARS_TAU_PAIR="m_vis,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,deltaR_ditaupair,pt_vis"
+VARS_JETS="jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mjj,njets,pt_dijet,jet_hemisphere"
+VARS_BJETS="nbtag,bpair_pt_1,bpair_pt_2,bpair_eta_1,bpair_eta_2,bpair_phi_1,bpair_phi_2,bpair_btag_value_1,bpair_btag_value_2,bpair_m_inv,bpair_pt_dijet,bpair_deltaR"
+# VARS_DISTANCES="deltaPhi_met_tau1,deltaPhi_met_tau2,deltaPhi_met_fatjet,deltaPhi_met_bjet1,deltaPhi_met_bjet2,deltaR_tau1_fatjet,deltaR_tau2_fatjet,balance_pT_fatjet_Z,deltaR_bjet1_fatjet,deltaR_bjet2_fatjet,deltaR_tau1_bjet1,deltaR_tau1_bjet2,deltaR_tau2_bjet1,deltaR_tau2_bjet2"
+VARS_BBTT="mt_tot,pt_tautaubb,mass_tautaubb"
+# VARS_KINFIT="kinfit_mX,kinfit_mY,kinfit_chi2,kinfit_convergence,kinfit_mX_YToBB,kinfit_mY_YToBB,kinfit_chi2_YToBB,kinfit_convergence_YToBB,kinfit_mX_YToTauTau,kinfit_mY_YToTauTau,kinfit_chi2_YToTauTau,kinfit_convergence_YToTauTau"
+# VARS_FASTMTT="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
+
+VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_BBTT}"
+
+
 ulimit -s unlimited
 export COLUMNS=$(tput cols)
 source utils/setup_root.sh
