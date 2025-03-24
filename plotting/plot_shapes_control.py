@@ -93,6 +93,16 @@ def parse_arguments():
 
     return parser.parse_args()
 
+def add_bkg_hist(process: str, proc_hist, total_bkg, plot):
+    if not proc_hist:
+        return
+    if total_bkg:
+        total_bkg.Add(proc_hist)
+    else:
+        total_bkg = proc_hist
+    plot.add_hist(proc_hist, process, "bkg")
+    plot.setGraphStyle(process, "hist", fillcolor=styles.color_dict[process])
+    return total_bkg
 
 def main(info):
     args = info["args"]
@@ -124,6 +134,28 @@ def main(info):
         selection_option=args.selection_option,
         draw_jet_fake_variation=args.draw_jet_fake_variation,
     )()
+
+    # Define process caragories
+    ST_proc = {"STL", "STT", "STJ"} & set(bkg_processes)
+    TT_proc = {"TTL", "TTT", "TTJ"} & set(bkg_processes)
+    VV_proc = {"VVL", "VVT", "VVJ"} & set(bkg_processes)
+    Z_proc = {"ZL", "ZTT", "ZJ"} & set(bkg_processes)
+    rare_proc = {"EWK", "VVV"} & set(bkg_processes)
+
+    remaining_procs = set(bkg_processes) - ST_proc - TT_proc - VV_proc - Z_proc - rare_proc
+
+    # Define legend order and add alias for process categories
+    bkg_processes = list(remaining_procs)
+    if ST_proc:
+        bkg_processes.append("ST")
+    if TT_proc:
+        bkg_processes.append("TT")
+    if VV_proc:
+        bkg_processes.append("VV")
+    if Z_proc:
+        bkg_processes.append("Z")
+    if rare_proc:
+        bkg_processes.append("rare")
 
     if "2016postVFP" in args.era:
         era = "Run2016postVFP"
@@ -160,16 +192,82 @@ def main(info):
         stype = "Nominal"
         cat = args.category
 
-    for index, process in enumerate(bkg_processes):
-        _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
+    # ST processes
+    if ST_proc:
+        proc_hist = None
+        for index, process in enumerate(ST_proc):
+            _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
 
-        if index == 0:
-            total_bkg = _hist
-        else:
-            total_bkg.Add(_hist)
+            if index == 0:
+                proc_hist = _hist
+            else:
+                proc_hist.Add(_hist)
 
-        plot.add_hist(_hist, process, "bkg")
-        plot.setGraphStyle(process, "hist", fillcolor=styles.color_dict[process])
+        total_bkg = add_bkg_hist("ST", proc_hist, total_bkg, plot)
+
+    # TT processes
+    if TT_proc:
+        proc_hist = None
+        for index, process in enumerate(TT_proc):
+            _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
+
+            if index == 0:
+                proc_hist = _hist
+            else:
+                proc_hist.Add(_hist)
+
+        total_bkg = add_bkg_hist("TT", proc_hist, total_bkg, plot)
+    
+    # VV processes
+    if VV_proc:
+        proc_hist = None
+        for index, process in enumerate(VV_proc):
+            _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
+
+            if index == 0:
+                proc_hist = _hist
+            else:
+                proc_hist.Add(_hist)
+
+        total_bkg = add_bkg_hist("VV", proc_hist, total_bkg, plot)
+    
+    # Z processes
+    if Z_proc:
+        proc_hist = None
+        for index, process in enumerate(Z_proc):
+            _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
+
+            if index == 0:
+                proc_hist = _hist
+            else:
+                proc_hist.Add(_hist)
+
+        total_bkg = add_bkg_hist("Z", proc_hist, total_bkg, plot)
+
+    # rare processes
+    if rare_proc:
+        proc_hist = None
+        for index, process in enumerate(rare_proc):
+            _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
+
+            if index == 0:
+                proc_hist = _hist
+            else:
+                proc_hist.Add(_hist)
+
+        total_bkg = add_bkg_hist("rare", proc_hist, total_bkg, plot)
+
+    # remaining processes
+    if remaining_procs:
+        for index, process in enumerate(remaining_procs):
+            _proc_hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
+            if total_bkg:
+                total_bkg.Add(_proc_hist)
+            else:
+                total_bkg = _proc_hist
+            plot.add_hist(_proc_hist, process, "bkg")
+            plot.setGraphStyle(process, "hist", fillcolor=styles.color_dict[process])
+
 
     plot.add_hist(total_bkg, "total_bkg")
     plot.setGraphStyle(
@@ -399,7 +497,7 @@ def main(info):
                 plot.legend(i).add_entry(
                 0,
                 process,
-                styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("STJ", "ST").replace("_NLO","")],
+                styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("STL", "ST").replace("_NLO","")],
                 'f'
                 )
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
