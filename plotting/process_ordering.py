@@ -61,7 +61,7 @@ def sorted_bkg_processes(x: List[str], /, *, ordering: Union[None, dict[float, s
 
 class ControlShapeBkgProcesses:
     #                                    | FF-processes -------------->| EMB-processes --->|
-    FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT', 'STT', 'STJ', 'STL'] # TODO: 'STT', 'STJ', 'STL'
+    FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT', 'STT', 'STJ', 'STL']
     EMB_FF = ['VVL', 'TTL', 'ZL', 'jetFakesEMB', 'EMB']
     CLASSIC_FF = ['VVL', 'TTL', 'ZL', 'jetFakes', 'VVT', 'TTT', 'ZTT']
     EMB_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCDEMB', 'W', 'EMB']
