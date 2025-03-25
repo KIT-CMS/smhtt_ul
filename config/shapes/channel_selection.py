@@ -13,6 +13,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts["extramuon_veto"] = "(extramuon_veto < 0.5)"
     cuts["dilepton_veto"] = "(dilepton_veto < 0.5)"
     cuts["os"] = "((q_1 * q_2) < 0)"
+    cuts["b_tagging"] = "(nbtag >= 1) && (bpair_pt_2 > 0)"
 
     if "DR;ff" in selection_option:
         modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=None)
