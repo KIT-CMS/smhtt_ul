@@ -223,9 +223,14 @@ def add_processes(
     add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVL))
     add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVT))
     add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVJ))
+    add_fn(name="vvvl", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVL))
+    add_fn(name="vvvt", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVT))
+    add_fn(name="vvvj", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVJ))
     add_fn(name="vh", dataset=datasets["VH"], selections=select_fn(selection.VH))
-
-
+    add_fn(name="ewk", dataset=datasets["EWK"], selections=select_fn(selection.EWK))
+    add_fn(name="ttvl", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVL))
+    add_fn(name="ttvt", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVT))
+    add_fn(name="ttvj", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVJ))
 
 
 def get_analysis_units(
@@ -541,6 +546,13 @@ def main(args):
             "vvt",
             "vvj",
             "vh",
+            "vvvl",
+            "vvvt",
+            "vvvj",
+            "ewk",
+            "ttvl",
+            "ttvt",
+            "ttvj",
         }
         # if "et" in args.channels:
         #     procS = procS - {"w"}
@@ -566,16 +578,18 @@ def main(args):
     dataS = {"data"} & procS
     # embS = {"emb"} & procS
     jetFakesDS = {
-        "et": {"zj", "ttj", "vvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
-        "mt": {"zj", "ttj", "vvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
-        "tt": {"zj", "ttj", "vvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
+        "et": {"zj", "ttj", "ttvj", "vvj", "vvvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
+        "mt": {"zj", "ttj", "ttvj", "vvj", "vvvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
+        "tt": {"zj", "ttj", "ttvj", "vvj", "vvvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
         "em": {"w", "w_nlo"} & procS,
     }
-    leptonFakesS = {"zl", "ttl", "vvl", "stl", "zl_nlo"} & procS
-    trueTauBkgS = {"ztt", "ttt", "vvt", "stt", "ztt_nlo"} & procS
+    leptonFakesS = {"zl", "ttl", "ttvl", "vvl", "vvvl", "stl", "zl_nlo"} & procS
+    trueTauBkgS = {"ztt", "ttt", "ttvt", "vvt", "vvvt", "stt", "ztt_nlo"} & procS
     sm_signalsS = {
         "hh2b2tau",
     } & procS
+    ewkS = {"ewk"} & procS
+    singleHiggsS = {"ggh", "qqh", "tth", "vh"} & procS
     signalsS = sm_signalsS
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
         signalsS = signalsS & {"ggh", "qqh"}
@@ -591,6 +605,7 @@ def main(args):
     logger.info(f"Jet fakes processes: {jetFakesDS}")
     logger.info(f"Lepton fakes processes: {leptonFakesS}")
     logger.info(f"True tau bkg processes: {trueTauBkgS}")
+    logger.info(f"Single Higgs processes: {singleHiggsS}")
     logger.info(f"signals: {signalsS}")
 
     _book_histogram = partial(
@@ -611,14 +626,14 @@ def main(args):
         #         datasets=nominals[args.era]["units"][channel],
         #    )
         if channel in ["mt", "et"]:
-            for procs in [dataS | trueTauBkgS | leptonFakesS, jetFakesDS[channel]]:
+            for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
                     variations=[variations.same_sign],
                     # variations=variations.SemiLeptonicFFEstimations.unrolled(),
                 )
         elif channel == "tt":
-            for procs in [dataS | trueTauBkgS, leptonFakesS, jetFakesDS[channel]]:
+            for procs in [dataS | trueTauBkgS, leptonFakesS  | singleHiggsS | ewkS, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
                     variations=[variations.same_sign],
@@ -674,7 +689,7 @@ def main(args):
                 variations=[variations.zpt],
             )
             _book_histogram(
-                processes={"ttt", "ttl", "ttj"} & procS,
+                processes={"ttt", "ttl", "ttj", "ttvt", "ttvl", "ttvj"} & procS,
                 variations=[variations.top_pt],
             )
             # Book variations common to multiple channels.

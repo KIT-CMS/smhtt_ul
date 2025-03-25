@@ -95,7 +95,7 @@ def parse_arguments():
 
 def add_bkg_hist(process: str, proc_hist, total_bkg, plot):
     if not proc_hist:
-        return
+        return total_bkg
     if total_bkg:
         total_bkg.Add(proc_hist)
     else:
@@ -140,12 +140,23 @@ def main(info):
     TT_proc = {"TTL", "TTT", "TTJ"} & set(bkg_processes)
     VV_proc = {"VVL", "VVT", "VVJ"} & set(bkg_processes)
     Z_proc = {"ZL", "ZTT", "ZJ"} & set(bkg_processes)
-    rare_proc = {"EWK", "VVV"} & set(bkg_processes)
+    rare_proc = {"EWK", "VVVL", "VVVT", "VVVJ", "TTVL", "TTVT", "TTVJ", "ggH", "qqH", "ttH", "VH"} & set(bkg_processes)
+
+    print("ST_proc", ST_proc)
+    print("TT_proc", TT_proc)
+    print("VV_proc", VV_proc)
+    print("Z_proc", Z_proc)
+    print("rare_proc", rare_proc)
 
     remaining_procs = set(bkg_processes) - ST_proc - TT_proc - VV_proc - Z_proc - rare_proc
+    print("remaining_procs", remaining_procs)
 
     # Define legend order and add alias for process categories
-    bkg_processes = list(remaining_procs)
+    bkg_processes = []
+    if rare_proc:
+        bkg_processes.append("rare")
+    if remaining_procs:
+        bkg_processes += list(remaining_procs)
     if ST_proc:
         bkg_processes.append("ST")
     if TT_proc:
@@ -154,8 +165,6 @@ def main(info):
         bkg_processes.append("VV")
     if Z_proc:
         bkg_processes.append("Z")
-    if rare_proc:
-        bkg_processes.append("rare")
 
     if "2016postVFP" in args.era:
         era = "Run2016postVFP"

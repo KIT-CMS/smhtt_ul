@@ -317,6 +317,21 @@ def TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(name="TT", weights=TT_process_weights)
 
 
+def TTV_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
+    TTV_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+    TTV_process_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            (
+                "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
+                "crossSectionPerEventWeight",
+            ),
+            # ("topPtReweightWeight", "topPtReweightWeight"),
+        ]
+    )
+    return Selection(name="TTV", weights=TTV_process_weights)
+
+
 def VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     VV_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     VV_process_weights.extend(
@@ -331,8 +346,22 @@ def VV_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(name="VV", weights=VV_process_weights)
 
 
-def EWK_process_selection(channel, era, **kwargs):
-    EWK_process_weights = MC_base_process_selection(channel, era).weights
+def VVV_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
+    VVV_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+    VVV_process_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            (
+                "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
+                "crossSectionPerEventWeight",
+            ),
+        ]
+    )
+    return Selection(name="VVV", weights=VVV_process_weights)
+
+
+def EWK_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
+    EWK_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     veto = __get_ZL_cut(channel)
     EWK_process_weights.extend(
         [
@@ -830,6 +859,66 @@ def TTJ_process_selection(channel, **kwargs):
     return Selection(name="TTJ", cuts=[(ct, "tt_fakes")])
 
 
+def TTVT_process_selection(channel, **kwargs):
+    tt_cut = ""
+    if "mt" in channel:
+        tt_cut = "gen_match_1==4 && gen_match_2==5"
+    elif "et" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==5"
+    elif "tt" in channel:
+        tt_cut = "gen_match_1==5 && gen_match_2==5"
+    elif "em" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==4"
+    elif "mm" in channel:
+        tt_cut = "gen_match_1==4 && gen_match_2==4"
+    elif "ee" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==3"
+    return Selection(name="TTVT", cuts=[(tt_cut, "ttvt_cut")])
+
+
+def TTVL_process_selection(channel, **kwargs):
+    emb_veto = ""
+    ff_veto = ""
+    if "mt" in channel:
+        emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
+        ff_veto = "!(gen_match_2 == 6)"
+    elif "et" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
+        ff_veto = "!(gen_match_2 == 6)"
+    elif "tt" in channel:
+        emb_veto = "!(gen_match_1==5 && gen_match_2==5)"
+        ff_veto = "!(gen_match_1 == 6 || gen_match_2 == 6)"
+    elif "em" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==4)"
+        ff_veto = "(1.0)"
+    elif "mm" in channel:
+        emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
+        ff_veto = "(1.0)"
+    elif "ee" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==3)"
+        ff_veto = "(1.0)"
+    return Selection(
+        name="TTVL",
+        cuts=[
+            ("{}".format(emb_veto), "ttv_emb_veto"),
+            ("{}".format(ff_veto), "ff_veto"),
+        ],
+    )
+
+
+def TTVJ_process_selection(channel, **kwargs):
+    ct = ""
+    if "mt" in channel or "et" in channel:
+        ct = "(gen_match_2 == 6 && gen_match_2 == 6)"
+    elif "tt" in channel:
+        ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
+    elif "em" in channel:
+        ct = "0 == 1"
+    elif "mm" in channel or "ee" in channel:
+        ct = "0 == 1"
+    return Selection(name="TTVJ", cuts=[(ct, "ttv_fakes")])
+
+
 def ST_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     ST_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     ST_process_weights.extend(
@@ -957,16 +1046,76 @@ def VVL_process_selection(channel, **kwargs):
     )
 
 
+def VVVT_process_selection(channel, **kwargs):
+    tt_cut = ""
+    if "mt" in channel:
+        tt_cut = "gen_match_1==4 && gen_match_2==5"
+    elif "et" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==5"
+    elif "tt" in channel:
+        tt_cut = "gen_match_1==5 && gen_match_2==5"
+    elif "em" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==4"
+    elif "mm" in channel:
+        tt_cut = "gen_match_1==4 && gen_match_2==4"
+    elif "ee" in channel:
+        tt_cut = "gen_match_1==3 && gen_match_2==3"
+    return Selection(name="VVVT", cuts=[(tt_cut, "vvt_cut")])
+
+
+def VVVJ_process_selection(channel, **kwargs):
+    ct = ""
+    if "mt" in channel or "et" in channel:
+        ct = "(gen_match_2 == 6 && gen_match_2 == 6)"
+    elif "tt" in channel:
+        ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
+    elif "em" in channel:
+        ct = "0.0 == 1.0"
+    elif "mm" in channel or "ee" in channel:
+        ct = "0.0 == 1.0"
+    return Selection(name="VVVJ", cuts=[(ct, "vv_fakes")])
+
+
+def VVVL_process_selection(channel, **kwargs):
+    emb_veto = ""
+    ff_veto = ""
+    if "mt" in channel:
+        emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
+        ff_veto = "!(gen_match_2 == 6)"
+    elif "et" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
+        ff_veto = "!(gen_match_2 == 6)"
+    elif "tt" in channel:
+        emb_veto = "!(gen_match_1==5 && gen_match_2==5)"
+        ff_veto = "!(gen_match_1 == 6 || gen_match_2 == 6)"
+    elif "em" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==4)"
+        ff_veto = "(1.0)"
+    elif "mm" in channel:
+        emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
+        ff_veto = "(1.0)"
+    elif "ee" in channel:
+        emb_veto = "!(gen_match_1==3 && gen_match_2==3)"
+        ff_veto = "(1.0)"
+    return Selection(
+        name="VVVL",
+        cuts=[
+            ("{}".format(emb_veto), "tt_emb_veto"),
+            ("{}".format(ff_veto), "ff_veto"),
+        ],
+    )
+
+
 def VH_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(
         name="VH125",
         weights=HTT_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights,
-        cuts=[
-            (
-                "(HTXS_stage1_2_cat_pTjet30GeV>=300)&&(HTXS_stage1_2_cat_pTjet30GeV<=505)",
-                "htxs_match",
-            )
-        ],
+        # cuts=[
+        #     (
+        #         "(HTXS_stage1_2_cat_pTjet30GeV>=300)&&(HTXS_stage1_2_cat_pTjet30GeV<=505)",
+        #         "htxs_match",
+        #     )
+        # ],
     )
 
 
@@ -982,12 +1131,12 @@ def WH_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
                 "crossSectionPerEventWeight",
             ),
         ],
-        cuts=[
-            (
-                "(HTXS_stage1_2_cat_pTjet30GeV>=300)&&(HTXS_stage1_2_cat_pTjet30GeV<=305)",
-                "htxs_match",
-            )
-        ],
+        # cuts=[
+        #     (
+        #         "(HTXS_stage1_2_cat_pTjet30GeV>=300)&&(HTXS_stage1_2_cat_pTjet30GeV<=305)",
+        #         "htxs_match",
+        #     )
+        # ],
     )
 
 
@@ -1004,12 +1153,12 @@ def ZH_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
                 "crossSectionPerEventWeight",
             ),
         ],
-        cuts=[
-            (
-                "(HTXS_stage1_2_cat_pTjet30GeV>=400)&&(HTXS_stage1_2_cat_pTjet30GeV<=405)",
-                "htxs_match",
-            )
-        ],
+        # cuts=[
+        #     (
+        #         "(HTXS_stage1_2_cat_pTjet30GeV>=400)&&(HTXS_stage1_2_cat_pTjet30GeV<=405)",
+        #         "htxs_match",
+        #     )
+        # ],
     )
 
 
@@ -1121,7 +1270,7 @@ def qqh_stitching_weight(era, **kwargs):
 
 def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     ggH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
-        ("ggh_NNLO_weight", "gghNNLO"),
+        # ("ggh_NNLO_weight", "gghNNLO"),
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         (
             "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
@@ -1129,13 +1278,13 @@ def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         ),
         # ggh_stitching_weight(era),
     ]
-    ggH125_cuts = [
-        (
-            "(HTXS_stage1_2_cat_pTjet30GeV>=100)&&(HTXS_stage1_2_cat_pTjet30GeV<=113)",
-            "htxs",
-        )
-    ]
-    return Selection(name="ggH125", weights=ggH125_weights, cuts=ggH125_cuts)
+    # ggH125_cuts = [
+    #     (
+    #         "(HTXS_stage1_2_cat_pTjet30GeV>=100)&&(HTXS_stage1_2_cat_pTjet30GeV<=113)",
+    #         "htxs",
+    #     )
+    # ]
+    return Selection(name="ggH125", weights=ggH125_weights) #, cuts=ggH125_cuts)
 
 
 def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
@@ -1147,13 +1296,13 @@ def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             "crossSectionPerEventWeight",
         ),
     ]
-    qqH125_cuts = [
-        (
-            "(HTXS_stage1_2_cat_pTjet30GeV>=200)&&(HTXS_stage1_2_cat_pTjet30GeV<=210)",
-            "qqH125",
-        )
-    ]
-    return Selection(name="qqH125", weights=qqH125_weights, cuts=qqH125_cuts)
+    # qqH125_cuts = [
+    #     (
+    #         "(HTXS_stage1_2_cat_pTjet30GeV>=200)&&(HTXS_stage1_2_cat_pTjet30GeV<=210)",
+    #         "qqH125",
+    #     )
+    # ]
+    return Selection(name="qqH125", weights=qqH125_weights) #, cuts=qqH125_cuts)
 
 
 def FF_training_process_selection(channel, era, **kwargs):
@@ -1182,7 +1331,9 @@ HH2B2Tau = HH2B2Tau_process_selection
 DY = DY_process_selection
 DY_NLO = DY_NLO_process_selection
 TT = TT_process_selection
+TTV = TTV_process_selection
 VV = VV_process_selection
+VVV = VVV_process_selection
 EWK = EWK_process_selection
 W = W_process_selection
 HTT_base = HTT_base_process_selection
@@ -1199,6 +1350,9 @@ ZJ_nlo = ZJ_nlo_process_selection
 TTT = TTT_process_selection
 TTL = TTL_process_selection
 TTJ = TTJ_process_selection
+TTVT = TTVT_process_selection
+TTVL = TTVL_process_selection
+TTVJ = TTVJ_process_selection
 ST = ST_process_selection
 STT = STT_process_selection
 STL = STL_process_selection
@@ -1206,6 +1360,9 @@ STJ = STJ_process_selection
 VVT = VVT_process_selection
 VVL = VVL_process_selection
 VVJ = VVJ_process_selection
+VVVT = VVVT_process_selection
+VVVL = VVVL_process_selection
+VVVJ = VVVJ_process_selection
 VH = VH_process_selection
 WH = WH_process_selection
 ZH = ZH_process_selection
