@@ -187,6 +187,13 @@ def main(args):
             "ZJ",
             "ZL",
             "ZTT",
+            "EWK",
+            "TTVT",
+            "TTVJ",
+            "TTVL",
+            "VVVT",
+            "VVVJ",
+            "VVVL",
         ]
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)

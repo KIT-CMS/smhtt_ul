@@ -195,7 +195,9 @@ def create_process_mapping(channel, era, no_embedding, no_fake_factors):
         default_mapping["wj"] = "ff"
         default_mapping["zj"] = "ff"
         default_mapping["ttj"] = "ff"
+        default_mapping["ttvj"] = "ff"
         default_mapping["vvj"] = "ff"
+        default_mapping["vvvj"] = "ff"
     else:
         default_mapping["jetfakes"] = "ff"
     # now write the mapping to a file

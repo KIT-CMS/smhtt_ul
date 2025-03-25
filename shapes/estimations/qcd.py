@@ -82,15 +82,15 @@ def qcd_estimation(
     LO_NLO_PROCESSES = {"ZTT": "ZTT_NLO", "W": "W_NLO", "ZL": "ZL_NLO", "ZJ": "ZJ_NLO"}
 
     procs_to_subtract = ["W"]  # all cases have at least this
-    procs_to_subtract.extend(["EMB"] if is_embedding else ["ZTT", "TTT", "VVT", "STT"])  # EMB or MC
+    procs_to_subtract.extend(["EMB"] if is_embedding else ["ZTT", "TTT", "TTVT", "VVT", "VVVT", "STT"])  # EMB or MC
 
     if channel in {"et", "mt", "tt"}:  # semi-leptonic and fully-hadronic
-        procs_to_subtract.extend(["ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "STL", "STJ"])
+        procs_to_subtract.extend(["ZL", "ZJ", "TTL", "TTJ", "TTVL", "TTVJ", "VVL", "VVJ", "VVVL", "VVVJ", "STL", "STJ"])
     else:  # fully-leptonic - a bunch of extra cases... TODO: can this be removed?
         if "em" in channel:
-            procs_to_subtract.extend(["ZL", "TTL", "VVL", "STL"])
+            procs_to_subtract.extend(["ZL", "TTL", "TTVL", "VVL", "VVVL", "STL"])
         elif channel in {"mm", "ee"} and not is_embedding:
-            procs_to_subtract = ["ZL", "W", "VVL", "STL", "TTL"]  # caution: replaced! no EMB or EMB MC equivalent
+            procs_to_subtract = ["ZL", "W", "VVL", "VVVL", "STL", "TTL", "TTVL"]  # caution: replaced! no EMB or EMB MC equivalent
 
     if is_nlo:
         for lo, nlo in LO_NLO_PROCESSES.items():
@@ -164,10 +164,10 @@ def abcd_estimation(
     procs_to_subtract = []
     procs_to_subtract.extend(["EMB"] if is_embedding else ["ZTT", "TTT", "VVT", "STT"])  # EMB or MC
     if channel in {"et", "mt", "tt"}:  # semi-leptonic and fully-hadronic
-        procs_to_subtract.extend(["ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ", "STL", "STJ", "W"])
+        procs_to_subtract.extend(["ZL", "ZJ", "TTL", "TTVL", "TTJ", "TTVJ", "VVL", "VVVL", "VVJ", "STL", "STJ", "W"])
     else:  # fully-leptonic - a bunch of extra cases... TODO: can this be removed?
         if "em" in channel:
-            procs_to_subtract.extend(["ZL", "TTL", "VVL", "STL", "W"])
+            procs_to_subtract.extend(["ZL", "TTL", "TTVL", "VVL", "VVVL", "STL", "W"])
 
     if is_nlo:
         for lo, nlo in LO_NLO_PROCESSES.items():
