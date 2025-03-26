@@ -522,14 +522,11 @@ def main(args):
     }
     leptonFakesS = {"zl", "ttl", "ttvl", "vvl", "vvvl", "stl", "zl_nlo"} & procS
     trueTauBkgS = {"ztt", "ttt", "ttvt", "vvt", "vvvt", "stt", "ztt_nlo"} & procS
-    sm_signalsS = {
+    signalsS = {
         "hh2b2tau",
     } & procS
     ewkS = {"ewk"} & procS
     singleHiggsS = {"ggh", "qqh", "tth", "vh"} & procS
-    signalsS = sm_signalsS
-    if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
-        signalsS = signalsS & {"ggh", "qqh"}
 
     simulatedProcsDS = {
         chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
