@@ -31,6 +31,7 @@ _dataset_map = {
     "VH125": "VH",
     "ZH125": "ZH",
     "WH125": "WH",
+    "HH2B2Tau": "HH2B2Tau",
 }
 
 _process_map = {
@@ -66,6 +67,7 @@ _process_map = {
     "VH125": "VH125",
     "ZH125": "ZH125",
     "WH125": "WH125",
+    "HH2B2Tau": "HH2B2Tau",
 }
 
 _name_string = "{dataset}#{channel}{process}{selection}#{variation}#{variable}"
