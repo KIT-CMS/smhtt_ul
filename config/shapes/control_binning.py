@@ -40,6 +40,8 @@ class HistogramBuildingDict(ObjBuildingDict):
 
 common_binning = HistogramBuildingDict(
     {
+        "mass_2": np.linspace(0, 3, 50),
+        "mass_1": np.linspace(0, 3, 50),
         "genbosonpt": np.arange(0, 150, 10),
         "deltaR_ditaupair": np.arange(0, 5, 0.2),
         "mTdileptonMET_puppi": np.arange(0, 200, 4),
@@ -48,7 +50,7 @@ common_binning = HistogramBuildingDict(
         "m_sv_puppi": np.arange(0, 225, 5),
         "pt_sv_puppi": np.arange(0, 160, 5),
         "eta_sv_puppi": np.linspace(-2.5, 2.5, 50),
-        "m_vis": np.linspace(50, 200, 50),
+        "m_vis": np.arange(0, 202, 3),
         "ME_q2v1": np.arange(0, 300000, 6000),
         "ME_q2v2": np.arange(0, 300000, 6000),
         "ME_costheta1": np.linspace(-1, 1, 50),
@@ -109,6 +111,4 @@ common_binning = HistogramBuildingDict(
     }
 )
 
-control_binning = {}
-for channel in ["et", "mt", "tt", "em", "ee", "mm"]:
-    control_binning[channel] = common_binning
+control_binning = {ch: common_binning for ch in ["et", "mt", "tt", "em", "ee", "mm"]}
