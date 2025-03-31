@@ -79,7 +79,48 @@ ulimit -s unlimited
 source utils/setup_root.sh
 source utils/setup_ul_samples.sh ${NTUPLETAG} ${ERA}
 
-VARIABLES="phi_2,phi_1,q_1,mjj,iso_2,iso_1,mjj,pt_dijet,pt_tt,pt_vis,mt_2,mt_1,tau_decaymode_1,tau_decaymode_2,nbtag,njets,jphi_2,jphi_1,jeta_2,jeta_1,jpt_2,jpt_1,eta_1,eta_2,pt_2,pt_1,mt_tot,met,metphi,m_vis,deltaR_ditaupair,pzetamissvis"
+# VARIABLES="phi_2,phi_1,q_1,mjj,iso_2,iso_1,mjj,pt_dijet,pt_tt,pt_vis,mt_2,mt_1,tau_decaymode_1,tau_decaymode_2,nbtag,njets,jphi_2,jphi_1,jeta_2,jeta_1,jpt_2,jpt_1,eta_1,eta_2,pt_2,pt_1,mt_tot,met,metphi,m_vis,deltaR_ditaupair,pzetamissvis"
+variable_list=(
+  phi_2
+  phi_1
+  q_1
+  mjj
+  iso_2
+  iso_1
+  mjj
+  pt_dijet
+  pt_tt
+  pt_vis
+  mt_2
+  mt_1
+  tau_decaymode_1
+  tau_decaymode_2
+  nbtag
+  njets
+  jphi_2
+  jphi_1
+  jeta_2
+  jeta_1
+  jpt_2
+  jpt_1
+  eta_1
+  eta_2
+  pt_2
+  pt_1
+  mt_tot
+  met
+  metphi
+  m_vis
+  deltaR_ditaupair
+  pzetamissvis
+  mass_2
+  bpt_1
+  bpt_2
+  mTdileptonMET
+  pt_tt
+  pt_ttjj
+)
+VARIABLES=$(IFS=, ; echo "${variable_list[*]}")
 
 output_shapes="control_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}

@@ -40,11 +40,12 @@ class HistogramBuildingDict(ObjBuildingDict):
 
 common_binning = HistogramBuildingDict(
     {
-        "mass_2": np.linspace(0, 3, 50),
-        "mass_1": np.linspace(0, 3, 50),
+        "mass_2": np.arange(0, 2.1, 0.1),
+        "mass_1": np.arange(0, 2.1, 0.1),
         "genbosonpt": np.arange(0, 150, 10),
         "deltaR_ditaupair": np.arange(0, 5, 0.2),
         "mTdileptonMET_puppi": np.arange(0, 200, 4),
+        "mTdileptonMET": np.arange(0, 200, 4),
         "pzetamissvis": np.arange(-200, 200, 5),
         "pzetamissvis_pf": np.arange(-200, 200, 5),
         "m_sv_puppi": np.arange(0, 225, 5),
