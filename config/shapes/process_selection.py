@@ -187,8 +187,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         lumi_weight(era),
         prefiring_weight(era),
     ]
-    if channel != "mm" and channel != "mt":
-        MC_base_process_weights.append(("btag_weight", "btagWeight"))
+    MC_base_process_weights.append(("btag_weight", "btagWeight"))
     return Selection(
         name="MC base",
         weights=[weight for weight in MC_base_process_weights if weight is not None],
@@ -203,10 +202,7 @@ def HH2B2Tau_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight * 0.1", "crossSectionPerEventWeight"),
         ]
     )
-    # TODO: Makes this sense?
-    btag_weight = ("btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0)", "btagging_weight")
-    HH2B2Tau_weights.append(btag_weight)
-    return Selection(name="HH2B2Tau", weights=HH2B2Tau_weights)
+    return Selection(name="HH2B2Tau", weights=[weight for weight in HH2B2Tau_weights if weight is not None])
 
 
 def dy_stitching_weight(era, **kwargs):
