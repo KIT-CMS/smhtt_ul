@@ -6,7 +6,6 @@ import pickle
 import yaml
 from functools import partial
 from itertools import combinations
-from typing import Union
 
 import config.shapes.process_selection as selection
 import config.shapes.signal_variations as signal_variations  # TODO: Unify this?
@@ -18,8 +17,6 @@ from config.shapes.channel_selection import channel_selection
 from config.shapes.control_binning import control_binning as default_control_binning
 from config.shapes.file_names import files
 from config.shapes.gof_binning import load_gof_binning
-from config.shapes.taues_measurement_binning import categorization as taues_categorization
-from config.shapes.tauid_measurement_binning import categorization as tauid_categorization
 from ntuple_processor import GraphManager, RunManager, UnitManager
 import shapes.utils as shape_utils
 
@@ -369,9 +366,8 @@ def main(args):
     else:
         output_file = "{}.root".format(args.output_file)
     # setup categories depending on the selected anayses
-    categorization = prepare_special_analysis(args.special_analysis)
     unit_manager = UnitManager()
-    print("#### Apply tau ID", args.apply_tauid)
+    logger.info(f"Apply tau ID: {args.apply_tauid}")
 
     nominals = {}
     nominals[args.era] = {}
@@ -394,7 +390,6 @@ def main(args):
             era=args.era,
             channel=channel,
             datasets=nominals[args.era]["datasets"][channel],
-            special_analysis=args.special_analysis,
             apply_tauid=args.apply_tauid,
             vs_jet_wp=args.vs_jet_wp,
             vs_ele_wp=args.vs_ele_wp,
@@ -417,7 +412,7 @@ def main(args):
         else:
             nominals[args.era]["units"][channel] = get_analysis_units(
                 **common_kwargs,
-                categorization=categorization,
+                categorization=default_categorization,
             )
 
     if args.process_selection is None:
