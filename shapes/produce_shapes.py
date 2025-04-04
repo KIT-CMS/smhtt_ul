@@ -492,37 +492,30 @@ def main(args):
     logger.info(f"True tau bkg processes: {trueTauBkgS}")
     logger.info(f"signals: {signalsS}")
 
-    _book = partial(
-        shape_utils.book_histograms,
-        manager=unit_manager,
-        datasets=nominals[args.era]["units"][channel],
-        enable_check=args.enable_booking_check,
-    )
+    def _book(processes, variations):  # helper wrapper
+        shape_utils.book_histograms(
+            processes=processes,
+            variations=variations,
+            manager=unit_manager,
+            datasets=nominals[args.era]["units"][channel],
+            enable_check=args.enable_booking_check,
+        )
 
     for channel in args.channels:
-        _book(processes=signalsS)
+        _book(signalsS, [])
         if channel in ["mt", "et"]:
             for procs in [embS, dataS | trueTauBkgS | leptonFakesS, jetFakesDS[channel]]:
-                _book(
-                    processes=procs,
-                    variations=variations.SemiLeptonicFFEstimations.unrolled(),
-                )
+                _book(procs, variations.SemiLeptonicFFEstimations.unrolled())
         elif channel == "tt":
             for procs in [dataS | embS | trueTauBkgS, leptonFakesS, jetFakesDS[channel]]:
-                _book(
-                    processes=procs,
-                    variations=variations.FullyHadronicFFEstimations.unrolled(),
-                )
+                _book(procs, variations.FullyHadronicFFEstimations.unrolled())
         elif channel == "em":
-            _book(
-                processes=dataS | embS | simulatedProcsDS[channel] - signalsS,
-                variations=[variations.same_sign_em],
-            )
+            _book((dataS | embS | simulatedProcsDS[channel]) - signalsS, [variations.same_sign_em])
         elif channel == "mm":
-            _book(processes=procS, variations=[variations.same_sign])
+            _book(procS, [variations.same_sign])
             # _book_histogram(processes=embS, variations=[trigger_eff_mt_emb])
         elif channel == "ee":
-            _book(processes=procS, variations=[variations.same_sign])
+            _book(procS, [variations.same_sign])
         ##################################
         # SYSTEMATICS
         ############################

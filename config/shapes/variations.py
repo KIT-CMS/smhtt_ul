@@ -1697,14 +1697,14 @@ class Recoil(_VariationCollection):
     recoil_response = recoil_response
 
 
-class TauEnergyScale:
+class TauEnergyScale(_VariationCollection):
     tau_es_3prong = tau_es_3prong
     tau_es_3prong1pizero = tau_es_3prong1pizero
     tau_es_1prong = tau_es_1prong
     tau_es_1prong1pizero = tau_es_1prong1pizero
 
 
-class TauEmbeddingEnergyScale:
+class TauEmbeddingEnergyScale(_VariationCollection):
     emb_tau_es_3prong = emb_tau_es_3prong
     emb_tau_es_3prong1pizero = emb_tau_es_3prong1pizero
     emb_tau_es_1prong = emb_tau_es_1prong
@@ -1712,18 +1712,7 @@ class TauEmbeddingEnergyScale:
 
 
 class FakeFactorLT(_VariationCollection):
-    ff_variations_lt = [
-        ReplaceCutAndAddWeight(
-            "anti_iso_CMS_{syst}_{ch}_{era}".format(syst=syst+shift, era="Era", ch="Channel"),
-            "tau_iso",
-            Cut("id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5", "tau_anti_iso"),
-            Weight(
-                "fake_factor__{syst}".format(syst=syst+shift), "fake_factor"
-            ),
-        )
-        for shift in ["Up", "Down"]
-        for syst in _ff_variations_lt
-    ]
+    ff_variations_lt = ff_variations_lt
 
 
 class TauIDAndTriggerEfficiency(_VariationCollection):
