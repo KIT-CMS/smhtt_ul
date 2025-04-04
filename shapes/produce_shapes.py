@@ -172,12 +172,6 @@ def parse_arguments():
         help="Enables check for double actions during booking. Takes long for all variations.",
     )
     parser.add_argument(
-        "--special-analysis",
-        help="Can be set to a special analysis name to only run that analysis.",
-        choices=["TauID", "TauES"],
-        default=None,
-    )
-    parser.add_argument(
         "--xrootd",
         action="store_true",
         help="Read input ntuples and friends via xrootd from gridka dCache",
@@ -358,17 +352,6 @@ def get_control_units(
     )
 
     return control_units
-
-
-def prepare_special_analysis(special):
-    if special is None:
-        return default_categorization
-    elif special == "TauID":
-        return tauid_categorization
-    elif special == "TauES":
-        return taues_categorization
-    else:
-        raise ValueError("Unknown special analysis: {}".format(special))
 
 
 def main(args):
