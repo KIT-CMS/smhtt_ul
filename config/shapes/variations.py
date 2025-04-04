@@ -1732,13 +1732,15 @@ class TauIDAndTriggerEfficiency(_VariationCollection):
     # tau_trigger_eff_tt_emb = tau_trigger_eff_tt_emb
     # tau_trigger_eff_tt = tau_trigger_eff_tt
     # emb_decay_mode_eff_tt = emb_decay_mode_eff_tt
+
+
 # ------------------------------------------------------------------------------------------
+
 
 class FakeProcessEstimationVariations(_VariationCollection):
     same_sign = same_sign
     same_sign_em = same_sign_em
     anti_iso_lt = anti_iso_lt
-    anti_iso_lt_no_ff = anti_iso_lt_no_ff
     anti_iso_tt = anti_iso_tt
     anti_iso_tt_mcl = anti_iso_tt_mcl
     abcd_method = abcd_method

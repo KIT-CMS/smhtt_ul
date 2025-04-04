@@ -613,17 +613,15 @@ def main(args):
         print("%s" % graph)
 
     if args.collect_config_only:
-        import sys
-        from copy import deepcopy
         r_manager = RunManager(graphs, create_histograms=False, create_config=True)
         r_manager.nthreads = 1
         for graph in graphs:
             logger.info(f"Creating config for graph {graph.name}")
             r_manager.node_to_root(graph)
         with open(args.config_output_file, "w") as f:
-            yaml.dump(deepcopy(r_manager.config.regular), f, default_flow_style=False)
+            yaml.dump(r_manager.config.regular, f, default_flow_style=False)
         logger.info("Configuration written to %s", args.config_output_file)
-        sys.exit(1)
+        logger.info("Due to a bug in ROOT/xrd the script won't exit properly. Please kill it manually.")
         return
     else:
         if args.only_create_graphs:
