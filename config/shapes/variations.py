@@ -1099,7 +1099,7 @@ ff_variations_lt = [
         f"anti_iso_CMS_{syst}{shift}_Channel_Era",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(f"RuntimeVariables.FF_name_lt__{syst}{shift}", "fake_factor"),
+        Weight(f"{RuntimeVariables.FF_name_lt}__{syst}{shift}", "fake_factor"),
     )
     for shift in ["Up", "Down"]
     for syst in _ff_variations_lt
