@@ -3,6 +3,7 @@ import argparse
 import logging
 import os
 import pickle
+import yaml
 from functools import partial
 from itertools import combinations
 from typing import Union
@@ -90,7 +91,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--optimization-level",
-        default=2,
+        default=1,
         type=int,
         help="Level of optimization for graph merging.",
     )
@@ -155,6 +156,17 @@ def parse_arguments():
         help="Directory the graph file is written to.",
     )
     parser.add_argument(
+        "--collect-config-only",
+        action="store_true",
+        help="Only collect cuts/weights/datasets/variations into a YAML file, skip histogram production.",
+    )
+    parser.add_argument(
+        "--config-output-file",
+        default="tmp_config.yaml",
+        type=str,
+        help="YAML file where configuration data will be stored. Required if --collect-config-only is set.",
+    )
+    parser.add_argument(
         "--enable-booking-check",
         action="store_true",
         help="Enables check for double actions during booking. Takes long for all variations.",
@@ -175,11 +187,6 @@ def parse_arguments():
         default="default",
         type=str,
         help="Tag to be used for the validation of the input samples",
-    )
-    parser.add_argument(
-        "--es",
-        action="store_true",
-        help="Add tau ES variations.",
     )
     parser.add_argument(
         "--selection-option",
@@ -228,7 +235,6 @@ def get_analysis_units(
     era: str,
     datasets: dict,
     categorization: dict,
-    special_analysis: Union[str, None],
     apply_tauid: bool,
     vs_jet_wp: str,
     vs_ele_wp: str,
@@ -238,7 +244,7 @@ def get_analysis_units(
     _selection_kwargs = dict(
         channel=channel,
         era=era,
-        special=special_analysis,
+        special=None,
         vs_jet_wp=vs_jet_wp,
         vs_ele_wp=vs_ele_wp,
         selection_option=selection_option,
@@ -276,7 +282,6 @@ def get_control_units(
     channel: str,
     era: str,
     datasets: dict,
-    special_analysis: Union[str, None],
     variables: list[str],
     apply_tauid: bool,
     vs_jet_wp: str,
@@ -322,7 +327,7 @@ def get_control_units(
     _selection_kwargs = dict(
         channel=channel,
         era=era,
-        special=special_analysis,
+        special=None,
         vs_jet_wp=vs_jet_wp,
         vs_ele_wp=vs_ele_wp,
         selection_option=selection_option,
@@ -364,49 +369,6 @@ def prepare_special_analysis(special):
         return taues_categorization
     else:
         raise ValueError("Unknown special analysis: {}".format(special))
-
-
-def TauES_TauID_histogram_booking(
-    channel,
-    processes,
-    unit_manager,
-    args,
-    datasets,
-):
-    if channel == "mt" and args.special_analysis == "TauES":
-        logger.info("Booking TauES")
-        shape_utils.book_tauES_histograms(
-            manager=unit_manager,
-            additional_emb_procS=processes,
-            datasets=datasets,
-            variations=[variations.same_sign, variations.anti_iso_lt],
-            enable_check=args.enable_booking_check,
-        )
-    elif channel == "mt" and args.es and args.special_analysis == "TauID":
-        logger.info("Booking TauES")
-        shape_utils.book_tauES_histograms(
-            manager=unit_manager,
-            additional_emb_procS=processes,
-            datasets=datasets,
-            variations=[variations.same_sign, variations.anti_iso_lt_no_ff],
-            enable_check=args.enable_booking_check,
-        )
-        # book_tauES_histograms(
-        #     um,
-        #     additional_emb_procS,
-        #     nominals[args.era]["units"][channel],
-        #     [trigger_eff_mt_emb],
-        #     args.enable_booking_check,
-        # )
-        # book_histograms(
-        #     um,
-        #     additional_emb_procS,
-        #     datasets=nominals[args.era]["units"][channel],
-        #     variations=[trigger_eff_mt_emb],
-        #     enable_check=args.enable_booking_check,
-        # )
-    else:
-        raise ValueError("Unknown special analysis: {}".format(args.special_analysis))
 
 
 def main(args):
@@ -474,46 +436,6 @@ def main(args):
                 **common_kwargs,
                 categorization=categorization,
             )
-        if args.special_analysis == "TauES":
-            additional_emb_procS = set()
-            tauESvariations = [-2.5 + 0.1 * i for i in range(0, 51)]
-            shape_utils.add_tauES_datasets(
-                args.era,
-                channel,
-                friend_directories,
-                files,
-                args.directory,
-                nominals,
-                tauESvariations,
-                [
-                    channel_selection(channel, args.era, args.special_analysis, args.vs_jet_wp, args.vs_ele_wp),
-                    selection.ZTT_embedded(channel, args.era, args.apply_tauid, args.vs_jet_wp),
-                ],
-                categorization,
-                additional_emb_procS,
-                xrootd=args.xrootd,
-                validation_tag=args.validation_tag,
-            )
-        if args.special_analysis == "TauID" and args.es:
-            additional_emb_procS = set()
-            tauESvariations = [-4.0 + 0.1 * i for i in range(0, 81)]
-            shape_utils.add_tauES_datasets(
-                args.era,
-                channel,
-                friend_directories,
-                files,
-                args.directory,
-                nominals,
-                tauESvariations,
-                [
-                    channel_selection(channel, args.era, args.special_analysis, args.vs_jet_wp, args.vs_ele_wp),
-                    selection.ZTT_embedded(channel, args.era, args.apply_tauid, args.vs_jet_wp),
-                ],
-                categorization,
-                additional_emb_procS,
-                xrootd=args.xrootd,
-                validation_tag=args.validation_tag,
-            )
 
     if args.process_selection is None:
         procS = {
@@ -540,10 +462,6 @@ def main(args):
         }
         # if "et" in args.channels:
         #     procS = procS - {"w"}
-        # procS = {"data", "emb", "ztt", "zl", "zj", "ttt", "ttl", "ttj", "vvt", "vvl", "vvj", "w",
-        #          "ggh", "qqh", "tth", "zh", "wh", "gghww", "qqhww", "zhww", "whww"} \
-        #         | set("ggh{}".format(mass) for mass in susy_masses[era]["ggH"]) \
-        #         | set("bbh{}".format(mass) for mass in susy_masses[era]["bbH"])
     else:
         procS = args.process_selection
     if "mm" in args.channels or "ee" in args.channels:
@@ -596,7 +514,7 @@ def main(args):
     logger.info(f"True tau bkg processes: {trueTauBkgS}")
     logger.info(f"signals: {signalsS}")
 
-    _book_histogram = partial(
+    _book = partial(
         shape_utils.book_histograms,
         manager=unit_manager,
         datasets=nominals[args.era]["units"][channel],
@@ -604,219 +522,88 @@ def main(args):
     )
 
     for channel in args.channels:
-        _book_histogram(processes=signalsS)
-        if channel == "mt" and args.special_analysis in {"TauES", "TauID"}:
-            TauES_TauID_histogram_booking(
-                channel=channel,
-                processes=additional_emb_procS,
-                unit_manager=unit_manager,
-                args=args,
-                datasets=nominals[args.era]["units"][channel],
-            )
+        _book(processes=signalsS)
         if channel in ["mt", "et"]:
             for procs in [embS, dataS | trueTauBkgS | leptonFakesS, jetFakesDS[channel]]:
-                _book_histogram(
+                _book(
                     processes=procs,
                     variations=variations.SemiLeptonicFFEstimations.unrolled(),
                 )
         elif channel == "tt":
             for procs in [dataS | embS | trueTauBkgS, leptonFakesS, jetFakesDS[channel]]:
-                _book_histogram(
+                _book(
                     processes=procs,
                     variations=variations.FullyHadronicFFEstimations.unrolled(),
                 )
         elif channel == "em":
-            _book_histogram(
+            _book(
                 processes=dataS | embS | simulatedProcsDS[channel] - signalsS,
                 variations=[variations.same_sign_em],
             )
-        elif channel == "mm" and args.special_analysis == "TauES":
-            _book_histogram(processes={"data", "zl", "w", "ttl"}, variations=[])
         elif channel == "mm":
-            _book_histogram(processes=procS, variations=[variations.same_sign])
+            _book(processes=procS, variations=[variations.same_sign])
             # _book_histogram(processes=embS, variations=[trigger_eff_mt_emb])
         elif channel == "ee":
-            _book_histogram(processes=procS, variations=[variations.same_sign])
+            _book(processes=procS, variations=[variations.same_sign])
         ##################################
         # SYSTEMATICS
         ############################
         if not args.skip_systematic_variations:
             # Book variations common to all channels.
-            # um.book([unit for d in {"ggh"} & procS for unit in nominals[era]['units'][channel][d]], [*ggh_acceptance], enable_check=args.enable_booking_check)
-            # um.book([unit for d in {"qqh"} & procS for unit in nominals[era]['units'][channel][d]], [*qqh_acceptance], enable_check=args.enable_booking_check)
-            # TODO add signal uncertainties
-            _book_histogram(
-                processes={"ggh"} & procS,
-                variations=[signal_variations.ggh_acceptance],
-            )
-            _book_histogram(
-                processes={"qqh"} & procS,
-                variations=[signal_variations.qqh_acceptance],
-            )
-            _book_histogram(
-                processes=simulatedProcsDS[channel],
-                variations=[variations.jet_es],
-            )
-            # TODO add btag stuff
-            # _book_histogram(
-            #     processes=simulatedProcsDS[channel],
-            #     variations=[mistag_eff, btag_eff],
-            # )
-            _book_histogram(
-                processes={"ztt", "zj", "zl", "w"} & procS | signalsS,
-                variations=[variations.recoil_resolution, variations.recoil_response],
-            )
-            _book_histogram(
-                processes=simulatedProcsDS[channel],
-                variations=[variations.met_unclustered, variations.pileup_reweighting],
-            )
-            _book_histogram(
-                processes={"ztt", "zl", "zj"} & procS,
-                variations=[variations.zpt],
-            )
-            _book_histogram(
-                processes={"ttt", "ttl", "ttj"} & procS,
-                variations=[variations.top_pt],
-            )
-            # Book variations common to multiple channels.
-            if channel in ["et", "mt", "tt"]:
-                if not args.es and args.special_analysis != "TauID":
-                    _book_histogram(
-                        processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
-                        variations=[
-                            variations.tau_es_3prong,
-                            variations.tau_es_3prong1pizero,
-                            variations.tau_es_1prong,
-                            variations.tau_es_1prong1pizero,
-                        ],
-                    )
-                    _book_histogram(
-                        processes=embS,
-                        variations=[
-                            variations.emb_tau_es_3prong,
-                            variations.emb_tau_es_3prong1pizero,
-                            variations.emb_tau_es_1prong,
-                            variations.emb_tau_es_1prong1pizero,
-                            variations.tau_es_3prong,
-                            variations.tau_es_3prong1pizero,
-                            variations.tau_es_1prong,
-                            variations.tau_es_1prong1pizero,
-                        ],
-                    )
-                _book_histogram(
-                    processes=jetFakesDS[channel],
-                    variations=[variations.jet_to_tau_fake],
-                )
-            if channel in ["et", "mt"]:
-                if not args.es and args.special_analysis != "TauID":
-                    _book_histogram(
-                        processes=(trueTauBkgS | leptonFakesS | signalsS) - {"zl"},
-                        variations=[variations.tau_id_eff_lt],
-                    )
-                    _book_histogram(
-                        processes=dataS | embS | leptonFakesS | trueTauBkgS,
-                        variations=[variations.ff_variations_lt],
-                    )
+            _book({"ggh"} & procS, [signal_variations.ggh_acceptance])  # TODO add signal uncertainties
+            _book({"qqh"} & procS, [signal_variations.qqh_acceptance])  # TODO add signal uncertainties
+            _book(simulatedProcsDS[channel], [variations.jet_es])
+            _book(signalsS, variations.LHE_scale.unrolled())
 
-                    _book_histogram(
-                        processes=leptonFakesS | trueTauBkgS | embS,
-                        variations=[variations.ff_variations_tau_es_lt],
-                    )
-                    _book_histogram(
-                        processes=embS,
-                        variations=[variations.ff_variations_tau_es_emb_lt],
-                    )
-                    _book_histogram(
-                        processes=embS,
-                        variations=[variations.emb_tau_id_eff_lt, variations.emb_tau_id_eff_lt_corr],
-                    )
+            _book({"ztt", "zj", "zl", "w"} & procS | signalsS, variations.Recoil.unrolled())
+            _book(simulatedProcsDS[channel], [variations.met_unclustered, variations.pileup_reweighting])
+            _book({"ztt", "zl", "zj"} & procS, [variations.zpt])
+            _book({"ttt", "ttl", "ttj"} & procS, [variations.top_pt])
+
+            if channel in ["et", "mt", "tt"]:
+                _book(jetFakesDS[channel], [variations.jet_to_tau_fake])
+                _book((trueTauBkgS | leptonFakesS | signalsS) - {"zl"}, variations.TauEnergyScale.unrolled())
+                _book(embS, (variations.TauEnergyScale + variations.TauEmbeddingEnergyScale).unrolled())
+
+            if channel in ["et", "mt"]:
+                _book((trueTauBkgS | leptonFakesS | signalsS) - {"zl"}, [variations.tau_id_eff_lt])
+                _book(dataS | embS | leptonFakesS | trueTauBkgS, variations.FakeFactorLT.unrolled())
+                _book(leptonFakesS | trueTauBkgS | embS, [variations.ff_variations_tau_es_lt])
+                _book(embS, [variations.ff_variations_tau_es_emb_lt])
+                _book(embS, [variations.emb_tau_id_eff_lt, variations.emb_tau_id_eff_lt_corr])
+
+            # TODO btag uncertainties?
+
             if channel in ["et", "em"]:
-                # TODO add eleES
-                # _book_histogram(
-                #     processes=simulatedProcsDS[channel],
-                #     variations=[ele_res, ele_es],
-                # )
-                # TODO add emb ele ES
-                _book_histogram(
-                    processes=embS,
-                    variations=[variations.emb_e_es],
-                )
-            # Book channel independent variables.
+                _book(simulatedProcsDS[channel], [variations.ele_res, variations.ele_es])
+                _book(embS, [variations.emb_e_es])
+
             if channel == "mt":
-                _book_histogram(
-                    processes={"zl"} & procS,
-                    variations=[variations.mu_fake_es_inc],
-                )
-                _book_histogram(
-                    processes=simulatedProcsDS[channel],
-                    variations=[variations.trigger_eff_mt],
-                )
-                # _book_histogram(
-                #     processes=embS,
-                #     variations=[trigger_eff_mt_emb],
-                # )
-                _book_histogram(
-                    processes=embS,
-                    variations=[variations.same_sign, variations.anti_iso_lt_no_ff],
-                )
-                _book_histogram(
-                    processes={"zl"} & procS,
-                    variations=[variations.zll_mt_fake_rate],
-                )
+                _book({"zl"} & procS, [variations.mu_fake_es_inc])
+                _book(simulatedProcsDS[channel], [variations.trigger_eff_mt])
+                _book(embS, [variations.trigger_eff_mt_emb])
+                _book({"zl"} & procS, [variations.zll_mt_fake_rate])
+
             if channel == "et":
-                _book_histogram(
-                    processes={"zl"} & procS,
-                    variations=[variations.ele_fake_es],
-                )
-                _book_histogram(
-                    processes=simulatedProcsDS[channel],
-                    variations=[variations.trigger_eff_et],
-                )
-                _book_histogram(
-                    processes=embS,
-                    variations=[variations.trigger_eff_et_emb],
-                )
-                _book_histogram(
-                    processes={"zl"} & procS,
-                    variations=[variations.zll_et_fake_rate],
-                )
+                _book({"zl"} & procS, [variations.ele_fake_es])
+                _book(simulatedProcsDS[channel], [variations.trigger_eff_et])
+                _book(embS, [variations.trigger_eff_et_emb])
+                _book({"zl"} & procS, [variations.zll_et_fake_rate])
             if channel == "tt":
-                _book_histogram(
-                    processes=trueTauBkgS | leptonFakesS | signalsS,
-                    variations=[variations.tau_id_eff_tt],
-                )
-                # Todo add trigger efficiency
-                # _book_histogram(
-                #     processes=simulatedProcsDS[channel],
-                #     variations=[tau_trigger_eff_tt],
-                # )
-                # TODO add trigger efficiency for emb
-                # _book_histogram(
-                #     processes=embS,
-                #     variations=[emb_tau_id_eff_tt, tau_id_eff_tt, tau_trigger_eff_tt_emb, tau_trigger_eff_tt, emb_decay_mode_eff_tt],
-                # )
-                # TODO add fake factor variations
-                # _book_histogram(
-                #     processes=dataS | embS | trueTauBkgS,
-                #     variations=[ff_variations_tt],
-                # )
-                # TODO add fake factor variations for lepton fakes
-                # _book_histogram(
-                #     processes=leptonFakesS,
-                #     variations=[ff_variations_tt_mcl],
-                # )
-            # if channel == "em":
-            # TODO add QCD variations ?
-            # _book_histogram(
-            #     processes=dataS | embS | simulatedProcsDS[channel] - signalsS,
-            #     variations=[qcd_variations_em],
-            # )
-            # Book era dependent uncertainty shapes
+                _book(trueTauBkgS | leptonFakesS | signalsS, [variations.tau_id_eff_tt])
+                # _book(simulatedProcsDS[channel], [variations.tau_trigger_eff_tt])  # TODO
+                # _book(embS, variations.TauIDAndTriggerEfficiency.unrolled())  # TODO
+                # _book(dataS | embS | trueTauBkgS, [variations.FakeFactorTT.unrolled()])  # TODO
+
+            if channel == "em":
+                _book(dataS | embS | simulatedProcsDS[channel] - signalsS, [variations.qcd_variations_em])  # TODO
+
             if "2016" in args.era or "2017" in args.era:
-                _book_histogram(
-                    processes=simulatedProcsDS[channel],
-                    variations=[variations.prefiring],
-                )
+                _book(simulatedProcsDS[channel], [variations.prefiring])
+
+            if "2018" in args.era:
+                _book(simulatedProcsDS[channel], [variations.jet_es_hem])
+
 
     # Step 2: convert units to graphs and merge them
     g_manager = GraphManager(unit_manager.booked_units, True)
@@ -825,24 +612,37 @@ def main(args):
     for graph in graphs:
         print("%s" % graph)
 
-    if args.only_create_graphs:
-        _channels = ",".join(args.channels)
-        _processes = ",".join(sorted(procS))
-        if args.control_plots or args.gof_inputs:
-            graph_file_name = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
-        else:
-            graph_file_name = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
-        if args.graph_dir is not None:
-            graph_file = os.path.join(args.graph_dir, graph_file_name)
-        else:
-            graph_file = graph_file_name
-        logger.info("Writing created graphs to file %s.", graph_file)
-        with open(graph_file, "wb") as f:
-            pickle.dump(graphs, f)
+    if args.collect_config_only:
+        import sys
+        from copy import deepcopy
+        r_manager = RunManager(graphs, create_histograms=False, create_config=True)
+        r_manager.nthreads = 1
+        for graph in graphs:
+            logger.info(f"Creating config for graph {graph.name}")
+            r_manager.node_to_root(graph)
+        with open(args.config_output_file, "w") as f:
+            yaml.dump(deepcopy(r_manager.config.regular), f, default_flow_style=False)
+        logger.info("Configuration written to %s", args.config_output_file)
+        sys.exit(1)
+        return
     else:
-        # Step 3: convert to RDataFrame and run the event loop
-        r_manager = RunManager(graphs)
-        r_manager.run_locally(output_file, args.num_processes, args.num_threads)
+        if args.only_create_graphs:
+            _channels = ",".join(args.channels)
+            _processes = ",".join(sorted(procS))
+            if args.control_plots or args.gof_inputs:
+                graph_file_name = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+            else:
+                graph_file_name = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+            if args.graph_dir is not None:
+                graph_file = os.path.join(args.graph_dir, graph_file_name)
+            else:
+                graph_file = graph_file_name
+            logger.info("Writing created graphs to file %s.", graph_file)
+            with open(graph_file, "wb") as f:
+                pickle.dump(graphs, f)
+        else:
+            r_manager = RunManager(graphs)
+            r_manager.run_locally(output_file, args.num_processes, args.num_threads)
     return
 
 
