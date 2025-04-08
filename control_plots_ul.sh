@@ -20,9 +20,9 @@ VARS_BJETS="nbtag,bpair_pt_1,bpair_pt_2,bpair_eta_1,bpair_eta_2,bpair_phi_1,bpai
 # VARS_DISTANCES="deltaPhi_met_tau1,deltaPhi_met_tau2,deltaPhi_met_fatjet,deltaPhi_met_bjet1,deltaPhi_met_bjet2,deltaR_tau1_fatjet,deltaR_tau2_fatjet,balance_pT_fatjet_Z,deltaR_bjet1_fatjet,deltaR_bjet2_fatjet,deltaR_tau1_bjet1,deltaR_tau1_bjet2,deltaR_tau2_bjet1,deltaR_tau2_bjet2"
 VARS_BBTT="mt_tot,pt_tautaubb,mass_tautaubb"
 # VARS_KINFIT="kinfit_mX,kinfit_mY,kinfit_chi2,kinfit_convergence,kinfit_mX_YToBB,kinfit_mY_YToBB,kinfit_chi2_YToBB,kinfit_convergence_YToBB,kinfit_mX_YToTauTau,kinfit_mY_YToTauTau,kinfit_chi2_YToTauTau,kinfit_convergence_YToTauTau"
-# VARS_FASTMTT="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
+VARS_FASTMTT="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
 
-VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_BBTT}"
+VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_BBTT},${VARS_FASTMTT}"
 
 
 ulimit -s unlimited
@@ -62,7 +62,7 @@ if [[ $MODE == "SHAPES" ]]; then
     
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $XSEC_FRIENDS \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS $FASTMTT_FRIENDS \
         --era $ERA --num-processes 4 --num-threads 12 \
         --optimization-level 1 --control-plots \
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
