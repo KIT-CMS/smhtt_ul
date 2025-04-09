@@ -307,13 +307,13 @@ same_sign_em = ReplaceCutAndAddWeight(
     Cut("q_1*q_2>0", "ss"),
     Weight("em_qcd_osss_binned_Weight", "qcd_weight"),
 )
-abcd_method = [
+abcd_method_tt = [
     ReplaceCut("abcd_same_sign", "os", Cut("q_1*q_2>0", "ss")),
     ReplaceCut(
         "abcd_anti_iso",
         "tau_iso",
         Cut(
-            "(id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+            "(id_tau_vsJet_Medium_1>0.5 && id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)",
             "tau_anti_iso",
         ),
     ),
@@ -323,7 +323,30 @@ abcd_method = [
         [
             Cut("q_1*q_2>0", "ss"),
             Cut(
-                "(id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+                "(id_tau_vsJet_Medium_1>0.5 && id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)",
+                "tau_anti_iso",
+            ),
+        ],
+    ),
+]
+
+abcd_method_lt = [
+    ReplaceCut("abcd_same_sign", "os", Cut("q_1*q_2>0", "ss")),
+    ReplaceCut(
+        "abcd_anti_iso",
+        "tau_iso",
+        Cut(
+            "(id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)",
+            "tau_anti_iso",
+        ),
+    ),
+    ReplaceMultipleCuts(
+        "abcd_same_sign_anti_iso",
+        ["os", "tau_iso"],
+        [
+            Cut("q_1*q_2>0", "ss"),
+            Cut(
+                "(id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)",
                 "tau_anti_iso",
             ),
         ],
@@ -1699,7 +1722,7 @@ class SemiLeptonicFFEstimations(_VariationCollection):
 
 
 class FullyHadronicFFEstimations(_VariationCollection):
-    abcd_method = abcd_method
+    abcd_method_tt = abcd_method_tt
     same_sign = same_sign
     anti_iso_tt = anti_iso_tt
 
@@ -1751,7 +1774,7 @@ class FakeProcessEstimationVariations(_VariationCollection):
     anti_iso_lt = anti_iso_lt
     anti_iso_tt = anti_iso_tt
     anti_iso_tt_mcl = anti_iso_tt_mcl
-    abcd_method = abcd_method
+    abcd_method_lt = abcd_method_tt
 
 
 class EnergyScaleVariations(_VariationCollection):

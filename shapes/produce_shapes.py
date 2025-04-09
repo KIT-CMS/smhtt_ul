@@ -565,15 +565,16 @@ def main(args):
             for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
-                    variations=[variations.same_sign],
+                    variations=[variations.abcd_method_lt, variations.same_sign],
                     # variations=variations.SemiLeptonicFFEstimations.unrolled(),
                 )
         elif channel == "tt":
             for procs in [dataS | trueTauBkgS, leptonFakesS  | singleHiggsS | ewkS, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
-                    variations=[variations.same_sign],
+                    # variations=[variations.same_sign],
                     # variations=variations.FullyHadronicFFEstimations.unrolled(),
+                    variations=[variations.abcd_method_tt, variations.same_sign],
                 )
         elif channel == "em":
             _book_histogram(

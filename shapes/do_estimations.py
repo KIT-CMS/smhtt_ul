@@ -244,7 +244,7 @@ def main(args):
                         variable=var,
                     )
                     for variation in qcd_inputs[channel][category][var]:
-                        if channel in ["tt", "et", "mt", "em", "mm", "ee"]:
+                        if channel in ["em", "mm", "ee"]:
                             for use_emb in [False]:
                                 for use_nlo in [False]:
                                     estimated_hist = qcd_estimation(
@@ -255,7 +255,7 @@ def main(args):
                                         extrapolation_factor=extrapolation_factor,
                                     )
                                     estimated_hist.Write()
-                        else:
+                        else: # et, mt, tt
                             for use_emb in [False]:
                                 estimated_hist = abcd_estimation(
                                     **common_kwargs,
