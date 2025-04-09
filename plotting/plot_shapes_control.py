@@ -17,6 +17,13 @@ import Dumbledraw.rootfile_parser_ntuple_processor_inputshapes as rootfile_parse
 import Dumbledraw.styles as styles
 from config.logging_setup_configs import setup_logging
 
+def get_signal_scale(channel: str) -> int:
+    if channel == "tt":
+        return 20
+    elif channel == "et" or channel == "mt":
+        return 100
+    else:
+        return 1
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -307,8 +314,7 @@ def main(info):
             # HWW = rootfile.get(channel, "HWW").Clone()
             hh2b2tau = rootfile.get(channel, "HH2B2Tau", category=cat).Clone()
             
-            # if hh2b2tau.Integral() > 0:
-            hh2b2tau_scale = 150
+            hh2b2tau_scale = get_signal_scale(channel)
             
             # if ggH.Integral() > 0:
             #     ggH_scale = 10
@@ -536,7 +542,8 @@ def main(info):
                 )
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         if args.add_signals:
-            plot.legend(i).add_entry(0 if args.linear else 1, "hh2b2tau%s" % suffix[i], "150 #times HH#rightarrowbb#tau#tau", 'l')
+            hh2b2tau_scale = get_signal_scale(channel)
+            plot.legend(i).add_entry(0 if args.linear else 1, "hh2b2tau%s" % suffix[i], str(hh2b2tau_scale) + " #times HH#rightarrowbb#tau#tau", 'l')
             # plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s #times gg#rightarrowH"%str(int(ggH_scale)), 'l')
             # plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s #times qq#rightarrowH"%str(int(qqH_scale)), 'l')
             # plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
