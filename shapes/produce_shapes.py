@@ -3,22 +3,24 @@ import argparse
 import logging
 import os
 import pickle
-import yaml
 from functools import partial
 from itertools import combinations
+from typing import Union
+
+import yaml
 
 import config.shapes.process_selection as selection
 import config.shapes.signal_variations as signal_variations  # TODO: Unify this?
 import config.shapes.variations as variations
+import shapes.utils as shape_utils
+from config.helper_collection import NestedDefaultDict, PreserveROOTPathsAsStrings
 from config.logging_setup_configs import setup_logging
-
 from config.shapes.category_selection import categorization as default_categorization
 from config.shapes.channel_selection import channel_selection
 from config.shapes.control_binning import control_binning as default_control_binning
 from config.shapes.file_names import files
 from config.shapes.gof_binning import load_gof_binning
 from ntuple_processor import GraphManager, RunManager, UnitManager
-import shapes.utils as shape_utils
 
 
 def parse_arguments():
@@ -351,6 +353,78 @@ def get_control_units(
     return control_units
 
 
+def collect_config(
+    graphs: list,
+    era: str,
+    channel: str,
+    filename: str,
+) -> None:
+
+    def _config_formatter(
+        config: Union[dict, NestedDefaultDict],
+        name: str,
+        cut_expression: str,
+        weight_expression: str,
+        **kwargs,  # dont need more, see ntuple_processor/run/RunManager/__histo1d_from_hist for more details
+    ) -> None:
+        replacement_dict = {"Era": era}
+
+        process, channel_and_sample, variation, variable = name.split("#")
+        channel, *sample_parts = channel_and_sample.split("-")
+        sample = "-".join(sample_parts)
+        variation = variation.replace(f"_{variable}", "").replace("Channel", channel)
+
+        for k, v in replacement_dict.items():
+            variation = variation.replace(k, v)
+
+        sample = "data" if process == "data" else sample
+
+        config[channel][era][process][sample][variation] = NestedDefaultDict(
+            cut=cut_expression or "(float)1.",
+            weight=weight_expression or "(float)1.",
+        )
+
+    def _add_paths(graph):
+        def __n(item):
+            return int(os.path.splitext(item)[0].split("_")[-1])
+
+        def __f(item):
+            return f'friends__{item.split("CROWNFriends/")[-1].split("/")[0]}'
+
+        for _unit_block in graph.unit_block.ntuples:
+            r_manager.config[channel][era][graph.name]["paths"]["ntuples"][__n(_unit_block.path)] = _unit_block.path
+            for _friend in _unit_block.friends:
+                r_manager.config[channel][era][graph.name]["paths"][__f(_friend.path)][__n(_friend.path)] = _friend.path
+
+    # ---
+
+    r_manager = RunManager(
+        graphs,
+        create_histograms=False,
+        create_config=True,
+        config_formatter=_config_formatter,
+    )
+    r_manager.nthreads = 1
+
+    for _graph in graphs:
+        logger.info(f"Creating config for graph {_graph.name}")
+        r_manager.node_to_root(_graph)
+
+        _add_paths(_graph)
+
+    _path, _basename = os.path.split(filename)
+    _path = os.path.join(_path, f"{era}__{channel}__{_basename}")
+    with open(_path, "w") as config_file:
+        yaml.dump(
+            r_manager.config.regular,
+            config_file,
+            default_flow_style=False,
+            Dumper=PreserveROOTPathsAsStrings,
+        )
+    logger.info("Configuration written to %s", args.config_output_file)
+    logger.info("Due to a bug in ROOT/xrd the script won't exit properly. Please kill it manually. (i.e. Ctrl+z && kill %1)")
+
+
 def main(args):
     # Parse given arguments.
     friend_directories = {
@@ -584,41 +658,33 @@ def main(args):
         print("%s" % graph)
 
     if args.collect_config_only:
-        for _era in args.era.split(","):
-            r_manager = RunManager(
-                graphs,
-                create_histograms=False,
-                create_config=True,
-                replacement_dict={"Era": _era},
-            )
-            r_manager.nthreads = 1
-            for graph in graphs:
-                logger.info(f"Creating config for graph {graph.name}")
-                r_manager.node_to_root(graph)
-            with open(f"{_era}_{args.config_output_file}", "w") as f:
-                yaml.dump(r_manager.config.regular, f, default_flow_style=False)
-        logger.info("Configuration written to %s", args.config_output_file)
-        logger.info("Due to a bug in ROOT/xrd the script won't exit properly. Please kill it manually.")
+        if len(args.channels) > 1:
+            raise NotImplementedError("Collecting config for multiple channels is not implemented yet.")
+        collect_config(
+            graphs=graphs,
+            era=args.era,
+            channel=args.channels[0],
+            filename=args.config_output_file,
+        )
         return
-    else:
-        if args.only_create_graphs:
-            _channels = ",".join(args.channels)
-            _processes = ",".join(sorted(procS))
-            if args.control_plots or args.gof_inputs:
-                graph_file_name = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
-            else:
-                graph_file_name = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
-            if args.graph_dir is not None:
-                graph_file = os.path.join(args.graph_dir, graph_file_name)
-            else:
-                graph_file = graph_file_name
-            logger.info("Writing created graphs to file %s.", graph_file)
-            with open(graph_file, "wb") as f:
-                pickle.dump(graphs, f)
+
+    if args.only_create_graphs:
+        _channels = ",".join(args.channels)
+        _processes = ",".join(sorted(procS))
+        if args.control_plots or args.gof_inputs:
+            graph_file_name = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
         else:
-            r_manager = RunManager(graphs)
-            r_manager.run_locally(output_file, args.num_processes, args.num_threads)
-    return
+            graph_file_name = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+        if args.graph_dir is not None:
+            graph_file = os.path.join(args.graph_dir, graph_file_name)
+        else:
+            graph_file = graph_file_name
+        logger.info("Writing created graphs to file %s.", graph_file)
+        with open(graph_file, "wb") as _friend:
+            pickle.dump(graphs, _friend)
+    else:
+        r_manager = RunManager(graphs)
+        r_manager.run_locally(output_file, args.num_processes, args.num_threads)
 
 
 if __name__ == "__main__":
