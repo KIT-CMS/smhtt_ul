@@ -23,7 +23,7 @@ def find_variable_expansions(full_expression: str, substring: str) -> list[str]:
 def iter_subprocesses(
     config: dict,
 ) -> Generator[tuple[str, str, str, str, dict], None, None]:
-    skip_subprocesses = {"paths", "common", "variables"}
+    skip_subprocesses = {"paths", "common", "variables", "nominal_variables"}
     for channel, channel_dict in config.items():
         if channel not in CHANNELS or not isinstance(channel_dict, dict):
             continue

@@ -66,6 +66,25 @@ FF_OPTIONS = {
                     )
                 )""",
     },
+    "fake_factor_with_DR_SR_and_bias_corr": {
+        "lt": """(
+                    (
+                        raw_qcd_fake_factor_2 *
+                        qcd_fake_factor_fraction_2 *
+                        qcd_fake_factor_correction_2
+                    ) +
+                    (
+                        raw_wjets_fake_factor_2 *
+                        wjets_fake_factor_fraction_2 *
+                        wjets_fake_factor_correction_2
+                    ) +
+                    (
+                        raw_ttbar_fake_factor_2 *
+                        ttbar_fake_factor_fraction_2 *
+                        ttbar_fake_factor_correction_2
+                    )
+                )""",
+    },
     # --------------------------------------------------------------------------------------
     "raw_fake_factor": {
         "lt": "raw_fake_factor_2",

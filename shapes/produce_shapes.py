@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 import argparse
+import hashlib
 import logging
 import os
 import pickle
+import sys
 from functools import partial
 from itertools import combinations
-from typing import Union
+from typing import List, Tuple, Union
 
 import yaml
 
@@ -384,17 +386,43 @@ def collect_config(
             weight=weight_expression or "(float)1.",
         )
 
+    def _generate_dict(paths: str, num_bytes: Union[int, None] = None) -> Tuple[int, dict]:
+        def unique_filename(item: Union[str, List[str]]) -> Union[str, List[str]]:
+            *_, era, sample, channel, filename = item.split("/")
+            return f"{era}__{sample}__{channel}__{filename}"
+
+        def stable_hash_key(key: str, num_bytes: int = 8) -> int:
+            hasher = hashlib.sha1(key.encode('utf-8'))
+            digest = hasher.digest()
+            return int.from_bytes(digest[:num_bytes], byteorder=sys.byteorder, signed=False)
+
+        allow_search = num_bytes is None
+        num_bytes = 1 if num_bytes is None else num_bytes
+
+        unique_filenames = [unique_filename(it) for it in paths]
+        unique_keys = [stable_hash_key(it, num_bytes=num_bytes) for it in unique_filenames]
+        if len(set(unique_keys)) == len(set(unique_filenames)):
+            return {k: v for k, v in zip(unique_keys, paths)}, num_bytes
+        else:
+            if allow_search:
+                return _generate_dict(paths, num_bytes=num_bytes + 1)
+            else:
+                raise ValueError("Cannot find unique keys for paths")
+
     def _add_paths(graph):
-        def __n(item):
-            return int(os.path.splitext(item)[0].split("_")[-1])
+        ntuple_dict, num_hash_bytes = _generate_dict([it.path for it in graph.unit_block.ntuples])
+        r_manager.config[channel][era][graph.name]["paths"]["ntuple"] = ntuple_dict
 
-        def __f(item):
-            return f'friends__{item.split("CROWNFriends/")[-1].split("/")[0]}'
+        for idx in range(len(graph.unit_block.ntuples[0].friends)):
+            friend_files = [it.friends[idx].path for it in graph.unit_block.ntuples]
 
-        for _unit_block in graph.unit_block.ntuples:
-            r_manager.config[channel][era][graph.name]["paths"]["ntuples"][__n(_unit_block.path)] = _unit_block.path
-            for _friend in _unit_block.friends:
-                r_manager.config[channel][era][graph.name]["paths"][__f(_friend.path)][__n(_friend.path)] = _friend.path
+            friend_name = f'friends__{friend_files[0].split("CROWNFriends/")[-1].split("/")[0]}'
+            friend_dict, _ = _generate_dict(friend_files, num_bytes=num_hash_bytes)
+
+            a, b = ntuple_dict.keys(), friend_dict.keys()
+            assert not a - b and not b - a, "Hash collision detected. This should not have happen."
+
+            r_manager.config[channel][era][graph.name]["paths"][friend_name] = friend_dict
 
     # ---
 
