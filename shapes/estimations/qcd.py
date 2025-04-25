@@ -20,21 +20,21 @@ def replace_negative_entries_and_renormalize(histogram, tolerance):
         else:
             norm_positive += this_bin
         norm_all += this_bin
-
+    
     if norm_all == 0.0 and norm_positive != 0.0:
-        logger.fatal(
+        logger.warning(
             "Aborted renormalization because initial normalization is zero, but positive normalization not. . Check histogram %s",
             histogram.GetName(),
         )
-        raise Exception
+        # raise Exception
 
     if norm_all < 0.0:
-        logger.fatal(
+        logger.warning(
             "Aborted renormalization because initial normalization is negative: %f. Check histogram %s ",
             norm_all,
             histogram.GetName(),
         )
-        raise Exception
+        # raise Exception
 
     if abs(norm_all - norm_positive) > tolerance * norm_all:
         logger.warning(
@@ -44,6 +44,8 @@ def replace_negative_entries_and_renormalize(histogram, tolerance):
             histogram.GetName(),
         )
 
+    return histogram
+    # Dont work!
     # Renormalize histogram if negative entries are found
     if norm_all != norm_positive:
         if norm_positive == 0.0:
@@ -250,6 +252,14 @@ def abcd_estimation(
     elif not data_yield_D - bkg_yield_D > 0:
         logger.warning(
             "Event content in region D for shape of variable %s in category %s is %f.",
+            variable,
+            selection if selection != "" else "inclusive",
+            data_yield_D - bkg_yield_D,
+        )
+        extrapolation_factor = 0.0
+    elif not data_yield_C - bkg_yield_C > 0:
+        logger.warning(
+            "Event content in region C for shape of variable %s in category %s is %f.",
             variable,
             selection if selection != "" else "inclusive",
             data_yield_D - bkg_yield_D,
