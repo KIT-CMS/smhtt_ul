@@ -36,7 +36,7 @@ def args_parser():
     parser.add_argument(
         "--dataset-config",
         type=str,
-        default="datasets/datasets.json",
+        default="datasets/nanoAOD_v12/datasets.json",
         help="path to the datasets.json",
     )
     parser.add_argument(
