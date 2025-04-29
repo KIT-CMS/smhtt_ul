@@ -18,14 +18,14 @@ except ModuleNotFoundError:
 def parse_args():
     parser = argparse.ArgumentParser(description="Process some integers.")
     parser.add_argument(
-        "--config-input",
+        "--configs",
         default=[],
         nargs="+",
         type=str,
         help="Path to the input config file(s) to be modified",
     )
     parser.add_argument(
-        "--output",
+        "--modified-config",
         type=str,
         default="./mt__tmp_config__modified.yaml",
         help="Path to the output config file",
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     config = (
         PipeDict()
-        .pipe(ConfigModification.general.recursive_update_from_file, path=args.config_input)
+        .pipe(ConfigModification.general.recursive_update_from_file, path=args.configs)
         .pipe(ConfigModification.general.set_common)
         .pipe(
             ConfigModification.general.remove_from_config,
@@ -63,6 +63,6 @@ if __name__ == "__main__":
         .pipe(ConfigModification.specific.nest_and_categorize_uncertainties)
     )
 
-    with open(args.output, "w") as f:
+    with open(args.modified_config, "w") as f:
         yaml.dump(dict(config), f, default_flow_style=False)
-        logger.info(f"Modified config saved to {args.output}")
+        logger.info(f"Modified config saved to {args.modified_config}")

@@ -158,7 +158,7 @@ class _FromConfig(object):
 
         for channel, era, sample, _ in Iterate.process(self.config):
             for k, v in self.config[channel][era][sample]["variables"].items():
-                if k not in config[channel][era][sample]["nominal_variables"]:
+                if k not in self.config[channel][era][sample]["nominal_variables"]:
                     shifted_variables[k.split("__")[0]].append(v)
 
         return dict(shifted_variables)
