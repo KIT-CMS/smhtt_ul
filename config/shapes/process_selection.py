@@ -205,6 +205,16 @@ def HH2B2Tau_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(name="HH2B2Tau", weights=[weight for weight in HH2B2Tau_weights if weight is not None])
 
 
+def QCD_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
+    QCD_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+    QCD_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight * 0.1", "crossSectionPerEventWeight"),
+        ]
+    )
+    return Selection(name="QCDMC", weights=[weight for weight in QCD_weights if weight is not None])
+
 def dy_stitching_weight(era, **kwargs):
     if era == "2017":
         weight = (
@@ -1370,3 +1380,4 @@ ZHWW = ZHWW_process_selection
 ggH125 = ggH125_process_selection
 qqH125 = qqH125_process_selection
 FF_training = FF_training_process_selection
+QCD = QCD_process_selection

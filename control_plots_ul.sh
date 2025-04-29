@@ -74,7 +74,7 @@ if [[ $MODE == "SHAPES" ]]; then
     echo "#      Additional estimations                                      #"
     echo "##############################################################################################"
 
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
+    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root # --do-qcd
 
 fi
 

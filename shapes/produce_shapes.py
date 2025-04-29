@@ -231,6 +231,7 @@ def add_processes(
     add_fn(name="ttvl", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVL))
     add_fn(name="ttvt", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVT))
     add_fn(name="ttvj", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVJ))
+    add_fn(name="qcd", dataset=datasets["QCDMC"], selections=select_fn(selection.QCD))
 
 
 def get_analysis_units(
@@ -553,6 +554,7 @@ def main(args):
             "ttvl",
             "ttvt",
             "ttvj",
+            "qcd",
         }
         # if "et" in args.channels:
         #     procS = procS - {"w"}
@@ -577,6 +579,7 @@ def main(args):
 
     dataS = {"data"} & procS
     # embS = {"emb"} & procS
+    qcdS = {"qcd"} & procS
     jetFakesDS = {
         "et": {"zj", "ttj", "ttvj", "vvj", "vvvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
         "mt": {"zj", "ttj", "ttvj", "vvj", "vvvj", "stj", "w", "zj_nlo", "w_nlo"} & procS,
@@ -623,14 +626,14 @@ def main(args):
         #         datasets=nominals[args.era]["units"][channel],
         #    )
         if channel in ["mt", "et"]:
-            for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS, jetFakesDS[channel]]:
+            for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS | qcdS | jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
                     variations=[variations.abcd_method_lt, variations.same_sign],
                     # variations=variations.SemiLeptonicFFEstimations.unrolled(),
                 )
         elif channel == "tt":
-            for procs in [dataS | trueTauBkgS, leptonFakesS  | singleHiggsS | ewkS, jetFakesDS[channel]]:
+            for procs in [dataS | trueTauBkgS | leptonFakesS  | singleHiggsS | ewkS | qcdS | jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
                     # variations=[variations.same_sign],
