@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 import argparse
-import hashlib
 import logging
 import os
 import pickle
-import sys
 from functools import partial
 from itertools import combinations
-from typing import List, Tuple, Union
 
 import yaml
 
@@ -15,7 +12,8 @@ import config.shapes.process_selection as selection
 import config.shapes.signal_variations as signal_variations  # TODO: Unify this?
 import config.shapes.variations as variations
 import shapes.utils as shape_utils
-from config.helper_collection import NestedDefaultDict, PreserveROOTPathsAsStrings
+import config.shapes.ntuple_processor_config_helper as ntuple_processor_config_helper
+from config.helper_collection import PreserveROOTPathsAsStrings
 from config.logging_setup_configs import setup_logging
 from config.shapes.category_selection import categorization as default_categorization
 from config.shapes.channel_selection import channel_selection
@@ -362,75 +360,11 @@ def collect_config(
     filename: str,
 ) -> None:
 
-    def _config_formatter(
-        config: Union[dict, NestedDefaultDict],
-        name: str,
-        cut_expression: str,
-        weight_expression: str,
-        **kwargs,  # dont need more, see ntuple_processor/run/RunManager/__histo1d_from_hist for more details
-    ) -> None:
-        replacement_dict = {"Era": era}
-
-        process, channel_and_sample, variation, variable = name.split("#")
-        channel, *sample_parts = channel_and_sample.split("-")
-        sample = "-".join(sample_parts)
-        variation = variation.replace(f"_{variable}", "").replace("Channel", channel)
-
-        for k, v in replacement_dict.items():
-            variation = variation.replace(k, v)
-
-        sample = "data" if process == "data" else sample
-
-        config[channel][era][process][sample][variation] = NestedDefaultDict(
-            cut=cut_expression or "(float)1.",
-            weight=weight_expression or "(float)1.",
-        )
-
-    def _generate_dict(paths: str, num_bytes: Union[int, None] = None) -> Tuple[int, dict]:
-        def unique_filename(item: Union[str, List[str]]) -> Union[str, List[str]]:
-            *_, era, sample, channel, filename = item.split("/")
-            return f"{era}__{sample}__{channel}__{filename}"
-
-        def stable_hash_key(key: str, num_bytes: int = 8) -> int:
-            hasher = hashlib.sha1(key.encode('utf-8'))
-            digest = hasher.digest()
-            return int.from_bytes(digest[:num_bytes], byteorder=sys.byteorder, signed=False)
-
-        allow_search = num_bytes is None
-        num_bytes = 1 if num_bytes is None else num_bytes
-
-        unique_filenames = [unique_filename(it) for it in paths]
-        unique_keys = [stable_hash_key(it, num_bytes=num_bytes) for it in unique_filenames]
-        if len(set(unique_keys)) == len(set(unique_filenames)):
-            return {k: v for k, v in zip(unique_keys, paths)}, num_bytes
-        else:
-            if allow_search:
-                return _generate_dict(paths, num_bytes=num_bytes + 1)
-            else:
-                raise ValueError("Cannot find unique keys for paths")
-
-    def _add_paths(graph):
-        ntuple_dict, num_hash_bytes = _generate_dict([it.path for it in graph.unit_block.ntuples])
-        r_manager.config[channel][era][graph.name]["paths"]["ntuple"] = ntuple_dict
-
-        for idx in range(len(graph.unit_block.ntuples[0].friends)):
-            friend_files = [it.friends[idx].path for it in graph.unit_block.ntuples]
-
-            friend_name = f'friends__{friend_files[0].split("CROWNFriends/")[-1].split("/")[0]}'
-            friend_dict, _ = _generate_dict(friend_files, num_bytes=num_hash_bytes)
-
-            a, b = ntuple_dict.keys(), friend_dict.keys()
-            assert not a - b and not b - a, "Hash collision detected. This should not have happen."
-
-            r_manager.config[channel][era][graph.name]["paths"][friend_name] = friend_dict
-
-    # ---
-
     r_manager = RunManager(
         graphs,
         create_histograms=False,
         create_config=True,
-        config_formatter=_config_formatter,
+        config_formatter=ntuple_processor_config_helper.get_config_formatter(era=era),
     )
     r_manager.nthreads = 1
 
@@ -438,7 +372,12 @@ def collect_config(
         logger.info(f"Creating config for graph {_graph.name}")
         r_manager.node_to_root(_graph)
 
-        _add_paths(_graph)
+        ntuple_processor_config_helper.add_paths(
+            graph=_graph,
+            channel=channel,
+            era=era,
+            r_manager=r_manager,
+        )
 
     _path, _basename = os.path.split(filename)
     _path = os.path.join(_path, f"{era}__{channel}__{_basename}")

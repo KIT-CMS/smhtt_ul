@@ -26,13 +26,27 @@ class RootToPandasRaw(object):
     def __init__(self, raw_path: Union[str, None], filtered_path: Union[str, None] = None) -> None:
         self.raw_path = raw_path
         self.filtered_path = filtered_path
-        self.dataframe = None
+        self._dataframe = None
+        self.dataframe_path = None
+
+    @property
+    def dataframe(self) -> pd.DataFrame:
+        if self._dataframe is None:
+            if self.filtered_path is not None and os.path.exists(self.filtered_path):
+                logger.info(f"Loading filtered dataframe from {self.filtered_path}")
+                self._dataframe = pd.read_feather(self.filtered_path)
+            elif self.raw_path is not None and os.path.exists(self.raw_path):
+                logger.info(f"Loading raw dataframe from {self.raw_path}")
+                self._dataframe = pd.read_feather(self.raw_path)
+            else:
+                raise FileNotFoundError("No raw or filtered dataframe found.")
+        return self._dataframe
 
     @staticmethod
     def build_rdf(
-        tree_and_files: Tuple[str, str, list[str]],
+        tree_and_paths: Tuple[str, str, list[str]],
     ) -> Tuple[ROOT.TChain, ROOT.RDataFrame]:
-        key, ntuple, *friends = tree_and_files
+        key, ntuple, *friends = tree_and_paths
         logger.debug(f"Adding {ntuple} with friends {friends}")
 
         chain = ROOT.TChain(key)
@@ -48,13 +62,18 @@ class RootToPandasRaw(object):
     @staticmethod
     def define_and_collect_columns(
         rdf: ROOT.RDataFrame,
-        process_dict: dict,
+        definitions: Iterable[Tuple[str, str]],
+        additional_columns: Union[None, Iterable[str]] = None,
     ) -> Tuple[ROOT.RDataFrame, list]:
         columns = []
-        for k, v in Iterate.common_dict(process_dict[Keys.COMMON]):
-            rdf = rdf.Define(k, v)
-            columns.append(k)
-        columns += list(process_dict[Keys.VARIABLES].keys())
+
+        if definitions is not None:
+            for k, v in definitions:
+                rdf = rdf.Define(k, v)
+                columns.append(k)
+
+        if additional_columns is not None:
+            columns += list(additional_columns)
 
         logger.debug(f"Columns: {columns}")
 
@@ -64,41 +83,55 @@ class RootToPandasRaw(object):
     def pandasDataFrame(
         args: Tuple[str, str, str, dict, str, str, list[str]],
     ) -> dict[tuple[str, ...], pd.DataFrame]:
-        process_dict, *tree_and_files = args
+        definitions, additional_columns, *paths = args
 
-        _, rdf = RootToPandasRaw.build_rdf(tree_and_files)
-        rdf, columns = RootToPandasRaw.define_and_collect_columns(rdf, process_dict)
+        _, rdf = RootToPandasRaw.build_rdf(tree_and_paths=paths)
+        rdf, columns = RootToPandasRaw.define_and_collect_columns(
+            rdf=rdf,
+            definitions=definitions,
+            additional_columns=additional_columns,
+        )
 
         return pd.DataFrame(rdf.AsNumpy(columns))
 
     def setup_raw_dataframe(
         self,
-        process_dict: dict,
+        tree_and_filepaths: Iterable[Tuple[str, ...]],
+        definitions: Union[Iterable[Tuple[str, str]], None] = None,
+        additional_columns: Union[None, Iterable[str]] = None,
         max_workers: int = 16,
         description: str = "",
     ) -> "RootToPandasRaw":
-        if self.raw_path and not os.path.exists(self.raw_path):
-            logger.info(f"Creating {self.raw_path}")
-            dataframe = pd.concat(
-                optional_process_pool(
-                    args_list=[
-                        (process_dict, *tree_and_files)
-                        for tree_and_files in Iterate.rdf_files(process_dict[Keys.PATHS])
-                    ],
-                    function=RootToPandasRaw.pandasDataFrame,
-                    max_workers=max_workers,
-                    description=description,
-                ),
-                axis=0,
-                ignore_index=True,
-                sort=False,
-            )
+        if self.raw_path is not None and os.path.exists(self.raw_path):
+            logger.info(f"Raw dataframe already exists at {self.raw_path}")
+            self.dataframe_path = self.raw_path
+            return self
 
+        logger.info(f"Creating {self.raw_path} from provided files")
+        self._dataframe = pd.concat(
+            optional_process_pool(
+                args_list=[
+                    (
+                        definitions,
+                        additional_columns,
+                        *tree_and_filepaths,
+                    )
+                    for tree_and_filepaths in tree_and_filepaths
+                ],
+                function=RootToPandasRaw.pandasDataFrame,
+                max_workers=max_workers,
+                description=description,
+            ),
+            axis=0,
+            ignore_index=True,
+            sort=False,
+        )
+
+        if self.raw_path is not None:
+            logger.info(f"Saving raw dataframe to {self.raw_path}")
             os.makedirs(os.path.split(self.raw_path)[0], exist_ok=True)
-            dataframe.to_feather(self.raw_path)
-            logger.info(f"finished creation of {self.raw_path}\n\tshape: {dataframe.shape}")
-
-            self.dataframe = dataframe
+            self._dataframe.to_feather(self.raw_path)
+            self.dataframe_path = self.raw_path
 
         return self
 
@@ -106,23 +139,22 @@ class RootToPandasRaw(object):
         self,
         filter_funciton: Callable,
     ) -> "RootToPandasRaw":
-        if self.filtered_path and os.path.exists(self.filtered_path):
-            self.dataframe = pd.read_feather(self.filtered_path)
-            logger.info(f"Loaded filtered from {self.filtered_path}\n\tshape: {self.dataframe.shape}")
-
+        if self.filtered_path is not None and os.path.exists(self.filtered_path):
+            logger.info(f"Filtered dataframe already exists at {self.filtered_path}")
+            self.dataframe_path = self.filtered_path
             return self
 
-        if self.dataframe is None:
-            self.dataframe = pd.read_feather(self.raw_path)
-            logger.info(f"Loaded raw from {self.raw_path}")
-
-        initial_shape = self.dataframe.shape
-        self.dataframe = self.dataframe[filter_funciton(self.dataframe)]
-        logger.info(f"Filtered {self.filtered_path}\n\tshape: {initial_shape} -> {self.dataframe.shape}")
+        assert self._dataframe is not None, "Dataframe is None. Please call setup_raw_dataframe first."
+        logger.info(f"Filtering dataframe with {filter_funciton.__name__}")
+        initial_shape = self._dataframe.shape
+        self._dataframe = self._dataframe[filter_funciton(self._dataframe)]
+        logger.info(f"Filtered dataframe shape: {initial_shape} -> {self._dataframe.shape}")
 
         if self.filtered_path is not None:
+            logger.info(f"Saving filtered dataframe to {self.filtered_path}")
             os.makedirs(os.path.split(self.filtered_path)[0], exist_ok=True)
-            self.dataframe.to_feather(self.filtered_path)
+            self._dataframe.to_feather(self.filtered_path)
+            self.dataframe_path = self.filtered_path
 
         return self
 
@@ -236,7 +268,7 @@ class ProcessDataFrameManipulation:
 
     def event_quantities(self, df: pd.DataFrame) -> pd.DataFrame:
         with duplicate_filter_context(logger):
-            logger.warning("Updated event quantities to use NTuple Event ID")
+            logger.warning("Update event quantities to use NTuple Event ID!")
 
         df[tuple_column(Keys.EVENT, Keys.ID)] = range(len(self.process_df))
 

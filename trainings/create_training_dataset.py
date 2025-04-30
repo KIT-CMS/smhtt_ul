@@ -7,7 +7,7 @@ from tqdm import tqdm
 import pandas as pd
 import yaml
 from src.dataset_manipulation import CombinedDataFrameManipulation, ProcessDataFrameManipulation, RootToPandasRaw, odd_id, tiled_mask
-from src.helper import Iterate, PipeDict
+from src.helper import Iterate, PipeDict, Keys
 
 try:
     from config.logging_setup_configs import setup_logging
@@ -66,13 +66,22 @@ if __name__ == "__main__":
     for channel, era, process, process_dict in Iterate.process(config):
         logger.info(f"Processing {channel} {era} {process}")
 
+        def path(directory):
+            return os.path.join(
+                args.base_dataset_directory,
+                directory,
+                f"{channel}_{era}_{process}.feather",
+            )
+
         raw_process_df = RootToPandasRaw(
-            raw_path=os.path.join(args.base_dataset_directory, "raw", f"{channel}_{era}_{process}.feather"),
-            filtered_path=os.path.join(args.base_dataset_directory, "filtered", f"{channel}_{era}_{process}.feather"),
+            raw_path=path("raw"),
+            filtered_path=path("filtered"),
         ).setup_raw_dataframe(
-            process_dict=process_dict,
-            max_workers=16,
+            tree_and_filepaths=list(Iterate.rdf_files(process_dict[Keys.PATHS])),
+            definitions=list(Iterate.common_dict(process_dict[Keys.COMMON])),
+            additional_columns=list(process_dict[Keys.VARIABLES].keys()),
             description=f"{channel}_{era}_{process}",
+            max_workers=16,
         ).generic_filtered(
             filter_funciton=lambda df: df[[it for it in df.columns if it.startswith("__common__cut__")]].any(axis=1),
         ).dataframe
