@@ -78,11 +78,12 @@ if __name__ == "__main__":
             filtered_path=path("filtered"),
         ).setup_raw_dataframe(
             tree_and_filepaths=list(Iterate.rdf_files(process_dict[Keys.PATHS])),
+            filters=None,  # if you want to cut on RDataFrame level.
             definitions=list(Iterate.common_dict(process_dict[Keys.COMMON])),
             additional_columns=list(process_dict[Keys.VARIABLES].keys()),
             description=f"{channel}_{era}_{process}",
             max_workers=16,
-        ).generic_filtered(
+        ).pandasDataFrame_filtered(
             filter_funciton=lambda df: df[[it for it in df.columns if it.startswith("__common__cut__")]].any(axis=1),
         ).dataframe
 

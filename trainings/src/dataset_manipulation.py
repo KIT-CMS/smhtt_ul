@@ -62,7 +62,8 @@ class RootToPandasRaw(object):
     @staticmethod
     def define_and_collect_columns(
         rdf: ROOT.RDataFrame,
-        definitions: Iterable[Tuple[str, str]],
+        filters: Union[Iterable[Tuple[str, str]], None] = None,
+        definitions: Union[Iterable[Tuple[str, str]], None] = None,
         additional_columns: Union[None, Iterable[str]] = None,
     ) -> Tuple[ROOT.RDataFrame, list]:
         columns = []
@@ -71,6 +72,10 @@ class RootToPandasRaw(object):
             for k, v in definitions:
                 rdf = rdf.Define(k, v)
                 columns.append(k)
+
+        if filters is not None:
+            for k, v in filters:
+                rdf = rdf.Filter(v, k)
 
         if additional_columns is not None:
             columns += list(additional_columns)
@@ -83,11 +88,12 @@ class RootToPandasRaw(object):
     def pandasDataFrame(
         args: Tuple[str, str, str, dict, str, str, list[str]],
     ) -> dict[tuple[str, ...], pd.DataFrame]:
-        definitions, additional_columns, *paths = args
+        filters, definitions, additional_columns, *paths = args
 
         _, rdf = RootToPandasRaw.build_rdf(tree_and_paths=paths)
         rdf, columns = RootToPandasRaw.define_and_collect_columns(
             rdf=rdf,
+            filters=filters,
             definitions=definitions,
             additional_columns=additional_columns,
         )
@@ -97,6 +103,7 @@ class RootToPandasRaw(object):
     def setup_raw_dataframe(
         self,
         tree_and_filepaths: Iterable[Tuple[str, ...]],
+        filters: Union[Iterable[Tuple[str, str]], None] = None,
         definitions: Union[Iterable[Tuple[str, str]], None] = None,
         additional_columns: Union[None, Iterable[str]] = None,
         max_workers: int = 16,
@@ -112,6 +119,7 @@ class RootToPandasRaw(object):
             optional_process_pool(
                 args_list=[
                     (
+                        filters,
                         definitions,
                         additional_columns,
                         *tree_and_filepaths,
