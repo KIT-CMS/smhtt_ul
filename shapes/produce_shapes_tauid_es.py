@@ -5,6 +5,7 @@ import os
 import pickle
 import re
 import yaml
+import numpy as np
 from itertools import combinations
 
 from copy import deepcopy
@@ -893,7 +894,8 @@ def main(args):
             )
         if channel == "mt" and special_analysis in ["TauID", "TauID_ES"]:
             additional_emb_procS = set()
-            tauESvariations = [-8.0 + 0.1 * i for i in range(0, 121)]
+            aranged = np.arange(4.0, -8.0 - 0.1, -0.1).round(2).tolist()
+            tauESvariations = [0.0 if x == 0.0 else x for x in aranged]
             add_tauES_datasets(
                 era,
                 channel,

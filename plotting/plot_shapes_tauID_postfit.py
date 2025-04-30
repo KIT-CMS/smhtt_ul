@@ -160,7 +160,23 @@ def main(args):
         "9": "DM10_11",
         "10": "DM10",
         "11": "DM11",
+        "12": "DM0_PT20_40",
+        "13": "DM1_PT20_40",
+        "15": "DM10_PT20_40",
+        "16": "DM11_PT20_40",
+        "17": "DM0_PT40_200",
+        "18": "DM1_PT40_200",
+        "19": "DM10_PT40_200",
+        "20": "DM11_PT40_200",
         "100": "Control Region"
+    }
+    category_dict_for_plot = {
+        "7": "#tau_{h}#rightarrow#pi^{#pm}#nu_{#tau}",
+        "8": "#pi^{#pm}#pi^{0}#nu_{#tau}",
+        "9": "DM10_11",
+        "10": "DM10",
+        "11": "DM11",
+        "100": "CR"
     }
     inv_category_dict = {v: k for k, v in category_dict.items()}
     
@@ -239,7 +255,7 @@ def main(args):
         legend_bkg_processes = copy.deepcopy(bkg_processes)
         legend_bkg_processes.reverse()
         # create plot
-        width = 600
+        width = 700
         if args.linear:
             plot = dd.Plot([0.3, [0.3, 0.28]], "ModTDR", r=0.04, l=0.14, width=width)
         else:
@@ -288,7 +304,7 @@ def main(args):
             linecolor=0,
         )
 
-        plot.subplot(2).normalize(
+        plot.subplot(2).normalize( # check for error ???
             [
                 "model_total",
                 "data_obs",
@@ -313,7 +329,7 @@ def main(args):
             ),
         )
 
-        plot.subplot(2).setYlims(0.75, 1.25)
+        plot.subplot(2).setYlims(0.75, 1.25) # Larger limits for DM10_11 ???
 
         if not args.linear:
             plot.subplot(1).setYlims(0.1, split_dict[channel])
@@ -329,7 +345,7 @@ def main(args):
         plot.scaleYLabelSize(0.8)
         # plot.scaleXLabelOffset(2.0)
         plot.scaleYTitleOffset(1.1)
-        plot.subplot(2).setNYdivisions(3, 5)
+        plot.subplot(2).setNYdivisions(3, 5) # what does it do ???
         plot.subplot(2).setNXdivisions(5, 3)
         # if not channel == "tt" and category in ["11", "12", "13", "14", "15", "16"]:
         #    plot.subplot(2).changeXLabels(["0.2", "0.4", "0.6", "0.8", "1.0"])
@@ -397,17 +413,17 @@ def main(args):
             chi2 = data.Chi2Test(background, "UW CHI2/NDF")
             plot.DrawText(0.7, 0.3, "\chi^{2}/ndf = " + str(round(chi2, 3)))
 
-        for i in range(2):
-            plot.add_legend(reference_subplot=2, pos=1, width=0.5, height=0.03)
-            plot.legend(i + 2).add_entry(0, "data_obs", "Data", "PE")
-            plot.legend(i + 2).add_entry(0, "total_bkg", "Bkg. unc.", "f")
-            plot.legend(i + 2).setNColumns(4)
-        plot.legend(2).Draw()
-        plot.legend(3).setAlpha(0.0)
-        plot.legend(3).Draw()
+        # for i in range(2):
+        #     plot.add_legend(reference_subplot=2, pos=1, width=0.5, height=0.03)
+        #     plot.legend(i + 2).add_entry(0, "data_obs", "Data", "PE")
+        #     plot.legend(i + 2).add_entry(0, "total_bkg", "Bkg. unc.", "f")
+        #     plot.legend(i + 2).setNColumns(4)
+        # plot.legend(2).Draw()
+        # plot.legend(3).setAlpha(0.0)
+        # plot.legend(3).Draw()
 
         # draw additional labels
-        plot.DrawCMS()
+        plot.DrawCMS(position="outside")
         if "2016postVFP" in args.era:
             plot.DrawLumi("16.8 fb^{-1} (2016UL postVFP, 13 TeV)")
         elif "2016preVFP" in args.era:
@@ -429,6 +445,8 @@ def main(args):
             "%s, %s" % (channel_dict[channel], category_dict[category]),
             begin_left=None,
             textsize=0.032,
+            print_inside=True,
+            legend_outside=False,
         )
 
         # save plot
@@ -444,17 +462,17 @@ def main(args):
                 "png",
             )
         )
-        # plot.save(
-        #     "%s/%s_%s_%s_%s.%s"
-        #     % (
-        #         args.outputfolder,
-        #         args.era,
-        #         channel,
-        #         args.gof_variable if args.gof_variable is not None else category,
-        #         postfix,
-        #         "pdf",
-        #     )
-        # )
+        plot.save(
+            "%s/%s_%s_%s_%s.%s"
+            % (
+                args.outputfolder,
+                args.era,
+                channel,
+                args.gof_variable if args.gof_variable is not None else category,
+                postfix,
+                "pdf",
+            )
+        )
         # work around to have clean up seg faults only at the end of the
         # script
         plots.append(plot)

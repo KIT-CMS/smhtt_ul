@@ -1,10 +1,18 @@
+import logging 
 import numpy as np
 from ntuple_processor.utils import Selection
 from ntuple_processor import Histogram
+from config.logging_setup_configs import setup_logging
+
+logger = setup_logging(logger=logging.getLogger(__name__))
+
 
 discriminator_variable = "m_vis"
-discriminator_binning = np.arange(30, 130, 5)
+discriminator_binning = np.arange(30, 130, 12)
+# discriminator_binning = np.array([30, 50, 80, 100, 130])
 discriminator_binning_enlarged = np.arange(30, 160, 5)
+
+logger.info(f"Using discriminator variable {discriminator_variable} with binning {discriminator_binning}")
 
 
 categories = {
@@ -62,6 +70,12 @@ categories = {
             "bins": discriminator_binning,
             "expression": discriminator_variable,
             "cut": "(tau_decaymode_2 == 11) && (pt_2 >= 20)",
+        },
+        "DM10_11": {
+            "var": discriminator_variable,
+            "bins": discriminator_binning,
+            "expression": discriminator_variable,
+            "cut": "(tau_decaymode_2 == 10 || tau_decaymode_2 == 11) && (pt_2 >= 20)",
         },
         "DM0_PT20_40": {
             "var": discriminator_variable,

@@ -147,7 +147,7 @@ if __name__ == "__main__":
     #print cp
     #ROOT.gStyle.SetPalette(cp) #kBlueGreenYellow kCoffee
     #ROOT.TColor.InvertPalette()
-    label_dict = {
+    label_dict = { # ToDo: adjust for DM_pt !!!
 
         "r_EMB_DM_0" : "EMB_DM_0", 
         "r_EMB_DM_1" : "EMB_DM_1", 
@@ -156,24 +156,74 @@ if __name__ == "__main__":
         "r_EMB_DM0" : "EMB_DM_0",
         "r_EMB_DM1" : "EMB_DM_1", 
         "r_EMB_DM10_11" : "EMB_DM_10_11",
+        "r_EMB_DM10" : "EMB_DM_10",
+        "r_EMB_DM11" : "EMB_DM_11",
+        "r_EMB_DM0_PT20_40" : "EMB_DM_0_PT_20_40",
+        "r_EMB_DM1_PT20_40" : "EMB_DM_1_PT_20_40",
+        "r_EMB_DM10_PT20_40" : "EMB_DM_10_PT_20_40",
+        "r_EMB_DM11_PT20_40" : "EMB_DM_11_PT_20_40",
+        "r_EMB_DM0_PT40_200" : "EMB_DM_0_PT_40_200",
+        "r_EMB_DM1_PT40_200" : "EMB_DM_1_PT_40_200",
+        "r_EMB_DM10_PT40_200" : "EMB_DM_10_PT_40_200",
+        "r_EMB_DM11_PT40_200" : "EMB_DM_11_PT_40_200",
 
         "ES_DM0" : "ES_DM0",
         "ES_DM1" : "ES_DM1",
         "ES_DM10_11" : "ES_DM10_11",
+        "ES_DM10" : "ES_DM10",
+        "ES_DM11" : "ES_DM11",
+        "ES_DM0_PT20_40" : "ES_DM0_PT20_40",
+        "ES_DM1_PT20_40" : "ES_DM1_PT20_40",
+        "ES_DM10_PT20_40" : "ES_DM10_PT20_40",
+        "ES_DM11_PT20_40" : "ES_DM11_PT20_40",
+        "ES_DM0_PT40_200" : "ES_DM0_PT40_200",
+        "ES_DM1_PT40_200" : "ES_DM1_PT40_200",
+        "ES_DM10_PT40_200" : "ES_DM10_PT40_200",
+        "ES_DM11_PT40_200" : "ES_DM11_PT40_200",
         
         "r_DY_incl_DM0":"r_DY_incl_DM0",
         "r_DY_incl_DM1":"r_DY_incl_DM1",
         "r_DY_incl_DM10_11":"r_DY_incl_DM10_11",
+        "r_DY_incl_DM10":"r_DY_incl_DM10",
+        "r_DY_incl_DM11":"r_DY_incl_DM11",
+        "r_DY_incl_DM0_PT20_40":"r_DY_incl_DM0_PT20_40",
+        "r_DY_incl_DM1_PT20_40":"r_DY_incl_DM1_PT20_40",
+        "r_DY_incl_DM10_PT20_40":"r_DY_incl_DM10_PT20_40",
+        "r_DY_incl_DM11_PT20_40":"r_DY_incl_DM11_PT20_40",
+        "r_DY_incl_DM0_PT40_200":"r_DY_incl_DM0_PT40_200",
+        "r_DY_incl_DM1_PT40_200":"r_DY_incl_DM1_PT40_200",
+        "r_DY_incl_DM10_PT40_200":"r_DY_incl_DM10_PT40_200",
+        "r_DY_incl_DM11_PT40_200":"r_DY_incl_DM11_PT40_200",
 
     }
-    label_list = [
+    label_list = [ # ToDo: adjust for DM_pt ?
 
          "EMB_DM_0",
          "EMB_DM_1",
+         "EMB_DM_10",
+         "EMB_DM_11",
          "EMB_DM_10_11",
+         "EMB_DM0_PT20_40",
+         "EMB_DM1_PT20_40",
+         "EMB_DM10_PT20_40",
+         "EMB_DM11_PT20_40",
+         "EMB_DM0_PT40_200",
+         "EMB_DM1_PT40_200",
+         "EMB_DM10_PT40_200",
+         "EMB_DM11_PT40_200",
          "ES_DM0",
          "ES_DM1",
          "ES_DM10_11",
+         "ES_DM10",
+         "ES_DM11",
+         "ES_DM0_PT20_40",
+         "ES_DM1_PT20_40",
+         "ES_DM10_PT20_40",
+         "ES_DM11_PT20_40",
+         "ES_DM0_PT40_200",
+         "ES_DM1_PT40_200",
+         "ES_DM10_PT40_200",
+         "ES_DM11_PT40_200",
     ]
 
     era = sys.argv[1]

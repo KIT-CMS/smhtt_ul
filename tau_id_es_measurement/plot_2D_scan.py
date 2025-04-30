@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import argparse
+# os.system("pip3 install mplhep")
+import mplhep as hep
+hep.style.use("CMS")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name',type=str, help='Name of the file')
@@ -15,7 +18,10 @@ parser.add_argument('--nbins',type=int, help='Number of bins per axis')
 args = parser.parse_args()
 title = args.outname
 if "DM" in title:
-    title_map = {"DM0":"DM 0", "DM1":"DM 1", "DM10_11":"DM 10+11"}
+    title_map = {"DM0":"DM 0", "DM1":"DM 1", "DM10_11":"DM 10+11", "DM10":"DM 10", "DM11":"DM 11",
+                 "DM0_PT20_40":"DM 0 pt20-40", "DM1_PT20_40":"DM 1 pt20-40", "DM10_PT20_40":"DM 10 pt20-40", "DM11_PT20_40":"DM 11 pt20-40",
+                 "DM0_PT40_200":"DM 0 pt40-200", "DM1_PT40_200":"DM 1 pt40-200", "DM10_PT40_200":"DM 10 4pt0-200", "DM11_PT40_200":"DM 11 pt40-200"}
+    # title_map_plot = {"DM0":"DM 0", "DM1":"#tau_{h}#rightarrow#pi^{#pm} #pi^{0} #nu_{#tau}", "DM10_11":"DM 10+11"}
     title_name = title_map[title]
 else:
     title_name = title
@@ -95,17 +101,49 @@ if loss_flag:
     seq_x = np.array(sequence_x)
     seq_x.sort()
     x_np_full = np.tile(seq_x, n_bins)
+    debug_list = []
+    debug_flag = False
+    if len(x_np_full) != n_bins**2:
+        print(f"Length of full x_np array: {len(x_np_full)} should be {n_bins**2}")
+        exit(1)
     x_np_cp = x_np.copy()
-    while len(missing_indices) != points_lost:
-        for i,val in enumerate(x_np_cp):  
-            if val != x_np_full[i]:
-                missing_indices.append(i)
-                x_np_cp = np.insert(x_np_cp, i, x_np_full[i])
-                break
-        # Finished?
+    acc=0
+    while len(missing_indices) != points_lost:            
+        for i,val in enumerate(x_np_full):
+            try:
+                if val != x_np_cp[i] or (not np.isclose(val, x_np_cp[i])):
+                    
+                    missing_indices.append(i)
+                    x_np_cp = np.insert(x_np_cp, i, x_np_full[i])
+                    break
+            except:
+                # Standard catch: Index out of range because last indices are missing! But everything else will also end up here!
+                if i == len(x_np_cp):
+                    missing_indices.append(i)
+                    x_np_cp = np.insert(x_np_cp, i, x_np_full[i])
+                    break
+                else:
+                    print(f'Something went wrong with the indices! i:{i}, len(x_np_cp):{len(x_np_cp)}, len(x_np_full):{len(x_np_full)}')
+                    print('\n If above print does not show index problems, other Errors will also end up here!\n')
+                    exit(1)
+            
+        acc += 1
+        # Finished findind all indices?
         if len(missing_indices) == points_lost:
-            print("Found all missing indices, now fixing the arrays")
+            print(f"Found all missing indices (#{points_lost}), now fixing the arrays")
             break
+        elif acc > (n_bins**2 + n_bins):
+            print(f"acc:{acc} Missing indices/points lost: {len(missing_indices)}/{points_lost} and could not recover for some reason! Please inspect!")
+            debug_flag = True
+            for i,val in enumerate(x_np_full):
+                try:
+                    if val != x_np_cp[i] or (not np.isclose(val, x_np_cp[i])):
+                        debug_list += ((i,val,x_np_cp[i]),)
+                except:
+                    debug_list += ((i,val,None),)
+            print(f"Debug list: {debug_list}")
+            break
+    
     
     y_np_fu = np.array(sequence_y)
     y_np_full = np.tile(y_np_fu, n_bins)
@@ -118,10 +156,10 @@ if loss_flag:
     #CHECK:
     if len(x_np_cp) != len(y_np_full) != len(deltaNLL_full) != n_bins **2:
         print("Lengths of x, y, and deltaNLL arrays are not equal or unequal n_bins^2!")
-        print(f"Lengths: x:{len(x_np_cp)}, y:{len(y_np_full)}, deltaNLL:{len(deltaNLL_full)}")
-        import pdb; pdb.set_trace()
-        
-    
+        print(f"Lengths: x:{len(x_np_cp)}, x_full:{len(x_np_full)}, y_full:{len(y_np_full)}, deltaNLL:{len(deltaNLL_full)}")
+        print(f'nbins: {n_bins}')
+        # exit(1)
+
 else:
     x_np_full = x_np.copy()
     y_np_full = y_np.copy()
@@ -167,7 +205,7 @@ fig = plt.figure()
 ax_x , ax_y = fig.subplots(1,2)
 for nan_flag,i in zip(nan_falgs_x,range(n_bins)):
     if nan_flag == -1:
-        ax_x.scatter(x_profile[i][0], x_profile[i][2], marker='_', color='k')
+        ax_x.scatter(x_profile[i][0], x_profile[i][2], marker='_', color='k',lw=2)
     else:
         ax_x.scatter(x_profile[i][0], x_profile[i][2], marker='_', color='r', lw=3)
 
@@ -177,7 +215,7 @@ ax_x.set(xlabel='tau ID SF', ylabel='-2 $\Delta\\ln\\mathcal{L}$')
 ax_x.legend()
 for nan_flag,i in zip(nan_falgs_y,range(n_bins)):
     if nan_flag == -1:
-        ax_y.scatter(y_profile[i][1], y_profile[i][2], marker='_', color='k')
+        ax_y.scatter(y_profile[i][1], y_profile[i][2], marker='_', color='k',lw=2)
     else:
         ax_y.scatter(y_profile[i][1], y_profile[i][2], marker='_', color='r', lw=3)
 
@@ -188,12 +226,55 @@ ax_y.vlines(bestfit_np[1],0,1, colors='b', linestyles='dashed', transform=ax_y.g
 ax_x.hlines(0, 0, 1, colors='k', linestyles='solid', transform=ax_x.get_yaxis_transform())
 ax_y.hlines(0, 0, 1, colors='k', linestyles='solid', transform=ax_y.get_yaxis_transform())
 ax_y.legend()
-fig.suptitle(title_name)
+fig.suptitle(title_map[title])
 fig.text(0.95, 0.95, f"# points lost:{points_lost}", ha='right', va='top', fontsize=12,
         bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 fig.tight_layout(pad=3.0)
 plt.savefig("1D_profiles_2Dscan_"+args.outname+"_id_es_tests.png")
+
+# tauID
+plt.rcParams["axes.labelsize"] = 13
+plt.rcParams["xtick.labelsize"] = 12
+plt.rcParams["ytick.labelsize"] = 12
+fig1 = plt.figure(figsize=(5, 5))
+ax1 = fig1.add_subplot(111)
+for nan_flag,i in zip(nan_falgs_x,range(n_bins)):
+    if nan_flag == -1:
+        ax1.scatter(x_profile[i][0], x_profile[i][2], marker='_', color='k',lw=2)
+    else:
+        ax1.scatter(x_profile[i][0], x_profile[i][2], marker='_', color='r', lw=3)
+
+ax1.vlines(bestfit_np[0],0,1, colors='b', linestyles='dashed', transform=ax1.get_xaxis_transform(), label='Best fit')
+ax1.set(xlabel='tau ID correction', ylabel='-2 $\Delta\\ln$L')
+hep.cms.text('Private Work (Data/Simulation)',loc=0,fontsize=10)
+ax1.legend(fontsize=11)
+ax1.hlines(0, 0, 1, colors='k', linestyles='solid', transform=ax1.get_yaxis_transform())
+fig1.tight_layout(pad=0.2)
+fig1.savefig("1D_profiles_2Dscan_"+args.outname+"_id_es_tests_onlyID.png")
+plt.close(fig1)
+
+# tau ES
+fig2 = plt.figure(figsize=(5, 5))
+ax2 = fig2.add_subplot(111)
+for nan_flag,i in zip(nan_falgs_y,range(n_bins)):
+    if nan_flag == -1:
+        ax2.scatter(y_profile[i][1], y_profile[i][2], marker='_', color='k',lw=2)
+    else:
+        ax2.scatter(y_profile[i][1], y_profile[i][2], marker='_', color='r', lw=3)
+
+ax2.set(xlabel='tau energy scale shift %', ylabel='-2 $\Delta\\ln$L')
+hep.cms.text('Private Work (Data/Simulation)',loc=0, fontsize=10)
+ax2.xaxis.set_ticks(np.arange(y_range[0], y_range[-1]+1, 2))
+ax2.vlines(bestfit_np[1],0,1, colors='b', linestyles='dashed', transform=ax2.get_xaxis_transform(), label='Best fit')
+ax2.hlines(0, 0, 1, colors='k', linestyles='solid', transform=ax2.get_yaxis_transform())
+ax2.legend(fontsize=11)
+fig2.tight_layout(pad=0.2)
+# fig2.set_size_inches(4, 6)
+fig2.savefig("1D_profiles_2Dscan_"+args.outname+"_id_es_tests_onlyES.png")
+plt.close(fig2)
+
 plt.close(fig)
+
 
 # Fill the 2D histogram
 # for i in range(len(grid_vals)):
@@ -245,6 +326,8 @@ corr_xy_str = f"Corr.:{corr_xy:.3f}"
 
 # Set up canvas
 canv = ROOT.TCanvas("canv", "canv", 680, 600)
+# canv.SetFillColor(0)
+# canv.SetFrameFillColor(0)
 canv.SetTickx()
 canv.SetTicky()
 canv.SetLeftMargin(0.115)
@@ -259,12 +342,12 @@ yw = (y_range[1] - y_range[0]) / n_bins
 # Set histogram properties
 h2D.SetContour(999)
 h2D.SetTitle(title_name)
-h2D.GetXaxis().SetTitle("#tau ID SF ")
+h2D.GetXaxis().SetTitle("#tau ID correction")
 h2D.GetXaxis().SetTitleSize(0.05)
 h2D.GetXaxis().SetTitleOffset(0.9)
 h2D.GetXaxis().SetRangeUser(x_range[0], x_range[1] - xw)
 
-h2D.GetYaxis().SetTitle("#tau ES shift %")
+h2D.GetYaxis().SetTitle("#tau energy scale shift %")
 h2D.GetYaxis().SetTitleSize(0.05)
 h2D.GetYaxis().SetTitleOffset(0.9)
 h2D.GetYaxis().SetRangeUser(y_range[0], y_range[1] - yw)
@@ -325,18 +408,29 @@ gBF.Draw("P")
 
 
 # Add legend
-leg = ROOT.TLegend(0.57, 0.67, 0.8, 0.87)
+leg = ROOT.TLegend(0.15, 0.7, 0.4, 0.89)
 leg.SetTextSize(0.04)
 leg.SetBorderSize(0)
 leg.SetFillColor(ROOT.kGray)
 leg.AddEntry(gBF, "Best fit", "P")
 leg.AddEntry(c68, "1#sigma CL", "L")
 leg.AddEntry(c95, "2#sigma CL", "L")
-leg.AddEntry(h2D, corr_xy_str, "")
-leg.AddEntry(h2D, f"Corr.:{corr_det:.3f}", "")
+# leg.AddEntry(h2D, corr_xy_str, "")
+leg.AddEntry(h2D, f"correl.:{corr_det:.3f}", "")
 
 # leg.AddEntry(gSM, "SM", "P")
 leg.Draw()
+
+# Add CMS labeling
+# label = ROOT.TText(0.5, 3.74, "CMS Private Work (Data/Simulation)")
+# label.SetTextAlign(13) 
+# label.SetTextSize(0.025) 
+# label.Draw()
+label = ROOT.TLatex()
+label.SetTextSize(0.025)
+label.SetTextAlign(13)
+label.DrawLatex(0.5, 3.74, "CMS #it{#bf{Private Work (Data/Simulation)}}")
+
 
 # canv.SetLogz()
 canv.Update()

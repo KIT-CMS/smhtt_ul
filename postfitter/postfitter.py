@@ -37,7 +37,14 @@ prefit_in_folders_names = []
 postfit_in_folders_names = []
 
 prefit_keys = file_inp.Get(prefit_fold).GetListOfKeys()
-postfit_keys = file_inp.Get(postfit_folder).GetListOfKeys()
+# Workaround, is using shapes_fit_b allowed?:
+try:
+    postfit_keys = file_inp.Get(postfit_folder).GetListOfKeys()
+except:
+    print("\n [ERROR] shapes_fit_s folder not found in fitDiagnostics root file! Fit has major problem! \n")
+    exit(0)
+    
+    
 
 
 for i in range(len(prefit_keys)):

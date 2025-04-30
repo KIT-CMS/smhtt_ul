@@ -35,16 +35,16 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     if [[  "$SPECIAL" == "TauID_ES" ]]; then
         python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
             --output-file dummy.root \
-            --directory $NTUPLES \
+            --directory ${NTUPLES} \
             --${CHANNEL}-friend-directory ${XSEC_FRIENDS} \
             --era $ERA \
-            --vs-jet-wp $WP \
+            --vs-jet-wp ${WP} \
             --optimization-level 1 \
             --special-analysis "TauID_ES" \
             --only-create-graphs \
-            --graph-dir $OUTPUT \
-            $CONTROL_ARG \
-            --xrootd --validation-tag $TAG
+            --graph-dir ${OUTPUT} \
+            ${CONTROL_ARG} \
+            --xrootd --validation-tag ${TAG}
     elif [[ "$SPECIAL" == "TauES" ]]; then
         python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
             --output-file dummy.root \
