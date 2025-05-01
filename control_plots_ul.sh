@@ -76,6 +76,7 @@ export COLUMNS=$(tput cols)
 export PYTHONPATH=${PYTHONPATH}:${PWD}/Dumbledraw
 source utils/setup_root.sh
 ulimit -s unlimited
+export COLUMNS=$(tput cols)
 source utils/setup_root.sh
 source utils/setup_ul_samples.sh ${NTUPLETAG} ${ERA}
 
