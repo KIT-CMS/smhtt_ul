@@ -159,6 +159,8 @@ def main(info):
     else:
         stype = "Nominal"
         cat = args.category
+        # stype = args.category
+        # cat = None
 
     for index, process in enumerate(bkg_processes):
         _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
