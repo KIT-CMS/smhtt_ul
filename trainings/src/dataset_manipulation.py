@@ -143,7 +143,7 @@ class RootToPandasRaw(object):
 
         return self
 
-    def generic_filtered(
+    def pandasDataFrame_filtered(
         self,
         filter_funciton: Callable,
     ) -> "RootToPandasRaw":
