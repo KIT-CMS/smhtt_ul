@@ -209,6 +209,7 @@ def add_processes(
     add_fn(name="ztt", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZTT))
     add_fn(name="zl", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZL))
     add_fn(name="zj", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZJ))
+    # add_fn(name="z", dataset=datasets["DY"], selections=select_fn(selection.DY))
     # add_fn(name="ztt_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZTT))
     # add_fn(name="zl_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZL))
     # add_fn(name="zj_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZJ))
@@ -216,23 +217,28 @@ def add_processes(
     add_fn(name="stl", dataset=datasets["ST"], selections=select_fn(selection.ST, selection.STL))
     add_fn(name="stt", dataset=datasets["ST"], selections=select_fn(selection.ST, selection.STT))
     add_fn(name="stj", dataset=datasets["ST"], selections=select_fn(selection.ST, selection.STJ))
+    # add_fn(name="st", dataset=datasets["ST"], selections=select_fn(selection.ST))
     add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
     add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
     add_fn(name="ttl", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTL))
     add_fn(name="ttt", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTT))
     add_fn(name="ttj", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTJ))
+    # add_fn(name="tt", dataset=datasets["TT"], selections=select_fn(selection.TT))
     add_fn(name="tth", dataset=datasets["ttH"], selections=select_fn(selection.ttH))
     add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVL))
     add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVT))
     add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVJ))
+    # add_fn(name="vv", dataset=datasets["VV"], selections=select_fn(selection.VV))
     add_fn(name="vvvl", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVL))
     add_fn(name="vvvt", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVT))
     add_fn(name="vvvj", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVJ))
+    # add_fn(name="vvv", dataset=datasets["VVV"], selections=select_fn(selection.VVV))
     add_fn(name="vh", dataset=datasets["VH"], selections=select_fn(selection.VH))
     add_fn(name="ewk", dataset=datasets["EWK"], selections=select_fn(selection.EWK))
     add_fn(name="ttvl", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVL))
     add_fn(name="ttvt", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVT))
     add_fn(name="ttvj", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVJ))
+    # add_fn(name="ttv", dataset=datasets["TTV"], selections=select_fn(selection.TTV))
 
 
 def get_analysis_units(
@@ -473,27 +479,33 @@ def main(args):
             "ztt",
             "zl",
             "zj",
+            # "z",
             "w",
             "stl",
             "stt",
             "stj",
+            # "st",
             "ggh",
             "qqh",
             "ttl",
             "ttt",
             "ttj",
+            # "tt",
             "tth",
             "vvl",
             "vvt",
             "vvj",
+            # "vv",
             "vh",
             "vvvl",
             "vvvt",
             "vvvj",
+            # "vvv",
             "ewk",
             "ttvl",
             "ttvt",
             "ttvj",
+            # "ttv",
         }
         # if "et" in args.channels:
         #     procS = procS - {"w"}
@@ -522,6 +534,7 @@ def main(args):
     }
     leptonFakesS = {"zl", "ttl", "ttvl", "vvl", "vvvl", "stl", "zl_nlo"} & procS
     trueTauBkgS = {"ztt", "ttt", "ttvt", "vvt", "vvvt", "stt", "ztt_nlo"} & procS
+    other = {"vv", "vvv", "z", "st", "tt", "ttv"} & procS
     signalsS = {
         "hh2b2tau",
     } & procS
@@ -529,7 +542,7 @@ def main(args):
     singleHiggsS = {"ggh", "qqh", "tth", "vh"} & procS
 
     simulatedProcsDS = {
-        chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
+        chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS | singleHiggsS | ewkS | other
         for chname_ in ["et", "mt", "tt", "em"]
     }
     logger.info(f"Processes to be computed: {procS}")
@@ -540,6 +553,8 @@ def main(args):
     logger.info(f"Lepton fakes processes: {leptonFakesS}")
     logger.info(f"True tau bkg processes: {trueTauBkgS}")
     logger.info(f"Single Higgs processes: {singleHiggsS}")
+    logger.info(f"EWK processes: {ewkS}")
+    logger.info(f"Other processes: {other}")
     logger.info(f"signals: {signalsS}")
 
     def _book_histogram(processes, variations):  # helper wrapper
@@ -552,7 +567,7 @@ def main(args):
         )
 
     for channel in args.channels:
-        _book_histogram(processes=signalsS)
+        _book_histogram(processes=signalsS, variations=[])
         # if channel == "mt" and args.special_analysis in {"TauES", "TauID"}:
         #     TauES_TauID_histogram_booking(
         #         channel=channel,
@@ -562,14 +577,14 @@ def main(args):
         #         datasets=nominals[args.era]["units"][channel],
         #    )
         if channel in ["mt", "et"]:
-            for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS, jetFakesDS[channel]]:
+            for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS | other, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
                     variations=[variations.abcd_method_lt, variations.same_sign],
                     # variations=variations.SemiLeptonicFFEstimations.unrolled(),
                 )
         elif channel == "tt":
-            for procs in [dataS | trueTauBkgS, leptonFakesS  | singleHiggsS | ewkS, jetFakesDS[channel]]:
+            for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS | other, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
                     # variations=[variations.same_sign],

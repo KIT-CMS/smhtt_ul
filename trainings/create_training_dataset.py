@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument(
         "--base-dataset-directory",
         type=str,
-        default=f"/ceph/{os.environ['USER']}/smhtt_ul/training_datasets",
+        default="/work/sdaigler/HH2b2tau/training_datasets",
         help="Base directory for the output files",
     )
     return parser.parse_args()
@@ -225,17 +225,11 @@ if __name__ == "__main__":
             .pipe(add.update_subprocess_df, by="index")
             .pipe(add.event_quantities)
             .pipe(add.nominal_variables)
-            .pipe(add.nominal_weight_and_cut)
-            .pipe(add.additional_nominal_cuts)
-            .pipe(add.weight_like_uncertainties)
-            .pipe(add.shift_like_uncertainties)
+            .pipe(add.nominal_weight)
+            .pipe(add.nominal_additional if process not in {"HH2B2Tau"} else add.passtrough)
+            # .pipe(add.weight_like_uncertainties)
+            # .pipe(add.shift_like_uncertainties)
         )
-
-        if subprocess == "jetFakes":  # SMHtt specific, might differ
-            process_df = (
-                process_df
-                .pipe(add.adjust_jetFakes_weights)
-            )
 
         process_df.columns = pd.MultiIndex.from_tuples(process_df.columns)
 

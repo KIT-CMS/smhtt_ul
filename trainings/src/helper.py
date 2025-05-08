@@ -15,7 +15,7 @@ TRAINING_VARIABLES = [
     "jpt_2",
     "jeta_1",
     "jeta_2",
-    # "m_fastmtt",
+    "m_fastmtt",
     "pt_vis",
     "mjj",
     "deltaR_ditaupair",
@@ -63,6 +63,8 @@ class Keys:
     DOWN = "down"
 
     ID = "id"
+
+    ADDITIONAL_NOMINALS = ["abcd_anti_iso", "abcd_same_sign", "abcd_same_sign_anti_iso"]
 
 
 def find_variable_expansions(full_expression: str, substring: str) -> list[str]:

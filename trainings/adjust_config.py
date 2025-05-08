@@ -52,18 +52,27 @@ if __name__ == "__main__":
         .pipe(ConfigModification.general.set_common)
         .pipe(  # SMHtt specific, (usage of jetFakes)
             ConfigModification.general.remove_from_config,
-            processes=["W", "DYNLO"],
+            processes=["DYNLO"],
+            subprocesses=[
+                "-ZJ",
+                "-ZTT",
+                "-TTJ",
+                "-TTT",
+                "-VVJ",
+                "-VVT",
+                "ST-STJ",
+                "ST-STT",
+                # "ST-STL",
+                "TTV-TTVJ",
+                "TTV-TTVT",
+                # "TTV-TTVL",
+                "VVV-VVVJ",
+                "VVV-VVVT",
+                # "VVV-VVVL",
+            ],
         )
-        .pipe(  # SMHtt specific, (usage of jetFakes with uncertainties selected only for data)
-            ConfigModification.general.remove_variation_pattern,
-            ff_pattern="anti_iso_CMS_",
-            ignore_process="data",
-        )
-        .pipe(  # SMHtt specific, (usage of jetFakes with uncertainties selected only for data)
-            ConfigModification.general.rename,
-            processes={"data": "jetFakes"},
-            subprocesses={"data": "jetFakes"},
-        )
+        .pipe(ConfigModification.general.remove_variation_pattern, ff_pattern="anti_iso_CMS_", ignore_process="data")
+        .pipe(ConfigModification.general.rename, processes={"data": "jetFakes"}, subprocesses={"data": "jetFakes"})
         .pipe(ConfigModification.general.add_era_and_process_name_flags)
         .pipe(ConfigModification.specific.convert_weights_and_cuts_to_common)
         .pipe(ConfigModification.specific.add_set_of_training_variables, training_variables=training_variables)

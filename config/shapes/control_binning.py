@@ -50,13 +50,8 @@ common_binning = HistogramBuildingDict(
         "pzetamissvis_pf": np.arange(-150, 150, 5),
         "m_sv_puppi": np.arange(0, 225, 5),
         "pt_sv_puppi": np.arange(0, 160, 5),
-<<<<<<< HEAD
-        "eta_sv_puppi": np.arange(-2.5, 2.6, 0.1),
-        "m_vis": np.linspace(0, 256, 33),
-=======
         "eta_sv_puppi": np.linspace(-2.5, 2.5, 50),
         "m_vis": np.arange(0, 202, 5),
->>>>>>> 3d68cf7 (feat: added HH2B2Tau signal)
         "ME_q2v1": np.arange(0, 300000, 6000),
         "ME_q2v2": np.arange(0, 300000, 6000),
         "ME_costheta1": np.linspace(-1, 1, 50),
