@@ -3,10 +3,14 @@ import logging
 import os
 from functools import partial
 from tqdm import tqdm
+import numpy as np
+from pathlib import Path
+import os
+from typing import Iterable
 
 import pandas as pd
 import yaml
-from src.dataset_manipulation import CombinedDataFrameManipulation, ProcessDataFrameManipulation, RootToPandasRaw, odd_id, tiled_mask
+from src.dataset_manipulation import CombinedDataFrameManipulation, ProcessDataFrameManipulation, ROOTToPlain, tuple_column
 from src.helper import Iterate, PipeDict, Keys
 
 try:
@@ -28,10 +32,107 @@ def parse_args():
     parser.add_argument(
         "--base-dataset-directory",
         type=str,
-        default="/ceph/amonsch/HiggsToTauTau/training_datasets",
+        default=f"/ceph/{os.environ['USER']}/HiggsToTauTau/training_datasets",
         help="Base directory for the output files",
     )
     return parser.parse_args()
+
+
+def tiled_mask(
+    df: pd.DataFrame,
+    pattern: Iterable[bool],
+) -> np.ndarray:
+    """
+    Helper to create a mask for the training and validation folds.
+    The pattern is repeated to cover the length of the dataframe.
+
+    Args:
+        df (pd.DataFrame): The dataframe to create the mask for.
+        pattern (Iterable[bool]): The pattern to repeat, i.e. [True, True, False, False] for 2 training and 2 validation folds.
+
+    Returns:
+        np.ndarray: A boolean mask of the same length as the dataframe.
+    """
+    return np.tile(pattern, int(np.ceil(len(df) / len(pattern))))[:len(df)].astype(bool)
+
+
+def odd_id(df: pd.DataFrame) -> np.ndarray:
+    """
+    Helper to create a mask for odd IDs.
+
+    Args:
+        df (pd.DataFrame): The dataframe to create the mask for.
+
+    Returns:
+        np.ndarray: A boolean mask of the same length as the dataframe.
+    """
+    return (df[Keys.EVENT][Keys.ID] % 2).astype(bool)
+
+
+def remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd.DataFrame:
+    """
+    Exemplary function.
+
+    Removes the cut regions from the dataframe that are not needed for the training.
+
+    Args:
+        df (pd.DataFrame): The dataframe to remove the cut regions from.
+        regions (Iterable[str]): The regions to remove.
+
+    Returns:
+        pd.DataFrame: The dataframe without the cut regions.
+    """
+    for region in regions:
+        cut_column = tuple_column(Keys.NOMINAL, region, Keys.CUT)
+        if cut_column in df.columns:
+            df = df[~df[cut_column].astype(bool)].copy()
+            for column in df.columns:
+                _level0, _level1, *_ = column
+                if (_level0, _level1) == (Keys.NOMINAL, region):
+                    df = df.drop(column, axis=1)
+
+    return df.copy()
+
+
+def custom_selection(df: pd.DataFrame, optimize_selection: bool = False) -> pd.DataFrame:
+    """
+    Exemplary function.
+
+    Selects the processes (subprocesses) and cut regions that are needed for the training.
+
+    Args:
+        df (pd.DataFrame): The dataframe to select the processes and cut regions from.
+        optimize_selection (bool): If True, the selection is optimized to including only the needed cut regions.
+            If False, all cut regions are included.
+            Default is False.
+
+    Returns:
+        pd.DataFrame: The dataframe with the selected processes and cut regions.
+    """
+    mask = False
+    is_nominal = tuple_column(Keys.NOMINAL, Keys.CUT)
+    is_anti_iso = tuple_column(Keys.NOMINAL, "anti_iso", Keys.CUT)
+    for _process, _cut in [
+        ("is_jetFakes", [is_anti_iso]),
+        ("is_ttbar", [is_anti_iso, is_nominal]),
+        ("is_dyjets", [is_anti_iso, is_nominal]),
+        ("is_embedding", [is_anti_iso, is_nominal]),
+        ("is_diboson", [is_anti_iso, is_nominal]),
+        ("is_vbf_htautau", [is_nominal]),
+        ("is_ggh_htautau", [is_nominal]),
+    ]:
+        process_mask = df[Keys.LABELS][_process].astype(bool)
+
+        selection_mask = True
+        if optimize_selection:
+            selection_mask = df[[it for it in _cut if it in df.columns]].astype(bool).any(axis=1)
+
+        mask |= (process_mask & selection_mask)
+
+
+    mask &= df[[it for it in df.columns if Keys.CUT in it]].astype(bool).any(axis=1)  # any cut
+
+    return df[mask].copy()
 
 
 if __name__ == "__main__":
@@ -63,47 +164,84 @@ if __name__ == "__main__":
     }
 
     process_dataframes = []
-    for channel, era, process, process_dict in Iterate.process(config):
-        logger.info(f"Processing {channel} {era} {process}")
+    for channel, era, process, subprocess, subprocess_dict in Iterate.subprocesses(config):
 
-        def path(directory):
-            return os.path.join(
-                args.base_dataset_directory,
-                directory,
-                f"{channel}_{era}_{process}.feather",
-            )
+        if subprocess in {"DY-ZJ", "DY-ZTT", "TT-TTJ", "TT-TTT", "VV-VVJ", "VV-VVT"}:  # SMHtt specific
+            continue
 
-        raw_process_df = RootToPandasRaw(
-            raw_path=path("raw"),
-            filtered_path=path("filtered"),
+        logger.info(f"Processing {channel} {era} {process} - {subprocess}")
+
+        def _path(directory, extension="feather"):
+            name = f"{channel}_{era}_{process}_{subprocess}.{extension}"
+            return (Path(args.base_dataset_directory) / Path(directory)).joinpath(name)
+
+        def any_cut(df):
+            pattern = "__common__cut__"
+            return df[[it for it in df.columns if it.startswith(pattern)]].any(axis=1)
+
+        subprocess_flags = [it for it in subprocess_dict.items() if it[0].startswith("is_")]
+        plain_dataframe_kwargs = dict(
+            tree_and_filepaths=list(Iterate.rdf_files(config[channel][era][process][Keys.PATHS])),
+            definitions=list(Iterate.common_dict(config[channel][era][process][Keys.COMMON])) + subprocess_flags,
+            additional_columns=list(config[channel][era][process][Keys.VARIABLES].keys()),
+            filters=None,
+        )
+
+        plain_subprocess_dataframe = ROOTToPlain(
+            raw_path=_path("raw"),
+            filtered_path=_path("filtered"),
+            dtype="pandas",
         ).setup_raw_dataframe(
-            tree_and_filepaths=list(Iterate.rdf_files(process_dict[Keys.PATHS])),
-            filters=None,  # if you want to cut on RDataFrame level.
-            definitions=list(Iterate.common_dict(process_dict[Keys.COMMON])),
-            additional_columns=list(process_dict[Keys.VARIABLES].keys()),
-            description=f"{channel}_{era}_{process}",
+            **plain_dataframe_kwargs,
+            description=f"{channel}_{era}_{process}_{subprocess}",
             max_workers=16,
-        ).pandasDataFrame_filtered(
-            filter_funciton=lambda df: df[[it for it in df.columns if it.startswith("__common__cut__")]].any(axis=1),
+        ).filter_dataframe(
+            filter_function=any_cut,
         ).dataframe
 
         add = ProcessDataFrameManipulation(
             config=config,
-            process_dict=process_dict,
-            process_df=raw_process_df,
+            subprocess_dict=subprocess_dict,
+            subprocess_df=plain_subprocess_dataframe.reset_index(drop=True),
+            process_name=process,
+            subprocess_name=subprocess,
         )
         process_df = (
             pd.DataFrame()
-            .pipe(add.labels, renaming_map={"is_data": "is_jetFakes"})
+            .pipe(
+                add.labels,
+                renaming_map={
+                    "is_DY__DY-ZL": "is_dyjets",
+                    "is_EMB__Embedded": "is_embedding",
+                    "is_TT__TT-TTL": "is_ttbar",
+                    "is_VV__VV_VVL": "is_diboson",
+                    "is_data": "is_jetFakes",
+                    "is_ggH__ggH125": "is_ggh_htautau",
+                    "is_VBF__VBF125": "is_vbf_htautau",
+                },   # SMHtt mt specific
+            )
+            .pipe(remove_cut_regions, regions=("same_sign", "same_sign_anti_iso"))  # exemplary before setting pd.MultiIndex
+            .pipe(add.update_subprocess_df, by="index")  # adjusting add.subprocess_df based on cut from remove_cut_regions
             .pipe(add.event_quantities)
             .pipe(add.nominal_variables)
-            .pipe(add.nominal_weight)
-            .pipe(add.nominal_additional if process not in {"qqH", "ggH"} else add.passtrough)
+            .pipe(add.nominal_weight_and_cut)
+            .pipe(add.additional_nominal_cuts)
             .pipe(add.weight_like_uncertainties)
             .pipe(add.shift_like_uncertainties)
         )
 
+        if subprocess == "jetFakes":  # Name is SMHtt specific, might differ
+            process_df = (
+                process_df
+                .pipe(add.adjust_jetFakes_weights)
+            )
+
         process_df.columns = pd.MultiIndex.from_tuples(process_df.columns)
+
+        process_df = (
+            process_df
+            .pipe(custom_selection, optimize_selection=True)  # exemplary after setting pd.MultiIndex
+        )
 
         logger.info("Creating folds:")
         for fold_name, fold in folds_splitted.items():
@@ -116,24 +254,27 @@ if __name__ == "__main__":
             logger.info(f"\t{fold_name}: Shape: {fold['data'][-1].shape}")
 
     logger.info("Merging folds and adjusting")
-
-    folds = (
-        PipeDict(
-            {
-                k: pd.concat(v["data"], ignore_index=True).reset_index(drop=True)
-                for k, v in tqdm(folds_splitted.items())
-            }
-        )
-        # Not needed if you do not include any systematic variations
-        .pipe(CombinedDataFrameManipulation.fill_nans_in_weight_like)
-        .pipe(CombinedDataFrameManipulation.fill_nans_in_shift_like)
-        # Potentially not needed here, depending on the data
-        .pipe(CombinedDataFrameManipulation.fill_nans_in_nominal_additional)
+    folds = PipeDict(
+        {
+            k: pd.concat(v["data"], ignore_index=True).reset_index(drop=True)
+            for k, v in tqdm(folds_splitted.items())
+        }
     )
 
-    os.makedirs(os.path.join(args.base_dataset_directory, "folds"), exist_ok=True)
+    folds = (
+        folds
+        .pipe(
+            CombinedDataFrameManipulation.fill_nans_in_weight_like,
+            has_jetFakes=True,  # SMHtt specific
+            jetFakes_identifier="is_jetFakes",  # SMHtt specific
+        )
+        .pipe(CombinedDataFrameManipulation.fill_nans_in_shift_like)
+        .pipe(CombinedDataFrameManipulation.fill_nans_in_nominal_additional, default_value=0.0)
+    )
+
+    (Path(args.base_dataset_directory) / Path("folds")).mkdir(parents=True, exist_ok=True)
 
     for fold_name, fold in folds.items():
-        path = os.path.join(args.base_dataset_directory, "folds", f"{fold_name}.feather")
-        fold.to_feather(path)
-        logger.info(f"Created {fold_name} with shape {fold.shape} at {path}")
+        fold_path = (Path(args.base_dataset_directory) / Path("folds")).joinpath(f"{fold_name}.feather")
+        fold.to_feather(fold_path)
+        logger.info(f"Created {fold_name} with shape {fold.shape} at {fold_path}")

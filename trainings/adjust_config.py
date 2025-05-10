@@ -53,7 +53,6 @@ if __name__ == "__main__":
         .pipe(
             ConfigModification.general.remove_from_config,
             processes=["W", "DYNLO"],
-            subprocesses=["-ZJ", "-ZTT", "-TTJ", "-TTT", "-VVJ", "-VVT"],
         )
         .pipe(ConfigModification.general.remove_variation_pattern, ff_pattern="anti_iso_CMS_", ignore_process="data")
         .pipe(ConfigModification.general.rename, processes={"data": "jetFakes"}, subprocesses={"data": "jetFakes"})

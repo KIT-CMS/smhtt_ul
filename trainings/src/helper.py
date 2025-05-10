@@ -115,7 +115,8 @@ class Iterate:
                     if not isinstance(process_dict, dict):
                         continue
                     for subprocess, subprocess_dict in process_dict.items():
-                        if isinstance(subprocess_dict, dict) and subprocess not in skip_subprocesses:
+                        flagname = f"is_{process}__{subprocess.replace('-', '_')}"
+                        if isinstance(subprocess_dict, dict) and subprocess not in skip_subprocesses and subprocess != flagname:
                             yield channel, era, process, subprocess, subprocess_dict
 
     @staticmethod

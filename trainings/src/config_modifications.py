@@ -179,7 +179,7 @@ class _GeneralConfigManipulation(object):
             for _process, _subprocess in process_subprocesses:
                 flag = int(_process == process and _subprocess == subprocess)
                 key = f"is_{_process}__{_subprocess.replace('-', '_')}"
-                config[channel][era][process][Keys.COMMON][key] = f"(float){flag}."
+                config[channel][era][process][subprocess][key] = f"(float){flag}."
                 logger.info(f"Adding {key} flag for {channel} {era} {process}")
 
         return config
@@ -191,12 +191,22 @@ class _SpecificConfigManipulation(object):
         config = deepcopy(config)
 
         for channel, era, process, _, subprocess_dict in Iterate.subprocesses(config):
-            config[channel][era][process].get(Keys.COMMON, {})
-            config[channel][era][process][Keys.COMMON][Keys.CUT] = {}
-            config[channel][era][process][Keys.COMMON][Keys.WEIGHT] = {}
-            common_cuts_rev, common_weights_rev = {}, {}
+            config[channel][era][process].setdefault(Keys.COMMON, {})
+            config[channel][era][process][Keys.COMMON].setdefault(Keys.CUT, {})
+            config[channel][era][process][Keys.COMMON].setdefault(Keys.WEIGHT, {})
+
+            try:
+                common_cuts_rev = dict(map(reversed, config[channel][era][process][Keys.COMMON][Keys.CUT].items()))
+            except KeyError:
+                common_cuts_rev = {}
+            try:
+                common_weights_rev = dict(map(reversed, config[channel][era][process][Keys.COMMON][Keys.WEIGHT].items()))
+            except KeyError:
+                common_weights_rev = {}
 
             for shift, shift_dict in subprocess_dict.items():
+                if not isinstance(shift_dict, dict):
+                    continue
                 cut, weight = shift_dict.get(Keys.CUT), shift_dict.get(Keys.WEIGHT)
                 if cut is None or weight is None:
                     raise MissingCutOrWeight(f"Missing cut or weight for {shift} in {subprocess_dict}, aborting.")

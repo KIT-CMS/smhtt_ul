@@ -5,7 +5,6 @@ import os
 import pickle
 from functools import partial
 from itertools import combinations
-from typing import Union
 
 import yaml
 
@@ -181,17 +180,6 @@ def parse_arguments():
         default="default",
         type=str,
         help="Tag to be used for the validation of the input samples",
-    )
-    parser.add_argument(
-        "--selection-option",
-        help="Set to the DR used for the fake factor estimation.",
-        choices=["CR", "DR;ff;wjet", "DR;ff;qcd", "DR;ff;ttbar"],
-        default="CR",
-    )
-    parser.add_argument(
-        "--ff-type",
-        help=f"Set to the type of fake factor used.\n{variations.__FF_OPTION_info__}",
-        default="fake_factor"
     )
     parser.add_argument(
         "--selection-option",
