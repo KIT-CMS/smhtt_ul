@@ -19,7 +19,7 @@ def unique_filename(item: Union[str, List[str]]) -> Union[str, List[str]]:
 
 
 def generate_filepath_dict(
-    paths: str,
+    paths: List[str],
     num_bytes: Union[int, None] = None,
 ) -> Tuple[int, dict]:
 

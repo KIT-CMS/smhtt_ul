@@ -39,8 +39,8 @@ if __name__ == "__main__":
     args = parse_args()
 
     ignore_for_now = {  # until fixed, TODO:
-        "lhe_scale_weight__LHEScaleMuFWeig",
-        "lhe_scale_weight__LHEScaleMuRWeig",
+        "lhe_scale_weight__LHEScaleMuFWeigt",
+        "lhe_scale_weight__LHEScaleMuRWeigt",
     }
     Iterate.common_dict = partial(Iterate.common_dict, ignore_weight_and_cuts=ignore_for_now)
     logger.warning(f"Ignoring cuts and weights of {ignore_for_now}, until fixed!")
@@ -50,12 +50,20 @@ if __name__ == "__main__":
         PipeDict()
         .pipe(ConfigModification.general.recursive_update_from_file, path=args.configs)
         .pipe(ConfigModification.general.set_common)
-        .pipe(
+        .pipe(  # SMHtt specific, (usage of jetFakes)
             ConfigModification.general.remove_from_config,
             processes=["W", "DYNLO"],
         )
-        .pipe(ConfigModification.general.remove_variation_pattern, ff_pattern="anti_iso_CMS_", ignore_process="data")
-        .pipe(ConfigModification.general.rename, processes={"data": "jetFakes"}, subprocesses={"data": "jetFakes"})
+        .pipe(  # SMHtt specific, (usage of jetFakes with uncertainties selected only for data)
+            ConfigModification.general.remove_variation_pattern,
+            ff_pattern="anti_iso_CMS_",
+            ignore_process="data",
+        )
+        .pipe(  # SMHtt specific, (usage of jetFakes with uncertainties selected only for data)
+            ConfigModification.general.rename,
+            processes={"data": "jetFakes"},
+            subprocesses={"data": "jetFakes"},
+        )
         .pipe(ConfigModification.general.add_era_and_process_name_flags)
         .pipe(ConfigModification.specific.convert_weights_and_cuts_to_common)
         .pipe(ConfigModification.specific.add_set_of_training_variables, training_variables=training_variables)

@@ -26,13 +26,12 @@ def parse_args():
     parser.add_argument(
         "--config",
         type=str,
-        default="./mt__tmp_config__modified.yaml",
         help="Path to the config file",
     )
     parser.add_argument(
         "--base-dataset-directory",
         type=str,
-        default=f"/ceph/{os.environ['USER']}/HiggsToTauTau/training_datasets",
+        default=f"/ceph/{os.environ['USER']}/smhtt_ul/training_datasets",
         help="Base directory for the output files",
     )
     return parser.parse_args()
@@ -48,7 +47,7 @@ def tiled_mask(
 
     Args:
         df (pd.DataFrame): The dataframe to create the mask for.
-        pattern (Iterable[bool]): The pattern to repeat, i.e. [True, True, False, False] for 2 training and 2 validation folds.
+        pattern (Iterable[bool]): The pattern to repeat, i.e. [True, True, False, False].
 
     Returns:
         np.ndarray: A boolean mask of the same length as the dataframe.
@@ -69,7 +68,7 @@ def odd_id(df: pd.DataFrame) -> np.ndarray:
     return (df[Keys.EVENT][Keys.ID] % 2).astype(bool)
 
 
-def remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd.DataFrame:
+def exemplary_remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd.DataFrame:
     """
     Exemplary function.
 
@@ -94,7 +93,7 @@ def remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd.DataFrame
     return df.copy()
 
 
-def custom_selection(df: pd.DataFrame, optimize_selection: bool = False) -> pd.DataFrame:
+def exemplary_custom_selection(df: pd.DataFrame, optimize_selection: bool = False) -> pd.DataFrame:
     """
     Exemplary function.
 
@@ -128,7 +127,6 @@ def custom_selection(df: pd.DataFrame, optimize_selection: bool = False) -> pd.D
             selection_mask = df[[it for it in _cut if it in df.columns]].astype(bool).any(axis=1)
 
         mask |= (process_mask & selection_mask)
-
 
     mask &= df[[it for it in df.columns if Keys.CUT in it]].astype(bool).any(axis=1)  # any cut
 
@@ -166,7 +164,9 @@ if __name__ == "__main__":
     process_dataframes = []
     for channel, era, process, subprocess, subprocess_dict in Iterate.subprocesses(config):
 
-        if subprocess in {"DY-ZJ", "DY-ZTT", "TT-TTJ", "TT-TTT", "VV-VVJ", "VV-VVT"}:  # SMHtt specific
+        # SMHtt mt specific, will differ for other analysis
+        subprocesses_to_skip = {"DY-ZJ", "DY-ZTT", "TT-TTJ", "TT-TTT", "VV-VVJ", "VV-VVT"}
+        if subprocess in subprocesses_to_skip:
             continue
 
         logger.info(f"Processing {channel} {era} {process} - {subprocess}")
@@ -190,7 +190,6 @@ if __name__ == "__main__":
         plain_subprocess_dataframe = ROOTToPlain(
             raw_path=_path("raw"),
             filtered_path=_path("filtered"),
-            dtype="pandas",
         ).setup_raw_dataframe(
             **plain_dataframe_kwargs,
             description=f"{channel}_{era}_{process}_{subprocess}",
@@ -210,7 +209,7 @@ if __name__ == "__main__":
             pd.DataFrame()
             .pipe(
                 add.labels,
-                renaming_map={
+                renaming_map={  # SMHtt mt specific, will differ for other analysis
                     "is_DY__DY-ZL": "is_dyjets",
                     "is_EMB__Embedded": "is_embedding",
                     "is_TT__TT-TTL": "is_ttbar",
@@ -218,10 +217,12 @@ if __name__ == "__main__":
                     "is_data": "is_jetFakes",
                     "is_ggH__ggH125": "is_ggh_htautau",
                     "is_VBF__VBF125": "is_vbf_htautau",
-                },   # SMHtt mt specific
+                },
             )
-            .pipe(remove_cut_regions, regions=("same_sign", "same_sign_anti_iso"))  # exemplary before setting pd.MultiIndex
-            .pipe(add.update_subprocess_df, by="index")  # adjusting add.subprocess_df based on cut from remove_cut_regions
+            # exemplary custom function before setting pd.MultiIndex
+            .pipe(exemplary_remove_cut_regions, regions=("same_sign", "same_sign_anti_iso"))
+            # adjusting add.subprocess_df based on cut from remove_cut_regions requiered
+            .pipe(add.update_subprocess_df, by="index")
             .pipe(add.event_quantities)
             .pipe(add.nominal_variables)
             .pipe(add.nominal_weight_and_cut)
@@ -230,7 +231,7 @@ if __name__ == "__main__":
             .pipe(add.shift_like_uncertainties)
         )
 
-        if subprocess == "jetFakes":  # Name is SMHtt specific, might differ
+        if subprocess == "jetFakes":  # SMHtt specific, might differ
             process_df = (
                 process_df
                 .pipe(add.adjust_jetFakes_weights)
@@ -240,7 +241,9 @@ if __name__ == "__main__":
 
         process_df = (
             process_df
-            .pipe(custom_selection, optimize_selection=True)  # exemplary after setting pd.MultiIndex
+            # exemplary custom function after setting pd.MultiIndex
+            # independent from ProcessDataFrameManipulation
+            .pipe(exemplary_custom_selection, optimize_selection=True)
         )
 
         logger.info("Creating folds:")
@@ -265,8 +268,8 @@ if __name__ == "__main__":
         folds
         .pipe(
             CombinedDataFrameManipulation.fill_nans_in_weight_like,
-            has_jetFakes=True,  # SMHtt specific
-            jetFakes_identifier="is_jetFakes",  # SMHtt specific
+            has_jetFakes=True,  # SMHtt specific, might differ
+            jetFakes_identifier="is_jetFakes",  # SMHtt specific, might differ
         )
         .pipe(CombinedDataFrameManipulation.fill_nans_in_shift_like)
         .pipe(CombinedDataFrameManipulation.fill_nans_in_nominal_additional, default_value=0.0)

@@ -5,7 +5,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Literal, Tuple, Union
 
-import numpy as np
 import pandas as pd
 import ROOT
 from src.helper import Iterate, Keys, optional_process_pool
@@ -14,7 +13,6 @@ from tqdm import tqdm
 try:
     from config.logging_setup_configs import duplicate_filter_context, setup_logging
 except ModuleNotFoundError:
-    import sys
     sys.path.extend([".", ".."])
     from config.logging_setup_configs import duplicate_filter_context, setup_logging
 
@@ -38,6 +36,11 @@ def tuple_column(*args: str, length: int = 5) -> str:
 
 
 class ROOTToPlain(object):
+    """
+    Generic converter class handling conversion of multiple ROOT files including friends
+    into a single ROOT or pandas DataFrame containing definitions, filter operations and
+    column collections simultaneously using multiprocessing.
+    """
 
     def __init__(
         self,
@@ -399,6 +402,7 @@ class ROOTToPlain(object):
 
             self._dataframe = self._dataframe.Filter(filter_function)
             logger.info(f"Filtered dataframe shape: {initial_shape} -> {self._dataframe.Count()}")
+
         if self.filtered_path is not None:
             logger.info(f"Saving filtered dataframe to {self.filtered_path}")
             self.filtered_path.parent.mkdir(parents=True, exist_ok=True)
@@ -418,6 +422,9 @@ class ROOTToPlain(object):
 
 
 class _FromConfig(object):
+    """
+    Helper to extract variables from the config.
+    """
     def __init__(self, config: dict):
         self.config = config
 
@@ -484,6 +491,9 @@ class _FromConfig(object):
 
 
 class ProcessDataFrameManipulation:
+    """
+    Helper to manipulate the dataframe for a single process.
+    """
     def __init__(
         self,
         config: dict,
@@ -559,6 +569,7 @@ class ProcessDataFrameManipulation:
         weight, cut = self.subprocess_dict[Keys.NOMINAL][Keys.WEIGHT], self.subprocess_dict[Keys.NOMINAL][Keys.CUT]
         df[tuple_column(Keys.NOMINAL, Keys.WEIGHT)] = self.subprocess_df[weight].astype(float).values
         df[tuple_column(Keys.NOMINAL, Keys.CUT)] = self.subprocess_df[cut].astype(float).values
+
         return df.copy()
 
     def event_quantities(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -574,6 +585,7 @@ class ProcessDataFrameManipulation:
         with duplicate_filter_context(logger):
             logger.warning("Update event quantities to use NTuple Event ID!")
         df[tuple_column(Keys.EVENT, Keys.ID)] = range(len(self.subprocess_df))
+
         return df.copy()
 
     def additional_nominal_cuts(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -705,6 +717,10 @@ class ProcessDataFrameManipulation:
 
 
 class CombinedDataFrameManipulation:
+    """
+    Helper to manipulate the dataframe for all processes combined, handling mainly
+    NaN values in the dataframe that arise from process stacking into a single dataframe.
+    """
     @staticmethod
     def _fill_nans_in_variables(dfs: pd.DataFrame, filter_function: callable):
         """
@@ -745,7 +761,11 @@ class CombinedDataFrameManipulation:
         return dfs.copy()
 
     @staticmethod
-    def _fill_nans_in_weight_like_jetFakes(dfs: pd.DataFrame, jetFakes_identifier: str, filter_function: callable) -> pd.DataFrame:
+    def _fill_nans_in_weight_like_jetFakes(
+        dfs: pd.DataFrame,
+        jetFakes_identifier: str,
+        filter_function: callable,
+    ) -> pd.DataFrame:
         """
         Generic function to fill NaN values in weight and cut columns in presence of jetFakes.
         jetFakes events are replaced with anti_iso weight and cut values, other events are

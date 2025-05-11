@@ -29,7 +29,7 @@ FF_OPTIONS = {
         "tt_1": "fake_factor_1",
         "tt_2": "fake_factor_2",
     },
-    "fake_factor_w_bias_corr": {
+    "fake_factor_with_bias_corr": {
         "lt": """(
                     (
                         raw_qcd_fake_factor_2 *
@@ -98,13 +98,13 @@ FF_OPTIONS = {
     "raw_qcd_fake_factor": {
         "lt": "raw_qcd_fake_factor_2",
     },
-    "raw_qcd_fake_factor_w_bias_corr": {
+    "raw_qcd_fake_factor_with_bias_corr": {
         "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2)",
     },
-    "raw_qcd_fake_factor_w_DR_SR_corr": {
+    "raw_qcd_fake_factor_with_DR_SR_corr": {
         "lt": "(raw_qcd_fake_factor_2 * qcd_DR_SR_correction_2)",
     },
-    "raw_qcd_fake_factor_w_DR_SR_and_bias_corr": {
+    "raw_qcd_fake_factor_with_DR_SR_and_bias_corr": {
         "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2 * qcd_DR_SR_correction_2)",
     },
     # --------------------------------------------------------------------------------------
@@ -114,13 +114,13 @@ FF_OPTIONS = {
     "raw_wjets_fake_factor": {
         "lt": "raw_wjets_fake_factor_2",
     },
-    "raw_wjets_fake_factor_w_bias_corr": {
+    "raw_wjets_fake_factor_with_bias_corr": {
         "lt": "(raw_wjets_fake_factor_2 * wjets_correction_wo_DR_SR_2)",
     },
-    "raw_wjets_fake_factor_w_DR_SR_corr": {
+    "raw_wjets_fake_factor_with_DR_SR_corr": {
         "lt": "(raw_wjets_fake_factor_2 * wjets_DR_SR_correction_2)",
     },
-    "raw_wjets_fake_factor_w_DR_SR_and_bias_corr": {
+    "raw_wjets_fake_factor_with_DR_SR_and_bias_corr": {
         "lt": "(raw_wjets_fake_factor_2 * wjets_correction_wo_DR_SR_2 * wjets_DR_SR_correction_2)",
     },
     # --------------------------------------------------------------------------------------
@@ -130,13 +130,13 @@ FF_OPTIONS = {
     "raw_ttbar_fake_factor": {
         "lt": "raw_ttbar_fake_factor_2",
     },
-    "raw_ttbar_fake_factor_w_bias_corr": {
+    "raw_ttbar_fake_factor_with_bias_corr": {
         "lt": "(raw_ttbar_fake_factor_2 * ttbar_correction_wo_DR_SR_2)",
     },
-    "raw_ttbar_fake_factor_w_DR_SR_corr": {
+    "raw_ttbar_fake_factor_with_DR_SR_corr": {
         "lt": "(raw_ttbar_fake_factor_2 * 1.0)",
     },
-    "raw_ttbar_fake_factor_w_DR_SR_and_bias_corr": {
+    "raw_ttbar_fake_factor_with_DR_SR_and_bias_corr": {
         "lt": "(raw_ttbar_fake_factor_2 * ttbar_correction_wo_DR_SR_2 * 1.0)",
     },
     # --------------------------------------------------------------------------------------
