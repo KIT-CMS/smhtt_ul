@@ -1,7 +1,7 @@
 tt:
   '2018':
     DY:
-      DY:
+      DY-ZJ:
         Nominal:
           cut: __common__cut__0__
           variables: __nominal_variables__
@@ -18,35 +18,148 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)1.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
           weight: __common__weight__0__
         uncertainties: {}
+      DY-ZL:
+        Nominal:
+          cut: __common__cut__4__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__5__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__7__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)1.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
+      DY-ZTT:
+        Nominal:
+          cut: __common__cut__8__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__9__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__11__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)1.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
       common:
         cut:
-          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
+          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__10__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==5&&gen_match_2==5)))
+          __common__cut__11__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==5&&gen_match_2==5)))
+          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__4__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__5__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__6__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__7__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__8__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==5&&gen_match_2==5)))
+          __common__cut__9__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==5&&gen_match_2==5)))
         is_2016postVFP: (float)0.
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)1.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*((crossSectionPerEventWeight*((1.0/negative_events_fraction)*(((genWeight<0)*(-1))+((genWeight>=0)*1)))))*(ZPtMassReweightWeight)
       nominal_variables:
@@ -369,6 +482,31 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)1.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
@@ -384,20 +522,6 @@ tt:
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)1.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(!(gen_match_1==5&&gen_match_2==5))*(!(gen_match_1==6||gen_match_2==6))*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       nominal_variables:
@@ -477,6 +601,31 @@ tt:
           cut: __common__cut__0__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)1.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         uncertainties: {}
       common:
         cut:
@@ -485,20 +634,6 @@ tt:
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)1.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight*0.1)
       nominal_variables:
@@ -561,7 +696,7 @@ tt:
         pt_dijet: pt_dijet
         pt_vis: pt_vis
     ST:
-      ST:
+      ST-STJ:
         Nominal:
           cut: __common__cut__0__
           variables: __nominal_variables__
@@ -578,37 +713,152 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)1.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
           weight: __common__weight__0__
         uncertainties: {}
+      ST-STL:
+        Nominal:
+          cut: __common__cut__4__
+          variables: __nominal_variables__
+          weight: __common__weight__1__
+        abcd_anti_iso:
+          cut: __common__cut__5__
+          variables: __nominal_variables__
+          weight: __common__weight__1__
+        abcd_same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__1__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__7__
+          variables: __nominal_variables__
+          weight: __common__weight__1__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)1.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__1__
+        uncertainties: {}
+      ST-STT:
+        Nominal:
+          cut: __common__cut__8__
+          variables: __nominal_variables__
+          weight: __common__weight__2__
+        abcd_anti_iso:
+          cut: __common__cut__9__
+          variables: __nominal_variables__
+          weight: __common__weight__2__
+        abcd_same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__2__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__11__
+          variables: __nominal_variables__
+          weight: __common__weight__2__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)1.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__2__
+        uncertainties: {}
       common:
         cut:
-          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
+          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__10__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__11__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__4__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__5__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__6__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__7__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__8__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__9__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
         is_2016postVFP: (float)0.
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)1.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
-          __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
+          __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)*(1.005110*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0))
+          __common__weight__1__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)*(1.017508*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0))
+          __common__weight__2__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)*(0.999864*btag_weight*(bpair_pt_1>=0)+(bpair_pt_1<0))
       nominal_variables:
         deltaR_ditaupair: deltaR_ditaupair
         is_2016postVFP: is_2016postVFP
@@ -861,7 +1111,7 @@ tt:
         pt_dijet: pt_dijet
         pt_vis: pt_vis
     TT:
-      TT:
+      TT-TTJ:
         Nominal:
           cut: __common__cut__0__
           variables: __nominal_variables__
@@ -878,35 +1128,148 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)1.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
           weight: __common__weight__0__
         uncertainties: {}
+      TT-TTL:
+        Nominal:
+          cut: __common__cut__4__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__5__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__7__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)1.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
+      TT-TTT:
+        Nominal:
+          cut: __common__cut__8__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__9__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__11__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)1.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
       common:
         cut:
-          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
+          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==6||gen_match_2==6)))
+          __common__cut__10__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==5&&gen_match_2==5))
+          __common__cut__11__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==5&&gen_match_2==5))
+          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==6||gen_match_2==6)))
+          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==6||gen_match_2==6)))
+          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==6||gen_match_2==6)))
+          __common__cut__4__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((!(gen_match_1==5&&gen_match_2==5)))&&((!(gen_match_1==6||gen_match_2==6)))
+          __common__cut__5__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((!(gen_match_1==5&&gen_match_2==5)))&&((!(gen_match_1==6||gen_match_2==6)))
+          __common__cut__6__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((!(gen_match_1==5&&gen_match_2==5)))&&((!(gen_match_1==6||gen_match_2==6)))
+          __common__cut__7__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((!(gen_match_1==5&&gen_match_2==5)))&&((!(gen_match_1==6||gen_match_2==6)))
+          __common__cut__8__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==5&&gen_match_2==5))
+          __common__cut__9__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==5&&gen_match_2==5))
         is_2016postVFP: (float)0.
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)1.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)*(topPtReweightWeight)
       nominal_variables:
@@ -1266,7 +1629,7 @@ tt:
         pt_dijet: pt_dijet
         pt_vis: pt_vis
     TTV:
-      TTV:
+      TTV-TTVJ:
         Nominal:
           cut: __common__cut__0__
           variables: __nominal_variables__
@@ -1283,35 +1646,148 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)1.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
           weight: __common__weight__0__
         uncertainties: {}
+      TTV-TTVL:
+        Nominal:
+          cut: __common__cut__4__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__5__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__7__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)1.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
+      TTV-TTVT:
+        Nominal:
+          cut: __common__cut__8__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__9__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__11__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)1.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
       common:
         cut:
-          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
+          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__10__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__11__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__4__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__5__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__6__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__7__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__8__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__9__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
         is_2016postVFP: (float)0.
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)1.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       nominal_variables:
@@ -1469,6 +1945,31 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)1.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
@@ -1484,20 +1985,6 @@ tt:
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)1.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       nominal_variables:
@@ -1584,7 +2071,7 @@ tt:
         pt_dijet: pt_dijet
         pt_vis: pt_vis
     VV:
-      VV:
+      VV-VVJ:
         Nominal:
           cut: __common__cut__0__
           variables: __nominal_variables__
@@ -1601,35 +2088,148 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)1.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
           weight: __common__weight__0__
         uncertainties: {}
+      VV-VVL:
+        Nominal:
+          cut: __common__cut__4__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__5__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__7__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)1.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
+      VV-VVT:
+        Nominal:
+          cut: __common__cut__8__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__9__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__11__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)1.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
       common:
         cut:
-          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
+          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==6||gen_match_2==6)))
+          __common__cut__10__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==5&&gen_match_2==5))
+          __common__cut__11__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==5&&gen_match_2==5))
+          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==6||gen_match_2==6)))
+          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==6||gen_match_2==6)))
+          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(((gen_match_1==6||gen_match_2==6)))
+          __common__cut__4__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((!(gen_match_1==5&&gen_match_2==5)))&&((!(gen_match_1==6||gen_match_2==6)))
+          __common__cut__5__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((!(gen_match_1==5&&gen_match_2==5)))&&((!(gen_match_1==6||gen_match_2==6)))
+          __common__cut__6__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((!(gen_match_1==5&&gen_match_2==5)))&&((!(gen_match_1==6||gen_match_2==6)))
+          __common__cut__7__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((!(gen_match_1==5&&gen_match_2==5)))&&((!(gen_match_1==6||gen_match_2==6)))
+          __common__cut__8__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==5&&gen_match_2==5))
+          __common__cut__9__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==5&&gen_match_2==5))
         is_2016postVFP: (float)0.
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)1.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       nominal_variables:
@@ -1902,7 +2502,7 @@ tt:
         pt_dijet: pt_dijet
         pt_vis: pt_vis
     VVV:
-      VVV:
+      VVV-VVVJ:
         Nominal:
           cut: __common__cut__0__
           variables: __nominal_variables__
@@ -1919,35 +2519,148 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)1.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
           weight: __common__weight__0__
         uncertainties: {}
+      VVV-VVVL:
+        Nominal:
+          cut: __common__cut__4__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__5__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__7__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)1.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__6__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
+      VVV-VVVT:
+        Nominal:
+          cut: __common__cut__8__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_anti_iso:
+          cut: __common__cut__9__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        abcd_same_sign_anti_iso:
+          cut: __common__cut__11__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)1.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
+        same_sign:
+          cut: __common__cut__10__
+          variables: __nominal_variables__
+          weight: __common__weight__0__
+        uncertainties: {}
       common:
         cut:
-          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
+          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__10__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__11__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&((gen_match_1==6||gen_match_2==6))
+          __common__cut__4__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__5__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__6__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__7__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(!(gen_match_1==5&&gen_match_2==5))&&(!(gen_match_1==6||gen_match_2==6))
+          __common__cut__8__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
+          __common__cut__9__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))&&(gen_match_1==5&&gen_match_2==5)
         is_2016postVFP: (float)0.
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)1.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       nominal_variables:
@@ -2039,6 +2752,31 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)1.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
@@ -2054,20 +2792,6 @@ tt:
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)1.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       nominal_variables:
@@ -2236,20 +2960,6 @@ tt:
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)1.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       ggH125:
@@ -2269,6 +2979,31 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)1.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
@@ -2342,338 +3077,6 @@ tt:
         pt_2: pt_2
         pt_dijet: pt_dijet
         pt_vis: pt_vis
-    jetFakes:
-      common:
-        cut:
-          __common__cut__0__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__1__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(((q_1*q_2)<0))&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__2__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5)&&(id_tau_vsJet_Medium_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-          __common__cut__3__: ((extraelec_veto<0.5))&&((extramuon_veto<0.5))&&((dilepton_veto<0.5))&&(q_1*q_2>0)&&((nbtag>=1)&&(bpair_pt_2>0))&&((id_tau_vsMu_VLoose_1>0.5)&&(id_tau_vsMu_VLoose_2>0.5))&&((id_tau_vsEle_VVLoose_1>0.5)&&(id_tau_vsEle_VVLoose_2>0.5))&&((id_tau_vsJet_Medium_1>0.5&&id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5))&&((pt_1>40)&&(pt_2>40))&&(((trg_double_tau35_tightiso_tightid>0.5)||(trg_double_tau35_mediumiso_hps>0.5)||(trg_double_tau40_mediumiso_tightid>0.5)||(trg_double_tau40_tightiso>0.5)))
-        is_2016postVFP: (float)0.
-        is_2016preVFP: (float)0.
-        is_2017: (float)0.
-        is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)1.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)0.
-        weight:
-          __common__weight__0__: (float)1.
-      jetFakes:
-        Nominal:
-          cut: __common__cut__0__
-          variables: __nominal_variables__
-          weight: __common__weight__0__
-        abcd_anti_iso:
-          cut: __common__cut__1__
-          variables: __nominal_variables__
-          weight: __common__weight__0__
-        abcd_same_sign:
-          cut: __common__cut__2__
-          variables: __nominal_variables__
-          weight: __common__weight__0__
-        abcd_same_sign_anti_iso:
-          cut: __common__cut__3__
-          variables: __nominal_variables__
-          weight: __common__weight__0__
-        same_sign:
-          cut: __common__cut__2__
-          variables: __nominal_variables__
-          weight: __common__weight__0__
-        uncertainties: {}
-      nominal_variables:
-        deltaR_ditaupair: deltaR_ditaupair
-        is_2016postVFP: is_2016postVFP
-        is_2016preVFP: is_2016preVFP
-        is_2017: is_2017
-        is_2018: is_2018
-        is_data: is_data
-        is_dyjets: is_dyjets
-        is_embedding: is_embedding
-        is_ggh_htautau: is_ggh_htautau
-        is_ttbar: is_ttbar
-        is_vbf_htautau: is_vbf_htautau
-        is_wjets: is_wjets
-        jeta_1: jeta_1
-        jeta_2: jeta_2
-        jpt_1: jpt_1
-        jpt_2: jpt_2
-        m_fastmtt: m_fastmtt
-        m_vis: m_vis
-        mjj: mjj
-        nbtag: nbtag
-        njets: njets
-        pt_1: pt_1
-        pt_2: pt_2
-        pt_dijet: pt_dijet
-        pt_vis: pt_vis
-      paths:
-        friends__fastmtt:
-          172: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_45.root
-          1327: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_36.root
-          1472: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_9.root
-          2005: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_32.root
-          2015: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_29.root
-          2475: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_2.root
-          4147: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_28.root
-          4632: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_19.root
-          5208: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_18.root
-          7200: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_20.root
-          7340: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_34.root
-          7675: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_3.root
-          8460: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_5.root
-          8709: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_32.root
-          9458: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_5.root
-          9854: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_35.root
-          11915: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_55.root
-          12657: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_42.root
-          12895: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_1.root
-          12946: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_4.root
-          12948: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_20.root
-          13927: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_46.root
-          14036: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_53.root
-          14162: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_50.root
-          14487: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_30.root
-          14664: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_11.root
-          15656: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_58.root
-          16722: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_52.root
-          17401: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_28.root
-          17864: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_40.root
-          18380: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_44.root
-          19141: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_7.root
-          19976: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_59.root
-          20384: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_14.root
-          20443: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_24.root
-          21319: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_24.root
-          21592: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_26.root
-          21766: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_51.root
-          22594: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_22.root
-          22888: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_11.root
-          23235: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_14.root
-          23553: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_31.root
-          23558: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_38.root
-          23941: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_2.root
-          25124: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_47.root
-          25159: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_16.root
-          25262: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_48.root
-          25391: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_8.root
-          25875: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_0.root
-          27479: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_65.root
-          27891: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_15.root
-          29586: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_21.root
-          29648: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_2.root
-          29939: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_13.root
-          30381: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_3.root
-          30552: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_54.root
-          30598: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_23.root
-          31215: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_3.root
-          31299: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_22.root
-          31724: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_62.root
-          32463: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_23.root
-          33540: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_63.root
-          33759: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_49.root
-          35229: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_19.root
-          35766: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_8.root
-          36177: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000_3.root
-          36419: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_25.root
-          37198: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_10.root
-          37458: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_30.root
-          37788: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_56.root
-          38555: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_17.root
-          39038: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_6.root
-          39187: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_41.root
-          39779: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_34.root
-          40046: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000_0.root
-          40095: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_29.root
-          41232: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_37.root
-          41251: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_27.root
-          43339: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_21.root
-          44296: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_67.root
-          45345: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_9.root
-          45346: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_12.root
-          46296: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_16.root
-          46680: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_6.root
-          47556: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_33.root
-          47692: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_5.root
-          48362: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_1.root
-          48718: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_10.root
-          48990: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_26.root
-          49132: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_60.root
-          49668: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_0.root
-          49836: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000_1.root
-          50710: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_7.root
-          51196: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_15.root
-          52214: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_27.root
-          52473: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_4.root
-          54881: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_4.root
-          54932: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_17.root
-          56702: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_66.root
-          57017: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_57.root
-          57831: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_39.root
-          57838: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_13.root
-          57960: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_1.root
-          58735: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_43.root
-          62024: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_25.root
-          62138: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_64.root
-          62604: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_68.root
-          62705: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_31.root
-          63077: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_12.root
-          63553: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_33.root
-          64850: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_6.root
-          64914: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_61.root
-          65085: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000_2.root
-          65494: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNFriends/fastmtt/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_18.root
-        ntuple:
-          172: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_45.root
-          1327: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_36.root
-          1472: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_9.root
-          2005: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_32.root
-          2015: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_29.root
-          2475: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_2.root
-          4147: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_28.root
-          4632: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_19.root
-          5208: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_18.root
-          7200: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_20.root
-          7340: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_34.root
-          7675: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_3.root
-          8460: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_5.root
-          8709: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_32.root
-          9458: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_5.root
-          9854: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_35.root
-          11915: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_55.root
-          12657: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_42.root
-          12895: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_1.root
-          12946: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_4.root
-          12948: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_20.root
-          13927: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_46.root
-          14036: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_53.root
-          14162: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_50.root
-          14487: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_30.root
-          14664: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_11.root
-          15656: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_58.root
-          16722: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_52.root
-          17401: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_28.root
-          17864: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_40.root
-          18380: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_44.root
-          19141: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_7.root
-          19976: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_59.root
-          20384: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_14.root
-          20443: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_24.root
-          21319: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_24.root
-          21592: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_26.root
-          21766: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_51.root
-          22594: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_22.root
-          22888: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_11.root
-          23235: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_14.root
-          23553: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_31.root
-          23558: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_38.root
-          23941: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_2.root
-          25124: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_47.root
-          25159: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_16.root
-          25262: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_48.root
-          25391: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_8.root
-          25875: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_0.root
-          27479: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_65.root
-          27891: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_15.root
-          29586: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_21.root
-          29648: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_2.root
-          29939: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_13.root
-          30381: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_3.root
-          30552: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_54.root
-          30598: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_23.root
-          31215: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_3.root
-          31299: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_22.root
-          31724: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_62.root
-          32463: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_23.root
-          33540: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_63.root
-          33759: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_49.root
-          35229: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_19.root
-          35766: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_8.root
-          36177: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000_3.root
-          36419: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_25.root
-          37198: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_10.root
-          37458: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_30.root
-          37788: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_56.root
-          38555: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_17.root
-          39038: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_6.root
-          39187: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_41.root
-          39779: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_34.root
-          40046: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000_0.root
-          40095: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_29.root
-          41232: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_37.root
-          41251: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_27.root
-          43339: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_21.root
-          44296: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_67.root
-          45345: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_9.root
-          45346: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_12.root
-          46296: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_16.root
-          46680: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_6.root
-          47556: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_33.root
-          47692: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_5.root
-          48362: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_1.root
-          48718: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_10.root
-          48990: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_26.root
-          49132: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_60.root
-          49668: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018A_1732626664-00000000000000000000000000000000_0.root
-          49836: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000_1.root
-          50710: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_7.root
-          51196: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_15.root
-          52214: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_27.root
-          52473: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_4.root
-          54881: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_4.root
-          54932: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_17.root
-          56702: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_66.root
-          57017: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_57.root
-          57831: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_39.root
-          57838: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_13.root
-          57960: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_1.root
-          58735: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_43.root
-          62024: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_25.root
-          62138: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_64.root
-          62604: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_68.root
-          62705: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_31.root
-          63077: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_12.root
-          63553: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_33.root
-          64850: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018B_1732626664-00000000000000000000000000000000_6.root
-          64914: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_61.root
-          65085: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018C_1732626664-00000000000000000000000000000000_2.root
-          65494: root://cmsdcache-kit-disk.gridka.de:1094//store/user/sdaigler/CROWN/ntuples/all-v4/CROWNRun/2018/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000/tt/Tau_aakhmets-data_2018UL_tau_Tau_Run2018D_1734106865-00000000000000000000000000000000_18.root
-      variables:
-        deltaR_ditaupair: deltaR_ditaupair
-        is_2016postVFP: is_2016postVFP
-        is_2016preVFP: is_2016preVFP
-        is_2017: is_2017
-        is_2018: is_2018
-        is_data: is_data
-        is_dyjets: is_dyjets
-        is_embedding: is_embedding
-        is_ggh_htautau: is_ggh_htautau
-        is_ttbar: is_ttbar
-        is_vbf_htautau: is_vbf_htautau
-        is_wjets: is_wjets
-        jeta_1: jeta_1
-        jeta_2: jeta_2
-        jpt_1: jpt_1
-        jpt_2: jpt_2
-        m_fastmtt: m_fastmtt
-        m_vis: m_vis
-        mjj: mjj
-        nbtag: nbtag
-        njets: njets
-        pt_1: pt_1
-        pt_2: pt_2
-        pt_dijet: pt_dijet
-        pt_vis: pt_vis
     qqH:
       common:
         cut:
@@ -2685,20 +3088,6 @@ tt:
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)1.
-        is_ttH__ttH125: (float)0.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       nominal_variables:
@@ -2754,6 +3143,31 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)1.
+        is_ttH__ttH125: (float)0.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__
@@ -2796,20 +3210,6 @@ tt:
         is_2016preVFP: (float)0.
         is_2017: (float)0.
         is_2018: (float)1.
-        is_DY__DY: (float)0.
-        is_EWK__EWK: (float)0.
-        is_HH2B2Tau__HH2B2Tau: (float)0.
-        is_ST__ST: (float)0.
-        is_TTV__TTV: (float)0.
-        is_TT__TT: (float)0.
-        is_VH__VH125: (float)0.
-        is_VVV__VVV: (float)0.
-        is_VV__VV: (float)0.
-        is_W__W: (float)0.
-        is_ggH__ggH125: (float)0.
-        is_jetFakes__jetFakes: (float)0.
-        is_qqH__qqH125: (float)0.
-        is_ttH__ttH125: (float)1.
         weight:
           __common__weight__0__: (puweight)*(((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1+(gen_match_2!=5)))*(((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_1!=5))*((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1+(gen_match_2!=5)))*(59.83*1000.0)*(1.0)*(btag_weight)*(numberGeneratedEventsWeight)*(((1.0/negative_events_fraction)*(((genWeight<0)*-1)+((genWeight>0*1))))*crossSectionPerEventWeight)
       nominal_variables:
@@ -2892,6 +3292,31 @@ tt:
           cut: __common__cut__3__
           variables: __nominal_variables__
           weight: __common__weight__0__
+        is_DY__DY_ZJ: (float)0.
+        is_DY__DY_ZL: (float)0.
+        is_DY__DY_ZTT: (float)0.
+        is_EWK__EWK: (float)0.
+        is_HH2B2Tau__HH2B2Tau: (float)0.
+        is_ST__ST_STJ: (float)0.
+        is_ST__ST_STL: (float)0.
+        is_ST__ST_STT: (float)0.
+        is_TTV__TTV_TTVJ: (float)0.
+        is_TTV__TTV_TTVL: (float)0.
+        is_TTV__TTV_TTVT: (float)0.
+        is_TT__TT_TTJ: (float)0.
+        is_TT__TT_TTL: (float)0.
+        is_TT__TT_TTT: (float)0.
+        is_VH__VH125: (float)0.
+        is_VVV__VVV_VVVJ: (float)0.
+        is_VVV__VVV_VVVL: (float)0.
+        is_VVV__VVV_VVVT: (float)0.
+        is_VV__VV_VVJ: (float)0.
+        is_VV__VV_VVL: (float)0.
+        is_VV__VV_VVT: (float)0.
+        is_W__W: (float)0.
+        is_ggH__ggH125: (float)0.
+        is_qqH__qqH125: (float)0.
+        is_ttH__ttH125: (float)1.
         same_sign:
           cut: __common__cut__2__
           variables: __nominal_variables__

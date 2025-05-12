@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument(
         "--base-dataset-directory",
         type=str,
-        default="/work/sdaigler/HH2b2tau/training_datasets",
+        default=f"/work/{os.environ['USER']}/smhtt_ul/training_datasets",
         help="Base directory for the output files",
     )
     return parser.parse_args()
@@ -110,7 +110,7 @@ def exemplary_custom_selection(df: pd.DataFrame, optimize_selection: bool = Fals
     """
     mask = False
     is_nominal = tuple_column(Keys.NOMINAL, Keys.CUT)
-    is_anti_iso = tuple_column(Keys.NOMINAL, "anti_iso", Keys.CUT)
+    is_anti_iso = tuple_column(Keys.NOMINAL, "abcd_anti_iso", Keys.CUT)
     for _process, _cut in [
         ("is_jetFakes", [is_anti_iso]),
         ("is_ttbar", [is_anti_iso, is_nominal]),
@@ -165,9 +165,9 @@ if __name__ == "__main__":
     for channel, era, process, subprocess, subprocess_dict in Iterate.subprocesses(config):
 
         # SMHtt mt specific, will differ for other analysis
-        subprocesses_to_skip = {"DY-ZJ", "DY-ZTT", "TT-TTJ", "TT-TTT", "VV-VVJ", "VV-VVT"}
-        if subprocess in subprocesses_to_skip:
-            continue
+        # subprocesses_to_skip = {"DY-ZJ", "DY-ZTT", "TT-TTJ", "TT-TTT", "VV-VVJ", "VV-VVT"}
+        # if subprocess in subprocesses_to_skip:
+        #     continue
 
         logger.info(f"Processing {channel} {era} {process} - {subprocess}")
 
@@ -209,36 +209,42 @@ if __name__ == "__main__":
             pd.DataFrame()
             .pipe(
                 add.labels,
-                renaming_map={  # SMHtt mt specific, will differ for other analysis
-                    "is_DY__DY-ZL": "is_dyjets",
-                    "is_EMB__Embedded": "is_embedding",
-                    "is_TT__TT-TTL": "is_ttbar",
-                    "is_VV__VV_VVL": "is_diboson",
-                    "is_data": "is_jetFakes",
-                    "is_ggH__ggH125": "is_ggh_htautau",
-                    "is_VBF__VBF125": "is_vbf_htautau",
-                },
+                # renaming_map={  # SMHtt mt specific, will differ for other analysis
+                #     "is_DY__DY-ZL": "is_dyjets",
+                #     "is_EMB__Embedded": "is_embedding",
+                #     "is_TT__TT-TTL": "is_ttbar",
+                #     "is_VV__VV_VVL": "is_diboson",
+                #     "is_data": "is_jetFakes",
+                #     "is_ggH__ggH125": "is_ggh_htautau",
+                #     "is_VBF__VBF125": "is_vbf_htautau",
+                # },
             )
             # exemplary custom function before setting pd.MultiIndex
-            .pipe(exemplary_remove_cut_regions, regions=("same_sign", "same_sign_anti_iso"))
+            .pipe(exemplary_remove_cut_regions, regions=("abcd_same_sign", "abcd_same_sign_anti_iso"))
             # adjusting add.subprocess_df based on cut from remove_cut_regions requiered
             .pipe(add.update_subprocess_df, by="index")
             .pipe(add.event_quantities)
             .pipe(add.nominal_variables)
-            .pipe(add.nominal_weight)
-            .pipe(add.nominal_additional if process not in {"HH2B2Tau"} else add.passtrough)
+            .pipe(add.nominal_weight_and_cut)
+            .pipe(add.additional_nominal_cuts)
             # .pipe(add.weight_like_uncertainties)
             # .pipe(add.shift_like_uncertainties)
         )
 
+        # if subprocess == "jetFakes":  # SMHtt specific, might differ
+        #     process_df = (
+        #         process_df
+        #         .pipe(add.adjust_jetFakes_weights)
+        #     )
+
         process_df.columns = pd.MultiIndex.from_tuples(process_df.columns)
 
-        process_df = (
-            process_df
-            # exemplary custom function after setting pd.MultiIndex
-            # independent from ProcessDataFrameManipulation
-            .pipe(exemplary_custom_selection, optimize_selection=True)
-        )
+        # process_df = (
+        #     process_df
+        #     # exemplary custom function after setting pd.MultiIndex
+        #     # independent from ProcessDataFrameManipulation
+        #     .pipe(exemplary_custom_selection, optimize_selection=True)
+        # )
 
         logger.info("Creating folds:")
         for fold_name, fold in folds_splitted.items():
@@ -262,7 +268,7 @@ if __name__ == "__main__":
         folds
         .pipe(
             CombinedDataFrameManipulation.fill_nans_in_weight_like,
-            has_jetFakes=True,  # SMHtt specific, might differ
+            has_jetFakes=False,  # SMHtt specific, might differ
             jetFakes_identifier="is_jetFakes",  # SMHtt specific, might differ
         )
         .pipe(CombinedDataFrameManipulation.fill_nans_in_shift_like)
