@@ -5,7 +5,8 @@ import os
 import pickle
 from functools import partial
 from itertools import combinations
-from typing import Union
+
+import yaml
 
 import yaml
 
@@ -13,7 +14,7 @@ import config.shapes.process_selection as selection
 import config.shapes.signal_variations as signal_variations  # TODO: Unify this?
 import config.shapes.variations as variations
 import shapes.utils as shape_utils
-import config.shapes.ntuple_processor_config_helper as ntuple_processor_config_helper
+import config.ntuple_processor_config_helper as ntuple_processor_config_helper
 from config.helper_collection import PreserveROOTPathsAsStrings
 from config.logging_setup_configs import setup_logging
 from config.shapes.category_selection import categorization as default_categorization
@@ -193,17 +194,6 @@ def parse_arguments():
         help=f"Set to the type of fake factor used.\n{variations.__FF_OPTION_info__}",
         default="fake_factor"
     )
-    parser.add_argument(
-        "--selection-option",
-        help="Set to the DR used for the fake factor estimation.",
-        choices=["CR", "DR;ff;wjet", "DR;ff;qcd", "DR;ff;ttbar"],
-        default="CR",
-    )
-    parser.add_argument(
-        "--ff-type",
-        help=f"Set to the type of fake factor used.\n{variations.__FF_OPTION_info__}",
-        default="fake_factor"
-    )
     return parser.parse_args()
 
 
@@ -314,20 +304,18 @@ def get_control_units(
                     )
             variables.extend(variables_2d)
             logger.info(
-                "Will run GoFs for {} variables, indluding {} 2D variables".format(
-                    len(variables) - len(variables_2d), len(variables_2d)
-                )
+                f"Will run GoFs for {len(variables) - len(variables_2d)} variables, including {len(variables_2d)} 2D variables"
             )
-        logger.debug("Variables: {}".format(variables))
+        logger.debug(f"Variables: {variables}")
     # check that all variables are available
     variable_set = set()
     for variable in set(variables):
         if variable not in control_binning[channel]:
-            raise Exception("Variable %s not available in control_binning" % variable)
+            raise Exception(f"Variable {variable} not available in control_binning")
         else:
             variable_set.add(variable)
     # variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
-    logger.info("[INFO] Running control plots for variables: {}".format(variable_set))
+    logger.info(f"[INFO] Running control plots for variables: {variable_set}")
 
     _selection_kwargs = dict(
         channel=channel,
@@ -400,7 +388,7 @@ def collect_config(
             default_flow_style=False,
             Dumper=PreserveROOTPathsAsStrings,
         )
-    logger.info("Configuration written to %s", args.config_output_file)
+    logger.info(f"Configuration written to {args.config_output_file}")
     logger.info("Due to a bug in ROOT/xrd the script won't exit properly. Please kill it manually. (i.e. Ctrl+z && kill %1)")
 
 
@@ -417,7 +405,7 @@ def main(args):
     if ".root" in args.output_file:
         output_file = args.output_file
     else:
-        output_file = "{}.root".format(args.output_file)
+        output_file = f"{args.output_file}.root"
     # setup categories depending on the selected anayses
     unit_manager = UnitManager()
     logger.info(f"Apply tau ID: {args.apply_tauid}")
@@ -556,19 +544,15 @@ def main(args):
 
     for channel in args.channels:
         _book(signalsS, [])
-        if channel in ["mt", "et"]:
-            for procs in [embS, dataS | trueTauBkgS | leptonFakesS, jetFakesDS[channel]]:
-                _book(procs, variations.SemiLeptonicFFEstimations.unrolled())
+        if channel in {"mt", "et"}:
+            _book(embS | dataS | trueTauBkgS | leptonFakesS | jetFakesDS[channel], variations.SemiLeptonicFFEstimations.unrolled())
         elif channel == "tt":
-            for procs in [dataS | embS | trueTauBkgS, leptonFakesS, jetFakesDS[channel]]:
-                _book(procs, variations.FullyHadronicFFEstimations.unrolled())
+            _book(dataS | embS | trueTauBkgS | leptonFakesS | jetFakesDS[channel], variations.FullyHadronicFFEstimations.unrolled())
         elif channel == "em":
             _book((dataS | embS | simulatedProcsDS[channel]) - signalsS, [variations.same_sign_em])
-        elif channel == "mm":
+        elif channel in {"mm", "ee"}:
             _book(procS, [variations.same_sign])
             # _book_histogram(processes=embS, variations=[trigger_eff_mt_emb])
-        elif channel == "ee":
-            _book(procS, [variations.same_sign])
         ##################################
         # SYSTEMATICS
         ############################
@@ -628,13 +612,23 @@ def main(args):
             if "2018" in args.era:
                 _book(simulatedProcsDS[channel], [variations.jet_es_hem])
 
-
     # Step 2: convert units to graphs and merge them
     g_manager = GraphManager(unit_manager.booked_units, True)
     g_manager.optimize(args.optimization_level)
     graphs = g_manager.graphs
     for graph in graphs:
-        print("%s" % graph)
+        print(f"{graph}")
+
+    if args.collect_config_only:
+        if len(args.channels) > 1:
+            raise NotImplementedError("Collecting config for multiple channels is not implemented yet.")
+        collect_config(
+            graphs=graphs,
+            era=args.era,
+            channel=args.channels[0],
+            filename=args.config_output_file,
+        )
+        return
 
     if args.collect_config_only:
         if len(args.channels) > 1:
@@ -658,9 +652,9 @@ def main(args):
             graph_file = os.path.join(args.graph_dir, graph_file_name)
         else:
             graph_file = graph_file_name
-        logger.info("Writing created graphs to file %s.", graph_file)
-        with open(graph_file, "wb") as _friend:
-            pickle.dump(graphs, _friend)
+        logger.info(f"Writing created graphs to file {graph_file}")
+        with open(graph_file, "wb") as file:
+            pickle.dump(graphs, file)
     else:
         r_manager = RunManager(graphs)
         r_manager.run_locally(output_file, args.num_processes, args.num_threads)
@@ -671,7 +665,7 @@ if __name__ == "__main__":
     if ".root" in args.output_file:
         log_file = args.output_file.replace(".root", ".log")
     else:
-        log_file = "{}.log".format(args.output_file)
+        log_file = f"{args.output_file}.log"
     logger = setup_logging(logger=logging.getLogger(__name__))
     variations.set_ff_type(args.ff_type)
     main(args)

@@ -10,6 +10,8 @@ __pycache__/
 *$py.class
 impacts*/
 *.bak
+*.bak.*
+*.original
 
 # C extensions
 *.so
