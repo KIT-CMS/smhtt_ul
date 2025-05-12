@@ -55,11 +55,6 @@ if __name__ == "__main__":
             processes=["W", "DYNLO"],
         )
         .pipe(  # SMHtt specific, (usage of jetFakes with uncertainties selected only for data)
-            ConfigModification.general.remove_variation_pattern,
-            ff_pattern="anti_iso_CMS_",
-            ignore_process="data",
-        )
-        .pipe(  # SMHtt specific, (usage of jetFakes with uncertainties selected only for data)
             ConfigModification.general.rename,
             processes={"data": "jetFakes"},
             subprocesses={"data": "jetFakes"},

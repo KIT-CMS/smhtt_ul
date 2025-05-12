@@ -141,12 +141,12 @@ if __name__ == "__main__":
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
 
-    ignore_for_now = {  # until fixed, TODO:
-        "lhe_scale_weight__LHEScaleMuFWeig",
-        "lhe_scale_weight__LHEScaleMuRWeig",
+    WEIGHT_AND_CUT_CONTAINING = {  # until fixed, TODO:
+        "lhe_scale_weight__LHEScaleMuFWeigt",
+        "lhe_scale_weight__LHEScaleMuRWeigt",
     }
-    Iterate.common_dict = partial(Iterate.common_dict, ignore_weight_and_cuts=ignore_for_now)
-    logger.warning(f"Ignoring cuts and weights of {ignore_for_now}, until fixed!")
+    Iterate.common_dict = partial(Iterate.common_dict, ignore_weight_and_cuts=WEIGHT_AND_CUT_CONTAINING)
+    logger.warning(f"Ignoring cuts and weights of {WEIGHT_AND_CUT_CONTAINING}, until fixed!")
 
     subfold_pattern = [True, True, False, False]
     folds_splitted = {
@@ -160,13 +160,14 @@ if __name__ == "__main__":
             ("fold1_validation", lambda df: ~odd_id(df) & ~tiled_mask(df, subfold_pattern)),
         ]
     }
+    # SMHtt mt specific, will differ for other analysis
+    # TODO: individually select for each analysis if needed
+    SUBPROCESSES_TO_SKIP = {"DY-ZJ", "DY-ZTT", "TT-TTJ", "TT-TTT", "VV-VVJ", "VV-VVT"}
 
     process_dataframes = []
     for channel, era, process, subprocess, subprocess_dict in Iterate.subprocesses(config):
 
-        # SMHtt mt specific, will differ for other analysis
-        subprocesses_to_skip = {"DY-ZJ", "DY-ZTT", "TT-TTJ", "TT-TTT", "VV-VVJ", "VV-VVT"}
-        if subprocess in subprocesses_to_skip:
+        if subprocess in SUBPROCESSES_TO_SKIP:
             continue
 
         logger.info(f"Processing {channel} {era} {process} - {subprocess}")
@@ -209,7 +210,9 @@ if __name__ == "__main__":
             pd.DataFrame()
             .pipe(
                 add.labels,
-                renaming_map={  # SMHtt mt specific, will differ for other analysis
+                renaming_map={
+                    # SMHtt mt specific, will differ for other analysis
+                    # TODO: individually adjust for each analysis
                     "is_DY__DY-ZL": "is_dyjets",
                     "is_EMB__Embedded": "is_embedding",
                     "is_TT__TT-TTL": "is_ttbar",
@@ -220,6 +223,7 @@ if __name__ == "__main__":
                 },
             )
             # exemplary custom function before setting pd.MultiIndex
+            # TODO: individually check for each analysis or remove completely
             .pipe(exemplary_remove_cut_regions, regions=("same_sign", "same_sign_anti_iso"))
             # adjusting add.subprocess_df based on cut from remove_cut_regions requiered
             .pipe(add.update_subprocess_df, by="index")
@@ -231,7 +235,9 @@ if __name__ == "__main__":
             .pipe(add.shift_like_uncertainties)
         )
 
-        if subprocess == "jetFakes":  # SMHtt specific, might differ
+        # SMHtt specific, might differ
+        # TODO: Apply only if present, otherwise remove. Name might differ
+        if subprocess == "jetFakes":
             process_df = (
                 process_df
                 .pipe(add.adjust_jetFakes_weights)
@@ -243,6 +249,7 @@ if __name__ == "__main__":
             process_df
             # exemplary custom function after setting pd.MultiIndex
             # independent from ProcessDataFrameManipulation
+            # TODO: Adjust for each analysis, or remove completely
             .pipe(exemplary_custom_selection, optimize_selection=True)
         )
 
@@ -268,8 +275,8 @@ if __name__ == "__main__":
         folds
         .pipe(
             CombinedDataFrameManipulation.fill_nans_in_weight_like,
-            has_jetFakes=True,  # SMHtt specific, might differ
-            jetFakes_identifier="is_jetFakes",  # SMHtt specific, might differ
+            has_jetFakes=True,  # SMHtt specific, might differ, TODO: set to False if not present
+            jetFakes_identifier="is_jetFakes",  # SMHtt specific, might differ, TODO: adjust if needed
         )
         .pipe(CombinedDataFrameManipulation.fill_nans_in_shift_like)
         .pipe(CombinedDataFrameManipulation.fill_nans_in_nominal_additional, default_value=0.0)
