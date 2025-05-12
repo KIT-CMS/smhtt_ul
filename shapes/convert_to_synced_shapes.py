@@ -28,13 +28,6 @@ _process_map = {
     "QCD": "QCD",
 }
 
-aranged = np.arange(4.0, -8.0 - 0.1, -0.1).round(2).tolist()
-cleaned_aranged = [0.0 if x == 0.0 else x for x in aranged]
-tau_es_map = {
-    f"emb{'minus' if val < 0 and not np.isclose(val, 0.0) else ''}{str(abs(val)).replace('.', 'p')}":
-    f"{val:.1f}" for val in cleaned_aranged
-    }
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--era", help="Experiment era.")
@@ -61,6 +54,18 @@ def parse_args():
     )
     parser.add_argument(
         "-n", "--num-processes", default=1, type=int, help="Number of processes used."
+    )
+    parser.add_argument(
+        "--es-up",
+        default=8,
+        type=int,
+        help="ES variation upper bound.",
+    )
+    parser.add_argument(
+        "--es-down",
+        default=-8,
+        type=int,
+        help="ES variation lower bound.",
     )
     return parser.parse_args()
 
@@ -382,4 +387,12 @@ def main(args):
 if __name__ == "__main__":
     args = parse_args()
     setup_logging("convert_to_synced_shapes.log", level=logging.INFO)
+    
+    aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
+    cleaned_aranged = [0.0 if x == 0.0 else x for x in aranged]
+    tau_es_map = {
+        f"emb{'minus' if val < 0 and not np.isclose(val, 0.0) else ''}{str(abs(val)).replace('.', 'p')}":
+        f"{val:.1f}" for val in cleaned_aranged
+    }
+    
     main(args)

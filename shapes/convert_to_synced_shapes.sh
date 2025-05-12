@@ -1,13 +1,13 @@
 #!/bin/bash
 
-ERA=$1
-CHANNEL=$2
-VARIABLE=$3
-TAG=$4
+ERA=${1}
+CHANNEL=${2}
+VARIABLE=${3}
+TAG=${4}
 
-CONTROL=$5
+CONTROL=${5}
 
-[[ ! -z $5 ]] || CONTROL=0
+[[ ! -z ${5} ]] || CONTROL=0
 
 source utils/bashFunctionCollection.sh
 source utils/setup_root.sh
