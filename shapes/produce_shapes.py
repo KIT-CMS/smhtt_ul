@@ -309,7 +309,7 @@ def get_control_units(
     variable_set = set()
     for variable in set(variables):
         if variable not in control_binning[channel]:
-            raise Exception("Variable %s not available in control_binning" % variable)
+            raise Exception(f"Variable {variable} not available in control_binning")
         else:
             variable_set.add(variable)
     # variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
@@ -542,19 +542,15 @@ def main(args):
 
     for channel in args.channels:
         _book(signalsS, [])
-        if channel in ["mt", "et"]:
-            for procs in [embS, dataS | trueTauBkgS | leptonFakesS, jetFakesDS[channel]]:
-                _book(procs, variations.SemiLeptonicFFEstimations.unrolled())
+        if channel in {"mt", "et"}:
+            _book(embS | dataS | trueTauBkgS | leptonFakesS | jetFakesDS[channel], variations.SemiLeptonicFFEstimations.unrolled())
         elif channel == "tt":
-            for procs in [dataS | embS | trueTauBkgS, leptonFakesS, jetFakesDS[channel]]:
-                _book(procs, variations.FullyHadronicFFEstimations.unrolled())
+            _book(dataS | embS | trueTauBkgS | leptonFakesS | jetFakesDS[channel], variations.FullyHadronicFFEstimations.unrolled())
         elif channel == "em":
             _book((dataS | embS | simulatedProcsDS[channel]) - signalsS, [variations.same_sign_em])
-        elif channel == "mm":
+        elif channel in {"mm", "ee"}:
             _book(procS, [variations.same_sign])
             # _book_histogram(processes=embS, variations=[trigger_eff_mt_emb])
-        elif channel == "ee":
-            _book(procS, [variations.same_sign])
         ##################################
         # SYSTEMATICS
         ############################
@@ -614,13 +610,12 @@ def main(args):
             if "2018" in args.era:
                 _book(simulatedProcsDS[channel], [variations.jet_es_hem])
 
-
     # Step 2: convert units to graphs and merge them
     g_manager = GraphManager(unit_manager.booked_units, True)
     g_manager.optimize(args.optimization_level)
     graphs = g_manager.graphs
     for graph in graphs:
-        print("%s" % graph)
+        print(f"{graph}")
 
     if args.collect_config_only:
         if len(args.channels) > 1:
@@ -644,7 +639,7 @@ def main(args):
             graph_file = os.path.join(args.graph_dir, graph_file_name)
         else:
             graph_file = graph_file_name
-        logger.info("Writing created graphs to file %s.", graph_file)
+        logger.info(f"Writing created graphs to file {graph_file}")
         with open(graph_file, "wb") as file:
             pickle.dump(graphs, file)
     else:
