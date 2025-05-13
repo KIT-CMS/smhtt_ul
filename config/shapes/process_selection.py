@@ -199,7 +199,7 @@ def HH2B2Tau_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     HH2B2Tau_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight * 0.1", "crossSectionPerEventWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
         ]
     )
     return Selection(name="HH2B2Tau", weights=[weight for weight in HH2B2Tau_weights if weight is not None])
