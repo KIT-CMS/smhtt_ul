@@ -19,9 +19,9 @@ from config.logging_setup_configs import setup_logging
 
 def get_signal_scale(channel: str) -> int:
     if channel == "tt":
-        return 20
+        return 2
     elif channel == "et" or channel == "mt":
-        return 100
+        return 10
     else:
         return 1
 
