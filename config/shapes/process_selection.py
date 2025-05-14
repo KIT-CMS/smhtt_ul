@@ -445,27 +445,27 @@ List of other processes meant to be put on top of base processes:
 
 def ZTT_process_selection(channel, **kwargs):
     tt_cut = __get_ZTT_cut(channel)
-    return Selection(name="ZTT", cuts=[(tt_cut, "ztt_cut")])
+    return Selection(name="ZTT", cuts=[(f"({tt_cut})", "ztt_cut")])
 
 
 def ZTT_nlo_process_selection(channel, **kwargs):
     tt_cut = __get_ZTT_cut(channel)
-    return Selection(name="ZTT_nlo", cuts=[(tt_cut, "ztt_cut")])
+    return Selection(name="ZTT_nlo", cuts=[(f"({tt_cut})", "ztt_cut")])
 
 
 def __get_ZTT_cut(channel, **kwargs):
     if "mt" in channel:
-        return "gen_match_1==4 && gen_match_2==5"
+        return "(gen_match_1==4 && gen_match_2==5)"
     elif "et" in channel:
-        return "gen_match_1==3 && gen_match_2==5"
+        return "(gen_match_1==3 && gen_match_2==5)"
     elif "tt" in channel:
-        return "gen_match_1==5 && gen_match_2==5"
+        return "(gen_match_1==5 && gen_match_2==5)"
     elif "em" in channel:
-        return "gen_match_1==3 && gen_match_2==4"
+        return "(gen_match_1==3 && gen_match_2==4)"
     elif "mm" in channel:
-        return "gen_match_1==4 && gen_match_2==4"
+        return "(gen_match_1==4 && gen_match_2==4)"
     elif "ee" in channel:
-        return "gen_match_1==3 && gen_match_2==3"
+        return "(gen_match_1==3 && gen_match_2==3)"
 
 
 def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs):
@@ -513,13 +513,12 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                     ("iso_wgt_mu_1", "isoweight"),
                     ("id_wgt_mu_1", "idweight"),
                     ("(trg_wgt_single_mu24ormu27)", "trgweight"),
-                    (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight"),
                 ]
             )
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -706,8 +705,8 @@ def __get_ZL_cut(channel, **kwargs):
     emb_veto = ""
     ff_veto = ""
     if "mt" in channel:
-        emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
-        ff_veto = "!(gen_match_2 == 6)"
+        emb_veto = "(!(gen_match_1==4 && gen_match_2==5))"
+        ff_veto = "(!(gen_match_2 == 6))"
     elif "et" in channel:
         emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
         ff_veto = "!(gen_match_2 == 6)"
@@ -740,7 +739,7 @@ def ZJ_nlo_process_selection(channel, **kwargs):
 
 def __get_ZJ_cut(channel, **kwargs):
     if "mt" in channel or "et" in channel:
-        return "gen_match_2 == 6"
+        return "(gen_match_2 == 6)"
     elif "tt" in channel:
         return "(gen_match_1 == 6 || gen_match_2 == 6)"
     elif "em" in channel:
@@ -756,7 +755,7 @@ def __get_ZJ_cut(channel, **kwargs):
 def TTT_process_selection(channel, **kwargs):
     tt_cut = ""
     if "mt" in channel:
-        tt_cut = "gen_match_1==4 && gen_match_2==5"
+        tt_cut = "(gen_match_1==4 && gen_match_2==5)"
     elif "et" in channel:
         tt_cut = "gen_match_1==3 && gen_match_2==5"
     elif "tt" in channel:
@@ -767,15 +766,15 @@ def TTT_process_selection(channel, **kwargs):
         tt_cut = "gen_match_1==4 && gen_match_2==4"
     elif "ee" in channel:
         tt_cut = "gen_match_1==3 && gen_match_2==3"
-    return Selection(name="TTT", cuts=[(tt_cut, "ttt_cut")])
+    return Selection(name="TTT", cuts=[(f"({tt_cut})", "ttt_cut")])
 
 
 def TTL_process_selection(channel, **kwargs):
     emb_veto = ""
     ff_veto = ""
     if "mt" in channel:
-        emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
-        ff_veto = "!(gen_match_2 == 6)"
+        emb_veto = "(!(gen_match_1==4 && gen_match_2==5))"
+        ff_veto = "(!(gen_match_2 == 6))"
     elif "et" in channel:
         emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
         ff_veto = "!(gen_match_2 == 6)"
@@ -793,30 +792,27 @@ def TTL_process_selection(channel, **kwargs):
         ff_veto = "(1.0)"
     return Selection(
         name="TTL",
-        cuts=[
-            ("{}".format(emb_veto), "tt_emb_veto"),
-            ("{}".format(ff_veto), "ff_veto"),
-        ],
+        cuts=[(f"({emb_veto})", "tt_emb_veto"), (f"({ff_veto})", "ff_veto")],
     )
 
 
 def TTJ_process_selection(channel, **kwargs):
     ct = ""
     if "mt" in channel or "et" in channel:
-        ct = "(gen_match_2 == 6 && gen_match_2 == 6)"
+        ct = "(gen_match_2 == 6)"
     elif "tt" in channel:
         ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
     elif "em" in channel:
         ct = "0 == 1"
     elif "mm" in channel or "ee" in channel:
         ct = "0 == 1"
-    return Selection(name="TTJ", cuts=[(ct, "tt_fakes")])
+    return Selection(name="TTJ", cuts=[(f"({ct})", "tt_fakes")])
 
 
 def VVT_process_selection(channel, **kwargs):
     tt_cut = ""
     if "mt" in channel:
-        tt_cut = "gen_match_1==4 && gen_match_2==5"
+        tt_cut = "(gen_match_1==4 && gen_match_2==5)"
     elif "et" in channel:
         tt_cut = "gen_match_1==3 && gen_match_2==5"
     elif "tt" in channel:
@@ -827,28 +823,28 @@ def VVT_process_selection(channel, **kwargs):
         tt_cut = "gen_match_1==4 && gen_match_2==4"
     elif "ee" in channel:
         tt_cut = "gen_match_1==3 && gen_match_2==3"
-    return Selection(name="VVT", cuts=[(tt_cut, "vvt_cut")])
+    return Selection(name="VVT", cuts=[(f"({tt_cut})", "vvt_cut")])
 
 
 def VVJ_process_selection(channel, **kwargs):
     ct = ""
     if "mt" in channel or "et" in channel:
-        ct = "(gen_match_2 == 6 && gen_match_2 == 6)"
+        ct = "(gen_match_2 == 6)"
     elif "tt" in channel:
         ct = "(gen_match_1 == 6 || gen_match_2 == 6)"
     elif "em" in channel:
         ct = "0.0 == 1.0"
     elif "mm" in channel or "ee" in channel:
         ct = "0.0 == 1.0"
-    return Selection(name="VVJ", cuts=[(ct, "vv_fakes")])
+    return Selection(name="VVJ", cuts=[(f"({ct})", "vv_fakes")])
 
 
 def VVL_process_selection(channel, **kwargs):
     emb_veto = ""
     ff_veto = ""
     if "mt" in channel:
-        emb_veto = "!(gen_match_1==4 && gen_match_2==5)"
-        ff_veto = "!(gen_match_2 == 6)"
+        emb_veto = "(!(gen_match_1==4 && gen_match_2==5))"
+        ff_veto = "(!(gen_match_2 == 6))"
     elif "et" in channel:
         emb_veto = "!(gen_match_1==3 && gen_match_2==5)"
         ff_veto = "!(gen_match_2 == 6)"
@@ -866,10 +862,7 @@ def VVL_process_selection(channel, **kwargs):
         ff_veto = "(1.0)"
     return Selection(
         name="VVL",
-        cuts=[
-            ("{}".format(emb_veto), "tt_emb_veto"),
-            ("{}".format(ff_veto), "ff_veto"),
-        ],
+        cuts=[(f"({emb_veto})", "tt_emb_veto"), (f"({ff_veto})", "ff_veto")],
     )
 
 
