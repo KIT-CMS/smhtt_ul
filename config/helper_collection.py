@@ -1,5 +1,8 @@
-from typing import Any, Dict, Union
 from abc import ABC, abstractmethod
+from collections import defaultdict
+from typing import Any, Dict, Union
+
+import yaml
 
 
 class ObjBuildingDict(ABC, dict):
@@ -29,6 +32,7 @@ class ObjBuildingDict(ABC, dict):
     **kwargs : dict
         Keyword arguments passed to the parent dict initializer.
     """
+
     def __init__(
         self,
         *args: Any,
@@ -83,3 +87,50 @@ class ObjBuildingDict(ABC, dict):
             return self.build_obj(key, obj)
         except KeyError:
             raise KeyError(f"Key {key} not found in the dictionary")
+
+
+class NestedDefaultDict(defaultdict):
+    """
+    A nested defaultdict that allows for easy creation of
+    multi-level dictionaries with default values.
+    This class is a subclass of defaultdict and is used to
+    create a nested dictionary structure where each level
+    is also a defaultdict.
+    """
+    def __init__(self, *args, **kwargs) -> None:
+        super(NestedDefaultDict, self).__init__(NestedDefaultDict, *args, **kwargs)
+
+    def __repr__(self) -> str:
+        return repr(dict(self))
+
+    @property
+    def regular(self) -> dict:
+        """
+        Convert the defaultdict to a regular dictionary, useful i.e. when saving as yaml
+        """
+        def convert(d):
+            if isinstance(d, defaultdict):
+                d = {k: convert(v) for k, v in d.items()}
+            return d
+        return convert(self)
+
+
+class PreserveROOTPathsAsStrings(yaml.Dumper):
+    """
+    Custom YAML dumper that preserves ROOT paths as strings.
+    This is necessary, since paths containing "root://" are not
+    automatically converted to strings by PyYAML and raise errors upon loading.
+
+    usage:
+        yaml.dump(data, Dumper=PreserveROOTPathsAsStrings)
+
+    """
+
+    def represent_data(self, data):
+        """
+        Override the represent_data method to handle ROOT paths.
+        """
+        if isinstance(data, str) and data.startswith("root://"):
+            return self.represent_scalar('tag:yaml.org,2002:str', data, style="'")
+
+        return super(PreserveROOTPathsAsStrings, self).represent_data(data)

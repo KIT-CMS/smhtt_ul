@@ -157,8 +157,8 @@ def main(info):
         stype = "Nominal"
         cat = None
     else:
-        stype = "Nominal"
-        cat = args.category
+        stype = "Nominal"  # or args.category if you want to plot a special category
+        cat = args.category  # in that case this should be set to None
 
     for index, process in enumerate(bkg_processes):
         _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()

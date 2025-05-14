@@ -29,7 +29,7 @@ FF_OPTIONS = {
         "tt_1": "fake_factor_1",
         "tt_2": "fake_factor_2",
     },
-    "fake_factor_without_DR_SR": {
+    "fake_factor_with_bias_corr": {
         "lt": """(
                     (
                         raw_qcd_fake_factor_2 *
@@ -48,7 +48,7 @@ FF_OPTIONS = {
                     )
                 )"""
     },
-    "fake_factor_with_DR_SR_without_correction": {
+    "fake_factor_with_DR_SR_corr": {
         "lt": """(
                     (
                         raw_qcd_fake_factor_2 *
@@ -66,6 +66,25 @@ FF_OPTIONS = {
                     )
                 )""",
     },
+    "fake_factor_with_DR_SR_and_bias_corr": {
+        "lt": """(
+                    (
+                        raw_qcd_fake_factor_2 *
+                        qcd_fake_factor_fraction_2 *
+                        qcd_fake_factor_correction_2
+                    ) +
+                    (
+                        raw_wjets_fake_factor_2 *
+                        wjets_fake_factor_fraction_2 *
+                        wjets_fake_factor_correction_2
+                    ) +
+                    (
+                        raw_ttbar_fake_factor_2 *
+                        ttbar_fake_factor_fraction_2 *
+                        ttbar_fake_factor_correction_2
+                    )
+                )""",
+    },
     # --------------------------------------------------------------------------------------
     "raw_fake_factor": {
         "lt": "raw_fake_factor_2",
@@ -79,13 +98,13 @@ FF_OPTIONS = {
     "raw_qcd_fake_factor": {
         "lt": "raw_qcd_fake_factor_2",
     },
-    "raw_qcd_fake_factor_with_bias_correction": {
+    "raw_qcd_fake_factor_with_bias_corr": {
         "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2)",
     },
-    "raw_qcd_fake_factor_with_DR_SR_correction": {
+    "raw_qcd_fake_factor_with_DR_SR_corr": {
         "lt": "(raw_qcd_fake_factor_2 * qcd_DR_SR_correction_2)",
     },
-    "raw_qcd_fake_factor_with_DR_SR_correction_and_bias_correction": {
+    "raw_qcd_fake_factor_with_DR_SR_and_bias_corr": {
         "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2 * qcd_DR_SR_correction_2)",
     },
     # --------------------------------------------------------------------------------------
@@ -95,12 +114,30 @@ FF_OPTIONS = {
     "raw_wjets_fake_factor": {
         "lt": "raw_wjets_fake_factor_2",
     },
+    "raw_wjets_fake_factor_with_bias_corr": {
+        "lt": "(raw_wjets_fake_factor_2 * wjets_correction_wo_DR_SR_2)",
+    },
+    "raw_wjets_fake_factor_with_DR_SR_corr": {
+        "lt": "(raw_wjets_fake_factor_2 * wjets_DR_SR_correction_2)",
+    },
+    "raw_wjets_fake_factor_with_DR_SR_and_bias_corr": {
+        "lt": "(raw_wjets_fake_factor_2 * wjets_correction_wo_DR_SR_2 * wjets_DR_SR_correction_2)",
+    },
     # --------------------------------------------------------------------------------------
     "raw_ttbar_fake_factor_with_fraction": {
         "lt": "(raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)",
     },
     "raw_ttbar_fake_factor": {
         "lt": "raw_ttbar_fake_factor_2",
+    },
+    "raw_ttbar_fake_factor_with_bias_corr": {
+        "lt": "(raw_ttbar_fake_factor_2 * ttbar_correction_wo_DR_SR_2)",
+    },
+    "raw_ttbar_fake_factor_with_DR_SR_corr": {
+        "lt": "(raw_ttbar_fake_factor_2 * 1.0)",
+    },
+    "raw_ttbar_fake_factor_with_DR_SR_and_bias_corr": {
+        "lt": "(raw_ttbar_fake_factor_2 * ttbar_correction_wo_DR_SR_2 * 1.0)",
     },
     # --------------------------------------------------------------------------------------
 }
@@ -311,14 +348,6 @@ anti_iso_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     )
 )
-anti_iso_lt_no_ff = LazyVariable(
-    lambda: ReplaceCutAndAddWeight(
-        "anti_iso",
-        "tau_iso",
-        Cut("(id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
-        Weight("1.0", "fake_factor"),
-    )
-)
 anti_iso_tt_mcl = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
     lambda: ReplaceMultipleCutsAndAddWeight(
         "anti_iso",
@@ -445,6 +474,20 @@ jet_es = [
     ReplaceVariable("CMS_res_j_EraDown", "jerUncDown"),
 ]
 
+jet_es_hem = [
+    ReplaceVariable("CMS_scale_j_HEMIssue_EraUp", "jesUncHEMIssueUp"),
+    ReplaceVariable("CMS_scale_j_HEMIssue_EraDown", "jesUncHEMIssueDown"),
+]
+
+LHE_scale_norm_muR = [
+    AddWeight("LHE_scale_muR_normUp", Weight("(lhe_scale_weight__LHEScaleMuRWeightUp)", "muR2p0_muF2p0_weight")),
+    AddWeight("LHE_scale_muR_normDown", Weight("(lhe_scale_weight__LHEScaleMuRWeightDown)", "muR0p5_muF0p5_weight"))
+]
+
+LHE_scale_norm_muF = [
+    AddWeight("LHE_scale_muF_normUp", Weight("(lhe_scale_weight__LHEScaleMuFWeightUp)", "muR2p0_muF2p0_weight")),
+    AddWeight("LHE_scale_muF_normDown", Weight("(lhe_scale_weight__LHEScaleMuFWeightDown)", "muR0p5_muF0p5_weight"))
+]
 
 # MET variations.
 met_unclustered = [
@@ -1042,47 +1085,42 @@ top_pt = [
     RemoveWeight("CMS_htt_ttbarShapeDown", "topPtReweightWeight"),
 ]
 
-# TODO add fake factors
 _ff_variations_lt = [
-    "ff_tt_morphed_{shift}",
-    "ff_tt_sf_{shift}",
-    "ff_corr_tt_syst_{shift}",
-    "ff_frac_w_{shift}",
-    "ff_qcd_dr0_njet0_morphed_stat_{shift}",
-    "ff_qcd_dr0_njet1_morphed_stat_{shift}",
-    "ff_qcd_dr0_njet2_morphed_stat_{shift}",
-    "ff_w_dr0_njet0_morphed_stat_{shift}",
-    "ff_w_dr0_njet1_morphed_stat_{shift}",
-    "ff_w_dr0_njet2_morphed_stat_{shift}",
-    "ff_w_dr1_njet0_morphed_stat_{shift}",
-    "ff_w_dr1_njet1_morphed_stat_{shift}",
-    "ff_w_dr1_njet2_morphed_stat_{shift}",
-    "ff_tt_dr0_njet0_morphed_stat_{shift}",
-    "ff_tt_dr0_njet1_morphed_stat_{shift}",
-    "ff_w_lepPt_{shift}",
-    "ff_corr_w_lepPt_{shift}",
-    "ff_w_mc_{shift}",
-    "ff_corr_w_mt_{shift}",
-    "ff_w_mt_{shift}",
-    "ff_qcd_mvis_{shift}",
-    "ff_qcd_mvis_osss_{shift}",
-    "ff_corr_qcd_mvis_{shift}",
-    "ff_corr_qcd_mvis_osss_{shift}",
-    "ff_qcd_muiso_{shift}",
-    "ff_corr_qcd_muiso_{shift}",
-    "ff_qcd_mc_{shift}",
+    'QCDFFunc',
+    'QCDFFmcSubUnc',
+    'WjetsFFunc',
+    'WjetsFFmcSubUnc',
+    'ttbarFFunc',
+    'process_fractionsfracQCDUnc',
+    'process_fractionsfracWjetsUnc',
+    'process_fractionsfracTTbarUnc',
+    'QCD_non_closure_m_vis_Corr',
+    'QCD_non_closure_mass_2_Corr',
+    'QCD_non_closure_deltaR_ditaupair_Corr',
+    'QCD_non_closure_iso_1_Corr',
+    'QCD_non_closure_tau_decaymode_2_Corr',
+    'QCD_DR_SR_Corr',
+    'Wjets_non_closure_m_vis_Corr',
+    'Wjets_non_closure_mass_2_Corr',
+    'Wjets_non_closure_deltaR_ditaupair_Corr',
+    'Wjets_non_closure_iso_1_Corr',
+    'Wjets_non_closure_tau_decaymode_2_Corr',
+    'Wjets_DR_SR_Corr',
+    'ttbar_non_closure_m_vis_Corr',
+    'ttbar_non_closure_mass_2_Corr',
+    'ttbar_non_closure_deltaR_ditaupair_Corr',
+    'ttbar_non_closure_iso_1_Corr',
+    'ttbar_non_closure_tau_decaymode_2_Corr'
 ]
 #  Variations on the jet backgrounds estimated with the fake factor method.
 ff_variations_lt = [
     ReplaceCutAndAddWeight(
-        "anti_iso_CMS_{syst}_{ch}_{era}".format(syst=syst.format(shift=shift.capitalize()), era="Era", ch="Channel"),
+        f"anti_iso_CMS_{syst}{shift}_Channel_Era",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(
-            "ff2_{syst}".format(syst=syst.format(shift=shift)), "fake_factor"
-        ),
+        Weight(f"{RuntimeVariables.FF_name_lt}__{syst}{shift}", "fake_factor"),
     )
-    for shift in ["up", "down"]
+    for shift in ["Up", "Down"]
     for syst in _ff_variations_lt
 ]
 
@@ -1633,7 +1671,18 @@ is still possible.
 """
 
 
-class _VariationCollection:
+class VariationCollectionMeta(type):
+    def __add__(cls, other):
+        if not issubclass(other, _VariationCollection):
+            raise TypeError("Cannot add {} to {}".format(other, cls))
+        merged_attrs = {
+            **{k: v for k, v in cls.__dict__.items() if not k.startswith("__")},
+            **{k: v for k, v in other.__dict__.items() if not k.startswith("__")},
+        }
+        return type(f"{cls.__name__}+{other.__name__}", (_VariationCollection,), merged_attrs)
+
+
+class _VariationCollection(metaclass=VariationCollectionMeta):
     @classmethod
     def unrolled(cls):
         results = []
@@ -1657,11 +1706,49 @@ class FullyHadronicFFEstimations(_VariationCollection):
 
 # ------------------------------------------------------------------------------------------
 
+class LHE_scale(_VariationCollection):
+    muR = LHE_scale_norm_muR
+    muF = LHE_scale_norm_muF
+
+
+class Recoil(_VariationCollection):
+    recoil_resolution = recoil_resolution
+    recoil_response = recoil_response
+
+
+class TauEnergyScale(_VariationCollection):
+    tau_es_3prong = tau_es_3prong
+    tau_es_3prong1pizero = tau_es_3prong1pizero
+    tau_es_1prong = tau_es_1prong
+    tau_es_1prong1pizero = tau_es_1prong1pizero
+
+
+class TauEmbeddingEnergyScale(_VariationCollection):
+    emb_tau_es_3prong = emb_tau_es_3prong
+    emb_tau_es_3prong1pizero = emb_tau_es_3prong1pizero
+    emb_tau_es_1prong = emb_tau_es_1prong
+    emb_tau_es_1prong1pizero = emb_tau_es_1prong1pizero
+
+
+class FakeFactorLT(_VariationCollection):
+    ff_variations_lt = ff_variations_lt
+
+
+class TauIDAndTriggerEfficiency(_VariationCollection):
+    emb_tau_id_eff_tt = emb_tau_id_eff_tt
+    tau_id_eff_tt = tau_id_eff_tt
+    # tau_trigger_eff_tt_emb = tau_trigger_eff_tt_emb
+    # tau_trigger_eff_tt = tau_trigger_eff_tt
+    # emb_decay_mode_eff_tt = emb_decay_mode_eff_tt
+
+
+# ------------------------------------------------------------------------------------------
+
+
 class FakeProcessEstimationVariations(_VariationCollection):
     same_sign = same_sign
     same_sign_em = same_sign_em
     anti_iso_lt = anti_iso_lt
-    anti_iso_lt_no_ff = anti_iso_lt_no_ff
     anti_iso_tt = anti_iso_tt
     anti_iso_tt_mcl = anti_iso_tt_mcl
     abcd_method = abcd_method

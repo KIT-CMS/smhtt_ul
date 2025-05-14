@@ -140,7 +140,7 @@ def setup_logging(
     logger.addHandler(console_handler)
 
     file_formatter = CustomFormatter(use_color=False)
-    file_handler = logging.FileHandler(output_file, "w")
+    file_handler = logging.FileHandler(output_file, "a")
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 
