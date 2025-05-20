@@ -608,6 +608,23 @@ class ProcessDataFrameManipulation:
 
         return df.copy()
 
+    def fake_factor_columns(self, df: pd.DataFrame, columns: Iterable[str]) -> pd.DataFrame:
+        """
+        Adds fake factor columns to the dataframe based on provided column names.
+
+        Args:
+            df (pd.DataFrame): DataFrame to add fake factor columns to.
+            column_names (Iterable[str]): List of column names to add.
+
+        Returns:
+            pd.DataFrame: DataFrame with added fake factor columns.
+        """
+        for column_name in columns:
+            column = tuple_column(Keys.NOMINAL, column_name)
+            df[column] = self.subprocess_df[column_name].astype(float).values
+
+        return df.copy()
+
     def weight_like_uncertainties(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Adds weight-like uncertainties to the dataframe based on provided subprocess_dict

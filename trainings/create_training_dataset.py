@@ -180,19 +180,27 @@ if __name__ == "__main__":
             pattern = "__common__cut__"
             return df[[it for it in df.columns if it.startswith(pattern)]].any(axis=1)
 
-        subprocess_flags = [it for it in subprocess_dict.items() if it[0].startswith("is_")]
-        plain_dataframe_kwargs = dict(
-            tree_and_filepaths=list(Iterate.rdf_files(config[channel][era][process][Keys.PATHS])),
-            definitions=list(Iterate.common_dict(config[channel][era][process][Keys.COMMON])) + subprocess_flags,
-            additional_columns=list(config[channel][era][process][Keys.VARIABLES].keys()),
-            filters=None,
-        )
+        # TODO:: Columns can be set here, also independent of the config!
+        tree_and_filepaths_tuples = list(Iterate.rdf_files(config[channel][era][process][Keys.PATHS]))
+        definitions_tuples = list(Iterate.common_dict(config[channel][era][process][Keys.COMMON]))
+
+        fake_factor_columns = []
+        for fake_factor_name in ["fake_factor_2", "fake_factor_1"]:
+            if (fake_factor_name, fake_factor_name) in definitions_tuples:
+                definitions_tuples.remove((fake_factor_name, fake_factor_name))
+                fake_factor_columns.append(fake_factor_name)
+
+        subprocess_flag_tuples = [it for it in subprocess_dict.items() if it[0].startswith("is_")]
+        additional_columns = list(config[channel][era][process][Keys.VARIABLES].keys())
 
         plain_subprocess_dataframe = ROOTToPlain(
             raw_path=_path("raw"),
             filtered_path=_path("filtered"),
         ).setup_raw_dataframe(
-            **plain_dataframe_kwargs,
+            tree_and_filepaths=tree_and_filepaths_tuples,
+            definitions=definitions_tuples + subprocess_flag_tuples,
+            additional_columns=additional_columns + fake_factor_columns,
+            filters=None,
             description=f"{channel}_{era}_{process}_{subprocess}",
             max_workers=16,
         ).filter_dataframe(
@@ -233,6 +241,7 @@ if __name__ == "__main__":
             .pipe(add.additional_nominal_cuts)
             .pipe(add.weight_like_uncertainties)
             .pipe(add.shift_like_uncertainties)
+            .pipe(add.fake_factor_columns, columns=fake_factor_columns)
         )
 
         # SMHtt specific, might differ

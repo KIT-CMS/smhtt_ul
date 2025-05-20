@@ -60,6 +60,7 @@ if __name__ == "__main__":
             subprocesses={"data": "jetFakes"},
         )
         .pipe(ConfigModification.general.add_era_and_process_name_flags)
+        .pipe(ConfigModification.general.add_jetFakes_column, column_name="fake_factor_2", ignore_processes=("ggH", "qqH"))
         .pipe(ConfigModification.specific.convert_weights_and_cuts_to_common)
         .pipe(ConfigModification.specific.add_set_of_training_variables, training_variables=training_variables)
         .pipe(ConfigModification.specific.nest_and_categorize_uncertainties)

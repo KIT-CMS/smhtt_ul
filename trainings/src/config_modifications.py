@@ -1,7 +1,7 @@
 import logging
 import re
 from copy import deepcopy
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import yaml
 from src.helper import Iterate, Keys, find_variable_expansions
@@ -288,6 +288,30 @@ class _GeneralConfigManipulation(object):
 
         return config
 
+    @staticmethod
+    def add_jetFakes_column(
+        config,
+        column_name: str = "fake_factor_2",
+        ignore_processes: Tuple[str, ...] = ("ggH", "qqH"),
+    ) -> dict:
+        """
+        Adds a new column to the common section specifying the fake factor value explicitly.
+
+        Args:
+            config (dict): The configuration dictionary to modify.
+            column_name (str): The name of the new column to add.
+            ignore_processes (Tuple[str, ...]): Processes to ignore when adding the column.
+
+        Returns:
+            dict: The modified configuration dictionary with the new column added.
+        """
+        for channel, era, process, *_ in Iterate.subprocesses(config):
+            if process in ignore_processes:
+                continue
+            config[channel][era][process].setdefault(Keys.COMMON, {})
+            config[channel][era][process][Keys.COMMON].setdefault(column_name, column_name)
+
+        return config
 
 class _SpecificConfigManipulation(object):
     """
