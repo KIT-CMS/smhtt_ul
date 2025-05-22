@@ -62,6 +62,9 @@ class Keys:
     UP = "up"
     DOWN = "down"
 
+    ANTI_ISO_CUT = "anti_iso_cut"
+    ANTI_ISO_WEIGHT = "anti_iso_weight"
+
     ID = "id"
 
 
@@ -78,6 +81,51 @@ def find_variable_expansions(full_expression: str, substring: str) -> list[str]:
     """
     pattern = re.compile(r'\b' + re.escape(substring) + r'(?:__[A-Za-z0-9_]+)?\b')
     return pattern.findall(full_expression)
+
+
+def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", vloose_wp: str = "VLoose") -> str:
+    """
+    Modifies a string containing tau isolation conditions.
+
+    1. Replaces (id_tau_vsJet_Tight_2>0.5) or (id_tau_vsJet_Tight_2==1)
+       with (id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5).
+    2. Handles optional suffixes like __something, applying them to both new variables.
+    3. If no such pattern is found, appends the anti-iso variant.
+    4. If an anti-iso variant already exists (with or without suffix), does nothing.
+    5. Tight and VLoose working points are configurable.
+    6. The _2 suffix is always present.
+    """
+
+    escaped_tight_wp = re.escape(tight_wp)
+    escaped_vloose_wp = re.escape(vloose_wp)
+
+    anti_iso_exists_pattern = re.compile(
+        rf"\((?:id_tau_vsJet_{escaped_tight_wp}_2((?:__[a-zA-Z0-9_]+)?)\s*<\s*0\.5)\s*&&\s*(?:id_tau_vsJet_{escaped_vloose_wp}_2\1\s*>\s*0\.5)\)"
+    )
+    if anti_iso_exists_pattern.search(input_str):
+        return input_str # Do nothing if already in anti-iso form
+
+    pattern_to_replace_str = \
+        rf"\(id_tau_vsJet_{escaped_tight_wp}_2((?:__[a-zA-Z0-9_]+)?)\s*(?:>0\.5|==1)\)"
+    pattern_to_replace = re.compile(pattern_to_replace_str)
+
+    def replacer(match):
+        opt_suffix = match.group(1) if match.group(1) else "" # Get the captured suffix or empty string
+        return f"(id_tau_vsJet_{tight_wp}_2{opt_suffix}<0.5&&id_tau_vsJet_{vloose_wp}_2{opt_suffix}>0.5)"
+
+    modified_str, num_subs = pattern_to_replace.subn(replacer, input_str)
+
+    if num_subs == 0:
+        append_str = f"(id_tau_vsJet_{tight_wp}_2<0.5&&id_tau_vsJet_{vloose_wp}_2<0.5)"
+        append_str = f"(id_tau_vsJet_{tight_wp}_2<0.5&&id_tau_vsJet_{vloose_wp}_2>0.5)"
+
+
+        if not input_str: # If original string is empty
+            return append_str
+        else:
+            return f"{input_str} && {append_str}"
+    else:
+        return modified_str
 
 
 class RuntimeVariables(object):
