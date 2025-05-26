@@ -103,7 +103,7 @@ def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", vloose_wp: st
         rf"\((?:id_tau_vsJet_{escaped_tight_wp}_2((?:__[a-zA-Z0-9_]+)?)\s*<\s*0\.5)\s*&&\s*(?:id_tau_vsJet_{escaped_vloose_wp}_2\1\s*>\s*0\.5)\)"
     )
     if anti_iso_exists_pattern.search(input_str):
-        return input_str # Do nothing if already in anti-iso form
+        return input_str  # Do nothing if already in anti-iso form
 
     pattern_to_replace_str = \
         rf"\(id_tau_vsJet_{escaped_tight_wp}_2((?:__[a-zA-Z0-9_]+)?)\s*(?:>0\.5|==1)\)"

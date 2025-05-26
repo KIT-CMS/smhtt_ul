@@ -479,7 +479,8 @@ class _SpecificConfigManipulation(object):
         cut_tight_wp: str = "Tight",
         cut_vloose_wp: str = "VLoose",
         fake_factor_string: str = "fake_factor_2",
-        ignore_processes: Tuple[str, ...] = ("ggH", "qqH"),
+        ignore_fake_factor_string_for_processes: Tuple[str, ...] = ("ggH", "qqH"),
+        ignore_anti_iso_string_for_processes: Tuple[str, ...] = tuple(),
     ) -> dict:
         """
         Adds a new version of the cut and weight for anti-isolation to the configuration.
@@ -499,24 +500,27 @@ class _SpecificConfigManipulation(object):
             dict: The modified configuration dictionary with the new cut version added.
         """
         for channel, era, process, subprocess, subprocess_dict in Iterate.subprocesses(config):
-            if process in ignore_processes:
-                continue
-
             for shift, shift_dict in subprocess_dict.items():
                 if not isinstance(shift_dict, dict):
                     continue
 
-                shift_dict[Keys.ANTI_ISO_CUT] = modify_tau_iso_string(
-                    shift_dict[Keys.CUT],
-                    tight_wp=cut_tight_wp,
-                    vloose_wp=cut_vloose_wp,
-                )
+                if process not in ignore_anti_iso_string_for_processes:
+                    shift_dict[Keys.ANTI_ISO_CUT] = modify_tau_iso_string(
+                        shift_dict[Keys.CUT],
+                        tight_wp=cut_tight_wp,
+                        vloose_wp=cut_vloose_wp,
+                    )
+                else:
+                    shift_dict[Keys.ANTI_ISO_CUT] = shift_dict[Keys.CUT]
 
-                shift_dict[Keys.ANTI_ISO_WEIGHT] = (
-                    shift_dict[Keys.WEIGHT]
-                    if fake_factor_string in shift_dict[Keys.WEIGHT]
-                    else f"{shift_dict[Keys.WEIGHT]}*({fake_factor_string})"
-                )
+                if process not in ignore_fake_factor_string_for_processes:
+                    shift_dict[Keys.ANTI_ISO_WEIGHT] = (
+                        shift_dict[Keys.WEIGHT]
+                        if fake_factor_string in shift_dict[Keys.WEIGHT]
+                        else f"{shift_dict[Keys.WEIGHT]}*({fake_factor_string})"
+                    )
+                else:
+                    shift_dict[Keys.ANTI_ISO_WEIGHT] = shift_dict[Keys.WEIGHT]
 
                 changed_cut = shift_dict[Keys.ANTI_ISO_CUT] != shift_dict[Keys.CUT]
                 changed_weight = shift_dict[Keys.ANTI_ISO_WEIGHT] != shift_dict[Keys.WEIGHT]

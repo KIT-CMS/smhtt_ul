@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument(
         "--base-dataset-directory",
         type=str,
-        default=f"/work/{os.environ['USER']}/smhtt_ul/training_datasets",
+        default=f"/ceph/{os.environ['USER']}/smhtt_ul/training_datasets",
         help="Base directory for the output files",
     )
     return parser.parse_args()
