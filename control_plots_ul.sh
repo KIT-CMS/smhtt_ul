@@ -35,8 +35,8 @@ CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
 shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
 shape_rootfile=${shapes_output}.root
 # print the paths to be used
-echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
-echo "BASEDIR: ${BASEDIR}"
+echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR_XROOTD"
+# echo "BASEDIR: ${BASEDIR}"
 echo "output_shapes: ${output_shapes}"
 
 if [[ $MODE == "XSEC" ]]; then
