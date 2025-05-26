@@ -4,22 +4,42 @@ from typing import Any, Callable, Generator, List, Optional, Tuple, Union
 
 from tqdm import tqdm
 
+VARS_TAUS = "iso_1,iso_2,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
+VARS_TAUS = VARS_TAUS.split(",")
+VARS_TAU_PAIR = "m_vis,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,deltaR_ditaupair,pt_vis,mtt_coll_approx"
+VARS_TAU_PAIR = VARS_TAU_PAIR.split(",")
+VARS_JETS="jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mjj,njets,pt_dijet,jet_hemisphere"
+VARS_JETS = VARS_JETS.split(",")
+VARS_BJETS="nbtag,bpair_pt_1,bpair_pt_2,bpair_eta_1,bpair_eta_2,bpair_phi_1,bpair_phi_2,bpair_btag_value_1,bpair_btag_value_2,bpair_m_inv,bpair_pt_dijet,bpair_deltaR"
+VARS_BJETS = VARS_BJETS.split(",")
+# VARS_DISTANCES="deltaPhi_met_tau1,deltaPhi_met_tau2,deltaPhi_met_fatjet,deltaPhi_met_bjet1,deltaPhi_met_bjet2,deltaR_tau1_fatjet,deltaR_tau2_fatjet,balance_pT_fatjet_Z,deltaR_bjet1_fatjet,deltaR_bjet2_fatjet,deltaR_tau1_bjet1,deltaR_tau1_bjet2,deltaR_tau2_bjet1,deltaR_tau2_bjet2"
+VARS_BBTT="mt_tot,pt_tautaubb,mass_tautaubb"
+VARS_BBTT = VARS_BBTT.split(",")
+# VARS_KINFIT="kinfit_mX,kinfit_mY,kinfit_chi2,kinfit_convergence,kinfit_mX_YToBB,kinfit_mY_YToBB,kinfit_chi2_YToBB,kinfit_convergence_YToBB,kinfit_mX_YToTauTau,kinfit_mY_YToTauTau,kinfit_chi2_YToTauTau,kinfit_convergence_YToTauTau"
+VARS_FASTMTT="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
+VARS_FASTMTT = VARS_FASTMTT.split(",")
 
-TRAINING_VARIABLES = [
-    "pt_1",
-    "pt_2",
-    "m_vis",
-    "njets",
-    "nbtag",
-    "jpt_1",
-    "jpt_2",
-    "jeta_1",
-    "jeta_2",
-    "m_fastmtt",
-    "pt_vis",
-    "mjj",
-    "deltaR_ditaupair",
-    "pt_dijet",
+ALL_VARIABLES = (
+    VARS_TAUS + VARS_TAU_PAIR + VARS_JETS + VARS_BJETS + VARS_BBTT + VARS_FASTMTT
+)
+
+
+TRAINING_VARIABLES = ALL_VARIABLES + [
+    # "pt_1",
+    # "pt_2",
+    # "m_vis",
+    # "njets",
+    # "nbtag",
+    # "jpt_1",
+    # "jpt_2",
+    # "jeta_1",
+    # "jeta_2",
+    # "m_fastmtt",
+    # "pt_vis",
+    # "mjj",
+    # "deltaR_ditaupair",
+    # "pt_dijet",
+
     # -- label flags ---
     "is_data",
     "is_dyjets",

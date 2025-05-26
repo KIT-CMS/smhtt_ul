@@ -4,7 +4,7 @@ output/
 Run201*/
 CMSSW*/
 validation_database/
-training_datasets/
+training_datasets*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

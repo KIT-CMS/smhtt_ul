@@ -32,7 +32,7 @@ def generate_filepath_dict(
         return {k: v for k, v in zip(unique_keys, paths)}, num_bytes
     else:
         if allow_search:
-            return generate_filepath_dict(paths, num_bytes=num_bytes + 1)
+            return generate_filepath_dict(paths, num_bytes=num_bytes + 5)
         else:
             raise ValueError("Cannot find unique keys for paths")
 
