@@ -38,10 +38,7 @@ if __name__ == "__main__":
     logger = setup_logging(logger=logging.getLogger(__name__))
     args = parse_args()
 
-    ignore_for_now = {  # until fixed, TODO:
-        "lhe_scale_weight__LHEScaleMuFWeigt",
-        "lhe_scale_weight__LHEScaleMuRWeigt",
-    }
+    ignore_for_now = {"lhe_scale_weight__LHEScale"}  # until fixed, TODO:
     Iterate.common_dict = partial(Iterate.common_dict, ignore_weight_and_cuts=ignore_for_now)
     logger.warning(f"Ignoring cuts and weights of {ignore_for_now}, until fixed!")
     training_variables = TRAINING_VARIABLES
@@ -60,6 +57,7 @@ if __name__ == "__main__":
             subprocesses={"data": "jetFakes"},
         )
         .pipe(ConfigModification.general.add_era_and_process_name_flags)
+        .pipe(ConfigModification.specific.add_anti_iso_cut_and_weight_version)
         .pipe(ConfigModification.specific.convert_weights_and_cuts_to_common)
         .pipe(ConfigModification.specific.add_set_of_training_variables, training_variables=training_variables)
         .pipe(ConfigModification.specific.nest_and_categorize_uncertainties)
