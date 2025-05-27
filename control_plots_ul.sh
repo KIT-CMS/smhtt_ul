@@ -68,7 +68,7 @@ if [[ $MODE == "SHAPES" ]]; then
         --control-plot-set ${VARIABLES} --skip-systematic-variations \
         --output-file $shapes_output \
         --xrootd --validation-tag $TAG \
-        --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" --collect-config-only
+        --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" # --collect-config-only
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                      #"
