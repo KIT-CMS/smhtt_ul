@@ -1,18 +1,17 @@
 import argparse
-from copy import deepcopy
 import logging
 import os
+from copy import deepcopy
 from functools import partial
-from tqdm import tqdm
-import numpy as np
 from pathlib import Path
-import os
 from typing import Iterable, Tuple
 
+import numpy as np
 import pandas as pd
 import yaml
 from src.dataset_manipulation import CombinedDataFrameManipulation, ProcessDataFrameManipulation, ROOTToPlain, tuple_column
-from src.helper import Iterate, PipeDict, Keys, RuntimeVariables, optional_process_pool
+from src.helper import Iterate, Keys, PipeDict, RuntimeVariables, optional_process_pool
+from tqdm import tqdm
 
 try:
     from config.logging_setup_configs import setup_logging
@@ -32,7 +31,7 @@ def parse_args():
     parser.add_argument(
         "--base-dataset-directory",
         type=str,
-        default=f"/ceph/{os.environ['USER']}/smhtt_ul/training_datasets",
+        default=f"/work/{os.environ['USER']}/smhtt_ul_new/training_datasets",
         help="Base directory for the output files",
     )
     return parser.parse_args()
@@ -56,7 +55,7 @@ def tiled_mask(
     return np.tile(pattern, int(np.ceil(len(df) / len(pattern))))[:len(df)].astype(bool)
 
 
-def odd_id(df: pd.DataFrame) -> np.ndarray:
+def odd_id(df: pd.DataFrame, key: str = "event") -> np.ndarray:
     """
     Helper to create a mask for odd IDs.
 
@@ -66,7 +65,7 @@ def odd_id(df: pd.DataFrame) -> np.ndarray:
     Returns:
         np.ndarray: A boolean mask of the same length as the dataframe.
     """
-    return (df[Keys.EVENT][Keys.ID] % 2).astype(bool)
+    return (df[Keys.EVENT][key] % 2).astype(bool)
 
 
 def exemplary_remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd.DataFrame:
@@ -124,7 +123,6 @@ def exemplary_custom_selection(df: pd.DataFrame, optimize_selection: bool = Fals
         process_mask = df[Keys.LABELS][_process].astype(bool)
         selection_mask = df[sum(_cut, start=[])].astype(bool).any(axis=1)
         if _process == "is_jetFakes" and not optimize_selection:
-            import ipdb; ipdb.set_trace()
             try:  # will only trigger for jetFakes dataframe for plotting nominal data
                 selection_mask |= df[tuple_column(Keys.NOMINAL, f"_{Keys.CUT}")].astype(bool)
             except KeyError:
@@ -175,7 +173,7 @@ def collect_filtered_plain_dataframes(arguments: Tuple[dict, str, str, str, str,
         ).setup_raw_dataframe(
             tree_and_filepaths=tree_and_filepaths_tuples,
             definitions=definitions_tuples + subprocess_flag_tuples,
-            additional_columns=additional_columns,
+            additional_columns=additional_columns + list(Keys.EVENT_IDENTIFIER_COLUMNS),
             filters=None,
             description=f"{channel}_{era}_{process}_{subprocess}",
             max_workers=8,
@@ -241,7 +239,7 @@ def collect_folds(arguments: Tuple[dict, str, str, str, str, dict, pd.DataFrame]
         # TODO: individually check for each analysis or remove completely
         # adjusting add.subprocess_df based on cut from remove_cut_regions requiered
         .pipe(add.update_subprocess_df, by="index")
-        .pipe(add.event_quantities)
+        .pipe(add.event_quantities, columns=list(Keys.EVENT_IDENTIFIER_COLUMNS))
         .pipe(add.nominal_variables)
         .pipe(add.nominal_weight_and_cut)
         .pipe(add.additional_nominal_cuts)
@@ -308,6 +306,7 @@ if __name__ == "__main__":
             if it[-2] not in SUBPROCESSES_TO_SKIP
         ],
         function=collect_filtered_plain_dataframes,
+        max_workers=4,
     ):
         filtered_plain_dataframes.update(result)
 

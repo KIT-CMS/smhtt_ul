@@ -66,6 +66,7 @@ class Keys:
     ANTI_ISO_WEIGHT = "anti_iso_weight"
 
     ID = "id"
+    EVENT_IDENTIFIER_COLUMNS = ["event"]
 
 
 def find_variable_expansions(full_expression: str, substring: str) -> list[str]:

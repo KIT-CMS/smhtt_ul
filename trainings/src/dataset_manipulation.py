@@ -387,7 +387,7 @@ class ROOTToPlain(object):
             elif callable(filter_function):
                 mask = filter_function(self._dataframe)
 
-            self._dataframe = self._dataframe[mask].copy()
+            self._dataframe = self._dataframe[mask]
             logger.info(f"Filtered dataframe shape: {initial_shape} -> {self._dataframe.shape}")
 
         if self.dtype == "ROOT":
@@ -535,7 +535,7 @@ class ProcessDataFrameManipulation:
             value = int(label == f"is_{self.process_name}__{self.subprocess_name.replace('-', '_')}")
             df[column] = value
 
-        return df.copy()
+        return df
 
     def nominal_variables(self, df: pd.DataFrame, renaming_map: Union[dict, None] = None) -> pd.DataFrame:
         """
@@ -556,7 +556,7 @@ class ProcessDataFrameManipulation:
             column = tuple_column(Keys.NOMINAL, Keys.VARIABLES, renaming_map.get(variable, variable))
             df[column] = self.subprocess_df[variable].astype(float).values
 
-        return df.copy()
+        return df
 
     def nominal_weight_and_cut(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -582,9 +582,9 @@ class ProcessDataFrameManipulation:
         except KeyError:
             pass
 
-        return df.copy()
+        return df
 
-    def event_quantities(self, df: pd.DataFrame) -> pd.DataFrame:
+    def event_quantities(self, df: pd.DataFrame, columns: Union[List[str], None] = None) -> pd.DataFrame:
         """
         Adds event quantities to the dataframe based on provided subprocess_df
 
@@ -594,11 +594,22 @@ class ProcessDataFrameManipulation:
         Returns:
             pd.DataFrame: DataFrame with added event quantities.
         """
-        with duplicate_filter_context(logger):
-            logger.warning("Update event quantities to use NTuple Event ID!")
         df[tuple_column(Keys.EVENT, Keys.ID)] = range(len(self.subprocess_df))
 
-        return df.copy()
+        has_ntuple_identifier = False
+        if columns is not None:
+            for column in columns:
+                if column in self.subprocess_df.columns:
+                    has_ntuple_identifier = True
+                    df[tuple_column(Keys.EVENT, column)] = self.subprocess_df[column].values
+                else:
+                    logger.warning(f"Column {column} not found in subprocess_df, skipping.")
+
+        if not has_ntuple_identifier:
+            with duplicate_filter_context(logger):
+                logger.warning("Update event quantities to use NTuple Event ID!")
+
+        return df
 
     def additional_nominal_cuts(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -618,7 +629,7 @@ class ProcessDataFrameManipulation:
             df[tuple_column(Keys.NOMINAL, name, Keys.CUT)] = self.subprocess_df[cut].astype(float).values
             df[tuple_column(Keys.NOMINAL, name, Keys.WEIGHT)] = self.subprocess_df[weight].astype(float).values
 
-        return df.copy()
+        return df
 
     def weight_like_uncertainties(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -665,7 +676,7 @@ class ProcessDataFrameManipulation:
                 except KeyError:
                     logger.warning(f"Missing columns for {uncertainty_name} {direction}: {uncertainty_dict[direction]}, skipping")
 
-        return df.copy()
+        return df
 
     def shift_like_uncertainties(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -730,7 +741,7 @@ class ProcessDataFrameManipulation:
                 except KeyError:
                     logger.warning(f"Missing columns for {uncertainty_name} {direction}: {uncertainty_dict[direction]}, skipping")
 
-        return df.copy()
+        return df
 
     def update_subprocess_df(self, df: pd.DataFrame, by: str = "index") -> pd.DataFrame:
         """
@@ -746,11 +757,11 @@ class ProcessDataFrameManipulation:
             pd.DataFrame: Updated dataframe.
         """
         if by == "index":
-            self.subprocess_df = self.subprocess_df.loc[df.index, :].copy()
+            self.subprocess_df = self.subprocess_df.loc[df.index, :]
         else:
             raise NotImplementedError(f"Unsupported method: {by}")
 
-        return df.copy()
+        return df
 
     def adjust_jetFakes_weights(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -774,7 +785,7 @@ class ProcessDataFrameManipulation:
                     _anti_iso_column = tuple(mapping.get(it, it) for it in column)
                 df[column] = df[_anti_iso_column].values
 
-        return df.copy()
+        return df
 
 
 class CombinedDataFrameManipulation:
@@ -800,7 +811,7 @@ class CombinedDataFrameManipulation:
             nominal_column = tuple_column(Keys.NOMINAL, Keys.VARIABLES, variable)
             dfs.loc[mask, column] = dfs.loc[mask, nominal_column]
 
-        return dfs.copy()
+        return dfs
 
     @staticmethod
     def _fill_nans_in_weights_and_cuts(dfs: pd.DataFrame, filter_function: callable):
@@ -821,7 +832,7 @@ class CombinedDataFrameManipulation:
                 mask = dfs.loc[:, column].isna()
                 dfs.loc[mask, column] = dfs.loc[mask, tuple_column(Keys.NOMINAL, contains[0])]
 
-        return dfs.copy()
+        return dfs
 
     @staticmethod
     def fill_nans_in_weight_like(
@@ -938,7 +949,7 @@ class CombinedDataFrameManipulation:
                     mask = dfs.loc[:, column].isna()
                     dfs.loc[mask, column] = default_value
 
-            return dfs.copy()
+            return dfs
         else:
             raise NotImplementedError(f"Unsupported type: {type(dfs)}")
 
