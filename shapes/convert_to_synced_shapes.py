@@ -265,9 +265,9 @@ def main(args):
                     if not "data" in split_name[0]
                     else "data_obs"
                 )
-            if "emb" in split_name[0] and split_name[0] !="emb0p0":
+            elif "emb" in split_name[0] and split_name[0] !="emb0p0":
                 process = split_name[0]
-            if split_name[0] =="emb0p0":
+            elif split_name[0] =="emb0p0":
                 pass
         # add the additional process of special analyses to the sync file
         if args.special in ["TauES", "EleES"]:

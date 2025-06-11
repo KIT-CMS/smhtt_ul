@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 ROOT.PyConfig.IgnoreCommandLineOptions = True  # disable ROOT internal argument parser
 ROOT.gStyle.SetPaintTextFormat(".2f")
 import sys
-
+import os
+import yaml
 ROOT.gROOT.SetBatch()
 
 
@@ -147,7 +148,7 @@ if __name__ == "__main__":
     #print cp
     #ROOT.gStyle.SetPalette(cp) #kBlueGreenYellow kCoffee
     #ROOT.TColor.InvertPalette()
-    label_dict = { # ToDo: adjust for DM_pt !!!
+    label_dict = {
 
         "r_EMB_DM_0" : "EMB_DM_0", 
         "r_EMB_DM_1" : "EMB_DM_1", 
@@ -155,73 +156,83 @@ if __name__ == "__main__":
         
         "r_EMB_DM0" : "EMB_DM_0",
         "r_EMB_DM1" : "EMB_DM_1", 
-        "r_EMB_DM10_11" : "EMB_DM_10_11",
+        "r_EMB_DM1011" : "EMB_DM_1011",
         "r_EMB_DM10" : "EMB_DM_10",
         "r_EMB_DM11" : "EMB_DM_11",
         "r_EMB_DM0_PT20_40" : "EMB_DM_0_PT_20_40",
         "r_EMB_DM1_PT20_40" : "EMB_DM_1_PT_20_40",
+        "r_EMB_DM1011_PT20_40" : "EMB_DM_1011_PT_20_40",
         "r_EMB_DM10_PT20_40" : "EMB_DM_10_PT_20_40",
         "r_EMB_DM11_PT20_40" : "EMB_DM_11_PT_20_40",
         "r_EMB_DM0_PT40_200" : "EMB_DM_0_PT_40_200",
         "r_EMB_DM1_PT40_200" : "EMB_DM_1_PT_40_200",
+        "r_EMB_DM1011_PT40_200" : "EMB_DM_1011_PT_40_200",
         "r_EMB_DM10_PT40_200" : "EMB_DM_10_PT_40_200",
         "r_EMB_DM11_PT40_200" : "EMB_DM_11_PT_40_200",
 
         "ES_DM0" : "ES_DM0",
         "ES_DM1" : "ES_DM1",
-        "ES_DM10_11" : "ES_DM10_11",
+        "ES_DM1011" : "ES_DM1011",
         "ES_DM10" : "ES_DM10",
         "ES_DM11" : "ES_DM11",
         "ES_DM0_PT20_40" : "ES_DM0_PT20_40",
         "ES_DM1_PT20_40" : "ES_DM1_PT20_40",
+        "ES_DM1011_PT20_40" : "ES_DM1011_PT20_40",
         "ES_DM10_PT20_40" : "ES_DM10_PT20_40",
         "ES_DM11_PT20_40" : "ES_DM11_PT20_40",
         "ES_DM0_PT40_200" : "ES_DM0_PT40_200",
         "ES_DM1_PT40_200" : "ES_DM1_PT40_200",
+        "ES_DM1011_PT40_200" : "ES_DM1011_PT40_200",
         "ES_DM10_PT40_200" : "ES_DM10_PT40_200",
         "ES_DM11_PT40_200" : "ES_DM11_PT40_200",
         
         "r_DY_incl_DM0":"r_DY_incl_DM0",
         "r_DY_incl_DM1":"r_DY_incl_DM1",
-        "r_DY_incl_DM10_11":"r_DY_incl_DM10_11",
+        "r_DY_incl_DM1011":"r_DY_incl_DM1011",
         "r_DY_incl_DM10":"r_DY_incl_DM10",
         "r_DY_incl_DM11":"r_DY_incl_DM11",
         "r_DY_incl_DM0_PT20_40":"r_DY_incl_DM0_PT20_40",
         "r_DY_incl_DM1_PT20_40":"r_DY_incl_DM1_PT20_40",
+        "r_DY_incl_DM1011_PT20_40":"r_DY_incl_DM1011_PT20_40",
         "r_DY_incl_DM10_PT20_40":"r_DY_incl_DM10_PT20_40",
         "r_DY_incl_DM11_PT20_40":"r_DY_incl_DM11_PT20_40",
         "r_DY_incl_DM0_PT40_200":"r_DY_incl_DM0_PT40_200",
         "r_DY_incl_DM1_PT40_200":"r_DY_incl_DM1_PT40_200",
+        "r_DY_incl_DM1011_PT40_200":"r_DY_incl_DM1011_PT40_200",
         "r_DY_incl_DM10_PT40_200":"r_DY_incl_DM10_PT40_200",
         "r_DY_incl_DM11_PT40_200":"r_DY_incl_DM11_PT40_200",
 
     }
-    label_list = [ # ToDo: adjust for DM_pt ?
+    label_list = [
 
          "EMB_DM_0",
          "EMB_DM_1",
          "EMB_DM_10",
          "EMB_DM_11",
-         "EMB_DM_10_11",
+         "EMB_DM_1011",
          "EMB_DM0_PT20_40",
          "EMB_DM1_PT20_40",
+         "EMB_DM1011_PT20_40",
          "EMB_DM10_PT20_40",
          "EMB_DM11_PT20_40",
          "EMB_DM0_PT40_200",
          "EMB_DM1_PT40_200",
+         "EMB_DM1011_PT40_200",
          "EMB_DM10_PT40_200",
          "EMB_DM11_PT40_200",
          "ES_DM0",
          "ES_DM1",
-         "ES_DM10_11",
+         "ES_DM1011",
          "ES_DM10",
          "ES_DM11",
          "ES_DM0_PT20_40",
          "ES_DM1_PT20_40",
+         "ES_DM1011_PT20_40",
          "ES_DM10_PT20_40",
          "ES_DM11_PT20_40",
          "ES_DM0_PT40_200",
          "ES_DM1_PT40_200",
+         "ES_DM1011_PT40_200",
          "ES_DM10_PT40_200",
          "ES_DM11_PT40_200",
     ]
@@ -234,6 +245,9 @@ if __name__ == "__main__":
     
     category= sys.argv[3]
     print("[INFO] Plot POI for category {}.".format(category))
+    
+    tag= sys.argv[4]
+    print("[INFO] Plot POI for category {}.".format(tag))
     
     f = ROOT.TFile(filename)
     if f == None:
@@ -267,8 +281,8 @@ if __name__ == "__main__":
     m.SetMinimum(-1)
     m.SetMaximum(1)
 
-    c = ROOT.TCanvas("c", "c", 600, 600)
-    c.SetGrid(1)
+    canv = ROOT.TCanvas("canv", "canv", 600, 600)
+    canv.SetGrid(1)
     m.SetContour(10000)
     m.Draw("colz text")
 
@@ -310,8 +324,40 @@ if __name__ == "__main__":
     linev.SetLineWidth(2)
     linev.Draw()
 
-    c.Update()
+    canv.Update()
 
-    # c.SaveAs("{}_plot_poi_correlation_stage-0.pdf".format(era))
-    # c.SaveAs(f"{era}_{category}_POIS_correlations_ID_ES.pdf")
-    c.SaveAs(f"{era}_{category}_POIS_correlations_ID_ES.png")
+    # canv.SaveAs(f"{era}_{category}_POIS_correlations_ID_ES.pdf")
+    canv.SaveAs(f"{era}_{category}_{tag}_POIS_correlations_ID_ES.png")
+    
+    # Extract the upper off-diagonal elements.
+    wp = tag.split("_")[0]
+    upper_corr = {}
+    for i in range(num_pois):
+        for j in range(i+1, num_pois):
+            poi1 = label_dict[pois[i]]
+            poi2 = label_dict[pois[j]]
+            key = f"{poi1}-{poi2}"
+            # note: bin indices in ROOT histograms start at 1
+            val = m.GetBinContent(i+1, j+1)
+            upper_corr[key] = val
+
+    # Check if the YAML file already exists; if yes, load existing content.
+    yaml_filename = "poi_corr_all.yaml"
+    if os.path.exists(yaml_filename):
+        with open(yaml_filename, "r") as file:
+            data = yaml.safe_load(file) or {}
+    else:
+        data = {}
+
+    # Organize the data in a nested structure.
+    if era not in data:
+        data[era] = {}
+    if wp not in data[era]:
+        data[era][wp] = {}
+    data[era][wp][category] = upper_corr
+
+    # Save the updated dictionary back to the YAML file.
+    with open(yaml_filename, "w") as file:
+        yaml.dump(data, file, default_flow_style=False)
+
+print(f"[INFO] Upper off-diagonal correlations saved to {yaml_filename}")

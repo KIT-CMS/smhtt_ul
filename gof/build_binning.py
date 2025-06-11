@@ -4,14 +4,16 @@ from ntuple_processor.utils import Selection
 from config.shapes.file_names import files
 import yaml
 
-from shapes.produce_shapes import setup_logging, get_analysis_units
+# from shapes.produce_shapes import setup_logging, get_analysis_units
+from shapes.produce_shapes_tauid_es import get_analysis_units
+from config.logging_setup_configs import setup_logging
+from config.shapes.tauid_measurement_binning import load_tauid_categorization
 import logging
 import argparse
 import numpy as np
 import os
 import ROOT
 
-logger = logging.getLogger("calculate_binning.py")
 
 
 def parse_arguments():
@@ -27,6 +29,30 @@ def parse_arguments():
         type=str,
         required=True,
         help="Channel to be processed",
+    )
+    parser.add_argument(
+        "--tag",
+        type=str,
+        required=True,
+        help="Production Tag",
+    )
+    parser.add_argument(
+        "--wp-vsjet",
+        type=str,
+        required=True,
+        help="Working point TauID vs. jets",
+    )
+    parser.add_argument(
+        "--wp-vsele",
+        type=str,
+        required=True,
+        help="Working point TauID vs. electrons",
+    )
+    parser.add_argument(
+        "--wp-vsmu",
+        type=str,
+        required=True,
+        help="Working point TauID vs. muons",
     )
     parser.add_argument(
         "--directory",
@@ -77,6 +103,11 @@ def parse_arguments():
         help="Directories arranged as Artus output and containing a friend tree for mm.",
     )
     parser.add_argument(
+        "--DM-categories",
+        nargs="+",
+        help="List of categories to be used. Binnigs need to be defined for each category.",
+    )
+    parser.add_argument(
         "--output-folder",
         type=str,
         required=True,
@@ -84,18 +115,6 @@ def parse_arguments():
     )
     return parser.parse_args()
 
-
-def setup_logging(output_file, level=logging.DEBUG):
-    logger.setLevel(level)
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    file_handler = logging.FileHandler(output_file, "w")
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
 
 
 def set_dummy_categorization():
@@ -111,11 +130,12 @@ def set_dummy_categorization():
         "mt": inclusive,
         "tt": inclusive,
         "em": inclusive,
+        "mm": inclusive,
     }
     return training_categorization
 
 
-def get_data_selection(era, channel, name, unit, categorization, basedir, frienddirs):
+def get_data_selection(name: str, unit, basedir, frienddirs, dm_cut: str) -> dict:
     cuts = ""
     weights = ""
     files = []
@@ -125,7 +145,7 @@ def get_data_selection(era, channel, name, unit, categorization, basedir, friend
             for friendfile in [x.path for x in unit[0].dataset.ntuples[0].friends]:
                 if friend_dir in friendfile and friend_dir not in friend_paths:
                     friend_paths.append(f"{friend_dir}/")
-    files = [ntuple.path.replace(basedir, "") for ntuple in unit[0].dataset.ntuples]
+    files = [ntuple for ntuple in unit[0].dataset.ntuples]
     for selection in unit[0].selections:
         cutstring = " && ".join(
             [
@@ -149,6 +169,15 @@ def get_data_selection(era, channel, name, unit, categorization, basedir, friend
         weights = weights[:-3]
     if len(cuts) > 0:
         cuts = cuts[:-4]
+    
+    # Append the extra cut for m_vis:
+    extra_cut = "(30 < m_vis && m_vis < 160)"
+    if cuts:
+        cuts = cuts + " && " + extra_cut + " && " + dm_cut
+    else:
+        cuts = extra_cut + " && " + dm_cut
+    
+    
     data = {
         "process": name,
         "weight_string": f"({weights})",
@@ -163,44 +192,29 @@ def get_data_selection(era, channel, name, unit, categorization, basedir, friend
 
 def build_chain(dict_):
     # Build chain
-    friend_paths = dict_["friend_paths"]
     logger.debug("Use tree path %s for chain.", dict_["tree_path"])
     chain = ROOT.TChain(dict_["tree_path"])
-    friendchains = {}
-    for d in friend_paths:
-        friendchains[d] = ROOT.TChain(dict_["tree_path"])
+    
     for i, f in enumerate(dict_["files"]):
-        filename = f"{dict_['base_path']}/{f}"
+        filename = f.path
         chain.AddFile(filename)
-        for friendchain in friendchains:
-            friendfile = f"{d}/{f}"
-            friendchains[friendchain].AddFile(friendfile)
-
+    
     chain_numentries = chain.GetEntries()
     if not chain_numentries > 0:
         logger.fatal("Chain (before skimming) does not contain any events.")
         raise Exception
     logger.debug("Found %s events before skimming with cut string.", chain_numentries)
     logger.debug("Using cut string %s", dict_["cut_string"])
-
     # Skim chain
-    chain_skimmed = chain.CopyTree(dict_["cut_string"])
+    clean_cut_string = dict_["cut_string"].replace("\n", "").strip()
+    chain_skimmed = chain.CopyTree(clean_cut_string)
     chain_skimmed_numentries = chain_skimmed.GetEntries()
-    friendchains_skimmed = {}
-    # Apply skim selection also to friend chains
-    for d in friendchains:
-        friendchains[d].AddFriend(chain)
-        friendchains_skimmed[d] = friendchains[d].CopyTree(dict_["cut_string"])
     if not chain_skimmed_numentries > 0:
         logger.fatal("Chain (after skimming) does not contain any events.")
         raise Exception
     logger.debug(
         "Found %s events after skimming with cut string.", chain_skimmed_numentries
     )
-    for d in friendchains_skimmed:
-        chain_skimmed.AddFriend(
-            friendchains_skimmed[d], "fr_{}".format(os.path.basename(d.rstrip("/")))
-        )
 
     return chain_skimmed
 
@@ -308,55 +322,84 @@ def main(args):
     }
     era = args.era
     channel = args.channel
-    nominals = {}
-    nominals[era] = {}
-    nominals[era]["datasets"] = {}
-    nominals[era]["units"] = {}
-    logger.info("Processing era {}".format(era))
-    logger.info("Processing channel {}".format(channel))
-    logger.info("Friends: {}".format(friend_directories[channel]))
-    if "," in args.variables[0]:
-        variables = args.variables[0].split(",")
-    else:
-        variables = args.variables
-    logger.info("Variables: {}".format(variables))
-    nominals[era]["datasets"][channel] = get_nominal_datasets(
-        era, channel, friend_directories, files, args.directory
-    )
-    logger.info("Found {} datasets".format(len(nominals[era]["datasets"][channel])))
-    logger.info("Creating analysis units")
-    nominals[era]["units"][channel] = get_analysis_units(
-        channel,
-        era,
-        nominals[era]["datasets"][channel],
-        set_dummy_categorization(),
-        None,
-    )
-    data_selection = get_data_selection(
-        era,
-        channel,
-        "data",
-        nominals[era]["units"][channel]["data"],
-        set_dummy_categorization(),
-        args.directory,
-        friend_directories[channel],
-    )
-
-    percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
-
-    outputfile = os.path.join(args.output_folder, f"binning_{era}_{channel}.yaml")
-    outputfile2d = os.path.join(args.output_folder, f"binning_{era}_{channel}_2D.yaml")
-    chain = build_chain(data_selection)
-    binning = get_1d_binning(channel, chain, variables, percentiles)
+    # Binnings need to be defined for each category. Their cuts have to be respected!!!
+    # Thus we load the possible categories from the binning script where the cut for each category is defined.
+    # The binning we produce here is used in exactly that script for shape production.
+    categories = args.DM_categories
+    category_cuts = load_tauid_categorization(era, channel, args.tag)
+    # Read out the cuts for all given categories:
+    dm_cut={}
+    for cat in categories:
+        if channel == "mm":
+            dm_cut[category_cuts[channel][0][0].name] = category_cuts[channel][0][0].cuts[0].expression
+        elif channel == "mt":
+            for i in range(len(category_cuts[channel])):
+                if category_cuts[channel][i][0].name == cat:
+                    dm_cut[cat] = category_cuts[channel][i][0].cuts[0].expression
+            pass
+        else:
+            logger.fatal(f"Channel {channel} not supported.")
+            raise Exception
+    for cat in categories:
+        if channel != "mm" and cat not in dm_cut:
+            logger.fatal(f"Category {cat} not found in category cuts. Please check.")
+            raise Exception
+    # We now calculate the binning for each category (dm bin) and save all to one yaml file.
+    all_binnings = {}
+    for dm_bin, cut in dm_cut.items():
+        
+        nominals = {}
+        nominals[era] = {}
+        nominals[era]["datasets"] = {}
+        nominals[era]["units"] = {}
+        logger.info("Processing era {}".format(era))
+        logger.info("Processing channel {}".format(channel))
+        logger.info("Friends: {}".format(friend_directories[channel]))
+        if "," in args.variables[0]:
+            variables = args.variables[0].split(",")
+        else:
+            variables = args.variables
+        logger.info("Variables: {}".format(variables))
+        nominals[era]["datasets"][channel] = get_nominal_datasets(
+            era, channel, friend_directories, files, args.directory, args.tag, xrootd=True,
+        )
+        logger.info("Found {} datasets".format(len(nominals[era]["datasets"][channel])))
+        logger.info("Creating analysis units")
+        nominals[era]["units"][channel] = get_analysis_units(
+            channel,
+            era,
+            nominals[era]["datasets"][channel],
+            set_dummy_categorization(),
+            None,
+            True,
+            args.wp_vsjet,
+            args.wp_vsele,
+            args.wp_vsmu,
+        )
+        data_selection = get_data_selection(
+            "data",
+            nominals[era]["units"][channel]["data"],
+            args.directory,
+            friend_directories[channel],
+            cut,
+        )
+        percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
+        chain = build_chain(data_selection)
+        binning = get_1d_binning(channel, chain, variables, percentiles, dm_bin)
+        all_binnings[dm_bin] = binning
+        
+    outputfile = os.path.join(args.output_folder, f"binning_{era}_{channel}_{args.tag}.yaml")    
     with open(outputfile, "w") as f:
-        yaml.dump(binning, f, default_flow_style=False)
+        yaml.dump(all_binnings, f, default_flow_style=False)
 
-    binning = add_2d_unrolled_binning(variables, binning)
-    with open(outputfile2d, "w") as f:
-        yaml.dump(binning, f, default_flow_style=False)
+    # outputfile2d = os.path.join(args.output_folder, f"binning_{era}_{channel}_2D.yaml")
+    # binning = add_2d_unrolled_binning(variables, binning)
+    # with open(outputfile2d, "w") as f:
+    #     yaml.dump(binning, f, default_flow_style=False)
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    setup_logging("create_gof_binning.txt", logging.DEBUG)
+    log_file = "{}.log".format(f"binning_{args.era}_{args.channel}_{args.tag}")
+    logger = setup_logging(logger=logging.getLogger(__name__))
     main(args)

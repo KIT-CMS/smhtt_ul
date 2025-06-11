@@ -21,7 +21,32 @@ List of base processes, mostly containing only weights:
     - HWW_process_selection
 """
 
-def lumi_weight(era):
+def triggerweight(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    weight = ("1.0", "triggerweight")
+
+    # General definitions of weights valid for all eras and channels
+    if "mt" in channel:
+        weight = ("mtau_triggerweight_ic", "triggerweight")
+    elif "et" in channel:
+        weight = ("etau_triggerweight_ic", "triggerweight")
+    elif "tt" in channel:
+        weight = ("tautau_triggerweight_ic", "triggerweight")
+    elif "em" in channel:
+        ElMuData = "(trigger_23_data_Weight_2*trigger_12_data_Weight_1*(trg_muonelectron_mu23ele12==1)+trigger_23_data_Weight_1*trigger_8_data_Weight_2*(trg_muonelectron_mu8ele23==1) - trigger_23_data_Weight_2*trigger_23_data_Weight_1*(trg_muonelectron_mu8ele23==1 && trg_muonelectron_mu23ele12==1))"
+        ElMuEmb = ElMuData.replace("data", "mc")
+        ElMu = "(" + ElMuData + ")/(" + ElMuEmb + ")"
+        weight = (ElMu, "triggerweight")
+
+    # In previous software only used in 2017 and 2018. Before usage in 2016 check if the weight is valid.
+    elif "mm" in channel:
+        weight = (
+            "singleTriggerDataEfficiencyWeightKIT_1/singleTriggerMCEfficiencyWeightKIT_1",
+            "trigger_lepton_sf",
+        )
+
+    return weight
+
+def lumi_weight(era, **kwargs):
     if era == "2016preVFP":
         lumi = "19.5"  # "36.326450080"
     elif era == "2016postVFP":
@@ -35,15 +60,37 @@ def lumi_weight(era):
     return ("{} * 1000.0".format(lumi), "lumi")
 
 
-def prefiring_weight(era):
+def prefiring_weight(era, **kwargs):
     if era in ["2016postVFP", "2016preVFP", "2017"]:
         weight = ("prefiring_wgt", "prefireWeight")
     else:
         weight = ("1.0", "prefireWeight")
     return weight
 
+def MC_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    wps_dict = [
 
-def MC_base_process_selection(channel, era, vs_jet_wp):
+        "VVTight",
+        "VVTight",
+        "Tight",
+        "Medium",
+        "Loose",
+        "VLoose",
+        "VVLoose",
+        "VVVLoose",
+    ]
+
+    if vs_ele_wp not in wps_dict:
+        print("This vs electron working point doen't exist. Please specify the correct vsEle discriminator ")
+        raise ValueError("Given vs electron working point {} not defined.".format(vs_ele_wp))
+    if vs_jet_wp not in wps_dict:
+        print("This vs jet working point doen't exist. Please specify the correct vsJet discriminator ")
+        raise ValueError("Given vs jet working point {} not defined.".format(vs_jet_wp))
+    if vs_mu_wp not in wps_dict:
+        print("This vs muon working point doen't exist. Please specify the correct vsMu discriminator ")
+        raise ValueError("Given vs muon working point {} not defined.".format(vs_mu_wp))
+
+    
     if channel == "em":
         isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
         idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
@@ -55,11 +102,11 @@ def MC_base_process_selection(channel, era, vs_jet_wp):
         isoweight = ("iso_wgt_ele_1", "isoweight")
         idweight = ("id_wgt_ele_1", "idweight")
         tauidweight = (
-            "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
+            f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        vsmu_weight = ("id_wgt_tau_vsMu_VLoose_2", "vsmuweight")
-        vsele_weight = ("id_wgt_tau_vsEle_Tight_2", "vseleweight")
+        vsmu_weight = (f"id_wgt_tau_vsMu_{vs_mu_wp}_2", "vsmuweight")
+        vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_wp}_2", "vseleweight")
         if era == "2017":
             trgweight = (
                 "((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)",
@@ -71,13 +118,13 @@ def MC_base_process_selection(channel, era, vs_jet_wp):
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
         tauidweight = (
-            "((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_wp+"_2 + (gen_match_2!=5))",
+            f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
-        vsele_weight = ("id_wgt_tau_vsEle_VVLoose_2", "vseleweight")
+        vsmu_weight = (f"id_wgt_tau_vsMu_{vs_mu_wp}_2", "vsmuweight")
+        vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_wp}_2", "vseleweight")
         trgweight = None
-        if era in ["2016preVFP", "2016postVFP"]:
+        if era == "2016preVFP" or era == "2016postVFP":
             trgweight = ("trg_wgt_single_mu22", "trgweight")
         elif era == "2017":
             trgweight = ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
@@ -90,15 +137,15 @@ def MC_base_process_selection(channel, era, vs_jet_wp):
         isoweight = None
         idweight = None
         tauidweight = (
-            "((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
+            f"((gen_match_1==5)*id_wgt_tau_vsJet_{vs_jet_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
         vsmu_weight = (
-            "((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1 + (gen_match_2!=5))",
+            f"((gen_match_1==5)*id_wgt_tau_vsMu_{vs_mu_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsMu_{vs_mu_wp}_1 + (gen_match_2!=5))",
             "vsmuweight",
         )
         vsele_weight = (
-            "((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1 + (gen_match_2!=5))",
+            f"((gen_match_1==5)*id_wgt_tau_vsEle_{vs_ele_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsEle_{vs_ele_wp}_1 + (gen_match_2!=5))",
             "vseleweight",
         )
         trgweight = None
@@ -112,7 +159,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp):
             trgweight = ("trg_wgt_single_mu27", "trgweight")
         elif era == "2018":
             trgweight = ("1", "trgweight")
-        elif era in ["2016postVFP", "2016preVFP"]:
+        elif era == "2016postVFP" or era == "2016preVFP":
             trgweight = ("trg_wgt_single_mu22", "trgweight")
     elif channel == "ee":
         isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
@@ -139,22 +186,39 @@ def MC_base_process_selection(channel, era, vs_jet_wp):
         lumi_weight(era),
         prefiring_weight(era),
     ]
+    if channel != "mm" and channel != "mt":
+        MC_base_process_weights.append(("btag_weight", "btagWeight"))
+    
     return Selection(
         name="MC base",
         weights=[weight for weight in MC_base_process_weights if weight is not None],
     )
 
-
-def dy_stitching_weight(era):
+def dy_stitching_weight(era, **kwargs):
     if era == "2017":
         weight = (
+            # TODO update me
             "((genbosonmass >= 50.0)*0.0000298298*((npartons == 0 || npartons >= 5)*1.0 + (npartons == 1)*0.3478960398 + (npartons == 2)*0.2909516577 + (npartons == 3)*0.1397995594 + (npartons == 4)*0.1257217076) + (genbosonmass < 50.0)*numberGeneratedEventsWeight*crossSectionPerEventWeight)",
             "dy_stitching_weight",
         )
         # xsec_NNLO [pb] = , N_inclusive = 203,729,540, xsec_NNLO/N_inclusive = 0.0000298298 [pb], weights: [1.0, 0.3478960398, 0.2909516577, 0.1397995594, 0.1257217076]
     elif era == "2018":
         weight = (
-            "((genbosonmass >= 50.0)*0.0000606542*((npartons == 0 || npartons >= 5)*1.0 + (npartons == 1)*0.194267667208 + (npartons == 2)*0.21727746547 + (npartons == 3)*0.26760465744 + (npartons == 4)*0.294078683662) + (genbosonmass < 50.0)*numberGeneratedEventsWeight*crossSectionPerEventWeight)",
+            """(
+                (genbosonmass >= 50.0) * 0.0000631493 * (
+                    ( (npartons <= 0) || (npartons >= 5) ) * 1.0 +
+                    (npartons == 1) * 0.2056921342 +
+                    (npartons == 2) * 0.1664121306 +
+                    (npartons == 3) * 0.0891121485 +
+                    (npartons == 4) * 0.0843396952
+                ) +
+                (genbosonmass < 50.0) * numberGeneratedEventsWeight * crossSectionPerEventWeight * (
+                    (1.0 / negative_events_fraction) * (
+                        ((genWeight < 0) * (-1)) +
+                        ((genWeight >= 0) * 1)
+                    )
+                )
+            )""",
             "dy_stitching_weight",
         )
         # xsec_NNLO [pb] = 2025.74*3, N_inclusive = 100194597,  xsec_NNLO/N_inclusive = 0.0000606542 [pb] weights: [1.0, 0.194267667208, 0.21727746547, 0.26760465744, 0.294078683662]
@@ -164,24 +228,68 @@ def dy_stitching_weight(era):
     return weight
 
 
-def DY_process_selection(channel, era, vs_jet_wp):
-    DY_process_weights = MC_base_process_selection(channel, era, vs_jet_wp).weights
+def DY_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", use_stitching=True, **kwargs):
+    DY_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
+    
+    if era == "2016postVFP" or era == "2016preVFP":
+        gen_events_weight = (
+            "numberGeneratedEventsWeight",
+            "numberGeneratedEventsWeight",
+        )
+    elif era == "2017":
+        gen_events_weight = (
+            "numberGeneratedEventsWeight",
+            "numberGeneratedEventsWeight",
+        )
+    elif era == "2018":
+        gen_events_weight = (
+            "numberGeneratedEventsWeight",
+            "numberGeneratedEventsWeight",
+        )
+        
     DY_process_weights.extend(
         [
-            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            gen_events_weight,
             (
-                "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
-                "crossSectionPerEventWeight",
+                (
+                    """(
+                        crossSectionPerEventWeight * (
+                            (1.0 / negative_events_fraction) * (
+                                ((genWeight < 0) * (-1)) +
+                                ((genWeight >= 0) * 1)
+                            )
+                        )
+                    )""",
+                    "crossSectionPerEventWeight",
+                ) if not use_stitching else dy_stitching_weight(era)
             ),
-            # dy_stitching_weight(era),  # TODO add stitching weight
-            # ("ZPtMassReweightWeight", "zPtReweightWeight"),
+            # ("ZPtMassReweightWeight", "zPtReweightWeight"), DY contains DYNLO atm, which does not need this!
         ]
     )
     return Selection(name="DY", weights=DY_process_weights)
 
+def DY_NLO_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    DY_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
+    DY_process_weights.extend(
+        [
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            (
+                """(
+                    (1.0 / negative_events_fraction) * (
+                        ((genWeight < 0) * (-1)) +
+                        ((genWeight >= 0) * 1)
+                    )
+                ) * crossSectionPerEventWeight
+                """,
+                "crossSectionPerEventWeight",
+            ),
+            # dy_stitching_weight(era),  # TODO add stitching weight
+        ]
+    )
+    return Selection(name="DY_NLO", weights=DY_process_weights)
 
-def TT_process_selection(channel, era, vs_jet_wp):
-    TT_process_weights = MC_base_process_selection(channel, era, vs_jet_wp).weights
+def TT_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    TT_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     TT_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
@@ -195,8 +303,8 @@ def TT_process_selection(channel, era, vs_jet_wp):
     return Selection(name="TT", weights=TT_process_weights)
 
 
-def VV_process_selection(channel, era, vs_jet_wp):
-    VV_process_weights = MC_base_process_selection(channel, era, vs_jet_wp).weights
+def VV_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    VV_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     VV_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
@@ -209,8 +317,21 @@ def VV_process_selection(channel, era, vs_jet_wp):
     return Selection(name="VV", weights=VV_process_weights)
 
 
-def ST_process_selection(channel, era, vs_jet_wp):
-    ST_process_weights = MC_base_process_selection(channel, era, vs_jet_wp).weights
+def EWK_process_selection(channel, era, **kwargs):
+    EWK_process_weights = MC_base_process_selection(channel, era).weights
+    veto = __get_ZL_cut(channel)
+    EWK_process_weights.extend(
+        [
+            (veto[0], "emb_veto"),
+            (veto[1], "ff_veto"),
+            ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+            ("(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight", "crossSectionPerEventWeight"),
+        ]
+    )
+    return Selection(name="EWK", weights=EWK_process_weights)
+
+def ST_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    ST_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     ST_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
@@ -223,20 +344,28 @@ def ST_process_selection(channel, era, vs_jet_wp):
     return Selection(name="ST", weights=ST_process_weights)
 
 
-def W_stitching_weight(era):
+def W_stitching_weight(era, **kwargs):
     if era == "2018":
         weight = (
-            "((0.0008662455*((npartons <= 0 || npartons >= 5)*1.0 + (npartons == 1)*0.174101755934 + (npartons == 2)*0.136212630745 + (npartons == 3)*0.0815667415121 + (npartons == 4)*0.06721295702670023)) * (genbosonmass>=0.0) + numberGeneratedEventsWeight * crossSectionPerEventWeight * (genbosonmass<0.0))",
+            """(
+                0.0007590865 * (
+                    ((npartons <= 0) || (npartons >= 5)) * 1.0 +
+                    (npartons == 1) * 0.2191273680 +
+                    (npartons == 2) * 0.1335837379 +
+                    (npartons == 3) * 0.0636217909 +
+                    (npartons == 4) * 0.0823135765
+                )
+            )""",
             "wj_stitching_weight",
         )
         # xsec_NNLO [pb] = 61526.7, N_inclusive = 71026861, xsec_NNLO/N_inclusive = 0.0008662455 [pb] weights: [1.0, 0.1741017559343336, 0.13621263074538312, 0.08156674151214884, 0.06721295702670023]
     else:
-        raise ValueError("DY stitching weight not defined for era {}".format(era))
+        raise NotImplementedError("W stitching weight not defined for era {}".format(era))
     return weight
 
 
-def W_process_selection(channel, era, vs_jet_wp):
-    W_process_weights = MC_base_process_selection(channel, era, vs_jet_wp).weights
+def W_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    W_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     W_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
@@ -250,14 +379,14 @@ def W_process_selection(channel, era, vs_jet_wp):
     return Selection(name="W", weights=W_process_weights)
 
 
-def HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
+def HTT_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
     return Selection(
-        name="HTT_base", weights=MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+        name="HTT_base", weights=MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     )
 
 
-def HTT_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    HTT_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
+def HTT_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    HTT_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights + [
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         (
             "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
@@ -269,8 +398,8 @@ def HTT_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
 
 # This could eventually be used for all HWW estimations if necessary. At the moment this is not possible due to wrong cross section weights in 2018.
 # If the additional processes are required new functions would need to be implemented.
-def HWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    HWW_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+def HWW_process_selection(channel, era,  vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    HWW_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     HWW_process_weights.extend(
         [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
@@ -283,8 +412,8 @@ def HWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
     return Selection(name="HWW", weights=HWW_process_weights)
 
 
-def HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    HWW_base_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
+def HWW_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    HWW_base_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights + [
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         (
             "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
@@ -327,12 +456,15 @@ List of other processes meant to be put on top of base processes:
 """
 
 
-def ZTT_process_selection(channel):
+def ZTT_process_selection(channel, **kwargs):
     tt_cut = __get_ZTT_cut(channel)
     return Selection(name="ZTT", cuts=[(tt_cut, "ztt_cut")])
 
+def ZTT_nlo_process_selection(channel, **kwargs):
+    tt_cut = __get_ZTT_cut(channel)
+    return Selection(name="ZTT_nlo", cuts=[(tt_cut, "ztt_cut")])
 
-def __get_ZTT_cut(channel):
+def __get_ZTT_cut(channel, **kwargs):
     if "mt" in channel:
         return "gen_match_1==4 && gen_match_2==5"
     elif "et" in channel:
@@ -347,7 +479,25 @@ def __get_ZTT_cut(channel):
         return "gen_match_1==3 && gen_match_2==3"
 
 
-def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
+def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    wps_dict = [
+
+        "VVTight",
+        "VVTight",
+        "Tight",
+        "Medium",
+        "Loose",
+        "VLoose",
+        "VVLoose",
+        "VVVLoose",
+    ]
+    if vs_jet_wp not in wps_dict:
+        print("This vs jet working point doen't exist. Please specify the correct vsJet discriminator ")
+    elif vs_ele_wp not in wps_dict:
+        print("This vs electron working point doen't exist. Please specify the correct vsEle discriminator ")
+    elif vs_mu_wp not in wps_dict:
+        print("This vs muon working point doen't exist. Please specify the correct vsMu discriminator ")
+    
     ztt_embedded_weights = [
         ("emb_genweight", "emb_genweight"),
         ("emb_idsel_wgt_1*emb_idsel_wgt_2*emb_triggersel_wgt", "emb_selection_weight"),
@@ -362,13 +512,13 @@ def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
                     ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight"),
                 ]
             )
-            if apply_id_sfs:
+            if apply_wps:
                 ztt_embedded_weights.extend(
                 [
                     (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 ]
                 )
-            if not apply_id_sfs:
+            if not apply_wps:
                 pass
         elif era == "2018":
             ztt_embedded_weights.extend(
@@ -380,31 +530,38 @@ def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
                         "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
                         "trgweight",
                     ),
+                    ("(trg_wgt_single_mu24ormu27)", "trgweight"),
                 ]
             )
-            if apply_id_sfs:
+            if apply_wps:
                 ztt_embedded_weights.extend(
                 [
                     (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 ]
                 )
-            if not apply_id_sfs:
+            if not apply_wps:
                 pass
-        elif era in ["2016preVFP", "2016postVFP"]:
+        elif era == "2016preVFP" or era == "2016postVFP":
             ztt_embedded_weights.extend(
                 [
                     ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
                     ("iso_wgt_mu_1", "isoweight"),
                     ("id_wgt_mu_1", "idweight"),
                     ("trg_wgt_single_mu22", "trgweight"),
+                    (
+                        "((pt_1>=23) * trg_wgt_single_mu22)",
+                        "trgweight",
+                    ),
                 ]
             )
-            if apply_id_sfs:
+            if apply_wps:
                 ztt_embedded_weights.extend(
                 [
                     (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 ]
                 )
+            if not apply_wps:
+                pass
         else:
             raise ValueError(
                 f"Embedded process selection for given era {era} not yet implemented"
@@ -421,16 +578,16 @@ def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
                         "((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)",
                         "trgweight",
                     ),
-                    # ("((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    # (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 ]
             )
-            if apply_id_sfs:
+            if apply_wps:
                 ztt_embedded_weights.extend(
                 [
                     (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 ]
                 )
-            if not apply_id_sfs:
+            if not apply_wps:
                 pass
         elif era == "2018":
             ztt_embedded_weights.extend(
@@ -441,13 +598,13 @@ def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
                     ("trg_wgt_single_ele32orele35", "trgweight"),
                 ]
             )
-            if apply_id_sfs:
+            if apply_wps:
                 ztt_embedded_weights.extend(
                 [
                     (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 ]
                 )
-            if not apply_id_sfs:
+            if not apply_wps:
                 pass
         else:
             raise ValueError(
@@ -467,7 +624,7 @@ def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
                 # fakemetweight_emb(channel, era, vs_jet_wp, vs_ele_wp),
             ]
         )
-        if apply_id_sfs:
+        if apply_wps:
             ztt_embedded_weights.extend(
             [
                 (
@@ -475,7 +632,7 @@ def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
                 )
             ]
             )
-        if not apply_id_sfs:
+        if not apply_wps:
             pass
     elif "em" in channel:
         ztt_embedded_weights.extend(
@@ -499,7 +656,7 @@ def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
                     # triggerweight_emb(channel, era, vs_jet_wp, vs_ele_wp),
                 ]
             )
-        if era in ["2016postVFP", "2016preVFP"]:
+        if era == "2016postVFP" or era == "2016preVFP":
             ztt_embedded_weights.extend(
                 [
                     ("(gen_match_1==2 && gen_match_2==2)", "emb_gen_match"),
@@ -547,15 +704,21 @@ def ZTT_embedded_process_selection(channel, era, apply_id_sfs, vs_jet_wp):
     )
 
 
-def ZL_process_selection(channel):
+def ZL_process_selection(channel, **kwargs):
     veto = __get_ZL_cut(channel)
     return Selection(
         name="ZL",
         cuts=[("{}".format(veto[0]), "dy_emb_veto"), ("{}".format(veto[1]), "ff_veto")],
     )
 
+def ZL_nlo_process_selection(channel, **kwargs):
+    veto = __get_ZL_cut(channel)
+    return Selection(
+        name="ZL_nlo",
+        cuts=[("{}".format(veto[0]), "dy_emb_veto"), ("{}".format(veto[1]), "ff_veto")],
+    )
 
-def __get_ZL_cut(channel):
+def __get_ZL_cut(channel, **kwargs):
     emb_veto = ""
     ff_veto = ""
     if "mt" in channel:
@@ -571,7 +734,7 @@ def __get_ZL_cut(channel):
         emb_veto = "!(gen_match_1==3 && gen_match_2==4)"
         ff_veto = "(1.0)"
     elif "mm" in channel:
-        emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
+        emb_veto = "!(gen_match_1==2 && gen_match_2==2) && !(gen_match_1==4 && gen_match_2==4) "
         ff_veto = "(1.0)"
     elif "ee" in channel:
         emb_veto = (
@@ -581,12 +744,15 @@ def __get_ZL_cut(channel):
     return (emb_veto, ff_veto)
 
 
-def ZJ_process_selection(channel):
+def ZJ_process_selection(channel, **kwargs):
     veto = __get_ZJ_cut(channel)
     return Selection(name="ZJ", cuts=[(__get_ZJ_cut(channel), "dy_fakes")])
 
+def ZJ_nlo_process_selection(channel, **kwargs):
+    veto = __get_ZJ_cut(channel)
+    return Selection(name="ZJ_nlo", cuts=[(__get_ZJ_cut(channel), "dy_fakes")])
 
-def __get_ZJ_cut(channel):
+def __get_ZJ_cut(channel, **kwargs):
     if "mt" in channel or "et" in channel:
         return "gen_match_2 == 6"
     elif "tt" in channel:
@@ -601,7 +767,7 @@ def __get_ZJ_cut(channel):
         return ""
 
 
-def TTT_process_selection(channel):
+def TTT_process_selection(channel, **kwargs):
     tt_cut = ""
     if "mt" in channel:
         tt_cut = "gen_match_1==4 && gen_match_2==5"
@@ -618,7 +784,7 @@ def TTT_process_selection(channel):
     return Selection(name="TTT", cuts=[(tt_cut, "ttt_cut")])
 
 
-def TTL_process_selection(channel):
+def TTL_process_selection(channel, **kwargs):
     emb_veto = ""
     ff_veto = ""
     if "mt" in channel:
@@ -648,7 +814,7 @@ def TTL_process_selection(channel):
     )
 
 
-def TTJ_process_selection(channel):
+def TTJ_process_selection(channel, **kwargs):
     ct = ""
     if "mt" in channel or "et" in channel:
         ct = "(gen_match_2 == 6)"
@@ -661,7 +827,7 @@ def TTJ_process_selection(channel):
     return Selection(name="TTJ", cuts=[(ct, "tt_fakes")])
 
 
-def STT_process_selection(channel):
+def STT_process_selection(channel, **kwargs):
     st_cut = ""
     if "mt" in channel:
         st_cut = "gen_match_1==4 && gen_match_2==5"
@@ -678,7 +844,7 @@ def STT_process_selection(channel):
     return Selection(name="STT", cuts=[(st_cut, "stt_cut")])
 
 
-def STJ_process_selection(channel):
+def STJ_process_selection(channel, **kwargs):
     ct = ""
     if "mt" in channel or "et" in channel:
         ct = "(gen_match_2 == 6)"
@@ -691,7 +857,7 @@ def STJ_process_selection(channel):
     return Selection(name="STJ", cuts=[(ct, "st_fakes")])
 
 
-def STL_process_selection(channel):
+def STL_process_selection(channel, **kwargs):
     emb_veto = ""
     ff_veto = ""
     if "mt" in channel:
@@ -721,7 +887,7 @@ def STL_process_selection(channel):
     )
     
 
-def VVT_process_selection(channel):
+def VVT_process_selection(channel, **kwargs):
     vv_cut = ""
     if "mt" in channel:
         vv_cut = "gen_match_1==4 && gen_match_2==5"
@@ -738,7 +904,7 @@ def VVT_process_selection(channel):
     return Selection(name="VVT", cuts=[(vv_cut, "vvt_cut")])
 
 
-def VVJ_process_selection(channel):
+def VVJ_process_selection(channel, **kwargs):
     ct = ""
     if "mt" in channel or "et" in channel:
         ct = "(gen_match_2 == 6)"
@@ -751,7 +917,7 @@ def VVJ_process_selection(channel):
     return Selection(name="VVJ", cuts=[(ct, "vv_fakes")])
 
 
-def VVL_process_selection(channel):
+def VVL_process_selection(channel, **kwargs):
     emb_veto = ""
     ff_veto = ""
     if "mt" in channel:
@@ -781,10 +947,10 @@ def VVL_process_selection(channel):
     )
 
 
-def VH_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
+def VH_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
     return Selection(
         name="VH125",
-        weights=HTT_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights,
+        weights=HTT_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights,
         cuts=[
             (
                 "(HTXS_stage1_2_cat_pTjet30GeV>=300)&&(HTXS_stage1_2_cat_pTjet30GeV<=505)",
@@ -794,10 +960,10 @@ def VH_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
     )
 
 
-def WH_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
+def WH_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
     return Selection(
         name="WH125",
-        weights=HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+        weights=HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
         + [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
             (
@@ -815,10 +981,10 @@ def WH_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
     )
 
 
-def ZH_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
+def ZH_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
     return Selection(
         name="ZH125",
-        weights=HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+        weights=HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
         + [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
             (
@@ -837,44 +1003,44 @@ def ZH_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
     )
 
 
-def ttH_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    ttH_weights = HTT_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+def ttH_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    ttH_weights = HTT_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     return Selection(name="ttH125", weights=ttH_weights)
 
 
-def ggHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
+def ggHWW_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
     if era in ["2016", "2017"]:
-        ggHWW_weights = HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+        ggHWW_weights = HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     else:
-        ggHWW_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
+        ggHWW_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights + [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
             ("1.1019558", "crossSectionPerEventWeight"),
         ]
     return Selection(name="ggHWW125", weights=ggHWW_weights)
 
 
-def qqHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
+def qqHWW_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
     if era in ["2016", "2017"]:
-        qqHWW_weights = HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+        qqHWW_weights = HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     else:
-        qqHWW_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
+        qqHWW_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights + [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
             ("0.0857883", "crossSectionPerEventWeight"),
         ]
     return Selection(name="qqHWW125", weights=qqHWW_weights)
 
 
-def WHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    WHWW_weights = HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+def WHWW_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    WHWW_weights = HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     return Selection(name="WHWW125", weights=WHWW_weights)
 
 
-def ZHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    ZHWW_weights = HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+def ZHWW_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    ZHWW_weights = HWW_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights
     return Selection(name="ZHWW125", weights=ZHWW_weights)
 
 
-# def ggh_stitching_weight(era):
+# def ggh_stitching_weight(era, **kwargs):
 #     if era == "2016":
 #         weight = (
 #             "(numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 3.0469376) > 1e-5)+1.0/(9673200 + 19939500 + 19977000)*2.998464*(abs(crossSectionPerEventWeight - 3.0469376) < 1e-5))",
@@ -905,7 +1071,7 @@ def ZHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
 #     return weight
 
 
-def ggh_stitching_weight(era):
+def ggh_stitching_weight(era, **kwargs):
     if era == "2016":
         weight = (
             "(numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 3.0469376) > 1e-5)+1.0/(9673200 + 19939500 + 19977000)*2.998464*(abs(crossSectionPerEventWeight - 3.0469376) < 1e-5))",
@@ -936,7 +1102,7 @@ def ggh_stitching_weight(era):
     return weight
 
 
-def qqh_stitching_weight(era):
+def qqh_stitching_weight(era, **kwargs):
     if era == "2016":
         weight = (
             "(numberGeneratedEventsWeight*((abs(crossSectionPerEventWeight - 0.04774)<0.001)*0.04683+"
@@ -974,8 +1140,8 @@ def qqh_stitching_weight(era):
     return weight
 
 
-def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    ggH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
+def ggH125_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    ggH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights + [
         ("ggh_NNLO_weight", "gghNNLO"),
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         (
@@ -993,8 +1159,8 @@ def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
     return Selection(name="ggH125", weights=ggH125_weights, cuts=ggH125_cuts)
 
 
-def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
-    qqH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
+def qqH125_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
+    qqH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, vs_mu_wp).weights + [
         # qqh_stitching_weight(era)
         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
         (
@@ -1011,14 +1177,14 @@ def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp):
     return Selection(name="qqH125", weights=qqH125_weights, cuts=qqH125_cuts)
 
 
-def FF_training_process_selection(channel, era):
+def FF_training_process_selection(channel, era, **kwargs):
     cuts = []
     weights = []
     if channel == "et" or channel == "mt":
         cuts = [
             ("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         ]
-        weights = [("ff2_nom", "fake_factor")]
+        weights = [("fake_factor", "fake_factor")]
     elif channel == "tt":
         raise NotImplementedError("FF training not implemented for tt")
     elif channel == "em":
@@ -1028,3 +1194,45 @@ def FF_training_process_selection(channel, era):
     print("FF training cuts:", cuts)
     print("FF training weights:", weights)
     return Selection(name="jetFakes", cuts=cuts, weights=weights)
+
+
+# --- Process selections aliases ---
+MC_base = MC_base_process_selection
+DY = DY_process_selection
+DY_NLO = DY_NLO_process_selection
+ST = ST_process_selection
+TT = TT_process_selection
+VV = VV_process_selection
+EWK = EWK_process_selection
+W = W_process_selection
+HTT_base = HTT_base_process_selection
+HTT = HTT_process_selection
+HWW = HWW_process_selection
+HWW_base = HWW_base_process_selection
+ZTT = ZTT_process_selection
+ZTT_nlo = ZTT_nlo_process_selection
+ZTT_embedded = ZTT_embedded_process_selection
+ZL = ZL_process_selection
+ZL_nlo = ZL_nlo_process_selection
+ZJ = ZJ_process_selection
+ZJ_nlo = ZJ_nlo_process_selection
+TTT = TTT_process_selection
+TTL = TTL_process_selection
+TTJ = TTJ_process_selection
+STL = STL_process_selection
+STT = STT_process_selection
+STJ = STJ_process_selection
+VVT = VVT_process_selection
+VVL = VVL_process_selection
+VVJ = VVJ_process_selection
+VH = VH_process_selection
+WH = WH_process_selection
+ZH = ZH_process_selection
+ttH = ttH_process_selection
+ggHWW = ggHWW_process_selection
+qqHWW = qqHWW_process_selection
+WHWW = WHWW_process_selection
+ZHWW = ZHWW_process_selection
+ggH125 = ggH125_process_selection
+qqH125 = qqH125_process_selection
+FF_training = FF_training_process_selection

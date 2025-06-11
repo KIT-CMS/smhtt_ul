@@ -45,6 +45,18 @@ def parse_args():
         action="store_true",
         help="Add qqh procs estimations to file.",
     )
+    parser.add_argument(
+        "--es-up",
+        default=8,
+        type=int,
+        help="ES variation upper bound.",
+    )
+    parser.add_argument(
+        "--es-down",
+        default=-8,
+        type=int,
+        help="ES variation lower bound.",
+    )
     parser.add_argument("-s", "--special", help="Special selection.", default="")
     return parser.parse_args()
 
@@ -228,7 +240,7 @@ def main(args):
             tauES_names.append(processname)
     if args.special == "TauID_ES":
         # we have to extend the _dataset_map and the _process_map to include the TauES variations
-        aranged = np.arange(4.0, -8.0 - 0.1, -0.1).round(2).tolist()
+        aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
         tauESvariations = [0.0 if x == 0.0 else x for x in aranged]
         for variation in tauESvariations:
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")

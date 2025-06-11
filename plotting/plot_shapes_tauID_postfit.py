@@ -123,17 +123,17 @@ def setup_logging(output_file, level=logging.DEBUG):
 def main(args):
     # plot signals
     logger.debug("Arguments: {}".format(args))
-    if args.gof_variable is not None:
-        channel_categories = {
-            "et": ["300"],
-            "mt": ["300"],
-            "tt": ["300"],
-            "em": ["300"],
-        }
-    else:
-        channel_categories = {
-            "mt": ["1", "2", "3", "4", "5", "6", "7"],
-        }
+    # if args.gof_variable is not None:
+    #     channel_categories = {
+    #         "et": ["300"],
+    #         "mt": ["300"],
+    #         "tt": ["300"],
+    #         "em": ["300"],
+    #     }
+    # else:
+    #     channel_categories = {
+    #         "mt": ["1", "2", "3", "4", "5", "6", "7"],
+    #     }
 
         # signalcats = []
         # for channel in ["mt"]:
@@ -157,17 +157,19 @@ def main(args):
         "6": "Inclusive",
         "7": "DM0",
         "8": "DM1",
-        "9": "DM10_11",
+        "9": "DM1011",
         "10": "DM10",
         "11": "DM11",
         "12": "DM0_PT20_40",
         "13": "DM1_PT20_40",
+        "14": "DM1011_PT20_40",
         "15": "DM10_PT20_40",
         "16": "DM11_PT20_40",
         "17": "DM0_PT40_200",
         "18": "DM1_PT40_200",
-        "19": "DM10_PT40_200",
-        "20": "DM11_PT40_200",
+        "19": "DM1011_PT40_200",
+        "20": "DM10_PT40_200",
+        "21": "DM11_PT40_200",
         "100": "Control Region"
     }
     category_dict_for_plot = {
@@ -263,22 +265,22 @@ def main(args):
 
         # get background histograms
         for process in bkg_processes:
-            try:
-                plot.add_hist(
-                    rootfile.get(era, channel, category, process), process, "bkg"
-                )
+            plot.add_hist(
+                rootfile.get(era, channel, category, process), process, "bkg"
+            )
+            if "EMB_" not in process:
                 plot.setGraphStyle(
                     process, "hist", fillcolor=styles.color_dict[process]
                 )
-            except BaseException:
-                if "EMB" in process:
+            else:
+                if "EMB_" in process:
                     plot.setGraphStyle(
-                        bkg_processes[-1], "hist", fillcolor=styles.color_dict["EMB"]
+                        process, "hist", fillcolor=styles.color_dict["EMB"]
                     )
-                    pass
+                
                 else:
                     print(f""" \n Something went wrong in creating hist and style for process: {process} \n""")
-                    # import pdb; pdb.set_trace()
+                    
                     pass
 
         
@@ -451,17 +453,17 @@ def main(args):
 
         # save plot
         postfix = "prefit" if args.prefit else "postfit"
-        plot.save(
-            "%s/%s_%s_%s_%s.%s"
-            % (
-                args.outputfolder,
-                args.era,
-                channel,
-                args.gof_variable if args.gof_variable is not None else category,
-                postfix,
-                "png",
-            )
-        )
+        # plot.save(
+        #     "%s/%s_%s_%s_%s.%s"
+        #     % (
+        #         args.outputfolder,
+        #         args.era,
+        #         channel,
+        #         args.gof_variable if args.gof_variable is not None else category,
+        #         postfix,
+        #         "png",
+        #     )
+        # )
         plot.save(
             "%s/%s_%s_%s_%s.%s"
             % (

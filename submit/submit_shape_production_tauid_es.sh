@@ -1,51 +1,59 @@
 #!/bin/bash
 
-ERA=$1
-CHANNEL=$2
-SUBMIT_MODE=$3
-TAG=$4
-CONTROL=$5
-NTUPLETAG=$6
-OUTPUT=$7
-SPECIAL=$8
-WP=$9 
-
-[[ ! -z $1 && ! -z $2 && ! -z $3 && ! -z $4 && ! -z $5 ]] || (
+ERA=${1}
+CHANNEL=${2}
+SUBMIT_MODE=${3}
+TAG=${4}
+CONTROL=${5}
+NTUPLETAG=${6}
+OUTPUT=${7}
+SPECIAL=${8}
+WP=${9}
+WP_VSe=${10}
+WP_VSmu=${11}
+ES_up=${12}
+ES_down=${13}
+[[ ! -z ${1} && ! -z ${2} && ! -z ${3} && ! -z ${4} && ! -z ${5} ]] || (
     echo "[ERROR] Number of given parameters is too small."
     exit 1
 )
-[[ ! -z $6 ]] || CONTROL=0
+[[ ! -z ${6} ]] || CONTROL=0
 CONTROL_ARG=""
-if [[ $CONTROL == 1 ]]; then
+if [[ ${CONTROL} == 1 ]]; then
     CONTROL_ARG="--gof-inputs --control-plot-set ${SPECIAL}"
     echo "[INFO] Control plots will be produced. Argument: ${CONTROL_ARG}"
 fi
 
-source utils/setup_ul_samples.sh $NTUPLETAG $ERA
+source utils/setup_ul_samples.sh ${NTUPLETAG} ${ERA}
 source utils/setup_root.sh
 
-if [[ "$SUBMIT_MODE" == "multigraph" ]]; then
+if [[ "${SUBMIT_MODE}" == "multigraph" ]]; then
     echo "[ERROR] Not implemented yet."
     exit 1
-elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
+elif [[ "${SUBMIT_MODE}" == "singlegraph" ]]; then
     echo "[INFO] Preparing graph for submission..."
-    echo "[INFO] Using tag $TAG"
-    echo "[INFO] Using friends $FRIENDS $NNSCORE_FRIENDS"
-    [[ ! -d $OUTPUT ]] && mkdir -p $OUTPUT
-    if [[  "$SPECIAL" == "TauID_ES" ]]; then
-        python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
+    echo "[INFO] Using tag ${TAG}"
+    echo "[INFO] Using friends ${FRIENDS} ${NNSCORE_FRIENDS}"
+    [[ ! -d ${OUTPUT} ]] && mkdir -p ${OUTPUT}
+    if [[  "${SPECIAL}" == "TauID_ES" ]]; then
+        python shapes/produce_shapes_tauid_es.py --channels ${CHANNEL} \
             --output-file dummy.root \
             --directory ${NTUPLES} \
             --${CHANNEL}-friend-directory ${XSEC_FRIENDS} \
-            --era $ERA \
+            --era ${ERA} \
             --vs-jet-wp ${WP} \
+            --vs-ele-wp ${WP_VSe} \
+            --vs-mu-wp ${WP_VSmu} \
             --optimization-level 1 \
             --special-analysis "TauID_ES" \
             --only-create-graphs \
             --graph-dir ${OUTPUT} \
             ${CONTROL_ARG} \
-            --xrootd --validation-tag ${TAG}
-    elif [[ "$SPECIAL" == "TauES" ]]; then
+            --xrootd --validation-tag ${TAG} \
+            --es-up ${ES_up} \
+            --es-down ${ES_down} 
+            
+    elif [[ "${SPECIAL}" == "TauES" ]]; then
         python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
             --output-file dummy.root \
             --directory $NTUPLES \
@@ -61,17 +69,17 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     fi
     # Set output graph file name produced during graph creation.
     GRAPH_FILE_FULL_NAME=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}.pkl
-    GRAPH_FILE=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}.pkl
-    if [[ $CONTROL == 1 ]]; then
+    GRAPH_FILE=${OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${TAG}.pkl
+    if [[ ${CONTROL} == 1 ]]; then
         GRAPH_FILE_FULL_NAME=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}.pkl
-        GRAPH_FILE=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}.pkl
+        GRAPH_FILE=${OUTPUT}/control_unit_graphs-${ERA}-${CHANNEL}-${TAG}.pkl
     fi
-    # rename the graph file to a shorter name
-    mv $GRAPH_FILE_FULL_NAME $GRAPH_FILE
+    # rename the graph file
+    mv ${GRAPH_FILE_FULL_NAME} ${GRAPH_FILE}
 
     # Prepare the jdl file for single core jobs.
     echo "[INFO] Creating the logging direcory for the jobs..."
-    GF_NAME=$(basename $GRAPH_FILE)
+    GF_NAME=$(basename ${GRAPH_FILE})
     if [[ ! -d log/condorShapes/${GF_NAME%.pkl}/ ]]; then
         mkdir -p log/condorShapes/${GF_NAME%.pkl}/
     fi
@@ -80,35 +88,35 @@ elif [[ "$SUBMIT_MODE" == "singlegraph" ]]; then
     fi
 
     echo "[INFO] Preparing submission file for single core jobs for variation pipelines..."
-    cp submit/produce_shapes_cc7.jdl $OUTPUT
-    echo "output = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).out" >>$OUTPUT/produce_shapes_cc7.jdl
-    echo "error = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).err" >>$OUTPUT/produce_shapes_cc7.jdl
-    echo "log = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).log" >>$OUTPUT/produce_shapes_cc7.jdl
-    echo "queue a3,a2,a1 from $OUTPUT/arguments.txt" >>$OUTPUT/produce_shapes_cc7.jdl
-    echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>$OUTPUT/produce_shapes_cc7.jdl
+    cp submit/produce_shapes_cc7.jdl ${OUTPUT}
+    echo "output = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).out" >>${OUTPUT}/produce_shapes_cc7.jdl
+    echo "error = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).err" >>${OUTPUT}/produce_shapes_cc7.jdl
+    echo "log = log/condorShapes/${GF_NAME%.pkl}/\$(cluster).\$(Process).log" >>${OUTPUT}/produce_shapes_cc7.jdl
+    echo "queue a3,a2,a1 from ${OUTPUT}/arguments.txt" >>${OUTPUT}/produce_shapes_cc7.jdl
+    echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>${OUTPUT}/produce_shapes_cc7.jdl
     # Prepare the multicore jdl.
     echo "[INFO] Preparing submission file for multi core jobs for nominal pipeline..."
-    cp submit/produce_shapes_cc7.jdl $OUTPUT/produce_shapes_cc7_multicore.jdl
+    cp submit/produce_shapes_cc7.jdl ${OUTPUT}/produce_shapes_cc7_multicore.jdl
     # Replace the values in the config which differ for multicore jobs.
-    if [[ $CONTROL == 1 ]]; then
-        sed -i '/^RequestMemory/c\RequestMemory = 16000' $OUTPUT/produce_shapes_cc7_multicore.jdl
+    if [[ ${CONTROL} == 1 ]]; then
+        sed -i '/^RequestMemory/c\RequestMemory = 16000' ${OUTPUT}/produce_shapes_cc7_multicore.jdl
     else
-        sed -i '/^RequestMemory/c\RequestMemory = 10000' $OUTPUT/produce_shapes_cc7_multicore.jdl
+        sed -i '/^RequestMemory/c\RequestMemory = 10000' ${OUTPUT}/produce_shapes_cc7_multicore.jdl
     fi
-    sed -i '/^RequestCpus/c\RequestCpus = 4' $OUTPUT/produce_shapes_cc7_multicore.jdl
+    sed -i '/^RequestCpus/c\RequestCpus = 4' ${OUTPUT}/produce_shapes_cc7_multicore.jdl
     sed -i '/^arguments/c\arguments = $(Proxy_path) $(a1) $(a2) $(a3) $(a4)' ${OUTPUT}/produce_shapes_cc7_multicore.jdl
     # Add log file locations to output file.
-    echo "output = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).out" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
-    echo "error = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).err" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
-    echo "log = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).log" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
-    echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
-    echo "queue a3,a2,a4,a1 from $OUTPUT/arguments_multicore.txt" >>$OUTPUT/produce_shapes_cc7_multicore.jdl
+    echo "output = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).out" >>${OUTPUT}/produce_shapes_cc7_multicore.jdl
+    echo "error = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).err" >>${OUTPUT}/produce_shapes_cc7_multicore.jdl
+    echo "log = log/condorShapes/${GF_NAME%.pkl}/multicore.\$(cluster).\$(Process).log" >>${OUTPUT}/produce_shapes_cc7_multicore.jdl
+    echo "JobBatchName = Shapes_${CHANNEL}_${ERA}" >>${OUTPUT}/produce_shapes_cc7_multicore.jdl
+    echo "queue a3,a2,a4,a1 from ${OUTPUT}/arguments_multicore.txt" >>${OUTPUT}/produce_shapes_cc7_multicore.jdl
     # Assemble the arguments.txt file used in the submission
-    python submit/prepare_args_file.py --graph-file $GRAPH_FILE --output-dir $OUTPUT --pack-multiple-pipelines 10
-    echo "[INFO] Submit shape production with 'condor_submit $OUTPUT/produce_shapes_cc7.jdl' and 'condor_submit $OUTPUT/produce_shapes_cc7_multicore.jdl'"
-    condor_submit $OUTPUT/produce_shapes_cc7.jdl
-    condor_submit $OUTPUT/produce_shapes_cc7_multicore.jdl
+    python submit/prepare_args_file.py --graph-file ${GRAPH_FILE} --output-dir ${OUTPUT} --pack-multiple-pipelines 10
+    echo "[INFO] Submit shape production with 'condor_submit ${OUTPUT}/produce_shapes_cc7.jdl' and 'condor_submit ${OUTPUT}/produce_shapes_cc7_multicore.jdl'"
+    condor_submit ${OUTPUT}/produce_shapes_cc7.jdl
+    condor_submit ${OUTPUT}/produce_shapes_cc7_multicore.jdl
 else
-    echo "[ERROR] Given mode $SUBMIT_MODE is not supported. Aborting..."
+    echo "[ERROR] Given mode ${SUBMIT_MODE} is not supported. Aborting..."
     exit 1
 fi

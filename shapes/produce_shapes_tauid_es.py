@@ -24,12 +24,6 @@ from ntuple_processor.utils import Selection
 from config.shapes.channel_selection import channel_selection
 from config.shapes.file_names import files
 from config.shapes.category_selection import categorization as default_categorization
-from config.shapes.tauid_measurement_binning import (
-    categorization as tauid_categorization,
-)
-from config.shapes.taues_measurement_binning import (
-    categorization as taues_categorization,
-)
 from config.shapes.control_binning import control_binning as default_control_binning
 from config.shapes.gof_binning import load_gof_binning
 import config.shapes.process_selection as selection
@@ -37,7 +31,7 @@ import config.shapes.signal_variations as signal_variations  # TODO: Unify this?
 import config.shapes.variations as variations
 from config.logging_setup_configs import setup_logging
 from config.shapes.taues_measurement_binning import categorization as taues_categorization
-from config.shapes.tauid_measurement_binning import categorization as tauid_categorization
+import config.shapes.tauid_measurement_binning as tauid_categorization
 
 import config.shapes.ntuple_processor_config_helper as ntuple_processor_config_helper
 from config.helper_collection import PreserveROOTPathsAsStrings
@@ -415,7 +409,7 @@ def prepare_special_analysis(special: str) -> dict:
     elif special == "TauES":
         return taues_categorization
     elif special == "TauID_ES":
-        return tauid_categorization
+        return tauid_categorization.load_tauid_categorization(args.era, 'mt', args.validation_tag)
     else:
         raise ValueError("Unknown special analysis: {}".format(special))
 
@@ -550,7 +544,7 @@ def main(args):
         if args.special_analysis == "TauES":
             additional_emb_procS = set()
             aranged_es = np.arange(2.5, -2.5 - 0.1, -0.1).round(2).tolist()
-            tauESvariations = [0.0 if x == 0.0 else x for x in aranged_es]
+            tauESvariations = [0.0 if x == 0.0 else x for x in aranged_es] # catches -0.0
             shape_utils.add_tauES_datasets(
                 args.era,
                 channel,
@@ -681,7 +675,7 @@ def main(args):
             
         if channel in ["mt", "et"]:
                 _book_histogram(
-                    processes=[embS | dataS | trueTauBkgS | leptonFakesS | jetFakesDS[channel]],
+                    processes=embS | dataS | trueTauBkgS | leptonFakesS | jetFakesDS[channel],
                     # variations=variations.SemiLeptonicFFEstimations.unrolled(),
                     variations=[variations.same_sign, variations.anti_iso_lt_no_ff]
                 )

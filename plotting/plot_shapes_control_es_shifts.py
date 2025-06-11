@@ -21,8 +21,7 @@ def parse_arguments():
         description=
         "Plot categories using Dumbledraw from shapes produced by shape-producer module."
     )
-    parser.add_argument(
-        "-l", "--linear", action="store_true", help="Enable linear x-axis")
+    parser.add_argument("-l", "--linear", action="store_true", help="Enable linear x-axis")
     parser.add_argument("-e", "--era", type=str, required=True, help="Era")
     parser.add_argument(
         "-i",
@@ -76,6 +75,16 @@ def parse_arguments():
         type=str,
         default=None,
         help="The value of the energy scale shift in %.")
+    parser.add_argument(
+        "--es_up",
+        type=int,
+        default=None,
+        help="Upper bound of the energy scale shift in %.")
+    parser.add_argument(
+        "--es_down",
+        type=int,
+        default=None,
+        help="Lower bound of the energy scale shift in %.")
     parser.add_argument(
         "--tag",
         type=str,
@@ -163,7 +172,7 @@ def main(info):
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
 
-    rootfile = rootfile_parser.Rootfile_parser(args.input, variable, )
+    rootfile = rootfile_parser.Rootfile_parser(args.input, variable, [args.es_down, args.es_up],)
     bkg_processes = [b for b in all_bkg_processes]
     if "em" in channel:
         if not args.embedding:
@@ -389,7 +398,7 @@ def main(info):
     elif "2018" in args.era:
         plot.DrawLumi("59.7 fb^{-1} (2018, 13 TeV)")
     else:
-        logger.critical("Era {} is not implemented.".format(args.era))
+        logger.critical(f"Era {args.era} is not implemented.")
         raise Exception
 
     posChannelCategoryLabelLeft = None
@@ -418,7 +427,7 @@ def main(info):
         else:
             shiftanme = ""
     print("Trying to save the created plot")
-    plot.save(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.pdf")
+    # plot.save(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.pdf")
     plot.save(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png")
     print(f"\noutput/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png\n")
 
