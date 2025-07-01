@@ -582,11 +582,21 @@ class ProcessDataFrameManipulation:
         Returns:
             pd.DataFrame: DataFrame with added event quantities.
         """
-        with duplicate_filter_context(logger):
-            logger.warning("Update event quantities to use NTuple Event ID!")
-        df[tuple_column(Keys.EVENT, Keys.ID)] = range(len(self.subprocess_df))
+        # df[tuple_column(Keys.EVENT, Keys.ID)] = range(len(self.subprocess_df))
 
-        return df.copy()
+        has_ntuple_identifier = False
+        for column in ["event"]:
+            if column in self.subprocess_df.columns:
+                has_ntuple_identifier = True
+                df[tuple_column(Keys.EVENT, column)] = self.subprocess_df[column].values
+            else:
+                logger.warning(f"Column {column} not found in subprocess_df, skipping.")
+
+        if not has_ntuple_identifier:
+            with duplicate_filter_context(logger):
+                logger.warning("Update event quantities to use NTuple Event ID!")
+
+        return df
 
     def additional_nominal_cuts(self, df: pd.DataFrame) -> pd.DataFrame:
         """

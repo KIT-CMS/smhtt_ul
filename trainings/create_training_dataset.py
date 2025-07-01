@@ -65,7 +65,7 @@ def odd_id(df: pd.DataFrame) -> np.ndarray:
     Returns:
         np.ndarray: A boolean mask of the same length as the dataframe.
     """
-    return (df[Keys.EVENT][Keys.ID] % 2).astype(bool)
+    return (df[Keys.EVENT]["event"] % 2).astype(bool)
 
 
 def exemplary_remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd.DataFrame:
@@ -183,7 +183,7 @@ if __name__ == "__main__":
         plain_dataframe_kwargs = dict(
             tree_and_filepaths=list(Iterate.rdf_files(config[channel][era][process][Keys.PATHS])),
             definitions=list(Iterate.common_dict(config[channel][era][process][Keys.COMMON])) + subprocess_flags,
-            additional_columns=list(config[channel][era][process][Keys.VARIABLES].keys()),
+            additional_columns=list(config[channel][era][process][Keys.VARIABLES].keys()) + ["event"],
             filters=None,
         )
 
