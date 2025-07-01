@@ -22,8 +22,7 @@ VARS_BBTT="mt_tot,pt_tautaubb,mass_tautaubb"
 # VARS_KINFIT="kinfit_mX,kinfit_mY,kinfit_chi2,kinfit_convergence,kinfit_mX_YToBB,kinfit_mY_YToBB,kinfit_chi2_YToBB,kinfit_convergence_YToBB,kinfit_mX_YToTauTau,kinfit_mY_YToTauTau,kinfit_chi2_YToTauTau,kinfit_convergence_YToTauTau"
 VARS_FASTMTT="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
 
-VARIABLES="${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_BBTT},${VARS_FASTMTT}"
-
+VARIABLES="q_1,${VARS_TAUS},${VARS_TAU_PAIR},${VARS_JETS},${VARS_BJETS},${VARS_BBTT},${VARS_FASTMTT}"
 
 ulimit -s unlimited
 export COLUMNS=$(tput cols)
