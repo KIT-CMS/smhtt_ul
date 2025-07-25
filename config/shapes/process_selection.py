@@ -1,4 +1,9 @@
+import logging
+
 from ntuple_processor.utils import Selection
+from config.logging_setup_configs import setup_logging, LogContext
+
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 
 """Base processes
@@ -229,7 +234,7 @@ def dy_stitching_weight(era, **kwargs):
     return weight
 
 
-def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
+def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_DY=True, **kwargs):
     DY_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     if era == "2017":
         gen_events_weight = (
@@ -246,24 +251,27 @@ def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             "numberGeneratedEventsWeight",
             "numberGeneratedEventsWeight",
         )
-    DY_process_weights.extend(
-        [
-            # gen_events_weight,
-            # (
-            #     """(
-            #         crossSectionPerEventWeight * (
-            #             (1.0 / negative_events_fraction) * (
-            #                 ((genWeight < 0) * (-1)) +
-            #                 ((genWeight >= 0) * 1)
-            #             )
-            #         )
-            #     )""",
-            #     "crossSectionPerEventWeight",
-            # ),
-            dy_stitching_weight(era),  # TODO add stitching weight
-            ("ZPtMassReweightWeight", "zPtReweightWeight"),
-        ]
-    )
+
+    if weight_stitching_DY:
+        DY_process_weights.append(dy_stitching_weight(era))
+    else:
+        DY_process_weights.extend(
+            [
+                gen_events_weight,
+                (
+                    """(
+                        crossSectionPerEventWeight * (
+                            (1.0 / negative_events_fraction) * (
+                                ((genWeight < 0) * (-1)) +
+                                ((genWeight >= 0) * 1)
+                            )
+                        )
+                    )""",
+                    "crossSectionPerEventWeight",
+                ),
+            ]
+        )
+    DY_process_weights.append(("ZPtMassReweightWeight", "zPtReweightWeight"))
     return Selection(name="DY", weights=DY_process_weights)
 
 
@@ -351,18 +359,20 @@ def W_stitching_weight(era, **kwargs):
     return weight
 
 
-def W_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
+def W_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_W=True, **kwargs):
     W_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
-    # W_process_weights.extend(
-    #     [
-    #         ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-    #         (
-    #             "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
-    #             "crossSectionPerEventWeight",
-    #         ),
-    #     ]
-    # )
-    W_process_weights.append(W_stitching_weight(era))  # TODO add W stitching weight in when npartons is available
+    if weight_stitching_W:
+        W_process_weights.append(W_stitching_weight(era))
+    else:
+        W_process_weights.extend(
+            [
+                ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+                (
+                    "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
+                    "crossSectionPerEventWeight",
+                ),
+            ]
+        )
     return Selection(name="W", weights=W_process_weights)
 
 
@@ -959,35 +969,174 @@ def ZHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(name="ZHWW125", weights=ZHWW_weights)
 
 
+def _stxs_bin_or_range(*bins):
+    if len(bins) == 1:
+        return f"(HTXS_stage1_2_cat_pTjet30GeV == {bins[0]})"
+    elif len(bins) == 2:
+        return f"((HTXS_stage1_2_cat_pTjet30GeV >= {bins[0]}) && (HTXS_stage1_2_cat_pTjet30GeV <= {bins[1]}))"
+
+
 def ggh_stitching_weight(era, **kwargs):
-    if era == "2016":
-        weight = (
-            "(numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 3.0469376) > 1e-5)+1.0/(9673200 + 19939500 + 19977000)*2.998464*(abs(crossSectionPerEventWeight - 3.0469376) < 1e-5))",
-            "ggh_stitching_weight",
+    xsec_inclusive = 48.58 * 0.06272  # N3LO * BR(tau tau)
+
+    # fraction determined from N3LO cross section in each bin of inclusive sample pre-selection
+    xsec_fractions = {
+        "bin100": 0.08318797823593468,
+        "bin101": 0.01042200334575194,
+        "bin102": 0.00298337083653306,
+        "bin103": 0.0005678862986734344,
+        "bin104to105": 0.00010037567623046294 + 0.12614697523978313,
+        "bin106": 0.44989430160739785,
+        "bin107to109": 0.140926124593334 + 0.08157534324506752 + 0.014167855250793428,
+        "bin110to113": 0.01976800749762655 + 0.0371421174622971 + 0.01734075531449457 + 0.005172074925766409,
+        "bin114": 0.005839791380690793,
+        "bin115": 0.0023501000717436656,
+        "bin116": 0.0024149390178801132,
+    }
+
+    N = {
+        '2016preVFP': {
+            'inclusive': 6134000,
+            'bin101': 1373032,
+            'bin101_ext1': 5232863,
+            'bin104to105': 6952512,
+            'bin104to105_ext1': 33418400,
+            'bin106': 1978107,
+            'bin106_ext1': 9825511,
+            'bin107to109': 2017851,
+            'bin107to109_ext1': 10165655,
+            'bin110to113': 3094573,
+            'bin110to113_ext1': 14530099,
+        },
+        '2016postVFP': {
+            'inclusive': 6439000,
+            'bin101': 1093494,
+            'bin101_ext1': 6340339,
+            'bin104to105': 6557985,
+            'bin104to105_ext1': 35814651,
+            'bin106': 2001772,
+            'bin106_ext1': 9948089,
+            'bin107to109': 2017124,
+            'bin107to109_ext1': 10122661,
+            'bin110to113': 3049031,
+            'bin110to113_ext1': 15992787,
+        },
+        '2018': {
+            'inclusive': 12966000,
+            'bin101': 2228950,
+            'bin101_ext1': 9732154,
+            'bin104to105': 13615355,
+            'bin104to105_ext1': 68079587,
+            'bin106': 3917850,
+            'bin106_ext1': 20141681,
+            'bin107to109': 4012248,
+            'bin107to109_ext1': 20518986,
+            'bin110to113': 6122208,
+            'bin110to113_ext1': 29718881,
+        },
+        '2017': {
+            'inclusive': 12974000,
+            'bin101': 2230442,
+            'bin101_ext1': 12316040,
+            'bin104to105_ext1': 69394908,
+            'bin107to109': 4037059,
+            'bin104to105': 13502118,
+            'bin110to113': 6037239,
+            'bin106_ext1': 19755954,
+            'bin106': 3945057,
+            'bin110to113_ext1': 30074010,
+            'bin107to109_ext1': 19863603,
+        },
+    }
+
+    negative_fraction = {
+        '2016preVFP': {
+            'inclusive': 0.9897538311053147,
+            'bin101': 0.9993459729999009,
+            'bin101_ext1': 0.9992803174858581,
+            'bin104to105': 0.9930312957388638,
+            'bin104to105_ext1': 0.9930483805328801,
+            'bin106': 0.9933694183378351,
+            'bin106_ext1': 0.9934517400672596,
+            'bin107to109': 0.9951314542054889,
+            'bin107to109_ext1': 0.9950293414443043,
+            'bin110to113': 0.9960065572859325,
+            'bin110to113_ext1': 0.9960758698202951,
+        },
+        '2016postVFP': {
+            'inclusive': 0.9896303773877931,
+            'bin101': 0.9992647421933728,
+            'bin101_ext1': 0.9992669161696244,
+            'bin104to105': 0.9929676569861017,
+            'bin104to105_ext1': 0.9930765763988598,
+            'bin106': 0.9933418990774174,
+            'bin106_ext1': 0.9934184344349956,
+            'bin107to109': 0.995108877788376,
+            'bin107to109_ext1': 0.9950321363127739,
+            'bin110to113': 0.9961259823202847,
+            'bin110to113_ext1': 0.996109871281347,
+        },
+        '2018': {
+            'inclusive': 0.9896493907141756,
+            'bin101': 0.9992812759371005,
+            'bin101_ext1': 0.9993010796993143,
+            'bin104to105': 0.9930831035988411,
+            'bin104to105_ext1': 0.9930390294523966,
+            'bin106': 0.993488265247521,
+            'bin106_ext1': 0.99343758845153,
+            'bin107to109': 0.9950102785271498,
+            'bin107to109_ext1': 0.9950589176287756,
+            'bin110to113': 0.996042277557378,
+            'bin110to113_ext1': 0.9960882780209659,
+        },
+        '2017': {
+            'inclusive': 0.9897097271466009,
+            'bin101': 0.9992862401263964,
+            'bin101_ext1': 0.9992996125377962,
+            'bin104to105': 0.9930560523911878,
+            'bin104to105_ext1': 0.9930626898446209,
+            'bin106': 0.9934439477046846,
+            'bin106_ext1': 0.9933888285020304,
+            'bin107to109': 0.9950944487063479,
+            'bin107to109_ext1': 0.9950293005755301,
+            'bin110to113': 0.9961280313732818,
+            'bin110to113_ext1': 0.9960913094063611,
+        },
+    }
+
+    def inclusive_and_extended(*bins):
+        _bin = f"bin{bins[0]}" if len(bins) == 1 else f"bin{bins[0]}to{bins[-1]}"
+        _bin_ext1 = f"{_bin}_ext1"
+
+        _frac = xsec_fractions[_bin]
+
+        return (_frac * xsec_inclusive)  / sum(
+            [
+                N[era][_bin] * negative_fraction[era][_bin],
+                N[era][_bin_ext1] * negative_fraction[era][_bin_ext1],
+                _frac * N[era]["inclusive"] * negative_fraction[era]["inclusive"],
+            ]
         )
-    elif era == "2017":
-        weight = (
-            "((HTXS_stage1_2_cat_pTjet30GeV==100||HTXS_stage1_2_cat_pTjet30GeV==102||HTXS_stage1_2_cat_pTjet30GeV==103)*crossSectionPerEventWeight*8.210e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV==101)*2.08e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV==104||HTXS_stage1_2_cat_pTjet30GeV==105)*4.39e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV==106)*1.19e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV>=107&&HTXS_stage1_2_cat_pTjet30GeV<=109)*4.91e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV>=110&&HTXS_stage1_2_cat_pTjet30GeV<=113)*7.90e-9"
-            ")*0.98409104275716*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5)",
-            "ggh_stitching_weight",
-        )
-    elif era == "2018":
-        weight = (
-            "(((HTXS_stage1_2_cat_pTjet30GeV==100||HTXS_stage1_2_cat_pTjet30GeV==102||HTXS_stage1_2_cat_pTjet30GeV==103)*crossSectionPerEventWeight*numberGeneratedEventsWeight+"
-            "(HTXS_stage1_2_cat_pTjet30GeV==101)*2.09e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV==104||HTXS_stage1_2_cat_pTjet30GeV==105)*4.28e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV==106)*1.39e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV>=107&&HTXS_stage1_2_cat_pTjet30GeV<=109)*4.90e-8+"
-            "(HTXS_stage1_2_cat_pTjet30GeV>=110&&HTXS_stage1_2_cat_pTjet30GeV<=113)*9.69e-9"
-            ")*0.98409104275716*(abs(crossSectionPerEventWeight - 0.00538017) > 1e-5) + numberGeneratedEventsWeight*0.005307836*(abs(crossSectionPerEventWeight - 0.00538017) < 1e-5))",
-            "ggh_stitching_weight",
-        )
-    return weight
+
+    sign = "(((genWeight < 0) * (-1)) + ((genWeight >= 0) * (1)))"
+    inclusive = xsec_inclusive * (N[era]["inclusive"] * negative_fraction[era]["inclusive"]) ** (-1)
+    category_wise_reweighting = " + ".join(
+        [
+            f"(({_stxs_bin_or_range(100)}) * ({inclusive}))",
+            f"(({_stxs_bin_or_range(101)}) * ({inclusive_and_extended(101)}))",
+            f"(({_stxs_bin_or_range(102)}) * ({inclusive}))",
+            f"(({_stxs_bin_or_range(103)}) * ({inclusive}))",
+            f"(({_stxs_bin_or_range(104, 105)}) * ({inclusive_and_extended(104, 105)}))",
+            f"(({_stxs_bin_or_range(106)}) * ({inclusive_and_extended(106)}))",
+            f"(({_stxs_bin_or_range(107, 109)}) * ({inclusive_and_extended(107, 109)}))",
+            f"(({_stxs_bin_or_range(110, 113)}) * ({inclusive_and_extended(110, 113)}))",
+            f"(({_stxs_bin_or_range(114)}) * ({inclusive}))",
+            f"(({_stxs_bin_or_range(115)}) * ({inclusive}))",
+            f"(({_stxs_bin_or_range(116)}) * ({inclusive}))",
+        ]
+    )
+
+    return (f"(({sign}) * ({category_wise_reweighting}))", "ggh_stitching_weight")
 
 
 def qqh_stitching_weight(era, **kwargs):
@@ -1028,23 +1177,40 @@ def qqh_stitching_weight(era, **kwargs):
     return weight
 
 
-def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
-    ggH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
-        ("ggh_NNLO_weight", "gghNNLO"),
-        ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-        (
-            "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
-            "crossSectionPerEventWeight",
-        ),
-        # ggh_stitching_weight(era),
-    ]
+def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_ggH125=True, **kwargs):
+    ggH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+    
+    if weight_stitching_ggH125:
+        ggH125_weights.append(ggh_stitching_weight(era))
+    else:
+        ggH125_weights.extend(
+            [
+                ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+                (
+                    "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
+                    "crossSectionPerEventWeight",
+                ),
+            ]
+        )
+    
+    ggH125_weights.append(("ggh_NNLO_weight", "gghNNLO"))
+
     ggH125_cuts = [
         (
-            "(HTXS_stage1_2_cat_pTjet30GeV>=100)&&(HTXS_stage1_2_cat_pTjet30GeV<=113)",
+            "(HTXS_stage1_2_cat_pTjet30GeV>=100)&&(HTXS_stage1_2_cat_pTjet30GeV<=116)",
             "htxs",
         )
     ]
     return Selection(name="ggH125", weights=ggH125_weights, cuts=ggH125_cuts)
+
+
+def _get_ggH125_bin_selection(*bins):
+    _bin = f"bin{bins[0]}" if len(bins) == 1 else f"bin{bins[0]}to{bins[-1]}"
+    with LogContext(logger).suppress_logging():
+        def _selection(**kwargs):
+            return Selection(name=f"ggH125_{_bin}_selection", cuts=[(_stxs_bin_or_range(*bins), f"ggH125_{_bin}_selection")])
+        _selection.__name__ = f"ggH125_{_bin}_selection"
+    return _selection
 
 
 def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
@@ -1121,3 +1287,23 @@ ZHWW = ZHWW_process_selection
 ggH125 = ggH125_process_selection
 qqH125 = qqH125_process_selection
 FF_training = FF_training_process_selection
+
+ggH125_inclusive = _get_ggH125_bin_selection(100, 116)
+ggH125_100 = _get_ggH125_bin_selection(100)
+ggH125_101 = _get_ggH125_bin_selection(101)
+ggH125_102 = _get_ggH125_bin_selection(102)
+ggH125_103 = _get_ggH125_bin_selection(103)
+ggH125_104 = _get_ggH125_bin_selection(104)
+ggH125_105 = _get_ggH125_bin_selection(105)
+ggH125_106 = _get_ggH125_bin_selection(106)
+ggH125_107 = _get_ggH125_bin_selection(107)
+ggH125_108 = _get_ggH125_bin_selection(108)
+ggH125_109 = _get_ggH125_bin_selection(109)
+ggH125_110 = _get_ggH125_bin_selection(110)
+ggH125_111 = _get_ggH125_bin_selection(111)
+ggH125_112 = _get_ggH125_bin_selection(112)
+ggH125_113 = _get_ggH125_bin_selection(113)
+ggH125_114 = _get_ggH125_bin_selection(114)
+ggH125_115 = _get_ggH125_bin_selection(115)
+ggH125_116 = _get_ggH125_bin_selection(116)
+

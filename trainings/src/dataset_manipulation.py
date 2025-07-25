@@ -12,10 +12,10 @@ from src.helper import Iterate, Keys, optional_process_pool
 from tqdm import tqdm
 
 try:
-    from config.logging_setup_configs import duplicate_filter_context, setup_logging
+    from config.logging_setup_configs import LogContext, setup_logging
 except ModuleNotFoundError:
     sys.path.extend([".", ".."])
-    from config.logging_setup_configs import duplicate_filter_context, setup_logging
+    from config.logging_setup_configs import LogContext, setup_logging
 
 
 logger = setup_logging(logger=logging.getLogger(__name__))
@@ -606,7 +606,7 @@ class ProcessDataFrameManipulation:
                     logger.warning(f"Column {column} not found in subprocess_df, skipping.")
 
         if not has_ntuple_identifier:
-            with duplicate_filter_context(logger):
+            with LogContext(logger).duplicate_filter():
                 logger.warning("Update event quantities to use NTuple Event ID!")
 
         return df
@@ -858,7 +858,7 @@ class CombinedDataFrameManipulation:
         elif isinstance(dfs, dict):
             return type(dfs)({k: CombinedDataFrameManipulation.fill_nans_in_weight_like(v) for k, v in tqdm(dfs.items())})
         elif isinstance(dfs, pd.DataFrame):
-            with duplicate_filter_context(logger):
+            with LogContext(logger).duplicate_filter():
                 logger.info("Filling NaN weight-like uncertainty weight and cut with Nominal (anti_iso) weight and cut")
             return CombinedDataFrameManipulation._fill_nans_in_weights_and_cuts(
                 dfs=dfs,
@@ -893,7 +893,7 @@ class CombinedDataFrameManipulation:
         elif isinstance(dfs, dict):
             return type(dfs)({k: CombinedDataFrameManipulation.fill_nans_in_shift_like(v, **kwargs) for k, v in tqdm(dfs.items())})
         elif isinstance(dfs, pd.DataFrame):
-            with duplicate_filter_context(logger):
+            with LogContext(logger).duplicate_filter():
                 logger.info("Filling NaN shift-like uncertainty weight and cut with Nominal (anti_iso) weight and cut")
 
             dfs = CombinedDataFrameManipulation._fill_nans_in_weights_and_cuts(
@@ -901,7 +901,7 @@ class CombinedDataFrameManipulation:
                 filter_function=lambda it: it[0] == Keys.SHIFT_LIKE,
             )
 
-            with duplicate_filter_context(logger):
+            with LogContext(logger).duplicate_filter():
                 logger.info("Filling NaN in shifted variables with Nominal variables")
 
             return CombinedDataFrameManipulation._fill_nans_in_variables(
@@ -933,7 +933,7 @@ class CombinedDataFrameManipulation:
         elif isinstance(dfs, dict):
             return type(dfs)({k: CombinedDataFrameManipulation.fill_nans_in_nominal_additional(v) for k, v in tqdm(dfs.items())})
         elif isinstance(dfs, pd.DataFrame):
-            with duplicate_filter_context(logger):
+            with LogContext(logger).duplicate_filter():
                 logger.info("Filling NaNs in nominal additional with Nominal Weights")
 
             def is_additional_nominal(x):
