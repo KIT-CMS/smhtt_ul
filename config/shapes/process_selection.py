@@ -1,7 +1,14 @@
 import logging
+import os
+import pathlib
+from dataclasses import dataclass
+from typing import Iterable, List, Union
 
+import yaml
+
+from config.helper_collection import calculate_stxs_N_and_negative_fractions
+from config.logging_setup_configs import LogContext, setup_logging
 from ntuple_processor.utils import Selection
-from config.logging_setup_configs import setup_logging, LogContext
 
 logger = setup_logging(logger=logging.getLogger(__name__))
 
@@ -969,14 +976,128 @@ def ZHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(name="ZHWW125", weights=ZHWW_weights)
 
 
-def _stxs_bin_or_range(*bins):
-    if len(bins) == 1:
-        return f"(HTXS_stage1_2_cat_pTjet30GeV == {bins[0]})"
-    elif len(bins) == 2:
-        return f"((HTXS_stage1_2_cat_pTjet30GeV >= {bins[0]}) && (HTXS_stage1_2_cat_pTjet30GeV <= {bins[1]}))"
+def _qqh_stitching_weight_twiki_like(era, **kwargs):
+    xsec_inclusive = 3.779 * 0.06272  # NNLO * BR(tau tau)
+    
+    # fraction determined from NNLO cross section in each bin of inclusive sample pre-selection
+    xsec_fractions = {
+        "bin200": 0.0668516531586647,
+        "bin201": 0.0699433982372284,
+        "bin202": 0.32849204540252686,
+        "bin203to205": 0.01365972775965929 + 0.024066464975476265 + 0.12312091886997223,
+        "bin206": 0.039959028363227844,
+        "bin207to210": 0.10251548141241074 + 0.03852349519729614 + 0.15031209588050842 + 0.04255538061261177,
+    }
+    
+    N = {
+        '2016preVFP': {
+            'inclusive': 1395000.0,
+            'bin203to205': 2054487.0,
+            'bin203to205_ext1': 10019672.0,
+            'bin206': 428607.0,
+            'bin206_ext1': 2081798.0,
+            'bin207to210': 1890825.0,
+            'bin207to210_ext1': 9390684.0,
+        },
+        '2016postVFP': {
+            'inclusive': 1500000.0,
+            'bin203to205': 2067093.0,
+            'bin203to205_ext1': 9901890.0,
+            'bin206': 398305.0,
+            'bin206_ext1': 2141581.0,
+            'bin207to210': 1951780.0,
+            'bin207to210_ext1': 9197503.0,
+        },
+        '2017': {
+            'inclusive': 2811630.0,
+            'bin203to205': 4014442.0,
+            'bin203to205_ext1': 20085840.0,
+            'bin206': 857314.0,
+            'bin206_ext1': 4174683.0,
+            'bin207to210': 3934902.0,
+            'bin207to210_ext1': 18605999.0,
+        },
+        '2018': {
+            'inclusive': 2987000.0,
+            'bin203to205': 4023251.0,
+            'bin203to205_ext1': 21046449.0,
+            'bin206': 775796.0,
+            'bin206_ext1': 3962415.0,
+            'bin207to210': 3770982.0,
+            'bin207to210_ext1': 19114184.0,
+        },
+    }
+    
+    negative_fraction = {
+        '2016preVFP': {
+            'inclusive': 0.9986293906810035,
+            'bin203to205': 0.9988639499787538,
+            'bin203to205_ext1': 0.9989221204047398,
+            'bin206': 0.9996033662539343,
+            'bin206_ext1': 0.999574406354507,
+            'bin207to210': 0.9995282482514246,
+            'bin207to210_ext1': 0.9995065322185264,
+        },
+        '2018': {
+            'inclusive': 0.9986916638767994,
+            'bin203to205': 0.998983409188241,
+            'bin203to205_ext1': 0.9989206730313508,
+            'bin206': 0.9995643184548515,
+            'bin206_ext1': 0.9995745019136058,
+            'bin207to210': 0.9995210796551137,
+            'bin207to210_ext1': 0.9995135549600234,
+        },
+        '2016postVFP': {
+            'inclusive': 0.9987186666666666,
+            'bin203to205': 0.9989473139331418,
+            'bin203to205_ext1': 0.9989202061424637,
+            'bin206': 0.9995179573442462,
+            'bin206_ext1': 0.9995778819479627,
+            'bin207to210': 0.9995173636372952,
+            'bin207to210_ext1': 0.9995179126334615,
+        },
+        '2017': {
+            'inclusive': 0.9986477594847117,
+            'bin203to205': 0.9988929968349275,
+            'bin203to205_ext1': 0.9989260095669387,
+            'bin206': 0.9995917481809465,
+            'bin206_ext1': 0.9995640387545593,
+            'bin207to210': 0.999522224441676,
+            'bin207to210_ext1': 0.9995115553859806,
+        },
+    }
+
+    def inclusive_and_extended(*bins):
+        _bin = f"bin{bins[0]}" if len(bins) == 1 else f"bin{bins[0]}to{bins[-1]}"
+        _bin_ext1 = f"{_bin}_ext1"
+
+        _frac = xsec_fractions[_bin]
+
+        return (_frac * xsec_inclusive)  / sum(
+            [
+                N[era][_bin] * negative_fraction[era][_bin],
+                N[era][_bin_ext1] * negative_fraction[era][_bin_ext1],
+                _frac * N[era]["inclusive"] * negative_fraction[era]["inclusive"],
+            ]
+        )
+
+    sign = "(((genWeight < 0) * (-1)) + ((genWeight >= 0) * (1)))"
+    inclusive = xsec_inclusive * (N[era]["inclusive"] * negative_fraction[era]["inclusive"]) ** (-1)
+    category_wise_reweighting = " + ".join(
+        [
+            f"(({_get_stxs_bin_or_range(200)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(201)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(202)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(203, 205)}) * ({inclusive_and_extended(203, 205)}))",
+            f"(({_get_stxs_bin_or_range(206)}) * ({inclusive_and_extended(206)}))",
+            f"(({_get_stxs_bin_or_range(207, 210)}) * ({inclusive_and_extended(207, 210)}))",
+        ]
+    )
+
+    return (f"(({sign}) * ({category_wise_reweighting}))", "qqh_stitching_weight")
 
 
-def ggh_stitching_weight(era, **kwargs):
+def _ggh_stitching_weight_twiki_like(era, **kwargs):
     xsec_inclusive = 48.58 * 0.06272  # N3LO * BR(tau tau)
 
     # fraction determined from N3LO cross section in each bin of inclusive sample pre-selection
@@ -1122,59 +1243,105 @@ def ggh_stitching_weight(era, **kwargs):
     inclusive = xsec_inclusive * (N[era]["inclusive"] * negative_fraction[era]["inclusive"]) ** (-1)
     category_wise_reweighting = " + ".join(
         [
-            f"(({_stxs_bin_or_range(100)}) * ({inclusive}))",
-            f"(({_stxs_bin_or_range(101)}) * ({inclusive_and_extended(101)}))",
-            f"(({_stxs_bin_or_range(102)}) * ({inclusive}))",
-            f"(({_stxs_bin_or_range(103)}) * ({inclusive}))",
-            f"(({_stxs_bin_or_range(104, 105)}) * ({inclusive_and_extended(104, 105)}))",
-            f"(({_stxs_bin_or_range(106)}) * ({inclusive_and_extended(106)}))",
-            f"(({_stxs_bin_or_range(107, 109)}) * ({inclusive_and_extended(107, 109)}))",
-            f"(({_stxs_bin_or_range(110, 113)}) * ({inclusive_and_extended(110, 113)}))",
-            f"(({_stxs_bin_or_range(114)}) * ({inclusive}))",
-            f"(({_stxs_bin_or_range(115)}) * ({inclusive}))",
-            f"(({_stxs_bin_or_range(116)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(100)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(101)}) * ({inclusive_and_extended(101)}))",
+            f"(({_get_stxs_bin_or_range(102)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(103)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(104, 105)}) * ({inclusive_and_extended(104, 105)}))",
+            f"(({_get_stxs_bin_or_range(106)}) * ({inclusive_and_extended(106)}))",
+            f"(({_get_stxs_bin_or_range(107, 109)}) * ({inclusive_and_extended(107, 109)}))",
+            f"(({_get_stxs_bin_or_range(110, 113)}) * ({inclusive_and_extended(110, 113)}))",
+            f"(({_get_stxs_bin_or_range(114)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(115)}) * ({inclusive}))",
+            f"(({_get_stxs_bin_or_range(116)}) * ({inclusive}))",
         ]
     )
 
     return (f"(({sign}) * ({category_wise_reweighting}))", "ggh_stitching_weight")
 
 
+@dataclass(kw_only=True)
+class _Bin:
+    xsec: float
+    N_events: List[int]
+    negative_fractions: List[float]
+
+    @property
+    def calculate(self):
+        return self.xsec / sum(_N_event * _negative_fraction for _N_event, _negative_fraction in zip(self.N_events, self.negative_fractions))
+
+
+def _get_stxs_bin_or_range(*bins):
+    if len(bins) == 1:
+        return f"(HTXS_stage1_2_cat_pTjet30GeV == {bins[0]})"
+    elif len(bins) == 2:
+        return f"((HTXS_stage1_2_cat_pTjet30GeV >= {bins[0]}) && (HTXS_stage1_2_cat_pTjet30GeV <= {bins[1]}))"
+
+
+def _get_stxs_stitching_weight(
+    era,
+    process,
+    full_recreation=True,
+    stage="1p2",
+    granularity="coarse",
+    nanoAOD_version="v9",
+    **kwargs,
+):
+    if full_recreation:
+        specific_era=("2018", "2017", "2016preVFP", "2016postVFP"),  # (era,),
+        specific_process=("ggh_htautau", "vbf_htautau"),  # (stxs_process,),
+    else:
+        specific_era = (era,)
+        specific_process = (process,)
+    
+    file = pathlib.Path(__file__).parent / "STXS_stitching_details.yaml"
+    try:
+        with open(file, "r") as f:
+            info = yaml.safe_load(f)[process]
+    except FileNotFoundError:
+        info = calculate_stxs_N_and_negative_fractions(
+            database_path=file.parent.parent.parent / "datasets" / f"nanoAOD_{nanoAOD_version}",
+            output_path=file,
+            specific_era=specific_era,
+            specific_process=specific_process,
+            stage=stage,
+            granularity=granularity,
+        )[process]
+
+    bins = {
+        b: _Bin(
+            xsec=info["xsec_inclusive"] * info["xsec_fractions"][b],
+            N_events=info[era]["N_events"][b],
+            negative_fractions=info[era]["negative_fractions"][b],
+        )
+        for b in info["xsec_fractions"]
+    }
+    sign = "(((genWeight < 0) * (-1)) + ((genWeight >= 0) * (1)))"
+    category_wise_reweighting = " + ".join(
+        [
+            f"(({_get_stxs_bin_or_range(b)}) * ({bins[b].calculate}))"
+            for b in bins
+        ]
+    )
+
+    return (f"(({sign}) * ({category_wise_reweighting}))", f"{process}_stitching_weight")
+
+
+def _get_stxs_bin_selection(process, *bins):
+    _bin = f"bin{bins[0]}" if len(bins) == 1 else f"bin{bins[0]}to{bins[-1]}"
+    with LogContext(logger).suppress_logging():
+        def stxs_bin_selection(**kwargs):
+            return Selection(name=f"{process}_{_bin}_selection", cuts=[(_get_stxs_bin_or_range(*bins), f"{process}_{_bin}_selection")])
+        stxs_bin_selection.__name__ = f"{process}_{_bin}_selection"
+    return stxs_bin_selection
+
+
+def ggh_stitching_weight(era, **kwargs):
+    return _get_stxs_stitching_weight(era=era, process="ggh_htautau", **kwargs)
+
+
 def qqh_stitching_weight(era, **kwargs):
-    if era == "2016":
-        weight = (
-            "(numberGeneratedEventsWeight*((abs(crossSectionPerEventWeight - 0.04774)<0.001)*0.04683+"
-            "(abs(crossSectionPerEventWeight - 0.052685)<0.001)*0.051607+"
-            "(abs(crossSectionPerEventWeight - 0.03342)<0.001)*0.032728576)"
-            "+1.0/(1499400 + 1999000 + 2997000)*0.2340416*(abs(crossSectionPerEventWeight - 0.2370687)<1e-4))",
-            "qqh_stitching_weight",
-        )
-    elif era == "2017":
-        weight = (
-            "(((HTXS_stage1_2_cat_pTjet30GeV>=200&&HTXS_stage1_2_cat_pTjet30GeV<=202)*(abs(crossSectionPerEventWeight-0.237207)<1e-4)*0.2340416)+"
-            "(abs(crossSectionPerEventWeight-0.04774)<0.001)*0.04683+"
-            "(abs(crossSectionPerEventWeight-0.052685)<0.001)*0.051607+"
-            "(abs(crossSectionPerEventWeight-0.03342)<0.001)*0.032728576)*numberGeneratedEventsWeight"
-            "+0.987231127517045*(abs(crossSectionPerEventWeight-0.04774)>=0.001&&abs(crossSectionPerEventWeight-0.052685)>=0.001&&abs(crossSectionPerEventWeight-0.03342)>=0.001)*("
-            "(HTXS_stage1_2_cat_pTjet30GeV>=203&&HTXS_stage1_2_cat_pTjet30GeV<=205)*8.70e-9+"
-            "(HTXS_stage1_2_cat_pTjet30GeV==206)*8.61e-9+"
-            "(HTXS_stage1_2_cat_pTjet30GeV>=207&&HTXS_stage1_2_cat_pTjet30GeV<=210)*1.79e-8"
-            ")",
-            "qqh_stitching_weight",
-        )
-    elif era == "2018":
-        weight = (
-            "(((HTXS_stage1_2_cat_pTjet30GeV>=200&&HTXS_stage1_2_cat_pTjet30GeV<=202)*(abs(crossSectionPerEventWeight-0.2370687)<1e-4)*0.2340416)+"
-            "(abs(crossSectionPerEventWeight-0.04774)<0.001)*0.04683+"
-            "(abs(crossSectionPerEventWeight-0.052685)<0.001)*0.051607+"
-            "(abs(crossSectionPerEventWeight-0.03342)<0.001)*0.032728576)*numberGeneratedEventsWeight"
-            "+0.987231127517045*(abs(crossSectionPerEventWeight-0.04774)>=0.001&&abs(crossSectionPerEventWeight-0.052685)>=0.001&&abs(crossSectionPerEventWeight-0.03342)>=0.001)*("
-            "(HTXS_stage1_2_cat_pTjet30GeV>=203&&HTXS_stage1_2_cat_pTjet30GeV<=205)*9.41e-9+"
-            "(HTXS_stage1_2_cat_pTjet30GeV==206)*8.52e-9+"
-            "(HTXS_stage1_2_cat_pTjet30GeV>=207&&HTXS_stage1_2_cat_pTjet30GeV<=210)*1.79e-8"
-            ")",
-            "qqh_stitching_weight",
-        )
-    return weight
+    return _get_stxs_stitching_weight(era=era, process="vbf_htautau", **kwargs)
 
 
 def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_ggH125=True, **kwargs):
@@ -1204,24 +1371,21 @@ def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitchin
     return Selection(name="ggH125", weights=ggH125_weights, cuts=ggH125_cuts)
 
 
-def _get_ggH125_bin_selection(*bins):
-    _bin = f"bin{bins[0]}" if len(bins) == 1 else f"bin{bins[0]}to{bins[-1]}"
-    with LogContext(logger).suppress_logging():
-        def _selection(**kwargs):
-            return Selection(name=f"ggH125_{_bin}_selection", cuts=[(_stxs_bin_or_range(*bins), f"ggH125_{_bin}_selection")])
-        _selection.__name__ = f"ggH125_{_bin}_selection"
-    return _selection
-
-
-def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
-    qqH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
-        # qqh_stitching_weight(era)
-        ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
-        (
-            "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
-            "crossSectionPerEventWeight",
-        ),
-    ]
+def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_qqH125=True, **kwargs):
+    qqH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
+    
+    if weight_stitching_qqH125:
+        qqH125_weights.append(qqh_stitching_weight(era))
+    else:
+        qqH125_weights.extend(
+            [
+                ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
+                (
+                    "(( 1.0 / negative_events_fraction) * (((genWeight<0) * -1) + ((genWeight > 0 * 1)))) * crossSectionPerEventWeight",
+                    "crossSectionPerEventWeight",
+                ),
+            ]
+        )
     qqH125_cuts = [
         (
             "(HTXS_stage1_2_cat_pTjet30GeV>=200)&&(HTXS_stage1_2_cat_pTjet30GeV<=210)",
@@ -1229,6 +1393,14 @@ def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         )
     ]
     return Selection(name="qqH125", weights=qqH125_weights, cuts=qqH125_cuts)
+
+
+def get_ggH125_bin_selection(*bins):
+    return _get_stxs_bin_selection("ggH125", *bins)
+
+
+def get_qqH125_bin_selection(*bins):
+    return _get_stxs_bin_selection("qqH125", *bins)
 
 
 def FF_training_process_selection(channel, era, **kwargs):
@@ -1288,22 +1460,34 @@ ggH125 = ggH125_process_selection
 qqH125 = qqH125_process_selection
 FF_training = FF_training_process_selection
 
-ggH125_inclusive = _get_ggH125_bin_selection(100, 116)
-ggH125_100 = _get_ggH125_bin_selection(100)
-ggH125_101 = _get_ggH125_bin_selection(101)
-ggH125_102 = _get_ggH125_bin_selection(102)
-ggH125_103 = _get_ggH125_bin_selection(103)
-ggH125_104 = _get_ggH125_bin_selection(104)
-ggH125_105 = _get_ggH125_bin_selection(105)
-ggH125_106 = _get_ggH125_bin_selection(106)
-ggH125_107 = _get_ggH125_bin_selection(107)
-ggH125_108 = _get_ggH125_bin_selection(108)
-ggH125_109 = _get_ggH125_bin_selection(109)
-ggH125_110 = _get_ggH125_bin_selection(110)
-ggH125_111 = _get_ggH125_bin_selection(111)
-ggH125_112 = _get_ggH125_bin_selection(112)
-ggH125_113 = _get_ggH125_bin_selection(113)
-ggH125_114 = _get_ggH125_bin_selection(114)
-ggH125_115 = _get_ggH125_bin_selection(115)
-ggH125_116 = _get_ggH125_bin_selection(116)
+ggH125_inclusive = get_ggH125_bin_selection(100, 116)
+ggH125_100 = get_ggH125_bin_selection(100)
+ggH125_101 = get_ggH125_bin_selection(101)
+ggH125_102 = get_ggH125_bin_selection(102)
+ggH125_103 = get_ggH125_bin_selection(103)
+ggH125_104 = get_ggH125_bin_selection(104)
+ggH125_105 = get_ggH125_bin_selection(105)
+ggH125_106 = get_ggH125_bin_selection(106)
+ggH125_107 = get_ggH125_bin_selection(107)
+ggH125_108 = get_ggH125_bin_selection(108)
+ggH125_109 = get_ggH125_bin_selection(109)
+ggH125_110 = get_ggH125_bin_selection(110)
+ggH125_111 = get_ggH125_bin_selection(111)
+ggH125_112 = get_ggH125_bin_selection(112)
+ggH125_113 = get_ggH125_bin_selection(113)
+ggH125_114 = get_ggH125_bin_selection(114)
+ggH125_115 = get_ggH125_bin_selection(115)
+ggH125_116 = get_ggH125_bin_selection(116)
 
+qqH125_inclusive = get_qqH125_bin_selection(200, 210)
+qqH125_200 = get_qqH125_bin_selection(200)
+qqH125_201 = get_qqH125_bin_selection(201)
+qqH125_202 = get_qqH125_bin_selection(202)
+qqH125_203 = get_qqH125_bin_selection(203)
+qqH125_204 = get_qqH125_bin_selection(204)
+qqH125_205 = get_qqH125_bin_selection(205)
+qqH125_206 = get_qqH125_bin_selection(206)
+qqH125_207 = get_qqH125_bin_selection(207)
+qqH125_208 = get_qqH125_bin_selection(208)
+qqH125_209 = get_qqH125_bin_selection(209)
+qqH125_210 = get_qqH125_bin_selection(210)
