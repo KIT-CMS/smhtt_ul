@@ -306,7 +306,7 @@ if __name__ == "__main__":
             if it[-2] not in SUBPROCESSES_TO_SKIP
         ],
         function=collect_filtered_plain_dataframes,
-        max_workers=4,
+        max_workers=1,
     ):
         filtered_plain_dataframes.update(result)
 
