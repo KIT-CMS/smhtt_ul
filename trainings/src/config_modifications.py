@@ -288,31 +288,6 @@ class _GeneralConfigManipulation(object):
 
         return config
 
-    @staticmethod
-    def add_jetFakes_column(
-        config,
-        column_name: str = "fake_factor_2",
-        ignore_processes: Tuple[str, ...] = ("ggH", "qqH"),
-    ) -> dict:
-        """
-        Adds a new column to the common section specifying the fake factor value explicitly.
-
-        Args:
-            config (dict): The configuration dictionary to modify.
-            column_name (str): The name of the new column to add.
-            ignore_processes (Tuple[str, ...]): Processes to ignore when adding the column.
-
-        Returns:
-            dict: The modified configuration dictionary with the new column added.
-        """
-        for channel, era, process, *_ in Iterate.subprocesses(config):
-            if process in ignore_processes:
-                continue
-            config[channel][era][process].setdefault(Keys.COMMON, {})
-            config[channel][era][process][Keys.COMMON].setdefault(column_name, column_name)
-
-        return config
-
 
 class _SpecificConfigManipulation(object):
     """
@@ -477,7 +452,7 @@ class _SpecificConfigManipulation(object):
     def add_anti_iso_cut_and_weight_version(
         config: dict,
         cut_tight_wp: str = "Tight",
-        cut_vloose_wp: str = "VLoose",
+        cut_loose_wp: str = "VLoose",
         fake_factor_string: str = "fake_factor_2",
         ignore_fake_factor_string_for_processes: Tuple[str, ...] = ("ggH", "qqH"),
         ignore_anti_iso_string_for_processes: Tuple[str, ...] = tuple(),
@@ -493,7 +468,7 @@ class _SpecificConfigManipulation(object):
         Args:
             config (dict): The configuration dictionary to modify.
             cut_tight_wp (str): The tight working point for the cut.
-            cut_vloose_wp (str): The very loose working point for the cut.
+            cut_loose_wp (str): The very loose working point for the cut.
             fake_factor_string (str): The string representing the fake factor weight.
 
         Returns:
@@ -508,7 +483,7 @@ class _SpecificConfigManipulation(object):
                     shift_dict[Keys.ANTI_ISO_CUT] = modify_tau_iso_string(
                         shift_dict[Keys.CUT],
                         tight_wp=cut_tight_wp,
-                        vloose_wp=cut_vloose_wp,
+                        loose_wp=cut_loose_wp,
                     )
                 else:
                     shift_dict[Keys.ANTI_ISO_CUT] = shift_dict[Keys.CUT]
