@@ -109,19 +109,6 @@ class _DuplicateFilter:
         return True
 
 
-@contextmanager
-def duplicate_filter_context(logger: logging.Logger) -> Generator[None, None, None]:
-    if any(isinstance(f, _DuplicateFilter) for f in logger.filters):
-        yield
-    else:
-        dup_filter = _DuplicateFilter()
-        logger.addFilter(dup_filter)
-        try:
-            yield
-        finally:
-            logger.removeFilter(dup_filter)
-
-
 def setup_logging(
     output_file: Union[str, None] = None,
     logger: logging.Logger = logging.getLogger(""),
@@ -149,3 +136,47 @@ def setup_logging(
         logger.addFilter(_DuplicateFilter())
 
     return logger
+
+
+class LogContext:
+    
+    def __init__(self, logger: logging.Logger) -> None:
+        self.logger = logger
+    
+    @contextmanager
+    def duplicate_filter(self) -> Generator[None, None, None]:
+        if any(isinstance(f, _DuplicateFilter) for f in self.logger.filters):
+            yield
+        else:
+            dup_filter = _DuplicateFilter()
+            self.logger.addFilter(dup_filter)
+            try:
+                yield
+            finally:
+                self.logger.removeFilter(dup_filter)
+
+    @contextmanager
+    def logging_raised_Error(self) -> Generator[None, None, None]:
+        try:
+            yield
+        except Exception as e:
+            self.logger.error(e)
+            raise
+
+    @contextmanager
+    def set_logging_level(self, level: int) -> Generator[None, None, None]:
+        original_level = self.logger.level
+        self.logger.setLevel(level)
+        try:
+            yield
+        finally:
+            self.logger.setLevel(original_level)
+
+    @contextmanager
+    def suppress_logging(self) -> Generator[None, None, None]:
+        original_level = self.logger.level
+        self.logger.setLevel(logging.CRITICAL + 1)
+        try:
+            yield
+        finally:
+            self.logger.setLevel(original_level)

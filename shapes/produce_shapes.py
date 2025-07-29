@@ -8,8 +8,6 @@ from itertools import combinations
 
 import yaml
 
-import yaml
-
 import config.shapes.process_selection as selection
 import config.shapes.signal_variations as signal_variations  # TODO: Unify this?
 import config.shapes.variations as variations
@@ -618,17 +616,6 @@ def main(args):
     graphs = g_manager.graphs
     for graph in graphs:
         print(f"{graph}")
-
-    if args.collect_config_only:
-        if len(args.channels) > 1:
-            raise NotImplementedError("Collecting config for multiple channels is not implemented yet.")
-        collect_config(
-            graphs=graphs,
-            era=args.era,
-            channel=args.channels[0],
-            filename=args.config_output_file,
-        )
-        return
 
     if args.collect_config_only:
         if len(args.channels) > 1:
