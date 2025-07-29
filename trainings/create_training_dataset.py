@@ -109,8 +109,8 @@ def exemplary_custom_selection(df: pd.DataFrame, optimize_selection: bool = Fals
         pd.DataFrame: The dataframe with the selected processes and cut regions.
     """
     mask = False
-    is_nominal = [it for it in df.columns if "cut" in it]  # applied for nominal region
-    is_anti_iso = [it for it in df.columns if "anti_iso_cut" in it]  # applied for anti iso region
+    is_nominal = [it for it in df.columns if Keys.CUT in it]  # applied for nominal region
+    is_anti_iso = [it for it in df.columns if Keys.ANTI_ISO_CUT in it]  # applied for anti iso region
     for _process, _cut in [
         ("is_jetFakes", [is_anti_iso]),
         ("is_ttbar", [is_anti_iso, is_nominal]),

@@ -1288,17 +1288,18 @@ def _get_stxs_stitching_weight(
     **kwargs,
 ):
     if full_recreation:
-        specific_era=("2018", "2017", "2016preVFP", "2016postVFP"),  # (era,),
-        specific_process=("ggh_htautau", "vbf_htautau"),  # (stxs_process,),
+        specific_era=("2018", "2017", "2016preVFP", "2016postVFP")  # (era,),
+        specific_process=("ggh_htautau", "vbf_htautau")  # (process,),
     else:
         specific_era = (era,)
         specific_process = (process,)
-    
+
     file = pathlib.Path(__file__).parent / "STXS_stitching_details.yaml"
     try:
         with open(file, "r") as f:
             info = yaml.safe_load(f)[process]
-    except FileNotFoundError:
+            _ = info[era]
+    except (FileNotFoundError, KeyError):
         info = calculate_stxs_N_and_negative_fractions(
             database_path=file.parent.parent.parent / "datasets" / f"nanoAOD_{nanoAOD_version}",
             output_path=file,
@@ -1310,11 +1311,11 @@ def _get_stxs_stitching_weight(
 
     bins = {
         b: _Bin(
-            xsec=info["xsec_inclusive"] * info["xsec_fractions"][b],
+            xsec=info["xsec_inclusive"] * info[era]["xsec_fractions"][b],
             N_events=info[era]["N_events"][b],
             negative_fractions=info[era]["negative_fractions"][b],
         )
-        for b in info["xsec_fractions"]
+        for b in info[era]["xsec_fractions"]
     }
     sign = "(((genWeight < 0) * (-1)) + ((genWeight >= 0) * (1)))"
     category_wise_reweighting = " + ".join(
@@ -1327,7 +1328,7 @@ def _get_stxs_stitching_weight(
     return (f"(({sign}) * ({category_wise_reweighting}))", f"{process}_stitching_weight")
 
 
-def _get_stxs_bin_selection(process, *bins):
+def get_stxs_bin_selection(process, *bins):
     _bin = f"bin{bins[0]}" if len(bins) == 1 else f"bin{bins[0]}to{bins[-1]}"
     with LogContext(logger).suppress_logging():
         def stxs_bin_selection(**kwargs):
@@ -1337,10 +1338,12 @@ def _get_stxs_bin_selection(process, *bins):
 
 
 def ggh_stitching_weight(era, **kwargs):
+    # another alternative: _ggh_stitching_weight_twiki_like(era=era, **kwargs)
     return _get_stxs_stitching_weight(era=era, process="ggh_htautau", **kwargs)
 
 
 def qqh_stitching_weight(era, **kwargs):
+    # another alternative: _qqh_stitching_weight_twiki_like(era=era, **kwargs)
     return _get_stxs_stitching_weight(era=era, process="vbf_htautau", **kwargs)
 
 
@@ -1393,14 +1396,6 @@ def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitchin
         )
     ]
     return Selection(name="qqH125", weights=qqH125_weights, cuts=qqH125_cuts)
-
-
-def get_ggH125_bin_selection(*bins):
-    return _get_stxs_bin_selection("ggH125", *bins)
-
-
-def get_qqH125_bin_selection(*bins):
-    return _get_stxs_bin_selection("qqH125", *bins)
 
 
 def FF_training_process_selection(channel, era, **kwargs):
@@ -1460,34 +1455,34 @@ ggH125 = ggH125_process_selection
 qqH125 = qqH125_process_selection
 FF_training = FF_training_process_selection
 
-ggH125_inclusive = get_ggH125_bin_selection(100, 116)
-ggH125_100 = get_ggH125_bin_selection(100)
-ggH125_101 = get_ggH125_bin_selection(101)
-ggH125_102 = get_ggH125_bin_selection(102)
-ggH125_103 = get_ggH125_bin_selection(103)
-ggH125_104 = get_ggH125_bin_selection(104)
-ggH125_105 = get_ggH125_bin_selection(105)
-ggH125_106 = get_ggH125_bin_selection(106)
-ggH125_107 = get_ggH125_bin_selection(107)
-ggH125_108 = get_ggH125_bin_selection(108)
-ggH125_109 = get_ggH125_bin_selection(109)
-ggH125_110 = get_ggH125_bin_selection(110)
-ggH125_111 = get_ggH125_bin_selection(111)
-ggH125_112 = get_ggH125_bin_selection(112)
-ggH125_113 = get_ggH125_bin_selection(113)
-ggH125_114 = get_ggH125_bin_selection(114)
-ggH125_115 = get_ggH125_bin_selection(115)
-ggH125_116 = get_ggH125_bin_selection(116)
+ggH125_inclusive = get_stxs_bin_selection("ggh_htautau", 100, 116)
+ggH125_100 = get_stxs_bin_selection("ggh_htautau", 100)
+ggH125_101 = get_stxs_bin_selection("ggh_htautau", 101)
+ggH125_102 = get_stxs_bin_selection("ggh_htautau", 102)
+ggH125_103 = get_stxs_bin_selection("ggh_htautau", 103)
+ggH125_104 = get_stxs_bin_selection("ggh_htautau", 104)
+ggH125_105 = get_stxs_bin_selection("ggh_htautau", 105)
+ggH125_106 = get_stxs_bin_selection("ggh_htautau", 106)
+ggH125_107 = get_stxs_bin_selection("ggh_htautau", 107)
+ggH125_108 = get_stxs_bin_selection("ggh_htautau", 108)
+ggH125_109 = get_stxs_bin_selection("ggh_htautau", 109)
+ggH125_110 = get_stxs_bin_selection("ggh_htautau", 110)
+ggH125_111 = get_stxs_bin_selection("ggh_htautau", 111)
+ggH125_112 = get_stxs_bin_selection("ggh_htautau", 112)
+ggH125_113 = get_stxs_bin_selection("ggh_htautau", 113)
+ggH125_114 = get_stxs_bin_selection("ggh_htautau", 114)
+ggH125_115 = get_stxs_bin_selection("ggh_htautau", 115)
+ggH125_116 = get_stxs_bin_selection("ggh_htautau", 116)
 
-qqH125_inclusive = get_qqH125_bin_selection(200, 210)
-qqH125_200 = get_qqH125_bin_selection(200)
-qqH125_201 = get_qqH125_bin_selection(201)
-qqH125_202 = get_qqH125_bin_selection(202)
-qqH125_203 = get_qqH125_bin_selection(203)
-qqH125_204 = get_qqH125_bin_selection(204)
-qqH125_205 = get_qqH125_bin_selection(205)
-qqH125_206 = get_qqH125_bin_selection(206)
-qqH125_207 = get_qqH125_bin_selection(207)
-qqH125_208 = get_qqH125_bin_selection(208)
-qqH125_209 = get_qqH125_bin_selection(209)
-qqH125_210 = get_qqH125_bin_selection(210)
+qqH125_inclusive = get_stxs_bin_selection("vbf_htautau", 200, 210)
+qqH125_200 = get_stxs_bin_selection("vbf_htautau", 200)
+qqH125_201 = get_stxs_bin_selection("vbf_htautau", 201)
+qqH125_202 = get_stxs_bin_selection("vbf_htautau", 202)
+qqH125_203 = get_stxs_bin_selection("vbf_htautau", 203)
+qqH125_204 = get_stxs_bin_selection("vbf_htautau", 204)
+qqH125_205 = get_stxs_bin_selection("vbf_htautau", 205)
+qqH125_206 = get_stxs_bin_selection("vbf_htautau", 206)
+qqH125_207 = get_stxs_bin_selection("vbf_htautau", 207)
+qqH125_208 = get_stxs_bin_selection("vbf_htautau", 208)
+qqH125_209 = get_stxs_bin_selection("vbf_htautau", 209)
+qqH125_210 = get_stxs_bin_selection("vbf_htautau", 210)

@@ -84,7 +84,7 @@ def find_variable_expansions(full_expression: str, substring: str) -> list[str]:
     return pattern.findall(full_expression)
 
 
-def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", vloose_wp: str = "VLoose") -> str:
+def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", loose_wp: str = "VLoose") -> str:
     """
     Modifies a string containing tau isolation conditions.
 
@@ -98,10 +98,10 @@ def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", vloose_wp: st
     """
 
     escaped_tight_wp = re.escape(tight_wp)
-    escaped_vloose_wp = re.escape(vloose_wp)
+    escaped_loose_wp = re.escape(loose_wp)
 
     anti_iso_exists_pattern = re.compile(
-        rf"\((?:id_tau_vsJet_{escaped_tight_wp}_2((?:__[a-zA-Z0-9_]+)?)\s*<\s*0\.5)\s*&&\s*(?:id_tau_vsJet_{escaped_vloose_wp}_2\1\s*>\s*0\.5)\)"
+        rf"\((?:id_tau_vsJet_{escaped_tight_wp}_2((?:__[a-zA-Z0-9_]+)?)\s*<\s*0\.5)\s*&&\s*(?:id_tau_vsJet_{escaped_loose_wp}_2\1\s*>\s*0\.5)\)"
     )
     if anti_iso_exists_pattern.search(input_str):
         return input_str  # Do nothing if already in anti-iso form
@@ -112,13 +112,12 @@ def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", vloose_wp: st
 
     def replacer(match):
         opt_suffix = match.group(1) if match.group(1) else "" # Get the captured suffix or empty string
-        return f"(id_tau_vsJet_{tight_wp}_2{opt_suffix}<0.5&&id_tau_vsJet_{vloose_wp}_2{opt_suffix}>0.5)"
+        return f"(id_tau_vsJet_{tight_wp}_2{opt_suffix}<0.5&&id_tau_vsJet_{loose_wp}_2{opt_suffix}>0.5)"
 
     modified_str, num_subs = pattern_to_replace.subn(replacer, input_str)
 
     if num_subs == 0:
-        append_str = f"(id_tau_vsJet_{tight_wp}_2<0.5&&id_tau_vsJet_{vloose_wp}_2<0.5)"
-        append_str = f"(id_tau_vsJet_{tight_wp}_2<0.5&&id_tau_vsJet_{vloose_wp}_2>0.5)"
+        append_str = f"(id_tau_vsJet_{tight_wp}_2<0.5&&id_tau_vsJet_{loose_wp}_2>0.5)"
 
 
         if not input_str: # If original string is empty

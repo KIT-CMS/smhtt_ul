@@ -286,7 +286,7 @@ def calculate_stxs_N_and_negative_fractions(
         keep_era = (specific_era is None) or (era in specific_era)
         return keep_process and keep_era
 
-    N_events, negative_fractions, _xsec_fractions = NestedDefaultDict(), NestedDefaultDict(), NestedDefaultDict()
+    N_events, negative_fractions, xsec_fractions = NestedDefaultDict(), NestedDefaultDict(), NestedDefaultDict()
 
     # prepopulate N_events and negative_fractions with empty containers
     for process, era in filter(should_keep_process_and_era, product(BINS.keys(), ERAS)):
@@ -334,20 +334,12 @@ def calculate_stxs_N_and_negative_fractions(
                     if "_Bin" not in file.name:  # is inclusive
                         N_events[process][era][b].insert(0, n_events)
                         negative_fractions[process][era][b].insert(0, frac)
-                        _xsec_fractions[process][era][b] = _df[KEYS["weight"]].sum() / df[KEYS["weight"]].sum()
+                        xsec_fractions[process][era][b] = (
+                            _df[KEYS["weight"]].sum() / df[KEYS["weight"]].sum()
+                        ).item()
                     else:
                         N_events[process][era][b].append(n_events)
                         negative_fractions[process][era][b].append(frac)
-
-    xsec_fractions = NestedDefaultDict()
-    for process in _xsec_fractions.keys():
-        for b in BINS[process][stage][granularity]:
-            xsec_fractions[process][b] = np.mean(
-                [
-                    _xsec_fractions[process][era][b]
-                    for era in _xsec_fractions[process].keys()
-                ]
-            ).item()
 
     info = NestedDefaultDict(
         {
@@ -356,8 +348,8 @@ def calculate_stxs_N_and_negative_fractions(
         }
     )
     for process, era in filter(should_keep_process_and_era, product(BINS.keys(), ERAS)):
-        info[process]["xsec_fractions"] = xsec_fractions[process].regular
         info[process][era] = {
+            "xsec_fractions": xsec_fractions[process][era].regular,
             "N_events": N_events[process][era].regular,
             "negative_fractions": negative_fractions[process][era].regular,
         }
