@@ -11,7 +11,7 @@ from shapes.estimations.additionals import qqH_merge_estimation
 from shapes.estimations.fakefactors import fake_factor_estimation
 from shapes.estimations.qcd import qcd_estimation, abcd_estimation
 from shapes.estimations.ttbar_emb import emb_ttbar_contamination_estimation
-from config.logging_setup_configs import setup_logging, duplicate_filter_context
+from config.logging_setup_configs import setup_logging, LogContext
 
 
 def parse_args():
@@ -347,7 +347,7 @@ def main(args):
         for ch in ff_inputs:
             for cat in ff_inputs[ch]:
                 logger.info("Do estimation for category %s", cat)
-                with duplicate_filter_context(logger):
+                with LogContext(logger).duplicate_filter():
                     for var in ff_inputs[ch][cat]:
                         for variation in ff_inputs[ch][cat][var]:
 

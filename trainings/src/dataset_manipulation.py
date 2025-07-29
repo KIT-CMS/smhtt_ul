@@ -4,6 +4,7 @@ import tempfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Literal, Tuple, Union
+from warnings import simplefilter
 
 import pandas as pd
 import ROOT
@@ -11,13 +12,15 @@ from src.helper import Iterate, Keys, optional_process_pool
 from tqdm import tqdm
 
 try:
-    from config.logging_setup_configs import duplicate_filter_context, setup_logging
+    from config.logging_setup_configs import LogContext, setup_logging
 except ModuleNotFoundError:
     sys.path.extend([".", ".."])
-    from config.logging_setup_configs import duplicate_filter_context, setup_logging
+    from config.logging_setup_configs import LogContext, setup_logging
 
 
 logger = setup_logging(logger=logging.getLogger(__name__))
+
+simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 
 def tuple_column(*args: str, length: int = 5) -> str:
@@ -341,7 +344,6 @@ class ROOTToPlain(object):
                     self._dataframe.to_feather(str(self.raw_path))
 
                 if self.dtype == "ROOT":
-                    import ipdb; ipdb.set_trace()
                     self._dataframe.Snapshot(self.tree_name, str(self.raw_path), self.columns)
 
                 self.dataframe_path = self.raw_path
@@ -385,7 +387,7 @@ class ROOTToPlain(object):
             elif callable(filter_function):
                 mask = filter_function(self._dataframe)
 
-            self._dataframe = self._dataframe[mask].copy()
+            self._dataframe = self._dataframe[mask]
             logger.info(f"Filtered dataframe shape: {initial_shape} -> {self._dataframe.shape}")
 
         if self.dtype == "ROOT":
@@ -533,7 +535,7 @@ class ProcessDataFrameManipulation:
             value = int(label == f"is_{self.process_name}__{self.subprocess_name.replace('-', '_')}")
             df[column] = value
 
-        return df.copy()
+        return df
 
     def nominal_variables(self, df: pd.DataFrame, renaming_map: Union[dict, None] = None) -> pd.DataFrame:
         """
@@ -554,7 +556,7 @@ class ProcessDataFrameManipulation:
             column = tuple_column(Keys.NOMINAL, Keys.VARIABLES, renaming_map.get(variable, variable))
             df[column] = self.subprocess_df[variable].astype(float).values
 
-        return df.copy()
+        return df
 
     def nominal_weight_and_cut(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -570,9 +572,19 @@ class ProcessDataFrameManipulation:
         df[tuple_column(Keys.NOMINAL, Keys.WEIGHT)] = self.subprocess_df[weight].astype(float).values
         df[tuple_column(Keys.NOMINAL, Keys.CUT)] = self.subprocess_df[cut].astype(float).values
 
-        return df.copy()
+        try:
+            anti_iso_weight, anti_iso_cut = (
+                self.subprocess_dict[Keys.NOMINAL][Keys.ANTI_ISO_WEIGHT],
+                self.subprocess_dict[Keys.NOMINAL][Keys.ANTI_ISO_CUT],
+            )
+            df[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_CUT)] = self.subprocess_df[anti_iso_cut].astype(float).values
+            df[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_WEIGHT)] = self.subprocess_df[anti_iso_weight].astype(float).values
+        except KeyError:
+            pass
 
-    def event_quantities(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df
+
+    def event_quantities(self, df: pd.DataFrame, columns: Union[List[str], None] = None) -> pd.DataFrame:
         """
         Adds event quantities to the dataframe based on provided subprocess_df
 
@@ -582,11 +594,22 @@ class ProcessDataFrameManipulation:
         Returns:
             pd.DataFrame: DataFrame with added event quantities.
         """
-        with duplicate_filter_context(logger):
-            logger.warning("Update event quantities to use NTuple Event ID!")
         df[tuple_column(Keys.EVENT, Keys.ID)] = range(len(self.subprocess_df))
 
-        return df.copy()
+        has_ntuple_identifier = False
+        if columns is not None:
+            for column in columns:
+                if column in self.subprocess_df.columns:
+                    has_ntuple_identifier = True
+                    df[tuple_column(Keys.EVENT, column)] = self.subprocess_df[column].values
+                else:
+                    logger.warning(f"Column {column} not found in subprocess_df, skipping.")
+
+        if not has_ntuple_identifier:
+            with LogContext(logger).duplicate_filter():
+                logger.warning("Update event quantities to use NTuple Event ID!")
+
+        return df
 
     def additional_nominal_cuts(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -606,7 +629,7 @@ class ProcessDataFrameManipulation:
             df[tuple_column(Keys.NOMINAL, name, Keys.CUT)] = self.subprocess_df[cut].astype(float).values
             df[tuple_column(Keys.NOMINAL, name, Keys.WEIGHT)] = self.subprocess_df[weight].astype(float).values
 
-        return df.copy()
+        return df
 
     def weight_like_uncertainties(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -627,20 +650,33 @@ class ProcessDataFrameManipulation:
             logger.debug(f"Processing weight-like uncertainties for {uncertainty_name}")
 
             for direction in [Keys.UP, Keys.DOWN]:
-                weight_column = tuple_column(Keys.WEIGHT_LIKE, uncertainty_name, direction, Keys.WEIGHT)
-                cut_column = tuple_column(Keys.WEIGHT_LIKE, uncertainty_name, direction, Keys.CUT)
-
-                weight, cut = uncertainty_dict[direction][Keys.WEIGHT], uncertainty_dict[direction][Keys.CUT]
+                (
+                    weight_column,
+                    cut_column,
+                    anti_iso_weight_column,
+                    anti_iso_cut_column,
+                ) = (
+                    tuple_column(Keys.WEIGHT_LIKE, uncertainty_name, direction, Keys.WEIGHT),
+                    tuple_column(Keys.WEIGHT_LIKE, uncertainty_name, direction, Keys.CUT),
+                    tuple_column(Keys.WEIGHT_LIKE, uncertainty_name, direction, Keys.ANTI_ISO_WEIGHT),
+                    tuple_column(Keys.WEIGHT_LIKE, uncertainty_name, direction, Keys.ANTI_ISO_CUT),
+                )
 
                 try:
-                    df[weight_column] = self.subprocess_df[weight].astype(float).values
-                    df[cut_column] = self.subprocess_df[cut].astype(float).values
+                    if (weight := uncertainty_dict[direction].get(Keys.WEIGHT)):
+                        df[weight_column] = self.subprocess_df[weight].astype(float).values
+                    if (cut := uncertainty_dict[direction].get(Keys.CUT)):
+                        df[cut_column] = self.subprocess_df[cut].astype(float).values
+                    if (anti_iso_weight := uncertainty_dict[direction].get(Keys.ANTI_ISO_WEIGHT)):
+                        df[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(float).values
+                    if (anti_iso_cut := uncertainty_dict[direction].get(Keys.ANTI_ISO_CUT)):
+                        df[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(float).values
+
+                    logger.debug(f"Adding {uncertainty_name}\n\t\t{weight=}\n\t\t{cut=}\n\t\t{anti_iso_weight=}\n\t\t{anti_iso_cut=}")
                 except KeyError:
-                    logger.warning(f"KeyError for {direction} {uncertainty_name} in {self.subprocess_name}, skipping!")
+                    logger.warning(f"Missing columns for {uncertainty_name} {direction}: {uncertainty_dict[direction]}, skipping")
 
-            df = df.copy()
-
-        return df.copy()
+        return df
 
     def shift_like_uncertainties(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -661,24 +697,51 @@ class ProcessDataFrameManipulation:
             logger.debug(f"Processing shift-like uncertainties for {uncertainty_name}")
 
             for direction in [Keys.UP, Keys.DOWN]:
-                weight_column = tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.WEIGHT)
-                cut_column = tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.CUT)
-                weight, cut = uncertainty_dict[direction][Keys.WEIGHT], uncertainty_dict[direction][Keys.CUT]
-
+                (
+                    weight_column,
+                    cut_column,
+                    anti_iso_weight_column,
+                    anti_iso_cut_column,
+                ) = (
+                    tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.WEIGHT),
+                    tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.CUT),
+                    tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.ANTI_ISO_WEIGHT),
+                    tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.ANTI_ISO_CUT),
+                )
                 try:
-                    df[weight_column] = self.subprocess_df[weight].astype(float).values
-                    df[cut_column] = self.subprocess_df[cut].astype(float).values
+                    if (weight := uncertainty_dict[direction].get(Keys.WEIGHT)):
+                        df[weight_column] = self.subprocess_df[weight].astype(float).values
+                    if (cut := uncertainty_dict[direction].get(Keys.CUT)):
+                        df[cut_column] = self.subprocess_df[cut].astype(float).values
+                    if (anti_iso_weight := uncertainty_dict[direction].get(Keys.ANTI_ISO_WEIGHT)):
+                        df[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(float).values
+                    if (anti_iso_cut := uncertainty_dict[direction].get(Keys.ANTI_ISO_CUT)):
+                        df[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(float).values
+
+                    shfted_variables_collection = []
+                    for variable in self.from_config.all_shifted_variables:
+                        variable_column = tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.VARIABLES, variable)
+                        shifted_variable = uncertainty_dict[direction][Keys.VARIABLES][variable]
+                        df[variable_column] = self.subprocess_df[shifted_variable].astype(float).values
+                        shfted_variables_collection.append((variable, shifted_variable))
+
+                    logger.debug(
+                        "\n\t\t".join(
+                            [
+                                f"Adding {uncertainty_name}",
+                                f"{weight=}",
+                                f"{cut=}",
+                                f"{anti_iso_weight=}",
+                                f"{anti_iso_cut=}",
+                                "Variables",
+                                *[f"\t{variable}={shifted_variable}" for variable, shfted_variable in shfted_variables_collection],
+                            ]
+                        )
+                    )
                 except KeyError:
-                    logger.warning(f"KeyError for {direction} {uncertainty_name} in {self.subprocess_name}, skipping!")
+                    logger.warning(f"Missing columns for {uncertainty_name} {direction}: {uncertainty_dict[direction]}, skipping")
 
-                for variable in self.from_config.all_shifted_variables:
-                    variable_column = tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.VARIABLES, variable)
-                    shifted_variable = uncertainty_dict[direction][Keys.VARIABLES][variable]
-                    df[variable_column] = self.subprocess_df[shifted_variable].astype(float).values
-
-            df = df.copy()
-
-        return df.copy()
+        return df
 
     def update_subprocess_df(self, df: pd.DataFrame, by: str = "index") -> pd.DataFrame:
         """
@@ -694,11 +757,11 @@ class ProcessDataFrameManipulation:
             pd.DataFrame: Updated dataframe.
         """
         if by == "index":
-            self.subprocess_df = self.subprocess_df.loc[df.index, :].copy()
+            self.subprocess_df = self.subprocess_df.loc[df.index, :]
         else:
             raise NotImplementedError(f"Unsupported method: {by}")
 
-        return df.copy()
+        return df
 
     def adjust_jetFakes_weights(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -709,11 +772,20 @@ class ProcessDataFrameManipulation:
         Returns:
             pd.DataFrame: DataFrame with adjusted weights.
         """
-        weight = tuple_column(Keys.NOMINAL, Keys.WEIGHT)
-        anti_iso = tuple_column(Keys.NOMINAL, "anti_iso", Keys.WEIGHT)
-        df[weight] = df[anti_iso].values.astype(df[weight].dtype)
 
-        return df.copy()
+        df[tuple_column(Keys.NOMINAL, f"_{Keys.CUT}")] = df[tuple_column(Keys.NOMINAL, Keys.CUT)].values  # copy
+
+        mapping = {Keys.WEIGHT: Keys.ANTI_ISO_WEIGHT, Keys.CUT: Keys.ANTI_ISO_CUT}
+
+        for column in df.columns:
+            if (x := Keys.WEIGHT) in column or (x := Keys.CUT) in column:
+                if Keys.NOMINAL in column:
+                    _anti_iso_column = tuple_column(Keys.NOMINAL, mapping.get(x, x))
+                else:
+                    _anti_iso_column = tuple(mapping.get(it, it) for it in column)
+                df[column] = df[_anti_iso_column].values
+
+        return df
 
 
 class CombinedDataFrameManipulation:
@@ -739,10 +811,10 @@ class CombinedDataFrameManipulation:
             nominal_column = tuple_column(Keys.NOMINAL, Keys.VARIABLES, variable)
             dfs.loc[mask, column] = dfs.loc[mask, nominal_column]
 
-        return dfs.copy()
+        return dfs
 
     @staticmethod
-    def _fill_nans_in_weights_and_cuts_default(dfs: pd.DataFrame, filter_function: callable):
+    def _fill_nans_in_weights_and_cuts(dfs: pd.DataFrame, filter_function: callable):
         """
         Generic function to fill NaN values in weight and cut columns with the nominal values.
 
@@ -753,55 +825,18 @@ class CombinedDataFrameManipulation:
         Returns:
             None: The function modifies the DataFrame in place.
         """
+        names = {Keys.WEIGHT, Keys.CUT, Keys.ANTI_ISO_WEIGHT, Keys.ANTI_ISO_CUT}
         for column in filter(filter_function, dfs.columns):
-            if (x := Keys.WEIGHT) in column or (x := Keys.CUT) in column:
+            contains = [it for it in names if it in column]
+            if contains:
                 mask = dfs.loc[:, column].isna()
-                dfs.loc[mask, column] = dfs.loc[mask, tuple_column(Keys.NOMINAL, x)]
+                dfs.loc[mask, column] = dfs.loc[mask, tuple_column(Keys.NOMINAL, contains[0])]
 
-        return dfs.copy()
-
-    @staticmethod
-    def _fill_nans_in_weight_like_jetFakes(
-        dfs: pd.DataFrame,
-        jetFakes_identifier: str,
-        filter_function: callable,
-    ) -> pd.DataFrame:
-        """
-        Generic function to fill NaN values in weight and cut columns in presence of jetFakes.
-        jetFakes events are replaced with anti_iso weight and cut values, other events are
-        replaced with nominal weight and cut values.
-
-        Args:
-            dfs (pd.DataFrame): DataFrame to fill NaNs in.
-            jetFakes_identifier (str): Identifier for jetFakes.
-            filter_function (callable): Function to filter columns.
-
-        Returns:
-            pd.DataFrame: DataFrame with NaNs filled.
-        """
-        assert all(
-            [
-                tuple_column(Keys.LABELS, jetFakes_identifier),
-                tuple_column(Keys.NOMINAL, "anti_iso", Keys.WEIGHT),
-                tuple_column(Keys.NOMINAL, "anti_iso", Keys.CUT),
-            ]
-        ), f"Missing columns requiered for jetFakes: {jetFakes_identifier}, anti_iso (weight), anti_iso (cut)"
-
-        for column in filter(filter_function, dfs.columns):
-            if (x := Keys.WEIGHT) in column or (x := Keys.CUT) in column:
-                is_nan = dfs.loc[:, column].isna()
-                is_jetFakes = dfs.loc[:, tuple_column(Keys.LABELS, jetFakes_identifier)].astype(bool)
-
-                dfs.loc[is_nan & is_jetFakes, column] = dfs.loc[is_nan & is_jetFakes, tuple_column(Keys.NOMINAL, "anti_iso", x)]
-                dfs.loc[is_nan & ~is_jetFakes, column] = dfs.loc[is_nan & ~is_jetFakes, tuple_column(Keys.NOMINAL, x)]
-
-        return dfs.copy()
+        return dfs
 
     @staticmethod
     def fill_nans_in_weight_like(
         dfs: Union[pd.DataFrame, Iterable[pd.DataFrame]],
-        has_jetFakes: bool = False,
-        jetFakes_identifier: str = "is_jetFakes",
     ) -> Union[pd.DataFrame, Iterable[pd.DataFrame]]:
         """
         Replaces NaN values in weight-like uncertainties columns with Nominal weight and cut
@@ -818,30 +853,17 @@ class CombinedDataFrameManipulation:
         Returns:
             Union[pd.DataFrame, Iterable[pd.DataFrame]]: DataFrame or iterable of DataFrames with NaNs filled.
         """
-        kwargs = dict(has_jetFakes=has_jetFakes, jetFakes_identifier=jetFakes_identifier)
-
         if isinstance(dfs, (list, tuple)):
-            return [CombinedDataFrameManipulation.fill_nans_in_weight_like(it, **kwargs) for it in tqdm(dfs)]
+            return [CombinedDataFrameManipulation.fill_nans_in_weight_like(it) for it in tqdm(dfs)]
         elif isinstance(dfs, dict):
-            return type(dfs)({k: CombinedDataFrameManipulation.fill_nans_in_weight_like(v, **kwargs) for k, v in tqdm(dfs.items())})
+            return type(dfs)({k: CombinedDataFrameManipulation.fill_nans_in_weight_like(v) for k, v in tqdm(dfs.items())})
         elif isinstance(dfs, pd.DataFrame):
-            if has_jetFakes:
-                with duplicate_filter_context(logger):
-                    logger.info("Filling NaN weight-like uncertainty weight and cut with anti_iso weight and cut for jetFakes and Nominal weight and cut for others")
-
-                return CombinedDataFrameManipulation._fill_nans_in_weight_like_jetFakes(
-                    dfs=dfs,
-                    filter_function=lambda it: it[0] == Keys.WEIGHT_LIKE,
-                    jetFakes_identifier=jetFakes_identifier,
-                )
-            else:
-                with duplicate_filter_context(logger):
-                    logger.info("Filling NaN weight-like uncertainty weight and cut with Nominal weight and cut")
-
-                return CombinedDataFrameManipulation._fill_nans_in_weights_and_cuts_default(
-                    dfs=dfs,
-                    filter_function=lambda it: it[0] == Keys.WEIGHT_LIKE,
-                )
+            with LogContext(logger).duplicate_filter():
+                logger.info("Filling NaN weight-like uncertainty weight and cut with Nominal (anti_iso) weight and cut")
+            return CombinedDataFrameManipulation._fill_nans_in_weights_and_cuts(
+                dfs=dfs,
+                filter_function=lambda it: it[0] == Keys.WEIGHT_LIKE,
+            )
         else:
             raise NotImplementedError(f"Unsupported type: {type(dfs)}")
 
@@ -871,25 +893,15 @@ class CombinedDataFrameManipulation:
         elif isinstance(dfs, dict):
             return type(dfs)({k: CombinedDataFrameManipulation.fill_nans_in_shift_like(v, **kwargs) for k, v in tqdm(dfs.items())})
         elif isinstance(dfs, pd.DataFrame):
-            if has_jetFakes:
-                with duplicate_filter_context(logger):
-                    logger.info("Filling NaN weight-like uncertainty weight and cut with anti_iso weight and cut for jetFakes and Nominal weight and cut for others")
+            with LogContext(logger).duplicate_filter():
+                logger.info("Filling NaN shift-like uncertainty weight and cut with Nominal (anti_iso) weight and cut")
 
-                dfs = CombinedDataFrameManipulation._fill_nans_in_weight_like_jetFakes(
-                    dfs=dfs,
-                    filter_function=lambda it: it[0] == Keys.SHIFT_LIKE,
-                    jetFakes_identifier=jetFakes_identifier,
-                )
-            else:
-                with duplicate_filter_context(logger):
-                    logger.info("Filling NaN weight-like uncertainty weight and cut with Nominal weight and cut")
+            dfs = CombinedDataFrameManipulation._fill_nans_in_weights_and_cuts(
+                dfs=dfs,
+                filter_function=lambda it: it[0] == Keys.SHIFT_LIKE,
+            )
 
-                dfs = CombinedDataFrameManipulation._fill_nans_in_weights_and_cuts_default(
-                    dfs=dfs,
-                    filter_function=lambda it: it[0] == Keys.SHIFT_LIKE,
-                )
-
-            with duplicate_filter_context(logger):
+            with LogContext(logger).duplicate_filter():
                 logger.info("Filling NaN in shifted variables with Nominal variables")
 
             return CombinedDataFrameManipulation._fill_nans_in_variables(
@@ -921,7 +933,7 @@ class CombinedDataFrameManipulation:
         elif isinstance(dfs, dict):
             return type(dfs)({k: CombinedDataFrameManipulation.fill_nans_in_nominal_additional(v) for k, v in tqdm(dfs.items())})
         elif isinstance(dfs, pd.DataFrame):
-            with duplicate_filter_context(logger):
+            with LogContext(logger).duplicate_filter():
                 logger.info("Filling NaNs in nominal additional with Nominal Weights")
 
             def is_additional_nominal(x):
@@ -929,6 +941,7 @@ class CombinedDataFrameManipulation:
                     Keys.VARIABLES,
                     Keys.WEIGHT,
                     Keys.CUT,
+                    f"_{Keys.CUT}",
                 }
 
             for column in filter(is_additional_nominal, dfs.columns):
@@ -936,7 +949,7 @@ class CombinedDataFrameManipulation:
                     mask = dfs.loc[:, column].isna()
                     dfs.loc[mask, column] = default_value
 
-            return dfs.copy()
+            return dfs
         else:
             raise NotImplementedError(f"Unsupported type: {type(dfs)}")
 

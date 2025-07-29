@@ -1,10 +1,10 @@
 import logging
 import re
 from copy import deepcopy
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import yaml
-from src.helper import Iterate, Keys, find_variable_expansions
+from src.helper import Iterate, Keys, find_variable_expansions, modify_tau_iso_string
 
 try:
     from config.logging_setup_configs import setup_logging
@@ -326,24 +326,31 @@ class _SpecificConfigManipulation(object):
             for shift, shift_dict in subprocess_dict.items():
                 if not isinstance(shift_dict, dict):
                     continue
-                cut, weight = shift_dict.get(Keys.CUT), shift_dict.get(Keys.WEIGHT)
-                if cut is None or weight is None:
-                    raise MissingCutOrWeight(f"Missing cut or weight for {shift} in {subprocess_dict}, aborting.")
-                if cut in common_cuts_rev:
-                    shift_dict[Keys.CUT] = common_cuts_rev[cut]
-                else:
-                    new_cut = f'__{Keys.COMMON}__{Keys.CUT}__{len(common_cuts_rev)}__'
-                    config[channel][era][process][Keys.COMMON][Keys.CUT][new_cut] = cut
-                    common_cuts_rev[cut] = new_cut
-                    shift_dict[Keys.CUT] = new_cut
 
-                if weight in common_weights_rev:
-                    shift_dict[Keys.WEIGHT] = common_weights_rev[weight]
-                else:
-                    new_weight = f'__{Keys.COMMON}__{Keys.WEIGHT}__{len(common_weights_rev)}__'
-                    config[channel][era][process][Keys.COMMON][Keys.WEIGHT][new_weight] = weight
-                    common_weights_rev[weight] = new_weight
-                    shift_dict[Keys.WEIGHT] = new_weight
+                if shift_dict.get(Keys.CUT) is None or shift_dict.get(Keys.WEIGHT) is None:
+                    raise MissingCutOrWeight(f"Missing cut or weight for {shift} in {subprocess_dict}, aborting.")
+
+                def set_common(x, /, key):
+                    if x is not None:
+                        _rev = (
+                            common_cuts_rev
+                            if key in {Keys.CUT, Keys.ANTI_ISO_CUT}
+                            else common_weights_rev
+                        )
+                        _key = Keys.CUT if key in {Keys.CUT, Keys.ANTI_ISO_CUT} else Keys.WEIGHT
+                        if x in _rev:
+                            shift_dict[key] = _rev[x]
+                        else:
+                            new = f"__{Keys.COMMON}__{_key}__{len(_rev)}__"
+                            config[channel][era][process][Keys.COMMON][_key][new] = x
+                            _rev[x] = new
+                            shift_dict[key] = new
+
+                set_common(shift_dict.get(Keys.CUT), key=Keys.CUT)
+                set_common(shift_dict.get(Keys.WEIGHT), key=Keys.WEIGHT)
+                set_common(shift_dict.get(Keys.ANTI_ISO_CUT), key=Keys.ANTI_ISO_CUT)
+                set_common(shift_dict.get(Keys.ANTI_ISO_WEIGHT), key=Keys.ANTI_ISO_WEIGHT)
+
             logger.info(f"Added common cuts and weights for {channel} {era} {process}")
         return config
 
@@ -439,6 +446,67 @@ class _SpecificConfigManipulation(object):
                 sorted_uncertainty_group = {k: v for k, v in sorted(uncertainty_group.items(), key=lambda item: item[0])}
                 subprocess_dict[Keys.UNCERTAINTIES] = sorted_uncertainty_group
             logger.info(f"Categorized uncertainties for {' '.join(info)}")
+        return config
+
+    @staticmethod
+    def add_anti_iso_cut_and_weight_version(
+        config: dict,
+        cut_tight_wp: str = "Tight",
+        cut_loose_wp: str = "VLoose",
+        fake_factor_string: str = "fake_factor_2",
+        ignore_fake_factor_string_for_processes: Tuple[str, ...] = ("ggH", "qqH"),
+        ignore_anti_iso_string_for_processes: Tuple[str, ...] = tuple(),
+    ) -> dict:
+        """
+        Adds a new version of the cut and weight for anti-isolation to the configuration.
+        The new cut and weight are based on the original ones, but modified to use the anti-isolation
+        criteria and adding the additional fake factor weight. The new cut and weight
+        are stored under the keys `Keys.ANTI_ISO_CUT` and `Keys.ANTI_ISO_WEIGHT`, respectively.
+
+        Works only with semi-leptonic channels so far.
+
+        Args:
+            config (dict): The configuration dictionary to modify.
+            cut_tight_wp (str): The tight working point for the cut.
+            cut_loose_wp (str): The very loose working point for the cut.
+            fake_factor_string (str): The string representing the fake factor weight.
+
+        Returns:
+            dict: The modified configuration dictionary with the new cut version added.
+        """
+        for channel, era, process, subprocess, subprocess_dict in Iterate.subprocesses(config):
+            for shift, shift_dict in subprocess_dict.items():
+                if not isinstance(shift_dict, dict):
+                    continue
+
+                if process not in ignore_anti_iso_string_for_processes:
+                    shift_dict[Keys.ANTI_ISO_CUT] = modify_tau_iso_string(
+                        shift_dict[Keys.CUT],
+                        tight_wp=cut_tight_wp,
+                        loose_wp=cut_loose_wp,
+                    )
+                else:
+                    shift_dict[Keys.ANTI_ISO_CUT] = shift_dict[Keys.CUT]
+
+                if process not in ignore_fake_factor_string_for_processes:
+                    shift_dict[Keys.ANTI_ISO_WEIGHT] = (
+                        shift_dict[Keys.WEIGHT]
+                        if fake_factor_string in shift_dict[Keys.WEIGHT]
+                        else f"{shift_dict[Keys.WEIGHT]}*({fake_factor_string})"
+                    )
+                else:
+                    shift_dict[Keys.ANTI_ISO_WEIGHT] = shift_dict[Keys.WEIGHT]
+
+                changed_cut = shift_dict[Keys.ANTI_ISO_CUT] != shift_dict[Keys.CUT]
+                changed_weight = shift_dict[Keys.ANTI_ISO_WEIGHT] != shift_dict[Keys.WEIGHT]
+
+                msg = f"{channel} {era} {process} {subprocess}\n"
+                msg += f"\t\t{shift}:\n"
+                msg += f"\t\t\tAnti-iso cut set ({'adjusted' if changed_cut else 'already existed'})\n"
+                msg += f"\t\t\tAnti-iso weight set ({'adjusted' if changed_weight else 'already existed'})\n"
+
+                logger.info(msg)
+
         return config
 
 
