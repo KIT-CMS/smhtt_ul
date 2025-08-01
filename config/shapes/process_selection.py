@@ -1,8 +1,9 @@
+import functools
 import logging
 import os
 import pathlib
 from dataclasses import dataclass
-from typing import Iterable, List, Union
+from typing import Any, Callable, Iterable, List, Tuple, Union
 
 import yaml
 
@@ -131,12 +132,12 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
         tauidweight = (
-            "((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
+            f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
         # tauidweight = None
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
-        vsele_weight = ("id_wgt_tau_vsEle_"+vs_ele_discr+"_2", "vseleweight")
+        vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_discr}_2", "vseleweight")
         if era == "2016preVFP" or era == "2016postVFP":
             trgweight = ("((pt_1>23)* trg_wgt_single_mu22)", "trgweight")
         elif era == "2017":
@@ -517,9 +518,9 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             )
             if apply_wps:
                 ztt_embedded_weights.extend(
-                [
-                    ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
-                ]
+                    [
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                    ]
                 )
             if not apply_wps:
                 pass
@@ -555,7 +556,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -582,7 +583,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -599,7 +600,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        ("((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -625,7 +626,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             ztt_embedded_weights.extend(
                 [
                     (
-                        "((gen_match_1==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_"+vs_jet_discr+"_2 + (gen_match_2!=5))",
+                        f"((gen_match_1==5)*id_wgt_tau_vsJet_{vs_jet_discr}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))",
                     )
                 ]
             )
@@ -745,12 +746,10 @@ def __get_ZL_cut(channel, **kwargs):
 
 
 def ZJ_process_selection(channel, **kwargs):
-    veto = __get_ZJ_cut(channel)
     return Selection(name="ZJ", cuts=[(__get_ZJ_cut(channel), "dy_fakes")])
 
 
 def ZJ_nlo_process_selection(channel, **kwargs):
-    veto = __get_ZJ_cut(channel)
     return Selection(name="ZJ_nlo", cuts=[(__get_ZJ_cut(channel), "dy_fakes")])
 
 
@@ -899,8 +898,7 @@ def VH_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
 def WH_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(
         name="WH125",
-        weights=HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
-        + [
+        weights=HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
             (
                 "(abs(crossSectionPerEventWeight - 0.052685) < 0.001)*0.051607+"
@@ -920,8 +918,7 @@ def WH_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
 def ZH_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(
         name="ZH125",
-        weights=HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
-        + [
+        weights=HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights + [
             ("numberGeneratedEventsWeight", "numberGeneratedEventsWeight"),
             (
                 "(abs(crossSectionPerEventWeight - 0.04774) < 0.001)*0.04683+"
@@ -978,7 +975,7 @@ def ZHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
 
 def _qqh_stitching_weight_twiki_like(era, **kwargs):
     xsec_inclusive = 3.779 * 0.06272  # NNLO * BR(tau tau)
-    
+
     # fraction determined from NNLO cross section in each bin of inclusive sample pre-selection
     xsec_fractions = {
         "bin200": 0.0668516531586647,
@@ -988,7 +985,7 @@ def _qqh_stitching_weight_twiki_like(era, **kwargs):
         "bin206": 0.039959028363227844,
         "bin207to210": 0.10251548141241074 + 0.03852349519729614 + 0.15031209588050842 + 0.04255538061261177,
     }
-    
+
     N = {
         '2016preVFP': {
             'inclusive': 1395000.0,
@@ -1027,7 +1024,7 @@ def _qqh_stitching_weight_twiki_like(era, **kwargs):
             'bin207to210_ext1': 19114184.0,
         },
     }
-    
+
     negative_fraction = {
         '2016preVFP': {
             'inclusive': 0.9986293906810035,
@@ -1073,7 +1070,7 @@ def _qqh_stitching_weight_twiki_like(era, **kwargs):
 
         _frac = xsec_fractions[_bin]
 
-        return (_frac * xsec_inclusive)  / sum(
+        return (_frac * xsec_inclusive) / sum(
             [
                 N[era][_bin] * negative_fraction[era][_bin],
                 N[era][_bin_ext1] * negative_fraction[era][_bin_ext1],
@@ -1113,6 +1110,21 @@ def _ggh_stitching_weight_twiki_like(era, **kwargs):
         "bin114": 0.005839791380690793,
         "bin115": 0.0023501000717436656,
         "bin116": 0.0024149390178801132,
+    }
+
+    # corrected within each bin by ggh_NNLO_weight (integrated)
+    xsec_fractions_NNLO_reweighted = {
+        "bin100": 0.0830123469125708,
+        "bin101": 0.0087041044246332,
+        "bin102": 0.0019733263818198,
+        "bin103": 0.0002590149237364,
+        "bin104to105": 0.0000467377721871 + 0.1321273039123475,
+        "bin106": 0.4199518784468383,
+        "bin107to109": 0.1460512451850370 + 0.0935405665336746 + 0.0162801269760206,
+        "bin110to113": 0.0266375229925088 + 0.0367349223869235 + 0.0177780159622972 + 0.0055871317952219,
+        "bin114": 0.0062540129865770,
+        "bin115": 0.0024753658999438,
+        "bin116": 0.0025863765076622,
     }
 
     N = {
@@ -1229,13 +1241,11 @@ def _ggh_stitching_weight_twiki_like(era, **kwargs):
         _bin = f"bin{bins[0]}" if len(bins) == 1 else f"bin{bins[0]}to{bins[-1]}"
         _bin_ext1 = f"{_bin}_ext1"
 
-        _frac = xsec_fractions[_bin]
-
-        return (_frac * xsec_inclusive)  / sum(
+        return (xsec_fractions[_bin] * xsec_inclusive) / sum(
             [
                 N[era][_bin] * negative_fraction[era][_bin],
                 N[era][_bin_ext1] * negative_fraction[era][_bin_ext1],
-                _frac * N[era]["inclusive"] * negative_fraction[era]["inclusive"],
+                xsec_fractions_NNLO_reweighted[_bin] * N[era]["inclusive"] * negative_fraction[era]["inclusive"],
             ]
         )
 
@@ -1288,8 +1298,8 @@ def _get_stxs_stitching_weight(
     **kwargs,
 ):
     if full_recreation:
-        specific_era=("2018", "2017", "2016preVFP", "2016postVFP")  # (era,),
-        specific_process=("ggh_htautau", "vbf_htautau")  # (process,),
+        specific_era = ("2018", "2017", "2016preVFP", "2016postVFP")  # (era,),
+        specific_process = ("ggh_htautau", "vbf_htautau")  # (process,),
     else:
         specific_era = (era,)
         specific_process = (process,)
@@ -1349,7 +1359,7 @@ def qqh_stitching_weight(era, **kwargs):
 
 def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_ggH125=True, **kwargs):
     ggH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
-    
+
     if weight_stitching_ggH125:
         ggH125_weights.append(ggh_stitching_weight(era))
     else:
@@ -1362,7 +1372,7 @@ def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitchin
                 ),
             ]
         )
-    
+
     ggH125_weights.append(("ggh_NNLO_weight", "gghNNLO"))
 
     ggH125_cuts = [
@@ -1376,7 +1386,7 @@ def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitchin
 
 def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_qqH125=True, **kwargs):
     qqH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
-    
+
     if weight_stitching_qqH125:
         qqH125_weights.append(qqh_stitching_weight(era))
     else:
@@ -1418,71 +1428,109 @@ def FF_training_process_selection(channel, era, **kwargs):
     return Selection(name="jetFakes", cuts=cuts, weights=weights)
 
 
-# --- Process selections aliases ---
-MC_base = MC_base_process_selection
-DY = DY_process_selection
-DY_NLO = DY_NLO_process_selection
-TT = TT_process_selection
-VV = VV_process_selection
-EWK = EWK_process_selection
-W = W_process_selection
-HTT_base = HTT_base_process_selection
-HTT = HTT_process_selection
-HWW = HWW_process_selection
-HWW_base = HWW_base_process_selection
-ZTT = ZTT_process_selection
-ZTT_nlo = ZTT_nlo_process_selection
+def make_chainable_process_selection(base_selection: Callable) -> Callable:
+    """
+    Wrap a process‐selection function to allow chaining additional selections.
+
+    This decorator takes a base_selection function (returning a Selection or tuple of Selections)
+    and returns a callable `wrapper` that behaves identically to base_selection, but
+    exposes a `.wrap_next(next_selection)` method. Using `.wrap_next`, you can create a new
+    chainable function that, when invoked, returns a tuple of all linked Selections.
+
+    Parameters
+    ----------
+    base_selection : Callable[..., Selection | Tuple[Selection, ...]]
+        A function that returns a Selection or tuple of Selections for a given process.
+
+    Returns
+    -------
+    Callable[..., Selection | Tuple[Selection, ...]]
+        A wrapped function with an added `.wrap_next(next_selection)` method. Calling
+        the wrapper yields the same result as base_selection. Calling
+        `wrapper.wrap_next(next_fn)` returns a new chainable function that first calls
+        the original base_selection, then next_fn, and aggregates their results.
+
+    Examples
+    --------
+    >>> DY = make_chainable_process_selection(DY_process_selection)
+    >>> # Call the base selection function
+    >>> result1 = DY(channel="mt", era="2018", vs_jet_wp="Tight", vs_ele_wp="VLoose")
+    >>> # result1 is a Selection object for DY process
+    >>> # Chain the ZTT selection on top of DY
+    >>> DY.TT = DY.wrap_next(ZTT_process_selection)
+    >>> result2 = DY.TT(channel="mt", era="2018", vs_jet_wp="Tight", vs_ele_wp="VLoose")
+    >>> # result2 is a tuple: (DY_selection, ZTT_selection)
+    >>> # Chain a third selection (e.g. decay‐mode filtering if we would have such a function)
+    >>> DY.TT.DM = DY.TT.wrap_next(decaymode_process_selection)
+    >>> result3 = DY.TT.DM(channel="mt", era="2018", vs_jet_wp="Tight", vs_ele_wp="VLoose")
+    >>> # result3 is a tuple: (DY_selection, ZTT_selection, DM_selection)
+    """
+    @functools.wraps(base_selection)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        return base_selection(*args, **kwargs)
+
+    def wrap_next(next_selection: Callable) -> Callable:
+        def next_link_base_func(*args: Any, **kwargs: Any) -> Tuple[Selection, ...]:
+            base_selection_result = wrapper(*args, **kwargs)
+            next_selection_result = next_selection(*args, **kwargs)
+            if isinstance(base_selection_result, tuple):
+                return (*base_selection_result, next_selection_result)
+            else:
+                return (base_selection_result, next_selection_result)
+        return make_chainable_process_selection(next_link_base_func)
+    wrapper.wrap_next = wrap_next
+    return wrapper
+
+
+# --- Process selection aliases ---
+
+# DY
+DY = make_chainable_process_selection(DY_process_selection)
+ZTT, ZL, ZJ = ZTT_process_selection, ZL_process_selection, ZJ_process_selection
+DY.TT, DY.L, DY.J = DY.wrap_next(ZTT), DY.wrap_next(ZL), DY.wrap_next(ZJ)
+
+# DY_NLO
+DY_NLO = make_chainable_process_selection(DY_NLO_process_selection)
+ZTT_nlo, ZL_nlo, ZJ_nlo = ZTT_nlo_process_selection, ZL_nlo_process_selection, ZJ_nlo_process_selection
+DY_NLO.TT, DY_NLO.L, DY_NLO.J = DY_NLO.wrap_next(ZTT_nlo), DY_NLO.wrap_next(ZL_nlo), DY_NLO.wrap_next(ZJ_nlo)
+
+# TT
+TT = make_chainable_process_selection(TT_process_selection)
+TTT, TTL, TTJ = TTT_process_selection, TTL_process_selection, TTJ_process_selection
+TT.T, TT.L, TT.J = TT.wrap_next(TTT), TT.wrap_next(TTL), TT.wrap_next(TTJ)
+
+# VV
+VV = make_chainable_process_selection(VV_process_selection)
+VVT, VVL, VVJ = VVT_process_selection, VVL_process_selection, VVJ_process_selection
+VV.J, VV.L, VV.T = VV.wrap_next(VVJ), VV.wrap_next(VVL), VV.wrap_next(VVT)
+
+# qqH125
+qqH125 = make_chainable_process_selection(qqH125_process_selection)
+for b in range(200, 211):
+    exec(f"qqH125_{b} = get_stxs_bin_selection('vbf_htautau', {b})")
+    exec(f"qqH125.bin{b} = qqH125.wrap_next(qqH125_{b})")
+
+# ggH125
+ggH125 = make_chainable_process_selection(ggH125_process_selection)
+for b in range(100, 117):
+    exec(f"ggH125_{b} = get_stxs_bin_selection('ggh_htautau', {b})")
+    exec(f"ggH125.bin{b} = ggH125.wrap_next(ggH125_{b})")
+
+# Individual and miscellaneous
 ZTT_embedded = ZTT_embedded_process_selection
-ZL = ZL_process_selection
-ZL_nlo = ZL_nlo_process_selection
-ZJ = ZJ_process_selection
-ZJ_nlo = ZJ_nlo_process_selection
-TTT = TTT_process_selection
-TTL = TTL_process_selection
-TTJ = TTJ_process_selection
-VVT = VVT_process_selection
-VVL = VVL_process_selection
-VVJ = VVJ_process_selection
+W = W_process_selection
+EWK = EWK_process_selection
+HWW = HWW_process_selection
 VH = VH_process_selection
 WH = WH_process_selection
 ZH = ZH_process_selection
 ttH = ttH_process_selection
+HTT = HTT_process_selection
 ggHWW = ggHWW_process_selection
+MC_base = MC_base_process_selection
+HTT_base = HTT_base_process_selection
+HWW_base = HWW_base_process_selection
 qqHWW = qqHWW_process_selection
 WHWW = WHWW_process_selection
 ZHWW = ZHWW_process_selection
-ggH125 = ggH125_process_selection
-qqH125 = qqH125_process_selection
 FF_training = FF_training_process_selection
-
-ggH125_inclusive = get_stxs_bin_selection("ggh_htautau", 100, 116)
-ggH125_100 = get_stxs_bin_selection("ggh_htautau", 100)
-ggH125_101 = get_stxs_bin_selection("ggh_htautau", 101)
-ggH125_102 = get_stxs_bin_selection("ggh_htautau", 102)
-ggH125_103 = get_stxs_bin_selection("ggh_htautau", 103)
-ggH125_104 = get_stxs_bin_selection("ggh_htautau", 104)
-ggH125_105 = get_stxs_bin_selection("ggh_htautau", 105)
-ggH125_106 = get_stxs_bin_selection("ggh_htautau", 106)
-ggH125_107 = get_stxs_bin_selection("ggh_htautau", 107)
-ggH125_108 = get_stxs_bin_selection("ggh_htautau", 108)
-ggH125_109 = get_stxs_bin_selection("ggh_htautau", 109)
-ggH125_110 = get_stxs_bin_selection("ggh_htautau", 110)
-ggH125_111 = get_stxs_bin_selection("ggh_htautau", 111)
-ggH125_112 = get_stxs_bin_selection("ggh_htautau", 112)
-ggH125_113 = get_stxs_bin_selection("ggh_htautau", 113)
-ggH125_114 = get_stxs_bin_selection("ggh_htautau", 114)
-ggH125_115 = get_stxs_bin_selection("ggh_htautau", 115)
-ggH125_116 = get_stxs_bin_selection("ggh_htautau", 116)
-
-qqH125_inclusive = get_stxs_bin_selection("vbf_htautau", 200, 210)
-qqH125_200 = get_stxs_bin_selection("vbf_htautau", 200)
-qqH125_201 = get_stxs_bin_selection("vbf_htautau", 201)
-qqH125_202 = get_stxs_bin_selection("vbf_htautau", 202)
-qqH125_203 = get_stxs_bin_selection("vbf_htautau", 203)
-qqH125_204 = get_stxs_bin_selection("vbf_htautau", 204)
-qqH125_205 = get_stxs_bin_selection("vbf_htautau", 205)
-qqH125_206 = get_stxs_bin_selection("vbf_htautau", 206)
-qqH125_207 = get_stxs_bin_selection("vbf_htautau", 207)
-qqH125_208 = get_stxs_bin_selection("vbf_htautau", 208)
-qqH125_209 = get_stxs_bin_selection("vbf_htautau", 209)
-qqH125_210 = get_stxs_bin_selection("vbf_htautau", 210)
