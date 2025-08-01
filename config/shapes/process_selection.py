@@ -1301,7 +1301,7 @@ def _get_stxs_stitching_weight(
             _ = info[era]
     except (FileNotFoundError, KeyError):
         info = calculate_stxs_N_and_negative_fractions(
-            database_path=file.parent.parent.parent / "datasets" / f"nanoAOD_{nanoAOD_version}",
+            database_path=file.parent.parent.parent.parent / "datasets" / f"nanoAOD_{nanoAOD_version}",
             output_path=file,
             specific_era=specific_era,
             specific_process=specific_process,
