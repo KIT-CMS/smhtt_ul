@@ -259,7 +259,7 @@ def calculate_stxs_N_and_negative_fractions(
             },
         }
     }
-
+    
     logger.info(f"Using database path: {database_path}")
     logger.info(f"Available Bins: {BINS}\nAvailable Eras: {ERAS}\nAvailable Keys: {KEYS}")
     logger.info(f"Adjusting to stage: {stage}, granularity: {granularity}")
