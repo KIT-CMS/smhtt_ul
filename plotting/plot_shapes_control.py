@@ -19,9 +19,9 @@ from config.logging_setup_configs import setup_logging
 
 def get_signal_scale(channel: str) -> int:
     if channel == "tt":
-        return 20
+        return 1000
     elif channel == "et" or channel == "mt":
-        return 100
+        return 5000
     else:
         return 1
 
@@ -543,7 +543,11 @@ def main(info):
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         if args.add_signals:
             hh2b2tau_scale = get_signal_scale(channel)
-            plot.legend(i).add_entry(0 if args.linear else 1, "hh2b2tau%s" % suffix[i], str(hh2b2tau_scale) + " #times HH#rightarrowbb#tau#tau", 'l')
+            if hh2b2tau_scale == 1:
+                plot.legend(i).add_entry(0 if args.linear else 1, "hh2b2tau%s" % suffix[i], "HH#rightarrowbb#tau#tau", 'l')
+            else:
+                plot.legend(i).add_entry(0 if args.linear else 1, "hh2b2tau%s" % suffix[i], str(hh2b2tau_scale) + "#times HH#rightarrowbb#tau#tau", 'l')
+            
             # plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s #times gg#rightarrowH"%str(int(ggH_scale)), 'l')
             # plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s #times qq#rightarrowH"%str(int(qqH_scale)), 'l')
             # plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
@@ -588,7 +592,7 @@ def main(info):
 
     posChannelCategoryLabelLeft = None
     plot.DrawChannelCategoryLabel(
-        "%s, %s" % (channel_dict[channel], "inclusive"),
+        "%s" % (channel_dict[channel]),
         begin_left=posChannelCategoryLabelLeft)
 
     print("Trying to save the created plot")
