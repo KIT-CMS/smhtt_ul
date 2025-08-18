@@ -9,7 +9,6 @@ from itertools import combinations
 import yaml
 
 import config.shapes.process_selection as selection
-import config.shapes.signal_variations as signal_variations  # TODO: Unify this?
 import config.shapes.variations as variations
 import shapes.utils as shape_utils
 import config.ntuple_processor_config_helper as ntuple_processor_config_helper
@@ -556,8 +555,8 @@ def main(args):
         ############################
         if not args.skip_systematic_variations:
             # Book variations common to all channels.
-            _book({"ggh"} & procS, [signal_variations.ggh_acceptance])  # TODO add signal uncertainties
-            _book({"qqh"} & procS, [signal_variations.qqh_acceptance])  # TODO add signal uncertainties
+            _book({"ggh"} & procS, [variations.ggh_acceptance])  # TODO add signal uncertainties
+            _book({"qqh"} & procS, [variations.qqh_acceptance])  # TODO add signal uncertainties
             _book(simulatedProcsDS[channel], [variations.jet_es])
             _book(signalsS, variations.LHE_scale.unrolled())
 
