@@ -975,7 +975,6 @@ def ZHWW_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
 
 def _qqh_stitching_weight_twiki_like(era, **kwargs):
     xsec_inclusive = 3.779 * 0.06272  # NNLO * BR(tau tau)
-
     # fraction determined from NNLO cross section in each bin of inclusive sample pre-selection
     xsec_fractions = {
         "bin200": 0.0668516531586647,
@@ -985,7 +984,6 @@ def _qqh_stitching_weight_twiki_like(era, **kwargs):
         "bin206": 0.039959028363227844,
         "bin207to210": 0.10251548141241074 + 0.03852349519729614 + 0.15031209588050842 + 0.04255538061261177,
     }
-
     N = {
         '2016preVFP': {
             'inclusive': 1395000.0,
@@ -1024,7 +1022,6 @@ def _qqh_stitching_weight_twiki_like(era, **kwargs):
             'bin207to210_ext1': 19114184.0,
         },
     }
-
     negative_fraction = {
         '2016preVFP': {
             'inclusive': 0.9986293906810035,
@@ -1359,7 +1356,6 @@ def qqh_stitching_weight(era, **kwargs):
 
 def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_ggH125=True, **kwargs):
     ggH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
-
     if weight_stitching_ggH125:
         ggH125_weights.append(ggh_stitching_weight(era))
     else:
@@ -1372,7 +1368,6 @@ def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitchin
                 ),
             ]
         )
-
     ggH125_weights.append(("ggh_NNLO_weight", "gghNNLO"))
 
     ggH125_cuts = [
@@ -1386,7 +1381,6 @@ def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitchin
 
 def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_qqH125=True, **kwargs):
     qqH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
-
     if weight_stitching_qqH125:
         qqH125_weights.append(qqh_stitching_weight(era))
     else:

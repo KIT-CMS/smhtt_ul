@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument(
         "--base-dataset-directory",
         type=str,
-        default=f"/work/{os.environ['USER']}/smhtt_ul_new/training_datasets",
+        default=f"/ceph/{os.environ['USER']}/smhtt_ul_new/training_datasets",
         help="Base directory for the output files",
     )
     return parser.parse_args()
@@ -306,7 +306,7 @@ if __name__ == "__main__":
             if it[-2] not in SUBPROCESSES_TO_SKIP
         ],
         function=collect_filtered_plain_dataframes,
-        max_workers=4,
+        max_workers=1,
     ):
         filtered_plain_dataframes.update(result)
 
