@@ -555,9 +555,9 @@ def main(args):
         ############################
         if not args.skip_systematic_variations:
             # Book variations common to all channels.
-            _book({"ggh"} & procS, [variations.ggh_acceptance])  # TODO add signal uncertainties
-            _book({"qqh"} & procS, [variations.qqh_acceptance])  # TODO add signal uncertainties
-            _book(simulatedProcsDS[channel], [variations.jet_es])
+            _book({"ggh"} & procS, [variations.ggh_acceptance])
+            _book({"qqh"} & procS, [variations.qqh_acceptance])
+            _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging])
             _book(signalsS, variations.LHE_scale.unrolled())
 
             _book({"ztt", "zj", "zl", "w"} & procS | signalsS, variations.Recoil.unrolled())
