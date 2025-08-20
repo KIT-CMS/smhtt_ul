@@ -24,6 +24,8 @@ from ntuple_processor.variations import (
 
 logger = setup_logging(logger=logging.getLogger(__name__))
 
+SHIFT_DIRECTIONS = ("Up", "Down")
+
 FF_OPTIONS = {
     "fake_factor": {
         "lt": "fake_factor_2",
@@ -424,40 +426,23 @@ jet_es_hem = [
     ReplaceVariable("CMS_scale_j_HEMIssue_EraDown", "jesUncHEMIssueDown"),
 ]
 jet_es = [
-    ReplaceVariable("CMS_scale_j_TotalUp", "jesUncTotalUp"),
-    ReplaceVariable("CMS_scale_j_TotalDown", "jesUncTotalDown"),
-    # ---
-    ReplaceVariable("CMS_scale_j_AbsoluteUp", "jesUncAbsoluteUp"),
-    ReplaceVariable("CMS_scale_j_AbsoluteDown", "jesUncAbsoluteDown"),
-    ReplaceVariable("CMS_scale_j_Absolute_EraUp", "jesUncAbsoluteYearUp"),
-    ReplaceVariable("CMS_scale_j_Absolute_EraDown", "jesUncAbsoluteYearDown"),
-    # ---
-    ReplaceVariable("CMS_scale_j_FlavorQCDUp", "jesUncFlavorQCDUp"),
-    ReplaceVariable("CMS_scale_j_FlavorQCDDown", "jesUncFlavorQCDDown"),
-    # ---
-    ReplaceVariable("CMS_scale_j_BBEC1Up", "jesUncBBEC1Up"),
-    ReplaceVariable("CMS_scale_j_BBEC1Down", "jesUncBBEC1Down"),
-    ReplaceVariable("CMS_scale_j_BBEC1_EraUp", "jesUncBBEC1YearUp"),
-    ReplaceVariable("CMS_scale_j_BBEC1_EraDown", "jesUncBBEC1YearDown"),
-    # ---
-    ReplaceVariable("CMS_scale_j_HFUp", "jesUncHFUp"),
-    ReplaceVariable("CMS_scale_j_HFDown", "jesUncHFDown"),
-    ReplaceVariable("CMS_scale_j_HF_EraUp", "jesUncHFYearUp"),
-    ReplaceVariable("CMS_scale_j_HF_EraDown", "jesUncHFYearDown"),
-    # ---
-    ReplaceVariable("CMS_scale_j_EC2Up", "jesUncEC2Up"),
-    ReplaceVariable("CMS_scale_j_EC2Down", "jesUncEC2Down"),
-    ReplaceVariable("CMS_scale_j_EC2_EraUp", "jesUncEC2YearUp"),
-    ReplaceVariable("CMS_scale_j_EC2_EraDown", "jesUncEC2YearDown"),
-    # ---
-    ReplaceVariable("CMS_scale_j_RelativeBalUp", "jesUncRelativeBalUp"),
-    ReplaceVariable("CMS_scale_j_RelativeBalDown", "jesUncRelativeBalDown"),
-    # ---
-    ReplaceVariable("CMS_scale_j_RelativeSample_EraUp", "jesUncRelativeSampleYearUp"),
-    ReplaceVariable("CMS_scale_j_RelativeSample_EraDown", "jesUncRelativeSampleYearDown"),
-    # ---
-    ReplaceVariable("CMS_res_j_EraUp", "jerUncUp"),
-    ReplaceVariable("CMS_res_j_EraDown", "jerUncDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_scale_j_Total{shift}", f"jesUncTotal{shift}"),
+        (f"CMS_scale_j_Absolute{shift}", f"jesUncAbsolute{shift}"),
+        (f"CMS_scale_j_Absolute_Era{shift}", f"jesUncAbsoluteYear{shift}"),
+        (f"CMS_scale_j_FlavorQCD{shift}", f"jesUncFlavorQCD{shift}"),
+        (f"CMS_scale_j_BBEC1{shift}", f"jesUncBBEC1{shift}"),
+        (f"CMS_scale_j_BBEC1_Era{shift}", f"jesUncBBEC1Year{shift}"),
+        (f"CMS_scale_j_HF{shift}", f"jesUncHF{shift}"),
+        (f"CMS_scale_j_HF_Era{shift}", f"jesUncHFYear{shift}"),
+        (f"CMS_scale_j_EC2{shift}", f"jesUncEC2{shift}"),
+        (f"CMS_scale_j_EC2_Era{shift}", f"jesUncEC2Year{shift}"),
+        (f"CMS_scale_j_RelativeBal{shift}", f"jesUncRelativeBal{shift}"),
+        (f"CMS_scale_j_RelativeSample_Era{shift}", f"jesUncRelativeSampleYear{shift}"),
+        (f"CMS_res_j_Era{shift}", f"jerUnc{shift}"),
+    ]
 ]
 
 # LHE/PS  variations
@@ -504,45 +489,41 @@ recoil_response = [
 
 # B-tagging uncertainties.
 btagging = [
-    ReplaceVariable("CMS_btag_b_HFUp", "btagUncHFUp"),
-    ReplaceVariable("CMS_btag_b_HFDown", "btagUncHFDown"),
-    # ---
-    ReplaceVariable("CMS_btag_b_HFstats1_EraUp", "btagUncHFstats1Up"),
-    ReplaceVariable("CMS_btag_b_HFstats1_EraDown", "btagUncHFstats1Down"),
-    # ---
-    ReplaceVariable("CMS_btag_b_HFstats2_EraUp", "btagUncHFstats2Up"),
-    ReplaceVariable("CMS_btag_b_HFstats2_EraDown", "btagUncHFstats2Down"),
-    # ---
-    ReplaceVariable("CMS_btag_j_LFUp", "btagUncLFUp"),
-    ReplaceVariable("CMS_btag_j_LFDown", "btagUncLFDown"),
-    # ---
-    ReplaceVariable("CMS_btag_j_LFstats1_EraUp", "btagUncLFstats1Up"),
-    ReplaceVariable("CMS_btag_j_LFstats1_EraDown", "btagUncLFstats1Down"),
-    # ---
-    ReplaceVariable("CMS_btag_j_LFstats2_EraUp", "btagUncLFstats2Up"),
-    ReplaceVariable("CMS_btag_j_LFstats2_EraDown", "btagUncLFstats2Down"),
-    # ---
-    ReplaceVariable("CMS_btag_c_CFerr1Up", "btagUncCFerr1Up"),
-    ReplaceVariable("CMS_btag_c_CFerr1Down", "btagUncCFerr1Down"),
-    # ---
-    ReplaceVariable("CMS_btag_c_CFerr2Up", "btagUncCFerr2Up"),
-    ReplaceVariable("CMS_btag_c_CFerr2Down", "btagUncCFerr2Down"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_btag_b_HF{shift}", f"btagUncHF{shift}"),
+        (f"CMS_btag_b_HFstats1_Era{shift}", f"btagUncHFstats1{shift}"),
+        (f"CMS_btag_b_HFstats2_Era{shift}", f"btagUncHFstats2{shift}"),
+        (f"CMS_btag_j_LF{shift}", f"btagUncLF{shift}"),
+        (f"CMS_btag_j_LFstats1_Era{shift}", f"btagUncLFstats1{shift}"),
+        (f"CMS_btag_j_LFstats2_Era{shift}", f"btagUncLFstats2{shift}"),
+        (f"CMS_btag_c_CFerr1{shift}", f"btagUncCFerr1{shift}"),
+        (f"CMS_btag_c_CFerr2{shift}", f"btagUncCFerr2{shift}"),
+    ]
 ]
 
 # Eta binned uncertainty
 ele_fake_es_1prong = [
-    ReplaceVariable("CMS_ZLShape_et_1prong_barrel_EraUp", "tauEleFakeEs1prongBarrelUp"),
-    ReplaceVariable("CMS_ZLShape_et_1prong_barrel_EraDown", "tauEleFakeEs1prongBarrelDown"),
-    ReplaceVariable("CMS_ZLShape_et_1prong_endcap_EraUp", "tauEleFakeEs1prongEndcapUp"),
-    ReplaceVariable("CMS_ZLShape_et_1prong_endcap_EraDown", "tauEleFakeEs1prongEndcapDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_ZLShape_et_1prong_barrel_Era{shift}", f"tauEleFakeEs1prongBarrel{shift}"),
+        (f"CMS_ZLShape_et_1prong_endcap_Era{shift}", f"tauEleFakeEs1prongEndcap{shift}"),
+    ]
 ]
 ele_fake_es_1prong1pizero = [
-    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_barrel_EraUp", "tauEleFakeEs1prong1pizeroBarrelUp"),
-    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_barrel_EraDown", "tauEleFakeEs1prong1pizeroBarrelDown"),
-    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_endcap_EraUp", "tauEleFakeEs1prong1pizeroEndcapUp"),
-    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_endcap_EraDown", "tauEleFakeEs1prong1pizeroEndcapDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_ZLShape_et_1prong1pizero_barrel_Era{shift}", f"tauEleFakeEs1prong1pizeroBarrel{shift}"),
+        (f"CMS_ZLShape_et_1prong1pizero_endcap_Era{shift}", f"tauEleFakeEs1prong1pizeroEndcap{shift}"),
+    ]
 ]
 ele_fake_es = ele_fake_es_1prong + ele_fake_es_1prong1pizero
+
+# Electron ES Resolution
+ele_es_res = [ReplaceVariable(f"CMS_res_e{shift}", f"eleEsReso{shift}") for shift in SHIFT_DIRECTIONS]
 
 # TODO add split by decay mode?
 # Mu Fake uncertainties
@@ -551,58 +532,59 @@ mu_fake_es_inc = [
     ReplaceVariable("CMS_ZLShape_mt_EraDown", "tauMuFakeEsDown"),
 ]
 
-# TODO add high pt tau ID efficiency
+# TODO add high pt tau ID efficiency?
 # Efficiency corrections.
 # Tau ID efficiency.
 tau_id_eff_lt = [
-    ReplaceVariable("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
-    ReplaceVariable("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
-    ReplaceVariable("CMS_eff_t_35-40_EraUp", "vsJetTau35to40Up"),
-    ReplaceVariable("CMS_eff_t_35-40_EraDown", "vsJetTau35to40Down"),
-    ReplaceVariable("CMS_eff_t_40-500_EraUp", "vsJetTau40to500Up"),
-    ReplaceVariable("CMS_eff_t_40-500_EraDown", "vsJetTau40to500Down"),
-    ReplaceVariable("CMS_eff_t_500-1000_EraUp", "vsJetTau500to1000Up"),
-    ReplaceVariable("CMS_eff_t_500-1000_EraDown", "vsJetTau500to1000Down"),
-    ReplaceVariable("CMS_eff_t_1000-Inf_EraUp", "vsJetTau1000toInfUp"),
-    ReplaceVariable("CMS_eff_t_1000-Inf_EraDown", "vsJetTau1000toInfDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
+        (f"CMS_eff_t_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
+        (f"CMS_eff_t_40-500_Era{shift}", f"vsJetTau40to500{shift}"),
+        (f"CMS_eff_t_500-1000_Era{shift}", f"vsJetTau500to1000{shift}"),
+        (f"CMS_eff_t_1000-Inf_Era{shift}", f"vsJetTau1000toInf{shift}"),
+    ]
 ]
 emb_tau_id_eff_lt = [
-    ReplaceVariable("CMS_eff_t_emb_30-35_EraUp", "vsJetTau30to35Up"),
-    ReplaceVariable("CMS_eff_t_emb_30-35_EraDown", "vsJetTau30to35Down"),
-    ReplaceVariable("CMS_eff_t_emb_35-40_EraUp", "vsJetTau35to40Up"),
-    ReplaceVariable("CMS_eff_t_emb_35-40_EraDown", "vsJetTau35to40Down"),
-    ReplaceVariable("CMS_eff_t_emb_40-Inf_EraUp", "vsJetTau40toInfUp"),
-    ReplaceVariable("CMS_eff_t_emb_40-Inf_EraDown", "vsJetTau40toInfDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_emb_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
+        (f"CMS_eff_t_emb_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
+        (f"CMS_eff_t_emb_40-Inf_Era{shift}", f"vsJetTau40toInf{shift}"),
+    ]
 ]
 
 # tauid variations used for correlation with mc ones
 emb_tau_id_eff_lt_corr = [
-    ReplaceVariable("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
-    ReplaceVariable("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
-    ReplaceVariable("CMS_eff_t_35-40_EraUp", "vsJetTau35to40Up"),
-    ReplaceVariable("CMS_eff_t_35-40_EraDown", "vsJetTau35to40Down"),
-    ReplaceVariable("CMS_eff_t_40-500_EraUp", "vsJetTau40toInfUp"),
-    ReplaceVariable("CMS_eff_t_40-500_EraDown", "vsJetTau40toInfDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
+        (f"CMS_eff_t_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
+        (f"CMS_eff_t_40-500_Era{shift}", f"vsJetTau40toInf{shift}"),
+    ]
 ]
 tau_id_eff_tt = [
-    ReplaceVariable("CMS_eff_t_dm0_EraUp", "vsJetTauDM0Up"),
-    ReplaceVariable("CMS_eff_t_dm0_EraDown", "vsJetTauDM0Down"),
-    ReplaceVariable("CMS_eff_t_dm1_EraUp", "vsJetTauDM1Up"),
-    ReplaceVariable("CMS_eff_t_dm1_EraDown", "vsJetTauDM1Down"),
-    ReplaceVariable("CMS_eff_t_dm10_EraUp", "vsJetTauDM10Up"),
-    ReplaceVariable("CMS_eff_t_dm10_EraDown", "vsJetTauDM10Down"),
-    ReplaceVariable("CMS_eff_t_dm11_EraUp", "vsJetTauDM11Up"),
-    ReplaceVariable("CMS_eff_t_dm11_EraDown", "vsJetTauDM11Down"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_dm0_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_dm1_Era{shift}", f"vsJetTauDM1{shift}"),
+        (f"CMS_eff_t_dm10_Era{shift}", f"vsJetTauDM10{shift}"),
+        (f"CMS_eff_t_dm11_Era{shift}", f"vsJetTauDM11{shift}"),
+    ]
 ]
 emb_tau_id_eff_tt = [
-    ReplaceVariable("CMS_eff_t_emb_dm0_EraUp", "vsJetTauDM0Up"),
-    ReplaceVariable("CMS_eff_t_emb_dm0_EraDown", "vsJetTauDM0Down"),
-    ReplaceVariable("CMS_eff_t_emb_dm1_EraUp", "vsJetTauDM1Up"),
-    ReplaceVariable("CMS_eff_t_emb_dm1_EraDown", "vsJetTauDM1Down"),
-    ReplaceVariable("CMS_eff_t_emb_dm10_EraUp", "vsJetTauDM10Up"),
-    ReplaceVariable("CMS_eff_t_emb_dm10_EraDown", "vsJetTauDM10Down"),
-    ReplaceVariable("CMS_eff_t_emb_dm11_EraUp", "vsJetTauDM11Up"),
-    ReplaceVariable("CMS_eff_t_emb_dm11_EraDown", "vsJetTauDM11Down"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_emb_dm0_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_emb_dm1_Era{shift}", f"vsJetTauDM1{shift}"),
+        (f"CMS_eff_t_emb_dm10_Era{shift}", f"vsJetTauDM10{shift}"),
+        (f"CMS_eff_t_emb_dm11_Era{shift}", f"vsJetTauDM11{shift}"),
+    ]
 ]
 
 # Jet to tau fake rate.
@@ -619,22 +601,20 @@ jet_to_tau_fake = [
 
 # vsEle ID
 zll_et_fake_rate = [
-    ReplaceVariable("CMS_fake_e_BA_EraUp", "vsEleBarrelUp"),
-    ReplaceVariable("CMS_fake_e_BA_EraDown", "vsEleBarrelDown"),
-    ReplaceVariable("CMS_fake_e_EC_EraUp", "vsEleEndcapUp"),
-    ReplaceVariable("CMS_fake_e_EC_EraDown", "vsEleEndcapDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_fake_e_BA_Era{shift}", f"vsEleBarrel{shift}"),
+        (f"CMS_fake_e_EC_Era{shift}", f"vsEleEndcap{shift}"),
+    ]
 ]
 
 # vsMu ID
-zll_mt_fake_rate_up = [
-    ReplaceVariable(f"CMS_fake_m_WH{region}_EraUp", f"vsMuWheel{region}Up")
+zll_mt_fake_rate = [
+    ReplaceVariable(f"CMS_fake_m_WH{region}_Era{shift}", f"vsMuWheel{region}{shift}")
+    for shift in SHIFT_DIRECTIONS
     for region in ["1", "2", "3", "4", "5"]
 ]
-zll_mt_fake_rate_down = [
-    ReplaceVariable(f"CMS_fake_m_WH{region}_EraDown", f"vsMuWheel{region}Down")
-    for region in ["1", "2", "3", "4", "5"]
-]
-zll_mt_fake_rate = zll_mt_fake_rate_up + zll_mt_fake_rate_down
 
 # # Trigger efficiency uncertainties.
 # mt
@@ -658,12 +638,13 @@ trigger_eff_et_emb = [
 ]
 
 # Embedding specific variations.
-# TODO Embedding electron scale
-emb_e_es = [
-    ReplaceVariable("CMS_scale_e_barrel_embUp", "eleEsBarrelUp"),
-    ReplaceVariable("CMS_scale_e_barrel_embDown", "eleEsBarrelDown"),
-    ReplaceVariable("CMS_scale_e_endcap_embUp", "eleEsEndcapUp"),
-    ReplaceVariable("CMS_scale_e_endcap_embDown", "eleEsEndcapDown"),
+emb_e_es = [  # TODO Embedding electron scale, check if right
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_scale_e_barrel_emb{shift}", f"eleEsBarrel{shift}"),
+        (f"CMS_scale_e_endcap_emb{shift}", f"eleEsEndcap{shift}"),
+    ]
 ]
 
 # TODO add embeddedDecayModeWeight?
@@ -671,15 +652,11 @@ emb_e_es = [
 # Prefiring
 prefiring = [
     ReplaceWeight(
-        "CMS_prefiringUp",
+        f"CMS_prefiring{shift}",
         "prefireWeight",
-        Weight("prefiring_wgt__prefiringUp", "prefireWeight"),
-    ),
-    ReplaceWeight(
-        "CMS_prefiringDown",
-        "prefireWeight",
-        Weight("prefiring_wgt__prefiringDown", "prefireWeight"),
-    ),
+        Weight(f"prefiring_wgt__prefiring{shift}", "prefireWeight"),
+    )
+    for shift in SHIFT_DIRECTIONS
 ]
 
 # Z pT reweighting
@@ -703,7 +680,7 @@ ff_variations_lt = [
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(f"{RuntimeVariables.FF_name_lt}__{syst}{shift}", "fake_factor"),
     )
-    for shift in ["Up", "Down"]
+    for shift in SHIFT_DIRECTIONS
     for syst in [
         'QCDFFunc',
         'QCDFFmcSubUnc',
@@ -746,7 +723,7 @@ ff_variations_tau_es_lt = LazyVariable(  # requieres LazyVariation since Used.FF
             Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
             Weight(f"{RuntimeVariables.FF_name_lt}__{variation}", "fake_factor"),
         )
-        for shift in ("Up", "Down")
+        for shift in SHIFT_DIRECTIONS
         for name, variation in [
             (f"anti_iso_CMS_scale_t_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
             (f"anti_iso_CMS_scale_t_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
@@ -766,7 +743,7 @@ ff_variations_tau_es_emb_lt = LazyVariable(  # requieres LazyVariation since Use
             Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
             Weight(f"{RuntimeVariables.FF_name_lt}__{variation}", "fake_factor"),
         )
-        for shift in ("Up", "Down")
+        for shift in SHIFT_DIRECTIONS
         for name, variation in [
             (f"anti_iso_CMS_scale_t_emb_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
             (f"anti_iso_CMS_scale_t_emb_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
@@ -808,7 +785,7 @@ ff_variations_tau_es_tt = LazyVariable(  # requieres LazyVariation since Used.FF
                 "fake_factor",
             ),
         )
-        for shift in ("Up", "Down")
+        for shift in SHIFT_DIRECTIONS
         for name, variation in [
             (f"anti_iso_CMS_scale_t_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
             (f"anti_iso_CMS_scale_t_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
@@ -850,7 +827,7 @@ ff_variations_tau_es_tt = LazyVariable(  # requieres LazyVariation since Used.FF
                 "fake_factor",
             ),
         )
-        for shift in ("Up", "Down")
+        for shift in SHIFT_DIRECTIONS
         for name, variation in [
             (f"anti_iso_CMS_scale_t_emb_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
             (f"anti_iso_CMS_scale_t_emb_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
@@ -863,7 +840,7 @@ ff_variations_tau_es_tt = LazyVariable(  # requieres LazyVariation since Used.FF
 # qcd variations
 qcd_variations_em = [  # TODO: Check if the name is correct and if it is still applicable, redo otherwise
     ReplaceCutAndAddWeight(name, "os", Cut("q_1*q_2>0", "ss"), Weight(weight, "qcd_weight"))
-    for shift in ("Up", "Down")
+    for shift in SHIFT_DIRECTIONS
     for name, weight in [
         (f"same_sign_CMS_htt_qcd_0jet_rate_Era{shift}", f"em_qcd_osss_stat_0jet_rate{shift.lower()}_Weight"),
         (f"same_sign_CMS_htt_qcd_0jet_shape_Era{shift}", f"em_qcd_osss_stat_0jet_shape{shift.lower()}_Weight"),
@@ -1289,7 +1266,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(weight, "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for name, weight in [
 #             (f"CMS_eff_trigger_mt_Era{shift}", f"mtau_triggerweight_ic_singlelep_{shift.lower()}"),
 #             (f"CMS_eff_xtrigger_l_mt_Era{shift}", f"mtau_triggerweight_ic_crosslep_{shift.lower()}"),
@@ -1302,7 +1279,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(f"mtau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for dm in [0, 1, 10, 11]
 #     ],
 # ]
@@ -1313,7 +1290,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(weight, "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for name, weight in [
 #             (f"CMS_eff_trigger_emb_mt_Era{shift}", f"mtau_triggerweight_ic_singlelep_{shift.lower()}"),
 #             (f"CMS_eff_xtrigger_l_emb_mt_Era{shift}", f"mtau_triggerweight_ic_crosslep_{shift.lower()}"),
@@ -1326,7 +1303,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(f"mtau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for dm in [0, 1, 10, 11]
 #     ]
 # ]
@@ -1337,7 +1314,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(weight, "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for name, weight in [
 #             (f"CMS_eff_trigger_et_Era{shift}", f"etau_triggerweight_ic_singlelep_{shift.lower()}"),
 #             (f"CMS_eff_xtrigger_l_et_Era{shift}", f"etau_triggerweight_ic_crosslep_{shift.lower()}"),
@@ -1350,7 +1327,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(f"etau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for dm in [0, 1, 10, 11]
 #     ]
 # ]
@@ -1361,7 +1338,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(weight, "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for name, weight in [
 #             (f"CMS_eff_trigger_emb_et_Era{shift}", f"etau_triggerweight_ic_singlelep_{shift.lower()}"),
 #             (f"CMS_eff_xtrigger_l_emb_et_Era{shift}", f"etau_triggerweight_ic_crosslep_{shift.lower()}"),
@@ -1374,7 +1351,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(f"etau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for dm in [0, 1, 10, 11]
 #     ]
 # ]
@@ -1385,7 +1362,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(weight, "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for dm in [0, 1, 10, 11]
 #         for name, weight in [
 #             (f"CMS_eff_xtrigger_t_tt_dm{dm}_Era{shift}", f"tautau_triggerweight_ic_lowpt_dm{dm}_{shift.lower()}")
@@ -1398,7 +1375,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(f"tautau_triggerweight_ic_singletau_{shift.lower()}", "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #     ]
 # ]
 # tau_trigger_eff_tt_emb = [  # TODO: Check if needed or is replaced
@@ -1408,7 +1385,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(weight, "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #         for dm in [0, 1, 10, 11]
 #         for name, weight in [
 #             (f"CMS_eff_xtrigger_t_emb_tt_dm{dm}_Era{shift}", f"tautau_triggerweight_ic_lowpt_dm{dm}_{shift.lower()}"),
@@ -1421,7 +1398,7 @@ class JetFakeVariations(_VariationCollection):
 #             "triggerweight",
 #             Weight(f"tautau_triggerweight_ic_singletau_{shift.lower()}", "triggerweight"),
 #         )
-#         for shift in ("Up", "Down")
+#         for shift in SHIFT_DIRECTIONS
 #     ]
 # ]
 # # embedded lt eff by decay mode
@@ -1431,7 +1408,7 @@ class JetFakeVariations(_VariationCollection):
 #         "decayMode_SF",
 #         Weight(weight, "decayMode_SF"),
 #     )
-#     for shift in ("Up", "Down")
+#     for shift in SHIFT_DIRECTIONS
 #     for name, weight in [
 #         (f"CMS_3ProngEff_Era{shift}", f"(pt_2<100)*embeddedDecayModeWeight_eff{shift}_pi0Nom+(pt_2>=100)"),
 #         (f"CMS_1ProngPi0Eff_Era{shift}", f"(pt_2<100)*embeddedDecayModeWeight_effNom_pi0{shift}+(pt_2>=100)"),
