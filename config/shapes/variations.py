@@ -1246,49 +1246,38 @@ class JetFakeVariations(_VariationCollection):
 
 # TODO: TBD, needed or not, collection:
 
-# Electron energy scale
-# TODO add in ntuples ?
-# ele_es = [
+# # Electron energy scale
+# ele_es = [  # TODO: Check if needed or is replaced
 #     ReplaceVariable("CMS_scale_eUp", "eleScaleUp"),
 #     ReplaceVariable("CMS_scale_eDown", "eleScaleDown"),
 # ]
-
-# ele_res = [
+# ele_res = [  # TODO: Check if needed or is replaced
 #     ReplaceVariable("CMS_res_eUp", "eleSmearUp"),
 #     ReplaceVariable("CMS_res_eDown", "eleSmearDown"),
 # ]
-
 # # fake met scaling in embedded samples
-# TODO still needed ?
-# emb_met_scale = [
+# emb_met_scale = [  # TODO: Check if needed or is replaced
 #         ReplaceVariable("scale_embed_metUp", "emb_scale_metUp"),
 #         ReplaceVariable("scale_embed_metDown", "emb_scale_metDown")
 #         ]
-
-# Energy scales of leptons faking tau leptons.
-# Inclusive in eta
-# TODO do we need the ones without barrel / endcap plit ?
-# ele_fake_es = [
+# # Energy scales of leptons faking tau leptons.
+# # Inclusive in eta
+# ele_fake_es = [    # TODO: Check if needed or is replaced, do we need the ones without barrel / endcap plit ?
 #         ReplaceVariable("CMS_ZLShape_et_1prong_EraUp", "tauEleFakeEsOneProngCommonUp"),
 #         ReplaceVariable("CMS_ZLShape_et_1prong_EraDown", "tauEleFakeEsOneProngCommonDown"),
 #         ReplaceVariable("CMS_ZLShape_et_1prong1pizero_EraUp", "tauEleFakeEsOneProngPiZerosCommonUp"),
 #         ReplaceVariable("CMS_ZLShape_et_1prong1pizero_EraDown", "tauEleFakeEsOneProngPiZerosCommonDown"),
 #         ]
-
-# TODO add split by decay mode ?
-# mu_fake_es_1prong = [
+# mu_fake_es_1prong = [  # TODO: Check if needed or is replaced, add split by decay mode ?
 #         ReplaceVariable("CMS_ZLShape_mt_1prong_EraUp", "tauMuFakeEsOneProngUp"),
 #         ReplaceVariable("CMS_ZLShape_mt_1prong_EraDown", "tauMuFakeEsOneProngDown")
 #         ]
-
-# TODO add split by decay mode ?
-# mu_fake_es_1prong1pizero = [
+# mu_fake_es_1prong1pizero = [  # TODO: Check if needed or is replaced, add split by decay mode ?
 #         ReplaceVariable("CMS_ZLShape_mt_1prong1pizero_EraUp", "tauMuFakeEsOneProngPiZerosUp"),
 #         ReplaceVariable("CMS_ZLShape_mt_1prong1pizero_EraDown", "tauMuFakeEsOneProngPiZerosDown")
 #         ]
-
-# TODO cross triggers
-# trigger_eff_mt = [
+# # cross triggers
+# trigger_eff_mt = [  # TODO: Check if needed or is replaced
 #     *[
 #         ReplaceWeight(
 #             name,
@@ -1312,7 +1301,7 @@ class JetFakeVariations(_VariationCollection):
 #         for dm in [0, 1, 10, 11]
 #     ],
 # ]
-# trigger_eff_mt_emb = [
+# trigger_eff_mt_emb = [  # TODO: Check if needed or is replaced
 #     *[
 #         ReplaceWeight(
 #             name,
@@ -1336,256 +1325,114 @@ class JetFakeVariations(_VariationCollection):
 #         for dm in [0, 1, 10, 11]
 #     ]
 # ]
-
-# trigger_eff_et = [
-#     ReplaceWeight(
-#         "CMS_eff_trigger_et_EraUp",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_singlelep_up", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_trigger_et_EraDown",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_singlelep_down", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_xtrigger_l_et_EraUp",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_crosslep_up", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_xtrigger_l_et_EraDown",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_crosslep_down", "triggerweight"),
-#     ),
+# trigger_eff_et = [  # TODO: Check if needed or is replaced
 #     *[
 #         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_et_dm{dm}_EraUp".format(dm=dm),
+#             name,
 #             "triggerweight",
-#             Weight("etau_triggerweight_ic_dm{dm}_up".format(dm=dm), "triggerweight"),
+#             Weight(weight, "triggerweight"),
 #         )
-#         for dm in [0, 1, 10, 11]
+#         for shift in ("Up", "Down")
+#         for name, weight in [
+#             (f"CMS_eff_trigger_et_Era{shift}", f"etau_triggerweight_ic_singlelep_{shift.lower()}"),
+#             (f"CMS_eff_xtrigger_l_et_Era{shift}", f"etau_triggerweight_ic_crosslep_{shift.lower()}"),
+#             (f"CMS_eff_trigger_single_t_Era{shift}", f"etau_triggerweight_ic_singletau_{shift.lower()}")
+#         ]
 #     ],
 #     *[
 #         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_et_dm{dm}_EraDown".format(dm=dm),
+#             f"CMS_eff_xtrigger_t_et_dm{dm}_Era{shift}",
 #             "triggerweight",
-#             Weight("etau_triggerweight_ic_dm{dm}_down".format(dm=dm), "triggerweight"),
+#             Weight(f"etau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
 #         )
+#         for shift in ("Up", "Down")
 #         for dm in [0, 1, 10, 11]
-#     ],
-#     ReplaceWeight(
-#         "CMS_eff_trigger_single_t_EraUp",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_singletau_up", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_trigger_single_t_EraDown",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_singletau_down", "triggerweight"),
-#     ),
+#     ]
 # ]
-
-# trigger_eff_et_emb = [
-#     ReplaceWeight(
-#         "CMS_eff_trigger_emb_et_EraUp",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_singlelep_up", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_trigger_emb_et_EraDown",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_singlelep_down", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_xtrigger_l_emb_et_EraUp",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_crosslep_up", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_xtrigger_l_emb_et_EraDown",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_crosslep_down", "triggerweight"),
-#     ),
+# trigger_eff_et_emb = [  # TODO: Check if needed or is replaced
 #     *[
 #         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_emb_et_dm{dm}_EraUp".format(dm=dm),
+#             name,
 #             "triggerweight",
-#             Weight("etau_triggerweight_ic_dm{dm}_up".format(dm=dm), "triggerweight"),
+#             Weight(weight, "triggerweight"),
 #         )
-#         for dm in [0, 1, 10, 11]
+#         for shift in ("Up", "Down")
+#         for name, weight in [
+#             (f"CMS_eff_trigger_emb_et_Era{shift}", f"etau_triggerweight_ic_singlelep_{shift.lower()}"),
+#             (f"CMS_eff_xtrigger_l_emb_et_Era{shift}", f"etau_triggerweight_ic_crosslep_{shift.lower()}"),
+#             (f"CMS_eff_trigger_single_t_emb_Era{shift}", f"etau_triggerweight_ic_singletau_{shift.lower()}")
+#         ]
 #     ],
 #     *[
 #         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_emb_et_dm{dm}_EraDown".format(dm=dm),
+#             f"CMS_eff_xtrigger_t_emb_et_dm{dm}_Era{shift}",
 #             "triggerweight",
-#             Weight("etau_triggerweight_ic_dm{dm}_down".format(dm=dm), "triggerweight"),
+#             Weight(f"etau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
 #         )
+#         for shift in ("Up", "Down")
 #         for dm in [0, 1, 10, 11]
-#     ],
-#     ReplaceWeight(
-#         "CMS_eff_trigger_single_t_emb_EraUp",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_singletau_up", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_trigger_single_t_emb_EraDown",
-#         "triggerweight",
-#         Weight("etau_triggerweight_ic_singletau_down", "triggerweight"),
-#     ),
+#     ]
 # ]
-
-# TODO Tau Triggers
-# tau_trigger_eff_tt = [
+# tau_trigger_eff_tt = [  # TODO: Check if needed or is replaced
 #     *[
 #         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_tt_dm{dm}_EraUp".format(dm=dm),
+#             name,
 #             "triggerweight",
-#             Weight(
-#                 "tautau_triggerweight_ic_lowpt_dm{dm}_up".format(dm=dm), "triggerweight"
-#             ),
+#             Weight(weight, "triggerweight"),
 #         )
+#         for shift in ("Up", "Down")
 #         for dm in [0, 1, 10, 11]
+#         for name, weight in [
+#             (f"CMS_eff_xtrigger_t_tt_dm{dm}_Era{shift}", f"tautau_triggerweight_ic_lowpt_dm{dm}_{shift.lower()}")
+#             (f"CMS_eff_xtrigger_t_tt_dm{dm}_highpT_Era{shift}", f"tautau_triggerweight_ic_highpt_dm{dm}_{shift.lower()}")
+#         ]
 #     ],
 #     *[
 #         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_tt_dm{dm}_EraDown".format(dm=dm),
+#             f"CMS_eff_trigger_single_t_Era{shift}",
 #             "triggerweight",
-#             Weight(
-#                 "tautau_triggerweight_ic_lowpt_dm{dm}_down".format(dm=dm),
-#                 "triggerweight",
-#             ),
+#             Weight(f"tautau_triggerweight_ic_singletau_{shift.lower()}", "triggerweight"),
 #         )
-#         for dm in [0, 1, 10, 11]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_tt_dm{dm}_highpT_EraUp".format(dm=dm),
-#             "triggerweight",
-#             Weight(
-#                 "tautau_triggerweight_ic_highpt_dm{dm}_up".format(dm=dm),
-#                 "triggerweight",
-#             ),
-#         )
-#         for dm in [0, 1, 10, 11]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_tt_dm{dm}_highpT_EraDown".format(dm=dm),
-#             "triggerweight",
-#             Weight(
-#                 "tautau_triggerweight_ic_highpt_dm{dm}_down".format(dm=dm),
-#                 "triggerweight",
-#             ),
-#         )
-#         for dm in [0, 1, 10, 11]
-#     ],
-#     ReplaceWeight(
-#         "CMS_eff_trigger_single_t_EraUp",
-#         "triggerweight",
-#         Weight("tautau_triggerweight_ic_singletau_up", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_trigger_single_t_EraDown",
-#         "triggerweight",
-#         Weight("tautau_triggerweight_ic_singletau_down", "triggerweight"),
-#     ),
+#         for shift in ("Up", "Down")
+#     ]
 # ]
-
-# tau_trigger_eff_tt_emb = [
+# tau_trigger_eff_tt_emb = [  # TODO: Check if needed or is replaced
 #     *[
 #         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_emb_tt_dm{dm}_EraUp".format(dm=dm),
+#             name,
 #             "triggerweight",
-#             Weight(
-#                 "tautau_triggerweight_ic_lowpt_dm{dm}_up".format(dm=dm), "triggerweight"
-#             ),
+#             Weight(weight, "triggerweight"),
 #         )
+#         for shift in ("Up", "Down")
 #         for dm in [0, 1, 10, 11]
+#         for name, weight in [
+#             (f"CMS_eff_xtrigger_t_emb_tt_dm{dm}_Era{shift}", f"tautau_triggerweight_ic_lowpt_dm{dm}_{shift.lower()}"),
+#             (f"CMS_eff_xtrigger_t_emb_tt_dm{dm}_highpT_Era{shift}", f"tautau_triggerweight_ic_highpt_dm{dm}_{shift.lower()}")
+#         ]
 #     ],
 #     *[
 #         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_emb_tt_dm{dm}_EraDown".format(dm=dm),
+#             f"CMS_eff_trigger_single_t_emb_Era{shift}",
 #             "triggerweight",
-#             Weight(
-#                 "tautau_triggerweight_ic_lowpt_dm{dm}_down".format(dm=dm),
-#                 "triggerweight",
-#             ),
+#             Weight(f"tautau_triggerweight_ic_singletau_{shift.lower()}", "triggerweight"),
 #         )
-#         for dm in [0, 1, 10, 11]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_emb_tt_dm{dm}_highpT_EraUp".format(dm=dm),
-#             "triggerweight",
-#             Weight(
-#                 "tautau_triggerweight_ic_highpt_dm{dm}_up".format(dm=dm),
-#                 "triggerweight",
-#             ),
-#         )
-#         for dm in [0, 1, 10, 11]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             "CMS_eff_xtrigger_t_emb_tt_dm{dm}_highpT_EraDown".format(dm=dm),
-#             "triggerweight",
-#             Weight(
-#                 "tautau_triggerweight_ic_highpt_dm{dm}_down".format(dm=dm),
-#                 "triggerweight",
-#             ),
-#         )
-#         for dm in [0, 1, 10, 11]
-#     ],
-#     ReplaceWeight(
-#         "CMS_eff_trigger_single_t_emb_EraUp",
-#         "triggerweight",
-#         Weight("tautau_triggerweight_ic_singletau_up", "triggerweight"),
-#     ),
-#     ReplaceWeight(
-#         "CMS_eff_trigger_single_t_emb_EraDown",
-#         "triggerweight",
-#         Weight("tautau_triggerweight_ic_singletau_down", "triggerweight"),
-#     ),
+#         for shift in ("Up", "Down")
+#     ]
 # ]
-
-# TODO add embeddedDecayModeWeight, TODO2: Needed or covered by something other?
-
-# emb_decay_mode_eff_lt = [
+# # embedded lt eff by decay mode
+# emb_decay_mode_eff_lt = [  # TODO: Check if needed or is replaced,  add embeddedDecayModeWeight, Needed or covered by something other?
 #     ReplaceWeight(
-#         "CMS_3ProngEff_EraUp",
+#         name,
 #         "decayMode_SF",
-#         Weight(
-#             "(pt_2<100)*embeddedDecayModeWeight_effUp_pi0Nom+(pt_2>=100)",
-#             "decayMode_SF",
-#         ),
-#     ),
-#     ReplaceWeight(
-#         "CMS_3ProngEff_EraDown",
-#         "decayMode_SF",
-#         Weight(
-#             "(pt_2<100)*embeddedDecayModeWeight_effDown_pi0Nom+(pt_2>=100)",
-#             "decayMode_SF",
-#         ),
-#     ),
-#     ReplaceWeight(
-#         "CMS_1ProngPi0Eff_EraUp",
-#         "decayMode_SF",
-#         Weight(
-#             "(pt_2<100)*embeddedDecayModeWeight_effNom_pi0Up+(pt_2>=100)",
-#             "decayMode_SF",
-#         ),
-#     ),
-#     ReplaceWeight(
-#         "CMS_1ProngPi0Eff_EraDown",
-#         "decayMode_SF",
-#         Weight(
-#             "(pt_2<100)*embeddedDecayModeWeight_effNom_pi0Down+(pt_2>=100)",
-#             "decayMode_SF",
-#         ),
-#     ),
+#         Weight(weight, "decayMode_SF"),
+#     )
+#     for shift in ("Up", "Down")
+#     for name, weight in [
+#         (f"CMS_3ProngEff_Era{shift}", f"(pt_2<100)*embeddedDecayModeWeight_eff{shift}_pi0Nom+(pt_2>=100)"),
+#         (f"CMS_1ProngPi0Eff_Era{shift}", f"(pt_2<100)*embeddedDecayModeWeight_effNom_pi0{shift}+(pt_2>=100)"),
+#     ]
 # ]
-
-# emb_decay_mode_eff_tt = [
+# _emb_decay_mode_eff_tt = [  # TODO: Check if needed or is replaced,  add embeddedDecayModeWeight, Needed or covered by something other?
 #     ReplaceWeight(
 #         "CMS_3ProngEff_EraUp",
 #         "decayMode_SF",
