@@ -524,6 +524,7 @@ ele_fake_es = ele_fake_es_1prong + ele_fake_es_1prong1pizero
 
 # Electron ES Resolution
 ele_es_res = [ReplaceVariable(f"CMS_res_e{shift}", f"eleEsReso{shift}") for shift in SHIFT_DIRECTIONS]
+ele_es_scale = [ReplaceVariable(f"CMS_scale_e{shift}", f"eleEsScale{shift}") for shift in SHIFT_DIRECTIONS]
 
 # TODO add split by decay mode?
 # Mu Fake uncertainties
@@ -1229,10 +1230,6 @@ class JetFakeVariations(_VariationCollection):
 # TODO: TBD, needed or not, collection:
 
 # # Electron energy scale
-# ele_es = [  # TODO: Check if needed or is replaced
-#     ReplaceVariable("CMS_scale_eUp", "eleScaleUp"),
-#     ReplaceVariable("CMS_scale_eDown", "eleScaleDown"),
-# ]
 # ele_res = [  # TODO: Check if needed or is replaced
 #     ReplaceVariable("CMS_res_eUp", "eleSmearUp"),
 #     ReplaceVariable("CMS_res_eDown", "eleSmearDown"),
