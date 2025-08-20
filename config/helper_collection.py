@@ -259,7 +259,6 @@ def calculate_stxs_N_and_negative_fractions(
             },
         }
     }
-    
     logger.info(f"Using database path: {database_path}")
     logger.info(f"Available Bins: {BINS}\nAvailable Eras: {ERAS}\nAvailable Keys: {KEYS}")
     logger.info(f"Adjusting to stage: {stage}, granularity: {granularity}")
@@ -330,7 +329,6 @@ def calculate_stxs_N_and_negative_fractions(
                     positive = np.count_nonzero(_df[KEYS["weight"]] >= 0)
                     negative = np.count_nonzero(_df[KEYS["weight"]] < 0)
                     frac = 1.0 - 2.0 * (negative / (negative + positive))
-
                     if "_Bin" not in file.name:  # is inclusive
                         N_events[process][era][b].insert(0, n_events)
                         negative_fractions[process][era][b].insert(0, frac)
