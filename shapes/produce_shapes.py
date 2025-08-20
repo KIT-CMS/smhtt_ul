@@ -555,8 +555,8 @@ def main(args):
         ############################
         if not args.skip_systematic_variations:
             # Book variations common to all channels.
-            _book({"ggh"} & procS, [variations.ggh_acceptance])
-            _book({"qqh"} & procS, [variations.qqh_acceptance])
+            _book({"ggh"} & procS, [variations.ggh_acceptance, variations.ggh_muRmuF_acceptance])
+            _book({"qqh"} & procS, [variations.qqh_acceptance, variations.qqh_muRmuF_acceptance])
             _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging])
             _book(signalsS, variations.LHE_scale.unrolled())
 
@@ -576,8 +576,6 @@ def main(args):
                 _book(leptonFakesS | trueTauBkgS | embS, [variations.ff_variations_tau_es_lt])
                 _book(embS, [variations.ff_variations_tau_es_emb_lt])
                 _book(embS, [variations.emb_tau_id_eff_lt, variations.emb_tau_id_eff_lt_corr])
-
-            # TODO btag uncertainties?
 
             if channel in ["et", "em"]:
                 _book(simulatedProcsDS[channel], [variations.ele_res, variations.ele_es])

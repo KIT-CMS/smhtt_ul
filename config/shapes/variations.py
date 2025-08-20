@@ -473,6 +473,10 @@ PS_scale_norm_Fsr = [
     AddWeight("PS_scale_Fsr_normUp", Weight('(ps_weight__FsrWeightUp)', "FsR2p0_weight")),
     AddWeight("PS_scale_Fsr_normDown", Weight('(ps_weight__FsrWeightDown)', "FsR0p5_weight")),
 ]
+PS_scale_norm_Isr = [
+    AddWeight("PS_scale_Isr_normUp", Weight('(ps_weight__IsrWeightUp)', "IsR2p0_weight")),
+    AddWeight("PS_scale_Isr_normDown", Weight('(ps_weight__IsrWeightDown)', "IsR0p5_weight")),
+]
 LHE_pdf = [
     AddWeight("LHE_pdfUp", Weight("(lhe_pdf_weight__PdfWeightUp)", "lhe_pdf_up_weight")),
     AddWeight("LHE_pdfDown", Weight("(lhe_pdf_weight__PdfWeightDown)", "lhe_pdf_down_weight")),
@@ -1121,6 +1125,7 @@ class LHE_scale(_VariationCollection):
     LHE_scale_norm_muR = LHE_scale_norm_muR
     LHE_scale_norm_muF = LHE_scale_norm_muF
     PS_scale_norm_Fsr = PS_scale_norm_Fsr
+    PS_scale_norm_Isr = PS_scale_norm_Isr
     LHE_pdf = LHE_pdf
     LHE_alphaS = LHE_alphaS
 
