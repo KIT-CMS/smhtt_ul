@@ -715,49 +715,49 @@ ff_variations_lt = [
 
 # Propagation of tau ES systematics on jetFakes process
 # lt channel
-ff_variations_tau_es_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-    lambda: [
-        ReplaceVariableReplaceCutAndAddWeight(
+ff_variations_tau_es_lt = [
+    LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
+        lambda: ReplaceVariableReplaceCutAndAddWeight(
             name,
             variation,
             "tau_iso",
             Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
             Weight(f"{RuntimeVariables.FF_name_lt}__{variation}", "fake_factor"),
         )
-        for shift in SHIFT_DIRECTIONS
-        for name, variation in [
-            (f"anti_iso_CMS_scale_t_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
-        ]
+    )
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"anti_iso_CMS_scale_t_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
     ]
-)
+]
 
 # lt for emb only for correlation
-ff_variations_tau_es_emb_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-    lambda: [
-        ReplaceVariableReplaceCutAndAddWeight(
+ff_variations_tau_es_emb_lt = [
+    LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
+        lambda: ReplaceVariableReplaceCutAndAddWeight(
             name,
             variation,
             "tau_iso",
             Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
             Weight(f"{RuntimeVariables.FF_name_lt}__{variation}", "fake_factor"),
         )
-        for shift in SHIFT_DIRECTIONS
-        for name, variation in [
-            (f"anti_iso_CMS_scale_t_emb_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_emb_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_emb_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_emb_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
-        ]
+    )
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"anti_iso_CMS_scale_t_emb_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_emb_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_emb_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_emb_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
     ]
-)
+]
 
 # # tt channel
-ff_variations_tau_es_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_tt may be defined later
-    lambda: [
-        ReplaceVariableReplaceCutAndAddWeight(
+ff_variations_tau_es_tt = [
+    LazyVariable(  # requieres LazyVariation since Used.FF_name_tt may be defined later
+        lambda: ReplaceVariableReplaceCutAndAddWeight(
             name,
             variation,
             "tau_iso",
@@ -786,20 +786,20 @@ ff_variations_tau_es_tt = LazyVariable(  # requieres LazyVariation since Used.FF
                 "fake_factor",
             ),
         )
-        for shift in SHIFT_DIRECTIONS
-        for name, variation in [
-            (f"anti_iso_CMS_scale_t_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
-        ]
+    )
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"anti_iso_CMS_scale_t_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
     ]
-)
+]
 
 # tt channel emb process
-ff_variations_tau_es_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_tt may be defined later
-    lambda: [
-        ReplaceVariableReplaceCutAndAddWeight(
+ff_variations_tau_es_tt = [
+    LazyVariable(  # requieres LazyVariation since Used.FF_name_tt may be defined later
+        lambda: ReplaceVariableReplaceCutAndAddWeight(
             name,
             variation,
             "tau_iso",
@@ -828,15 +828,15 @@ ff_variations_tau_es_tt = LazyVariable(  # requieres LazyVariation since Used.FF
                 "fake_factor",
             ),
         )
-        for shift in SHIFT_DIRECTIONS
-        for name, variation in [
-            (f"anti_iso_CMS_scale_t_emb_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_emb_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_emb_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
-            (f"anti_iso_CMS_scale_t_emb_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
-        ]
+    )
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"anti_iso_CMS_scale_t_emb_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_emb_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_emb_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
+        (f"anti_iso_CMS_scale_t_emb_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
     ]
-)
+]
 
 # qcd variations
 qcd_variations_em = [  # TODO: Check if the name is correct and if it is still applicable, redo otherwise

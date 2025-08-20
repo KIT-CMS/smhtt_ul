@@ -20,6 +20,7 @@ from config.shapes.control_binning import control_binning as default_control_bin
 from config.shapes.file_names import files
 from config.shapes.gof_binning import load_gof_binning
 from ntuple_processor import GraphManager, RunManager, UnitManager
+from ntuple_processor.utils import Selection
 
 
 def parse_arguments():
@@ -222,6 +223,22 @@ def add_processes(
     add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
 
 
+def get_select_function(
+    channel_selection: Selection,
+    selection_kwargs: dict,
+    selection_memo: dict,
+) -> callable:
+    def _function(*args):
+        _selection = [channel_selection]
+        for _process in args:
+            if _process.__name__ not in selection_memo:
+                selection_memo[_process.__name__] = _process(**selection_kwargs)
+            _selection.append(selection_memo[_process.__name__])
+        return _selection
+
+    return _function
+
+
 def get_analysis_units(
     channel: str,
     era: str,
@@ -244,14 +261,7 @@ def get_analysis_units(
     )
     _selection_memo = {}
     _channel_selection = channel_selection(**_selection_kwargs)
-
-    def select(*args):
-        _selection = [_channel_selection]
-        for _process in args:
-            if _process.__name__ not in _selection_memo:
-                _selection_memo[_process.__name__] = _process(**_selection_kwargs)
-            _selection.append(_selection_memo[_process.__name__])
-        return _selection
+    _select = get_select_function(_channel_selection, _selection_kwargs, _selection_memo)
 
     analysis_units = {}
 
@@ -263,7 +273,7 @@ def get_analysis_units(
             channel=channel,
         ),
         datasets=datasets,
-        select_fn=select,
+        select_fn=_select,
         channel=channel,
     )
 
@@ -325,14 +335,7 @@ def get_control_units(
     )
     _selection_memo = {}
     _channel_selection = channel_selection(**_selection_kwargs)
-
-    def select(*args):
-        _selection = [_channel_selection]
-        for _process in args:
-            if _process.__name__ not in _selection_memo:
-                _selection_memo[_process.__name__] = _process(**_selection_kwargs)
-            _selection.append(_selection_memo[_process.__name__])
-        return _selection
+    _select = get_select_function(_channel_selection, _selection_kwargs, _selection_memo)
 
     add_processes(
         add_fn=partial(
@@ -343,7 +346,7 @@ def get_control_units(
             variables=variable_set,
         ),
         datasets=datasets,
-        select_fn=select,
+        select_fn=_select,
         channel=channel,
     )
 
@@ -578,7 +581,7 @@ def main(args):
                 _book(embS, [variations.emb_tau_id_eff_lt, variations.emb_tau_id_eff_lt_corr])
 
             if channel in ["et", "em"]:
-                _book(simulatedProcsDS[channel], [variations.ele_res, variations.ele_es])
+                _book(simulatedProcsDS[channel], [variations.ele_es_res, variations.ele_es_scale])
                 _book(embS, [variations.emb_e_es])
 
             if channel == "mt":
