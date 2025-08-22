@@ -207,20 +207,17 @@ def add_processes(
     add_fn(name="ztt", dataset=datasets["DY"], selections=select_fn(*selection.DY.TT))
     add_fn(name="zl", dataset=datasets["DY"], selections=select_fn(*selection.DY.L))
     add_fn(name="zj", dataset=datasets["DY"], selections=select_fn(*selection.DY.J))
-    add_fn(name="ztt_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.TT))
-    add_fn(name="zl_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.L))
-    add_fn(name="zj_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.J))
     add_fn(name="ttl", dataset=datasets["TT"], selections=select_fn(*selection.TT.L))
     add_fn(name="ttt", dataset=datasets["TT"], selections=select_fn(*selection.TT.T))
     add_fn(name="ttj", dataset=datasets["TT"], selections=select_fn(*selection.TT.J))
     add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(*selection.VV.L))
     add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(*selection.VV.T))
     add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(*selection.VV.J))
+    # TODO add ST?
+    add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
     if channel != "mm":
         add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
         add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
-        # add_fn(name="w_nlo", dataset=datasets["WNLO"], selections=select_fn(selection.W))
-    add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
 
 
 def get_select_function(
@@ -463,9 +460,6 @@ def main(args):
             "ztt",
             "zl",
             "zj",
-            "ztt_nlo",
-            "zl_nlo",
-            "zj_nlo",
             "ttt",
             "ttl",
             "ttj",
@@ -473,25 +467,18 @@ def main(args):
             "vvl",
             "vvj",
             "w",
-            # "w_nlo",
             "ggh",
             "qqh",
-            # "zh",
-            # "wh",
         }
-        # if "et" in args.channels:
-        #     procS = procS - {"w"}
     else:
         procS = args.process_selection
     if "mm" in args.channels or "ee" in args.channels:
         procS = {
             "data",
             "zl",
-            "zl_nlo",
             "ttl",
             "vvl",
             "w",
-            # "w_nlo",
             "emb",
         } & procS
 
@@ -544,9 +531,11 @@ def main(args):
 
     for channel in args.channels:
         _book(signalsS, [])
-        if channel in {"mt", "et"}:
+        if channel in {"mt", "et", "tt"}:
+            _book(embS | dataS | trueTauBkgS | leptonFakesS | jetFakesDS[channel], [variations.same_sign])
+        if channel in {"mt", "et"} and args.ff_type != "none":
             _book(embS | dataS | trueTauBkgS | leptonFakesS | jetFakesDS[channel], variations.SemiLeptonicFFEstimations.unrolled())
-        elif channel == "tt":
+        elif channel == "tt" and args.ff_type != "none":
             _book(dataS | embS | trueTauBkgS | leptonFakesS | jetFakesDS[channel], variations.FullyHadronicFFEstimations.unrolled())
         elif channel == "em":
             _book((dataS | embS | simulatedProcsDS[channel]) - signalsS, [variations.same_sign_em])
@@ -575,10 +564,11 @@ def main(args):
 
             if channel in ["et", "mt"]:
                 _book((trueTauBkgS | leptonFakesS | signalsS) - {"zl"}, [variations.tau_id_eff_lt])
-                _book(dataS | embS | leptonFakesS | trueTauBkgS, variations.FakeFactorLT.unrolled())
-                _book(leptonFakesS | trueTauBkgS | embS, [variations.ff_variations_tau_es_lt])
-                _book(embS, [variations.ff_variations_tau_es_emb_lt])
                 _book(embS, [variations.emb_tau_id_eff_lt, variations.emb_tau_id_eff_lt_corr])
+                if args.ff_type != "none":
+                    _book(dataS | embS | leptonFakesS | trueTauBkgS, variations.FakeFactorLT.unrolled())
+                    _book(leptonFakesS | trueTauBkgS | embS, [variations.ff_variations_tau_es_lt])
+                    _book(embS, [variations.ff_variations_tau_es_emb_lt])
 
             if channel in ["et", "em"]:
                 _book(simulatedProcsDS[channel], [variations.ele_es_res, variations.ele_es_scale])

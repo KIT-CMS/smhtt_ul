@@ -27,6 +27,7 @@ logger = setup_logging(logger=logging.getLogger(__name__))
 SHIFT_DIRECTIONS = ("Up", "Down")
 
 FF_OPTIONS = {
+    "none": {"lt": None, "tt_1": None, "tt_2": None},
     "fake_factor": {
         "lt": "fake_factor_2",
         "tt_1": "fake_factor_1",
@@ -1086,14 +1087,12 @@ class _VariationCollection(metaclass=VariationCollectionMeta):
 
 
 class SemiLeptonicFFEstimations(_VariationCollection):
-    same_sign = same_sign
     anti_iso_lt = anti_iso_lt
     same_sign_anti_iso_lt = same_sign_anti_iso_lt
 
 
 class FullyHadronicFFEstimations(_VariationCollection):
     abcd_method = abcd_method
-    same_sign = same_sign
     anti_iso_tt = anti_iso_tt
 
 
