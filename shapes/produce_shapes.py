@@ -189,8 +189,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--ff-type",
-        help=f"Set to the type of fake factor used.\n{variations.__FF_OPTION_info__}",
-        default="fake_factor"
+        help=f"Set to the type of fake factor used. If set to none anti_iso (and associated) variation is (are) skipped. \n{variations.__FF_OPTION_info__}",
+        default="none"
     )
     return parser.parse_args()
 
