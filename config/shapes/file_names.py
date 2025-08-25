@@ -814,14 +814,14 @@ files = {
 }
 
 
-def remove_empty_lists(d: dict) -> dict:
+def remove_empty_processes(d: dict) -> dict:
     for key in list(d.keys()):
         value = d[key]
         if isinstance(value, dict):
-            remove_empty_lists(value)
+            remove_empty_processes(value)
         if isinstance(value, list) and not value:
             del d[key]
     return d
 
 
-files = remove_empty_lists(files)
+files = remove_empty_processes(files)

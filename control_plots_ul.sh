@@ -6,6 +6,7 @@ SELECTION_OPTION_ESTIMATION="CR"
 PLOTVERSION="all"
 FF_TYPE="none"
 VARIABLES=""
+NANOAODVERSION="v9"
 DEFAULT_VARIABLES_LIST=(
   pt_1 eta_1 phi_1 tau_decaymode_1 mt_1 iso_1 mass_1
   pt_2 eta_2 phi_2 tau_decaymode_2 mt_2 iso_2 mass_2
@@ -37,6 +38,7 @@ options=(
   "F:ff_type:"
   "p:plotversion:"
   "v:variables:"
+  "N:nanoaodversion:"
 )
 
 short_opts=""
@@ -84,6 +86,8 @@ while true; do
     PLOTVERSION="${2}"; shift 2; ;;
   -v | --variables)
     VARIABLES="${2}"; shift 2; ;;
+  -N | --nanoaodversion)
+    NANOAODVERSION="${2}"; shift 2; ;;
   --)
     shift
     break
@@ -153,7 +157,7 @@ if [[ ${MODE} == "XSEC" ]]; then
   nice -n 19 python3 friends/build_friend_tree.py \
     --basepath ${KINGMAKER_BASEDIR_XROOTD} \
     --outputpath root://cmsdcache-kit-disk.gridka.de/${XSEC_FRIENDS} \
-    --dataset-config "datasets/nanoAOD_v9/datasets.json" \
+    --dataset-config "datasets/nanoAOD_${NANOAODVERSION}/datasets.json" \
     --nthreads 20
 fi
 

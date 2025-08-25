@@ -1228,31 +1228,10 @@ class JetFakeVariations(_VariationCollection):
 
 # TODO: TBD, needed or not, collection:
 
-# # Electron energy scale
-# ele_res = [  # TODO: Check if needed or is replaced
-#     ReplaceVariable("CMS_res_eUp", "eleSmearUp"),
-#     ReplaceVariable("CMS_res_eDown", "eleSmearDown"),
-# ]
 # # fake met scaling in embedded samples
 # emb_met_scale = [  # TODO: Check if needed or is replaced
 #         ReplaceVariable("scale_embed_metUp", "emb_scale_metUp"),
 #         ReplaceVariable("scale_embed_metDown", "emb_scale_metDown")
-#         ]
-# # Energy scales of leptons faking tau leptons.
-# # Inclusive in eta
-# ele_fake_es = [    # TODO: Check if needed or is replaced, do we need the ones without barrel / endcap plit ?
-#         ReplaceVariable("CMS_ZLShape_et_1prong_EraUp", "tauEleFakeEsOneProngCommonUp"),
-#         ReplaceVariable("CMS_ZLShape_et_1prong_EraDown", "tauEleFakeEsOneProngCommonDown"),
-#         ReplaceVariable("CMS_ZLShape_et_1prong1pizero_EraUp", "tauEleFakeEsOneProngPiZerosCommonUp"),
-#         ReplaceVariable("CMS_ZLShape_et_1prong1pizero_EraDown", "tauEleFakeEsOneProngPiZerosCommonDown"),
-#         ]
-# mu_fake_es_1prong = [  # TODO: Check if needed or is replaced, add split by decay mode ?
-#         ReplaceVariable("CMS_ZLShape_mt_1prong_EraUp", "tauMuFakeEsOneProngUp"),
-#         ReplaceVariable("CMS_ZLShape_mt_1prong_EraDown", "tauMuFakeEsOneProngDown")
-#         ]
-# mu_fake_es_1prong1pizero = [  # TODO: Check if needed or is replaced, add split by decay mode ?
-#         ReplaceVariable("CMS_ZLShape_mt_1prong1pizero_EraUp", "tauMuFakeEsOneProngPiZerosUp"),
-#         ReplaceVariable("CMS_ZLShape_mt_1prong1pizero_EraDown", "tauMuFakeEsOneProngPiZerosDown")
 #         ]
 # # cross triggers
 # trigger_eff_mt = [  # TODO: Check if needed or is replaced
