@@ -93,7 +93,7 @@ common_binning = HistogramBuildingDict(
         "pt_ttjj": np.arange(0, 160, 5),
         "mjj": np.arange(0, 300, 10),
         "met": np.arange(0, 160, 5),
-        "metSumEt": np.arange(0, 160, 5),
+        "metSumEt": np.arange(0, 360, 5),
         "pfmet": np.concatenate((np.arange(0, 160, 5), [200, 400])),
         "iso_1": np.linspace(0, 0.3, 50),
         "iso_2": np.linspace(0, 1.0, 50),
