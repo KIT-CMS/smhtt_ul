@@ -1427,13 +1427,13 @@ class _SelectionChain(list):
         super().__init__(functions or [])
         names = [f.__name__ for f in self if hasattr(f, "__name__")]
         assert len(names) == len(functions), "All functions in the chain must have a __name__ attribute."
-        self.__name__ = "__".join(names)
+        self.__name__ = "_".join(names)
 
     def wrap_next(self, next_selection: Callable) -> '_SelectionChain':
         new_chain = _SelectionChain(self)
         new_chain.append(next_selection)
         if hasattr(next_selection, "__name__"):
-            new_chain.__name__ = f"{self.__name__}__{next_selection.__name__}"
+            new_chain.__name__ = f"{self.__name__}_{next_selection.__name__}"
         return new_chain
 
 
