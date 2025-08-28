@@ -11,7 +11,12 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts = WarnDict()
     cuts["extraelec_veto"] = "(extraelec_veto < 0.5)"
     cuts["extramuon_veto"] = "(extramuon_veto < 0.5)"
-    cuts["dilepton_veto"] = "(dimuon_veto < 0.5)"
+    if "et" in channel:
+        cuts["dilepton_veto"] = "(dielectron_veto < 0.5)"
+    elif "mt" in channel:
+        cuts["dilepton_veto"] = "(dimuon_veto < 0.5)"
+    else:
+        cuts["dilepton_veto"] = "(dilepton_veto < 0.5)"
     cuts["os"] = "((q_1 * q_2) < 0)"
 
     if "DR;ff" in selection_option:
@@ -34,7 +39,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         if "mt" in channel:
             cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_Tight_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = "(id_tau_vsEle_VVLoose_2 > 0.5)"
-            cuts["tau_iso"] = "(id_tau_vsJet_Tight_2 > 0.5)"
+            cuts["tau_iso"] = "(id_tau_vsJet_Medium_2 > 0.5)"
             cuts["muon_iso"] = "(iso_1 < 0.15)"
             cuts["mt_cut"] = "(mt_1 < 70)"
 
@@ -71,6 +76,16 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                         )
                     )
                 )"""
+            elif era in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix", "2024"]:
+                cuts["trg_selection"] = """(
+                    (pt_2 > 30) &&
+                    (
+                        (pt_1 > 25) &&
+                        (
+                            (trg_single_mu24 > 0.5)
+                        )
+                    )
+                )"""
             else:
                 logger.error(f"Given era {era} does not exist")
                 raise ValueError(f"Given era {era} does not exist")
@@ -79,7 +94,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         if "et" in channel:
             cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_VLoose_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = "(id_tau_vsEle_Tight_2 > 0.5)"
-            cuts["tau_iso"] = "(id_tau_vsJet_Tight_2 > 0.5)"
+            cuts["tau_iso"] = "(id_tau_vsJet_Medium_2 > 0.5)"
             cuts["ele_iso"] = "(iso_1 < 0.15)"
             cuts["mt_cut"] = "(mt_1 < 70)"
 
@@ -111,6 +126,16 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                         (
                             (trg_single_ele35 > 0.5) ||
                             (trg_single_ele32 > 0.5)
+                        )
+                    )
+                )"""
+            elif era in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix", "2024"]:
+                cuts["trg_selection"] = """(
+                    (pt_2 > 30) &&
+                    (
+                        (pt_1 > 32) &&
+                        (
+                            (trg_single_ele30 > 0.5) 
                         )
                     )
                 )"""

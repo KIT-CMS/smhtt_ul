@@ -133,6 +133,16 @@ def main(info):
         era = "Run2017"
     elif "2018" in args.era:
         era = "Run2018"
+    elif "2022preEE" in args.era:
+        era = "Run2022preEE"
+    elif "2022postEE" in args.era:
+        era = "Run2022postEE"
+    elif "2023preBPix" in args.era:
+        era = "Run2023preBPix"
+    elif "2023postBPix" in args.era:
+        era = "Run2023postBPix"
+    elif "2024" in args.era:
+        era = "Run2024"
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
@@ -297,7 +307,7 @@ def main(info):
     # set axes limits and labels
     plot.subplot(0).setYlims(
         split_dict[channel],
-        max(1.6 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
+        max(1.6 * plot.subplot(0).get_hist("total_bkg").GetMaximum(),
             split_dict[channel] * 2))
 
     log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
@@ -310,7 +320,7 @@ def main(info):
             1.0,
             1000 * plot.subplot(0).get_hist("data_obs").GetMaximum())
 
-    plot.subplot(2).setYlims(0.75, 1.45)
+    plot.subplot(2).setYlims(0.45, 1.45)
     # if channel == "mm":
     #     plot.subplot(0).setLogY()
     #     plot.subplot(0).setYlims(1, 10**10)
@@ -440,6 +450,16 @@ def main(info):
         plot.DrawLumi("41.5 fb^{-1} (2017, 13 TeV)")
     elif "2018" in args.era:
         plot.DrawLumi("59.8 fb^{-1} (2018, 13 TeV)")
+    elif "2022preEE" in args.era:
+        plot.DrawLumi("7.98 fb^{-1} (2022 preEE, 13.6 TeV)")
+    elif "2022postEE" in args.era:
+        plot.DrawLumi("26.67 fb^{-1} (2022 postEE, 13.6 TeV)")
+    elif "2023preBPix" in args.era:
+        plot.DrawLumi("17.79 fb^{-1} (2023 preBPix, 13.6 TeV)")
+    elif "2023postBPix" in args.era:
+        plot.DrawLumi("9.45 fb^{-1} (2023 postBPix, 13.6 TeV)")
+    elif "2024" in args.era:
+        plot.DrawLumi("109.08 fb^{-1} (2024, 13.6 TeV)")
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
@@ -450,7 +470,7 @@ def main(info):
         begin_left=posChannelCategoryLabelLeft)
 
     print("Trying to save the created plot")
-    _path = os.path.join(f"{args.era}_plots_{postfix}_{args.tag}", channel)
+    _path = os.path.join(f"/web/sgiappic/public_html/HTT/{args.era}_plots_{postfix}_{args.tag}", channel)
     if not os.path.exists(_path):
         os.makedirs(_path, exist_ok=True)
     for _ext in ["pdf", "png"]:

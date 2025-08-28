@@ -24,6 +24,7 @@ from config.logging_setup_configs import setup_logging
 logger = setup_logging(logger=logging.getLogger(__name__))
 
 FF_OPTIONS = {
+    "none": {},
     "fake_factor": {
         "lt": "fake_factor_2",
         "tt_1": "fake_factor_1",
@@ -181,7 +182,11 @@ def set_ff_type(ff_type):
         raise KeyError(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
 
     logger.info(f"Setting fake factor option to {ff_type}= {FF_OPTIONS[ff_type]}")
-    RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
+    # Only set FF_name_lt if present in the option (e.g. skip for 'none')
+    if "lt" in FF_OPTIONS[ff_type]:
+        RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
+    else:
+        RuntimeVariables.FF_name_lt = None
     logger.warning(
         """
             Setting fake factor option for tt_1 and tt_2 is in parts not implemented yet.

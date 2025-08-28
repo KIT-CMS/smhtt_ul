@@ -6,7 +6,7 @@ from typing import Generator, Union
 
 
 __LOG_FILENAME__ = "routine_output.log"
-__LOG_LEVEL__ = logging.INFO
+__LOG_LEVEL__ = logging.DEBUG
 
 GRAY = "\x1b[38;21m"
 WHITE = "\x1b[38;5;15m"
@@ -112,7 +112,7 @@ class _DuplicateFilter:
 def setup_logging(
     output_file: Union[str, None] = None,
     logger: logging.Logger = logging.getLogger(""),
-    level: Union[int, None] = logging.INFO,
+    level: Union[int, None] = logging.DEBUG,
 ) -> logging.Logger:
     if output_file is None:
         output_file = __LOG_FILENAME__

@@ -1,3 +1,87 @@
+# Input files used accross all channels in 2024.
+common_files_2024 = {
+    "DYNLO": [
+        "DYto2Tau_Bin-MLL-10to50_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-120to200_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-1500to2500_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-200to400_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-2500to4000_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-4000to6000_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-400to800_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-50to120_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-6000_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Tau_Bin-MLL-800to1500_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2E-2Jets_Bin-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "DYto2Mu-2Jets_Bin-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X",
+    ],
+    "TT": [
+        "TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "TTto4Q_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "TTtoLNu2Q_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+    ],
+    "VV": [
+        "WWto4Q_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "WWtoLNu2Q_TuneCP5_13p6TeV_powheg-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "WZ_TuneCP5_13p6TeV_pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "ZZ_TuneCP5_13p6TeV_pythia8_RunIII2024Summer24NanoAODv15-150X",
+    ],
+    "WNLO": [
+        "WtoENu-2Jets_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "WtoMuNu-2Jets_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X",
+        "WtoTauNu-2Jets_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X",
+    ],
+    
+}
+# Input files used accross all channels in 2022preEE
+common_files_2022preEE = {
+    "DYNLO": [
+        "DYto2E_MLL-10to50_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-120to200_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-1500to2500_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-200to400_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-2500to4000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-4000to6000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-400to800_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-50to120_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-6000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2E_MLL-800to1500_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-10to50_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-120to200_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-1500to2500_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-200to400_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-2500to4000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-4000to6000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-400to800_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-50to120_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-6000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Mu_MLL-800to1500_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-10to50_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-120to200_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-1500to2500_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-200to400_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-2500to4000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-4000to6000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-400to800_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-50to120_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-6000_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "DYto2Tau_MLL-800to1500_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+    ],
+    "TT": [
+        "TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "TTto4Q_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "TTtoLNu2Q_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+    ],
+    "VV": [
+        "WWto4Q_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "WWtoLNu2Q_TuneCP5_13p6TeV_powheg-pythia8_Run3Summer22NanoAODv12-130X",
+        "WZ_TuneCP5_13p6TeV_pythia8_Run3Summer22NanoAODv12-130X",
+        "ZZ_TuneCP5_13p6TeV_pythia8_Run3Summer22NanoAODv12-130X",
+    ],
+    "WNLO": [
+        "WtoLNu-2Jets_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_Run3Summer22NanoAODv12-130X",
+    ],
+    
+}
 # Input files used accross all channels in 2018.
 common_files_2018 = {
     "DY": [
@@ -269,6 +353,74 @@ common_files_2016preVFP = {
     ],
 }
 files = {
+    "2024": {
+        "mt": dict(
+            {
+                "data": [
+                    "Muon0_Run2024C-MINIv6NANOv15-v1",
+                    "Muon0_Run2024D-MINIv6NANOv15-v1",
+                    "Muon0_Run2024E-MINIv6NANOv15-v1",
+                    "Muon0_Run2024F-MINIv6NANOv15-v1",
+                    "Muon0_Run2024G-MINIv6NANOv15-v1",
+                    "Muon0_Run2024H-MINIv6NANOv15-v1",
+                    "Muon0_Run2024I-MINIv6NANOv15",
+                    "Muon0_Run2024I-MINIv6NANOv15-v1",
+                    "Muon1_Run2024C-MINIv6NANOv15-v1",
+                    "Muon1_Run2024D-MINIv6NANOv15-v1",
+                    "Muon1_Run2024E-MINIv6NANOv15-v1",
+                    "Muon1_Run2024F-MINIv6NANOv15-v1",
+                    "Muon1_Run2024G-MINIv6NANOv15-v2",
+                    "Muon1_Run2024H-MINIv6NANOv15-v2",
+                    "Muon1_Run2024I-MINIv6NANOv15",
+                    "Muon1_Run2024I-MINIv6NANOv15-v1",
+                ],
+            },
+            **common_files_2024
+        ),
+        "et": dict(
+            {
+                "data": [
+                    "EGamma0_Run2024C-MINIv6NANOv15-v1",
+                    "EGamma0_Run2024D-MINIv6NANOv15-v1",
+                    "EGamma0_Run2024E-MINIv6NANOv15-v1",
+                    "EGamma0_Run2024F-MINIv6NANOv15-v1",
+                    "EGamma0_Run2024G-MINIv6NANOv15-v2",
+                    "EGamma0_Run2024H-MINIv6NANOv15-v2",
+                    "EGamma0_Run2024I-MINIv6NANOv15",
+                    "EGamma0_Run2024I-MINIv6NANOv15-v1",
+                    "EGamma1_Run2024C-MINIv6NANOv15-v1",
+                    "EGamma1_Run2024D-MINIv6NANOv15-v1",
+                    "EGamma1_Run2024E-MINIv6NANOv15-v1",
+                    "EGamma1_Run2024F-MINIv6NANOv15-v1",
+                    "EGamma1_Run2024G-MINIv6NANOv15-v2",
+                    "EGamma1_Run2024H-MINIv6NANOv15-v1",
+                    "EGamma1_Run2024I-MINIv6NANOv15",
+                    "EGamma1_Run2024I-MINIv6NANOv15-v1",
+                ],
+            },
+            **common_files_2024
+        ),
+    },
+    "2022preEE":{
+        "et": dict(
+            {
+                "data": [
+                    "EGamma_Run2022C-22Sep2023-v1",
+                    "EGamma_Run2022D-22Sep2023-v1",
+                ],
+            },
+            **common_files_2022preEE
+        ),
+        "mt": dict(
+            {
+                "data": [
+                    "Muon_Run2022C-22Sep2023-v1",
+                    "Muon_Run2022D-22Sep2023-v1"
+                ],
+            },
+            **common_files_2022preEE
+        ),
+    },
     "2018": {
         "et": dict(
             {

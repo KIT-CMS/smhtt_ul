@@ -124,7 +124,7 @@ def parse_arguments():
     parser.add_argument(
         "--do-2dGofs",
         action="store_true",
-        help="It set, run the 2D gof Tests as well",
+        help="If set, run the 2D gof Tests as well",
     )
     parser.add_argument(
         "--control-plots-full-samples",
@@ -203,24 +203,25 @@ def add_processes(
 ) -> None:
 
     add_fn(name="data", dataset=datasets["data"], selections=select_fn())
-    add_fn(name="emb", dataset=datasets["EMB"], selections=select_fn(selection.ZTT_embedded))
-    add_fn(name="ztt", dataset=datasets["DY"], selections=select_fn(*selection.DY.TT))
-    add_fn(name="zl", dataset=datasets["DY"], selections=select_fn(*selection.DY.L))
-    add_fn(name="zj", dataset=datasets["DY"], selections=select_fn(*selection.DY.J))
-    add_fn(name="ztt_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.TT))
-    add_fn(name="zl_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.L))
-    add_fn(name="zj_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.J))
-    add_fn(name="ttl", dataset=datasets["TT"], selections=select_fn(*selection.TT.L))
-    add_fn(name="ttt", dataset=datasets["TT"], selections=select_fn(*selection.TT.T))
-    add_fn(name="ttj", dataset=datasets["TT"], selections=select_fn(*selection.TT.J))
-    add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(*selection.VV.L))
-    add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(*selection.VV.T))
-    add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(*selection.VV.J))
-    if channel != "mm":
-        add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
-        add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
+    #add_fn(name="emb", dataset=datasets["EMB"], selections=select_fn(selection.ZTT_embedded))
+    #add_fn(name="ztt", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZTT))
+    #add_fn(name="zl", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZL))
+    #add_fn(name="zj", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZJ))
+    add_fn(name="ztt_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZTT))
+    add_fn(name="zl_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZL))
+    add_fn(name="zj_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZJ))
+    add_fn(name="ttl", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTL))
+    add_fn(name="ttt", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTT))
+    add_fn(name="ttj", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTJ))
+    add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVL))
+    add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVT))
+    add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVJ))
+    #if channel != "mm":
+        #add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
+        #add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
         # add_fn(name="w_nlo", dataset=datasets["WNLO"], selections=select_fn(selection.W))
-    add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
+    #add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
+    add_fn(name="w_nlo", dataset=datasets["WNLO"], selections=select_fn(selection.W))
 
 
 def get_analysis_units(
@@ -457,10 +458,10 @@ def main(args):
     if args.process_selection is None:
         procS = {
             "data",
-            "emb",
-            "ztt",
-            "zl",
-            "zj",
+            #"emb",
+            #"ztt",
+            #"zl",
+            #"zj",
             "ztt_nlo",
             "zl_nlo",
             "zj_nlo",
@@ -470,10 +471,10 @@ def main(args):
             "vvt",
             "vvl",
             "vvj",
-            "w",
-            # "w_nlo",
-            "ggh",
-            "qqh",
+            #"w",
+            "w_nlo",
+            #"ggh",
+            #"qqh",
             # "zh",
             # "wh",
         }
@@ -607,7 +608,7 @@ def main(args):
             if "2016" in args.era or "2017" in args.era:
                 _book(simulatedProcsDS[channel], [variations.prefiring])
 
-            if "2018" in args.era:
+            else:
                 _book(simulatedProcsDS[channel], [variations.jet_es_hem])
 
     # Step 2: convert units to graphs and merge them
