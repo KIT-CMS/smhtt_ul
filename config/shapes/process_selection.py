@@ -1432,6 +1432,21 @@ def FF_training_process_selection(channel, era, **kwargs):
     return Selection(name="jetFakes", cuts=cuts, weights=weights)
 
 
+class _SelectionChain(list):
+    def __init__(self, functions: Union[Callable, None] = None) -> None:
+        super().__init__(functions or [])
+        names = [f.__name__ for f in self if hasattr(f, "__name__")]
+        assert len(names) == len(functions), "All functions in the chain must have a __name__ attribute."
+        self.__name__ = "_".join(names)
+
+    def wrap_next(self, next_selection: Callable) -> '_SelectionChain':
+        new_chain = _SelectionChain(self)
+        new_chain.append(next_selection)
+        if hasattr(next_selection, "__name__"):
+            new_chain.__name__ = f"{self.__name__}_{next_selection.__name__}"
+        return new_chain
+
+
 def make_chainable_process_selection(base_selection: Callable) -> Callable:
     """
     Wrap a process‐selection function to allow chaining additional selections.
@@ -1473,15 +1488,9 @@ def make_chainable_process_selection(base_selection: Callable) -> Callable:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         return base_selection(*args, **kwargs)
 
-    def wrap_next(next_selection: Callable) -> Callable:
-        def next_link_base_func(*args: Any, **kwargs: Any) -> Tuple[Selection, ...]:
-            base_selection_result = wrapper(*args, **kwargs)
-            next_selection_result = next_selection(*args, **kwargs)
-            if isinstance(base_selection_result, tuple):
-                return (*base_selection_result, next_selection_result)
-            else:
-                return (base_selection_result, next_selection_result)
-        return make_chainable_process_selection(next_link_base_func)
+    def wrap_next(next_selection: Callable) -> _SelectionChain:
+        return _SelectionChain([base_selection, next_selection])
+
     wrapper.wrap_next = wrap_next
     return wrapper
 
@@ -1538,35 +1547,3 @@ qqHWW = qqHWW_process_selection
 WHWW = WHWW_process_selection
 ZHWW = ZHWW_process_selection
 FF_training = FF_training_process_selection
-
-ggH125_inclusive = get_stxs_bin_selection("ggh_htautau", 100, 116)
-ggH125_100 = get_stxs_bin_selection("ggh_htautau", 100)
-ggH125_101 = get_stxs_bin_selection("ggh_htautau", 101)
-ggH125_102 = get_stxs_bin_selection("ggh_htautau", 102)
-ggH125_103 = get_stxs_bin_selection("ggh_htautau", 103)
-ggH125_104 = get_stxs_bin_selection("ggh_htautau", 104)
-ggH125_105 = get_stxs_bin_selection("ggh_htautau", 105)
-ggH125_106 = get_stxs_bin_selection("ggh_htautau", 106)
-ggH125_107 = get_stxs_bin_selection("ggh_htautau", 107)
-ggH125_108 = get_stxs_bin_selection("ggh_htautau", 108)
-ggH125_109 = get_stxs_bin_selection("ggh_htautau", 109)
-ggH125_110 = get_stxs_bin_selection("ggh_htautau", 110)
-ggH125_111 = get_stxs_bin_selection("ggh_htautau", 111)
-ggH125_112 = get_stxs_bin_selection("ggh_htautau", 112)
-ggH125_113 = get_stxs_bin_selection("ggh_htautau", 113)
-ggH125_114 = get_stxs_bin_selection("ggh_htautau", 114)
-ggH125_115 = get_stxs_bin_selection("ggh_htautau", 115)
-ggH125_116 = get_stxs_bin_selection("ggh_htautau", 116)
-
-qqH125_inclusive = get_stxs_bin_selection("vbf_htautau", 200, 210)
-qqH125_200 = get_stxs_bin_selection("vbf_htautau", 200)
-qqH125_201 = get_stxs_bin_selection("vbf_htautau", 201)
-qqH125_202 = get_stxs_bin_selection("vbf_htautau", 202)
-qqH125_203 = get_stxs_bin_selection("vbf_htautau", 203)
-qqH125_204 = get_stxs_bin_selection("vbf_htautau", 204)
-qqH125_205 = get_stxs_bin_selection("vbf_htautau", 205)
-qqH125_206 = get_stxs_bin_selection("vbf_htautau", 206)
-qqH125_207 = get_stxs_bin_selection("vbf_htautau", 207)
-qqH125_208 = get_stxs_bin_selection("vbf_htautau", 208)
-qqH125_209 = get_stxs_bin_selection("vbf_htautau", 209)
-qqH125_210 = get_stxs_bin_selection("vbf_htautau", 210)

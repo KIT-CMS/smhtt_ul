@@ -40,8 +40,8 @@ class HistogramBuildingDict(ObjBuildingDict):
 
 common_binning = HistogramBuildingDict(
     {
-        "mass_2": np.arange(0, 2.1, 0.1),
         "mass_1": np.arange(0, 2.1, 0.1),
+        "mass_2": np.arange(0, 2.1, 0.1),
         "genbosonpt": np.arange(0, 150, 10),
         "deltaR_ditaupair": np.arange(0, 5.2, 0.2),
         "mTdileptonMET_puppi": np.arange(0, 200, 4),
@@ -98,7 +98,7 @@ common_binning = HistogramBuildingDict(
         "dz_1": np.linspace(-1, 1, 50),
         "dz_2": np.linspace(-1, 1, 50),
         "met": np.arange(0, 160, 5),
-        "met_uncorrected": np.arange(0, 160, 5),
+        "metSumEt": np.arange(0, 360, 5),
         "pfmet": np.concatenate((np.arange(0, 160, 5), [200, 400])),
         "iso_1": np.linspace(0, 0.3, 50),
         "iso_2": np.linspace(0, 1.0, 50),
@@ -106,6 +106,12 @@ common_binning = HistogramBuildingDict(
         "bpt_2": np.arange(0, 160, 5),
         "beta_1": np.linspace(-5, 5, 20),
         "beta_2": np.linspace(-5, 5, 20),
+        "bphi_1": np.linspace(-np.pi, np.pi, 50),
+        "bphi_2": np.linspace(-np.pi, np.pi, 50),
+        "btag_value_1": np.linspace(0, 1, 50),
+        "btag_value_2": np.linspace(0, 1, 50),
+        "deltaEta_ditaupair": np.linspace(-10, 10, 20),
+        "deltaPhi_ditaupair": np.linspace(-2 * np.pi, 2 * np.pi, 20),
         # fastmtt variables
         "m_fastmtt": np.arange(0, 225, 5),
         "pt_fastmtt": np.arange(0, 160, 5),
