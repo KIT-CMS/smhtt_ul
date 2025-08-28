@@ -70,6 +70,16 @@ def lumi_weight(era, **kwargs):
         lumi = "41.529"
     elif era == "2018":
         lumi = "59.83"
+    elif era == "2022preEE":
+        lumi = "7.98"
+    elif era == "2022postEE":
+        lumi = "26.67"
+    elif era == "2023preBPix":
+        lumi = "17.79"
+    elif era == "2023postBPix":
+        lumi = "9.45"
+    elif era == "2024":
+        lumi = "109.08"
     else:
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
@@ -113,8 +123,8 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         vsele_weight = None
         trgweight = None
     elif channel == "et":
-        isoweight = ("iso_wgt_ele_1", "isoweight")
-        idweight = ("id_wgt_ele_1", "idweight")
+        isoweight = None #("iso_wgt_ele_1", "isoweight") #only for embedding??
+        idweight = ("id_wgt_ele_wp90nonIso_1", "idweight")
         tauidweight = (
             "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
@@ -126,8 +136,10 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
                 "((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)",
                 "trgweight",
             )
-        else:
+        elif era == "2018":
             trgweight = ("trg_wgt_single_ele32orele35", "trgweight")
+        else:
+            trgweight = ("trg_wgt_single_ele30", "trgweight")
     elif channel == "mt":
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
@@ -142,11 +154,13 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             trgweight = ("((pt_1>23)* trg_wgt_single_mu22)", "trgweight")
         elif era == "2017":
             trgweight = ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
-        else:
+        elif era == "2018":
             trgweight = (
                 "((pt_1>=25 && pt_1<28)* trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
                 "trgweight",
             )
+        else:
+            trgweight = ("(trg_wgt_single_mu24)", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -200,7 +214,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         lumi_weight(era),
         prefiring_weight(era),
     ]
-    if channel != "mm" and channel != "mt":
+    if channel != "mm": # and channel != "mt":
         MC_base_process_weights.append(("btag_weight", "btagWeight"))
     return Selection(
         name="MC base",
@@ -242,19 +256,14 @@ def dy_stitching_weight(era, **kwargs):
     return weight
 
 
-def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_DY=True, **kwargs):
+def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_DY=False, **kwargs):
     DY_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     if era == "2017":
         gen_events_weight = (
             "(1./203729540)*(genbosonmass >= 50.0) + (genbosonmass < 50.0)*numberGeneratedEventsWeight",
             "numberGeneratedEventsWeight",
         )
-    elif era == "2018":
-        gen_events_weight = (
-            "numberGeneratedEventsWeight",
-            "numberGeneratedEventsWeight",
-        )
-    elif era in ["2016preVFP", "2016postVFP"]:
+    else:
         gen_events_weight = (
             "numberGeneratedEventsWeight",
             "numberGeneratedEventsWeight",
@@ -279,7 +288,7 @@ def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_DY
                 ),
             ]
         )
-    DY_process_weights.append(("ZPtMassReweightWeight", "zPtReweightWeight"))
+    DY_process_weights.append(("ZPtReweightWeight[0]", "zPtReweightWeight"))
     return Selection(name="DY", weights=DY_process_weights)
 
 
@@ -301,6 +310,7 @@ def DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             # dy_stitching_weight(era),  # TODO add stitching weight
         ]
     )
+    DY_process_weights.append(("ZPtReweightWeight[0]", "zPtReweightWeight"))
     return Selection(name="DY_NLO", weights=DY_process_weights)
 
 
@@ -367,7 +377,7 @@ def W_stitching_weight(era, **kwargs):
     return weight
 
 
-def W_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_W=True, **kwargs):
+def W_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_W=False, **kwargs):
     W_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     if weight_stitching_W:
         W_process_weights.append(W_stitching_weight(era))

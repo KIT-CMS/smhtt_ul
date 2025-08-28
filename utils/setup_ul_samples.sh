@@ -15,4 +15,14 @@ elif [[ $ERA == *"2017"* ]]; then
     NTUPLES=$KINGMAKER_BASEDIR
 elif [[ $ERA == *"2018"* ]]; then
     NTUPLES=$KINGMAKER_BASEDIR
+elif [[ $ERA == *"2022preEE"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
+elif [[ $ERA == *"2022postEE"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
+elif [[ $ERA == *"2023preBPix"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
+elif [[ $ERA == *"2023postBPix"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
+elif [[ $ERA == *"2024"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
 fi
