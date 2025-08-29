@@ -64,7 +64,7 @@ class ControlShapeBkgProcesses:
 
     LO_NLO_PROCESSES = {
         "ZTT": "ZTT_NLO",
-        "W": "W_NLO",
+        "W": "W",
         "QCD": "QCD_NLO",
         "ZL": "ZL_NLO",
         "QCDEMB": "QCDEMB_NLO",

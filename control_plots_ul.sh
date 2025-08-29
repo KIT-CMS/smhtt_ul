@@ -6,7 +6,7 @@ SELECTION_OPTION_ESTIMATION="CR"
 PLOTVERSION="all"
 FF_TYPE="none"
 VARIABLES=""
-NANOAODVERSION="v9"
+NANOAODVERSION="v12"
 DEFAULT_VARIABLES_LIST=(
   pt_1 eta_1 phi_1 tau_decaymode_1 mt_1 iso_1 mass_1
   pt_2 eta_2 phi_2 tau_decaymode_2 mt_2 iso_2 mass_2
@@ -19,8 +19,9 @@ DEFAULT_VARIABLES_LIST=(
   met metphi mTdileptonMET metSumEt
   nbtag njets
   q_1 pzetamissvis jet_hemisphere
-  deltaR_ditaupair deltaEta_ditaupair deltaPhi_ditaupair
+  deltaR_ditaupair 
 )
+# deltaEta_ditaupair deltaPhi_ditaupair for fake factors: to add when i update CROWN
 
 options=(
   "c:channel:"
