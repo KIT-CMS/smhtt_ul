@@ -1500,22 +1500,22 @@ def make_chainable_process_selection(base_selection: Callable) -> Callable:
 # DY
 DY = make_chainable_process_selection(DY_process_selection)
 ZTT, ZL, ZJ = ZTT_process_selection, ZL_process_selection, ZJ_process_selection
-DY.TT, DY.L, DY.J = DY.wrap_next(ZTT), DY.wrap_next(ZL), DY.wrap_next(ZJ)
+#DY.TT, DY.L, DY.J = DY.wrap_next(ZTT), DY.wrap_next(ZL), DY.wrap_next(ZJ)
 
 # DY_NLO
-DY_NLO = make_chainable_process_selection(DY_NLO_process_selection)
+DY_NLO = DY_NLO_process_selection #make_chainable_process_selection(DY_NLO_process_selection)
 ZTT_nlo, ZL_nlo, ZJ_nlo = ZTT_nlo_process_selection, ZL_nlo_process_selection, ZJ_nlo_process_selection
-DY_NLO.TT, DY_NLO.L, DY_NLO.J = DY_NLO.wrap_next(ZTT_nlo), DY_NLO.wrap_next(ZL_nlo), DY_NLO.wrap_next(ZJ_nlo)
+#DY_NLO.TT, DY_NLO.L, DY_NLO.J = DY_NLO.wrap_next(ZTT_nlo), DY_NLO.wrap_next(ZL_nlo), DY_NLO.wrap_next(ZJ_nlo)
 
 # TT
-TT = make_chainable_process_selection(TT_process_selection)
+TT = TT_process_selection #make_chainable_process_selection(TT_process_selection)
 TTT, TTL, TTJ = TTT_process_selection, TTL_process_selection, TTJ_process_selection
-TT.T, TT.L, TT.J = TT.wrap_next(TTT), TT.wrap_next(TTL), TT.wrap_next(TTJ)
+#TT.T, TT.L, TT.J = TT.wrap_next(TTT), TT.wrap_next(TTL), TT.wrap_next(TTJ)
 
 # VV
-VV = make_chainable_process_selection(VV_process_selection)
+VV = VV_process_selection #make_chainable_process_selection(VV_process_selection)
 VVT, VVL, VVJ = VVT_process_selection, VVL_process_selection, VVJ_process_selection
-VV.J, VV.L, VV.T = VV.wrap_next(VVJ), VV.wrap_next(VVL), VV.wrap_next(VVT)
+#VV.J, VV.L, VV.T = VV.wrap_next(VVJ), VV.wrap_next(VVL), VV.wrap_next(VVT)
 
 # qqH125
 qqH125 = make_chainable_process_selection(qqH125_process_selection)
