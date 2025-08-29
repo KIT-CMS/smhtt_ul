@@ -79,18 +79,18 @@ def qcd_estimation(
     logger.debug("sub_scale: %s", sub_scale)
 
     # Found a bug with ZJ/ZJ_NLO in the previous solution. This fixes it.
-    LO_NLO_PROCESSES = {"ZTT": "ZTT_NLO", "W": "W_NLO", "ZL": "ZL_NLO", "ZJ": "ZJ_NLO"}
+    LO_NLO_PROCESSES = {"ZTT": "ZTT_NLO", "W": "W", "ZL": "ZL_NLO", "ZJ": "ZJ_NLO"}
 
-    procs_to_subtract = ["W_NLO"]  # all cases have at least this
+    procs_to_subtract = ["W"]  # all cases have at least this
     procs_to_subtract.extend(["EMB"] if is_embedding else ["ZTT_NLO", "TTT", "VVT"])  # EMB or MC
 
     if channel in {"et", "mt", "tt"}:  # semi-leptonic and fully-hadronic
         procs_to_subtract.extend(["ZL_NLO", "ZJ_NLO", "TTL", "TTJ", "VVL", "VVJ"])
     else:  # fully-leptonic - a bunch of extra cases... TODO: can this be removed?
         if "em" in channel:
-            procs_to_subtract.extend(["ZL", "TTL", "VVL"])
+            procs_to_subtract.extend(["ZL_NLO", "TTL", "VVL"])
         elif channel in {"mm", "ee"} and not is_embedding:
-            procs_to_subtract = ["ZL_NLO", "W_NLO", "VVL", "TTL"]  # caution: replaced! no EMB or EMB MC equivalent
+            procs_to_subtract = ["ZL_NLO", "W", "VVL", "TTL"]  # caution: replaced! no EMB or EMB MC equivalent
 
     if is_nlo:
         for lo, nlo in LO_NLO_PROCESSES.items():

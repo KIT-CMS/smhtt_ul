@@ -311,7 +311,7 @@ def DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         ]
     )
     DY_process_weights.append(("ZPtReweightWeight[0]", "zPtReweightWeight"))
-    return Selection(name="DY_NLO", weights=DY_process_weights)
+    return Selection(name="DYNLO", weights=DY_process_weights)
 
 
 def TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
@@ -478,7 +478,7 @@ def ZTT_process_selection(channel, **kwargs):
 
 def ZTT_nlo_process_selection(channel, **kwargs):
     tt_cut = __get_ZTT_cut(channel)
-    return Selection(name="ZTT_nlo", cuts=[(f"({tt_cut})", "ztt_cut")])
+    return Selection(name="ZTT_NLO", cuts=[(f"({tt_cut})", "ztt_cut")])
 
 
 def __get_ZTT_cut(channel, **kwargs):
@@ -724,7 +724,7 @@ def ZL_process_selection(channel, **kwargs):
 def ZL_nlo_process_selection(channel, **kwargs):
     veto = __get_ZL_cut(channel)
     return Selection(
-        name="ZL_nlo",
+        name="ZL_NLO",
         cuts=[("{}".format(veto[0]), "dy_emb_veto"), ("{}".format(veto[1]), "ff_veto")],
     )
 
@@ -760,7 +760,7 @@ def ZJ_process_selection(channel, **kwargs):
 
 
 def ZJ_nlo_process_selection(channel, **kwargs):
-    return Selection(name="ZJ_nlo", cuts=[(__get_ZJ_cut(channel), "dy_fakes")])
+    return Selection(name="ZJ_NLO", cuts=[(__get_ZJ_cut(channel), "dy_fakes")])
 
 
 def __get_ZJ_cut(channel, **kwargs):
