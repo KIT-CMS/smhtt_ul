@@ -25,8 +25,8 @@ _process_map = {
     "QCD": "QCD",
 }
 
+# Energy scales for embedding
 tau_es_map = {
-
     "embminus4p0": "-4.0",
     "embminus3p9": "-3.9",
     "embminus3p8": "-3.8",
@@ -316,6 +316,7 @@ def main(args):
     # Loop over histograms to extract relevant information for synced files.
     logging.info("Reading input histograms from file %s", args.input)
     hist_map = {}
+    logger.info(f"Input keys: {[key.GetName() for key in input_file.GetListOfKeys()]}")
     for key in input_file.GetListOfKeys():
         split_name = key.GetName().split("#")
         channel = split_name[1].split("-")[0]
@@ -387,6 +388,9 @@ def main(args):
             if "MC" in process:
                 continue
         _rev_process_map = {val: key for key, val in _process_map.items()}
+        logger.info(f"Process: {process}")
+        logger.info(f"Process map: {_rev_process_map.keys()}")
+        logger.info(f"Process in _rev_process_map.keys(): {process in _rev_process_map.keys()}")
         if process in _rev_process_map.keys():
             # Check if MSSM sample.
             if "SUSY" in process:

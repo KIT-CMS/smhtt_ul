@@ -5,9 +5,6 @@ import os
 import pickle
 from functools import partial
 from itertools import combinations
-
-import yaml
-
 import yaml
 
 import config.shapes.process_selection as selection
@@ -17,7 +14,7 @@ import shapes.utils as shape_utils
 import config.ntuple_processor_config_helper as ntuple_processor_config_helper
 from config.helper_collection import PreserveROOTPathsAsStrings
 from config.logging_setup_configs import setup_logging
-from config.shapes.category_selection import categorization as default_categorization
+from config.shapes.category_selection import get_categorization
 from config.shapes.channel_selection import channel_selection
 from config.shapes.control_binning import control_binning as default_control_binning
 from config.shapes.file_names import files
@@ -469,7 +466,7 @@ def main(args):
         else:
             nominals[args.era]["units"][channel] = get_analysis_units(
                 **common_kwargs,
-                categorization=default_categorization,
+                categorization=get_categorization(),
             )
 
     if args.process_selection is None:

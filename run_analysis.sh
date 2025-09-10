@@ -21,7 +21,7 @@ shapes_rootfile=${shapes_output}.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
 # TODO: How to use this variables?
-VARIABLES="iso_1,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
+# VARIABLES="iso_1,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
 
 # if the output folder does not exist, create it
 if [ ! -d "$shapes_output" ]; then
@@ -30,7 +30,7 @@ fi
 
 # print the paths to be used
 echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
-echo "BASEDIR: ${BASEDIR}"
+# echo "BASEDIR: ${BASEDIR}"
 echo "output_shapes: ${output_shapes}"
 echo "FRIENDS: ${FRIENDS}"
 echo "NNSCORE_FRIENDS: ${NNSCORE_FRIENDS}"
@@ -119,10 +119,13 @@ if [[ $MODE == "LOCAL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS $NNSCORE_FRIENDS \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS $FASTMTT_FRIENDS $NN_FRIENDS_EQUAL_EVENTS \
         --era $ERA --num-processes 4 --num-threads 12 \
         --optimization-level 1 \
-        --output-file $shapes_output
+        --output-file $shapes_output \
+        --skip-systematic-variations \
+        --xrootd --validation-tag $TAG \
+        --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" 
 fi
 
 if [[ $MODE == "CONDOR" ]]; then
@@ -141,7 +144,7 @@ fi
 
 if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
+    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd # --do-emb-tt --do-ff 
 
     # if the output folder does not exist, create it
     if [ ! -d "$shapes_output_synced" ]; then
