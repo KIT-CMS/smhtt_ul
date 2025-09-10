@@ -7,7 +7,7 @@ import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from itertools import product
-from typing import Any, Dict, Iterable, Tuple, Union
+from typing import Any, Dict, Iterable, Tuple, Union, Callable
 
 import numpy as np
 import pandas as pd
@@ -198,7 +198,7 @@ def pandas_df_from_root(args: Tuple[str, Iterable, str]) -> pd.DataFrame:
 
 def calculate_stxs_N_and_negative_fractions(
     database_path: str = "../datasets/nanoAOD_v9",
-    output_path: str = "./config/shapes/stxs_bin_split_info.yaml",
+    output_path: str = "./config/shapes/additional_files/sm/STXS_stitching_details.yaml",
     stage: str = "1p2",
     granularity: str = "coarse",
     specific_process: Union[None, Iterable[str]] = ("ggh_htautau", "vbf_htautau"),
@@ -364,3 +364,123 @@ def calculate_stxs_N_and_negative_fractions(
         yaml.dump(info, f, sort_keys=True)
 
     return info
+
+
+class LazyVariable:
+    """
+    A lazy evaluation wrapper for variables whose underlying value may change over time.
+
+    This class accepts a factory callable that produces the actual instance to use.
+    Any attribute access or string representation is delegated to the instance returned
+    by the factory at call time, ensuring that modifications to the underlying variable
+    are reflected immediately.
+
+    Usage:
+        >>> def my_factory() -> SomeClass:
+        ...     return SomeClass()
+        >>> lazy_var = LazyVariable(my_factory)
+        >>> # Any attribute access on lazy_var is delegated to the instance returned by my_factory.
+        >>> value = lazy_var.some_attribute
+    """
+
+    def __init__(self, factory: Callable[[], Any]) -> None:
+        """
+        Initializes a LazyVariable with a factory callable.
+
+        Args:
+            factory (Callable[[], Any]): A callable that returns the actual variable instance.
+        """
+        self.factory: Callable[[], Any] = factory
+        try:
+            caller = inspect.stack()[1]
+            logger.debug(f"LazyVariable created at {caller.filename}:{caller.lineno} with {inspect.getsource(factory)}")
+        except NameError:  # logger or inspect not defined
+            pass
+
+    def __getattr__(self, name: str) -> Any:
+        """
+        Delegates attribute access to the instance returned by the factory.
+
+        Args:
+            name (str): The name of the attribute to access.
+
+        Returns:
+            Any: The attribute value from the instantiated object.
+        """
+        instance = self.factory()
+        try:
+            caller = inspect.stack()[1]
+            logger.debug(f"LazyVariable __getattr__: '{name}' called from {caller.filename}:{caller.lineno}, returning {instance}")
+        except NameError:  # logger or inspect not defined
+            pass
+        return getattr(instance, name)
+
+    def __repr__(self) -> str:
+        """
+        Returns the official string representation of the LazyVariable.
+
+        Returns:
+            str: The string representation of the object returned by the factory.
+        """
+        result = repr(self.factory())
+        try:
+            caller = inspect.stack()[1]
+            logger.debug(f"LazyVariable __repr__: called from {caller.filename}:{caller.lineno}, returning {result}")
+        except NameError:  # logger or inspect not defined
+            pass
+        return result
+
+    def __str__(self) -> str:
+        """
+        Returns the informal string representation of the LazyVariable.
+
+        Returns:
+            str: The string representation of the object returned by the factory.
+        """
+        result = str(self.factory())
+        try:
+            caller = inspect.stack()[1]
+            logger.debug(f"LazyVariable __str__: called from {caller.filename}:{caller.lineno}, returning {result}")
+        except NameError:  # logger or inspect not defined
+            pass
+        return result
+
+class RuntimeVariables(object):
+    """
+    A singleton-like container class holding several variables that can be adjusted in time.
+
+    Attributes:
+        FF_name_lt (str): Fake factor name for the "lt" channel.
+        FF_name_tt_1 (str): Fake factor name for the first "tt" channel.
+        FF_name_tt_2 (str): Fake factor name for the second "tt" channel.
+
+    Usage:
+        >>> used = Used()
+        >>> print(used.FF_name_lt)
+
+    Note:
+        This class implements a singleton-like pattern by returning the same instance
+        on every instantiation.
+    """
+    
+    FF_name_lt = None
+    FF_name_tt_1 = None
+    FF_name_tt_2 = None
+
+    def __new__(cls) -> "RuntimeVariables":
+        if not hasattr(cls, "instance"):
+            cls.instance = super(RuntimeVariables, cls).__new__(cls)
+            return cls.instance
+
+
+def fake_factor_ff_and_corrections_extractor(
+    ff_file: str,
+    correction_file: str,
+) -> Iterable[str]:
+    return [
+        value["key"].removesuffix("Up")
+        for path in [ff_file, correction_file]
+        for corr in json.loads(correctionlib.CorrectionSet.from_file(path)._data)["corrections"]
+        for value in corr["data"]["content"]
+        if value["key"].endswith("Up")
+    ]

@@ -189,7 +189,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--ff-type",
-        help=f"Set to the type of fake factor used.\n{variations.__FF_OPTION_info__}",
+        help=f"Set to the type of fake factor used.\n{variations.FFHelper.__FF_OPTION_info__}",
         default="fake_factor"
     )
     return parser.parse_args()
@@ -644,5 +644,5 @@ if __name__ == "__main__":
     else:
         log_file = f"{args.output_file}.log"
     logger = setup_logging(logger=logging.getLogger(__name__))
-    variations.set_ff_type(args.ff_type)
+    variations.FFHelper.set_ff_type(args.ff_type)
     main(args)

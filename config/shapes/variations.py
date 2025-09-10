@@ -1,8 +1,8 @@
 import inspect
 import logging
 from itertools import product
-from typing import Any, Callable
 
+from config.helper_collection import LazyVariable, RuntimeVariables
 from config.logging_setup_configs import setup_logging
 from config.shapes.process_selection import _get_stxs_bin_or_range
 from ntuple_processor.utils import Cut, Weight
@@ -26,280 +26,200 @@ logger = setup_logging(logger=logging.getLogger(__name__))
 
 SHIFT_DIRECTIONS = ("Up", "Down")
 
-FF_OPTIONS = {
-    "none": {"lt": None, "tt_1": None, "tt_2": None},
-    "fake_factor": {
-        "lt": "fake_factor_2",
-        "tt_1": "fake_factor_1",
-        "tt_2": "fake_factor_2",
-    },
-    "fake_factor_with_bias_corr": {
-        "lt": """(
-                    (
-                        raw_qcd_fake_factor_2 *
-                        qcd_fake_factor_fraction_2 *
-                        qcd_correction_wo_DR_SR_2
-                    ) +
-                    (
-                        raw_wjets_fake_factor_2 *
-                        wjets_fake_factor_fraction_2 *
-                        wjets_correction_wo_DR_SR_2
-                    ) +
-                    (
-                        raw_ttbar_fake_factor_2 *
-                        ttbar_fake_factor_fraction_2 *
-                        ttbar_correction_wo_DR_SR_2
-                    )
-                )"""
-    },
-    "fake_factor_with_DR_SR_corr": {
-        "lt": """(
-                    (
-                        raw_qcd_fake_factor_2 *
-                        qcd_fake_factor_fraction_2 *
-                        qcd_DR_SR_correction_2
-                    ) +
-                    (
-                        raw_wjets_fake_factor_2 *
-                        wjets_fake_factor_fraction_2 *
-                        wjets_DR_SR_correction_2
-                    ) +
-                    (
-                        raw_ttbar_fake_factor_2 *
-                        ttbar_fake_factor_fraction_2
-                    )
-                )""",
-    },
-    "fake_factor_with_DR_SR_and_bias_corr": {
-        "lt": """(
-                    (
-                        raw_qcd_fake_factor_2 *
-                        qcd_fake_factor_fraction_2 *
-                        qcd_fake_factor_correction_2
-                    ) +
-                    (
-                        raw_wjets_fake_factor_2 *
-                        wjets_fake_factor_fraction_2 *
-                        wjets_fake_factor_correction_2
-                    ) +
-                    (
-                        raw_ttbar_fake_factor_2 *
-                        ttbar_fake_factor_fraction_2 *
-                        ttbar_fake_factor_correction_2
-                    )
-                )""",
-    },
-    # --------------------------------------------------------------------------------------
-    "raw_fake_factor": {
-        "lt": "raw_fake_factor_2",
-        "tt_1": "raw_fake_factor_1",
-        "tt_2": "raw_fake_factor_2",
-    },
-    # --------------------------------------------------------------------------------------
-    "raw_qcd_fake_factor_with_fraction": {
-        "lt": "(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2)",
-    },
-    "raw_qcd_fake_factor": {
-        "lt": "raw_qcd_fake_factor_2",
-    },
-    "raw_qcd_fake_factor_with_bias_corr": {
-        "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2)",
-    },
-    "raw_qcd_fake_factor_with_DR_SR_corr": {
-        "lt": "(raw_qcd_fake_factor_2 * qcd_DR_SR_correction_2)",
-    },
-    "raw_qcd_fake_factor_with_DR_SR_and_bias_corr": {
-        "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2 * qcd_DR_SR_correction_2)",
-    },
-    # --------------------------------------------------------------------------------------
-    "raw_wjets_fake_factor_with_fraction": {
-        "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)",
-    },
-    "raw_wjets_fake_factor": {
-        "lt": "raw_wjets_fake_factor_2",
-    },
-    "raw_wjets_fake_factor_with_bias_corr": {
-        "lt": "(raw_wjets_fake_factor_2 * wjets_correction_wo_DR_SR_2)",
-    },
-    "raw_wjets_fake_factor_with_DR_SR_corr": {
-        "lt": "(raw_wjets_fake_factor_2 * wjets_DR_SR_correction_2)",
-    },
-    "raw_wjets_fake_factor_with_DR_SR_and_bias_corr": {
-        "lt": "(raw_wjets_fake_factor_2 * wjets_correction_wo_DR_SR_2 * wjets_DR_SR_correction_2)",
-    },
-    # --------------------------------------------------------------------------------------
-    "raw_ttbar_fake_factor_with_fraction": {
-        "lt": "(raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)",
-    },
-    "raw_ttbar_fake_factor": {
-        "lt": "raw_ttbar_fake_factor_2",
-    },
-    "raw_ttbar_fake_factor_with_bias_corr": {
-        "lt": "(raw_ttbar_fake_factor_2 * ttbar_correction_wo_DR_SR_2)",
-    },
-    "raw_ttbar_fake_factor_with_DR_SR_corr": {
-        "lt": "(raw_ttbar_fake_factor_2 * 1.0)",
-    },
-    "raw_ttbar_fake_factor_with_DR_SR_and_bias_corr": {
-        "lt": "(raw_ttbar_fake_factor_2 * ttbar_correction_wo_DR_SR_2 * 1.0)",
-    },
-    # --------------------------------------------------------------------------------------
-}
+class FFHelper:
+    FF_OPTIONS = {
+        "none": {"lt": None, "tt_1": None, "tt_2": None},
+        "fake_factor": {
+            "lt": "fake_factor_2",
+            "tt_1": "fake_factor_1",
+            "tt_2": "fake_factor_2",
+        },
+        "fake_factor_with_bias_corr": {
+            "lt": """(
+                        (
+                            raw_qcd_fake_factor_2 *
+                            qcd_fake_factor_fraction_2 *
+                            qcd_correction_wo_DR_SR_2
+                        ) +
+                        (
+                            raw_wjets_fake_factor_2 *
+                            wjets_fake_factor_fraction_2 *
+                            wjets_correction_wo_DR_SR_2
+                        ) +
+                        (
+                            raw_ttbar_fake_factor_2 *
+                            ttbar_fake_factor_fraction_2 *
+                            ttbar_correction_wo_DR_SR_2
+                        )
+                    )"""
+        },
+        "full_fake_factor": {
+            "lt": """(
+                (
+                    raw_qcd_fake_factor_2 *
+                    qcd_fake_factor_fraction_2 *
+                    qcd_fake_factor_correction_2 *
+                    qcd_DR_SR_correction_2
+                ) +
+                (
+                    raw_wjets_fake_factor_2 *
+                    wjets_fake_factor_fraction_2 *
+                    wjets_correction_wo_DR_SR_2 *
+                    wjets_DR_SR_correction_2
+                ) +
+                (
+                    raw_ttbar_fake_factor_2 *
+                    ttbar_fake_factor_fraction_2 *
+                    ttbar_correction_wo_DR_SR_2
+                )
+            )""",
+        },
+        "fake_factor_with_DR_SR_corr": {
+            "lt": """(
+                        (
+                            raw_qcd_fake_factor_2 *
+                            qcd_fake_factor_fraction_2 *
+                            qcd_DR_SR_correction_2
+                        ) +
+                        (
+                            raw_wjets_fake_factor_2 *
+                            wjets_fake_factor_fraction_2 *
+                            wjets_DR_SR_correction_2
+                        ) +
+                        (
+                            raw_ttbar_fake_factor_2 *
+                            ttbar_fake_factor_fraction_2
+                        )
+                    )""",
+        },
+        "fake_factor_with_DR_SR_and_bias_corr": {
+            "lt": """(
+                        (
+                            raw_qcd_fake_factor_2 *
+                            qcd_fake_factor_fraction_2 *
+                            qcd_fake_factor_correction_2
+                        ) +
+                        (
+                            raw_wjets_fake_factor_2 *
+                            wjets_fake_factor_fraction_2 *
+                            wjets_fake_factor_correction_2
+                        ) +
+                        (
+                            raw_ttbar_fake_factor_2 *
+                            ttbar_fake_factor_fraction_2 *
+                            ttbar_fake_factor_correction_2
+                        )
+                    )""",
+        },
+        # --------------------------------------------------------------------------------------
+        "raw_fake_factor": {
+            "lt": "raw_fake_factor_2",
+            "tt_1": "raw_fake_factor_1",
+            "tt_2": "raw_fake_factor_2",
+        },
+        # --------------------------------------------------------------------------------------
+        "raw_qcd_fake_factor_with_fraction": {
+            "lt": "(raw_qcd_fake_factor_2 * qcd_fake_factor_fraction_2)",
+        },
+        "raw_qcd_fake_factor": {
+            "lt": "raw_qcd_fake_factor_2",
+        },
+        "raw_qcd_fake_factor_with_bias_corr": {
+            "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2)",
+        },
+        "raw_qcd_fake_factor_with_DR_SR_corr": {
+            "lt": "(raw_qcd_fake_factor_2 * qcd_DR_SR_correction_2)",
+        },
+        "raw_qcd_fake_factor_with_DR_SR_and_bias_corr": {
+            "lt": "(raw_qcd_fake_factor_2 * qcd_correction_wo_DR_SR_2 * qcd_DR_SR_correction_2)",
+        },
+        # --------------------------------------------------------------------------------------
+        "raw_wjets_fake_factor_with_fraction": {
+            "lt": "(raw_wjets_fake_factor_2 * wjets_fake_factor_fraction_2)",
+        },
+        "raw_wjets_fake_factor": {
+            "lt": "raw_wjets_fake_factor_2",
+        },
+        "raw_wjets_fake_factor_with_bias_corr": {
+            "lt": "(raw_wjets_fake_factor_2 * wjets_correction_wo_DR_SR_2)",
+        },
+        "raw_wjets_fake_factor_with_DR_SR_corr": {
+            "lt": "(raw_wjets_fake_factor_2 * wjets_DR_SR_correction_2)",
+        },
+        "raw_wjets_fake_factor_with_DR_SR_and_bias_corr": {
+            "lt": "(raw_wjets_fake_factor_2 * wjets_correction_wo_DR_SR_2 * wjets_DR_SR_correction_2)",
+        },
+        # --------------------------------------------------------------------------------------
+        "raw_ttbar_fake_factor_with_fraction": {
+            "lt": "(raw_ttbar_fake_factor_2 * ttbar_fake_factor_fraction_2)",
+        },
+        "raw_ttbar_fake_factor": {
+            "lt": "raw_ttbar_fake_factor_2",
+        },
+        "raw_ttbar_fake_factor_with_bias_corr": {
+            "lt": "(raw_ttbar_fake_factor_2 * ttbar_correction_wo_DR_SR_2)",
+        },
+        "raw_ttbar_fake_factor_with_DR_SR_corr": {
+            "lt": "(raw_ttbar_fake_factor_2 * 1.0)",
+        },
+        "raw_ttbar_fake_factor_with_DR_SR_and_bias_corr": {
+            "lt": "(raw_ttbar_fake_factor_2 * ttbar_correction_wo_DR_SR_2 * 1.0)",
+        },
+        # --------------------------------------------------------------------------------------
+    }
 
-__FF_OPTION_info__ = """
-    Different implementation of accessing full (FF_OPTIONS["fake_factor"]) and raw fake factors
-    (FF_OPTIONS["raw_fake_factor"]) and their individual combinations with different corrections
-    this can be set to a default value in RuntimeVariables or via set_ff_type function.
+    __FF_OPTION_info__ = """
+        Different implementation of accessing full (FFHelper.FF_OPTIONS["fake_factor"]) and raw fake factors
+        (FFHelper.FF_OPTIONS["raw_fake_factor"]) and their individual combinations with different corrections
+        this can be set to a default value in RuntimeVariables or via set_ff_type function.
 
-    In case of usage: This is mainly intendet to investigate individual contributions of the fake factors
-    and their corrections to the SR in the DR region. Make sure that the corresponding components
-    that are specified are also present in the produced ntuples!
+        In case of usage: This is mainly intendet to investigate individual contributions of the fake factors
+        and their corrections to the SR in the DR region. Make sure that the corresponding components
+        that are specified are also present in the produced ntuples!
 
-    possible options based on https://github.com/KIT-CMS/TauAnalysis-CROWN/commit/d73463bfdf5a7023b6b032a0c2d05b00f88e4150
-      - "fake_factor_2"
-      - "qcd_DR_SR_correction_2"
-      - "qcd_correction_wo_DR_SR_2"
-      - "qcd_fake_factor_2"
-      - "qcd_fake_factor_correction_2"
-      - "qcd_fake_factor_fraction_2"
-      - "raw_fake_factor_2"
-      - "raw_qcd_fake_factor_2"
-      - "raw_ttbar_fake_factor_2"
-      - "raw_wjets_fake_factor_2"
-      - "ttbar_DR_SR_correction_2"
-      - "ttbar_correction_wo_DR_SR_2"
-      - "ttbar_fake_factor_2"
-      - "ttbar_fake_factor_correction_2"
-      - "ttbar_fake_factor_fraction_2"
-      - "wjets_DR_SR_correction_2"
-      - "wjets_correction_wo_DR_SR_2"
-      - "wjets_fake_factor_2"
-      - "wjets_fake_factor_correction_2"
-      - "wjets_fake_factor_fraction_2"
-"""
-
-
-def set_ff_type(ff_type):
-    if ff_type not in FF_OPTIONS:
-        logger.error(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
-        raise KeyError(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
-
-    logger.info(f"Setting fake factor option to {ff_type}= {FF_OPTIONS[ff_type]}")
-    RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
-    logger.warning(
-        """
-            Setting fake factor option for tt_1 and tt_2 is in parts not implemented yet.
-            Will not change the fake factor for tt_1 and tt_2 for now, only for lt.
-            Please make sure to set the fake factor for tt_1 and tt_2 accordingly if needed.
-        """
-    )
-
-
-class RuntimeVariables(object):
-    """
-    A singleton-like container class holding several variables that can be adjusted in time.
-
-    Attributes:
-        FF_name_lt (str): Fake factor name for the "lt" channel.
-        FF_name_tt_1 (str): Fake factor name for the first "tt" channel.
-        FF_name_tt_2 (str): Fake factor name for the second "tt" channel.
-
-    Usage:
-        >>> used = Used()
-        >>> print(used.FF_name_lt)
-
-    Note:
-        This class implements a singleton-like pattern by returning the same instance
-        on every instantiation.
-    """
-    FF_name_lt = FF_OPTIONS["fake_factor"]["lt"]
-    FF_name_tt_1 = FF_OPTIONS["fake_factor"]["tt_1"]
-    FF_name_tt_2 = FF_OPTIONS["fake_factor"]["tt_2"]
-
-    def __new__(cls) -> "RuntimeVariables":
-        if not hasattr(cls, "instance"):
-            cls.instance = super(RuntimeVariables, cls).__new__(cls)
-            return cls.instance
-
-
-class LazyVariable:
-    """
-    A lazy evaluation wrapper for variables whose underlying value may change over time.
-
-    This class accepts a factory callable that produces the actual instance to use.
-    Any attribute access or string representation is delegated to the instance returned
-    by the factory at call time, ensuring that modifications to the underlying variable
-    are reflected immediately.
-
-    Usage:
-        >>> def my_factory() -> SomeClass:
-        ...     return SomeClass()
-        >>> lazy_var = LazyVariable(my_factory)
-        >>> # Any attribute access on lazy_var is delegated to the instance returned by my_factory.
-        >>> value = lazy_var.some_attribute
+        possible options based on https://github.com/KIT-CMS/TauAnalysis-CROWN/commit/d73463bfdf5a7023b6b032a0c2d05b00f88e4150
+        - "fake_factor_2"
+        - "qcd_DR_SR_correction_2"
+        - "qcd_correction_wo_DR_SR_2"
+        - "qcd_fake_factor_2"
+        - "qcd_fake_factor_correction_2"
+        - "qcd_fake_factor_fraction_2"
+        - "raw_fake_factor_2"
+        - "raw_qcd_fake_factor_2"
+        - "raw_ttbar_fake_factor_2"
+        - "raw_wjets_fake_factor_2"
+        - "ttbar_DR_SR_correction_2"
+        - "ttbar_correction_wo_DR_SR_2"
+        - "ttbar_fake_factor_2"
+        - "ttbar_fake_factor_correction_2"
+        - "ttbar_fake_factor_fraction_2"
+        - "wjets_DR_SR_correction_2"
+        - "wjets_correction_wo_DR_SR_2"
+        - "wjets_fake_factor_2"
+        - "wjets_fake_factor_correction_2"
+        - "wjets_fake_factor_fraction_2"
     """
 
-    def __init__(self, factory: Callable[[], Any]) -> None:
-        """
-        Initializes a LazyVariable with a factory callable.
+    @staticmethod
+    def set_ff_type(ff_type):
+        # set default
+        RuntimeVariables.FF_name_lt = FFHelper.FF_OPTIONS["fake_factor"]["lt"]
+        RuntimeVariables.FF_name_tt_1 = FFHelper.FF_OPTIONS["fake_factor"]["tt_1"]
+        RuntimeVariables.FF_name_tt_2 = FFHelper.FF_OPTIONS["fake_factor"]["tt_2"]
+        
+        if ff_type not in FFHelper.FF_OPTIONS:
+            logger.error(f"Fake factor option {ff_type} not found in FFHelper.FF_OPTIONS.")
+            raise KeyError(f"Fake factor option {ff_type} not found in FFHelper.FF_OPTIONS.")
 
-        Args:
-            factory (Callable[[], Any]): A callable that returns the actual variable instance.
-        """
-        self.factory: Callable[[], Any] = factory
-        try:
-            caller = inspect.stack()[1]
-            logger.debug(f"LazyVariable created at {caller.filename}:{caller.lineno} with {inspect.getsource(factory)}")
-        except NameError:  # logger or inspect not defined
-            pass
-
-    def __getattr__(self, name: str) -> Any:
-        """
-        Delegates attribute access to the instance returned by the factory.
-
-        Args:
-            name (str): The name of the attribute to access.
-
-        Returns:
-            Any: The attribute value from the instantiated object.
-        """
-        instance = self.factory()
-        try:
-            caller = inspect.stack()[1]
-            logger.debug(f"LazyVariable __getattr__: '{name}' called from {caller.filename}:{caller.lineno}, returning {instance}")
-        except NameError:  # logger or inspect not defined
-            pass
-        return getattr(instance, name)
-
-    def __repr__(self) -> str:
-        """
-        Returns the official string representation of the LazyVariable.
-
-        Returns:
-            str: The string representation of the object returned by the factory.
-        """
-        result = repr(self.factory())
-        try:
-            caller = inspect.stack()[1]
-            logger.debug(f"LazyVariable __repr__: called from {caller.filename}:{caller.lineno}, returning {result}")
-        except NameError:  # logger or inspect not defined
-            pass
-        return result
-
-    def __str__(self) -> str:
-        """
-        Returns the informal string representation of the LazyVariable.
-
-        Returns:
-            str: The string representation of the object returned by the factory.
-        """
-        result = str(self.factory())
-        try:
-            caller = inspect.stack()[1]
-            logger.debug(f"LazyVariable __str__: called from {caller.filename}:{caller.lineno}, returning {result}")
-        except NameError:  # logger or inspect not defined
-            pass
-        return result
+        logger.info(f"Setting fake factor option to {ff_type}= {FFHelper.FF_OPTIONS[ff_type]}")
+        RuntimeVariables.FF_name_lt = FFHelper.FF_OPTIONS[ff_type]["lt"]
+        logger.warning(
+            """
+                Setting fake factor option for tt_1 and tt_2 is in parts not implemented yet.
+                Will not change the fake factor for tt_1 and tt_2 for now, only for lt.
+                Please make sure to set the fake factor for tt_1 and tt_2 accordingly if needed.
+            """
+        )
 
 
 #  Variations needed for the various jet background estimations.
@@ -692,23 +612,52 @@ ff_variations_lt = [
         'process_fractionsfracQCDUnc',
         'process_fractionsfracWjetsUnc',
         'process_fractionsfracTTbarUnc',
-        'QCD_non_closure_m_vis_Corr',
-        'QCD_non_closure_mass_2_Corr',
-        'QCD_non_closure_deltaR_ditaupair_Corr',
-        'QCD_non_closure_iso_1_Corr',
+        'QCD_DR_SR_Corr',
         'QCD_non_closure_tau_decaymode_2_Corr',
-        # 'QCD_DR_SR_Corr',  # TODO: Add them when actually applying this correction!
-        'Wjets_non_closure_m_vis_Corr',
-        'Wjets_non_closure_mass_2_Corr',
-        'Wjets_non_closure_deltaR_ditaupair_Corr',
-        'Wjets_non_closure_iso_1_Corr',
+        'QCD_non_closure_mass_2_Corr',
+        'QCD_non_closure_eta_1_Corr',
+        'QCD_non_closure_eta_2_Corr',
+        'QCD_non_closure_jpt_1_Corr',
+        'QCD_non_closure_jeta_1_Corr',
+        'QCD_non_closure_jpt_2_Corr',
+        'QCD_non_closure_jeta_2_Corr',
+        'QCD_non_closure_met_Corr',
+        'QCD_non_closure_deltaEta_ditaupair_Corr',
+        'QCD_non_closure_deltaR_ditaupair_Corr',
+        'QCD_non_closure_pt_ttjj_Corr',
+        'QCD_non_closure_mt_tot_Corr',
+        'QCD_non_closure_iso_1_Corr',
+        'Wjets_DR_SR_Corr',
         'Wjets_non_closure_tau_decaymode_2_Corr',
-        # 'Wjets_DR_SR_Corr',  # TODO: Add them when actually applying this correction!
-        'ttbar_non_closure_m_vis_Corr',
+        'Wjets_non_closure_mass_2_Corr',
+        'Wjets_non_closure_eta_1_Corr',
+        'Wjets_non_closure_eta_2_Corr',
+        'Wjets_non_closure_jpt_1_Corr',
+        'Wjets_non_closure_jeta_1_Corr',
+        'Wjets_non_closure_jpt_2_Corr',
+        'Wjets_non_closure_jeta_2_Corr',
+        'Wjets_non_closure_met_Corr',
+        'Wjets_non_closure_deltaEta_ditaupair_Corr',
+        'Wjets_non_closure_deltaR_ditaupair_Corr',
+        'Wjets_non_closure_pt_ttjj_Corr',
+        'Wjets_non_closure_mt_tot_Corr',
+        'Wjets_non_closure_iso_1_Corr',
+        'ttbar_non_closure_nbtag_Corr',
+        'ttbar_non_closure_tau_decaymode_2_Corr',
         'ttbar_non_closure_mass_2_Corr',
+        'ttbar_non_closure_eta_1_Corr',
+        'ttbar_non_closure_eta_2_Corr',
+        'ttbar_non_closure_jpt_1_Corr',
+        'ttbar_non_closure_jeta_1_Corr',
+        'ttbar_non_closure_jpt_2_Corr',
+        'ttbar_non_closure_jeta_2_Corr',
+        'ttbar_non_closure_met_Corr',
+        'ttbar_non_closure_deltaEta_ditaupair_Corr',
+        'ttbar_non_closure_pt_tt_Corr',
+        'ttbar_non_closure_pt_ttjj_Corr',
         'ttbar_non_closure_deltaR_ditaupair_Corr',
-        'ttbar_non_closure_iso_1_Corr',
-        'ttbar_non_closure_tau_decaymode_2_Corr'
+        'ttbar_non_closure_mt_tot_Corr',
+        'ttbar_non_closure_iso_1_Corr'
     ]
 ]
 

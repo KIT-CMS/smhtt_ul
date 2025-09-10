@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ADDITIONAL_FRIENDS="xsec"
+ADDITIONAL_MULTIFRIENDS=""
 SELECTION_OPTION="CR"
 SELECTION_OPTION_ESTIMATION="CR"
 PLOTVERSION="all"
@@ -33,6 +34,7 @@ options=(
   "t:tag:"
   "m:mode:"
   "f:additional_friends:"
+  "M:additional_multifriends:"
   "s:selection_option:"
   "S:selection_option_estimation:"
   "F:ff_type:"
@@ -76,6 +78,8 @@ while true; do
     MODE="${2}"; shift 2; ;;
   -f | --additional_friends)
     ADDITIONAL_FRIENDS="${2}"; shift 2; ;;
+  -M | --additional_multifriends)
+    ADDITIONAL_MULTIFRIENDS="${2}"; shift 2; ;;
   -s | --selection_option)
     SELECTION_OPTION="${2}"; shift 2; ;;
   -S | --selection_option_estimation)
@@ -126,6 +130,16 @@ if [ -n "${ADDITIONAL_FRIENDS}" ]; then
     FRIENDS+="${path} "
   done
   FRIENDS="${FRIENDS% }"
+fi
+
+MULTIFRIENDS=""
+if [ -n "${ADDITIONAL_MULTIFRIENDS}" ]; then
+  echo "INFO: Constructing friend directory paths for: ${ADDITIONAL_MULTIFRIENDS}"
+  for tag in ${ADDITIONAL_MULTIFRIENDS}; do
+    path="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNMultiFriends/${tag}/"
+    MULTIFRIENDS+="${path} "
+  done
+  MULTIFRIENDS="${MULTIFRIENDS% }"
 fi
 
 # ---
@@ -199,22 +213,27 @@ if [[ ${MODE} == "PLOT" ]]; then
   echo "#     plotting                                      #"
   echo "##############################################################################################"
 
-  BASE_COMMAND="python3 plotting/plot_shapes_control.py \
-                    -l \
-                    --era Run${ERA} \
-                    --input ${shapes_output}.root \
-                    --variables ${USED_VARIABLES} \
-                    --channels ${CHANNEL} \
-                    --tag ${TAG} \
-                    --selection-option ${SELECTION_OPTION}"
+  BASE_COMMAND=(
+    python3 plotting/plot_shapes_control.py
+    -l
+    --era Run${ERA}
+    --input "${shapes_output}.root"
+    --variables "${USED_VARIABLES}"
+    --channels "${CHANNEL}"
+    --tag "${TAG}"
+    --selection-option "${SELECTION_OPTION}"
+  )
 
   if [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "emb+ff" ]]; then
-    ${BASE_COMMAND} --embedding --fake-factor
-  elif [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "emb+classic" ]]; then
-    ${BASE_COMMAND} --embedding
-  elif [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "classic+ff" ]]; then
-    ${BASE_COMMAND} --fake-factor
-  elif [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "classic+classic" ]]; then
-    ${BASE_COMMAND}
+    "${BASE_COMMAND[@]}" --embedding --fake-factor
+  fi
+  if [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "emb+classic" ]]; then
+    "${BASE_COMMAND[@]}" --embedding
+  fi
+  if [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "classic+ff" ]]; then
+    "${BASE_COMMAND[@]}" --fake-factor
+  fi
+  if [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "classic+classic" ]]; then
+    "${BASE_COMMAND[@]}"
   fi
 fi

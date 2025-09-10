@@ -1301,7 +1301,7 @@ def _get_stxs_stitching_weight(
         specific_era = (era,)
         specific_process = (process,)
 
-    file = pathlib.Path(__file__).parent / "STXS_stitching_details.yaml"
+    file = pathlib.Path(__file__).parent / "additional_files/sm/STXS_stitching_details.yaml"
     try:
         with open(file, "r") as f:
             info = yaml.safe_load(f)[process]

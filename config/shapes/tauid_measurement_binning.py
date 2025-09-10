@@ -6,64 +6,25 @@ discriminator_variable = "m_vis"
 discriminator_binning = np.arange(30, 130, 5)
 discriminator_binning_enlarged = np.arange(30, 160, 5)
 
-
 categories = {
     "mt": {
-        "Pt20to25": {
+        category: {
             "var": discriminator_variable,
             "bins": discriminator_binning,
             "expression": discriminator_variable,
-            "cut": "(pt_2 >= 20) && (pt_2 < 25)",
-        },
-        "Pt25to30": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(pt_2 >= 25) && (pt_2 < 30)",
-        },
-        "Pt30to35": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(pt_2 >= 30) && (pt_2 < 35)",
-        },
-        "Pt35to40": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(pt_2 >= 35) && (pt_2 < 40)",
-        },
-        "PtGt40": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning_enlarged,
-            "expression": discriminator_variable,
-            "cut": "(pt_2 >= 40)",
-        },
-        "DM0": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 40)",
-        },
-        "DM1": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 40)",
-        },
-        "DM10_11": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "((tau_decaymode_2 == 10) || (tau_decaymode_2 == 11)) && (pt_2 >= 40)",
-        },
-        "Inclusive": {
-            "var": discriminator_variable,
-            "bins": discriminator_binning,
-            "expression": discriminator_variable,
-            "cut": "(pt_2 >= 20)",
-        },
-    }
+            "cut": cut
+        }
+        for category, cut in {
+            "Pt20to25": "(pt_2 >= 20) && (pt_2 < 25)",
+            "Pt25to30": "(pt_2 >= 25) && (pt_2 < 30)",
+            "Pt30to35": "(pt_2 >= 30) && (pt_2 < 35)",
+            "Pt35to40": "(pt_2 >= 35) && (pt_2 < 40)",
+            "PtGt40": "(pt_2 >= 40)",
+            "DM0": "(tau_decaymode_2 == 0) && (pt_2 >= 40)",
+            "DM1": "(tau_decaymode_2 == 1) && (pt_2 >= 40)",
+            "DM10_11": "((tau_decaymode_2 == 10) || (tau_decaymode_2 == 11)) && (pt_2 >= 40)",
+            "Inclusive": "(pt_2 >= 20)",
+        }.items(),
 }
 
 categorization = {
