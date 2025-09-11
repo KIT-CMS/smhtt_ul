@@ -29,14 +29,17 @@ export COLUMNS=$(tput cols)
 source utils/setup_root.sh
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
-output_shapes="control_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+shapes_name="control_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+
 CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
-shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
+shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${shapes_name}
+control_plots_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/control-plots
+
 shape_rootfile=${shapes_output}.root
 # print the paths to be used
 echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
 echo "BASEDIR: ${BASEDIR}"
-echo "output_shapes: ${output_shapes}"
+echo "shapes output: ${shapes_output}"
 
 if [[ $MODE == "XSEC" ]]; then
 
@@ -84,7 +87,7 @@ if [[ $MODE == "PLOT" ]]; then
 
     # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --fake-factor
     # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --embedding --tag ${TAG}
-    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals
+    python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals -o ${control_plots_output}
     # python3 plotting/plot_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --fake-factor
 
     # python2 ~/tools/webgallery/gallery.py Run${ERA}_plots_emb_classic/

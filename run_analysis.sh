@@ -16,9 +16,12 @@ datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_${CHANNEL}"
 output_shapes="tauid_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
 shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
+analysis_plots_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/analysis-plots
 shapes_output_synced=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
+
+VARIABLES="NN_score"
 
 # TODO: How to use this variables?
 # VARIABLES="iso_1,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
@@ -140,6 +143,18 @@ if [[ $MODE == "MERGE" ]]; then
     source utils/setup_root.sh
     echo "[INFO] Merging outputs located in ${CONDOR_OUTPUT}"
     hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/*.root
+fi
+
+if [[ $MODE == "PLOT_ANALYSIS_SHAPES" ]]; then
+    source utils/setup_root.sh
+    # python plotting/plot_shapes_tauID.py -i ${shapes_rootfile} -o ${plots_output}/analysis-shapes -c ${CHANNEL} -e $ERA
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "HH2B2Tau" -o ${analysis_plots_output} --blind
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "DY" -o ${analysis_plots_output}
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "ST" -o ${analysis_plots_output}
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "TT" -o ${analysis_plots_output}
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "VV" -o ${analysis_plots_output}
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "Other" -o ${analysis_plots_output}
+
 fi
 
 if [[ $MODE == "SYNC" ]]; then

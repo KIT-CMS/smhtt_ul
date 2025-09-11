@@ -17,13 +17,25 @@ import Dumbledraw.rootfile_parser_ntuple_processor_inputshapes as rootfile_parse
 import Dumbledraw.styles as styles
 from config.logging_setup_configs import setup_logging
 
-def get_signal_scale(channel: str) -> int:
-    if channel == "tt":
-        return 1000
-    elif channel == "et" or channel == "mt":
-        return 5000
+def get_signal_scale(channel: str, cat: str) -> int:
+    if cat == "HH2B2Tau":
+        if channel == "tt":
+            return 100
+        elif channel == "et" or channel == "mt":
+            return 500
     else:
-        return 1
+        if channel == "tt":
+            return 1000
+        elif channel == "et" or channel == "mt":
+            return 5000
+    return 1
+
+# y limit for ratio plot
+Y_MIN_RATIO = 0.5
+Y_MAX_RATIO = 2.0
+
+# y limit events. Ratio to max(obs_data)
+Y_EVENTS_PLOT = 1.9
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -102,6 +114,11 @@ def parse_arguments():
         default="",
         help="Tag that is added to the output file"
     )
+    parser.add_argument(
+        "--blind",
+        action="store_true",
+        help="Blind the data/MC comparison"
+    )
 
     return parser.parse_args()
 
@@ -120,6 +137,14 @@ def main(info):
     args = info["args"]
     variable = info["variable"]
     channel = info["channel"]
+    class_dict = {
+        "HH2B2Tau": "HH2B2Tau",
+        "DY": "Drell Yan",
+        "ST": "Single t",
+        "TT": "t#bar{t}",
+        "VV": "Diboson",
+        "Other": "Other",
+    }
     channel_dict = {
         "ee": "#font[42]{#scale[0.85]{ee}}",
         "em": "#scale[0.85]{e}#mu",
@@ -298,11 +323,12 @@ def main(info):
         fillcolor=styles.color_dict["unc"],
         linecolor=0)
 
-    plot.add_hist(rootfile.get(channel, "data", category=cat, shape_type=stype), "data_obs")
-    data_norm = plot.subplot(0).get_hist("data_obs").Integral()
-    plot.subplot(0).get_hist("data_obs").GetXaxis().SetMaxDigits(4)
-    plot.subplot(0).setGraphStyle("data_obs", "e0")
-    plot.subplot(0).setGraphStyle("data_obs", "e0")
+    if not args.blind:
+        plot.add_hist(rootfile.get(channel, "data", category=cat, shape_type=stype), "data_obs")
+        data_norm = plot.subplot(0).get_hist("data_obs").Integral()
+        plot.subplot(0).get_hist("data_obs").GetXaxis().SetMaxDigits(4)
+        plot.subplot(0).setGraphStyle("data_obs", "e0")
+        plot.subplot(0).setGraphStyle("data_obs", "e0")
     if args.linear:
         pass
     else:
@@ -319,7 +345,7 @@ def main(info):
             # HWW = rootfile.get(channel, "HWW").Clone()
             hh2b2tau = rootfile.get(channel, "HH2B2Tau", category=cat).Clone()
             
-            hh2b2tau_scale = get_signal_scale(channel)
+            hh2b2tau_scale = get_signal_scale(channel, cat)
             
             # if ggH.Integral() > 0:
             #     ggH_scale = 10
@@ -420,12 +446,15 @@ def main(info):
         #     "bkg_qqH_top", "data_obs"
         # ]
         to_draw = [
-            "total_bkg", "bkg_hh2b2tau", "bkg_hh2b2tau_top", "data_obs"
+            "total_bkg", "bkg_hh2b2tau", "bkg_hh2b2tau_top"
         ]
     else:
         to_draw = [
-            "total_bkg", "data_obs"
+            "total_bkg"
         ]
+    if not args.blind:
+        to_draw.append("data_obs")
+
     plot.subplot(2).normalize(to_draw, "total_bkg")
 
     # stack background processes
@@ -437,10 +466,16 @@ def main(info):
         plot.subplot(1).normalizeByBinWidth()
 
     # set axes limits and labels
-    plot.subplot(0).setYlims(
-        split_dict[channel],
-        max(1.8 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
-            split_dict[channel] * 2))
+    if args.blind:
+        plot.subplot(0).setYlims(
+            split_dict[channel],
+            max(Y_EVENTS_PLOT * plot.subplot(0).get_hist("total_bkg").GetMaximum(),
+                split_dict[channel] * 2))
+    else:
+        plot.subplot(0).setYlims(
+            split_dict[channel],
+            max(Y_EVENTS_PLOT * plot.subplot(0).get_hist("data_obs").GetMaximum(),
+                split_dict[channel] * 2))
 
     log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
 
@@ -452,7 +487,8 @@ def main(info):
             1.0,
             1000 * plot.subplot(0).get_hist("data_obs").GetMaximum())
 
-    plot.subplot(2).setYlims(0.65, 1.55)
+    # ylim for ratio plot
+    plot.subplot(2).setYlims(Y_MIN_RATIO, Y_MAX_RATIO)
     # if channel == "mm":
     #     plot.subplot(0).setLogY()
     #     plot.subplot(0).setYlims(1, 10**10)
@@ -495,11 +531,13 @@ def main(info):
     # procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "VH", "VH_top", "ttH", "ttH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
     if args.add_signals:
         # procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
-        procs_to_draw = ["stack", "total_bkg", "hh2b2tau", "hh2b2tau_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+        procs_to_draw = ["stack", "total_bkg", "hh2b2tau", "hh2b2tau_top"] if args.linear else ["stack", "total_bkg"]
     else:
-        procs_to_draw = ["stack", "total_bkg", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+        procs_to_draw = ["stack", "total_bkg"] if args.linear else ["stack", "total_bkg"]
     if args.draw_jet_fake_variation is not None:
-        procs_to_draw = ["stack", "total_bkg", "data_obs"]
+        procs_to_draw = ["stack", "total_bkg"]
+    if not args.blind:
+        procs_to_draw.append("data_obs")
     plot.subplot(0).Draw(procs_to_draw)
     if args.linear != True:
         # plot.subplot(1).Draw([
@@ -507,23 +545,20 @@ def main(info):
         #     "VH", "VH_top", "ttH", "ttH_top", "HWW", "HWW_top", "data_obs"
         # ])
         if args.add_signals:
-            plot.subplot(1).Draw([
-                # "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "data_obs"
-                "stack", "total_bkg", "hh2b2tau", "hh2b2tau_top", "data_obs"
-            ])
+            to_draw = ["stack", "total_bkg", "hh2b2tau", "hh2b2tau_top"]
+            
         else:
-            plot.subplot(1).Draw([
-                "stack", "total_bkg", "data_obs"
-            ])
+            to_draw = ["stack", "total_bkg"]
+        if not args.blind:
+            to_draw.append("data_obs")
+        plot.subplot(1).Draw(to_draw)
     if args.draw_jet_fake_variation is None:
-        plot.subplot(2).Draw([
-            # "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH", "bkg_qqH_top", "data_obs"
-            "total_bkg", "bkg_hh2b2tau", "bkg_hh2b2tau_top", "data_obs"
-        ])
+        to_draw = ["total_bkg", "bkg_hh2b2tau", "bkg_hh2b2tau_top"]
     else:
-        plot.subplot(2).Draw([
-            "total_bkg", "data_obs"
-        ])
+        to_draw = ["total_bkg"]
+    if not args.blind:
+        to_draw.append("data_obs")
+    plot.subplot(2).Draw(to_draw)
 
     # create legends
     suffix = ["", "_top"]
@@ -547,7 +582,7 @@ def main(info):
                 )
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         if args.add_signals:
-            hh2b2tau_scale = get_signal_scale(channel)
+            hh2b2tau_scale = get_signal_scale(channel, cat)
             if hh2b2tau_scale == 1:
                 plot.legend(i).add_entry(0 if args.linear else 1, "hh2b2tau%s" % suffix[i], "HH#rightarrowbb#tau#tau", 'l')
             else:
@@ -558,7 +593,8 @@ def main(info):
             # plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
             # plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s #times ttH"%str(int(ttH_scale)), 'l')
             # # plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "%s #times H#rightarrowWW"%str(int(HWW_scale)), 'l')
-        plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
+        if not args.blind:
+            plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(3)
     plot.legend(0).Draw()
     plot.legend(1).setAlpha(0.0)
@@ -567,7 +603,8 @@ def main(info):
     for i in range(2):
         plot.add_legend(
             reference_subplot=2, pos=1, width=0.6, height=0.03)
-        plot.legend(i + 2).add_entry(0, "data_obs", "Observed", 'PE2L')
+        if not args.blind:
+            plot.legend(i + 2).add_entry(0, "data_obs", "Observed", 'PE2L')
         if "mm" not in channel and "ee" not in channel and args.draw_jet_fake_variation is None and args.add_signals:
             # plot.legend(i + 2).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i],
             #                              "ggH+bkg.", 'l')
@@ -596,8 +633,9 @@ def main(info):
         raise Exception
 
     posChannelCategoryLabelLeft = None
+    label = f"{channel_dict[channel]} - Classified as {class_dict[cat]}" if cat in class_dict else f"{channel_dict[channel]}"
     plot.DrawChannelCategoryLabel(
-        "%s" % (channel_dict[channel]),
+        label,
         begin_left=posChannelCategoryLabelLeft)
 
     print("Trying to save the created plot")
