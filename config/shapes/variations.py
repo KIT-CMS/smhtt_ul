@@ -368,12 +368,12 @@ jet_es = [
 
 # LHE/PS  variations
 LHE_scale_norm_muR = [
-    AddWeight("LHE_scale_muR_normUp", Weight("(lhe_scale_weight__LHEScaleMuRWeightUp)", "muR2p0_muF1p0_weight")),
-    AddWeight("LHE_scale_muR_normDown", Weight("(lhe_scale_weight__LHEScaleMuRWeightDown)", "muR0p5_muF1p0_weight"))
+    AddWeight("LHE_scale_muR_normUp", Weight("(lhe_scale_weight__muRWeightUp)", "muR2p0_muF1p0_weight")),
+    AddWeight("LHE_scale_muR_normDown", Weight("(lhe_scale_weight__muRWeightDown)", "muR0p5_muF1p0_weight"))
 ]
 LHE_scale_norm_muF = [
-    AddWeight("LHE_scale_muF_normUp", Weight("(lhe_scale_weight__LHEScaleMuFWeightUp)", "muR1p0_muF2p0_weight")),
-    AddWeight("LHE_scale_muF_normDown", Weight("(lhe_scale_weight__LHEScaleMuFWeightDown)", "muR1p0_muF0p5_weight"))
+    AddWeight("LHE_scale_muF_normUp", Weight("(lhe_scale_weight__muFWeightUp)", "muR1p0_muF2p0_weight")),
+    AddWeight("LHE_scale_muF_normDown", Weight("(lhe_scale_weight__muFWeightDown)", "muR1p0_muF0p5_weight"))
 ]
 PS_scale_norm_Fsr = [
     AddWeight("PS_scale_Fsr_normUp", Weight('(ps_weight__FsrWeightUp)', "FsR2p0_weight")),
@@ -596,11 +596,13 @@ top_pt = [
 # FF variations
 # Variations on the jet backgrounds estimated with the fake factor method.
 ff_variations_lt = [
-    ReplaceCutAndAddWeight(
-        f"anti_iso_CMS_{syst}{shift}_Channel_Era",
-        "tau_iso",
-        Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-        Weight(f"{RuntimeVariables.FF_name_lt}__{syst}{shift}", "fake_factor"),
+    LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
+        lambda: ReplaceCutAndAddWeight(
+            f"anti_iso_CMS_{syst}{shift}_Channel_Era",
+            "tau_iso",
+            Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+            Weight(f"{RuntimeVariables.FF_name_lt}__{syst}{shift}", "fake_factor"),
+        )
     )
     for shift in SHIFT_DIRECTIONS
     for syst in [
@@ -965,7 +967,7 @@ for _container, _scheme, _cuts in [
                             f"""(
                                 1.0 + (
                                     (
-                                        lhe_scale_weight__LHEScale{scale_type}Weight{shift} - 1.0
+                                        lhe_scale_weight__{scale_type}Weight{shift} - 1.0
                                     ) * ({_cuts[scheme_parts]})
                                 )
                             )"""
@@ -1048,12 +1050,15 @@ class FullyHadronicFFEstimations(_VariationCollection):
 # ------------------------------------------------------------------------------------------
 
 class LHE_scale(_VariationCollection):
-    LHE_scale_norm_muR = LHE_scale_norm_muR
+    LHE_scale_norm_muR = LHE_scale_norm_muR  # not well defined for vbf/qqh, apply manually for ggh
     LHE_scale_norm_muF = LHE_scale_norm_muF
-    PS_scale_norm_Fsr = PS_scale_norm_Fsr
-    PS_scale_norm_Isr = PS_scale_norm_Isr
     LHE_pdf = LHE_pdf
     LHE_alphaS = LHE_alphaS
+
+
+class PS_scale(_VariationCollection):
+    PS_scale_norm_Fsr = PS_scale_norm_Fsr
+    PS_scale_norm_Isr = PS_scale_norm_Isr
 
 
 class Recoil(_VariationCollection):

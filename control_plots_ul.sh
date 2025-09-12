@@ -187,7 +187,7 @@ if [[ ${MODE} == "SHAPES" ]]; then
 
   nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
     --directory ${NTUPLES} \
-    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} ${MULTIFRIENDS} \
     --era ${ERA} --num-processes 30 --num-threads 60 \
     --optimization-level 1 --control-plots \
     --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \

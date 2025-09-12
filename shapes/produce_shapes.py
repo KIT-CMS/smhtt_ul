@@ -551,6 +551,7 @@ def main(args):
             _book({"qqh"} & procS, [variations.qqh_acceptance, variations.qqh_muRmuF_acceptance])
             _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging])
             _book(signalsS, variations.LHE_scale.unrolled())
+            _book(signalsS - {"qqh"}, variations.PS_scale.unrolled())
 
             _book({"ztt", "zj", "zl", "w"} & procS | signalsS, variations.Recoil.unrolled())
             _book(simulatedProcsDS[channel], [variations.met_unclustered, variations.pileup_reweighting])
