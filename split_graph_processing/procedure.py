@@ -30,8 +30,6 @@ def create_argument_list(
 ):
     with open(argument_file, "w") if to_file else nullcontext() as f:
         for graph in graphs:
-            if graph.name != "EMB":
-                continue
             for idx in range(len(graph.unit_block.ntuples)):
                 if output_path is not None:
                     _output_path = output_path / graph.name / f"{idx}.root"
@@ -42,9 +40,6 @@ def create_argument_list(
                     f.write(f"{graph.name} {idx}\n")
                 else:
                     print(f"{graph.name} {idx}")
-                if idx == 2:
-                    break
-            break
 
 
 def get_subgraph(graphs, process, idx):
@@ -75,10 +70,6 @@ if __name__ == "__main__":
         output_path = pathlib.Path(__file__).parent / "tmp" / "_output" / args.process / f"{args.index}.root"
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        logs_path = pathlib.Path(__file__).parent / "tmp" / "_logs" / args.process / f"{args.index}.log"
-        logs_path.parent.mkdir(parents=True, exist_ok=True)
-
-        logger = setup_logging(logger=logging.getLogger(f"{socket.gethostname()}.{__name__}"), output_file=logs_path)
         subgraph = get_subgraph(graphs, args.process, args.index)
 
         if not output_path.exists():
