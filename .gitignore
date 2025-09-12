@@ -12,6 +12,9 @@ impacts*/
 *.bak
 *.bak.*
 *.original
+*.archive
+/split_graph_processing/tmp/*
+/split_graph_processing/condor_jobs/*
 
 # C extensions
 *.so

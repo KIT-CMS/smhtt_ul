@@ -56,6 +56,8 @@ request_memory = 10000
 request_disk = 10000
 +RequestWalltime = 7200
 
+num_retries = $NUM_RETRIES
+
 Output = $SUBMIT_DIR/job_\$(Cluster)_\$(Process).out
 Error  = $SUBMIT_DIR/job_\$(Cluster)_\$(Process).err
 Log  = $SUBMIT_DIR/workflow.log
