@@ -8,6 +8,7 @@ if [ -z "$INPUT_FILE" ]; then
 fi
 
 NUM_WORKERS=1
+NUM_RETRIES=10
 
 USER=$(whoami)
 ANALYSISPATH=$(pwd)
