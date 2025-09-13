@@ -144,6 +144,22 @@ fi
 
 # ---
 
+elementIn() {
+  local element
+  for element in "${@:2}"; do [[ "$element" == "$1" ]] && return 0; done
+  return 1
+}
+
+ask_for_confirmation() {
+    local question="$1"
+    local answer
+    read -p "$question [y/N] " answer
+    case "${answer,,}" in
+        y|yes) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
 export PYTHONPATH=${PYTHONPATH}:${PWD}/Dumbledraw
 ulimit -s unlimited
 export COLUMNS=$(tput cols)
@@ -185,16 +201,50 @@ if [[ ${MODE} == "SHAPES" ]]; then
     mkdir -p ${shapes_output}
   fi
 
-  nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
-    --directory ${NTUPLES} \
-    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} ${MULTIFRIENDS} \
-    --era ${ERA} --num-processes 30 --num-threads 60 \
-    --optimization-level 1 --control-plots \
-    --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
-    --output-file ${shapes_output} \
-    --xrootd --validation-tag ${TAG} \
-    --vs-jet-wp "Tight" --vs-ele-wp "VVLoose" --apply-tauid \
-    --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}
+  GRAPH_FILENAME=${CHANNEL}_${ERA}_${NTUPLETAG}_${TAG}.pkl
+
+  BASE_COMMAND=(
+    nice -n 19 python shapes/produce_shapes.py
+    --channels ${CHANNEL}
+    --directory ${NTUPLES}
+    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} ${MULTIFRIENDS}
+    --era ${ERA}
+    --num-processes 30
+    --num-threads 60
+    --optimization-level 2
+    --control-plots
+    --control-plot-set ${USED_VARIABLES}
+    --output-file ${shapes_output}
+    --xrootd
+    --validation-tag ${TAG}
+    --vs-jet-wp "Tight"
+    --vs-ele-wp "VVLoose"
+    --apply-tauid
+    --selection-option ${SELECTION_OPTION}
+    --ff-type ${FF_TYPE}
+    # --skip-systematic-variations
+    # the following two options should be mutually exclusive
+    # --- 1 ---
+    --only-create-graphs
+    --graph-filename ${GRAPH_FILENAME}
+    # --- 2 ---
+    # --collect-config-only
+    # --config-output-file ${CHANNEL}_${ERA}_${NTUPLETAG}_${TAG}.yaml
+  )
+
+  "${BASE_COMMAND[@]}"
+
+  if elementIn "--only-create-graphs" "${BASE_COMMAND[@]}"; then
+    
+    echo "Graph splitting enabled."
+    bash split_graph_processing/run_split_graph_processing.sh ${GRAPH_FILENAME} ${shape_rootfile}
+    if ask_for_confirmation "Graph processing finished. Clean up the temporary directories? ('tmp' and 'condor_jobs')?"; then
+        rm -rfv split_graph_processing/tmp
+        rm -rfv split_graph_processing/condor_jobs
+    else
+        echo "Cleanup skipped"
+    fi
+  fi
 
   echo "##############################################################################################"
   echo "#      Additional estimations                                      #"

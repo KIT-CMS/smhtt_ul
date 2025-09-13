@@ -155,6 +155,12 @@ def parse_arguments():
         help="Directory the graph file is written to.",
     )
     parser.add_argument(
+        "--graph-filename",
+        default=None,
+        type=str,
+        help="Filename for the graph file.",
+    )
+    parser.add_argument(
         "--collect-config-only",
         action="store_true",
         help="Only collect cuts/weights/datasets/variations into a YAML file, skip histogram production.",
@@ -620,16 +626,19 @@ def main(args):
         return
 
     if args.only_create_graphs:
-        _channels = ",".join(args.channels)
-        _processes = ",".join(sorted(procS))
-        if args.control_plots or args.gof_inputs:
-            graph_file_name = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
-        else:
-            graph_file_name = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
-        if args.graph_dir is not None:
-            graph_file = os.path.join(args.graph_dir, graph_file_name)
-        else:
-            graph_file = graph_file_name
+        if args.graph_filename is None:
+            _channels = ",".join(args.channels)
+            _processes = ",".join(sorted(procS))
+            if args.control_plots or args.gof_inputs:
+                args.graph_filename = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+            else:
+                args.graph_filename = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+        if args.graph_dir is None:
+            args.graph_dir = "."
+        
+        os.makedirs(args.graph_dir, exist_ok=True)
+        graph_file = os.path.join(args.graph_dir, args.graph_filename)
+        
         logger.info(f"Writing created graphs to file {graph_file}")
         with open(graph_file, "wb") as file:
             pickle.dump(graphs, file)

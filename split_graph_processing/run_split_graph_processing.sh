@@ -7,6 +7,12 @@ if [ -z "$INPUT_FILE" ]; then
     exit 1
 fi
 
+OUTPUT_FILE="$2"
+if [ -z "$OUTPUT_FILE" ]; then
+    echo "Error: Please provide an output file."
+    exit 1
+fi
+
 NUM_WORKERS=1
 NUM_RETRIES=10
 
@@ -57,8 +63,6 @@ request_memory = 10000
 request_disk = 10000
 +RequestWalltime = 7200
 
-num_retries = $NUM_RETRIES
-
 Output = $SUBMIT_DIR/job_\$(Cluster)_\$(Process).out
 Error  = $SUBMIT_DIR/job_\$(Cluster)_\$(Process).err
 Log  = $SUBMIT_DIR/workflow.log
@@ -77,6 +81,11 @@ chmod +x "$RUN_SH_SCRIPT"
 
 TEMP_JDL=$(mktemp /tmp/job_XXXXXX.jdl)
 trap "rm -f '$TEMP_JDL'" EXIT
+
+python3 "$FOLDER/procedure.py" --input "$INPUT_FILE" --output "$OUTPUT_FILE" --mode combine_daemon &
+DAEMON_PID=$!
+
+echo "Started combine_daemon (PID $DAEMON_PID)"
 
 while true; do
     echo "--------------------------------------------------"
@@ -127,5 +136,14 @@ done
 echo "--------------------------------------------------"
 echo "All job batches have completed."
 
-python3 $FOLDER/procedure.py --input "$INPUT_FILE" --output "combined.root" --mode hadd
+wait "$DAEMON_PID"
+DAEMON_STATUS=$?
 
+if [ $DAEMON_STATUS -eq 0 ]; then
+    echo "Combine daemon exited normally."
+else
+    echo "Combine daemon exited with status $DAEMON_STATUS"
+    exit $DAEMON_STATUS
+fi
+
+trap - INT TERM
