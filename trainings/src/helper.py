@@ -15,7 +15,7 @@ TRAINING_VARIABLES = [
     "jpt_2",
     "jeta_1",
     "jeta_2",
-    # "m_fastmtt",
+    "m_fastmtt",
     "pt_vis",
     "mjj",
     "deltaR_ditaupair",

@@ -23,9 +23,9 @@ BOLD_RED = "\x1b[31;1m"
 RESET = "\x1b[0m"
 
 
-def capture_rich_renderable_as_string(renderable) -> str:
+def capture_rich_renderable_as_string(renderable, width: int = 200) -> str:
     string_io = io.StringIO()
-    capture_console = Console(file=string_io, record=True, width=200)
+    capture_console = Console(file=string_io, record=True, width=width)
     capture_console.print(renderable)
     return string_io.getvalue()
 
@@ -47,6 +47,17 @@ class CustomRichHandler(RichHandler):
         )
 
 
+class MarkupStrippingRichHandler(CustomRichHandler):
+    """
+    A RichHandler that strips Rich markup from the log message before rendering.
+    Ideal for writing clean, plain-text log files.
+    """
+    def render_message(self, record: LogRecord, message: str) -> ConsoleRenderable:
+        """Strips markup from the message before passing it to the parent renderer."""
+        plain_message = Text.from_markup(message).plain
+        return super().render_message(record, plain_message)
+
+
 class _DuplicateFilter:
     def __init__(self) -> None:
         self.msgs = set()
@@ -62,6 +73,7 @@ def setup_logging(
     output_file: Union[str, None] = None,
     logger: logging.Logger = logging.getLogger(""),
     level: Union[int, None] = logging.INFO,
+    console_markup: bool = False,
 ) -> logging.Logger:
     if output_file is None:
         output_file = LOG_FILENAME
@@ -80,13 +92,14 @@ def setup_logging(
         show_level=True,
         show_path=True,
         log_time_format="[%Y-%m-%d %H:%M:%S]",
+        markup=console_markup,
     )
     console_handler.addFilter(NoFileOnlyFilter())
     logger.addHandler(console_handler)
 
     log_file = open(output_file, "a")
     file_console = Console(file=log_file, record=True, width=200)
-    file_handler = CustomRichHandler(
+    file_handler = MarkupStrippingRichHandler(
         console=file_console,
         show_time=True,
         show_level=True,

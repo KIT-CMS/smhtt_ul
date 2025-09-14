@@ -30,6 +30,13 @@ def parse_args():
         default="./mt__tmp_config__modified.yaml",
         help="Path to the output config file",
     )
+    parser.add_argument(
+        "--training-variables",
+        type=str,
+        default=TRAINING_VARIABLES,
+        nargs="+",
+        help="List of training variables to be added to the config",
+    )
     return parser.parse_args()
 
 
@@ -41,7 +48,8 @@ if __name__ == "__main__":
     ignore_for_now = {"lhe_scale_weight__LHEScale"}  # until fixed, TODO:
     Iterate.common_dict = partial(Iterate.common_dict, ignore_weight_and_cuts=ignore_for_now)
     logger.warning(f"Ignoring cuts and weights of {ignore_for_now}, until fixed!")
-    training_variables = TRAINING_VARIABLES
+    training_variables = list(set(args.training_variables))
+    logger.info(f"Used training variables: {training_variables}")
 
     config = (
         PipeDict()
