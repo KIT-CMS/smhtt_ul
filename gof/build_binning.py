@@ -226,7 +226,7 @@ def get_1d_binning(channel, chain, variables, percentiles):
     return binning
 
 
-def add_2d_unrolled_binning(variables, binning):
+def add_2d_unrolled_binning(variables, binning, chain):
     for i1, v1 in enumerate(variables):
         for i2, v2 in enumerate(variables):
             if i2 <= i1:
@@ -242,7 +242,31 @@ def add_2d_unrolled_binning(variables, binning):
                 bins2 = binning[v2]["bins"][::2]
             range_ = max(bins1) - min(bins1)
 
-            bins = [bins1[0]]
+            unrolled_values = []
+            bad_values = [-11.0, -999.0, -10.0, -1.0]
+            for event in chain:
+                val1 = getattr(event, v1)
+                val2 = getattr(event, v2)
+                if val1 in bad_values or val2 in bad_values:
+                    continue
+                for b in range(len(bins2) - 1):
+                    if val2 > bins2[b] and val2 <= bins2[b + 1]:
+                        unrolled = b * range_ + val1
+                        unrolled_values.append(unrolled)
+                        break
+            num_subbins = len(bins1) - 1
+            num_slices = len(bins2) - 1
+            num_total = num_subbins * num_slices
+            if len(unrolled_values) > 0:
+                perc = np.linspace(0, 100, num_total + 1)
+                borders = [float(x) for x in np.percentile(unrolled_values, perc)]
+                borders = sorted(list(set(borders)))
+                borders = [b - 0.0001 for b in borders]
+                borders[-1] += 0.0002
+            else:
+                logger.fatal("No valid values found for unrolled variable {}_{}.".format(v1, v2))
+                raise Exception
+
             expression = ""
             for b in range(len(bins2) - 1):
                 expression += "({OFFSET}+{VAR1})*({VAR2}>{MIN})*({VAR2}<={MAX})".format(
@@ -253,8 +277,7 @@ def add_2d_unrolled_binning(variables, binning):
                     OFFSET=b * range_)
                 if b != len(bins2) - 2:
                     expression += "+"
-                for c in range(len(bins1) - 1):
-                    bins.append(b * range_ + bins1[c + 1])
+
             # Add separate term shifting undefined values away from zero.
             # If this is not done the bin including zero is populated with all events
             # with default values.
@@ -289,10 +312,9 @@ def add_2d_unrolled_binning(variables, binning):
 
             name = "{}_{}".format(v1, v2)
             binning[name] = {}
-            binning[name]["bins"] = bins
+            binning[name]["bins"] = borders
             binning[name]["expression"] = expression
-            binning[name]["cut"] = "({VAR}>{MIN})&&({VAR}<{MAX})".format(
-                VAR=v1, MIN=bins1[0], MAX=bins1[-1])
+            binning[name]["cut"] = "({})&&({})".format(binning[v1]["cut"].strip("()"), binning[v2]["cut"].strip("()"))
 
     return binning
 

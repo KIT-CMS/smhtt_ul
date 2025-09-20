@@ -247,9 +247,9 @@ def get_analysis_units(
     era: str,
     datasets: dict,
     categorization: dict,
-    apply_tauid: bool,
-    vs_jet_wp: str,
-    vs_ele_wp: str,
+    apply_tauid: bool = True,
+    vs_jet_wp: str = "Tight",
+    vs_ele_wp: str = "VVLoose",
     selection_option: str = "CR",
 ) -> dict:
 
