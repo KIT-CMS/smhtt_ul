@@ -1,17 +1,17 @@
-from shapes.utils import get_nominal_datasets
-from ntuple_processor import Histogram
-from ntuple_processor.utils import Selection
-from config.shapes.file_names import files
+import argparse
+import logging
+import os
+
+import numpy as np
+import ROOT
 import yaml
 
-from shapes.produce_shapes import setup_logging, get_analysis_units
-import logging
-import argparse
-import numpy as np
-import os
-import ROOT
-
-logger = logging.getLogger("calculate_binning.py")
+from config.logging_setup_configs import setup_logging
+from config.shapes.file_names import files
+from ntuple_processor import Histogram
+from ntuple_processor.utils import Selection
+from shapes.produce_shapes import get_analysis_units
+from shapes.utils import get_nominal_datasets
 
 
 def parse_arguments():
@@ -40,6 +40,12 @@ def parse_arguments():
         default=[],
         nargs="+",
         help="List of variables to be processed",
+    )
+    parser.add_argument(
+        "--validation-tag",
+        type=str,
+        default="",
+        help="Validation tag of the ntuples",
     )
     parser.add_argument(
         "--et-friend-directory",
@@ -85,19 +91,6 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def setup_logging(output_file, level=logging.DEBUG):
-    logger.setLevel(level)
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    file_handler = logging.FileHandler(output_file, "w")
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-
-
 def set_dummy_categorization():
     # this is just a dummy selection we need to trick the framework, we do not use it !
     inclusive = [
@@ -116,31 +109,18 @@ def set_dummy_categorization():
 
 
 def get_data_selection(era, channel, name, unit, categorization, basedir, frienddirs):
-    cuts = ""
-    weights = ""
-    files = []
-    friend_paths = []
+    cuts, weights, files, friend_paths = "", "", [], []
+    files = [ntuple.path for ntuple in unit[0].dataset.ntuples]
     if unit[0].dataset.ntuples[0].friends is not None:
-        for friend_dir in frienddirs:
-            for friendfile in [x.path for x in unit[0].dataset.ntuples[0].friends]:
-                if friend_dir in friendfile and friend_dir not in friend_paths:
-                    friend_paths.append(f"{friend_dir}/")
-    files = [ntuple.path.replace(basedir, "") for ntuple in unit[0].dataset.ntuples]
+        for friend_file_path in unit[0].dataset.ntuples[0].friends:
+            try:
+                *friend_path_bulk, _, _, _, _ = friend_file_path.path.split("/")
+                friend_paths.append("/".join(friend_path_bulk))
+            except ValueError:
+                logger.warning(f"Could not parse friend path {friend_file_path.path} with expected structure. Skipping.")
     for selection in unit[0].selections:
-        cutstring = " && ".join(
-            [
-                "({})".format(cut.expression)
-                for cut in selection.cuts
-                if cut.expression != ""
-            ]
-        )
-        weightstring = " * ".join(
-            [
-                "({})".format(weight.expression)
-                for weight in selection.weights
-                if weight.expression != ""
-            ]
-        )
+        cutstring = " && ".join([f"({cut.expression})" for cut in selection.cuts if cut.expression != ""])
+        weightstring = " * ".join([f"({weight.expression})" for weight in selection.weights if weight.expression != ""])
         if cutstring != "":
             cuts += cutstring + " && "
         if weightstring != "":
@@ -153,7 +133,7 @@ def get_data_selection(era, channel, name, unit, categorization, basedir, friend
         "process": name,
         "weight_string": f"({weights})",
         "files": files,
-        "cut_string": f"({cuts})",
+        "cut_string": "(" + cuts.replace("\n", "").replace(" ", "").strip() + ")",
         "tree_path": "ntuple",
         "base_path": basedir,
         "friend_paths": friend_paths,
@@ -170,10 +150,10 @@ def build_chain(dict_):
     for d in friend_paths:
         friendchains[d] = ROOT.TChain(dict_["tree_path"])
     for i, f in enumerate(dict_["files"]):
-        filename = f"{dict_['base_path']}/{f}"
-        chain.AddFile(filename)
+        chain.AddFile(f)
+        *_, __era, __sample, __channel, __file = f.split("/")
         for friendchain in friendchains:
-            friendfile = f"{d}/{f}"
+            friendfile = "/".join([friendchain, __era, __sample, __channel, __file])
             friendchains[friendchain].AddFile(friendfile)
 
     chain_numentries = chain.GetEntries()
@@ -245,6 +225,7 @@ def get_1d_binning(channel, chain, variables, percentiles):
         logger.debug("Binning for variable %s: %s", v, binning[v]["bins"])
     return binning
 
+
 def add_2d_unrolled_binning(variables, binning):
     for i1, v1 in enumerate(variables):
         for i2, v2 in enumerate(variables):
@@ -272,13 +253,31 @@ def add_2d_unrolled_binning(variables, binning):
                     OFFSET=b * range_)
                 if b != len(bins2) - 2:
                     expression += "+"
-                for c in range(len(bins1)-1):
-                    bins.append(b * range_ + bins1[c+1])
+                for c in range(len(bins1) - 1):
+                    bins.append(b * range_ + bins1[c + 1])
             # Add separate term shifting undefined values away from zero.
             # If this is not done the bin including zero is populated with all events
             # with default values.
             # This problem only occurs for variables taking integer values.
-            jet_variables = ["mjj", "jdeta", "dijetpt", "ME_q2v1", "ME_q2v2"]
+            jet_variables = [
+                "deltaEta_jj",
+                "deltaEta_1j1",
+                "deltaEta_1j2",
+                "deltaEta_2j1",
+                "deltaEta_2j2",
+                "deltaR_jj",
+                "deltaR_2j1",
+                "deltaR_2j2",
+                "deltaR_1j1",
+                "deltaR_1j2",
+                "jpt_1",
+                "jeta_1",
+                "jpt_2",
+                "jeta_2",
+                "mjj",
+                "pt_dijet",
+                "pt_ttjj",
+            ]
             default_val = -10.
             if v1 in ["njets", "nbtag"]:
                 if v2 in jet_variables:
@@ -321,25 +320,30 @@ def main(args):
         variables = args.variables
     logger.info("Variables: {}".format(variables))
     nominals[era]["datasets"][channel] = get_nominal_datasets(
-        era, channel, friend_directories, files, args.directory
+        era=era,
+        channel=channel,
+        friend_directories=friend_directories,
+        files=files,
+        directory=args.directory,
+        validation_tag=args.validation_tag,
+        xrootd=True,
     )
     logger.info("Found {} datasets".format(len(nominals[era]["datasets"][channel])))
     logger.info("Creating analysis units")
     nominals[era]["units"][channel] = get_analysis_units(
-        channel,
-        era,
-        nominals[era]["datasets"][channel],
-        set_dummy_categorization(),
-        None,
+        channel=channel,
+        era=era,
+        datasets=nominals[era]["datasets"][channel],
+        categorization=set_dummy_categorization(),
     )
     data_selection = get_data_selection(
-        era,
-        channel,
-        "data",
-        nominals[era]["units"][channel]["data"],
-        set_dummy_categorization(),
-        args.directory,
-        friend_directories[channel],
+        era=era,
+        channel=channel,
+        name="data",
+        unit=nominals[era]["units"][channel]["data"],
+        categorization=set_dummy_categorization(),
+        basedir=args.directory,
+        frienddirs=friend_directories[channel],
     )
 
     percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
@@ -351,12 +355,16 @@ def main(args):
     with open(outputfile, "w") as f:
         yaml.dump(binning, f, default_flow_style=False)
 
+    logger.info(f"Done: 1d binning, written to {outputfile}")
+
     binning = add_2d_unrolled_binning(variables, binning)
     with open(outputfile2d, "w") as f:
         yaml.dump(binning, f, default_flow_style=False)
 
+    logger.info(f"Done: 2d unrolled binning, written to {outputfile2d}")
+
 
 if __name__ == "__main__":
     args = parse_arguments()
-    setup_logging("create_gof_binning.txt", logging.DEBUG)
+    logger = setup_logging(logger=logging.getLogger(__name__), level=logging.DEBUG)
     main(args)

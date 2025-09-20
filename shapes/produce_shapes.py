@@ -288,9 +288,9 @@ def get_control_units(
     era: str,
     datasets: dict,
     variables: list[str],
-    apply_tauid: bool,
-    vs_jet_wp: str,
-    vs_ele_wp: str,
+    apply_tauid: bool = True,
+    vs_jet_wp: str = "Tight",
+    vs_ele_wp: str = "VVLoose",
     selection_option: str = "CR",
     do_gofs: bool = False,
     do_2dGofs: bool = False,
@@ -303,7 +303,9 @@ def get_control_units(
         # also build all aviailable 2D variables from the 1D variables
         if do_2dGofs:
             variables_2d = []
-            for var1, var2 in combinations(variables, 2):
+            for var1, var2 in product(variables, variables):  # order invariant
+                if var1 == var2:  # diagonals are solved by 1d
+                    continue
                 if f"{var1}_{var2}" in control_binning[channel]:
                     variables_2d.append(f"{var1}_{var2}")
                 elif f"{var2}_{var1}" in control_binning[channel]:
