@@ -95,13 +95,18 @@ class GraphProcessor:
                 return [_graph]
     
     def run_subgraph(self, process: str, idx: int, numworkers: int = 1) -> None:
-        subgraph = self.subgraph(process, idx)
-
         output_path = self.output_path / process / f"{idx}.root"
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        r_manager = RunManager(subgraph)
-        r_manager.run_locally(str(output_path), numworkers, numworkers * 4)
+        reservation_path = self.output_path / process / f"{idx}.lock"
+        if not reservation_path.exists():
+            reservation_path.touch()
+            subgraph = self.subgraph(process, idx)
+            r_manager = RunManager(subgraph)
+            r_manager.run_locally(str(output_path), numworkers, numworkers * 4)
+            reservation_path.unlink()
+        else:
+            logger.info(f"Reservation file {reservation_path} exists, {process} {idx} is being processed by another worker.")
 
     def incremental_hadd(self, output_file: str, older_than: int = 60, batch_size: int = 50) -> None:
         output_file = pathlib.Path(output_file)
@@ -146,7 +151,12 @@ class GraphProcessor:
 
 if __name__ == "__main__":
     args = input_arg_parser.parse_args()
-    graphs_manager = GraphProcessor(args.input)
+
+    graphs_manager = GraphProcessor(
+        graphs_path=args.input,
+        output_path=pathlib.Path(__file__).parent / f"tmp_{args.tag}" / "_output",
+        processed_path=pathlib.Path(__file__).parent / f"tmp_{args.tag}" / "processed.archive",
+    )
 
     with open(args.input, "rb") as f:
         graphs = pickle.load(f)
