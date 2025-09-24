@@ -217,7 +217,7 @@ if [[ $MODE == "DATACARD-PY" ]]; then
     # inputfile
     inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
 
-    python3 ${CMSSW_BASE}/src/HHAnalysis/hh_datacards.py --ntuple-tag $NTUPLETAG --tag $TAG --era $ERA
+    python3 ${CMSSW_BASE}/src/HHDatacards/hh_datacards.py --ntuple-tag $NTUPLETAG --tag $TAG --era $ERA
 
     THIS_PWD=$(pwd)
     target_dir="output/$datacard_output/cmb"
