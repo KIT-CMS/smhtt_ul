@@ -104,6 +104,9 @@ def parse_arguments():
     return parser.parse_args()
 
 
+# --- helpers --- #
+
+
 def to_python_native(obj):
     if isinstance(obj, np.integer):
         return int(obj)
@@ -139,6 +142,9 @@ def set_dummy_categorization():
         "em": inclusive,
     }
     return training_categorization
+
+
+# --- data aquisition helpers --- #
 
 
 def get_data_selection(era, channel, name, unit, categorization, basedir, frienddirs):
@@ -260,14 +266,10 @@ def extract_data_from_chain(chain, variables, cache_path=None):
     return var_data_np
 
 
-# ---
+# --- binning helpers --- #
 
 
 def get_quantized_1d_bins(data, target_nbins, min_yield_fraction=0.15, high_cutoff=50):
-    """
-    Creates robust, equipopulated bins for a 1D quantized variable.
-    Iteratively merges bins that are less populated than `min_yield_fraction`.
-    """
     counts = Counter(data)
     sorted_unique_vals = sorted(counts.keys())
     total_events = len(data)
@@ -315,11 +317,7 @@ def get_quantized_1d_bins(data, target_nbins, min_yield_fraction=0.15, high_cuto
 
 
 def calculate_1d_binning_from_numpy(channel, var_data_np, variables, percentiles):
-    """
-    Corrected version that uses robust merging for quantized variables.
-    """
-    binning = {}
-    bad_values = [-11.0, -999.0, -10.0, -1.0]
+    binning, bad_values = {}, [-11.0, -999.0, -10.0, -1.0]  # usually it is -10
     
     for v in tqdm(variables, desc="Calculating 1D binning"):
         values_clean = var_data_np[v][~np.isin(var_data_np[v], bad_values)]
@@ -332,12 +330,11 @@ def calculate_1d_binning_from_numpy(channel, var_data_np, variables, percentiles
             num_bins = len(percentiles) - 1
             borders = get_quantized_1d_bins(values_clean, num_bins)
         else:
-            noise = np.random.normal(0, 1e-9, values_clean.shape)
-            values_jittered = values_clean + noise
-            borders = [float(x) for x in np.percentile(values_jittered, percentiles)]
+            borders = [float(x) for x in np.percentile(values_clean, percentiles)]
             borders = sorted(list(set(borders)))
 
-        if len(borders) < 2: borders = [values_clean.min(), values_clean.max()]
+        if len(borders) < 2:
+            borders = [values_clean.min(), values_clean.max()]
 
         borders[0] -= abs(borders[0] * 1e-4) if borders[0] != 0 else 1e-4
         borders[-1] += abs(borders[-1] * 1e-4) if borders[-1] != 0 else 1e-4
@@ -351,7 +348,8 @@ def calculate_1d_binning_from_numpy(channel, var_data_np, variables, percentiles
 
 
 def is_quantized(data, unique_threshold=30):
-    if len(data) == 0: return False
+    if len(data) == 0:
+        return False
     unique_vals = np.unique(data)
     is_integer_like = np.all(np.equal(np.mod(unique_vals, 1), 0))
     return is_integer_like and len(unique_vals) < unique_threshold
@@ -362,7 +360,6 @@ def get_quantized_slice_bins(data, num_slices, high_cutoff=50):
     Finds more robustly equipopulated bin edges for a quantized variable.
     """
     if num_slices <= 1 or len(np.unique(data)) <= 1:
-        # Use a high cutoff for the upper edge
         return [np.min(data) - 0.5, high_cutoff + 0.5]
 
     counts = Counter(data)
@@ -377,17 +374,13 @@ def get_quantized_slice_bins(data, num_slices, high_cutoff=50):
     for i, val in enumerate(sorted_unique_vals):
         # Look ahead to see if adding this value would be a good cut point
         if cumulative_events >= target_per_slice:
-            # We are past the target, so the cut should have been before this value
             edges.append(val - 0.5)
-            # Reset the counter for the new slice
             cumulative_events = 0
         cumulative_events += counts[val]
     
-    # Add the final, high-cutoff edge
     edges.append(high_cutoff + 0.5)
     
     final_edges = sorted(list(set(edges)))
-    # If the logic produced too few bins, fall back to a simpler split
     if len(final_edges) < num_slices:
         logger.warning("Quantized binning created fewer slices than requested. Check data distribution.")
 
@@ -395,28 +388,27 @@ def get_quantized_slice_bins(data, num_slices, high_cutoff=50):
 
     
 def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_primary_slices=5, target_total_bins=25):
-    """
-    Final, correct version based on the user's working code and final correction.
-    - Implements 1-based indexing in the ROOT expression to solve the "bin 0" spike.
-    - Adjusts the final bins array to match the 1-based index.
-    - Preserves all other working logic.
-    """
     new_binning = binning.copy()
 
     for v1, v2 in tqdm(list(itertools.combinations(variables, 2)), desc="Calculating 2D unrolled binning"):
-        # 1. Prepare and filter local data for the pair
         val1_raw, val2_raw = var_data_np[v1], var_data_np[v2]
         v1_min, v1_max = binning[v1]['bins'][0], binning[v1]['bins'][-1]
         v2_min, v2_max = binning[v2]['bins'][0], binning[v2]['bins'][-1]
         bad_values = [-11.0, -999.0, -10.0, -1.0]
-        final_mask = (~np.isin(val1_raw, bad_values) & ~np.isin(val2_raw, bad_values) &
-                      (val1_raw > v1_min) & (val1_raw < v1_max) &
-                      (val2_raw > v2_min) & (val2_raw < v2_max))
+        final_mask = (
+            ~np.isin(val1_raw, bad_values) &
+            ~np.isin(val2_raw, bad_values) &
+            (val1_raw > v1_min) &
+            (val1_raw < v1_max) &
+            (val2_raw > v2_min) &
+            (val2_raw < v2_max)
+        )
         val1_local, val2_local = val1_raw[final_mask], val2_raw[final_mask]
 
-        if len(val1_local) < target_total_bins: continue
+        if len(val1_local) < target_total_bins:
+            continue
 
-        # 2. UNIVERSAL LOGIC: Select slicing (v_slice) and adaptive (v_cont) variables
+        # Select slicing (v_slice) and adaptive (v_cont) variables
         v1_is_quantized = "njets" in v1 or "nbtag" in v1
         v2_is_quantized = "njets" in v2 or "nbtag" in v2
         if v1_is_quantized and not v2_is_quantized:
@@ -425,7 +417,7 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
         elif v2_is_quantized and not v1_is_quantized:
             v_slice_name, v_cont_name = v2, v1
             slice_data, cont_data = val2_local, val1_local
-        else: # Covers continuous-continuous and quantized-quantized
+        else:  # Covers continuous-continuous and quantized-quantized
             if len(val1_local) <= len(val2_local):
                 v_slice_name, v_cont_name = v1, v2
                 slice_data, cont_data = val1_local, val2_local
@@ -433,7 +425,7 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
                 v_slice_name, v_cont_name = v2, v1
                 slice_data, cont_data = val2_local, val1_local
         
-        # 3. Define primary slices for v_slice
+        # Define primary slices for v_slice
         slice_is_quantized_check = is_quantized(slice_data)
         if slice_is_quantized_check:
             slice_edges = get_quantized_slice_bins(slice_data, num_primary_slices)
@@ -443,9 +435,8 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
         slice_edges = sorted(list(set(slice_edges)))
         if len(slice_edges) < 2: continue
 
-        # 4. Pre-calculate the adaptive number of sub-bins and their edges for each slice
-        slice_info = []
-        total_valid_events = len(slice_data)
+        # Pre-calculate the adaptive number of sub-bins and their edges for each slice
+        slice_info, total_valid_events = [], len(slice_data)
         global_target_yield = max(1, total_valid_events / target_total_bins) if target_total_bins > 0 else 1
         for i in range(len(slice_edges) - 1):
             start, end = slice_edges[i], slice_edges[i+1]
@@ -461,10 +452,8 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
             secondary_edges = np.percentile(cont_in_slice + noise, np.linspace(0, 100, num_sub_bins + 1))
             slice_info.append({'valid': True, 'num_sub_bins': num_sub_bins, 'secondary_edges': secondary_edges})
 
-        # 5. Build the nested expression that calculates a final bin index
-        expression_parts = []
-        slice_conditions = []
-        bin_offset = 0
+        # Build the nested expression for bin index
+        expression_parts, slice_conditions, bin_offset = [], [], 0
         for i, info in enumerate(slice_info):
             if not info['valid']: continue
             start_slice, end_slice = slice_edges[i], slice_edges[i+1]
@@ -473,7 +462,6 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
             sub_bin_expr_parts = []
             for j in range(info['num_sub_bins']):
                 start_sub, end_sub = info['secondary_edges'][j], info['secondary_edges'][j+1]
-                # Correctly handle the last bin to be inclusive
                 is_last_sub = (j == info['num_sub_bins'] - 1)
                 sub_cond = f"((({v1} > -10) && ({v2} > -10)) && (({v_cont_name} >= {start_sub}) && ({v_cont_name} {'<=' if is_last_sub else '<'} {end_sub})))"
                 sub_bin_expr_parts.append(f"{j}*{sub_cond}")
@@ -483,32 +471,18 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
             slice_condition = f"((({v1} > -10) && (({v2} > -10)) && ({v_slice_name} >= {start_slice}) && ({v_slice_name} {'<=' if is_last_slice else '<'} {end_slice})))"
             slice_conditions.append(slice_condition)
 
-            # --- THE DEFINITIVE FIX ---
-            # Use 1-based indexing for the bin content to separate fall-through events (which will be 0)
-            # from valid events in the first bin (which will now be 1, 6, 11, etc.).
             expression_parts.append(f"({bin_offset + 1} + {sub_bin_index_expr}) * {slice_condition}")
             
             bin_offset += info['num_sub_bins']
 
-        if not expression_parts: continue
-        
-        # The main expression now correctly produces 0 for misses, and 1-based indices for hits.
-        full_expression = ' + '.join(expression_parts)
-        
-        # 6. The final bins now start at 0.5 to exclude the "miss" bin at 0.
-        total_final_bins = bin_offset
-        final_bins = np.arange(total_final_bins + 1, dtype=float) + 0.5
+        if not expression_parts:
+            continue
 
-        # 7. Finalize and store
-        name = f"{v1}_{v2}"
-        cut = f"(({v1} > {v1_min}) && ({v1} < {v1_max}) && ({v2} > {v2_min}) && ({v2} < {v2_max}))"
-        
-        # The -9999.0 part is no longer necessary as misses are cleanly handled by the 0 bin,
-        # but we keep the structure for safety against primary slice fall-through.
-        all_slice_conditions = " || ".join(slice_conditions)
-        full_expression_with_safety = f"(({full_expression}) * ({all_slice_conditions})) + (0 * !({all_slice_conditions}))"
-
-        new_binning[name] = {"bins": final_bins, "expression": full_expression_with_safety, "cut": cut}
+        new_binning[f"{v1}_{v2}"] = {
+            "bins": np.arange(bin_offset + 1, dtype=float) + 0.5,  # everything else lands in bin 0
+            "expression": ' + '.join(expression_parts),
+            "cut": f"(({v1} > {v1_min}) && ({v1} < {v1_max}) && ({v2} > {v2_min}) && ({v2} < {v2_max}))",
+        }
 
     return to_python_native(new_binning)
 
