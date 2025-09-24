@@ -9,7 +9,7 @@ import sys
 
 if __name__ == "__main__":
     filename = sys.argv[1]
-    print("[INFO] Print fit results from file {}.".format(filename))
+    print("[INFO] Print fit results from file {}".format(filename))
     f = ROOT.TFile(filename)
     if f == None:
         raise Exception("[ERROR] File {} not found.".format(filename))

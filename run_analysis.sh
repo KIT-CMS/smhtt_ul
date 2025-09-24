@@ -11,7 +11,7 @@ ulimit -s unlimited
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 # Datacard Setup
-datacard_output="datacards/${NTUPLETAG}-${TAG}/${ERA}_${CHANNEL}"
+datacard_output="datacards/${NTUPLETAG}-${TAG}"
 
 output_shapes="tauid_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
@@ -182,48 +182,59 @@ if [[ $MODE == "DATACARD" ]]; then
     # inputfile
     inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
 
-    ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
+    ${CMSSW_BASE}/bin/${SCRAM_ARCH}/MorphingSMRun2Legacy \
         --base_path=$PWD \
         --input_folder_mt=$shapes_output_synced \
         --input_folder_tt=$shapes_output_synced \
         --input_folder_et=$shapes_output_synced \
-        --input_folder_em=$shapes_output_synced \
-        --real_data=false \
-        --classic_bbb=false \
-        --binomial_bbb=false \
-        --jetfakes=1 \
-        --embedding=1 \
-        --postfix="-ML" \
+        --postfix=${POSTFIX} \
         --channel=${CHANNEL} \
         --auto_rebin=true \
-        --stxs_signals="stxs_stage0" \
-        --categories="stxs_stage0" \
         --era=${ERA} \
         --output=output/$datacard_output \
-        --use_automc=true \
-        --train_ff=1 \
-        --train_stage0=1\
-        --train_emb=1
-    THIS_PWD=${PWD}
-    echo $THIS_PWD
-    cd output/$datacard_output/$CHANNEL
+        --use_automc=true 
+
+    THIS_PWD=$(pwd)
+    target_dir="output/$datacard_output/$CHANNEL"
+    echo "[INFO] Current PWD: $THIS_PWD"
+    echo "[INFO] Datacard dir: $target_dir"
+
     for FILE in */*.txt; do
         sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
     done
     cd $THIS_PWD
 
     echo "[INFO] Create Workspace for datacard"
-    # combineTool.py -M T2W -i output/$datacard_output/htt_$channel_*/ -o workspace.root --parallel 4 -m 125
-    combineTool.py -M T2W -o workspace.root -i output/$datacard_output/$CHANNEL/125 --parallel 4 -m 125 \
-        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-        --PO '"map=^.*/ggH_htt.?$:r_ggH[1,-5,5]"' \
-        --PO '"map=^.*/qqH_htt.?$:r_qqH[1,-5,5]"'
-        # --PO '"map=^.*/WH_htt.?$:r_VH[1,-5,7]"' \
-       	# --PO '"map=^.*/ZH_htt.?$:r_VH[1,-5,7]"'
-        # --PO '"map=^.*/ggZH_had_htt.?$:r_ggH[1,-5,5]"' \
-        # --PO '"map=^.*/WH_had_htt.?$:r_qqH[1,-5,5]"' \
-        # --PO '"map=^.*/ZH_had_htt.?$:r_qqH[1,-5,5]"' \
-        # --PO '"map=^.*/ggZH_lep_htt.?$:r_VH[1,-5,7]"'
+    combineTool.py -M T2W -o workspace.root -i $target_dir --parallel 4 -m 125 # \
+                    # -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+                    # --PO verbose \
+                    # --PO '"map=^.*/HH2B2Tau.*?$:r_HH[1.0,-20,20]"' 
+    exit 0
+fi
+
+if [[ $MODE == "DATACARD-PY" ]]; then
+    source utils/setup_cmssw.sh
+    # inputfile
+    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
+
+    python3 ${CMSSW_BASE}/src/HHAnalysis/hh_datacards.py --ntuple-tag $NTUPLETAG --tag $TAG --era $ERA
+
+    THIS_PWD=$(pwd)
+    target_dir="output/$datacard_output/cmb"
+    echo "[INFO] Current PWD: $THIS_PWD"
+    echo "[INFO] Datacard dir: $target_dir"
+
+    for FILE in */*.txt; do
+        sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+    done
+    cd $THIS_PWD
+
+    echo "[INFO] Create Workspace for datacard"
+    combineTool.py -M T2W -i $target_dir -m 125 
+                    # \
+                    # -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+                    # --PO verbose \
+                    # --PO '"map=^.*/HH2B2Tau.*?$:r_HH[1.0,-20,20]"' 
     exit 0
 fi
 
@@ -277,22 +288,49 @@ if [[ $MODE == "DATACARD-MC" ]]; then
     exit 0
 fi
 
+if [[ $MODE == "FIT-HH" ]]; then
+    datacard_dir="output/$datacard_output/cmb"
+    source utils/setup_cmssw.sh
+        combineTool.py -M MultiDimFit \
+            -m 125 \
+            -d ${datacard_dir}/combined.txt.cmb.root \
+            --algo singles \
+            --robustFit 1 -v 1 --there \
+            -t -1 --expectSignal 1 \
+            --setParameterRanges r=-19,21 -n ".Fit"
+        combineTool.py -M AsymptoticLimits \
+            -m 125 \
+            -d ${datacard_dir}/combined.txt.cmb.root \
+            -v 1 --there \
+            -t -1 --expectSignal 0 \
+            --setParameterRanges r=-20,20 -n ".Limit"
+        combineTool.py -M Significance \
+            -m 125 \
+            -d ${datacard_dir}/combined.txt.cmb.root \
+            -v 1 --there -t -1 \
+            --expectSignal 1 \
+            --setParameterRanges r=-19,21 -n ".Significance"
+    exit 0
+fi
+
 if [[ $MODE == "FIT" ]]; then
     source utils/setup_cmssw.sh
         combineTool.py \
         -M MultiDimFit \
         -m 125 \
-        -d output/$datacard_output/$CHANNEL/125/workspace.root \
+        -d output/$datacard_output/$CHANNEL/workspace.root \
         --algo singles \
         --robustFit 1 \
         --X-rtd MINIMIZER_analytic \
         --cminDefaultMinimizerStrategy 0 \
         -n $ERA -v1 \
-        --parallel 1 --there
-    for RESDIR in output/$datacard_output/$CHANNEL/125; do
+        --parallel 1 --there \
+        -t -1 \
+        --expectSignal=1
+    for RESDIR in output/$datacard_output/$CHANNEL; do
         echo "[INFO] Printing fit result for category $(basename $RESDIR)"
         FITFILE=${RESDIR}/higgsCombine${ERA}.MultiDimFit.mH125.root
-        python datacards/print_fitresult.py ${FITFILE}
+        python3 datacards/print_fitresult.py ${FITFILE}
     done
     exit 0
 fi
