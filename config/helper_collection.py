@@ -6,7 +6,7 @@ import pathlib
 import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from itertools import product
+from itertools import islice, product
 from typing import Any, Dict, Iterable, Tuple, Union, Callable
 
 import numpy as np
@@ -484,3 +484,42 @@ def fake_factor_ff_and_corrections_extractor(
         for value in corr["data"]["content"]
         if value["key"].endswith("Up")
     ]
+
+
+def _batched(iterable, n):
+    iterator = iter(iterable)
+    while batch := tuple(islice(iterator, n)):
+        yield batch
+
+
+def incremental_hadd(
+    input_directory: str,
+    output_file: str,
+    batch_size: int = 250,
+    remove_partial_files: bool = False,
+) -> None:
+    output_file = pathlib.Path(output_file)
+    to_add_files = [_file for _file in pathlib.Path(input_directory).glob("*.root")]
+
+    for files_batch in _batched(to_add_files, batch_size):
+        logger.info(f"Adding files: {files_batch}")
+
+        if not output_file.exists():
+            tmp_output = None
+            cmd = f"hadd -f {output_file} {' '.join(map(str, files_batch))}"
+        else:
+            tmp_output = output_file.with_suffix(".tmp.root")
+            cmd = f"hadd -f {tmp_output} {output_file} {' '.join(map(str, files_batch))}"
+        
+        logger.info(f"Running command: {cmd}")
+        result = os.system(cmd)
+
+        if result == 0:
+            if tmp_output is not None:
+                tmp_output.replace(output_file)
+            if remove_partial_files:
+                for file in files_batch:
+                    print(f"Would remove file: {file}")
+                    # os.remove(file)
+        else:
+            logger.error(f"Command failed with exit code {result}: {cmd}")

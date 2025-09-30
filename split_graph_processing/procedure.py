@@ -17,6 +17,7 @@ logger = setup_logging(logger=logging.getLogger(__name__))
 
 input_arg_parser = argparse.ArgumentParser()
 input_arg_parser.add_argument("-i", "--input", type=str, help="Input file containing the pickled graphs")
+input_arg_parser.add_argument("-t", "--tag", type=str, help="Tag for the processing run")
 input_arg_parser.add_argument("-o", "--output", type=str, default=None, help="Output directory for the produced root files")
 input_arg_parser.add_argument("-m", "--mode", type=str, help="setup|run|hadd|combine_daemon - working modes")
 input_arg_parser.add_argument("-p", "--process", type=str, default=None, help="process to run")
@@ -24,10 +25,12 @@ input_arg_parser.add_argument("-idx", "--index", type=int, default=None, help="i
 input_arg_parser.add_argument("-n", "--numworkers", type=int, default=1, help="Number of workers to use")
 input_arg_parser.add_argument("-a", "--argument-file", type=str, default=None, help="File to write argument list to")
 
+
 def _batched(iterable, n):
     iterator = iter(iterable)
     while batch := tuple(islice(iterator, n)):
         yield batch
+
 
 class GraphProcessor:
     def __init__(
@@ -42,6 +45,11 @@ class GraphProcessor:
 
         self._graphs = None
         self._all_files = None
+        
+        if not self.output_path.exists():
+            self.output_path.mkdir(parents=True, exist_ok=True)
+        if not self.processed_path.parent.exists():
+            self.processed_path.parent.mkdir(parents=True, exist_ok=True)
 
     @property
     def graphs(self) -> List[Callable]:

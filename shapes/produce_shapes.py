@@ -4,7 +4,12 @@ import logging
 import os
 import pickle
 from functools import partial
-from itertools import combinations
+from itertools import product
+import multiprocessing as mp
+import pathlib
+import time
+from copy import deepcopy
+from tqdm import tqdm
 
 import yaml
 
@@ -12,7 +17,7 @@ import config.shapes.process_selection as selection
 import config.shapes.variations as variations
 import shapes.utils as shape_utils
 import config.ntuple_processor_config_helper as ntuple_processor_config_helper
-from config.helper_collection import PreserveROOTPathsAsStrings
+from config.helper_collection import PreserveROOTPathsAsStrings, incremental_hadd
 from config.logging_setup_configs import setup_logging
 from config.shapes.category_selection import categorization as default_categorization
 from config.shapes.channel_selection import channel_selection
@@ -197,6 +202,21 @@ def parse_arguments():
         "--ff-type",
         help=f"Set to the type of fake factor used.\n{variations.FFHelper.__FF_OPTION_info__}",
         default="fake_factor"
+    )
+    parser.add_argument(
+        "--run-splitted",
+        action="store_true",
+        help="If set, run the job in splitted mode.",
+    )
+    parser.add_argument(
+        "--incremental-hadd",
+        action="store_true",
+        help="If set, incrementally hadd the output files that are produced if --run-splitted is set.",
+    )
+    parser.add_argument(
+        "--remove-partial-files",
+        action="store_true",
+        help="If set, remove partial files after processing.",
     )
     return parser.parse_args()
 
@@ -613,8 +633,7 @@ def main(args):
     g_manager = GraphManager(unit_manager.booked_units, True)
     g_manager.optimize(args.optimization_level)
     graphs = g_manager.graphs
-    for graph in graphs:
-        print(f"{graph}")
+    logger.info('\n'.join(str(graph) for graph in graphs))
 
     if args.collect_config_only:
         if len(args.channels) > 1:
@@ -645,9 +664,52 @@ def main(args):
         with open(graph_file, "wb") as file:
             pickle.dump(graphs, file)
     else:
-        r_manager = RunManager(graphs)
-        r_manager.run_locally(output_file, args.num_processes, args.num_threads)
+        if not args.run_splitted:
+            r_manager = RunManager(graphs)
+            r_manager.run_locally(output_file, args.num_processes, args.num_threads)
+        else:
+            _p = pathlib.Path(args.output_file).parent / "partial_graph_results"
+            _p.mkdir(exist_ok=True)
+            arguments = [
+                (deepcopy(_graph), _p / f"_out_{idx}.root", args) 
+                for idx, _graph in tqdm(enumerate(graphs))
+                if not (_p / f"_out_{idx}.root").exists()
+            ]
+            with mp.Pool(args.num_processes) as pool:
+                print("\n".join(list(pool.imap_unordered(run_partial_graph, arguments))))
+            if args.incremental_hadd:
+                incremental_hadd(
+                    input_directory=str(_p),
+                    output_file=output_file,
+                    batch_size=250,
+                    remove_partial_files=args.remove_partial_files,
+                )
 
+
+def run_partial_graph(arguments):
+    graph, output_file, args = arguments
+
+    output_file = pathlib.Path(output_file)
+    reservation_path = pathlib.Path(str(output_file).replace(".root", ".lock"))
+
+    if output_file.exists() and not reservation_path.exists():
+        return f"skip {output_file.name}, already done"
+
+    if reservation_path.exists() and not output_file.exists():
+        return f"locked {output_file.name}"
+
+    try:
+        reservation_path.touch(exist_ok=False)
+    except FileExistsError:
+        return f"locked {output_file.name}"
+
+    try:
+        RunManager([graph]).run_locally(str(output_file), 1, args.num_threads)
+        return f"done {output_file.name}"
+    except Exception as e:
+        return f"failed {output_file.name}: {e}"
+    finally:
+        reservation_path.unlink(missing_ok=True)
 
 if __name__ == "__main__":
     args = parse_arguments()

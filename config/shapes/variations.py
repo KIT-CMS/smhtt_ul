@@ -596,12 +596,13 @@ top_pt = [
 # FF variations
 # Variations on the jet backgrounds estimated with the fake factor method.
 ff_variations_lt = [
-    LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-        lambda: ReplaceCutAndAddWeight(
-            f"anti_iso_CMS_{syst}{shift}_Channel_Era",
-            "tau_iso",
-            Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
-            Weight(f"{RuntimeVariables.FF_name_lt}__{syst}{shift}", "fake_factor"),
+    ReplaceCutAndAddWeight(
+        f"anti_iso_CMS_{syst}{shift}_Channel_Era",
+        "tau_iso",
+        Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+        Weight(
+            f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__{syst}{shift}",
+            f"fake_factor",
         )
     )
     for shift in SHIFT_DIRECTIONS
@@ -668,14 +669,12 @@ ff_variations_lt = [
 # Propagation of tau ES systematics on jetFakes process
 # lt channel
 ff_variations_tau_es_lt = [
-    LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-        lambda: ReplaceVariableReplaceCutAndAddWeight(
-            name,
-            variation,
-            "tau_iso",
-            Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
-            Weight(f"{RuntimeVariables.FF_name_lt}__{variation}", "fake_factor"),
-        )
+    ReplaceVariableReplaceCutAndAddWeight(
+        name,
+        variation,
+        "tau_iso",
+        Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
+        Weight(f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__{variation}", "fake_factor")
     )
     for shift in SHIFT_DIRECTIONS
     for name, variation in [
@@ -688,14 +687,12 @@ ff_variations_tau_es_lt = [
 
 # lt for emb only for correlation
 ff_variations_tau_es_emb_lt = [
-    LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-        lambda: ReplaceVariableReplaceCutAndAddWeight(
-            name,
-            variation,
-            "tau_iso",
-            Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
-            Weight(f"{RuntimeVariables.FF_name_lt}__{variation}", "fake_factor"),
-        )
+    ReplaceVariableReplaceCutAndAddWeight(
+        name,
+        variation,
+        "tau_iso",
+        Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
+        Weight(f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__{variation}", "fake_factor"),
     )
     for shift in SHIFT_DIRECTIONS
     for name, variation in [
@@ -708,36 +705,34 @@ ff_variations_tau_es_emb_lt = [
 
 # # tt channel
 ff_variations_tau_es_tt = [
-    LazyVariable(  # requieres LazyVariation since Used.FF_name_tt may be defined later
-        lambda: ReplaceVariableReplaceCutAndAddWeight(
-            name,
-            variation,
-            "tau_iso",
-            Cut(
-                f"""(
-                        (
-                            (id_tau_vsJet_Tight_1__{variation} < 0.5) &&
-                            (id_tau_vsJet_Tight_2__{variation} > 0.5) &&
-                            (id_tau_vsJet_VLoose_1__{variation} > 0.5)
-                        ) ||
-                        (
-                            (id_tau_vsJet_Tight_1__{variation} > 0.5) &&
-                            (id_tau_vsJet_Tight_2__{variation} < 0.5) &&
-                            (id_tau_vsJet_VLoose_2__{variation} > 0.5)
-                        )
-                    )""",
-                "tau_anti_iso"
-            ),
-            Weight(
-                f"""(
-                    (0.5) * (
-                        ({RuntimeVariables.FF_name_tt_1}__{variation} * (id_tau_vsJet_Tight_1__{variation} < 0.5)) +
-                        ({RuntimeVariables.FF_name_tt_2}__{variation} * (id_tau_vsJet_Tight_2__{variation} < 0.5))
+    ReplaceVariableReplaceCutAndAddWeight(
+        name,
+        variation,
+        "tau_iso",
+        Cut(
+            f"""(
+                    (
+                        (id_tau_vsJet_Tight_1__{variation} < 0.5) &&
+                        (id_tau_vsJet_Tight_2__{variation} > 0.5) &&
+                        (id_tau_vsJet_VLoose_1__{variation} > 0.5)
+                    ) ||
+                    (
+                        (id_tau_vsJet_Tight_1__{variation} > 0.5) &&
+                        (id_tau_vsJet_Tight_2__{variation} < 0.5) &&
+                        (id_tau_vsJet_VLoose_2__{variation} > 0.5)
                     )
                 )""",
-                "fake_factor",
-            ),
-        )
+            "tau_anti_iso"
+        ),
+        Weight(
+            f"""(
+                (0.5) * (
+                    ({FFHelper.FF_OPTIONS['fake_factor']['tt_1']}__{variation} * (id_tau_vsJet_Tight_1__{variation} < 0.5)) +
+                    ({FFHelper.FF_OPTIONS['fake_factor']['tt_2']}__{variation} * (id_tau_vsJet_Tight_2__{variation} < 0.5))
+                )
+            )""",
+            "fake_factor",
+        ),
     )
     for shift in SHIFT_DIRECTIONS
     for name, variation in [
@@ -750,36 +745,34 @@ ff_variations_tau_es_tt = [
 
 # tt channel emb process
 ff_variations_tau_es_tt = [
-    LazyVariable(  # requieres LazyVariation since Used.FF_name_tt may be defined later
-        lambda: ReplaceVariableReplaceCutAndAddWeight(
-            name,
-            variation,
-            "tau_iso",
-            Cut(
-                f"""(
-                        (
-                            (id_tau_vsJet_Tight_1__{variation} < 0.5) &&
-                            (id_tau_vsJet_Tight_2__{variation} > 0.5) &&
-                            (id_tau_vsJet_VLoose_1__{variation} > 0.5)
-                        ) ||
-                        (
-                            (id_tau_vsJet_Tight_1__{variation} > 0.5) &&
-                            (id_tau_vsJet_Tight_2__{variation} < 0.5) &&
-                            (id_tau_vsJet_VLoose_2__{variation} > 0.5)
-                        )
-                    )""",
-                "tau_anti_iso"
-            ),
-            Weight(
-                f"""(
-                    (0.5) * (
-                        ({RuntimeVariables.FF_name_tt_1}__{variation} * (id_tau_vsJet_Tight_1__{variation} < 0.5)) +
-                        ({RuntimeVariables.FF_name_tt_2}__{variation} * (id_tau_vsJet_Tight_2__{variation} < 0.5))
+    ReplaceVariableReplaceCutAndAddWeight(
+        name,
+        variation,
+        "tau_iso",
+        Cut(
+            f"""(
+                    (
+                        (id_tau_vsJet_Tight_1__{variation} < 0.5) &&
+                        (id_tau_vsJet_Tight_2__{variation} > 0.5) &&
+                        (id_tau_vsJet_VLoose_1__{variation} > 0.5)
+                    ) ||
+                    (
+                        (id_tau_vsJet_Tight_1__{variation} > 0.5) &&
+                        (id_tau_vsJet_Tight_2__{variation} < 0.5) &&
+                        (id_tau_vsJet_VLoose_2__{variation} > 0.5)
                     )
                 )""",
-                "fake_factor",
-            ),
-        )
+            "tau_anti_iso"
+        ),
+        Weight(
+            f"""(
+                (0.5) * (
+                    ({FFHelper.FF_OPTIONS['fake_factor']['tt_1']}__{variation} * (id_tau_vsJet_Tight_1__{variation} < 0.5)) +
+                    ({FFHelper.FF_OPTIONS['fake_factor']['tt_2']}__{variation} * (id_tau_vsJet_Tight_2__{variation} < 0.5))
+                )
+            )""",
+            "fake_factor",
+        ),
     )
     for shift in SHIFT_DIRECTIONS
     for name, variation in [
