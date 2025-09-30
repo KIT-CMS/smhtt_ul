@@ -11,7 +11,7 @@ ulimit -s unlimited
 source utils/setup_ul_samples.sh $NTUPLETAG $ERA
 
 # Datacard Setup
-datacard_output="datacards/${NTUPLETAG}-${TAG}"
+datacard_output="datacards/${NTUPLETAG}/${TAG}"
 
 output_shapes="tauid_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
@@ -214,27 +214,28 @@ fi
 
 if [[ $MODE == "DATACARD-PY" ]]; then
     source utils/setup_cmssw.sh
-    # inputfile
-    inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
 
-    python3 ${CMSSW_BASE}/src/HHDatacards/hh_datacards.py --ntuple-tag $NTUPLETAG --tag $TAG --era $ERA
+    for FS in tt mt et all; do
+        output_dir="output/$datacard_output/$FS"
+        echo "[INFO] Creating datacards for final state: $FS"
+        python3 ${CMSSW_BASE}/src/HHDatacards/hh_datacards.py --ntuple-tag $NTUPLETAG --tag $TAG --era $ERA --output-dir $output_dir --final-state $FS
 
-    THIS_PWD=$(pwd)
-    target_dir="output/$datacard_output/cmb"
-    echo "[INFO] Current PWD: $THIS_PWD"
-    echo "[INFO] Datacard dir: $target_dir"
+        THIS_PWD=$(pwd)
+        echo "[INFO] Current PWD: $THIS_PWD"
+        echo "[INFO] Datacard dir: $output_dir"
 
-    for FILE in */*.txt; do
-        sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+        for FILE in */*.txt; do
+            sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+        done
+        cd $THIS_PWD
+
+        echo "[INFO] Create Workspace for datacard with final state $FS"
+        combineTool.py -M T2W -i $output_dir/cmb -m 125
+                        # \
+                        # -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+                        # --PO verbose \
+                        # --PO '"map=^.*/HH2B2Tau.*?$:r_HH[1.0,-20,20]"' 
     done
-    cd $THIS_PWD
-
-    echo "[INFO] Create Workspace for datacard"
-    combineTool.py -M T2W -i $target_dir -m 125 
-                    # \
-                    # -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-                    # --PO verbose \
-                    # --PO '"map=^.*/HH2B2Tau.*?$:r_HH[1.0,-20,20]"' 
     exit 0
 fi
 
@@ -289,27 +290,32 @@ if [[ $MODE == "DATACARD-MC" ]]; then
 fi
 
 if [[ $MODE == "FIT-HH" ]]; then
-    datacard_dir="output/$datacard_output/cmb"
-    source utils/setup_cmssw.sh
-        combineTool.py -M MultiDimFit \
-            -m 125 \
-            -d ${datacard_dir}/combined.txt.cmb.root \
-            --algo singles \
-            --robustFit 1 -v 1 --there \
-            -t -1 --expectSignal 1 \
-            --setParameterRanges r=-19,21 -n ".Fit"
-        combineTool.py -M AsymptoticLimits \
-            -m 125 \
-            -d ${datacard_dir}/combined.txt.cmb.root \
-            -v 1 --there \
-            -t -1 --expectSignal 0 \
-            --setParameterRanges r=-20,20 -n ".Limit"
-        combineTool.py -M Significance \
-            -m 125 \
-            -d ${datacard_dir}/combined.txt.cmb.root \
-            -v 1 --there -t -1 \
-            --expectSignal 1 \
-            --setParameterRanges r=-19,21 -n ".Significance"
+    for FS in tt mt et all; do
+        echo " "
+        echo "[INFO] Running fit for final state: $FS"
+        datacard_dir="output/$datacard_output/$FS/cmb"
+        source utils/setup_cmssw.sh
+            combineTool.py -M MultiDimFit \
+                -m 125 \
+                -d ${datacard_dir}/combined.txt.cmb.root \
+                --algo singles \
+                --robustFit 1 -v 1 --there \
+                -t -1 --expectSignal 1 \
+                --setParameterRanges r=-40,40 -n ".Fit"
+            combineTool.py -M AsymptoticLimits \
+                -m 125 \
+                -d ${datacard_dir}/combined.txt.cmb.root \
+                -v 1 --there \
+                -t -1 --expectSignal 0 \
+                --setParameterRanges r=-40,40 -n ".Limit"
+            combineTool.py -M Significance \
+                -m 125 \
+                -d ${datacard_dir}/combined.txt.cmb.root \
+                -v 1 --there -t -1 \
+                --expectSignal 1 \
+                --setParameterRanges r=-40,40 -n ".Significance"
+    done
+            
     exit 0
 fi
 
