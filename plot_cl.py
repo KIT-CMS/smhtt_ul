@@ -141,7 +141,7 @@ def plot_intervals(outdir: str = "plots", filename: str = "cl_intervals", traini
 	# Sicherstellen, dass keine Minor-Ticks erscheinen
 	from matplotlib.ticker import NullLocator
 	ax.yaxis.set_minor_locator(NullLocator())
-	ax.set_xlabel("Signalstrength r")
+	ax.set_xlabel(r"$95\%$ CL upper limit on $\sigma(pp \to HH)\,/\,\sigma_{\mathrm{theory}}$")
 	ax.set_ylim(-0.6, len(order) - 0.4)
 	ax.set_xlim(xmin, xmax)
 	ax.grid(axis="x", alpha=0.3, linestyle=":")

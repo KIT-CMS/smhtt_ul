@@ -129,6 +129,8 @@ if [[ $MODE == "LOCAL" ]]; then
         --skip-systematic-variations \
         --xrootd --validation-tag $TAG \
         --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" 
+
+    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd 
 fi
 
 if [[ $MODE == "CONDOR" ]]; then
@@ -159,7 +161,7 @@ fi
 
 if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd # --do-emb-tt --do-ff 
+    # python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd # --do-emb-tt --do-ff 
 
     # if the output folder does not exist, create it
     if [ ! -d "$shapes_output_synced" ]; then
@@ -169,7 +171,8 @@ if [[ $MODE == "SYNC" ]]; then
     python shapes/convert_to_synced_shapes.py -e $ERA \
         -i ${shapes_rootfile} \
         -o ${shapes_output_synced} \
-        -n 1
+        -n 1 \
+        --mc
 
     inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
     hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${ERA}-${CHANNEL}*.root
