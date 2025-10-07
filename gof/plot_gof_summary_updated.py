@@ -8,7 +8,9 @@ from itertools import product
 import seaborn as sns
 import matplotlib.colors as mcolors
 from Dumbledraw.styles import x_label_dict
-from typing import Optional
+from typing import Optional, Callable
+import matplotlib.ticker as mplticker
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import logging
 from itertools import product
@@ -29,7 +31,7 @@ def parse_arguments():
     parser.add_argument("--channel", type=str, help="Select channel to be plotted")
     parser.add_argument("--era", type=str, help="Select era to be plotted")
     parser.add_argument("-c", "--classification", type=str, default=None)
-    parser.add_argument("-tc", "--threshold", type=float, default=0.05)
+    parser.add_argument("-tc", "--threshold", type=float, default=0.01)
     parser.add_argument("-tt", "--test-type", type=str, default="gof", help="gof, gof_KS, gof_AD")
     return parser.parse_args()
 
@@ -89,8 +91,7 @@ def get_matrix(args: argparse.Namespace):
     return p_values
 
 
-def plot_2d_matrix(args: argparse.Namespace):
-    vmin, vmax = -0.05, 1.0
+def plot_2d_matrix(args: argparse.Namespace, label_func: Callable):
     def frac(value):
         vmin, vmax = 0.0, 1.0
         return (value - vmin) / (vmax - vmin)
@@ -98,12 +99,12 @@ def plot_2d_matrix(args: argparse.Namespace):
     cmap_list = [
         (0.0, "red"),
         (frac(0.0),  "red"),
-        (frac(0.05),  "red"),
-        (frac(0.05),  "green"),
-        (frac(vmax), "green"),
+        (frac(args.threshold),  "red"),
+        (frac(args.threshold),  "green"),
+        (1.0, "green"),
     ]
     cmap = mcolors.LinearSegmentedColormap.from_list("segmented_cmap", cmap_list)
-    norm = mcolors.Normalize(vmin=0.0, vmax=vmax)
+    norm = mcolors.Normalize(vmin=0.0, vmax=1.0)
     
     matrix = get_matrix(args)
     matrix[matrix == -1] = -0.05
@@ -116,10 +117,20 @@ def plot_2d_matrix(args: argparse.Namespace):
             .replace("#", "\\")
             .replace(" ", "\ ")
         ) + r"$"
-        for it in variables
+        for it in args.variables
     ]
 
-    fig, ax = plt.subplots(figsize=(18, 18))
+    n_vars = len(args.variables)
+    cell_size = 1.0  # / per cell
+    fig_size = max(6, cell_size * n_vars)
+    fig_size = max(6, cell_size * n_vars)
+    fig, ax = plt.subplots(figsize=(fig_size, fig_size))
+
+    label_func(ax)
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3%", pad=0.1)
+
     sns.heatmap(
         ax=ax,
         data=matrix,
@@ -132,13 +143,39 @@ def plot_2d_matrix(args: argparse.Namespace):
         yticklabels=latex_variables,
         cmap=cmap,
         norm=norm,
-        cbar_kws={"ticks": [-1.0, 0.0, 0.05, 1.0], "label": "p-value"},
+        cbar_ax=cax,
+        cbar_kws={
+            "ticks": [0.0, args.threshold, 1.0],
+            "label": "p-value",
+        },
     )
 
-    for ext in {"png", "pdf", "pgf"}:
-        plt.savefig(Path(args.path) / f"gof_summary_2d_matrix_{args.test_type}.{ext}", bbox_inches='tight')
+    ax.set_aspect('equal', 'box')
+    ax.tick_params(axis='both', which='major')
+    plt.setp(ax.get_xticklabels(), rotation=45, ha='right', va='top')
+
+    ax.xaxis.set_minor_locator(mplticker.NullLocator())
+    ax.yaxis.set_minor_locator(mplticker.NullLocator())
+
+    cbar = ax.collections[0].colorbar
+    cbar.ax.minorticks_off()
+    cbar.ax.set_position(ax.get_position())
+
+    cax.minorticks_off()
+    plt.tight_layout(rect=[0, 0, 0.975, 1])
+
+    for ext in {"png", "pdf"}:
+        p = Path(args.path) / f"gof_summary_2d_matrix_{args.test_type}.{ext}"
+        logger.info(f"Saving {p}")
+        plt.savefig(p, bbox_inches='tight')
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    plot_2d_matrix(args)
+    args.variables = args.variables.split(",")
+
+    label_func = lambda ax: (
+        hep.cms.label("Privat Work", data=True, lumi=59.8, year=2018, ax=ax)
+    )
+
+    plot_2d_matrix(args, label_func)
