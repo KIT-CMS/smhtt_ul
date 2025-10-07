@@ -399,7 +399,7 @@ def main(args):
                 else:
                     if not "emb" in process and not "jetFakes" in process:
                         process = _rev_process_map[process]
-        if category != "control_region":
+        if category != "control_region" and not args.gof:
             if "EMB" in process:
                 process  = "EMB_"+category+"_0.0"
             if "emb" in process:
@@ -414,6 +414,19 @@ def main(args):
             name_output = process.replace("125", "_htt125")
         if "Nominal" not in variation:
             name_output += "_" + variation
+        if process == "jetFakes":  # Check for the incorrect pattern
+            if "Down_" in name_output:
+                parts = name_output.split("Down_")
+                if len(parts) == 2:
+                    corrected_name = f"{parts[0]}_{parts[1]}Down"
+                    logger.debug(f"Correcting jetFakes name: {name_output} -> {corrected_name}")
+                    name_output = corrected_name
+            elif "Up_" in name_output:
+                parts = name_output.split("Up_")
+                if len(parts) == 2:
+                    corrected_name = f"{parts[0]}_{parts[1]}Up"
+                    logger.debug(f"Correcting jetFakes name: {name_output} -> {corrected_name}")
+                    name_output = corrected_name
         logging.debug(
             "Adding histogram with name %s as %s to category %s.",
             key.GetName(),
