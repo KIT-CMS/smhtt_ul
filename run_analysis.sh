@@ -36,7 +36,7 @@ echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
 # echo "BASEDIR: ${BASEDIR}"
 echo "output_shapes: ${output_shapes}"
 echo "FRIENDS: ${FRIENDS}"
-echo "NNSCORE_FRIENDS: ${NNSCORE_FRIENDS}"
+echo "NNSCORE_FRIENDS: $MULTI_FRIENDS_BASE_DIR$NNSCORE_FRIENDS"
 echo "###################################"
 echo "#           Mode ${MODE}          #"
 echo "###################################"
@@ -122,7 +122,7 @@ if [[ $MODE == "LOCAL" ]]; then
     source utils/setup_root.sh
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $XSEC_FRIENDS $FASTMTT_FRIENDS $NN_FRIENDS_EQUAL_EVENTS \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS $FASTMTT_FRIENDS $MULTI_FRIENDS_BASE_DIR$NNSCORE_FRIENDS \
         --era $ERA --num-processes 4 --num-threads 12 \
         --optimization-level 1 \
         --output-file $shapes_output \
@@ -215,12 +215,52 @@ if [[ $MODE == "DATACARD" ]]; then
     exit 0
 fi
 
+if [[ $MODE == "DATACARD-PY-SYST" ]]; then
+    source utils/setup_cmssw.sh
+
+    for FS in tt mt et all; do
+        output_dir="output/$datacard_output/$FS"
+        echo "[INFO] Creating datacards for final state: $FS"
+        echo "[INFO] Using systematic uncertainties (yes, no): ${USE_SYSTEMATICS:-yes}"
+        if [[ "${USE_SYSTEMATICS:-yes}" == "yes" ]]; then
+            echo "[INFO] Including systematic uncertainties"
+            python3 ${CMSSW_BASE}/src/HHDatacards/hh_datacards.py --ntuple-tag $NTUPLETAG --tag $TAG --era $ERA --output-dir $output_dir --final-state $FS --systematics
+        else
+            echo "[INFO] Not including systematic uncertainties"
+            python3 ${CMSSW_BASE}/src/HHDatacards/hh_datacards.py --ntuple-tag $NTUPLETAG --tag $TAG --era $ERA --output-dir $output_dir --final-state $FS
+        fi
+
+        THIS_PWD=$(pwd)
+        echo "[INFO] Current PWD: $THIS_PWD"
+        echo "[INFO] Datacard dir: $output_dir"
+
+        pushd "$output_dir" >/dev/null || exit 1
+        for FILE in */*.txt; do
+            [[ -f "$FILE" ]] || continue
+            if ! grep -q "autoMCStats" "$FILE"; then
+                sed -i '$s/$/\n * autoMCStats 0.0/' "$FILE"
+            fi
+        done
+        popd >/dev/null
+        # cd $THIS_PWD
+
+        echo "[INFO] Create Workspace for datacard with final state $FS"
+        combineTool.py -M T2W -i $output_dir/cmb -m 125
+                        # \
+                        # -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+                        # --PO verbose \
+                        # --PO '"map=^.*/HH2B2Tau.*?$:r_HH[1.0,-20,20]"' 
+    done
+    exit 0
+fi
+
 if [[ $MODE == "DATACARD-PY" ]]; then
     source utils/setup_cmssw.sh
 
     for FS in tt mt et all; do
         output_dir="output/$datacard_output/$FS"
         echo "[INFO] Creating datacards for final state: $FS"
+        echo "[INFO] Including systematic uncertainties"
         python3 ${CMSSW_BASE}/src/HHDatacards/hh_datacards.py --ntuple-tag $NTUPLETAG --tag $TAG --era $ERA --output-dir $output_dir --final-state $FS
 
         THIS_PWD=$(pwd)
@@ -234,10 +274,6 @@ if [[ $MODE == "DATACARD-PY" ]]; then
 
         echo "[INFO] Create Workspace for datacard with final state $FS"
         combineTool.py -M T2W -i $output_dir/cmb -m 125
-                        # \
-                        # -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-                        # --PO verbose \
-                        # --PO '"map=^.*/HH2B2Tau.*?$:r_HH[1.0,-20,20]"' 
     done
     exit 0
 fi
@@ -302,9 +338,10 @@ if [[ $MODE == "FIT-HH" ]]; then
                 -m 125 \
                 -d ${datacard_dir}/combined.txt.cmb.root \
                 --algo singles \
-                --robustFit 1 -v 1 --there \
+                1 -v 1 --there \
                 -t -1 --expectSignal 1 \
                 --setParameterRanges r=-40,40 -n ".Fit"
+                # --robustFit (warum auch immer absolut nicht robust)
             combineTool.py -M AsymptoticLimits \
                 -m 125 \
                 -d ${datacard_dir}/combined.txt.cmb.root \

@@ -2,6 +2,13 @@ set -euo pipefail
 
 TAG=$1
 NNSCORE_FRIENDS=$2
+USE_SYSTEMATICS=${3:-no}
+
+export USE_SYSTEMATICS
+
+echo "[INFO] Using tag: $TAG"
+echo "[INFO] Using NN score friends: $NNSCORE_FRIENDS"
+echo "[INFO] Using systematic uncertainties (yes, no): $USE_SYSTEMATICS"
 
 ERA=2018
 NTUPLETAG=all-v4
@@ -22,7 +29,7 @@ bash run_analysis.sh mt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS PLOT_ANALYSIS_SHAP
 bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS PLOT_ANALYSIS_SHAPES
 
 # produce datacards (channel is ignored -> run with tt will produce for all channels)
-bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS DATACARD-PY
+bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS DATACARD-PY-SYST
 
 # fit (channel is ignored -> run with tt will produce for all channels)
 bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS FIT-HH
