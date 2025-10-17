@@ -48,16 +48,109 @@ all_cl_equal_events = [5.5038, 7.4523, 10.5938, 15.1965, 20.9798]
 # CL values for equal weights
 ##############################
 
+# tt
+# Expected  2.5%: r < 7.4121                                                                                                                                                                                                                          
+# Expected 16.0%: r < 10.0232                                                                                                                                                                                                                         
+# Expected 50.0%: r < 14.3750                                                                                                                                                                                                                         
+# Expected 84.0%: r < 20.8498                                                                                                                                                                                                                         
+# Expected 97.5%: r < 29.0660 
+tt_cl_equal_weights = [7.4121, 10.0232, 14.3750, 20.8498, 29.0660]
+
+# mt
+# Expected  2.5%: r < 12.1213
+# Expected 16.0%: r < 16.5490
+# Expected 50.0%: r < 23.6875
+# Expected 84.0%: r < 34.4513
+# Expected 97.5%: r < 48.1030
+mt_cl_equal_weights = [12.1213, 16.5490, 23.6875, 34.4513, 48.1030]
+
+# et
+# Expected  2.5%: r < 17.4624                                                                                                                                                                                                                         
+# Expected 16.0%: r < 23.8411
+# Expected 50.0%: r < 34.1250
+# Expected 84.0%: r < 49.7677
+# Expected 97.5%: r < 69.8073
+et_cl_equal_weights = [17.4624, 23.8411, 34.1250, 49.7677, 69.8073]
+
+# all together
+# Expected  2.5%: r < 5.8069
+# Expected 16.0%: r < 7.8308
+# Expected 50.0%: r < 11.0938
+# Expected 84.0%: r < 15.9137
+# Expected 97.5%: r < 21.8308
+all_cl_equal_weights = [5.8069, 7.8308, 11.0938, 15.9137, 21.8308]
 
 ##############################
 # CL values for custom events
 ##############################
 
+# tt
+# Expected  2.5%: r < 7.4121                                                                                                                                                                                                                          
+# Expected 16.0%: r < 10.0232                                                                                                                                                                                                                         
+# Expected 50.0%: r < 14.3750                                                                                                                                                                                                                         
+# Expected 84.0%: r < 20.8498                                                                                                                                                                                                                         
+# Expected 97.5%: r < 29.0660 
+tt_cl_custom_events = [7.4121, 10.0232, 14.3750, 20.8498, 29.0660]
+
+# mt
+# Expected  2.5%: r < 12.1213                                                                                                                                                                                                                         
+# Expected 16.0%: r < 16.5490                                                                                                                                                                                                                         
+# Expected 50.0%: r < 23.6875                                                                                                                                                                                                                         
+# Expected 84.0%: r < 34.4513                                                                                                                                                                                                                         
+# Expected 97.5%: r < 48.1030 
+mt_cl_custom_events = [12.1213, 16.5490, 23.6875, 34.4513, 48.1030]
+
+# et
+# Expected  2.5%: r < 17.4624                                                                                                                                                                                                                         
+# Expected 16.0%: r < 23.8411                                                                                                                                                                                                                         
+# Expected 50.0%: r < 34.1250                                                                                                                                                                                                                         
+# Expected 84.0%: r < 49.7677                                                                                                                                                                                                                         
+# Expected 97.5%: r < 69.8073 
+et_cl_custom_events = [17.4624, 23.8411, 34.1250, 49.7677, 69.8073]
+
+# all together
+# Expected  2.5%: r < 5.8069
+# Expected 16.0%: r < 7.8308
+# Expected 50.0%: r < 11.0938
+# Expected 84.0%: r < 15.9137
+# Expected 97.5%: r < 21.8308
+all_cl_custom_events = [5.8069, 7.8308, 11.0938, 15.9137, 21.8308]
 
 ##############################
 # CL values for custom weights
 ##############################
 
+# tt
+# Expected  2.5%: r < 7.4121                                                                                                                                                                                                                          
+# Expected 16.0%: r < 10.0232                                                                                                                                                                                                                         
+# Expected 50.0%: r < 14.3750                                                                                                                                                                                                                         
+# Expected 84.0%: r < 20.8498                                                                                                                                                                                                                         
+# Expected 97.5%: r < 29.0660 
+tt_cl_custom_weights = [7.4121, 10.0232, 14.3750, 20.8498, 29.0660]
+
+# mt
+# Expected  2.5%: r < 12.1213                                                                                                                                                                                                                         
+# Expected 16.0%: r < 16.5490                                                                                                                                                                                                                         
+# Expected 50.0%: r < 23.6875                                                                                                                                                                                                                         
+# Expected 84.0%: r < 34.4513                                                                                                                                                                                                                         
+# Expected 97.5%: r < 48.1030 
+mt_cl_custom_weights = [12.1213, 16.5490, 23.6875, 34.4513, 48.1030]
+
+# et
+# Expected  2.5%: r < 17.4624                                                                                                                                                                                                                         
+# Expected 16.0%: r < 23.8411                                                                                                                                                                                                                         
+# Expected 50.0%: r < 34.1250                                                                                                                                                                                                                         
+# Expected 84.0%: r < 49.7677                                                                                                                                                                                                                         
+# Expected 97.5%: r < 69.8073 
+et_cl_custom_weights = [17.4624, 23.8411, 34.1250, 49.7677, 69.8073]
+
+# all together
+# Expected  2.5%: r < 5.8069
+# Expected 16.0%: r < 7.8308
+# Expected 50.0%: r < 11.0938
+# Expected 84.0%: r < 15.9137
+# Expected 97.5%: r < 21.8308
+all_cl_custom_weights = [5.8069, 7.8308, 11.0938, 15.9137, 21.8308]
 
 def build_interval_dict(training_type: str):
     raw = {}
