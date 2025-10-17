@@ -1,9 +1,19 @@
+import logging
 import concurrent.futures
 import re
 from typing import Any, Callable, Generator, List, Optional, Tuple, Union
 
 from tqdm import tqdm
 
+try:
+    from config.logging_setup_configs import setup_logging
+except ModuleNotFoundError:
+    import sys
+    sys.path.extend([".", "..", "../.."])
+    from config.logging_setup_configs import setup_logging
+
+
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 TRAINING_VARIABLES = [
     "pt_1",
@@ -62,6 +72,7 @@ class Keys:
     UP = "up"
     DOWN = "down"
 
+    ANTI_ISO = "anti_iso"
     ANTI_ISO_CUT = "anti_iso_cut"
     ANTI_ISO_WEIGHT = "anti_iso_weight"
 
@@ -310,3 +321,22 @@ class PipeDict(dict):
     """
     def pipe(self, func: callable, *args: Any, **kwargs: Any) -> dict:
         return func(self, *args, **kwargs)
+
+    def conditional_pipe(self, condition: bool, func: callable, *args: Any, **kwargs: Any) -> dict:
+        if condition:
+            return self.pipe(func, *args, **kwargs)
+        return self
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key not in self:
+            logger.warning(f"Key '{key}' not found in the dictionary. Returning default value: {default}")
+        return super().get(key, default)
+    
+    def recursive_get(self, keys: List[str], default: Any = None) -> Any:
+        current = self
+        for key in keys:
+            if not isinstance(current, dict) or key not in current:
+                logger.warning(f"Key path '{' -> '.join(keys)}' not found. Returning default value: {default}")
+                return default
+            current = current[key]
+        return current

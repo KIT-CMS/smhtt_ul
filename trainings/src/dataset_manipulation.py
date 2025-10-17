@@ -526,14 +526,24 @@ class ProcessDataFrameManipulation:
         """
         renaming_map = renaming_map or {}
 
-        for label in self.from_config.label_columns:
-            column = tuple_column(Keys.LABELS, renaming_map.get(label, label))
-            df[column] = self.subprocess_df[label].astype(int).values
 
-        for label in (item for item in self.subprocess_dict if item.startswith("is_")):
-            column = tuple_column(Keys.LABELS, renaming_map.get(label, label))
-            value = int(label == f"is_{self.process_name}__{self.subprocess_name.replace('-', '_')}")
-            df[column] = value
+        if renaming_map:
+            logger.info(f"Using renaming map for label derivation: {renaming_map}")
+            for column, labels in renaming_map.items():
+                if isinstance(labels, str):
+                    labels = [labels]
+                df[tuple_column(Keys.LABELS, column)] = (self.subprocess_df[labels].astype(bool).any(axis=1)).astype(int).values
+
+        else:
+            logger.warning("No renaming map provided. Performing a copy of all label-like columns starting with 'is_'")
+            for label in self.from_config.label_columns:
+                column = tuple_column(Keys.LABELS, label)
+                df[column] = self.subprocess_df[label].astype(int).values
+
+            for label in (item for item in self.subprocess_dict if item.startswith("is_")):
+                column = tuple_column(Keys.LABELS, label)
+                value = int(label == f"is_{self.process_name}__{self.subprocess_name.replace('-', '_')}")
+                df[column] = value
 
         return df
 

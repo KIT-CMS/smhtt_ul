@@ -48,22 +48,22 @@ def fetch_p_value(
         folder_path = base_path / f"{prefix}_{var2}_{var1}"
 
     if not folder_path.exists():
-        return -1
+        return float("nan")
     
     json_file = folder_path / f"{test_type}.json"
     if not json_file.exists():
-        return -1
+        return float("nan")
 
     try:
         with open(json_file, 'r') as f:
             content = f.read()
             if not content:
-                return -1
+                return float("nan")
             data = json.loads(content)
         
         mass_dict = data.get("125.0")
         if not isinstance(mass_dict, dict):
-            return -1
+            return float("nan")
 
         p_value = mass_dict.get("p")  # simple gof
 
@@ -76,7 +76,7 @@ def fetch_p_value(
         return float(p_value) if p_value is not None else -1
         
     except (json.JSONDecodeError, KeyError, ValueError, TypeError):
-        return -1
+        return float("nan")
 
 
 def get_matrix(args: argparse.Namespace):

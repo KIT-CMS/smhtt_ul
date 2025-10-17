@@ -37,6 +37,12 @@ def parse_args():
         nargs="+",
         help="List of training variables to be added to the config",
     )
+    parser.add_argument(
+        "--common-setup-config",
+        type=str,
+        default="",
+        help="Path to the common setup config file",
+    )
     return parser.parse_args()
 
 
@@ -44,25 +50,38 @@ if __name__ == "__main__":
 
     logger = setup_logging(logger=logging.getLogger(__name__))
     args = parse_args()
+    
+    if args.common_setup_config:
+        with open(args.common_setup_config, "r") as f:
+            args.common_setup_config = yaml.safe_load(f)
+            if not args.common_setup_config:
+                logger.warning("No common setup config provided or it is empty, using default settings.")
+                args.common_setup_config = {}
+    else:
+        args.common_setup_config = {}
 
-    ignore_for_now = {"lhe_scale_weight__LHEScale"}  # until fixed, TODO:
-    Iterate.common_dict = partial(Iterate.common_dict, ignore_weight_and_cuts=ignore_for_now)
-    logger.warning(f"Ignoring cuts and weights of {ignore_for_now}, until fixed!")
-    training_variables = list(set(args.training_variables))
+    args.common_setup_config = PipeDict(args.common_setup_config)
+
+
+    Iterate.common_dict = partial(Iterate.common_dict)
+    training_variables = list(set(args.common_setup_config.get("training_variables", args.training_variables)))
     logger.info(f"Used training variables: {training_variables}")
 
     config = (
         PipeDict()
         .pipe(ConfigModification.general.recursive_update_from_file, path=args.configs)
         .pipe(ConfigModification.general.set_common)
-        .pipe(  # SMHtt specific, (usage of jetFakes)
+        .conditional_pipe(
+            processes := args.common_setup_config.recursive_get(["config_modifications", "general", "remove_from_config"]),
             ConfigModification.general.remove_from_config,
-            processes=["W", "DYNLO"],
+            processes=processes,
         )
-        .pipe(  # SMHtt specific, (usage of jetFakes with uncertainties selected only for data)
+        .conditional_pipe(
+            rename := args.common_setup_config.recursive_get(["config_modifications", "general", "rename"]),
             ConfigModification.general.rename,
-            processes={"data": "jetFakes"},
-            subprocesses={"data": "jetFakes"},
+            processes=rename.get("processes", {}),
+            subprocesses=rename.get("subprocesses", {}),
+            shifts=rename.get("shifts", {}),
         )
         .pipe(ConfigModification.general.add_era_and_process_name_flags)
         .pipe(ConfigModification.specific.add_anti_iso_cut_and_weight_version)

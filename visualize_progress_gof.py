@@ -38,7 +38,7 @@ def parse_arguments() -> argparse.Namespace:
         help="The type of Goodness-of-Fit test to display."
     )
     parser.add_argument(
-        "--threshold", type=float, default=0.05,
+        "--threshold", type=float, default=0.01,
         help="The p-value threshold for color-coding (values below are red)."
     )
     parser.add_argument(

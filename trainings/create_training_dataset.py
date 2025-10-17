@@ -4,7 +4,8 @@ import os
 from copy import deepcopy
 from functools import partial
 from pathlib import Path
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Union
+from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -33,6 +34,12 @@ def parse_args():
         type=str,
         default=f"/ceph/{os.environ['USER']}/smhtt_ul_new/training_datasets",
         help="Base directory for the output files",
+    )
+    parser.add_argument(
+        "--common-setup-config",
+        type=str,
+        default="",
+        help="Path to the common setup config file",
     )
     return parser.parse_args()
 
@@ -93,7 +100,7 @@ def exemplary_remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd
     return df.copy()
 
 
-def exemplary_custom_selection(df: pd.DataFrame, optimize_selection: bool = False) -> pd.DataFrame:
+def exemplary_custom_selection(df: pd.DataFrame, selections: Union[None, dict] = None) -> pd.DataFrame:
     """
     Exemplary function.
 
@@ -108,26 +115,26 @@ def exemplary_custom_selection(df: pd.DataFrame, optimize_selection: bool = Fals
     Returns:
         pd.DataFrame: The dataframe with the selected processes and cut regions.
     """
-    mask = False
+    
     is_nominal = [it for it in df.columns if Keys.CUT in it]  # applied for nominal region
     is_anti_iso = [it for it in df.columns if Keys.ANTI_ISO_CUT in it]  # applied for anti iso region
-    for _process, _cut in [
-        ("is_jetFakes", [is_anti_iso]),
-        ("is_ttbar", [is_anti_iso, is_nominal]),
-        ("is_dyjets", [is_anti_iso, is_nominal]),
-        ("is_embedding", [is_anti_iso, is_nominal]),
-        ("is_diboson", [is_anti_iso, is_nominal]),
-        ("is_vbf_htautau", [is_nominal]),
-        ("is_ggh_htautau", [is_nominal]),
-    ]:
-        process_mask = df[Keys.LABELS][_process].astype(bool)
-        selection_mask = df[sum(_cut, start=[])].astype(bool).any(axis=1)
-        if _process == "is_jetFakes" and not optimize_selection:
-            try:  # will only trigger for jetFakes dataframe for plotting nominal data
-                selection_mask |= df[tuple_column(Keys.NOMINAL, f"_{Keys.CUT}")].astype(bool)
-            except KeyError:
-                pass
 
+    _mapping = {
+        "nominal": [is_nominal],
+        "anti_iso": [is_anti_iso],
+        "anti_iso+nominal": [is_nominal, is_anti_iso],
+        "nominal+anti_iso": [is_nominal, is_anti_iso],
+    }
+
+    selections = defaultdict(lambda: "nominal", selections or {}) 
+    
+    mask = False
+    for _process_label_column in df[Keys.LABELS].columns:
+        _process = _process_label_column[0]
+        
+        selection_mask = df[sum(_mapping[selections[_process]], start=[])].astype(bool).any(axis=1)
+        process_mask = df[tuple_column(Keys.LABELS, *_process_label_column)].astype(bool)
+        
         mask |= (process_mask & selection_mask)
 
     return df[mask].copy()
@@ -192,6 +199,7 @@ def collect_folds(arguments: Tuple[dict, str, str, str, str, dict, pd.DataFrame]
         subprocess,
         subprocess_dict,
         plain_subprocess_dataframe,
+        common_setup_config,
     ) = arguments
     """
     Function to collect folds for the training dataset. It creates a dataframe
@@ -219,21 +227,14 @@ def collect_folds(arguments: Tuple[dict, str, str, str, str, dict, pd.DataFrame]
         process_name=process,
         subprocess_name=subprocess,
     )
+    logger.info(f"Processing {process} - {subprocess}")
     process_df = (
         pd.DataFrame()
         .pipe(
             add.labels,
-            renaming_map={
-                # SMHtt mt specific, will differ for other analysis
-                # TODO: individually adjust for each analysis
-                "is_DY__DY-ZL": "is_dyjets",
-                "is_EMB__Embedded": "is_embedding",
-                "is_TT__TT-TTL": "is_ttbar",
-                "is_VV__VV_VVL": "is_diboson",
-                "is_data": "is_jetFakes",
-                "is_ggH__ggH125": "is_ggh_htautau",
-                "is_VBF__VBF125": "is_vbf_htautau",
-            },
+            renaming_map=common_setup_config.recursive_get(
+                ["dataset_modifications", "labels", "renaming_map"]
+            )
         )
         # exemplary custom function before setting pd.MultiIndex
         # TODO: individually check for each analysis or remove completely
@@ -260,10 +261,12 @@ def collect_folds(arguments: Tuple[dict, str, str, str, str, dict, pd.DataFrame]
 
     process_df = (
         process_df
-        # exemplary custom function after setting pd.MultiIndex
-        # independent from ProcessDataFrameManipulation
-        # TODO: Adjust for each analysis, or remove completely
-        .pipe(exemplary_custom_selection, optimize_selection=True)
+        .pipe(
+            exemplary_custom_selection,
+            selections=common_setup_config.recursive_get(
+                ["dataset_modifications", "selections"]
+            )
+        )
     )
 
     msg = f"Creating folds for {channel} {era} {process} - {subprocess}"
@@ -289,14 +292,23 @@ if __name__ == "__main__":
 
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
+        
+    if args.common_setup_config:
+        with open(args.common_setup_config, "r") as f:
+            args.common_setup_config = yaml.safe_load(f)
+            if not args.common_setup_config:
+                logger.warning("No common setup config provided or it is empty, using default settings.")
+                args.common_setup_config = {}
+    else:
+        args.common_setup_config = {}
 
-    WEIGHT_AND_CUT_CONTAINING = {"lhe_scale_weight__LHEScale"}  # until fixed, TODO:
+    args.common_setup_config = PipeDict(args.common_setup_config)
+
+    WEIGHT_AND_CUT_CONTAINING = {"ps_weight__FsrWeight", "ps_weight__IsrWeight"}
     Iterate.common_dict = partial(Iterate.common_dict, ignore_weight_and_cuts=WEIGHT_AND_CUT_CONTAINING)
     logger.warning(f"Ignoring cuts and weights of {WEIGHT_AND_CUT_CONTAINING}, until fixed!")
 
-    # SMHtt mt specific, will differ for other analysis
-    # TODO: individually select for each analysis if needed
-    SUBPROCESSES_TO_SKIP = {"DY-ZJ", "DY-ZTT", "TT-TTJ", "TT-TTT", "VV-VVJ", "VV-VVT"}
+    SUBPROCESSES_TO_SKIP = args.common_setup_config.recursive_get(["dataset_modifications", "subprocesses_to_skip"], set())
 
     filtered_plain_dataframes = {}
     for result in optional_process_pool(
@@ -326,7 +338,7 @@ if __name__ == "__main__":
     # RuntimeVariables.USE_MULTIPROCESSING = False
     for result in optional_process_pool(
         args_list=[
-            tuple(map(deepcopy, [config] + list(it) + [filtered_plain_dataframes[it[:-1]]]))
+            tuple(map(deepcopy, [config] + list(it) + [filtered_plain_dataframes[it[:-1]]] + [args.common_setup_config]))
             for it in Iterate.subprocesses(config)
             if it[-2] not in SUBPROCESSES_TO_SKIP
         ],

@@ -1,26 +1,19 @@
 export PYTHONPATH=$PYTHONPATH:$PWD/Dumbledraw
+
+set -e
+set -o pipefail
+
 CHANNEL="mt"
 ERA="2018"
 NTUPLETAG="ff_and_cr_production_2018UL_mt__2025-09-10_w_syst_v2"
 TAG="2025-09-10__test_2d_gof_binning__v6"
+YAML_FILE="config/gof_binning_mp2/binning_${ERA}_${CHANNEL}_2D.yaml"
+
+FORCE_REPROCESSING=0
+
 MODE=$1
 
-VARIABLES_LIST=(
-  # deltaR_2j1 deltaR_2j2 deltaR_1j1 deltaR_1j2 deltaR_12jj
-  # deltaEta_1j1 deltaEta_1j2 deltaEta_2j1 deltaEta_2j2 deltaEta_12jj
-  deltaEta_jj
-  deltaR_jj
-  jpt_1 jeta_1
-  jpt_2 jeta_2
-  mjj pt_dijet pt_ttjj
-  #
-  m_vis mt_tot pt_tt pt_vis
-  pt_1 eta_1 mt_1
-  pt_2 eta_2 mt_2
-  deltaEta_ditaupair deltaR_ditaupair
-  met njets nbtag
-  m_fastmtt pt_fastmtt eta_fastmtt
-)
+# ---
 
 VARIABLES_LIST_1D=(
   # deltaR_2j1 deltaR_2j2 deltaR_1j1 deltaR_1j2 deltaR_12jj
@@ -33,151 +26,41 @@ VARIABLES_LIST_1D=(
   deltaR_ditaupair njets nbtag
 )
 
+
+echo "[INFO] Parsing variables from ${YAML_FILE} based on master 1D list..."
+mapfile -t all_yaml_keys < <(grep '^[^ ]' "$YAML_FILE" | sed 's/://')  # all keys from the YAML.
+
+declare -A master_vars_map
+for var in "${VARIABLES_LIST_1D[@]}"; do
+    master_vars_map["$var"]=1
+done
+
+final_variables_list=()
+for key in "${all_yaml_keys[@]}"; do
+    if [[ -v master_vars_map["$key"] ]]; then
+        final_variables_list+=("$key")
+        continue # 1D match
+    fi
+
+    for var1 in "${VARIABLES_LIST_1D[@]}"; do
+        if [[ "$key" == "${var1}_"* ]]; then  # key starts with "var1_"
+            var2=${key#${var1}_}
+            
+            if [[ -v master_vars_map["$var2"] ]]; then
+                final_variables_list+=("$key")
+                break # Found a valid combination
+            fi
+        fi
+    done
+done
+
+# VARIABLES_LIST=( pt_vis )
+
 VARIABLES_1D=$(IFS=, ; echo "${VARIABLES_LIST_1D[*]}")
+VARIABLES=$(IFS=, ; echo "${final_variables_list[*]}")
 
-VARIABLES_LIST=(
-  deltaEta_jj
-  deltaEta_jj_pt_tt deltaEta_jj_m_fastmtt deltaEta_jj_met deltaEta_jj_pt_2
-  deltaEta_jj_deltaR_ditaupair deltaEta_jj deltaEta_jj_njets deltaEta_jj_jpt_1
-  deltaEta_jj_pt_1 deltaEta_jj_nbtag deltaEta_jj_eta_1 deltaEta_jj_deltaEta_ditaupair
-  deltaEta_jj_mt_2 deltaEta_jj_pt_vis deltaEta_jj_jeta_2 deltaEta_jj_eta_2
-  deltaEta_jj_pt_ttjj deltaEta_jj_mt_1 deltaEta_jj_mjj deltaEta_jj_pt_dijet
-  deltaEta_jj_pt_fastmtt deltaEta_jj_eta_fastmtt deltaEta_jj_m_vis deltaEta_jj_deltaR_jj
-  deltaEta_jj_jeta_1 deltaEta_jj_mt_tot deltaEta_jj_jpt_2
-  #
-  deltaR_jj
-  deltaR_jj_mt_2 deltaR_jj_deltaEta_ditaupair deltaR_jj_njets deltaR_jj_m_vis
-  deltaR_jj_deltaR_ditaupair deltaR_jj_eta_1 deltaR_jj_pt_fastmtt deltaR_jj deltaR_jj_pt_1
-  deltaR_jj_mt_1 deltaR_jj_pt_vis deltaR_jj_mjj deltaR_jj_jeta_1 deltaR_jj_met
-  deltaR_jj_eta_fastmtt deltaR_jj_eta_2 deltaR_jj_pt_2 deltaR_jj_jeta_2 deltaR_jj_nbtag
-  deltaR_jj_mt_tot deltaR_jj_pt_tt deltaR_jj_jpt_2 deltaR_jj_jpt_1 deltaR_jj_pt_dijet
-  deltaR_jj_m_fastmtt deltaR_jj_pt_ttjj
-  #
-  jpt_1
-  jpt_1_pt_ttjj jpt_1_pt_dijet jpt_1_nbtag jpt_1_njets jpt_1_m_fastmtt jpt_1_pt_tt
-  jpt_1_jeta_2 jpt_1_mt_2 jpt_1_pt_fastmtt jpt_1_met jpt_1_eta_2 jpt_1_deltaR_ditaupair
-  jpt_1_eta_1 jpt_1_deltaEta_ditaupair jpt_1 jpt_1_jpt_2 jpt_1_eta_fastmtt jpt_1_m_vis
-  jpt_1_mjj jpt_1_mt_1 jpt_1_pt_vis jpt_1_pt_1 jpt_1_pt_2 jpt_1_jeta_1 jpt_1_mt_tot
-  #
-  jeta_1
-  jeta_1_pt_1 jeta_1_mt_1 jeta_1_eta_2 jeta_1_eta_1 jeta_1_m_fastmtt jeta_1_pt_vis
-  jeta_1_jpt_2 jeta_1_pt_dijet jeta_1_mjj jeta_1_deltaEta_ditaupair jeta_1_pt_ttjj
-  jeta_1_mt_2 jeta_1 jeta_1_pt_2 jeta_1_nbtag jeta_1_m_vis jeta_1_pt_tt
-  jeta_1_deltaR_ditaupair jeta_1_pt_fastmtt jeta_1_eta_fastmtt jeta_1_met jeta_1_jeta_2
-  jeta_1_njets jeta_1_mt_tot
-  #
-  jpt_2
-  jpt_2 jpt_2_njets jpt_2_mt_tot jpt_2_m_vis jpt_2_m_fastmtt jpt_2_nbtag jpt_2_pt_vis
-  jpt_2_mjj jpt_2_jeta_2 jpt_2_eta_2 jpt_2_deltaR_ditaupair jpt_2_eta_fastmtt
-  jpt_2_deltaEta_ditaupair jpt_2_mt_2 jpt_2_eta_1 jpt_2_met jpt_2_mt_1 jpt_2_pt_fastmtt
-  jpt_2_pt_tt jpt_2_pt_ttjj jpt_2_pt_dijet jpt_2_pt_2 jpt_2_pt_1
-  #
-  jeta_2
-  jeta_2_pt_ttjj jeta_2_mt_tot jeta_2_mjj jeta_2_mt_1 jeta_2_pt_fastmtt jeta_2_m_fastmtt
-  jeta_2_eta_1 jeta_2_deltaR_ditaupair jeta_2_pt_vis jeta_2_nbtag jeta_2 jeta_2_mt_2
-  jeta_2_njets jeta_2_eta_fastmtt jeta_2_pt_2 jeta_2_eta_2 jeta_2_deltaEta_ditaupair
-  jeta_2_met jeta_2_pt_tt jeta_2_pt_dijet jeta_2_pt_1 jeta_2_m_vis
-  #
-  mjj
-  mjj_nbtag mjj_pt_fastmtt mjj_eta_fastmtt mjj_met mjj_pt_vis mjj_eta_1 mjj_pt_tt
-  mjj_mt_tot mjj_eta_2 mjj_mt_2 mjj_deltaEta_ditaupair mjj_njets mjj mjj_pt_2 mjj_pt_ttjj
-  mjj_m_vis mjj_m_fastmtt mjj_pt_dijet mjj_mt_1 mjj_deltaR_ditaupair mjj_pt_1
-  #
-  pt_dijet
-  pt_dijet_pt_fastmtt pt_dijet_njets pt_dijet_pt_ttjj pt_dijet_pt_1 pt_dijet_pt_tt
-  pt_dijet_met pt_dijet_pt_vis pt_dijet_m_vis pt_dijet_mt_tot pt_dijet_deltaEta_ditaupair
-  pt_dijet_eta_2 pt_dijet_pt_2 pt_dijet_eta_fastmtt pt_dijet_mt_2 pt_dijet
-  pt_dijet_deltaR_ditaupair pt_dijet_mt_1 pt_dijet_m_fastmtt pt_dijet_nbtag pt_dijet_eta_1
-  #
-  pt_ttjj
-  pt_ttjj_pt_vis pt_ttjj_mt_tot pt_ttjj_eta_1 pt_ttjj_mt_1 pt_ttjj_deltaEta_ditaupair
-  pt_ttjj_pt_1 pt_ttjj_pt_fastmtt pt_ttjj_pt_tt pt_ttjj_mt_2 pt_ttjj_deltaR_ditaupair
-  pt_ttjj_eta_fastmtt pt_ttjj_m_fastmtt pt_ttjj_eta_2 pt_ttjj_nbtag pt_ttjj_njets pt_ttjj
-  pt_ttjj_met pt_ttjj_pt_2 pt_ttjj_m_vis
-  #
-  m_vis
-  m_vis_pt_1 m_vis_mt_1 m_vis_deltaR_ditaupair m_vis_pt_vis m_vis_pt_fastmtt m_vis_met
-  m_vis_deltaEta_ditaupair m_vis_nbtag m_vis_pt_tt m_vis_njets m_vis m_vis_eta_2
-  m_vis_eta_fastmtt m_vis_mt_2 m_vis_pt_2 m_vis_mt_tot m_vis_m_fastmtt m_vis_eta_1
-  #
-  mt_tot
-  mt_tot_njets mt_tot_nbtag mt_tot_eta_fastmtt mt_tot_pt_1 mt_tot mt_tot_pt_fastmtt
-  mt_tot_deltaR_ditaupair mt_tot_mt_2 mt_tot_mt_1 mt_tot_met mt_tot_m_fastmtt mt_tot_eta_2
-  mt_tot_pt_vis mt_tot_pt_tt mt_tot_pt_2 mt_tot_eta_1 mt_tot_deltaEta_ditaupair
-  #
-  pt_tt
-  pt_tt_pt_1 pt_tt_pt_vis pt_tt_deltaEta_ditaupair pt_tt_mt_2 pt_tt_pt_fastmtt
-  pt_tt_eta_fastmtt pt_tt_m_fastmtt pt_tt_eta_2 pt_tt_pt_2 pt_tt_met pt_tt_njets
-  pt_tt_mt_1 pt_tt_eta_1 pt_tt_deltaR_ditaupair pt_tt pt_tt_nbtag
-  #
-  pt_vis pt_vis_njets pt_vis_eta_fastmtt pt_vis_nbtag pt_vis_eta_1 pt_vis_deltaR_ditaupair
-  pt_vis_mt_2 pt_vis_deltaEta_ditaupair pt_vis_m_fastmtt pt_vis_pt_fastmtt pt_vis_mt_1
-  pt_vis_met pt_vis_eta_2 pt_vis pt_vis_pt_2 pt_vis_pt_1
-  #
-  pt_1
-  pt_1_eta_1 pt_1_eta_2 pt_1_deltaR_ditaupair pt_1_pt_2 pt_1_deltaEta_ditaupair
-  pt_1_m_fastmtt pt_1_mt_2 pt_1_pt_fastmtt pt_1_met pt_1_mt_1 pt_1_nbtag pt_1_eta_fastmtt
-  pt_1 pt_1_njets
-  #
-  eta_1
-  eta_1_pt_2 eta_1_pt_fastmtt eta_1 eta_1_mt_1 eta_1_njets eta_1_eta_2
-  eta_1_deltaEta_ditaupair eta_1_nbtag eta_1_eta_fastmtt eta_1_m_fastmtt
-  eta_1_deltaR_ditaupair eta_1_met eta_1_mt_2
-  #
-  mt_1
-  mt_1_mt_2 mt_1_deltaR_ditaupair mt_1 mt_1_pt_fastmtt mt_1_pt_2 mt_1_met
-  mt_1_deltaEta_ditaupair mt_1_njets mt_1_nbtag mt_1_m_fastmtt mt_1_eta_2 mt_1_eta_fastmtt
-  #
-  pt_2
-  pt_2_njets pt_2_m_fastmtt pt_2_deltaEta_ditaupair pt_2_deltaR_ditaupair
-  pt_2_eta_fastmtt pt_2_eta_2 pt_2_mt_2 pt_2_nbtag pt_2 pt_2_pt_fastmtt pt_2_met
-  #
-  eta_2
-  eta_2_njets eta_2_nbtag eta_2_mt_2 eta_2_met eta_2_eta_fastmtt eta_2_pt_fastmtt
-  eta_2_m_fastmtt eta_2_deltaEta_ditaupair eta_2 eta_2_deltaR_ditaupair
-  #
-  mt_2
-  mt_2_njets mt_2_nbtag mt_2_pt_fastmtt mt_2 mt_2_deltaR_ditaupair mt_2_eta_fastmtt
-  mt_2_m_fastmtt mt_2_deltaEta_ditaupair mt_2_met
-  #
-  deltaEta_ditaupair
-  deltaEta_ditaupair_deltaR_ditaupair deltaEta_ditaupair_met deltaEta_ditaupair_eta_fastmtt
-  deltaEta_ditaupair_njets deltaEta_ditaupair_m_fastmtt deltaEta_ditaupair_pt_fastmtt
-  deltaEta_ditaupair_nbtag deltaEta_ditaupair
-  #
-  deltaR_ditaupair
-  deltaR_ditaupair deltaR_ditaupair_nbtag deltaR_ditaupair_pt_fastmtt deltaR_ditaupair_njets
-  deltaR_ditaupair_met deltaR_ditaupair_eta_fastmtt deltaR_ditaupair_m_fastmtt
-  #
-  met
-  met_nbtag met met_pt_fastmtt met_njets met_m_fastmtt met_eta_fastmtt
-  #
-  njets
-  njets_pt_fastmtt njets_eta_fastmtt njets njets_nbtag njets_m_fastmtt
-  #
-  nbtag
-  nbtag nbtag_m_fastmtt nbtag_eta_fastmtt nbtag_pt_fastmtt
-  #
-  m_fastmtt
-  m_fastmtt m_fastmtt_pt_fastmtt m_fastmtt_eta_fastmtt
-  #
-  pt_fastmtt
-  pt_fastmtt_eta_fastmtt pt_fastmtt
-  #
-  eta_fastmtt
-)
-
-
-VARIABLES=$(IFS=, ; echo "${VARIABLES_LIST[*]}")
-
-VARIABLES_LIST_1D=( 
-    nbtag
-    jeta_1
-    jeta_2
-    deltaR_jj
-    pt_ttjj
-    pt_tt pt_fastmtt eta_fastmtt deltaEta_ditaupair met deltaEta_jj jpt_1 jpt_2     mjj pt_dijet mt_tot m_vis pt_vis m_fastmtt    pt_1 eta_1 mt_1 pt_2 eta_2 mt_2   deltaR_ditaupair njets )
-
+echo "[INFO] Using ${#VARIABLES_LIST_1D[@]} master 1D variables."
+echo "[INFO] Found ${#final_variables_list[@]} total matching variables (1D & 2D) in YAML to process."
 
 POSTFIX="-ML"
 ulimit -s unlimited
@@ -190,6 +73,8 @@ shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
 shapes_output_synced=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
+
+THEORY_NUISANCES_TO_FREEZE="rgx{BR_Htt.*},rgx{LHE_.*},rgx{PS_scale.*},rgx{THU_.*},rgx{ggH_scale.*},rgx{vbf_scale.*}"
 
 # if the output folder does not exist, create it
 if [ ! -d "$shapes_output" ]; then
@@ -275,12 +160,11 @@ if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
     # python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
 
-    # if the output folder does not exist, create it
     if [ ! -d "$shapes_output_synced" ]; then
         mkdir -p $shapes_output_synced
     fi
 
-    python shapes/convert_to_synced_shapes.py -e $ERA \
+    python3 shapes/convert_to_synced_shapes.py -e $ERA \
         -i ${shapes_rootfile} \
         -o ${shapes_output_synced} \
         -n 40 --gof
@@ -291,52 +175,21 @@ if [[ $MODE == "SYNC" ]]; then
     exit 0
 fi
 
-if [[ $MODE == "DATACARD_" ]]; then
-    source utils/setup_cmssw.sh
-    # Datacard Setup
-    for VARIABLE in ${VARIABLES//,/ }; do
-        datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ERA}_${CHANNEL}_${VARIABLE}"
-        GOF_CATEGORY_NAME=${CHANNEL}_${VARIABLE}
-        FILENAME="${ERA}-${CHANNEL}-synced-${VARIABLE}.root"
-        # ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
-        ${CMSSW_BASE}/bin/el9_amd64_gcc12/MorphingSMRun2Legacy \
-            --base_path=$PWD \
-            --input_folder_mt=$shapes_output_synced \
-            --real_data=true \
-            --classic_bbb=false \
-            --binomial_bbb=false \
-            --jetfakes=1 \
-            --embedding=1 \
-            --postfix="-ML" \
-            --channel=${CHANNEL} \
-            --auto_rebin=false \
-            --rebin_categories=false \
-            --stxs_signals="stxs_stage0" \
-            --categories="gof" \
-            --era=${ERA} \
-            --gof_category_name=$GOF_CATEGORY_NAME \
-            --output=$datacard_output \
-            --train_ff=1 \
-            --train_stage0=1 \
-            --train_emb=1
-        THIS_PWD=${PWD}
-        echo $THIS_PWD
-        cd $datacard_output/${CHANNEL}
-        for FILE in */*.txt; do
-            sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
-        done
-        cd $THIS_PWD
-
-        echo "[INFO] Create Workspace for datacard"
-        combineTool.py -M T2W -o workspace.root -i $datacard_output/${CHANNEL}/125 --channel-masks
-    done
-    exit 0
-fi
-
 if [[ $MODE == "DATACARD" ]]; then
     source utils/setup_cmssw.sh
     run_morphing() {
         VARIABLE=$1
+
+        local datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ERA}_${CHANNEL}_${VARIABLE}"
+        local workspace_file="${datacard_output}/${CHANNEL}/workspace.root"
+
+        if [[ -z "${FORCE_REPROCESSING}" && (-f "$workspace_file") ]]; then
+            echo "[INFO] Workspace file for ${VARIABLE} already exists at ${workspace_file}. Skipping."
+            return 0
+        fi
+
+        echo "[INFO] Processing variable: ${VARIABLE}"
+
         datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ERA}_${CHANNEL}_${VARIABLE}"
         GOF_CATEGORY_NAME=${CHANNEL}_${VARIABLE}
         FILENAME="${ERA}-${CHANNEL}-synced-${VARIABLE}.root"
@@ -374,9 +227,11 @@ if [[ $MODE == "DATACARD" ]]; then
     }
 
     export -f run_morphing
-    export NTUPLETAG TAG ERA CHANNEL shapes_output_synced CMSSW_BASE
+    export NTUPLETAG TAG ERA CHANNEL shapes_output_synced CMSSW_BASE FORCE_REPROCESSING
 
     echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 60 -I {} bash -c 'run_morphing "{}"'
+
+    wait
 
     exit 0
 fi
@@ -423,123 +278,60 @@ if [[ $MODE == "DATACARD-MC" ]]; then
     exit 0
 fi
 
-if [[ $MODE == "GOF_" ]]; then
-    source utils/setup_cmssw.sh
-    for VARIABLE in ${VARIABLES//,/ }; do
-        ID=${ERA}_${CHANNEL}_${VARIABLE}
-        datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
-        WORKSPACE=$datacard_output/${CHANNEL}/125/workspace.root
-        MASS=125
-        NUM_TOYS=100 # multiply x10
-        for ALGO in "saturated" "KS" "AD"; do
-            # Get test statistic value
-            if [[ "$ALGO" == "saturated" ]]; then
-                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE --fixedSignalStrength=0 -v 1
-            else
-                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE --plots --fixedSignalStrength=0
-            fi
-
-            # Throw toys
-            TOYSOPT=""
-            if [[ "$ALGO" == "saturated" ]]; then
-                TOYSOPT="--toysFreq"
-            fi
-
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1230 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1231 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1232 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1233 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1234 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1235 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1236 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1237 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1238 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1239 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            wait
-            # Collect results
-            combineTool.py -M CollectGoodnessOfFit --input \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1230.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1231.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1232.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1233.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1234.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1235.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1236.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1237.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1238.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1239.root \
-                --output output/gof/${NTUPLETAG}-${TAG}/${ID}/gof_${ALGO}.json
-
-            mv higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.123?.root output/gof/${NTUPLETAG}-${TAG}/${ID}/
-            if [[ "$ALGO" == "saturated" ]]; then
-                mv output/gof/${NTUPLETAG}-${TAG}/${ID}/gof_${ALGO}.json output/gof/${NTUPLETAG}-${TAG}/${ID}/gof.json
-            fi
-
-            # Plot
-            if [[ "$ALGO" != "saturated" ]]; then
-                plotGof.py --statistic $ALGO --mass $MASS.0 --output gof_${ALGO} output/gof/${NTUPLETAG}-${TAG}/${ID}/gof_${ALGO}.json
-                mv htt_${CHANNEL}_300_${ERA}gof_${ALGO}.p{df,ng} output/gof/${NTUPLETAG}-${TAG}/${ID}/
-                python3 plotting/gof/plot_gof_metrics.py -e $ERA -g $ALGO -o output/gof/${NTUPLETAG}-${TAG}/${ID}/ -i output/gof/${NTUPLETAG}-${TAG}/${ID}/higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root
-            else
-                plotGof.py --statistic $ALGO --mass $MASS.0 --output output/gof/${NTUPLETAG}-${TAG}/${ID}/gof output/gof/${NTUPLETAG}-${TAG}/${ID}/gof.json
-            fi
-        done
-    done
-    source utils/setup_root.sh
-    python3 gof/plot_gof_summary.py --variables $VARIABLES --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL
-    exit 0
-fi
-
-
 if [[ $MODE == "GOF" ]]; then
     source utils/setup_cmssw.sh
 
-    # Define a function to process a single variable
     run_gof_for_variable() {
         VARIABLE=$1
         
         ID=${ERA}_${CHANNEL}_${VARIABLE}
+
+        local output_dir="output/gof/${NTUPLETAG}-${TAG}/${ID}"
+        local final_json="$output_dir/gof.json"
+        local final_plot_pdf="$output_dir/gof.pdf"
+        local final_plot_png="$output_dir/gof.png"
+        local final_root_file="$output_dir/higgsCombineTest.${ID}.GoodnessOfFit.mH125.root"
+
+        if [[ -z "${FORCE_REPROCESSING}" && (-f "$final_json" && (-f "$final_plot_pdf" || -f "$final_plot_png") && -f "$final_root_file") ]]; then
+            echo "[INFO] All output files for ${VARIABLE} in ${output_dir} already exist. Skipping."
+            return 0
+        fi
+
         datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
         WORKSPACE=$datacard_output/${CHANNEL}/125/workspace.root
         MASS=125
-        NUM_TOYS=100 # multiply x10
-        for ALGO in "saturated" "KS" "AD"; do
-            # Get test statistic value
+        NUM_TOYS=100 # multiply x10 later on
+
+        FREEZE_OPTS="--setParameters r=0 --freezeParameters r,${THEORY_NUISANCES_TO_FREEZE} --fixedSignalStrength=0"
+
+        # for ALGO in "saturated" "KS" "AD"; do
+        for ALGO in "saturated"; do
             if [[ "$ALGO" == "saturated" ]]; then
-                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE --fixedSignalStrength=0 -v 1
+                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE ${FREEZE_OPTS} -v 1 -V
             else
-                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE --plots --fixedSignalStrength=0
+                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE --plots ${FREEZE_OPTS} -v 1 -V
             fi
 
-            # Throw toys
             TOYSOPT=""
             if [[ "$ALGO" == "saturated" ]]; then
-                TOYSOPT="--toysFreq"
+                TOYSOPT="--toysFrequentist"
             fi
 
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1230 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1231 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1232 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1233 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1234 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1235 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1236 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1237 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1238 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
-            combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s 1239 -t $NUM_TOYS $TOYSOPT --fixedSignalStrength=0 >/dev/null &
+            for SEED in {1230..1239}; do
+                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s ${SEED} -t $NUM_TOYS $TOYSOPT -V ${FREEZE_OPTS} >/dev/null &
+            done
             wait
+
+            DATA_FILE="higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root"
+            INPUT_FILES=()
+
+            for SEED in {1230..1239}; do
+                TOY_FILE="higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.${SEED}.root"
+                INPUT_FILES+=("$DATA_FILE" "$TOY_FILE")
+            done
+
             # Collect results
-            combineTool.py -M CollectGoodnessOfFit --input \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1230.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1231.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1232.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1233.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1234.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1235.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1236.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1237.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1238.root \
-                higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.1239.root \
+            combineTool.py -M CollectGoodnessOfFit --input "${INPUT_FILES[@]}"
                 --output output/gof/${NTUPLETAG}-${TAG}/${ID}/gof_${ALGO}.json
 
             mv higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.123?.root output/gof/${NTUPLETAG}-${TAG}/${ID}/
@@ -559,21 +351,19 @@ if [[ $MODE == "GOF" ]]; then
     }
     
     export -f run_gof_for_variable
-    export NTUPLETAG TAG ERA CHANNEL
+    export NTUPLETAG TAG ERA CHANNEL THEORY_NUISANCES_TO_FREEZE FORCE_REPROCESSING
 
-    # echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 5 -I {} bash -c 'run_gof_for_variable "{}"'
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 1 -I {} bash -c 'run_gof_for_variable "{}"'
 
-    # --- These commands run AFTER all parallel jobs are finished ---
-    
+    wait
+
     echo "[INFO] All GOF jobs complete. Creating summary plot."
     source utils/setup_root.sh
-    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.05 --test-type gof
-    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.05 --test-type gof_KS
-    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.05 --test-type gof_AD    
+    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.00013225 --test-type gof
+    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.00013225 --test-type gof_KS
+    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.00013225 --test-type gof_AD    
     exit 0
 fi
-
-  
 
 
 if [[ $MODE == "GOF-SUMMARY" ]]; then
@@ -588,38 +378,54 @@ if [[ $MODE == "POSTFIT" ]]; then
         ID=${ERA}_${CHANNEL}_${VARIABLE}
         datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
         WORKSPACE=$datacard_output/${CHANNEL}/125/workspace.root
+
+        final_postfit_file="${datacard_output}/${ID}-datacard-shapes-postfit-b.root"
+        if [[ -z "${FORCE_REPROCESSING}" && (-f "$final_postfit_file") ]]; then
+            echo "[INFO] Final post-fit file for ${VARIABLE} already exists. Skipping."
+            continue
+        fi
+
+        echo "[INFO] Processing variable: ${VARIABLE}"
+
         combine \
             -M FitDiagnostics \
             -m 125 -d $WORKSPACE \
-            --robustFit 1 -v1 \
+            --robustFit 1 \
             --robustHesse 1 \
             -n .$ID \
-            --setParameters r=0 --freezeParameters r \
+            --verbose 2 \
+            --setParameters r=0 --freezeParameters r,${THEORY_NUISANCES_TO_FREEZE} \
             --X-rtd MINIMIZER_analytic \
-            --cminDefaultMinimizerStrategy 0 |
-            tee $LOGFILE
+            --setRobustFitAlgo=Minuit2,Migrad  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+            --cminFallbackAlgo Minuit2,Migrad,0:0.001,Minuit2,Migrad,0:0.01 --cminPreScan \
+            --saveShapes --saveWithUncertainties \
+            --saveNormalizations --cminDefaultMinimizerTolerance 0.1 \
+            --stepSize=0.01 \
+            --cminDefaultMinimizerStrategy 2 2>&1 |
+            tee .${ID}-${VARIABLE}.log
+        
+        if [ $? -ne 0 ]; then
+            echo "[ERROR] The combine fit failed for variable: ${VARIABLE}. Check the log file .${ID}-${VARIABLE}.log for details. Skipping."
+            rm -f fitDiagnostics.${ID}.root
+            continue
+        fi
+
         FITFILE=${datacard_output}/fitDiagnostics.${ID}.MultiDimFit.mH125.root
         mv fitDiagnostics.${ID}.root $FITFILE
-        #python combine/check_mlfit.py fitDiagnostics${ERA}.root
-        # root -l $FITFILE <<< "fit_b->Print(); fit_s->Print()"
         echo "done 1"
         # python ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py \
         python3 diffNuisances.py \
             ${datacard_output}/fitDiagnostics.${ID}.MultiDimFit.mH125.root -a \
             -f html >${datacard_output}/nuisances.html
-        echo "done 2"
-	PostFitShapesFromWorkspace -m 125 -w $WORKSPACE \
+	    PostFitShapesFromWorkspace -m 125 -w $WORKSPACE \
             --output ${datacard_output}/${ID}-datacard-shapes-prefit.root \
             -d ${datacard_output}/cmb/125/htt_${CHANNEL}_300_${ERA}.txt
-        echo "done 3"
         PostFitShapesFromWorkspace -m 125 -w $WORKSPACE \
             --output ${datacard_output}/${ID}-datacard-shapes-postfit-b.root \
             -f ${datacard_output}/fitDiagnostics.${ID}.MultiDimFit.mH125.root:fit_b --postfit --sampling \
             -d ${datacard_output}/cmb/125/htt_${CHANNEL}_300_${ERA}.txt
-        echo "done 4"
     done
     exit 0
-
 fi
 
 if [[ $MODE == "PLOT-POSTFIT" ]]; then
@@ -630,25 +436,27 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
         ID=${ERA}_${CHANNEL}_${VARIABLE}
         datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
         PLOTDIR=${datacard_output}/plots
+
+        final_plot_pdf="${PLOTDIR}/${ID}_postfit.pdf"
+        final_plot_png="${PLOTDIR}/${ID}_postfit.png"
+
+        if [[ -z "${FORCE_REPROCESSING}" && (-f "$final_plot_pdf" || -f "$final_plot_png") ]]; then
+            echo "[INFO] Post-fit plots for ${VARIABLE} already exist. Skipping."
+            [ -f "${SUMMARYFOLDER}/${ID}_postfit.pdf" ] || cp "${PLOTDIR}"/*.p{df,ng} $SUMMARYFOLDER &> /dev/null
+            continue
+        fi
+
         PREFITFILE=${datacard_output}/${ID}-datacard-shapes-prefit.root
         POSTFITFILE=${datacard_output}/${ID}-datacard-shapes-postfit-b.root
         [ -d $PLOTDIR ] || mkdir -p $PLOTDIR
         echo "[INFO] Using postfitshapes from $FILE"
-        # python3 plotting/plot_shapes.py -i $FILE -o $PLOTDIR \
-        #         -c ${channel} -e $ERA --categories $CATEGORIES \
-        #         --fake-factor --embedding --normalize-by-bin-width \
-        #         -l --train-ff True --train-emb True
-        # CATEGORIES="stxs_stage0"
-
-        # python3 plotting/plot_shapes_combined.py -i $FILE -o $PLOTDIR -c ${CHANNEL} -e $ERA --categories "None" --fake-factor --embedding -l --train-ff True --train-emb True --combine-backgrounds
-        # python3 plotting/plot_shapes_combined.py -i $FILE -o $PLOTDIR -c ${CHANNEL} -e $ERA --categories "None" --fake-factor --embedding -l --train-ff True --train-emb True --combine-backgrounds
         for OPTION in "" "--png"; do
             python3 gof/plot_shapes_gof.py -i $PREFITFILE -c $CHANNEL -e $ERA $OPTION \
                 --categories 'None' --fake-factor --embedding \
-                --gof-variable $VARIABLE -o ${PLOTDIR}
+                --gof-variable $VARIABLE -o ${PLOTDIR} -l
             python3 gof/plot_shapes_gof.py -i $POSTFITFILE -c $CHANNEL -e $ERA $OPTION \
                 --categories 'None' --fake-factor --embedding \
-                --gof-variable $VARIABLE -o ${PLOTDIR}
+                --gof-variable $VARIABLE -o ${PLOTDIR} -l
         done
         cp ${PLOTDIR}/*.p{df,ng} $SUMMARYFOLDER
     done
@@ -682,20 +490,59 @@ fi
 
 if [[ $MODE == "IMPACTS" ]]; then
     source utils/setup_cmssw.sh
-    WORKSPACE=output/$datacard_output/mt/125/workspace.root
-    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
-        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
-        --doInitialFit --robustFit 1 \
-        --parallel 16
+    for VARIABLE in ${VARIABLES//,/ }; do
+        ID=${ERA}_${CHANNEL}_${VARIABLE}
+        datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
+        # WORKSPACE=$datacard_output/${CHANNEL}/125/workspace.root
+        WORKSPACE=$(pwd)/${datacard_output}/${CHANNEL}/125/workspace.root
+        IMPACTSDIR=${datacard_output}/impacts
+            
+            # --- DEFINE FINAL OUTPUT PATHS AND ADD SKIP LOGIC ---
+            FINAL_JSON_PATH="${IMPACTSDIR}/impacts_${ID}.json"
+            FINAL_PDF_PATH="${IMPACTSDIR}/impacts_${ID}.pdf"
 
-    combineTool.py -M Impacts -d $WORKSPACE -m 125 \
-        --X-rtd MINIMIZER_analytic --cminDefaultMinimizerStrategy 0 \
-        --robustFit 1 --doFits \
-        --parallel 16
+            if [[ -f "$FINAL_JSON_PATH" && -f "$FINAL_PDF_PATH" ]]; then
+                echo "[INFO] Impact plots for ${VARIABLE} already exist in ${IMPACTSDIR}. Skipping."
+                continue
+            fi
+        
+        mkdir -p $IMPACTSDIR
+            
+            echo "[INFO] Running impacts for variable: ${VARIABLE}"
 
-    combineTool.py -M Impacts -d $WORKSPACE -m 125 -o sm_${ERA}_${CHANNEL}.json
-    plotImpacts.py -i sm_${ERA}_${CHANNEL}.json -o sm_${ERA}_${CHANNEL}_impacts
-    # cleanup the fit files
-    rm higgsCombine*.root
+        ROBUST_OPTS=(
+            "--robustFit 1 \
+                --robustHesse 1 \
+                --setRobustFitAlgo Minuit2,Migrad \
+                --cminDefaultMinimizerStrategy 2 \
+                --cminDefaultMinimizerTolerance 0.1 \
+                --stepSize=0.01 \
+                --cminPreScan \
+                --cminFallbackAlgo Minuit2,Migrad,0:0.01,Minuit2,Migrad,0:0.01 \
+                --X-rtd FITTER_NEW_CROSSING_ALGO \
+                --X-rtd FITTER_NEVER_GIVE_UP \
+                --X-rtd MINIMIZER_analytic"
+        )
+
+        (cd $IMPACTSDIR && combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+                -n "_${ID}" \
+                --doInitialFit \
+            --parallel 16 \
+                "${ROBUST_OPTS[@]}")
+
+            (cd $IMPACTSDIR && combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+                -n "_${ID}" \
+                --doFits \
+                --parallel 16 \
+                "${ROBUST_OPTS[@]}")
+        
+        (cd $IMPACTSDIR && combineTool.py -M Impacts -d $WORKSPACE -m 125 \
+                -n "_${ID}" \
+                -o $FINAL_JSON_PATH)
+
+        plotImpacts.py -i $FINAL_JSON_PATH -o ${FINAL_PDF_PATH%.pdf}
+        rm ${IMPACTSDIR}/higgsCombine*_${ID}.*.root
+        exit 0
+    done
     exit 0
 fi

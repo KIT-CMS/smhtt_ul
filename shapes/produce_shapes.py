@@ -244,6 +244,11 @@ def add_processes(
     if channel != "mm":
         add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
         add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
+        # ---
+        for b in range(100, 117):
+            add_fn(name=f"ggh_b{b}", dataset=datasets["ggH"], selections=select_fn(*getattr(selection.ggH125, f"bin{b}")))
+        for b in range(200, 211):
+            add_fn(name=f"qqh_b{b}", dataset=datasets["qqH"], selections=select_fn(*getattr(selection.qqH125, f"bin{b}")))
 
 
 def get_select_function(
@@ -530,10 +535,22 @@ def main(args):
         "qqhww",
         "zhww",
         "whww",
+        *[f"ggh_b{b}" for b in range(100, 117)],
+        *[f"qqh_b{b}" for b in range(200, 211)],
     } & procS
-    signalsS = sm_signalsS
+    signalsS = sm_signalsS | set(
+        [
+            *[f"ggh_b{b}" for b in range(100, 117)],
+            *[f"qqh_b{b}" for b in range(200, 211)],
+        ]
+    )
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
-        signalsS = signalsS & {"ggh", "qqh"}
+        signalsS = signalsS & {
+            "ggh",
+            "qqh",
+            *[f"ggh_b{b}" for b in range(100, 117)],
+            *[f"qqh_b{b}" for b in range(200, 211)],
+        }
 
     simulatedProcsDS = {
         chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
