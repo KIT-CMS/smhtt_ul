@@ -659,12 +659,12 @@ def plot_intervals(outdir: str = "plots", training_type: str = "equal_events", )
 	scaling_note = ""
 	if "scaled_137" in training_type:
 		scaling_note = "- full Run 2"
-	elif "scaled_429" in training_type:
-		scaling_note = "- Run 2 + 3"
+	elif "scaled_430" in training_type:
+		scaling_note = "- Run 2 and 3"
 	if systematics:
-		ax.set_title(f"CLs {scaling_note}- with systematic uncertainties")
+		ax.set_title(f"CLs {scaling_note} - with systematic uncertainties")
 	else:
-		ax.set_title(f"CLs {scaling_note}- only statistical uncertainties")
+		ax.set_title(f"CLs {scaling_note} - only statistical uncertainties")
 
 	# Legende
 	from matplotlib.patches import Patch
