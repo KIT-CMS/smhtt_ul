@@ -2,10 +2,10 @@
 import argparse
 import logging
 from functools import partial
-import yaml
 
-from src.config_modifications import ConfigModification
-from src.helper import Iterate, PipeDict, TRAINING_VARIABLES
+import yaml
+from src.config_modifications import ConfigModification, remove_keys
+from src.helper import TRAINING_VARIABLES, Iterate, PipeDict
 
 try:
     from config.logging_setup_configs import setup_logging
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     logger = setup_logging(logger=logging.getLogger(__name__))
     args = parse_args()
-    
+
     if args.common_setup_config:
         with open(args.common_setup_config, "r") as f:
             args.common_setup_config = yaml.safe_load(f)
@@ -61,7 +61,6 @@ if __name__ == "__main__":
         args.common_setup_config = {}
 
     args.common_setup_config = PipeDict(args.common_setup_config)
-
 
     Iterate.common_dict = partial(Iterate.common_dict)
     training_variables = list(set(args.common_setup_config.get("training_variables", args.training_variables)))
@@ -88,6 +87,7 @@ if __name__ == "__main__":
         .pipe(ConfigModification.specific.convert_weights_and_cuts_to_common)
         .pipe(ConfigModification.specific.add_set_of_training_variables, training_variables=training_variables)
         .pipe(ConfigModification.specific.nest_and_categorize_uncertainties)
+        .pipe(remove_keys, keys_to_remove={"var"})
     )
 
     with open(args.modified_config, "w") as f:

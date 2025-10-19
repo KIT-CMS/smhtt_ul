@@ -6,9 +6,10 @@ from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Literal, Tuple, Union
 from warnings import simplefilter
 
+import numpy as np
 import pandas as pd
 import ROOT
-from src.helper import Iterate, Keys, optional_process_pool
+from src.helper import Iterate, Keys, get_class_weights, optional_process_pool
 from tqdm import tqdm
 
 try:
@@ -36,6 +37,119 @@ def tuple_column(*args: str, length: int = 5) -> str:
         str: The tuple column name.
     """
     return tuple(list(args) + [""] * (length - len(args)))
+
+
+def get_fold_conditions() -> Dict[str, Callable[[pd.DataFrame], np.ndarray]]:
+    """
+    Get the fold conditions for the training dataset.
+
+    Returns:
+        Dict[str, Callable[[pd.DataFrame], np.ndarray]]: A dictionary mapping fold names to their conditions.
+    """
+    subfold_pattern = [True, True, False, False]
+    return {
+        "fold0": lambda df: odd_id(df),
+        "fold0_training": lambda df: odd_id(df) & tiled_mask(df, subfold_pattern),
+        "fold0_validation": lambda df: odd_id(df) & ~tiled_mask(df, subfold_pattern),
+        "fold1": lambda df: ~odd_id(df),
+        "fold1_training": lambda df: ~odd_id(df) & tiled_mask(df, subfold_pattern),
+        "fold1_validation": lambda df: ~odd_id(df) & ~tiled_mask(df, subfold_pattern),
+    }
+
+
+def tiled_mask(
+    df: pd.DataFrame,
+    pattern: Iterable[bool],
+) -> np.ndarray:
+    """
+    Helper to create a mask for the training and validation folds.
+    The pattern is repeated to cover the length of the dataframe.
+
+    Args:
+        df (pd.DataFrame): The dataframe to create the mask for.
+        pattern (Iterable[bool]): The pattern to repeat, i.e. [True, True, False, False].
+
+    Returns:
+        np.ndarray: A boolean mask of the same length as the dataframe.
+    """
+    return np.tile(pattern, int(np.ceil(len(df) / len(pattern))))[:len(df)].astype(bool)
+
+
+def odd_id(df: pd.DataFrame, key: str = "event") -> np.ndarray:
+    """
+    Helper to create a mask for odd IDs.
+
+    Args:
+        df (pd.DataFrame): The dataframe to create the mask for.
+
+    Returns:
+        np.ndarray: A boolean mask of the same length as the dataframe.
+    """
+    return (df[Keys.EVENT][key] % 2).astype(bool)
+
+
+def exemplary_remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd.DataFrame:
+    """
+    Exemplary function.
+
+    Removes the cut regions from the dataframe that are not needed for the training.
+
+    Args:
+        df (pd.DataFrame): The dataframe to remove the cut regions from.
+        regions (Iterable[str]): The regions to remove.
+
+    Returns:
+        pd.DataFrame: The dataframe without the cut regions.
+    """
+    for region in regions:
+        cut_column = tuple_column(Keys.NOMINAL, region, Keys.CUT)
+        if cut_column in df.columns:
+            df = df[~df[cut_column].astype(bool)].copy()
+            for column in df.columns:
+                _level0, _level1, *_ = column
+                if (_level0, _level1) == (Keys.NOMINAL, region):
+                    df = df.drop(column, axis=1)
+
+    return df.copy()
+
+
+def exemplary_custom_selection(df: pd.DataFrame, selections: Union[None, dict] = None) -> pd.DataFrame:
+    """
+    Exemplary function.
+
+    Selects the processes (subprocesses) and cut regions that are needed for the training.
+
+    Args:
+        df (pd.DataFrame): The dataframe to select the processes and cut regions from.
+        optimize_selection (bool): If True, the selection is optimized to including only the needed cut regions.
+            If False, all cut regions are included.
+            Default is False.
+
+    Returns:
+        pd.DataFrame: The dataframe with the selected processes and cut regions.
+    """
+    is_nominal = [it for it in df.columns if Keys.CUT in it]  # applied for nominal region
+    is_anti_iso = [it for it in df.columns if Keys.ANTI_ISO_CUT in it]  # applied for anti iso region
+
+    _mapping = {
+        "nominal": [is_nominal],
+        "anti_iso": [is_anti_iso],
+        "anti_iso+nominal": [is_nominal, is_anti_iso],
+        "nominal+anti_iso": [is_nominal, is_anti_iso],
+    }
+
+    selections = defaultdict(lambda: "nominal", selections or {})
+
+    mask = False
+    for _process_label_column in df[Keys.LABELS].columns:
+        _process = _process_label_column[0]
+
+        selection_mask = df[sum(_mapping[selections[_process]], start=[])].astype(bool).any(axis=1)
+        process_mask = df[tuple_column(Keys.LABELS, *_process_label_column)].astype(bool)
+
+        mask |= (process_mask & selection_mask)
+
+    return df[mask].copy()
 
 
 class ROOTToPlain(object):
@@ -367,7 +481,7 @@ class ROOTToPlain(object):
         """
         if self.filtered_path is not None and self.filtered_path.exists():
             logger.info(f"Filtered dataframe already exists at {self.filtered_path}")
-            self.dataframe_path = self.filtered_path            
+            self.dataframe_path = self.filtered_path
             return self
 
         assert self._dataframe is not None or self.raw_path.exists(), "Dataframe is None. Please call setup_raw_dataframe first."
@@ -480,7 +594,7 @@ class _FromConfig(object):
     @property
     def all_shifted_variables(self) -> dict:
         """
-        Returns a dictionary of all shifted variables from the config for all processes.    
+        Returns a dictionary of all shifted variables from the config for all processes.
         """
         shifted_variables = defaultdict(list)
 
@@ -525,7 +639,6 @@ class ProcessDataFrameManipulation:
             pd.DataFrame: DataFrame with added labels.
         """
         renaming_map = renaming_map or {}
-
 
         if renaming_map:
             logger.info(f"Using renaming map for label derivation: {renaming_map}")
@@ -843,6 +956,41 @@ class CombinedDataFrameManipulation:
                 dfs.loc[mask, column] = dfs.loc[mask, tuple_column(Keys.NOMINAL, contains[0])]
 
         return dfs
+
+    @staticmethod
+    def add_class_weights(
+        dfs: Union[pd.DataFrame, Iterable[pd.DataFrame]],
+        class_weighted: bool = True,
+    ) -> Union[pd.DataFrame, Iterable[pd.DataFrame]]:
+        """
+        Adds class weights column to the dataframe(s) based on the provided labels and physics weights,
+        if class_weighted is True.
+
+        Args:
+            dfs (Union[pd.DataFrame, Iterable[pd.DataFrame]]): DataFrame or iterable of DataFrames to add class weights to.
+            class_weighted (bool): Flag to indicate if class weights should be applied.
+
+        Returns:
+            Union[pd.DataFrame, Iterable[pd.DataFrame]]: DataFrame or iterable of DataFrames with class weights added.
+        """
+        if isinstance(dfs, (list, tuple)):
+            return [CombinedDataFrameManipulation.add_class_weights(it, class_weighted) for it in tqdm(dfs)]
+        elif isinstance(dfs, dict):
+            return type(dfs)({k: CombinedDataFrameManipulation.add_class_weights(v, class_weighted) for k, v in tqdm(dfs.items())})
+        elif isinstance(dfs, pd.DataFrame):
+            with LogContext(logger).duplicate_filter():
+                logger.info("Adding class weights to nominal weights")
+
+            dfs.loc[:, tuple_column(Keys.NOMINAL, Keys.CLASS_WEIGHT)] = get_class_weights(
+                weights=dfs[tuple_column(Keys.NOMINAL, Keys.WEIGHT)],
+                Y=dfs.loc[:, (Keys.LABELS,)].values.argmax(axis=1),
+                classes=np.unique(dfs.loc[:, (Keys.LABELS,)].values.argmax(axis=1)),
+                class_weighted=class_weighted,
+            ).astype(float).values
+
+            return dfs
+        else:
+            raise NotImplementedError(f"Unsupported type: {type(dfs)}")
 
     @staticmethod
     def fill_nans_in_weight_like(

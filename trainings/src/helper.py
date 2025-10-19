@@ -1,8 +1,10 @@
-import logging
 import concurrent.futures
+import logging
 import re
 from typing import Any, Callable, Generator, List, Optional, Tuple, Union
 
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 try:
@@ -68,6 +70,7 @@ class Keys:
 
     VARIABLES = "variables"
     WEIGHT = "weight"
+    CLASS_WEIGHT = "class_weight"
     CUT = "cut"
     UP = "up"
     DOWN = "down"
@@ -122,7 +125,7 @@ def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", loose_wp: str
     pattern_to_replace = re.compile(pattern_to_replace_str)
 
     def replacer(match):
-        opt_suffix = match.group(1) if match.group(1) else "" # Get the captured suffix or empty string
+        opt_suffix = match.group(1) if match.group(1) else ""  # Get the captured suffix or empty string
         return f"(id_tau_vsJet_{tight_wp}_2{opt_suffix}<0.5&&id_tau_vsJet_{loose_wp}_2{opt_suffix}>0.5)"
 
     modified_str, num_subs = pattern_to_replace.subn(replacer, input_str)
@@ -130,8 +133,7 @@ def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", loose_wp: str
     if num_subs == 0:
         append_str = f"(id_tau_vsJet_{tight_wp}_2<0.5&&id_tau_vsJet_{loose_wp}_2>0.5)"
 
-
-        if not input_str: # If original string is empty
+        if not input_str:  # If original string is empty
             return append_str
         else:
             return f"{input_str} && {append_str}"
@@ -331,7 +333,7 @@ class PipeDict(dict):
         if key not in self:
             logger.warning(f"Key '{key}' not found in the dictionary. Returning default value: {default}")
         return super().get(key, default)
-    
+
     def recursive_get(self, keys: List[str], default: Any = None) -> Any:
         current = self
         for key in keys:
@@ -340,3 +342,15 @@ class PipeDict(dict):
                 return default
             current = current[key]
         return current
+
+
+def get_class_weights(
+    weights: Union[pd.Series, np.ndarray],
+    Y: Union[pd.Series, np.ndarray],
+    classes: tuple = (0, 1),
+    class_weighted: bool = True,
+) -> Union[pd.Series, np.ndarray]:
+    _weights = np.zeros_like(weights)
+    for _class in classes:
+        _weights[Y == _class] = weights.sum() / weights[Y == _class].sum()
+    return _weights * (weights if class_weighted else 1.0)
