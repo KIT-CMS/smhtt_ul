@@ -200,7 +200,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         lumi_weight(era),
         prefiring_weight(era),
     ]
-    if channel != "mm" and channel != "mt":
+    if channel != "mm":
         MC_base_process_weights.append(("btag_weight", "btagWeight"))
     return Selection(
         name="MC base",
