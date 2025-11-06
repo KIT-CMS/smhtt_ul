@@ -168,19 +168,22 @@ def qcd_estimation(
                 )
             )
         )
-        base_hist.Add(
-            rootfile.Get(
-                _name_string.format(
-                    dataset=_dataset_map[proc],
-                    channel=channel,
-                    process="-" + _process_map[proc],
-                    selection="-" + selection if selection != "" else "",
-                    variation="same_sign" if "subtrMC" in variation else variation,
-                    variable=variable,
-                )
-            ),
-            -sub_scale,
-        )
+        try:
+            base_hist.Add(
+                rootfile.Get(
+                    _name_string.format(
+                        dataset=_dataset_map[proc],
+                        channel=channel,
+                        process="-" + _process_map[proc],
+                        selection="-" + selection if selection != "" else "",
+                        variation="same_sign" if "subtrMC" in variation else variation,
+                        variable=variable,
+                    )
+                ),
+                -sub_scale,
+            )
+        except:
+            breakpoint()
 
     proc_name = "QCD" if is_embedding else "QCDMC"
     if is_nlo:

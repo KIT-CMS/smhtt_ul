@@ -8,7 +8,7 @@ import yaml
 logger = setup_logging(logger=logging.getLogger(__name__))
 
 
-def load_tauid_categorization(era: str, channel: str, TAG: str, dm_bin: str) -> dict:
+def load_tauid_categorization(era: str, channel: str, TAG: str) -> dict:
     """
     Load tau ID categorization based on the era and channel.
     """
@@ -27,8 +27,8 @@ def load_tauid_categorization(era: str, channel: str, TAG: str, dm_bin: str) -> 
         special_flag = False
    
     discriminator_variable = "m_vis"
-    discriminator_binning = np.arange(30, 130, 12) # -> [ 30  42  54  66  78  90 102 114 126]
-    # discriminator_binning = np.array([30, 50, 80, 100, 130])
+    # discriminator_binning = np.arange(30, 130, 12) # -> [ 30  42  54  66  78  90 102 114 126]
+    discriminator_binning = np.array([30, 50, 80, 100, 130])
     # discriminator_binning = special_binning["m_vis"]["bins"]
     discriminator_binning_enlarged = np.arange(30, 160, 5)
     logger.info(f"Using discriminator variable {discriminator_variable} with binning {discriminator_binning} as default. Special binning is used for specific categories:{special_flag}")

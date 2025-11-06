@@ -194,7 +194,7 @@ class TauID(Correction):
                 },
                 { "name": "wp_VSe",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSe working point: VVLoose"
+                "description": "DeepTau2017v2p1VSe working point: VVLoose,Tight"
                 },
                 { "name": "syst",
                 "type": "string",
@@ -245,24 +245,24 @@ class TauID(Correction):
                                     "value": {
                                         "nodetype": "binning",
                                         "input": "pt",
-                                        "edges":  self.dm_pt_bin_lists[wp][wp_VSe][dm],
+                                        "edges":  self.dm_pt_bin_lists[wp]["VVLoose"][dm],
                                         "flow": "clamp",
                                         "content": [
                                             {
                                                 "nodetype": "category",
                                                 "input": "syst",
                                                 "content": [
-                                                    {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="id")},
-                                                    {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="id")},
-                                                    {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="id")},
+                                                    {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="id")},
+                                                    {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="id")},
+                                                    {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="id")},
                                                                     ],
-                                                                } for pt in self.dm_pt_bin_lists[wp][wp_VSe][dm][:-1]
+                                                                } for pt in self.dm_pt_bin_lists[wp]["VVLoose"][dm][:-1]
                                                             ],
                                                         }
-                                                    } for dm in self.dm_pt_bin_lists[wp][wp_VSe].keys()
+                                                    } for dm in self.dm_pt_bin_lists[wp]["VVLoose"].keys()
                                                 ],
                                             },
-                                        } for wp_VSe in self.data[wp].keys()
+                                        } for wp_VSe in ["VVLoose", "Tight"]#self.data[wp].keys()
                                     ],
                                 },
                             } for wp in self.data.keys()
@@ -298,7 +298,7 @@ class TauID(Correction):
                 },
                 { "name": "wp_VSe",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSe working point: VVLoose"
+                "description": "DeepTau2017v2p1VSe working point: VVLoose,Tight"
                 },
                 { "name": "syst",
                 "type": "string",
@@ -355,17 +355,17 @@ class TauID(Correction):
                                                 "nodetype": "category",
                                                 "input": "syst",
                                                 "content": [
-                                                    {"key": "nom","value": self.get_tau_sf(dm,"nom", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="id")},
-                                                    {"key": "up","value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="id")},
-                                                    {"key": "down","value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="id")},
+                                                    {"key": "nom","value": self.get_tau_sf(dm,"nom", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="id")},
+                                                    {"key": "up","value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="id")},
+                                                    {"key": "down","value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="id")},
                                                                     ],
                                                                 }
                                                             ],
                                                         }
-                                                    } for dm in self.data[wp][wp_VSe].keys() if dm in self.dm_binning.keys()
+                                                    } for dm in self.data[wp]["VVLoose"].keys() if dm in self.dm_binning.keys()
                                                 ],
                                             },
-                                        } for wp_VSe in self.data[wp].keys()
+                                        } for wp_VSe in ["VVLoose", "Tight"]#self.data[wp].keys()
                                     ],
                                 },
                             } for wp in self.data.keys() 
@@ -412,7 +412,7 @@ class TauID(Correction):
                 },
                 { "name": "wp_VSe",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSe working point: VVLoose"
+                "description": "DeepTau2017v2p1VSe working point: VVLoose,Tight"
                 },
                 { "name": "syst",
                 "type": "string",
@@ -482,27 +482,27 @@ class TauID(Correction):
                                                     "content": [
                                                         {"nodetype": "binning",
                                                         "input": "pt",
-                                                        "edges":  self.dm_pt_bin_lists[wp][wp_VSe][dm],
+                                                        "edges":  self.dm_pt_bin_lists[wp]["VVLoose"][dm],
                                                         "flow": "clamp",
                                                         "content": [
                                                             {
                                                                 "nodetype": "category",
                                                                 "input": "syst",
                                                                 "content": [
-                                                                    {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="es")},
-                                                                    {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="es")},
-                                                                    {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="es")},
+                                                                    {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="es")},
+                                                                    {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="es")},
+                                                                    {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="es")},
                                                                                             ],
-                                                                                        } for pt in self.dm_pt_bin_lists[wp][wp_VSe][dm][:-1]
+                                                                                        } for pt in self.dm_pt_bin_lists[wp]["VVLoose"][dm][:-1]
                                                                                     ],
                                                                                 }
                                                                             ],
                                                                         }
                                                                     }
-                                                                } for dm in self.dm_pt_bin_lists[wp][wp_VSe].keys()
+                                                                } for dm in self.dm_pt_bin_lists[wp]["VVLoose"].keys()
                                                             ],
                                                         },
-                                                    } for wp_VSe in self.data[wp].keys()
+                                                    } for wp_VSe in ["VVLoose", "Tight"]#self.data[wp].keys()
                                                 ],
                                             },
                                         } for wp in self.data.keys()
@@ -549,7 +549,7 @@ class TauID(Correction):
                 },
                 { "name": "wp_VSe",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSe working point: VVLoose"
+                "description": "DeepTau2017v2p1VSe working point: VVLoose,Tight"
                 },
                 { "name": "syst",
                 "type": "string",
@@ -626,9 +626,9 @@ class TauID(Correction):
                                                                 "nodetype": "category",
                                                                 "input": "syst",
                                                                 "content": [
-                                                                    {"key": "nom", "value": self.get_tau_sf(dm, "nom", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="es")},
-                                                                    {"key": "up", "value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="es")},
-                                                                    {"key": "down", "value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="es")},
+                                                                    {"key": "nom", "value": self.get_tau_sf(dm, "nom", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="es")},
+                                                                    {"key": "up", "value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="es")},
+                                                                    {"key": "down", "value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="es")},
                                                                                             ],
                                                                                         }
                                                                                     ],
@@ -636,10 +636,10 @@ class TauID(Correction):
                                                                             ],
                                                                         }
                                                                     }
-                                                                } for dm in self.data[wp][wp_VSe].keys() if dm in self.dm_binning.keys()
+                                                                } for dm in self.data[wp]["VVLoose"].keys() if dm in self.dm_binning.keys()
                                                             ],
                                                         },
-                                                    } for wp_VSe in self.data[wp].keys()
+                                                    } for wp_VSe in ["VVLoose", "Tight"]#self.data[wp].keys()
                                                 ],
                                             },
                                         } for wp in self.data.keys()
@@ -672,7 +672,6 @@ class TauID(Correction):
             for bin in data[dm_pt].keys():
                 if variable == bin:
                     if variation == "nom":
-                        
                         return _convert_tes_to_factor(data[dm_pt][bin]["r"], id_es=id_es)
                     elif variation == "up":
                         return _convert_tes_to_factor(data[dm_pt][bin]["u"], id_es=id_es)
@@ -785,6 +784,7 @@ def load_fitresults_from_files(filenames, sig_bins):
             
         dat = {}
         # results_list = values_lst[2:].copy() # values_lst might not be read strictly ordered, maybe look it up.
+        
         results_list = list(set(values_lst.copy()))
         results_list.sort()
         if len(results_list) != 3:
@@ -954,7 +954,7 @@ correctionset.add_correction(correction_dm_es)
 # Adds dm as second correction:
 # correctionset.add_correction(correction_dm)
 correctionset.write_json(
-    "Tau_ID_ES_"
+    "CHECK_Tau_ID_ES_"
     + str(args.era)
     + "_UL_"
     + str(args.channel)

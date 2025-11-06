@@ -13,7 +13,9 @@ import argparse
 import numpy as np
 import os
 import ROOT
-
+import uproot
+import multiprocessing as mp
+import tempfile
 
 
 def parse_arguments():
@@ -192,19 +194,17 @@ def get_data_selection(name: str, unit, basedir, frienddirs, dm_cut: str) -> dic
 
 def build_chain(dict_):
     # Build chain
-    logger.debug("Use tree path %s for chain.", dict_["tree_path"])
+    logger.info(f"Use tree path \"{dict_['tree_path']}\" for chain.")
     chain = ROOT.TChain(dict_["tree_path"])
-    
     for i, f in enumerate(dict_["files"]):
         filename = f.path
         chain.AddFile(filename)
-    
     chain_numentries = chain.GetEntries()
     if not chain_numentries > 0:
         logger.fatal("Chain (before skimming) does not contain any events.")
         raise Exception
-    logger.debug("Found %s events before skimming with cut string.", chain_numentries)
-    logger.debug("Using cut string %s", dict_["cut_string"])
+    logger.info("Found %s events before skimming with cut string.", chain_numentries)
+    logger.info("Using cut string %s", dict_["cut_string"])
     # Skim chain
     clean_cut_string = dict_["cut_string"].replace("\n", "").strip()
     chain_skimmed = chain.CopyTree(clean_cut_string)
@@ -212,51 +212,135 @@ def build_chain(dict_):
     if not chain_skimmed_numentries > 0:
         logger.fatal("Chain (after skimming) does not contain any events.")
         raise Exception
-    logger.debug(
+    logger.info(
         "Found %s events after skimming with cut string.", chain_skimmed_numentries
     )
-
+    # breakpoint()
     return chain_skimmed
 
 
-def get_1d_binning(channel, chain, variables, percentiles):
-    # Collect values
-    values = [[] for v in variables]
-    for event in chain:
-        for i, v in enumerate(variables):
-            value = getattr(event, v)
-            if value not in [-11.0, -999.0, -10.0, -1.0]:
-                values[i].append(value)
+def _skim_file_to_disk(args):
+    """Worker: skim one file with your cut and write out a temp .root."""
+    filename, tree_path, cut = args
+    in_file = ROOT.TFile.Open(filename)
+    tr      = in_file.Get(tree_path)
 
-    # Get min and max by percentiles
+    # create output file first (so any new TTrees go on disk, not in RAM)
+    tmp      = tempfile.NamedTemporaryFile(suffix=".root", delete=False)
+    out_file = ROOT.TFile.Open(tmp.name, "RECREATE")
+    out_file.cd()
+
+    # now CopyTree will produce a file‐resident TTree
+    skim = tr.CopyTree(cut)
+    skim.Write()
+
+    out_file.Close()
+    in_file.Close()
+    return tmp.name
+
+def build_chain_mp(dict_, n_workers=None):
+    """Parallel skim per file, then build one chain over all skims."""
+    files     = [f.path for f in dict_["files"]]
+    tree_path = dict_["tree_path"]
+    cut       = dict_["cut_string"].replace("\n","").strip()
+    args      = [(fn, tree_path, cut) for fn in files]
+
+    with mp.Pool(processes=n_workers) as pool:
+        skim_files = pool.map(_skim_file_to_disk, args)
+
+    chain = ROOT.TChain(tree_path)
+    for sf in skim_files:
+        chain.AddFile(sf)
+
+    return chain
+
+
+
+# def get_1d_binning(channel, chain, variables, percentiles):
+#     # Collect values
+#     values = [[] for v in variables]
+#     for event in chain:
+#         for i, v in enumerate(variables):
+#             value = getattr(event, v)
+#             if value not in [-11.0, -999.0, -10.0, -1.0]:
+#                 values[i].append(value)
+
+#     # Get min and max by percentiles
+#     binning = {}
+#     for i, v in enumerate(variables):
+#         binning[v] = {}
+#         if len(values[i]) > 0:
+#             borders = [float(x) for x in np.percentile(values[i], percentiles)]
+#             # remove duplicates in bins for integer binning
+#             borders = sorted(list(set(borders)))
+#             # epsilon offset for integer variables to make it more stable
+#             borders = [b - 0.0001 for b in borders]
+#             # stretch last one to include the last border in case it is an integer
+#             borders[-1] += 0.0002
+#         else:
+#             logger.fatal(
+#                 "No valid values found for variable {}. Please remove from list for channel {}.".format(
+#                     v, channel
+#                 )
+#             )
+#             raise Exception
+
+#         binning[v]["bins"] = borders
+#         binning[v]["expression"] = v
+#         if len(borders) >= 2:
+#             binning[v]["cut"] = "({VAR}>{MIN})&&({VAR}<{MAX})".format(
+#                 VAR=v, MIN=borders[0], MAX=borders[-1]
+#             )
+#         else:
+#             binning[v]["cut"] = "(1 == 0)"
+#         logger.debug("Binning for variable %s: %s", v, binning[v]["bins"])
+#     # breakpoint()
+#     return binning
+
+def get_1d_binning(channel, chain, variables, percentiles):
+
+    # 1) collect all filenames and the tree name from the chain
+    try:
+        files     = [elem.GetTitle() for elem in chain.GetListOfFiles()]
+        tree_name = chain.GetName()
+        
+        # 2) bulk‐read each branch into a NumPy array
+        data = uproot.concatenate(
+            files,
+            expressions=variables,
+            filter_name=tree_name,
+            library="np",
+        )
+    except:
+        breakpoint()
+
+    # 3) build the binning dict by masking invalids and calling np.percentile
+    invalid = {-11.0, -999.0, -10.0, -1.0}
     binning = {}
-    for i, v in enumerate(variables):
-        binning[v] = {}
-        if len(values[i]) > 0:
-            borders = [float(x) for x in np.percentile(values[i], percentiles)]
-            # remove duplicates in bins for integer binning
-            borders = sorted(list(set(borders)))
-            # epsilon offset for integer variables to make it more stable
-            borders = [b - 0.0001 for b in borders]
-            # stretch last one to include the last border in case it is an integer
-            borders[-1] += 0.0002
-        else:
+    for v in variables:
+        arr = data[v]
+        mask = ~np.isin(arr, list(invalid))
+        arr = arr[mask]
+        if arr.size == 0:
             logger.fatal(
-                "No valid values found for variable {}. Please remove from list for channel {}.".format(
-                    v, channel
-                )
+                "No valid values found for variable %s. Please remove from list for channel %s.",
+                v, channel
             )
             raise Exception
 
-        binning[v]["bins"] = borders
-        binning[v]["expression"] = v
-        if len(borders) >= 2:
-            binning[v]["cut"] = "({VAR}>{MIN})&&({VAR}<{MAX})".format(
-                VAR=v, MIN=borders[0], MAX=borders[-1]
-            )
-        else:
-            binning[v]["cut"] = "(1 == 0)"
-        logger.debug("Binning for variable %s: %s", v, binning[v]["bins"])
+        # compute, dedupe & pad the edges exactly as before
+        edges = np.percentile(arr, percentiles)
+        edges = sorted(set(float(x) for x in edges))
+        edges = [e - 1e-4 for e in edges]
+        edges[-1] += 2e-4
+
+        binning[v] = {
+            "bins": edges,
+            "expression": v,
+            "cut": f"({v}>{edges[0]})&&({v}<{edges[-1]})"
+        }
+        logger.debug("Binning for variable %s: %s", v, edges)
+
     return binning
 
 def add_2d_unrolled_binning(variables, binning):
@@ -347,7 +431,7 @@ def main(args):
     # We now calculate the binning for each category (dm bin) and save all to one yaml file.
     all_binnings = {}
     for dm_bin, cut in dm_cut.items():
-        
+
         nominals = {}
         nominals[era] = {}
         nominals[era]["datasets"] = {}
@@ -370,8 +454,8 @@ def main(args):
             era,
             nominals[era]["datasets"][channel],
             set_dummy_categorization(),
-            None,
-            True,
+            "TauID_ES",
+            False,
             args.wp_vsjet,
             args.wp_vsele,
             args.wp_vsmu,
@@ -383,9 +467,13 @@ def main(args):
             friend_directories[channel],
             cut,
         )
-        percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
-        chain = build_chain(data_selection)
-        binning = get_1d_binning(channel, chain, variables, percentiles, dm_bin)
+        logger.info(f"Building chain {dm_bin}")
+        # percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
+        percentiles = [0.0, 20.0, 40.0, 60.0, 80.0, 100.0]
+        # chain = build_chain(data_selection)
+        chain = build_chain_mp(dict_=data_selection, n_workers=32)
+        logger.info(f"Calculating binning for {dm_bin}")
+        binning = get_1d_binning(channel, chain, variables, percentiles)
         all_binnings[dm_bin] = binning
         
     outputfile = os.path.join(args.output_folder, f"binning_{era}_{channel}_{args.tag}.yaml")    

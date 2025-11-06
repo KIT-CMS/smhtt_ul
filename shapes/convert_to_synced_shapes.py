@@ -58,13 +58,13 @@ def parse_args():
     parser.add_argument(
         "--es-up",
         default=8,
-        type=int,
+        type=float,
         help="ES variation upper bound.",
     )
     parser.add_argument(
         "--es-down",
         default=-8,
-        type=int,
+        type=float,
         help="ES variation lower bound.",
     )
     return parser.parse_args()
@@ -389,9 +389,9 @@ if __name__ == "__main__":
     setup_logging("convert_to_synced_shapes.log", level=logging.INFO)
     
     aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
-    cleaned_aranged = [0.0 if x == 0.0 else x for x in aranged]
+    cleaned_aranged = [x for x in aranged if x != 0.0]
     tau_es_map = {
-        f"emb{'minus' if val < 0 and not np.isclose(val, 0.0) else ''}{str(abs(val)).replace('.', 'p')}":
+        f"emb{'minus' if val < 0 else ''}{str(abs(val)).replace('.', 'p')}":
         f"{val:.1f}" for val in cleaned_aranged
     }
     

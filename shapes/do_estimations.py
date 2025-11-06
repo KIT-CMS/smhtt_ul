@@ -48,13 +48,13 @@ def parse_args():
     parser.add_argument(
         "--es-up",
         default=8,
-        type=int,
+        type=float,
         help="ES variation upper bound.",
     )
     parser.add_argument(
         "--es-down",
         default=-8,
-        type=int,
+        type=float,
         help="ES variation lower bound.",
     )
     parser.add_argument("-s", "--special", help="Special selection.", default="")
@@ -229,11 +229,12 @@ def parse_histograms_for_qqh(inputfile):
 def main(args):
     input_file = ROOT.TFile(args.input, "update")
     logger.info("Reading inputs from file {}".format(args.input))
-    tauES_names = []
+    tauES_names = ["EMB"]    # Include nominal
     eleES_names = []
     if args.special == "TauES":
         # we have to extend the _dataset_map and the _process_map to include the TauES variations
-        tauESvariations = [-2.5 + 0.1 * i for i in range(0, 52)]
+        aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
+        tauESvariations = [x for x in aranged if x != 0.0]
         for variation in tauESvariations:
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
             processname = f"emb{name}"
@@ -241,7 +242,7 @@ def main(args):
     if args.special == "TauID_ES":
         # we have to extend the _dataset_map and the _process_map to include the TauES variations
         aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
-        tauESvariations = [0.0 if x == 0.0 else x for x in aranged]
+        tauESvariations = [x for x in aranged if x != 0.0]
         for variation in tauESvariations:
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
             processname = f"emb{name}"

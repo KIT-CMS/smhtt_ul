@@ -36,9 +36,8 @@ elif [[ "${SUBMIT_MODE}" == "singlegraph" ]]; then
     echo "[INFO] Using tag ${TAG}"
     echo "[INFO] Using friends ${FRIENDS} ${NNSCORE_FRIENDS}"
     [[ ! -d ${OUTPUT} ]] && mkdir -p ${OUTPUT}
-    echo "OUTPUT: ${OUTPUT}"
     if [[  "${SPECIAL}" == "TauID_ES" ]]; then
-        python shapes/produce_shapes_tauid_es.py --channels ${CHANNEL} \
+        python shapes/produce_shapes_tauid_es_extensions.py --channels ${CHANNEL} \
             --output-file dummy.root \
             --directory ${NTUPLES} \
             --${CHANNEL}-friend-directory ${XSEC_FRIENDS} \
@@ -54,18 +53,6 @@ elif [[ "${SUBMIT_MODE}" == "singlegraph" ]]; then
             --xrootd --validation-tag ${TAG} --binning-tag ${BIN_TAG} \
             --es-up ${ES_up} \
             --es-down ${ES_down} 
-            
-    elif [[ "${SPECIAL}" == "TauES" ]]; then
-        python shapes/produce_shapes_tauid_es.py --channels $CHANNEL \
-            --output-file dummy.root \
-            --directory $NTUPLES \
-            --$CHANNEL-friend-directory ${SUBM_FRIENDS} \
-            --era $ERA \
-            --optimization-level 1 \
-            --special-analysis "TauES" \
-            --only-create-graphs \
-            --graph-dir $OUTPUT \
-            $CONTROL_ARG
     else
         echo "[ERROR] Not implemented yet."
     fi

@@ -10,12 +10,15 @@ WP_VSe=${7}
 WP_VSmu=${8}
 ES_up=${9}
 ES_down=${10}
+EXTENDED_TAG_UP=${11:-"M_pre_20to20_ext_up"}
+EXTENDED_TAG_DOWN=${12:-"M_pre_20to20_ext_down"}
+BIN_TAG=${13}
 # For producing correction libs of a given era and channel! All files for different wp should be given with their tags.
-TAG_list_parse=${11:-"M_post_8to8_flat_data,T_post_8to8_flat_data"}
+TAG_list_parse=${14:-"M_post_8to8_,T_post_8to8_"}
 IFS=',' read -r -a TAG_list <<< "${TAG_list_parse}"
-WP_list_parse=${12:-"Medium,Tight"}
+WP_list_parse=${15:-"Medium,Tight"}
 IFS=',' read -r -a WP_list <<< "${WP_list_parse}"
-WP_VSe_list_parse=${13:-"VVLoose"}
+WP_VSe_list_parse=${16:-"VVLoose"}
 IFS=',' read -r -a WP_VSe_list <<< "${WP_VSe_list_parse}"
 
 
@@ -31,22 +34,12 @@ source utils/setup_ul_samples.sh ${NTUPLETAG} ${ERA}
 # pip3 install ipdb
 export PYTHONBREAKPOINT="ipdb.set_trace"
 
-# [INFO] tau_id_es_measurement/tau_id_es_sim_fit_conf.sh contains all fit parameters.
-
 # Datacard Setup
-
-datacard_output_pt="datacards_pt_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
-
-datacard_output_dm="datacards_dm_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
-
-datacard_output_incl="datacards_incl_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
-
-# datacard_output_dm_pt="datacards_dm_pt_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}"
 datacard_output_dm_pt="datacards_dm_pt_${TAG}/${NTUPLETAG}-${TAG}/${ERA}_tauid_${WP}_VSe${WP_VSe}"
 
 poi_path="poi_corr_${TAG}"
 
-impact_path="impacts_${TAG}"
+impact_path="impacts_${TAG}_Test_shape_unc"
 
 
 echo "MY WP,WP_VSe,WP_VSmu is: " ${WP} ${WP_VSe} ${WP_VSmu}
@@ -60,11 +53,9 @@ echo "output_shapes: ${output_shapes}"
 echo "FRIENDS: ${FRIENDS}"
 echo "XSEC: ${XSEC_FRIENDS}"
 
-# categories=("DM1" "DM1_PT20_40")
 all_categories=("DM0" "DM1" "DM1011" \
 "DM0_PT20_40" "DM1_PT20_40" "DM1011_PT20_40" \
 "DM0_PT40_200" "DM1_PT40_200" "DM1011_PT40_200")
-# dm_categories=("DM0" "DM1" "DM1011")
 
 # Generates es_shifts from {ES_down} to ${ES_up} in 0.1 steps:
 es_shifts=()
@@ -72,7 +63,9 @@ ES_up_int=$(printf "%.0f" "$(echo "${ES_up}*10" | bc -l)")
 ES_down_int=$(printf "%.0f" "$(echo "${ES_down}*10" | bc -l)")
 for i in $(seq ${ES_down_int} ${ES_up_int}); do
     shift_val=$(printf "%.1f" "$(echo "${i} / 10" | bc -l)")
-    if [[ $shift_val == -* ]]; then
+    if [[ $shift_val == "0.0" ]]; then
+        es_shifts+=("EMB")  # Replace emb0p0 with EMB
+    elif [[ $shift_val == -* ]]; then
         # Remove minus and replace the dot with "p"
         formatted=${shift_val#-}
         formatted=${formatted/./p}
@@ -86,15 +79,24 @@ echo "${es_shifts[@]}"
 
 # Read out yaml file:
 get_yaml_vals() {
-    # Expecting two parameters: TAG and cat
-    python3 -c "import yaml, sys; 
-tag = sys.argv[1]; cat = sys.argv[2]; 
-data = yaml.safe_load(open('tau_id_es_measurement/1Dscan_contours.yaml'));
-min_id_sep, max_id_sep = data[tag][cat]['ID'];
-min_es_sep, max_es_sep = data[tag][cat]['ES'];
+    python3 -c "import sys, yaml; 
+tag = sys.argv[1]; 
+cat = sys.argv[2]; 
+scan_tag = sys.argv[3]; 
+sigma = sys.argv[4];
+data = yaml.safe_load(open(f'tau_id_es_measurement/confidence_yaml/1D_{scan_tag}_{tag}_{cat}_contours.yaml'));
+if sigma == '1':
+    min_id_sep, max_id_sep = data[tag][cat]['ID'];
+    min_es_sep, max_es_sep = data[tag][cat]['ES'];
+elif sigma == '2':
+    min_id_sep, max_id_sep = data[tag][cat]['ID_2'];
+    min_es_sep, max_es_sep = data[tag][cat]['ES_2'];
+else:
+    print('Invalid sigma value. Use \"1\" or \"2\".');
+    sys.exit(1);
 cent_id_sep = data[tag][cat]['fit']['ID'];
 cent_es_sep = data[tag][cat]['fit']['ES'];
-print(min_id_sep, max_id_sep, cent_id_sep, min_es_sep, max_es_sep, cent_es_sep)" "$1" "$2"
+print(min_id_sep, max_id_sep, cent_id_sep, min_es_sep, max_es_sep, cent_es_sep)" "$1" "$2" "$3" "$4"
 }
 
 
@@ -167,10 +169,6 @@ if [[ $MODE == "CONTROL" ]]; then
     do
         source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
 
-        if [ ! -d "${shapes_output}" ]; then
-            mkdir -p ${shapes_output}
-        fi
-
         python shapes/produce_shapes_tauid_es.py --channels ${CHANNEL} \
             --directory ${NTUPLES} \
             --${CHANNEL}-friend-directory ${XSEC_FRIENDS} \
@@ -181,13 +179,13 @@ if [[ $MODE == "CONTROL" ]]; then
             --optimization-level 1 --skip-systematic-variations \
             --special-analysis "TauID_ES" \
             --control-plot-set ${VARIABLES} \
-            --output-file ${shapes_output}  --xrootd  --validation-tag ${TAG} \
+            --output-file ${shapes_output}  --xrootd  --validation-tag ${TAG} --binning-tag ${BIN_TAG} \
             --es-up ${ES_up} --es-down ${ES_down}
     done
 fi
 
 
-# TODO: check this LOCAL part
+# TODO: update this LOCAL part
 PROCESSES="emb"
 number="_emb_ssos"
 if [[ $MODE == "LOCAL" ]]; then
@@ -208,7 +206,7 @@ if [[ $MODE == "LOCAL" ]]; then
             --process-selection ${PROCESSES} \
             --control-plot-set ${VARIABLES} \
             --optimization-level 1 \
-            --output-file ${shapes_output}${number} --xrootd --validation-tag ${TAG} --es
+            --output-file ${shapes_output}${number} --xrootd --validation-tag ${TAG} --binning-tag ${BIN_TAG} --es
     done
 fi
 
@@ -221,14 +219,97 @@ if [[ $MODE == "CONDOR" ]]; then
         if [ ! -d "${CONDOR_OUTPUT}" ]; then
             mkdir -p ${CONDOR_OUTPUT}
         fi
-
         echo "[INFO] Running on Condor"
         echo "[INFO] Condor output folder: ${CONDOR_OUTPUT}"
         bash submit/submit_shape_production_tauid_es.sh ${ERA} ${CHANNEL} \
-        "singlegraph" ${TAG} 0 ${NTUPLETAG} ${CONDOR_OUTPUT} "TauID_ES" ${WP} ${WP_VSe} ${WP_VSmu} ${ES_up} ${ES_down}
+        "singlegraph" ${TAG} 0 ${NTUPLETAG} ${CONDOR_OUTPUT} "TauID_ES" ${WP} ${WP_VSe} ${WP_VSmu} ${ES_up} ${ES_down} ${BIN_TAG}
         echo "[INFO] Jobs submitted"
     done
 fi
+
+
+if [[ $MODE == "EXTENSIONS" ]]; then
+    source utils/setup_root.sh
+    echo "##############################################################################################"
+    echo "#      Moving extensions to the new output folder including the extension shapes             #"
+    echo "##############################################################################################"
+    ORIG_DIR=$(pwd)
+    for CHANNEL in "${CHANNELS[@]}"
+    do
+        source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
+        dest_dir="output/condor_shapes/analysis_unit_graphs-${ERA}-${CHANNEL}-${TAG}_extended"
+        base_name="analysis_unit_graphs-${ERA}-${CHANNEL}-${TAG}_extended"
+        echo "This is the new TAG the full shapes will be associated with further on: ${TAG}_extended"
+        if [[ ${CHANNEL} == "mm" ]]; then
+            mkdir -p "${dest_dir}"
+            cp ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${TAG}/*.root "${dest_dir}"/
+            cd "${dest_dir}" || { echo "Cannot change to directory ${dest_dir}"; exit 1; }
+            counter=0
+            # Loop through all files
+            for file in *; do
+                # Skip if not a file
+                if [ ! -f "$file" ]; then
+                    continue
+                fi
+                # Get file extension (if any)
+                ext="${file##*.}"
+                if [[ "$file" != *.* ]]; then
+                    new_file="${base_name}-${counter}"
+                else
+                    new_file="${base_name}-${counter}.${ext}"
+                fi
+                echo "Renaming $file to $new_file"
+                mv "$file" "$new_file"
+                counter=$((counter + 1))
+            done
+            cd "${ORIG_DIR}"
+        else
+            src1="output/condor_shapes/analysis_unit_graphs-${ERA}-${CHANNEL}-${TAG}"
+            src2="output/condor_shapes/analysis_unit_graphs-${ERA}-${CHANNEL}-${EXTENDED_TAG_UP}"
+            src3="output/condor_shapes/analysis_unit_graphs-${ERA}-${CHANNEL}-${EXTENDED_TAG_DOWN}"
+
+            # Create destination directory if it does not exist
+            mkdir -p "${dest_dir}"
+
+            # Copy all files from the three source directories into the destination directory
+            for src in "$src1" "$src2" "$src3"; do
+                if [ -d "$src" ]; then
+                    cp "$src"/* "${dest_dir}"/
+                else
+                    echo "Warning: $src is not a directory, skipping."
+                fi
+            done
+
+            # Change to the destination directory
+            cd "${dest_dir}" || { echo "Cannot change to directory ${dest_dir}"; exit 1; }
+
+            # Rename each file in the destination directory sequentially
+            counter=0
+            # Loop through all files (adjust glob if you want specific types only, e.g. *.root)
+            for file in *; do
+                # Skip if not a file
+                if [ ! -f "$file" ]; then
+                    continue
+                fi
+                # Get file extension (if any)
+                ext="${file##*.}"
+                if [[ "$file" != *.* ]]; then
+                    # No extension found
+                    new_file="${base_name}-${counter}"
+                else
+                    new_file="${base_name}-${counter}.${ext}"
+                fi
+                echo "Renaming $file to $new_file"
+                mv "${file}" "${new_file}"
+                counter=$((counter + 1))
+            done
+            cd "${ORIG_DIR}"
+        fi
+    done
+fi
+
+
+# echo "[INFO] If you want to use the extended shapes, use ${TAG}_extended as the TAG from here on!"
 
 
 if [[ $MODE == "MERGE" ]]; then
@@ -236,9 +317,11 @@ if [[ $MODE == "MERGE" ]]; then
     for CHANNEL in "${CHANNELS[@]}"
     do
         source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
-
-        echo "[INFO] Merging outputs located in ${CONDOR_OUTPUT}"
-        hadd -j 5 -n 600 -f ${shapes_rootfile} ${CONDOR_OUTPUT}/../analysis_unit_graphs-${ERA}-${CHANNEL}-${TAG}/*.root
+        if [ ! -d "${shapes_output}" ]; then
+            mkdir -p ${shapes_output}
+        fi
+        echo "[INFO] Merging outputs located in ... "
+        hadd -j 5 -n 600 -f ${shapes_rootfile} output/condor_shapes/analysis_unit_graphs-${ERA}-${CHANNEL}-${TAG}/*.root
     done
 fi
 
@@ -252,7 +335,12 @@ if [[ $MODE == "SYNC" ]]; then
     for CHANNEL in "${CHANNELS[@]}"
     do
         source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
-
+        if [ ! -d "${shapes_output}" ]; then
+            mkdir -p ${shapes_output}
+        fi
+        if [ ! -d "${shapes_output_synced}" ]; then
+            mkdir -p ${shapes_output_synced}
+        fi
         if [[ $CHANNEL != "mm" ]]; then
             python shapes/do_estimations.py -e ${ERA} -i ${shapes_rootfile} --do-qcd --do-emb-tt -s TauID_ES --es-up ${ES_up} --es-down ${ES_down}
         fi
@@ -264,10 +352,6 @@ if [[ $MODE == "SYNC" ]]; then
         echo "#     synced shapes                                      #"
         echo "##############################################################################################"
 
-        # if the output folder does not exist, create it
-        if [ ! -d "${shapes_output_synced}" ]; then
-            mkdir -p ${shapes_output_synced}
-        fi
 
         python shapes/convert_to_synced_shapes.py -e ${ERA} \
             -i ${shapes_rootfile} \
@@ -286,24 +370,33 @@ fi
 if [[ $MODE == "PLOT_CONTROL_ES" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
-    echo "#     plotting                                      #"
+    echo "#     Plotting                                      #"
     echo "##############################################################################################"
     for CHANNEL in "${CHANNELS[@]}"
     do
         source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
+        if [ ! -d "${shapes_output}" ]; then
+            mkdir -p ${shapes_output}
+        fi
+        all_categories=("DM1" "DM1_PT20_40" "DM0_PT40_200" "DM1_PT40_200")
         if [[ $CHANNEL != "mm" ]]; then
             for CATEGORY in "${all_categories[@]}"
             do
-                for es_sh in "${es_shifts[@]}"
-                do 
-                    python3 plotting/plot_shapes_control_es_shifts.py -l --era Run${ERA} --input ${shapes_rootfile} \
-                    --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category ${CATEGORY} --energy_scale --es_shift ${es_sh} --tag ${TAG} --es_up ${ES_up} --es-down ${ES_down}
-                done
+                # (
+                    for es_sh in "${es_shifts[@]}"
+                    do
+                        # (
+                            python3 plotting/plot_shapes_control_es_shifts.py -l --era Run${ERA} --input ${shapes_rootfile} \
+                            --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category ${CATEGORY} --energy_scale \
+                            --es_shift ${es_sh} --tag ${TAG} --es_up ${ES_up} --es_down ${ES_down}
+                        # ) &
+                    done
+                # ) &
             done
         fi
         if [[ $CHANNEL == "mm" ]]; then
                     python3 plotting/plot_shapes_control_es_shifts.py -l --era Run${ERA} --input ${shapes_rootfile} \
-                    --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category control_region --energy_scale --tag ${TAG}
+                    --variables ${VARIABLES} --channels ${CHANNEL} --embedding --category control_region --tag ${TAG}
         fi
     done
 fi
@@ -311,9 +404,21 @@ fi
 # For the next steps combine need to be installed (if not already done)
 # via e.g. source utils/install_combine_tauid.sh
 
+
+if  [[ $MODE == "MAKE_SHAPE_UNC" ]]; then 
+    source utils/setup_root.sh
+    CHANNEL='mt'
+    all_categories=("DM1011_PT20_40")
+    for cat in "${all_categories[@]}"; do
+        python shapes/make_extra_shape_unc.py --input="output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced/htt_${CHANNEL}.inputs-sm-Run${ERA}-TauID_ES.root" \
+            --output="output/${WP}-${ERA}-mt-${NTUPLETAG}-${TAG}/synced/htt_${CHANNEL}.inputs-sm-Run${ERA}-TauID_ES_shape_unc_Test.root" \
+            --process=${cat} --scaleup=1.3 --scaledown=0.7 --scaleTES=0.03
+    done
+fi
+
 if [[ $MODE == "DATACARD" ]]; then
     source utils/setup_cmssw_tauid.sh
-    # all_categories=("DM0")
+    # all_categories=("DM1011_PT20_40")
     for cat in "${all_categories[@]}"
     do
         # for category in "dm_binned"
@@ -321,7 +426,7 @@ if [[ $MODE == "DATACARD" ]]; then
         datacard_output=${datacard_output_dm_pt}
         fi
         
-        $CMSSW_BASE/bin/el9_amd64_gcc12/MorphingTauID2017 \
+        ${CMSSW_BASE}/bin/el9_amd64_gcc12/MorphingTauID2017 \
             --base_path=${PWD} \
             --input_folder_mt="output/${WP}-${ERA}-mt-${NTUPLETAG}-${TAG}/synced" \
             --input_folder_mm="output/${WP}-${ERA}-mm-${NTUPLETAG}-${TAG}/synced" \
@@ -341,6 +446,7 @@ if [[ $MODE == "DATACARD" ]]; then
         # Add rate parameter for DY inclusive scaling:
         for file_mt in output/${datacard_output}/htt_mt_${cat}/htt_mt_*.txt; do
             echo "[Datacard file to use]: ${file_mt}"
+
             sed -i '$s/$/\nr_DY_incl_'${cat}' rateParam * EMB_'${cat}' 1.0 [0.5,1.5]/' "${file_mt}"
             if grep -q "ZL" "${file_mt}"; then
                 sed -i '$s/$/\nr_DY_incl_'${cat}' rateParam * ZL 1.0 [0.5,1.5]/' "${file_mt}"
@@ -356,37 +462,31 @@ fi
 
 if  [[ $MODE == "WORKSPACE" ]]; then 
     source utils/setup_cmssw_tauid.sh
-    # all_categories=("DM0")
-    for cat in "${all_categories[@]}"
-    do
+    # all_categories=("DM1011_PT20_40")
+    for cat in "${all_categories[@]}"; do
         # for category in "dm_binned"
         if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
           datacard_output=${datacard_output_dm_pt}
         fi
         THIS_PWD=${PWD}
-        echo $THIS_PWD
+        echo ${THIS_PWD}
         if [ ! -d "output/${datacard_output}" ]; then
             mkdir -p  output/${datacard_output}
         fi
-
+        echo "Category: ${cat}"
         echo "[INFO] Create Multifit_Workspace for datacard in ${cat} category."
         combineTool.py -M T2W -i output/${datacard_output}/htt_mt_${cat}/ \
             -o workspace_${cat}_${TAG}_multidimfit.root --parallel 4 -m 125 \
             -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-            --PO "map=^.*/EMB_${cat}:r_EMB_${cat}[1,0.1,1.9]"
+            --PO "map=^.*/EMB_${cat}:r_EMB_${cat}[1,0.1,2.9]" --verbose 3
         
     done
 fi
+# ws range old 0.1 to 1.9
 
-
-#  2D likelihood scan for tau ID + ES, we vary ID from 0.5 to 1.5 abd ES from -8.0 % to +8.0%
+#  2D likelihood scan for tau ID + ES, we vary ID and ES
 
 # That's reflected in min/max_id and min/max_es parameters that have corresponding ranges
-
-min_id=0
-max_id=0
-min_es=0
-max_es=0
 
 mH=125
 
@@ -399,223 +499,287 @@ if [[ $MODE == "SCAN_2D" ]]; then
     if [ ! -d "${scan_2D_plot_path}" ]; then
             mkdir -p  ${scan_2D_plot_path}
     fi
+    if [ ! -d "tau_id_es_measurement/confidence_yaml" ]; then
+            mkdir -p  "tau_id_es_measurement/confidence_yaml"
+    fi
 
-    all_categories=("DM0" "DM1" "DM1011")
+    # all_categories=("DM1011_PT20_40")
     for cat in "${all_categories[@]}"
     do
-        if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
-            datacard_output=${datacard_output_dm_pt}
-            min_id=0.1
-            max_id=1.9
-            min_es=-8.0
-            max_es=8.0
-        fi
-
-        # 2D scan ID-ES
-        combineTool.py -M MultiDimFit -n .scan_2D_${cat}_${TAG} -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
-            --setParameters ES_${cat}=0.0,r_EMB_${cat}=1.0,r_DY_incl_${cat}=1.0 \
-            --setParameterRanges r_EMB_${cat}=${min_id},${max_id}:ES_${cat}=${min_es},${max_es}:r_DY_incl_${cat}=0.5,1.5 \
-            --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-            --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-            --redefineSignalPOIs ES_${cat},r_EMB_${cat} \
-            --floatOtherPOIs=1 --points=841 --algo grid -m ${mH} --alignEdges=1 --parallel 12 --cminDefaultMinimizerStrategy 0
-
-        echo "[INFO] Moving scan file to datacard folder ..."
-        mv higgsCombine.scan_2D_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
-
-        
-        # 1D scan for r_EMB_${cat} (profiling ES_${cat})
-        echo "[INFO] 1D scan for r_EMB_${cat} (profiling ES_${cat})"
-        combineTool.py -M MultiDimFit -n .scan_1D_rEMB_${cat}_${TAG} \
-            -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
-            --setParameters ES_${cat}=0.0,r_EMB_${cat}=1.0,r_DY_incl_${cat}=1.0 \
-            --setParameterRanges r_EMB_${cat}=${min_id},${max_id}:ES_${cat}=${min_es},${max_es}:r_DY_incl_${cat}=0.5,1.5 \
-            --robustFit=1 --setRobustFitAlgo=Minuit2 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-            --X-rtd REMOVE_CONSTANT_ZERO_POINT=1 \
-            --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-            --redefineSignalPOIs r_EMB_${cat} --algo grid -m ${mH} --parallel 12 --cminDefaultMinimizerStrategy 0 --saveNLL \
-            --points=29 --alignEdges=1
-
-        mv higgsCombine.scan_1D_rEMB_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
-
-        combineTool.py -M MultiDimFit -n .scan_1D_ES_${cat}_${TAG} \
-            -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
-            --setParameters ES_${cat}=0.0,r_EMB_${cat}=1.0,r_DY_incl_${cat}=1.0 \
-            --setParameterRanges r_EMB_${cat}=${min_id},${max_id}:ES_${cat}=${min_es},${max_es}:r_DY_incl_${cat}=0.5,1.5 \
-            --robustFit=1 --setRobustFitAlgo=Minuit2 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-            --X-rtd REMOVE_CONSTANT_ZERO_POINT=1 \
-            --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-            --redefineSignalPOIs ES_${cat} --algo grid -m ${mH} --parallel 12 --cminDefaultMinimizerStrategy 0 --saveNLL \
-            --points=29 --alignEdges=1
-
-        mv higgsCombine.scan_1D_ES_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
-
-        echo "[INFO] Create plots for 2D and 1D scans"
-        echo "[INFO] Input file: " output/${datacard_output}/htt_mt_${cat}/higgsCombine.scan_2D_${cat}_${TAG}.MultiDimFit.mH${mH}.root
-        # Plotting
-        python3 tau_id_es_measurement/plot_2D_scan.py \
-        --name-2D scan_2D_${cat}_${TAG} \
-        --name-1D-ID scan_1D_rEMB_${cat}_${TAG} \
-        --name-1D-ES scan_1D_ES_${cat}_${TAG} \
-        --in-path output/${datacard_output}/htt_mt_${cat}/ \
-        --tau-id-poi ${cat} --tau-es-poi ES_${cat} --outname ${cat} --tag ${TAG} --nbins 29 \
-        --x-range ${min_id} ${max_id} --y-range ${min_es} ${max_es} --scale_range 0.1
-        mv scan_2D_${cat}_${TAG}* ${scan_2D_plot_path}
-        # mv 1D_projections_2Dscan_${cat}* ${scan_2D_plot_path}
-        # mv 1D_profiles_2Dscan_${cat}_${TAG}* ${scan_2D_plot_path}
-        mv 1D_fit_tau* ${scan_2D_plot_path}
-        echo "[INFO]/[WARNING] If the yaml file contains Nones/nulls, the scanning window has to be adjusted!!! Remove affected categories from all_categories loop to not throw errors further down this script!!!!!"
-    done
-
-fi
-
-
-fix_es=-1.4
-fix_id=1.097
-
-probl_nuisance="ES_DM1"
-
-probl_categories=("DM1")
-
-if [[ $MODE == "PROBL_NUIS_SCAN" ]]; then
-
-    source utils/setup_cmssw_tauid.sh
-
-   echo "[INFO] Create 1D scan for problematic nuisance parameter ${probl_nuisance}"
-    for CHANNEL in "${CHANNELS[@]}"
-    do
-        source utils/setup_shapes.sh $CHANNEL $ERA $NTUPLETAG $TAG $MODE $WP
-        for cat in "${probl_categories[@]}"
-        do
-            if [[ " ${dm_categories[@]} " =~ " $cat " ]]; then
+        (
+            if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
                 datacard_output=${datacard_output_dm_pt}
+                min_id=0.11
+                max_id=2.89
+                min_es=-19.9
+                max_es=19.9
+                points_2D=289
+                points_1D=17
             fi
-            if [[ " ${pt_categories[@]} " =~ " $cat " ]]; then
-                datacard_output=$datacard_output_pt
+
+            # 2D scan ID-ES
+            combineTool.py -M MultiDimFit -n .scan_2D_${cat}_${TAG} -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
+                --setParameters r_EMB_${cat}=1.0,ES_${cat}=0.0 \
+                --setParameterRanges r_EMB_${cat}=${min_id},${max_id}:ES_${cat}=${min_es},${max_es} \
+                --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+                --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,1:0.01 --cminPreScan \
+                --redefineSignalPOIs r_EMB_${cat},ES_${cat} \
+                --floatOtherPOIs=1 --points=${points_2D} --algo grid -m ${mH} --alignEdges=1 --parallel 12 --cminDefaultMinimizerStrategy 0
+
+            echo "[INFO] Moving scan file to datacard folder ..."
+            mv higgsCombine.scan_2D_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
+
+            
+            # 1D scans ID and ES:
+            combineTool.py -M MultiDimFit -n .scan_1D_rEMB_${cat}_${TAG} \
+                -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
+                --setParameters r_EMB_${cat}=1.0,ES_${cat}=0.0 \
+                --setParameterRanges r_EMB_${cat}=${min_id},${max_id}:ES_${cat}=${min_es},${max_es} \
+                --robustFit=1 --setRobustFitAlgo=Minuit2 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+                --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,1:0.01 --cminPreScan \
+                --redefineSignalPOIs r_EMB_${cat} --algo grid -m ${mH} --parallel 12 --cminDefaultMinimizerStrategy 0 \
+                --floatOtherPOIs=1 --points=${points_1D} --alignEdges=1
+
+            mv higgsCombine.scan_1D_rEMB_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
+
+            combineTool.py -M MultiDimFit -n .scan_1D_ES_${cat}_${TAG} \
+                -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
+                --setParameters ES_${cat}=0.0,r_EMB_${cat}=1.0 \
+                --setParameterRanges r_EMB_${cat}=${min_id},${max_id}:ES_${cat}=${min_es},${max_es} \
+                --robustFit=1 --setRobustFitAlgo=Minuit2 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+                --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,1:0.01 --cminPreScan \
+                --redefineSignalPOIs ES_${cat} --algo grid -m ${mH} --parallel 12 --cminDefaultMinimizerStrategy 0 \
+                --floatOtherPOIs=1 --points=${points_1D} --alignEdges=1
+
+            mv higgsCombine.scan_1D_ES_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
+
+
+            echo "[INFO] Create plots for 2D and 1D scans"
+            echo "[INFO] Input file: " output/${datacard_output}/htt_mt_${cat}/higgsCombine.scan_2D_${cat}_${TAG}.MultiDimFit.mH${mH}.root
+            # Plotting
+            python3 tau_id_es_measurement/plot_2D_scan.py \
+            --name-2D scan_2D_${cat}_${TAG} \
+            --name-1D-ID scan_1D_rEMB_${cat}_${TAG} \
+            --name-1D-ES scan_1D_ES_${cat}_${TAG} \
+            --in-path output/${datacard_output}/htt_mt_${cat}/ \
+            --tau-id-poi ${cat} --tau-es-poi ES_${cat} --outname ${cat} --tag ${TAG} --nbins ${points_1D} \
+            --x-range ${min_id} ${max_id} --y-range ${min_es} ${max_es} --scale_range 0.1
+            mv 2D_full_scan_${cat}_${TAG}* ${scan_2D_plot_path}
+            mv 1D_full_scan_tauES_${cat}_${TAG}* ${scan_2D_plot_path}
+            mv 1D_full_scan_tauID_${cat}_${TAG}* ${scan_2D_plot_path}
+            echo "[INFO]/[WARNING] If the yaml file contains Nones/nulls, the scanning window has to be adjusted!!! Remove affected categories from all_categories loop to not throw errors further down this script!!!!! (Nones/nulls are replaced with border values atm, thus no such errors should occur)"
+
+            # sleep 5
+            # Do closeup of the full 2D scan.
+            read min_id_2 max_id_2 cent_id_2 min_es_2 max_es_2 cent_es_2 < <(get_yaml_vals "${TAG}" "${cat}" "full_scan" "2")
+            echo "For category ${cat} under TAG ${TAG}:"
+            echo "ID range: ${min_id_2} to ${max_id_2} with fit = ${cent_id_2}"
+            echo "ES range: ${min_es_2} to ${max_es_2} with fit = ${cent_es_2}"
+            echo "My values for ${cat}"
+
+            # Calculate the number of points for the closeup scan:
+            # 1. Calculate the range for ES
+            es_range=$(echo "${max_es_2} - ${min_es_2}" | bc)
+            # 2. Calculate the number of points for ES
+                # The 0.1 is the fines ES granularity (atm), it is not used for 2D scan as it will lead to too many points to scan.
+            es_points_full=$(echo "scale=0; ${es_range} / 0.1" | bc)
+            es_points=$(echo "scale=0; ${es_range} / 0.25" | bc)
+            # 3. Round upwards to integer
+                # Protect against too many point
+            es_points=$(echo "($es_points+0.999999)/1" | bc)
+            if (( es_points > 17 )); then
+                es_points=17
             fi
+            # 4. Use square for total points of 2D scan, it applies the sqrt of it to each axis
+            total_points=$(echo "${es_points} * ${es_points}" | bc)
+            echo "[INFO] Total points for closeup scan: ${total_points} (ES points: ${es_points})"
 
-            combineTool.py -M MultiDimFit -n .scan_2D${cat}_check_poi -d output/$datacard_output/htt_mt_${cat}/ws_scan_${cat}.root \
-            --setParameters ES_${cat}=${fix_es},r=${fix_id} --setParameterRanges r=0.5,1.5:ES_${cat}=-4.0,4.0 \
-            --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-            --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-            --redefineSignalPOIs ${probl_nuisance} \
-            --floatOtherPOIs=1 --points=400 --algo grid -v 2
+            # 2D scan ID-ES
+            combineTool.py -M MultiDimFit -n .closeup_scan_2D_${cat}_${TAG} -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
+                --setParameters r_EMB_${cat}=${cent_id_2},ES_${cat}=${cent_es_2} \
+                --setParameterRanges r_EMB_${cat}=${min_id_2},${max_id_2}:ES_${cat}=${min_es_2},${max_es_2} \
+                --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+                --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,1:0.01 --cminPreScan \
+                --redefineSignalPOIs r_EMB_${cat},ES_${cat} \
+                --floatOtherPOIs=1 --points=289 --algo grid -m ${mH} --alignEdges=1 --parallel 12 --cminDefaultMinimizerStrategy 0
 
-            echo "[INFO] Moving scan with problematic nuisance parameter file to datacard folder ..."
+            echo "[INFO] Moving scan file to datacard folder ..."
+            mv higgsCombine.closeup_scan_2D_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
 
-            mv higgsCombine.nominal_${cat}_check_poi.MultiDimFit.mH120.root output/$datacard_output/htt_mt_${cat}/
+            
+            # 1D scan for r_EMB_${cat} (profiling ES_${cat})
+            echo "[INFO] 1D scan for r_EMB_${cat} (profiling ES_${cat})"
+            combineTool.py -M MultiDimFit -n .closeup_scan_1D_rEMB_${cat}_${TAG} \
+                -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
+                --setParameters ES_${cat}=${cent_es_2},r_EMB_${cat}=${cent_id_2} \
+                --setParameterRanges r_EMB_${cat}=${min_id_2},${max_id_2}:ES_${cat}=${min_es_2},${max_es_2} \
+                --robustFit=1 --setRobustFitAlgo=Minuit2 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+                --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,1:0.01 --cminPreScan \
+                --redefineSignalPOIs r_EMB_${cat} --algo grid -m ${mH} --parallel 12 --cminDefaultMinimizerStrategy 0 \
+                --floatOtherPOIs=1 --points=17 --alignEdges=1
 
-            echo "[INFO] Plotting 1D scan ..."
+            mv higgsCombine.closeup_scan_1D_rEMB_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
 
-            python3 plot1DScan.py  output/$datacard_output/htt_mt_${cat}/higgsCombine.nominal_${cat}_check_poi.MultiDimFit.mH120.root \
-            --POI $probl_nuisance --y-max 12 --output ${TAG}_${ERA}_${CHANNEL}_${WP}_${cat}_${probl_nuisance}_scan
+            combineTool.py -M MultiDimFit -n .closeup_scan_1D_ES_${cat}_${TAG} \
+                -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
+                --setParameters ES_${cat}=${cent_es_2},r_EMB_${cat}=${cent_id_2} \
+                --setParameterRanges r_EMB_${cat}=${min_id_2},${max_id_2}:ES_${cat}=${min_es_2},${max_es_2} \
+                --robustFit=1 --setRobustFitAlgo=Minuit2 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+                --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,1:0.01 --cminPreScan \
+                --redefineSignalPOIs ES_${cat} --algo grid -m ${mH} --parallel 12 --cminDefaultMinimizerStrategy 0 \
+                --floatOtherPOIs=1 --points=17 --alignEdges=1
 
-            mv ${TAG}_${ERA}_${CHANNEL}_${WP}_${cat}_${probl_nuisance}_scan.* output/$datacard_output/htt_mt_${cat}/
-        done
+            mv higgsCombine.closeup_scan_1D_ES_${cat}_${TAG}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
+
+            echo "[INFO] Create plots for 2D and 1D scans"
+            echo "[INFO] Input file: " output/${datacard_output}/htt_mt_${cat}/higgsCombine.closeup_scan_2D_${cat}_${TAG}.MultiDimFit.mH${mH}.root
+            # Plotting
+            python3 tau_id_es_measurement/plot_2D_scan.py \
+            --name-2D closeup_scan_2D_${cat}_${TAG} \
+            --name-1D-ID closeup_scan_1D_rEMB_${cat}_${TAG} \
+            --name-1D-ES closeup_scan_1D_ES_${cat}_${TAG} \
+            --in-path output/${datacard_output}/htt_mt_${cat}/ \
+            --tau-id-poi ${cat} --tau-es-poi ES_${cat} --outname ${cat} --tag ${TAG} --nbins 17 \
+            --x-range ${min_id_2} ${max_id_2} --y-range ${min_es_2} ${max_es_2} --scale_range 0.05 --closeup_scan
+            mv 2D_closeup_scan_${cat}_${TAG}* ${scan_2D_plot_path}
+            mv 1D_closeup_scan_tauES_${cat}_${TAG}* ${scan_2D_plot_path}
+            mv 1D_closeup_scan_tauID_${cat}_${TAG}* ${scan_2D_plot_path}
+            echo "[INFO]/[WARNING] If the yaml file contains Nones/nulls, the scanning window has to be adjusted!!! Remove affected categories from all_categories loop to not throw errors further down this script!!!!! (Nones/nulls are replaced with border values atm, thus no such errors should occur)"
+        ) &
     done
 fi
-
-# This script sets all necessary fit parameters. Check if they are correctly exported!
-#. tau_id_es_measurement/tau_id_es_sim_fit_conf.sh
-
-min_id_sep=0
-max_id_sep=0
-
-min_es_sep=0
-max_es_sep=0
-
-cent_id_sep=0
-cent_es_sep=0
 
 
 if [[ $MODE == "MULTIFIT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
-
+    if [ ! -d "combine_logs" ]; then
+            mkdir -p  "combine_logs"
+    fi
     echo "[INFO] Create Workspace for all the datacards (fitting separately in every DM category)"    
-    all_categories=("DM0" "DM1" "DM1011")
+    # all_categories=("DM1_PT40_200")
     for cat in "${all_categories[@]}"
     do
-        if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
-            datacard_output=${datacard_output_dm_pt}
-        fi
+        # (
+            if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
+                datacard_output=${datacard_output_dm_pt}
+            fi
 
-        
-        read min_id_sep max_id_sep cent_id_sep min_es_sep max_es_sep cent_es_sep < <(get_yaml_vals "${TAG}" "${cat}")
-        echo "For category ${cat} under TAG ${TAG}:"
-        echo "ID range: ${min_id_sep} to ${max_id_sep} with fit = ${cent_id_sep}"
-        echo "ES range: ${min_es_sep} to ${max_es_sep} with fit = ${cent_es_sep}"
-        echo "My values for ${cat}"
+            read min_id_sep max_id_sep cent_id_sep min_es_sep max_es_sep cent_es_sep < <(get_yaml_vals "${TAG}" "${cat}" "closeup_scan" "1")
+            echo "For category ${cat} under TAG ${TAG}:"
+            echo "ID range: ${min_id_sep} to ${max_id_sep} with fit = ${cent_id_sep}"
+            echo "ES range: ${min_es_sep} to ${max_es_sep} with fit = ${cent_es_sep}"
+            echo "My values for ${cat}"
+
+            # Make temp dir for unique logging.
+            start_dir=$(pwd)
+            tmpdir=$(mktemp -d -p "${start_dir}")
+            pushd "${tmpdir}" >/dev/null
+
+            # Copy or link the input workspace and any other required files into tmpdir if needed
+            cp ${start_dir}/output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root ./
+            
 
 
-        combineTool.py -M MultiDimFit -n .comb_sep_fit_${cat} \
-        -d output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root \
-        --setParameters ES_${cat}=${cent_es_sep},r_EMB_${cat}=${cent_id_sep},r_DY_incl_${cat}=1.0 \
-        --setParameterRanges r_EMB_${cat}=${min_id_sep},${max_id_sep}:ES_${cat}=${min_es_sep},${max_es_sep}:r_DY_incl_${cat}=0.5,1.5 \
-        --robustFit=1 --setRobustFitAlgo=Minuit2 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-        --cminFallbackAlgo Minuit2,Migrad,0:0.001,Minuit2,Migrad,0:0.01 --cminPreScan \
-        --redefineSignalPOIs r_EMB_${cat},ES_${cat} --floatOtherPOIs=1 --algo singles -m ${mH} \
-        --saveWorkspace --saveFitResult --verbose 2 --cminDefaultMinimizerStrategy 0
-        
-        ROOTFILE="higgsCombine.comb_sep_fit_${cat}.MultiDimFit.mH${mH}.root"
+            combineTool.py -M MultiDimFit -n .comb_sep_fit_${TAG}_${cat} \
+            -d workspace_${cat}_${TAG}_multidimfit.root \
+            --setParameters ES_${cat}=${cent_es_sep},r_EMB_${cat}=${cent_id_sep},r_DY_incl_${cat}=1.0 \
+            --setParameterRanges r_EMB_${cat}=${min_id_sep},${max_id_sep}:ES_${cat}=${min_es_sep},${max_es_sep}:r_DY_incl_${cat}=0.5,1.5 \
+            --robustFit=1 --setRobustFitAlgo=Minuit2 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+            --cminFallbackAlgo Minuit2,Migrad,0:0.001,Minuit2,Migrad,0:0.01 --cminPreScan \
+            --redefineSignalPOIs r_EMB_${cat},ES_${cat} --floatOtherPOIs=1 --algo singles -m ${mH} \
+            --saveWorkspace --saveFitResult --verbose 2 --cminDefaultMinimizerStrategy 0 
+            
+            ROOTFILE="higgsCombine.comb_sep_fit_${TAG}_${cat}.MultiDimFit.mH${mH}.root"
 
-        # Add the WP and WP_VSe to the ROOT file
-        root -l -b <<-EOF
-        {
-            // Open the file for update
-            TFile *f = TFile::Open("${ROOTFILE}", "UPDATE");
-            if (!f || f->IsZombie()) {
-                std::cerr << "Error opening file ${ROOTFILE}" << std::endl;
-                exit(1);
+            # Add the WP, WP_VSe and WP_VSmu to the ROOT file
+            root -l -b <<-EOF
+            {
+                // Open the file for update
+                TFile *f = TFile::Open("${ROOTFILE}", "UPDATE");
+                if (!f || f->IsZombie()) {
+                    std::cerr << "Error opening file ${ROOTFILE}" << std::endl;
+                    exit(1);
+                }
+                // Create a TParameter to hold the WP value (or any string metadata you need)
+                // For a string, you might use a TNamed:
+                TNamed *wpInfo = new TNamed("WP", "${WP}");
+                wpInfo->Write("WP", TObject::kOverwrite);
+                TNamed *wpVSeInfo = new TNamed("WP_VSe", "${WP_VSe}");
+                wpVSeInfo->Write("WP_VSe", TObject::kOverwrite);
+                TNamed *wpVSmuInfo = new TNamed("WP_VSmu", "${WP_VSmu}");
+                wpVSmuInfo->Write("WP_VSmu", TObject::kOverwrite);
+                f->Close();
             }
-            // Create a TParameter to hold the WP value (or any string metadata you need)
-            // For a string, you might use a TNamed:
-            TNamed *wpInfo = new TNamed("WP", "${WP}");
-            wpInfo->Write("WP", TObject::kOverwrite);
-            TNamed *wpVSeInfo = new TNamed("WP_VSe", "${WP_VSe}");
-            wpVSeInfo->Write("WP_VSe", TObject::kOverwrite);
-            TNamed *wpVSmuInfo = new TNamed("WP_VSmu", "${WP_VSmu}");
-            wpVSmuInfo->Write("WP_VSmu", TObject::kOverwrite);
-            f->Close();
-        }
 EOF
+            # Move your outputs out of the tmp dir or it will be deleted!!!
+            mv combine_logger.out combine_logger_${TAG}_${cat}.log
+            cp combine_logger_${TAG}_${cat}.log ${start_dir}/combine_logs/
 
-        mv multidimfit.comb_sep_fit_${cat}.root output/${datacard_output}/htt_mt_${cat}/
-        mv higgsCombine.comb_sep_fit_${cat}.MultiDimFit.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
+            cp multidimfit.comb_sep_fit_${TAG}_${cat}.root ${start_dir}/output/${datacard_output}/htt_mt_${cat}/
+            cp higgsCombine.comb_sep_fit_${TAG}_${cat}.MultiDimFit.mH${mH}.root ${start_dir}/output/${datacard_output}/htt_mt_${cat}/
+
+            popd >/dev/null
+            rm -rf "${tmpdir}"
+
+        # ) &
     done
 fi
 
 
-
 if [[ $MODE == "POSTFIT_MULT_SEP" ]]; then
     source utils/setup_cmssw_tauid.sh
-    all_categories=("DM0" "DM1" "DM1011")
+    # all_categories=("DM1011_PT20_40")
     for cat in "${all_categories[@]}"
     do
-        if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
-            datacard_output=${datacard_output_dm_pt}
-        fi
+        (
+            if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
+                datacard_output=${datacard_output_dm_pt}
+            fi
 
-        read min_id_sep max_id_sep cent_id_sep min_es_sep max_es_sep cent_es_sep < <(get_yaml_vals "${TAG}" "${cat}")
-        echo "For category ${cat} under TAG ${TAG}:"
-        echo "ID range: ${min_id_sep} to ${max_id_sep} with fit = ${cent_id_sep}"
-        echo "ES range: ${min_es_sep} to ${max_es_sep} with fit = ${cent_es_sep}"
+            read min_id_post max_id_post cent_id_post min_es_post max_es_post cent_es_post < <(get_yaml_vals "${TAG}" "${cat}" "closeup_scan" "1")
+            echo "For category ${cat} under TAG ${TAG}:"
+            echo "ID range: ${min_id_post} to ${max_id_post} with fit = ${cent_id_post}"
+            echo "ES range: ${min_es_post} to ${max_es_post} with fit = ${cent_es_post}"
 
-        WORKSPACE=output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root
-        
-        FITFILE=output/${datacard_output}/htt_mt_${cat}/fitDiagnostics_${cat}.${ERA}.root
+
+            # Make temp dir for unique logging.
+            start_dir=$(pwd)
+            tmpdir_post=$(mktemp -d -p "${start_dir}")
+            pushd "${tmpdir_post}" >/dev/null
+
+            # Copy or link the input workspace and any other required files into tmpdir if needed
+            WORKSPACE=${start_dir}/output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root
+            FITFILE=${start_dir}/output/${datacard_output}/htt_mt_${cat}/fitDiagnostics_${cat}.${ERA}.root
+
     
-        combineTool.py -M FitDiagnostics  -d ${WORKSPACE} -m ${mH} -n .${TAG} \
-        --setParameters ES_${cat}=${cent_es_sep},r_EMB_${cat}=${cent_id_sep},r_DY_incl_${cat}=1.0 \
-        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-        --parallel 16 --robustHesse 1 --saveShapes --saveWithUncertainties --cminDefaultMinimizerStrategy 0 \
-        --redefineSignalPOIs ES_${cat},r_EMB_${cat}
+            combineTool.py -M FitDiagnostics  -d ${WORKSPACE} -m ${mH} -n .${TAG}.${cat} \
+            --setParameters r_EMB_${cat}=${cent_id_post},ES_${cat}=${cent_es_post} \
+            --setParameterRanges r_EMB_${cat}=${min_id_post},${max_id_post}:ES_${cat}=${min_es_post},${max_es_post}\
+            --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+            --cminFallbackAlgo Minuit2,Migrad,0:0.001,Minuit2,Migrad,0:0.01 --cminPreScan --verbose 1 \
+            --parallel 20 --robustHesse 1 --saveShapes --saveWithUncertainties --cminDefaultMinimizerStrategy 0 \
+            --saveNormalizations --cminDefaultMinimizerTolerance=0.1 --numToysForShape 1000 --plots \
+            --redefineSignalPOIs r_EMB_${cat},ES_${cat} \
+            2>&1 | tee -a combine_logger_${TAG}_${cat}_postfits_output.log
 
-        mv fitDiagnostics.${TAG}.root ${FITFILE}
-        mv higgsCombine.${TAG}.FitDiagnostics.mH${mH}.root output/${datacard_output}/htt_mt_${cat}/
-        echo "[INFO] Already built Prefit/Postfit shapes"
+            mv fitDiagnostics.${TAG}.${cat}.root ${FITFILE}
+            mv higgsCombine.${TAG}.${cat}.FitDiagnostics.mH${mH}.root ${start_dir}/output/${datacard_output}/htt_mt_${cat}/
+            echo "[INFO] Already built Prefit/Postfit shapes"
 
-        python3 postfitter/postfitter.py -in ${FITFILE} -out output/${datacard_output}/htt_mt_${cat}/ --era ${ERA} --category ${cat}
+            python3 ${start_dir}/postfitter/postfitter.py -in ${FITFILE} -out ${start_dir}/output/${datacard_output}/htt_mt_${cat}/ --era ${ERA} --category ${cat}
 
+
+            # Move your outputs out of the tmp dir or it will be deleted!!!
+            mv combine_logger.out combine_logger_${TAG}_${cat}_postfits.log
+            cp combine_logger_${TAG}_${cat}_postfits.log ${start_dir}/combine_logs/
+            cp combine_logger_${TAG}_${cat}_postfits_output.log ${start_dir}/combine_logs/
+            mv covariance_fit_s.png covariance_fit_s_${TAG}_${cat}.png
+            cp covariance_fit_s_${TAG}_${cat}.png ${start_dir}/output/${datacard_output}/htt_mt_${cat}/
+
+            popd >/dev/null
+            rm -rf "${tmpdir_post}"
+
+        ) &
     done
 fi
 
@@ -626,30 +790,32 @@ if [[ $MODE == "GOF_SEP" ]]; then
     mH=125
     for cat in "${all_categories[@]}"
     do
-        if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
-            datacard_output=${datacard_output_dm_pt}
-        fi
+        (
+            if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
+                datacard_output=${datacard_output_dm_pt}
+            fi
 
-        WORKSPACE=output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root
-    
-        combineTool.py -M GoodnessOfFit ${WORKSPACE} --algo saturated -m ${mH} --freezeParameters MH -n .GOF_data_${cat} 
-        combineTool.py -M GoodnessOfFit ${WORKSPACE} --algo saturated -m ${mH} --freezeParameters MH -n .GOF_toys_${cat} -t 1000 \
-        --toysFrequentist 
+            WORKSPACE=output/${datacard_output}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root
         
-        echo "[INFO] Moving GOF files to datacard folder ..."
+            combineTool.py -M GoodnessOfFit ${WORKSPACE} --algo saturated -m ${mH} --freezeParameters MH -n .GOF_data_${cat}_${TAG} 
+            combineTool.py -M GoodnessOfFit ${WORKSPACE} --algo saturated -m ${mH} --freezeParameters MH -n .GOF_toys_${cat}_${TAG} -t 1000 \
+            --toysFrequentist 
+            
+            echo "[INFO] Moving GOF files to datacard folder ..."
 
-        mv higgsCombine.GOF_data_${cat}.GoodnessOfFit.mH${mH}.root output/$datacard_output/htt_mt_${cat}/
-        mv higgsCombine.GOF_toys_${cat}.GoodnessOfFit.mH${mH}.123456.root output/$datacard_output/htt_mt_${cat}/
+            mv higgsCombine.GOF_data_${cat}_${TAG}.GoodnessOfFit.mH${mH}.root output/$datacard_output/htt_mt_${cat}/
+            mv higgsCombine.GOF_toys_${cat}_${TAG}.GoodnessOfFit.mH${mH}.123456.root output/$datacard_output/htt_mt_${cat}/
 
-        echo "[INFO] Collecting GOF results in json file and plotting ..."
-        
-        combineTool.py -M CollectGoodnessOfFit \
-        --input output/$datacard_output/htt_mt_${cat}/higgsCombine.GOF_data_${cat}.GoodnessOfFit.mH${mH}.root \
-         output/$datacard_output/htt_mt_${cat}/higgsCombine.GOF_toys_${cat}.GoodnessOfFit.mH${mH}.123456.root \
-        -o output/$datacard_output/htt_mt_${cat}/gof_${cat}.json -m ${mH}
+            echo "[INFO] Collecting GOF results in json file and plotting ..."
+            
+            combineTool.py -M CollectGoodnessOfFit \
+            --input output/$datacard_output/htt_mt_${cat}/higgsCombine.GOF_data_${cat}_${TAG}.GoodnessOfFit.mH${mH}.root \
+            output/$datacard_output/htt_mt_${cat}/higgsCombine.GOF_toys_${cat}_${TAG}.GoodnessOfFit.mH${mH}.123456.root \
+            -o output/$datacard_output/htt_mt_${cat}/gof_${cat}_${TAG}.json -m ${mH}
 
-        plotGof.py output/$datacard_output/htt_mt_${cat}/gof_${cat}.json --statistic saturated --mass 125.0 \
-        -o output/$datacard_output/htt_mt_${cat}/gof_${cat}
+            plotGof.py output/$datacard_output/htt_mt_${cat}/gof_${cat}_${TAG}.json --statistic saturated --mass 125.0 \
+            -o output/$datacard_output/htt_mt_${cat}/gof_${cat}_${TAG}
+        ) &
 
     done
 fi
@@ -662,47 +828,52 @@ if [[ $MODE == "PLOT_MULTIPOSTFIT_SEP" ]]; then
     for CHANNEL in "${CHANNELS[@]}"
     do
         source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
-        all_categories=("DM0" "DM1" "DM1011")
+        # all_categories=("DM1011_PT20_40")
         for cat in "${all_categories[@]}"
         do
-            if [[ " ${all_categories[@]} " =~ " ${cat} " ]]; then
-                FILE=output/${datacard_output_dm_pt}/htt_mt_${cat}/postfitshape.${cat}.${ERA}.root
-            fi
+            (
+                if [[ " ${all_categories[@]} " =~ " ${cat} " ]]; then
+                    FILE=output/${datacard_output_dm_pt}/htt_mt_${cat}/postfitshape.${cat}.${ERA}.root
+                fi
 
 
-            # create output folder if it does not exist
-            if [ ! -d "output/postfitplots_emb_${TAG}_multifit_sep/" ]; then
-                mkdir -p output/postfitplots_emb_${TAG}_multifit_sep/${WP}
-            fi
-            echo "[INFO] Postfits plots for category ${cat}"
-            if [[ ${CHANNEL} != "mm" ]]; then
-                python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category ${cat} --categories "None" -o output/postfitplots_emb_${TAG}_multifit_sep/${WP} --normalize-by-bin-width --prefit 
-                python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category ${cat} --categories "None" -o output/postfitplots_emb_${TAG}_multifit_sep/${WP} --normalize-by-bin-width
-            fi
-            if [[ ${CHANNEL} == "mm" ]]; then
-                python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category "Control Region" --categories "None" -o output/postfitplots_emb_${TAG}_multifit_sep/${WP} --normalize-by-bin-width --prefit
-                python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category "Control Region" --categories "None" -o output/postfitplots_emb_${TAG}_multifit_sep/${WP} --normalize-by-bin-width
-            fi
+                # create output folder if it does not exist
+                if [ ! -d "output/postfitplots_emb_${TAG}_multifit_sep/" ]; then
+                    mkdir -p output/postfitplots_emb_${TAG}_multifit_sep/${WP}
+                fi
+                echo "[INFO] Postfits plots for category ${cat}"
+                if [[ ${CHANNEL} != "mm" ]]; then
+                    python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category ${cat} --categories "None" -o output/postfitplots_emb_${TAG}_multifit_sep/${WP} --binning-tag ${BIN_TAG} --prefit 
+                    python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel ${CHANNEL} --embedding --single-category ${cat} --categories "None" -o output/postfitplots_emb_${TAG}_multifit_sep/${WP} --binning-tag ${BIN_TAG}
+                fi
+                if [[ ${CHANNEL} == "mm" ]]; then
+                    python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category "Control Region" --categories "None" -o output/postfitplots_emb_${TAG}_multifit_sep/${WP} --binning-tag ${BIN_TAG} --prefit
+                    python3 plotting/plot_shapes_tauID_postfit.py -l --era ${ERA} --input ${FILE} --channel mm --embedding --single-category "Control Region" --categories "None" -o output/postfitplots_emb_${TAG}_multifit_sep/${WP} --binning-tag ${BIN_TAG}
+                fi
+            ) &
         done
     done
-    exit 0
 fi
 
 if [[ $MODE == "POI_CORRELATION_SEP" ]]; then
     source utils/setup_root.sh
-    all_categories=("DM0" "DM1" "DM1011")
+    # all_categories=("DM1011")
     for cat in "${all_categories[@]}"
     do
         FITFILE_dm=output/${datacard_output_dm_pt}/htt_mt_${cat}/fitDiagnostics_${cat}.${ERA}.root
-        if [ ! -d "${poi_path}/${ERA}/${cat}/${WP}" ]; then
-            mkdir -p  ${poi_path}/${ERA}/${cat}/${WP}
+        if [ ! -d "${poi_path}" ]; then
+            mkdir -p  ${poi_path}
         fi
-        python tau_id_es_measurement/poi_correlation.py ${ERA} ${FITFILE_dm} ${cat} ${TAG}
-        mv "${ERA}_${cat}_${TAG}_POIS_correlations_ID_ES.png" ${poi_path}/${ERA}/${cat}/${WP}
-        
+        python tau_id_es_measurement/poi_correlation.py ${ERA} ${FITFILE_dm} ${cat} ${TAG} || true
+        PDFFILE="${ERA}_${cat}_${TAG}_POIS_correlations_ID_ES.pdf"
+        PNGFILE="${ERA}_${cat}_${TAG}_POIS_correlations_ID_ES.png"
+        if [ -f "${PDFFILE}" ] && [ -f "${PNGFILE}" ]; then
+            mv "${PDFFILE}" "${PNGFILE}" "${poi_path}"
+        else
+            echo "[WARNING] No plots for ${cat}."
+        fi
     done
 fi
-
 
 
 if [[ $MODE == "IMPACTS_ALL" ]]; then
@@ -712,47 +883,60 @@ if [[ $MODE == "IMPACTS_ALL" ]]; then
         echo "[INFO] Channel: ${CHANNEL}"
         if [[ ${CHANNEL} != "mm" ]]; then
             source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
-            if [ ! -d "${impact_path}/${ERA}/${CHANNEL}/${WP}" ]; then
-                mkdir -p  ${impact_path}/${ERA}/${CHANNEL}/${WP}
+            if [ ! -d "${impact_path}" ]; then
+                mkdir -p  ${impact_path}
             fi
-            all_categories=("DM1011")
+            # all_categories=("DM0")
+            # all_categories=("DM1011_PT20_40")
             for cat in "${all_categories[@]}"
-
             do
-                if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
-                    WORKSPACE_IMP=output/${datacard_output_dm_pt}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root
-                fi
+                (
+                    start_dir=$(pwd)
+                    if [[ " ${all_categories[@]} " =~ " $cat " ]]; then
+                        WORKSPACE_IMP=${start_dir}/output/${datacard_output_dm_pt}/htt_mt_${cat}/workspace_${cat}_${TAG}_multidimfit.root
+                    fi
 
-                read min_id_sep max_id_sep cent_id_sep min_es_sep max_es_sep cent_es_sep < <(get_yaml_vals "${TAG}" "${cat}")
-                echo "For category ${cat} under TAG ${TAG}:"
-                echo "ID range: ${min_id_sep} to ${max_id_sep} with fit = ${cent_id_sep}"
-                echo "ES range: ${min_es_sep} to ${max_es_sep} with fit = ${cent_es_sep}"
+                    read min_id_sep max_id_sep cent_id_sep min_es_sep max_es_sep cent_es_sep < <(get_yaml_vals "${TAG}" "${cat}" "closeup_scan" "2")
+                    echo "For category ${cat} under TAG ${TAG}:"
+                    echo "ID range: ${min_id_sep} to ${max_id_sep} with fit = ${cent_id_sep}"
+                    echo "ES range: ${min_es_sep} to ${max_es_sep} with fit = ${cent_es_sep}"
 
-                ### Impacts for r_EMB_DMXY
-                combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 125 \
-                    --setParameters ES_${cat}=${cent_es_sep},r_EMB_${cat}=${cent_id_sep},r_DY_incl_${cat}=1.0 \
-                    --setParameterRanges r_EMB_${cat}=${min_id_sep},${max_id_sep}:ES_${cat}=${min_es_sep},${max_es_sep}:r_DY_incl_${cat}=0.5,1.5 \
-                    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-                    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-                    --parallel 16 --doInitialFit --redefineSignalPOIs r_EMB_${cat},ES_${cat} --cminDefaultMinimizerStrategy 0
+                    
+                    # Make temp dir for unique logging.
+                    start_dir=$(pwd)
+                    tmpdir_imp=$(mktemp -d -p "${start_dir}")
+                    pushd "${tmpdir_imp}" >/dev/null
 
-                combineTool.py -M Impacts  -d ${WORKSPACE_IMP} -m 125 \
-                    --setParameters ES_${cat}=${cent_es_sep},r_EMB_${cat}=${cent_id_sep},r_DY_incl_${cat}=1.0 \
-                    --setParameterRanges r_EMB_${cat}=${min_id_sep},${max_id_sep}:ES_${cat}=${min_es_sep},${max_es_sep}:r_DY_incl_${cat}=0.5,1.5 \
-                    --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
-                    --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
-                    --parallel 16 --doFits --redefineSignalPOIs r_EMB_${cat},ES_${cat} --cminDefaultMinimizerStrategy 0
+                    # Copy or link the input workspace and any other required files into tmpdir if needed
+                    cp "${WORKSPACE_IMP}" ./
 
-                combineTool.py -M Impacts -d ${WORKSPACE_IMP} -m 125 -o tauid_${WP}_impacts_${cat}_${TAG}.json  --redefineSignalPOIs r_EMB_${cat},ES_${cat} --cminDefaultMinimizerStrategy 0
+                    ### Impacts for r_EMB_DMXY
+                    combineTool.py -M Impacts  -d workspace_${cat}_${TAG}_multidimfit.root -m 125 \
+                        --setParameters ES_${cat}=${cent_es_sep},r_EMB_${cat}=${cent_id_sep},r_DY_incl_${cat}=1.0 \
+                        --setParameterRanges r_EMB_${cat}=${min_id_sep},${max_id_sep}:ES_${cat}=${min_es_sep},${max_es_sep}:r_DY_incl_${cat}=0.5,1.5 \
+                        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+                        --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+                        --parallel 4 --doInitialFit --redefineSignalPOIs r_EMB_${cat},ES_${cat} --cminDefaultMinimizerStrategy 2
 
-                plotImpacts.py -i tauid_${WP}_impacts_${cat}_${TAG}.json -o tauid_${WP}_impacts_r_${cat}_${TAG} --POI r_EMB_${cat}
-                plotImpacts.py -i tauid_${WP}_impacts_${cat}_${TAG}.json -o tauid_${WP}_impacts_${cat}_${TAG}_ES --POI ES_${cat}
-                # # cleanup the fit files
-                rm higgsCombine_paramFit*.root
-                rm higgsCombine_initialFit*.root
-                # rm robustHesse_paramFit*.root
-                mv tauid_${WP}_impacts_r_${cat}_${TAG}* ${impact_path}/${ERA}/${CHANNEL}/${WP}
-                mv tauid_${WP}_impacts_${cat}_${TAG}* ${impact_path}/${ERA}/${CHANNEL}/${WP}
+                    combineTool.py -M Impacts  -d workspace_${cat}_${TAG}_multidimfit.root -m 125 \
+                        --setParameters ES_${cat}=${cent_es_sep},r_EMB_${cat}=${cent_id_sep},r_DY_incl_${cat}=1.0 \
+                        --setParameterRanges r_EMB_${cat}=${min_id_sep},${max_id_sep}:ES_${cat}=${min_es_sep},${max_es_sep}:r_DY_incl_${cat}=0.5,1.5 \
+                        --robustFit=1 --setRobustFitAlgo=Minuit2  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+                        --cminFallbackAlgo Minuit2,Migrad,0:0.001 --cminFallbackAlgo Minuit2,Migrad,0:0.01 --cminPreScan \
+                        --parallel 4 --doFits --redefineSignalPOIs r_EMB_${cat},ES_${cat} --cminDefaultMinimizerStrategy 2
+
+                    combineTool.py -M Impacts -d workspace_${cat}_${TAG}_multidimfit.root -m 125 -o tauid_${WP}_impacts_${cat}_${TAG}.json  --redefineSignalPOIs r_EMB_${cat},ES_${cat} --cminDefaultMinimizerStrategy 2
+
+                    plotImpacts.py -i tauid_${WP}_impacts_${cat}_${TAG}.json -o tauid_${WP}_impacts_r_${cat}_${TAG} --POI r_EMB_${cat}
+                    plotImpacts.py -i tauid_${WP}_impacts_${cat}_${TAG}.json -o tauid_${WP}_impacts_${cat}_${TAG}_ES --POI ES_${cat}
+                    
+                    mv tauid_${WP}_impacts_r_${cat}_${TAG}* ${start_dir}/${impact_path}
+                    mv tauid_${WP}_impacts_${cat}_${TAG}* ${start_dir}/${impact_path}
+
+                    popd >/dev/null
+                    rm -rf "${tmpdir_imp}"
+
+                ) &
             done
         fi
     done
@@ -762,13 +946,15 @@ fi
 # Read out scale factors from the fitfiles. VSmu not supported by tau POG, thus not in corrlibs!
 if [[ $MODE == "CORRECTION_LIB" ]]; then
     source utils/setup_root.sh
-
+    if [ ! -d "Tau_ID_ES_${NTUPLETAG}" ]; then
+                mkdir -p  Tau_ID_ES_${NTUPLETAG}
+            fi
     CHANNELS=("mt")
     for CHANNEL in "${CHANNELS[@]}"
     do
         input_files_list=()
         bin_names_list=()
-        all_categories=("DM0" "DM1" "DM1011")
+        # all_categories=("DM0" "DM1" "DM1011")
         for cat in "${all_categories[@]}"
         do
             for VSjet in "${WP_list[@]}"
@@ -779,13 +965,13 @@ if [[ $MODE == "CORRECTION_LIB" ]]; then
                     do
                         datacard_path="datacards_dm_pt_${TAG_it}/${NTUPLETAG}-${TAG_it}/${ERA}_tauid_${VSjet}_VSe${VSe}"
                         
-                        # Check if the file exists
-                        if [ ! -f "output/${datacard_path}/htt_mt_${cat}/higgsCombine.comb_sep_fit_${cat}.MultiDimFit.mH125.root" ]; then
-                            echo "File output/${datacard_path}/htt_mt_${cat}/higgsCombine.comb_sep_fit_${cat}.MultiDimFit.mH125.root does not exist."
+                        # Check if the file exists (Does all possibilities, thus there will always be 2*len(all_categories) missing file messages!)
+                        if [ ! -f "output/${datacard_path}/htt_mt_${cat}/higgsCombine.comb_sep_fit_${TAG_it}_${cat}.MultiDimFit.mH${mH}.root" ]; then
+                            echo "File output/${datacard_path}/htt_mt_${cat}/higgsCombine.comb_sep_fit_${TAG_it}_${cat}.MultiDimFit.mH${mH}.root does not exist."
                             continue
                         else
                             # Add file to list of fitfiles
-                            input_file="output/${datacard_path}/htt_mt_${cat}/higgsCombine.comb_sep_fit_${cat}.MultiDimFit.mH125.root"
+                            input_file="output/${datacard_path}/htt_mt_${cat}/higgsCombine.comb_sep_fit_${TAG_it}_${cat}.MultiDimFit.mH${mH}.root"
                             input_files_list+=("${input_file}")
                             # Add bin name to list of names
                             bin_names_list+=("${cat}")
@@ -794,18 +980,23 @@ if [[ $MODE == "CORRECTION_LIB" ]]; then
                 done
             done
         done
-        # Join lists into comma-separated strings
+        # Join lists into comma-separated strings, the lists contain duplicate the python script deals with that.
         input_files_str=$(IFS=, ; echo "${input_files_list[*]}")
         bin_names_str=$(IFS=, ; echo "${bin_names_list[*]}")
-
-        python3 friends/create_xpog_json_v2.py \
+        python3 friends/create_xpog_json_v2_vsEle_workaround.py \
             --nTuple_tag "${NTUPLETAG}" \
             --era "${ERA}" \
             --channel "${CHANNEL}" \
             --input_files ${input_files_str} \
             --binnames ${bin_names_str}
 
-        # mv ...
+        # mv Tau*_${ERA}_UL_${CHANNEL}*_${NTUPLETAG}* Tau_ID_ES_${NTUPLETAG}_${TAG}
     done
 
+fi
+
+# Generate LaTeX figures and tables for the results.
+if [[ $MODE == "LATEX" ]]; then
+    python3 LaTeX/gen_latex_figures.py
+    mv *.tex LaTeX/
 fi

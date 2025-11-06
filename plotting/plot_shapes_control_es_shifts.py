@@ -71,19 +71,23 @@ def parse_arguments():
         action="store_true",
         help="Include energy scale variation in the plot.")
     parser.add_argument(
+        "--es_family_plot",
+        default=[],
+        help="List of energy scale variations to put in one plot additionaly to the nominal one.")
+    parser.add_argument(
         "--es_shift",
         type=str,
-        default=None,
+        default=0.0,
         help="The value of the energy scale shift in %.")
     parser.add_argument(
         "--es_up",
-        type=int,
-        default=None,
+        type=float,
+        default=0.0,
         help="Upper bound of the energy scale shift in %.")
     parser.add_argument(
         "--es_down",
-        type=int,
-        default=None,
+        type=float,
+        default=0.0,
         help="Lower bound of the energy scale shift in %.")
     parser.add_argument(
         "--tag",
@@ -136,7 +140,7 @@ def main(info):
         bkg_processes = [
             "QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
         ]
-    if not args.fake_factor and args.embedding and  args.energy_scale:
+    if not args.fake_factor and args.embedding and args.energy_scale:
         bkg_processes = [
             "QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", args.es_shift
         ]
@@ -158,7 +162,7 @@ def main(info):
             ]
         if not args.fake_factor and args.embedding and args.energy_scale:
             bkg_processes = [
-                "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "embminus2p5",
+                "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", args.es_shift,
             ]
         if not args.embedding and args.fake_factor:
             bkg_processes = [
@@ -171,7 +175,7 @@ def main(info):
     all_bkg_processes = [b for b in bkg_processes]
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
-
+    
     rootfile = rootfile_parser.Rootfile_parser(args.input, variable, [args.es_down, args.es_up],)
     bkg_processes = [b for b in all_bkg_processes]
     if "em" in channel:
@@ -236,8 +240,12 @@ def main(info):
             plot.add_hist(
                 rootfile.get(channel, process, cat, shape_type=stype), process, "bkg")
         if "emb" in process:
-            plot.setGraphStyle(
-                process, "hist", fillcolor=styles.color_dict["EMB"])
+            if channel != "mm":
+                plot.setGraphStyle(
+                    process, "hist", fillcolor=styles.color_dict["EMB"])
+            else:
+                plot.setGraphStyle(
+                    process, "hist", fillcolor=styles.color_dict["MUEMB"])
         else:
             plot.setGraphStyle(
                 process, "hist", fillcolor=styles.color_dict[process])
@@ -274,7 +282,7 @@ def main(info):
     # set axes limits and labels
     plot.subplot(0).setYlims(
         split_dict[channel],
-        max(1.6 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
+        max(2.5 * plot.subplot(0).get_hist("data_obs").GetMaximum(),
             split_dict[channel] * 2))
 
     log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
@@ -284,7 +292,7 @@ def main(info):
             1.0,
             1000 * plot.subplot(0).get_hist("data_obs").GetMaximum())
 
-    plot.subplot(2).setYlims(0.75, 1.45)
+    plot.subplot(2).setYlims(0.55, 2.05)
     if channel == "mm":
         # plot.subplot(0).setLogY()
         # plot.subplot(0).setYlims(1, 10**10)
@@ -362,10 +370,15 @@ def main(info):
         plot.add_legend(width=0.6, height=0.15)
         for process in legend_bkg_processes:
             if "emb" in process:
-                tes_variation = process.split("emb")[1].replace("minus", "-").replace("p", ".")
-                emb_label = f"#tau embedded {tes_variation}%"
-                plot.legend(i).add_entry(
-                    0, process, emb_label, 'f')
+                if channel != "mm":
+                    tes_variation = process.split("emb")[1].replace("minus", "-").replace("p", ".")
+                    emb_label = f"#tau embedded {tes_variation}%"
+                    plot.legend(i).add_entry(
+                        0, process, emb_label, 'f')
+                else:
+                    emb_label = f"#mu embedded"
+                    plot.legend(i).add_entry(
+                        0, process, emb_label, 'f')
             else:
                 plot.legend(i).add_entry(
                     0, process, styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("NLO","")], 'f')

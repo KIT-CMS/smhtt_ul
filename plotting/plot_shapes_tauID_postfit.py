@@ -11,6 +11,7 @@ import copy
 import yaml
 import distutils.util
 import logging
+import math
 
 logger = logging.getLogger("")
 
@@ -104,6 +105,13 @@ def parse_arguments():
     parser.add_argument(
         "--prefit", action="store_true", help="If set, use prefit shapes"
     )
+    parser.add_argument(
+        "--binning-tag",
+        type=str,
+        default="default",
+        help="Binning the shapes are based on.",
+    )
+    
     return parser.parse_args()
 
 
@@ -243,8 +251,12 @@ def main(args):
     logger.warning(f"Categories: {categories}")
     if not isinstance(categories, list):
         categories = [categories]
+    binning_tag = args.binning_tag
     for category in categories:
-        rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit)
+        if channel != "mm":
+            rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit, tag=binning_tag)
+        else:
+            rootfile = rootfile_parser.Rootfile_parser(args.input, mode="CombineHarvester", prefit=args.prefit, tag="mm")
         if channel == "em":
             if args.embedding:
                 bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
@@ -298,15 +310,24 @@ def main(args):
             model_total.Add(plot.subplot(2).get_hist("total_sig"))
         plot.add_hist(model_total, "model_total")
         plot.subplot(0).setGraphStyle("data_obs", "e0")
-        plot.setGraphStyle(
+        try:
+            n_bins = model_total.GetNbinsX()
+            errors = [model_total.GetBinError(i) for i in range(1, n_bins + 1)]
+            if any([math.isnan(i) for i in errors]):
+                raise ValueError("Postfit uncertainties contain NaN values.")
+            plot.setGraphStyle(
             "model_total",
             "e2",
             markersize=0,
             fillcolor=styles.color_dict["unc"],
             linecolor=0,
         )
-
-        plot.subplot(2).normalize( # check for error ???
+        except:
+            print("\n EXCEPT \n")
+            logger.warning("Postfit uncertainties appear to be faulty; skipping error band plotting.")
+            plot.setGraphStyle("model_total", "hist")
+        
+        plot.subplot(2).normalize(
             [
                 "model_total",
                 "data_obs",
@@ -318,6 +339,7 @@ def main(args):
         plot.create_stack(bkg_processes, "stack")
 
         # normalize stacks by bin-width
+        # breakpoint()
         if args.normalize_by_bin_width:
             plot.subplot(0).normalizeByBinWidth()
             plot.subplot(1).normalizeByBinWidth()
@@ -331,7 +353,7 @@ def main(args):
             ),
         )
 
-        plot.subplot(2).setYlims(0.75, 1.25) # Larger limits for DM10_11 ???
+        plot.subplot(2).setYlims(0.79, 1.41) # Larger limits for DM10_11 ???
 
         if not args.linear:
             plot.subplot(1).setYlims(0.1, split_dict[channel])
@@ -342,6 +364,7 @@ def main(args):
         plot.subplot(0).setYlabel("N_{events}")
         plot.subplot(2).setXlabel("m_{vis} [GeV]")
         plot.subplot(2).setYlabel("Ratio")
+        plot.subplot(2).setGrid()
         # plot.scaleXLabelSize(0.8)
         # plot.scaleYTitleSize(0.8)
         plot.scaleYLabelSize(0.8)
@@ -453,17 +476,17 @@ def main(args):
 
         # save plot
         postfix = "prefit" if args.prefit else "postfit"
-        # plot.save(
-        #     "%s/%s_%s_%s_%s.%s"
-        #     % (
-        #         args.outputfolder,
-        #         args.era,
-        #         channel,
-        #         args.gof_variable if args.gof_variable is not None else category,
-        #         postfix,
-        #         "png",
-        #     )
-        # )
+        plot.save(
+            "%s/%s_%s_%s_%s.%s"
+            % (
+                args.outputfolder,
+                args.era,
+                channel,
+                args.gof_variable if args.gof_variable is not None else category,
+                postfix,
+                "png",
+            )
+        )
         plot.save(
             "%s/%s_%s_%s_%s.%s"
             % (

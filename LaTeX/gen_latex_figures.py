@@ -14,8 +14,8 @@ for era, era_short in eras:
     for wp, wp_short in wps:
         for dm in dms:
             # Get fit results from impact jsons.
-            impact_str_ES = total_path+f"impacts_{wp_short}_{era_short}_8to8/{era}/mt/{wp}/tauid_{wp}_impacts_r_{dm}_{wp_short}_{era_short}_8to8_ES.json"
-            impact_str = total_path+f"impacts_{wp_short}_{era_short}_8to8/{era}/mt/{wp}/tauid_{wp}_impacts_r_{dm}_{wp_short}_{era_short}_8to8.json"
+            # impact_str_ES = total_path+f"impacts_{wp_short}_{era_short}_8to8_20_06_extended/{era}/mt/{wp}/tauid_{wp}_impacts_{dm}_{wp_short}_{era_short}_8to8_20_06_extended_ES.json"
+            impact_str = total_path+f"impacts_{wp_short}_{era_short}_8to8_20_06_extended/{era}/mt/{wp}/tauid_{wp}_impacts_{dm}_{wp_short}_{era_short}_8to8_20_06_extended.json"
             
             if era not in impact_dict:
                 impact_dict[era] = {}
@@ -24,17 +24,17 @@ for era, era_short in eras:
             if dm not in impact_dict[era][wp]:
                 impact_dict[era][wp][dm] = {}
             
-            if os.path.exists(impact_str_ES):
-                with open(impact_str_ES, "r") as file_ES:
-                    data_ES = yaml.safe_load(file_ES) or {}
-                    if data_ES["POIs"][0]["name"] == "ES_"+dm:
-                        es_list = data_ES["POIs"][0]["fit"]
-                        es = round(es_list[1], 2)
-                        es_down = round(es_list[0] - es, 2)
-                        es_up = round(es_list[2] - es, 2)
-                        impact_dict[era][wp][dm]["ES_"+dm] = (es, es_down, es_up)
-                    else:
-                        breakpoint()
+            # if os.path.exists(impact_str_ES):
+            #     with open(impact_str_ES, "r") as file_ES:
+            #         data_ES = yaml.safe_load(file_ES) or {}
+            #         if data_ES["POIs"][0]["name"] == "ES_"+dm:
+            #             es_list = data_ES["POIs"][0]["fit"]
+            #             es = round(es_list[1], 2)
+            #             es_down = round(es_list[0] - es, 2)
+            #             es_up = round(es_list[2] - es, 2)
+            #             impact_dict[era][wp][dm]["ES_"+dm] = (es, es_down, es_up)
+            #         else:
+            #             breakpoint()
                     
             if os.path.exists(impact_str):
                 with open(impact_str, "r") as file:
@@ -45,6 +45,12 @@ for era, era_short in eras:
                         id_down = round(id_list[0] - id, 3)
                         id_up = round(id_list[2] - id, 3)
                         impact_dict[era][wp][dm]["r_EMB_"+dm] = (id, id_down, id_up)
+                    elif data["POIs"][1]["name"] == "ES_"+dm:
+                        es_list = data["POIs"][1]["fit"]
+                        es = round(es_list[1], 2)
+                        es_down = round(es_list[0] - es, 2)
+                        es_up = round(es_list[2] - es, 2)
+                        impact_dict[era][wp][dm]["ES_"+dm] = (es, es_down, es_up)
                     else:
                         breakpoint()
             
@@ -56,14 +62,14 @@ for era, era_short in eras:
         \vspace{{-1.1cm}}
             \begin{{figure}}
                 \centering
-                \includegraphics[width=\linewidth]{{images/scan_{era_short}_{wp_short}/scan_2D_{dm}_{wp_short}_{era_short}_8to8_id_es_tests.pdf}}
+                \includegraphics[width=\linewidth]{{images/scan_{era_short}_{wp_short}/2D_full_scan_{dm}_{wp_short}_{era_short}_8to8_20_06_extended.pdf}}
                 \caption{{2D likelihood scan}}
             \end{{figure}}
         \column{{\kitthreecolumns}}
         \vspace{{-2cm}}
             \begin{{figure}}
                 \centering
-                \includegraphics[width=\linewidth]{{images/scan_{era_short}_{wp_short}/1D_profiles_2Dscan_{dm}_{wp_short}_{era_short}_8to8_id_es_tests.pdf}}
+                \includegraphics[width=\linewidth]{{images/scan_{era_short}_{wp_short}/1D_full_scan_tauID_{dm}_{wp_short}_{era_short}_8to8_20_06_extended.pdf}}
                 \caption{{1D profiles of 2D scan}}
             \end{{figure}}           
     \end{{columns}}
@@ -75,13 +81,13 @@ for era, era_short in eras:
         \column{{\kitthreecolumns}}
             \begin{{figure}}
                 \centering
-                \includegraphics[width=\linewidth]{{images/impacts_{era_short}_{wp_short}/tauid_{wp}_impacts_r_{dm}_{wp_short}_{era_short}_8to8.pdf}}
+                \includegraphics[width=\linewidth]{{images/impacts_{era_short}_{wp_short}/tauid_{wp}_impacts_r_{dm}_{wp_short}_{era_short}_8to8_20_06_extended.pdf}}
                 \caption{{Impact on ID}}
             \end{{figure}}
         \column{{\kitthreecolumns}}
             \begin{{figure}}
                 \centering
-                \includegraphics[width=\linewidth]{{images/impacts_{era_short}_{wp_short}/tauid_{wp}_impacts_r_{dm}_{wp_short}_{era_short}_8to8_ES.pdf}}
+                \includegraphics[width=\linewidth]{{images/impacts_{era_short}_{wp_short}/tauid_{wp}_impacts_{dm}_{wp_short}_{era_short}_8to8_20_06_extended_ES.pdf}}
                 \caption{{Impact on ES}}
             \end{{figure}}
     \end{{columns}}
@@ -98,6 +104,7 @@ with open(poi_path, "r") as f:
 
 for era, era_short in eras:
     for wp, wp_short in wps:
+        era_str = f"Era_{era}"
         # Build table for r_EMB impacts ("ID" impacts)
         table_r_emb = r"""\begin{tabular}{lccc}
 \hline
@@ -141,7 +148,7 @@ for era, era_short in eras:
         table_es    += r"\hline" + "\n" + r"\end{tabular}"
         
         # Corelation table:
-        corr_data = corr_yaml.get(era, {}).get(wp_short, {})
+        corr_data = corr_yaml.get(era_str, {}).get(wp_short, {})
         table_corr = r"""\begin{tabular}{lc}
 \hline
 DM & Correlation \\

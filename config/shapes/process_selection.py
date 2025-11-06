@@ -263,7 +263,7 @@ def DY_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", v
                     "crossSectionPerEventWeight",
                 ) if not use_stitching else dy_stitching_weight(era)
             ),
-            # ("ZPtMassReweightWeight", "zPtReweightWeight"), DY contains DYNLO atm, which does not need this!
+            ("ZPtMassReweightWeight", "zPtReweightWeight"), #DY uses DYNLO files sometimes instead of using the NLO functions, then this is not needed!
         ]
     )
     return Selection(name="DY", weights=DY_process_weights)

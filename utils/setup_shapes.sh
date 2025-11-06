@@ -13,8 +13,9 @@ shapes_output=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes
 shapes_output_synced=output/${WP}-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced
 shapes_rootfile=${shapes_output}.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
-
-# if the output folder does not exist, create it | this folder is not used...?
-if [ ! -d "$shapes_output" ]; then
+if [ ! -d "${shapes_output}" ]; then
     mkdir -p ${shapes_output}
+fi
+if [ ! -d "${shapes_output_synced}" ]; then
+    mkdir -p ${shapes_output_synced}
 fi

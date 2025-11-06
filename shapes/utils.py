@@ -11,6 +11,7 @@ from copy import deepcopy
 import logging
 import itertools
 from typing import List, Dict, Union, Any, Set
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -285,6 +286,7 @@ def book_tauES_histograms(
                 variationlist = [variation]
             for subvariation in variationlist:
                 if isinstance(subvariation, ReplaceCut):
+                    # breakpoint()
                     subvariation.cut.expression = replace_expression(
                         subvariation.cut.expression, quants
                     )
@@ -299,6 +301,11 @@ def book_tauES_histograms(
                     subvariation.add_weight.weight.expression = replace_expression(
                         subvariation.add_weight.weight.expression, quants
                     )
+                # elif isinstance(subvariation, ReplaceVariable): was regarding trigger_eff_mt_emb, is now done via logN.
+                #     # breakpoint()
+                #     subvariation.variation = replace_expression(
+                #         subvariation.variation, quants
+                #     )
                 else:
                     logger.critical(f"Unknown variation {subvariation}")
                     raise ValueError(f"Unknown variation {subvariation}")

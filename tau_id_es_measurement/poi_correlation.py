@@ -255,7 +255,8 @@ if __name__ == "__main__":
 
     result = f.Get("fit_s")
     if result == None:
-        raise Exception("[ERROR] Failed to load fit_s from file {}.".format(filename))
+        print(f"[ERROR] Failed to load fit_s from file {filename}. There won't be a plot for {category}!")
+        sys.exit(1)
 
     params = result.floatParsInit()
     pois = []
@@ -326,7 +327,7 @@ if __name__ == "__main__":
 
     canv.Update()
 
-    # canv.SaveAs(f"{era}_{category}_POIS_correlations_ID_ES.pdf")
+    canv.SaveAs(f"{era}_{category}_{tag}_POIS_correlations_ID_ES.pdf")
     canv.SaveAs(f"{era}_{category}_{tag}_POIS_correlations_ID_ES.png")
     
     # Extract the upper off-diagonal elements.
@@ -350,11 +351,12 @@ if __name__ == "__main__":
         data = {}
 
     # Organize the data in a nested structure.
-    if era not in data:
-        data[era] = {}
-    if wp not in data[era]:
-        data[era][wp] = {}
-    data[era][wp][category] = upper_corr
+    era_str = f"Era_{era}"
+    if era_str not in data:
+        data[era_str] = {}
+    if wp not in data[era_str]:
+        data[era_str][wp] = {}
+    data[era_str][wp][category] = upper_corr
 
     # Save the updated dictionary back to the YAML file.
     with open(yaml_filename, "w") as file:
