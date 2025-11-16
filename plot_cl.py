@@ -5,6 +5,8 @@ import numpy as np
 import os
 import mplhep as hep
 
+from Dumbledraw.Dumbledraw import styles
+
 hep.style.use("CMS")
 
 ##############################
@@ -20,15 +22,32 @@ hep.style.use("CMS")
 # Expected 50.0%: r < 14.3750                                                                                                                                                                                                                         
 # Expected 84.0%: r < 20.8498                                                                                                                                                                                                                         
 # Expected 97.5%: r < 29.0660 
-tt_cl_equal_events = [7.4121, 10.0232, 14.3750, 20.8498, 29.0660]
+# tt_cl_equal_events = [7.4121, 10.0232, 14.3750, 20.8498, 29.0660]
+
+# Observed Limit: r < 13.7075                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 6.9507                                                                                                                                                                                                                                                   
+# Expected 16.0%: r < 9.4770                                                                                                                                                                                                                                                   
+# Expected 50.0%: r < 13.6875                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 20.0709                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 28.2366 
+tt_cl_equal_events = [6.9507, 9.4770, 13.6875, 20.0709, 28.2366]
 
 # mt
 # Expected  2.5%: r < 12.1213
 # Expected 16.0%: r < 16.5490
-# Expected 50.0%: r < 23.6875
+# Expected 50.0%: r < 23.687d5
 # Expected 84.0%: r < 34.4513
 # Expected 97.5%: r < 48.1030
-mt_cl_equal_events = [12.1213, 16.5490, 23.6875, 34.4513, 48.1030]
+# mt_cl_equal_events = [12.1213, 16.5490, 23.6875, 34.4513, 48.1030]
+
+# Observed Limit: r < 24.3258                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 12.5361                                                                                                                                                                                                                                                  
+# Expected 16.0%: r < 17.0443                                                                                                                                                                                                                                                  
+# Expected 50.0%: r < 24.3125                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 35.2634                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 49.0084 
+mt_cl_equal_events = [12.5361, 17.0443, 24.3125, 35.2634, 49.0084]
+
 
 # et
 # Expected  2.5%: r < 17.4624                                                                                                                                                                                                                         
@@ -36,7 +55,15 @@ mt_cl_equal_events = [12.1213, 16.5490, 23.6875, 34.4513, 48.1030]
 # Expected 50.0%: r < 34.1250
 # Expected 84.0%: r < 49.7677
 # Expected 97.5%: r < 69.8073
-et_cl_equal_events = [17.4624, 23.8411, 34.1250, 49.7677, 69.8073]
+# et_cl_equal_events = [17.4624, 23.8411, 34.1250, 49.7677, 69.8073]
+
+# Observed Limit: r < 31.6935                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 15.8125                                                                                                                                                                                                                                                  
+# Expected 16.0%: r < 21.7422                                                                                                                                                                                                                                                  
+# Expected 50.0%: r < 31.6250                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 46.7520                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 66.2478   
+et_cl_equal_events = [15.8125, 21.7422, 31.6250, 46.7520, 66.2478]
 
 # all together
 # Expected  2.5%: r < 5.8069
@@ -44,7 +71,15 @@ et_cl_equal_events = [17.4624, 23.8411, 34.1250, 49.7677, 69.8073]
 # Expected 50.0%: r < 11.0938
 # Expected 84.0%: r < 15.9137
 # Expected 97.5%: r < 21.8308
-all_cl_equal_events = [5.8069, 7.8308, 11.0938, 15.9137, 21.8308]
+# all_cl_equal_events = [5.8069, 7.8308, 11.0938, 15.9137, 21.8308]
+
+# Observed Limit: r < 10.6363
+# Expected  2.5%: r < 5.4946
+# Expected 16.0%: r < 7.4706
+# Expected 50.0%: r < 10.6562
+# Expected 84.0%: r < 15.3711
+# Expected 97.5%: r < 21.2927
+all_cl_equal_events = [5.4946, 7.4706, 10.6562, 15.3711, 21.2927]
 
 
 ##############################
@@ -180,7 +215,15 @@ all_cl_custom_weights = [6.7566, 9.1222, 12.8125, 18.2771, 24.8216]
 # Expected 50.0%: r < 14.8125                                                                                                                                                                                                                     
 # Expected 84.0%: r < 21.8386                                                                                                                                                                                                                     
 # Expected 97.5%: r < 30.8121 
-tt_cl_equal_events_sys = [7.5798, 10.2921, 14.8125, 21.8386, 30.8121]
+# tt_cl_equal_events_sys = [7.5798, 10.2921, 14.8125, 21.8386, 30.8121]
+
+# Observed Limit: r < 14.1159                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 7.0625                                                                                                                                                                                                                                                   
+# Expected 16.0%: r < 9.7109                                                                                                                                                                                                                                                   
+# Expected 50.0%: r < 14.1250                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 20.9376                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 29.9670   
+tt_cl_equal_events_sys = [7.0625, 9.7109, 14.1250, 20.9376, 29.9670]
 
 # mt
 # Observed Limit: r < 24.1344                                                                                             
@@ -189,7 +232,15 @@ tt_cl_equal_events_sys = [7.5798, 10.2921, 14.8125, 21.8386, 30.8121]
 # Expected 50.0%: r < 24.1250                                                                                             
 # Expected 84.0%: r < 35.3761                                                                                             
 # Expected 97.5%: r < 50.0654 
-mt_cl_equal_events_sys = [12.2510, 16.7037, 24.1250, 35.3761, 50.0654]
+# mt_cl_equal_events_sys = [12.2510, 16.7037, 24.1250, 35.3761, 50.0654]
+
+# Observed Limit: r < 24.7613                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 12.6650                                                                                                                                                                                                                                                  
+# Expected 16.0%: r < 17.1969                                                                                                                                                                                                                                                  
+# Expected 50.0%: r < 24.7500                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 36.0953                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 50.9355 
+mt_cl_equal_events_sys = [12.6650, 17.1969, 24.7500, 36.0953, 50.9355]
 
 # et
 # Observed Limit: r < 34.8394                                                                                             
@@ -198,7 +249,15 @@ mt_cl_equal_events_sys = [12.2510, 16.7037, 24.1250, 35.3761, 50.0654]
 # Expected 50.0%: r < 34.8750                                                                                             
 # Expected 84.0%: r < 51.1395                                                                                             
 # Expected 97.5%: r < 72.8034 
-et_cl_equal_events_sys = [17.7100, 24.1469, 34.8750, 51.1395, 72.8034]
+# et_cl_equal_events_sys = [17.7100, 24.1469, 34.8750, 51.1395, 72.8034]
+
+# Observed Limit: r < 32.2548                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 15.9990                                                                                                                                                                                                                                                  
+# Expected 16.0%: r < 22.0931                                                                                                                                                                                                                                                  
+# Expected 50.0%: r < 32.2500                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 48.0616                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 68.9625 
+et_cl_equal_events_sys = [15.9990, 22.0931, 32.2500, 48.0616, 68.9625]
 
 # all together
 # Observed Limit: r < 11.3985                                                                                             
@@ -207,7 +266,15 @@ et_cl_equal_events_sys = [17.7100, 24.1469, 34.8750, 51.1395, 72.8034]
 # Expected 50.0%: r < 11.3750                                                                                             
 # Expected 84.0%: r < 16.4986                                                                                             
 # Expected 97.5%: r < 22.9294 
-all_cl_equal_events_sys = [5.9097, 8.0019, 11.3750, 16.4986, 22.9294]
+# all_cl_equal_events_sys = [5.9097, 8.0019, 11.3750, 16.4986, 22.9294]
+
+# Observed Limit: r < 10.9182
+# Expected  2.5%: r < 5.5809
+# Expected 16.0%: r < 7.6195
+# Expected 50.0%: r < 10.9062
+# Expected 84.0%: r < 15.9056
+# Expected 97.5%: r < 22.3102
+all_cl_equal_events_sys = [5.5809, 7.6195, 10.9062, 15.9056, 22.3102]
 
 ###############################
 # CL values for equal weights with systematics
@@ -375,7 +442,15 @@ all_cl_equal_events_scaled_137 = [4.0342, 5.4246, 7.5938, 10.7720, 14.6700]
 # Expected 50.0%: r < 10.4375                                                                                                                                                                                                                     
 # Expected 84.0%: r < 15.0140                                                                                                                                                                                                                     
 # Expected 97.5%: r < 20.8285   
-tt_cl_equal_events_scaled_137_sys = [5.4634, 7.3287, 10.4375, 15.0140, 20.8285]
+# tt_cl_equal_events_scaled_137_sys = [5.4634, 7.3287, 10.4375, 15.0140, 20.8285]
+
+# Observed Limit: r < 9.1653                                                                                                                                                                                                                                                   
+# Expected  2.5%: r < 4.6497                                                                                                                                                                                                                                                   
+# Expected 16.0%: r < 6.3396                                                                                                                                                                                                                                                   
+# Expected 50.0%: r < 9.1562                                                                                                                                                                                                                                                   
+# Expected 84.0%: r < 13.4994                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 19.1023  
+tt_cl_equal_events_scaled_137_sys = [4.6497, 6.3396, 9.1562, 13.4994, 19.1023]
 
 # mt
 # Observed Limit: r < 16.4207
@@ -384,7 +459,15 @@ tt_cl_equal_events_scaled_137_sys = [5.4634, 7.3287, 10.4375, 15.0140, 20.8285]
 # Expected 50.0%: r < 16.4375
 # Expected 84.0%: r < 23.7103
 # Expected 97.5%: r < 32.8445
-mt_cl_equal_events_scaled_137_sys = [8.6040, 11.6028, 16.4375, 23.7103, 32.8445]
+# mt_cl_equal_events_scaled_137_sys = [8.6040, 11.6028, 16.4375, 23.7103, 32.8445]
+
+# Observed Limit: r < 16.8851                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 8.8657                                                                                                                                                                                                                                                   
+# Expected 16.0%: r < 11.9557                                                                                                                                                                                                                                                  
+# Expected 50.0%: r < 16.9375                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 24.2965                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 33.7555 
+mt_cl_equal_events_scaled_137_sys = [8.8657, 11.9557, 16.9375, 24.2965, 33.7555]
 
 # et
 # Observed Limit: r < 20.3069
@@ -393,7 +476,15 @@ mt_cl_equal_events_scaled_137_sys = [8.6040, 11.6028, 16.4375, 23.7103, 32.8445]
 # Expected 50.0%: r < 20.3125
 # Expected 84.0%: r < 29.9475
 # Expected 97.5%: r < 42.7500
-et_cl_equal_events_scaled_137_sys = [10.1562, 13.9648, 20.3125, 29.9475, 42.7500]
+# et_cl_equal_events_scaled_137_sys = [10.1562, 13.9648, 20.3125, 29.9475, 42.7500]
+
+# Observed Limit: r < 20.5151                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 10.4419                                                                                                                                                                                                                                                  
+# Expected 16.0%: r < 14.2371                                                                                                                                                                                                                                                  
+# Expected 50.0%: r < 20.5625                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 30.1522                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 42.7988 
+et_cl_equal_events_scaled_137_sys = [10.4419, 14.2371, 20.5625, 30.1522, 42.7988]
 
 # all together
 # Observed Limit: r < 7.7949
@@ -402,7 +493,15 @@ et_cl_equal_events_scaled_137_sys = [10.1562, 13.9648, 20.3125, 29.9475, 42.7500
 # Expected 50.0%: r < 7.8125
 # Expected 84.0%: r < 11.1446
 # Expected 97.5%: r < 15.3322
-all_cl_equal_events_scaled_137_sys = [4.1199, 5.5335, 7.8125, 11.1446, 15.3322]
+# all_cl_equal_events_scaled_137_sys = [4.1199, 5.5335, 7.8125, 11.1446, 15.3322]
+
+# Observed Limit: r < 7.2301
+# Expected  2.5%: r < 3.7222
+# Expected 16.0%: r < 5.0607
+# Expected 50.0%: r < 7.2188
+# Expected 84.0%: r < 10.4702
+# Expected 97.5%: r < 14.5513
+all_cl_equal_events_scaled_137_sys = [3.7222, 5.0607, 7.2188, 10.4702, 14.5513]
 
 ###############################
 # equal events scaled to lumi 430fb-1, no systematics
@@ -482,6 +581,46 @@ et_cl_equal_events_scaled_430_sys = [6.4775, 8.7352, 12.3750, 17.8503, 24.8043]
 # Expected 97.5%: r < 9.9490
 all_cl_equal_events_scaled_430_sys = [2.7144, 3.6312, 5.1094, 7.2682, 9.9490]
 
+###############################
+# with custom bins
+# equal events scaled to lumi 500fb-1, with systematics
+###############################
+
+# tt
+# Observed Limit: r < 5.8553                                                                                                                                                                                                                                                   
+# Expected  2.5%: r < 3.0670                                                                                                                                                                                                                                                   
+# Expected 16.0%: r < 4.1360                                                                                                                                                                                                                                                   
+# Expected 50.0%: r < 5.8594                                                                                                                                                                                                                                                   
+# Expected 84.0%: r < 8.4051                                                                                                                                                                                                                                                   
+# Expected 97.5%: r < 11.6406   
+tt_cl_equal_events_scaled_500_sys = [3.0670, 4.1360, 5.8594, 8.4051, 11.6406]
+
+# mt
+# Observed Limit: r < 11.2053                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 6.0038                                                                                                                                                                                                                                                   
+# Expected 16.0%: r < 8.0409                                                                                                                                                                                                                                                   
+# Expected 50.0%: r < 11.2188                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 15.8247                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 21.6118 
+mt_cl_equal_events_scaled_500_sys = [6.0038, 8.0409, 11.2188, 15.8247, 21.6118]
+
+# et
+# Observed Limit: r < 12.0268                                                                                                                                                                                                                                                  
+# Expected  2.5%: r < 6.2976                                                                                                                                                                                                                                                   
+# Expected 16.0%: r < 8.4925                                                                                                                                                                                                                                                   
+# Expected 50.0%: r < 12.0312                                                                                                                                                                                                                                                  
+# Expected 84.0%: r < 17.2586                                                                                                                                                                                                                                                  
+# Expected 97.5%: r < 23.8266  
+et_cl_equal_events_scaled_500_sys = [6.2976, 8.4925, 12.0312, 17.2586, 23.8266]
+
+# all together
+# Observed Limit: r < 4.6988
+# Expected  2.5%: r < 2.4902
+# Expected 16.0%: r < 3.3314
+# Expected 50.0%: r < 4.6875
+# Expected 84.0%: r < 6.6867
+# Expected 97.5%: r < 9.1402
+all_cl_equal_events_scaled_500_sys = [2.4902, 3.3314, 4.6875, 6.6867, 9.1402]
 
 def build_interval_dict(training_type: str):
     raw = {}
@@ -570,6 +709,13 @@ def build_interval_dict(training_type: str):
 			"tt": tt_cl_equal_events_scaled_430_sys,
 			"all": all_cl_equal_events_scaled_430_sys,
 		}
+    elif training_type == "equal_events_scaled_500_sys":
+        raw = {
+			"et": et_cl_equal_events_scaled_500_sys,
+			"mt": mt_cl_equal_events_scaled_500_sys,
+			"tt": tt_cl_equal_events_scaled_500_sys,
+			"all": all_cl_equal_events_scaled_500_sys,
+		}
 
     if not raw:
         raise ValueError(f"Unknown training_type: {training_type}")
@@ -586,6 +732,13 @@ def build_interval_dict(training_type: str):
             "err95_high": p97 - p50,
         }
     return out
+
+label_map = {
+"all": "all",
+"et": r"$e\tau_h$",
+"mt": r"$\mu\tau_h$",
+"tt": r"$\tau_h\tau_h$",
+}
 
 
 def plot_intervals(outdir: str = "plots", training_type: str = "equal_events", ):
@@ -645,7 +798,7 @@ def plot_intervals(outdir: str = "plots", training_type: str = "equal_events", )
 	#     ax.axvline(1.0, color="red", linestyle="--", linewidth=1, label="r=1")
 
 	ax.set_yticks(y_positions)
-	ax.set_yticklabels(order)
+	ax.set_yticklabels([label_map[l] for l in order])
 	# Keine sichtbaren Tick-Markierungen zwischen den Labels
 	ax.tick_params(axis="y", which="both", length=0)
 	# Sicherstellen, dass keine Minor-Ticks erscheinen
@@ -661,10 +814,10 @@ def plot_intervals(outdir: str = "plots", training_type: str = "equal_events", )
 		scaling_note = "- full Run 2"
 	elif "scaled_430" in training_type:
 		scaling_note = "- Run 2 and 3"
-	if systematics:
-		ax.set_title(f"CLs {scaling_note} - with systematic uncertainties")
-	else:
-		ax.set_title(f"CLs {scaling_note} - only statistical uncertainties")
+	# if systematics:
+	# 	ax.set_title(f"CLs {scaling_note} - with systematic uncertainties")
+	# else:
+	# 	ax.set_title(f"CLs {scaling_note} - only statistical uncertainties")
 
 	# Legende
 	from matplotlib.patches import Patch
@@ -676,6 +829,8 @@ def plot_intervals(outdir: str = "plots", training_type: str = "equal_events", )
 		Line2D([0, 1], [0, 1], color="black", linestyle="--", label="Median expected"),
 	]
 	ax.legend(handles=legend_elements, loc="upper right")
+
+	hep.cms.label(ax=ax, label="Private Work", loc=0, data=True, lumi=138 if "scaled_137" in training_type else 430 if "scaled_430" in training_type else 500 if "scaled_500" in training_type else 59.8)
 
 	filename = f"cl_{training_type}"
 
@@ -725,4 +880,7 @@ if __name__ == "__main__":
 	plot_intervals(outdir=output_dir, training_type=training_type)
 
 	training_type = "equal_events_scaled_430_sys"
+	plot_intervals(outdir=output_dir, training_type=training_type)
+     
+	training_type = "equal_events_scaled_500_sys"
 	plot_intervals(outdir=output_dir, training_type=training_type)
