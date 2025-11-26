@@ -566,6 +566,7 @@ def main(args):
     logger.info(f"signals: {signalsS}")
 
     def _book(processes, variations):  # helper wrapper
+        logger.info(f"Booking processes on line {shape_utils.get_caller_line_number()}\n\nProcess {processes} booking variations\n\n{variations}\n")
         shape_utils.book_histograms(
             processes=processes,
             variations=variations,
@@ -592,29 +593,41 @@ def main(args):
         ############################
         if not args.skip_systematic_variations:
             # Book variations common to all channels.
+            logger.info(f"Start booking systematic variations for channel {channel}")
+
             _book({"ggh"} & procS, [variations.ggh_acceptance, variations.ggh_muRmuF_acceptance])
             _book({"qqh"} & procS, [variations.qqh_acceptance, variations.qqh_muRmuF_acceptance])
+
+            # General variations for simulated processes
             _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging])
             _book(signalsS, variations.LHE_scale.unrolled())
-            _book(signalsS - {"qqh"}, variations.PS_scale.unrolled())
+            _book(signalsS - {"qqh"}, variations.PS_scale.unrolled())  # qqh not properly present in v9 samples
 
             _book({"ztt", "zj", "zl", "w"} & procS | signalsS, variations.Recoil.unrolled())
             _book(simulatedProcsDS[channel], [variations.met_unclustered, variations.pileup_reweighting])
+
+            # Pt Reweighting
             _book({"ztt", "zl", "zj"} & procS, [variations.zpt])
             _book({"ttt", "ttl", "ttj"} & procS, [variations.top_pt])
 
             if channel in ["et", "mt", "tt"]:
                 _book(jetFakesDS[channel], [variations.jet_to_tau_fake])
+
+                # Tau Energy Scale (MC)
                 _book((trueTauBkgS | leptonFakesS | signalsS) - {"zl"}, variations.TauEnergyScale.unrolled())
-                _book(embS, (variations.TauEnergyScale + variations.TauEmbeddingEnergyScale).unrolled())
+                # Tau Energy Scale (Embedding)
+                _book(embS, variations.TauEmbeddingEnergyScale.unrolled())
 
             if channel in ["et", "mt"]:
+                # Tau ID Efficiencies
                 _book((trueTauBkgS | leptonFakesS | signalsS) - {"zl"}, [variations.tau_id_eff_lt])
                 _book(embS, [variations.emb_tau_id_eff_lt, variations.emb_tau_id_eff_lt_corr])
+
                 if args.ff_type != "none":
-                    _book(dataS | embS | leptonFakesS | trueTauBkgS, variations.FakeFactorLT.unrolled())
-                    _book(leptonFakesS | trueTauBkgS | embS, [variations.ff_variations_tau_es_lt])
-                    _book(embS, [variations.ff_variations_tau_es_emb_lt])
+                    _book(dataS | embS | leptonFakesS | trueTauBkgS, [variations.FakeFactorLT.ff_variations_lt])
+                    # due to renaming issues we have to split the booking here, FIXME
+                    _book(leptonFakesS | trueTauBkgS, [variations.FakeFactorLT.ff_variations_tau_es_lt_mc])
+                    _book(embS, [variations.FakeFactorLT.ff_variations_tau_es_emb_lt, variations.FakeFactorLT.ff_variations_tau_es_emb_lt_corr])
 
             if channel in ["et", "em"]:
                 _book(simulatedProcsDS[channel], [variations.ele_es_res, variations.ele_es_scale])

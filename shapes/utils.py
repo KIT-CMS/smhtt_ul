@@ -1,32 +1,33 @@
-from ntuple_processor import dataset_from_crownoutput, Unit
-from ntuple_processor.variations import (
-    get_quantities_from_expression,
-    ReplaceCut,
-    ReplaceWeight,
-    ReplaceCutAndAddWeight,
-    ReplaceVariable,
-)
+import inspect
+import itertools
+import logging
 import re
 from copy import deepcopy
 import logging
 import itertools
 
 from config.logging_setup_configs import setup_logging
+from ntuple_processor import Unit, dataset_from_crownoutput
+from ntuple_processor.variations import (ReplaceCut, ReplaceCutAndAddWeight,
+                                         ReplaceVariable, ReplaceWeight,
+                                         get_quantities_from_expression)
 
 logger = setup_logging(logger=logging.getLogger(__name__))
 
-# def add_process(analysis_unit, name, dataset, selections, categorization, channel):
-#     """
-#     Add a process to the analysis unit.
-#     """
-#     if not isinstance(selections, list):
-#         selections = [selections]
-#     unitlist = []
-#     for category_selection, actions in categorization[channel]:
-#         full_selection = selections + [category_selection]
-#         unitlist.append(Unit(dataset, full_selection, actions))
 
-#     analysis_unit[name] = unitlist
+def get_caller_line_number(level=2):
+    """Get the line number of the caller function in the code.
+
+    Args:
+        level (int): The stack level to get the caller from. Default is 2.
+
+    Returns:
+        int: The line number of the caller function.
+    """
+    frame = inspect.currentframe()
+    for _ in range(level):
+        frame = frame.f_back
+    return frame.f_lineno
 
 
 def add_process(

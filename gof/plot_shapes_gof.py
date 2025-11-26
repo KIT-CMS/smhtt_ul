@@ -16,8 +16,7 @@ logger = logging.getLogger("")
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description=
-        "Plot categories using Dumbledraw from shapes produced by shape-producer module."
+        description="Plot categories using Dumbledraw from shapes produced by shape-producer module."
     )
     parser.add_argument(
         "-l", "--linear", action="store_true", help="Enable linear x-axis")

@@ -25,6 +25,9 @@ from ntuple_processor.variations import (
 logger = setup_logging(logger=logging.getLogger(__name__))
 
 SHIFT_DIRECTIONS = ("Up", "Down")
+pt_bins = ("20to40", "40toInf")
+decay_modes = ("1prong0pizero", "1prong1pizero", "3prong0pizero", "3prong1pizero")
+
 
 class FFHelper:
     FF_OPTIONS = {
@@ -307,40 +310,20 @@ pileup_reweighting = [
 ]
 
 # Energy scales.
-# Previously defined with 2017 in name.
-tau_es_3prong = [
-    ReplaceVariable("CMS_scale_t_3prong_EraUp", "tauEs3prong0pizeroUp"),
-    ReplaceVariable("CMS_scale_t_3prong_EraDown", "tauEs3prong0pizeroDown"),
+tau_es_pt_dm_binned = [
+    ReplaceVariable(
+        f"CMS_scale_t_{dm}_{pt}_Era{shift}",
+        f"tauEs{dm}_{pt}{shift}"
+    )
+    for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
-tau_es_3prong1pizero = [
-    ReplaceVariable("CMS_scale_t_3prong1pizero_EraUp", "tauEs3prong1pizeroUp"),
-    ReplaceVariable("CMS_scale_t_3prong1pizero_EraDown", "tauEs3prong1pizeroDown"),
+emb_tau_es_pt_dm_binned = [
+    ReplaceVariable(
+        f"CMS_scale_t_emb_{dm}_{pt}_Era{shift}",
+        f"tauEs{dm}{pt}{shift}",  # (NO underscore here) #FIXME
+    )
+    for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
-tau_es_1prong = [
-    ReplaceVariable("CMS_scale_t_1prong_EraUp", "tauEs1prong0pizeroUp"),
-    ReplaceVariable("CMS_scale_t_1prong_EraDown", "tauEs1prong0pizeroDown"),
-]
-tau_es_1prong1pizero = [
-    ReplaceVariable("CMS_scale_t_1prong1pizero_EraUp", "tauEs1prong1pizeroUp"),
-    ReplaceVariable("CMS_scale_t_1prong1pizero_EraDown", "tauEs1prong1pizeroDown"),
-]
-emb_tau_es_3prong = [
-    ReplaceVariable("CMS_scale_t_emb_3prong_EraUp", "tauEs3prong0pizeroUp"),
-    ReplaceVariable("CMS_scale_t_emb_3prong_EraDown", "tauEs3prong0pizeroDown"),
-]
-emb_tau_es_3prong1pizero = [
-    ReplaceVariable("CMS_scale_t_emb_3prong1pizero_EraUp", "tauEs3prong1pizeroUp"),
-    ReplaceVariable("CMS_scale_t_emb_3prong1pizero_EraDown", "tauEs3prong1pizeroDown"),
-]
-emb_tau_es_1prong = [
-    ReplaceVariable("CMS_scale_t_emb_1prong_EraUp", "tauEs1prong0pizeroUp"),
-    ReplaceVariable("CMS_scale_t_emb_1prong_EraDown", "tauEs1prong0pizeroDown"),
-]
-emb_tau_es_1prong1pizero = [
-    ReplaceVariable("CMS_scale_t_emb_1prong1pizero_EraUp", "tauEs1prong1pizeroUp"),
-    ReplaceVariable("CMS_scale_t_emb_1prong1pizero_EraDown", "tauEs1prong1pizeroDown"),
-]
-
 # Jet energy scale split by sources.
 jet_es_hem = [
     ReplaceVariable("CMS_scale_j_HEMIssue_EraUp", "jesUncHEMIssueUp"),
@@ -458,36 +441,27 @@ mu_fake_es_inc = [
 # Efficiency corrections.
 # Tau ID efficiency.
 tau_id_eff_lt = [
-    ReplaceVariable(name, variation)
-    for shift in SHIFT_DIRECTIONS
-    for name, variation in [
-        (f"CMS_eff_t_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
-        (f"CMS_eff_t_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
-        (f"CMS_eff_t_40-500_Era{shift}", f"vsJetTau40to500{shift}"),
-        (f"CMS_eff_t_500-1000_Era{shift}", f"vsJetTau500to1000{shift}"),
-        (f"CMS_eff_t_1000-Inf_Era{shift}", f"vsJetTau1000toInf{shift}"),
-    ]
+    ReplaceVariable(
+        f"CMS_eff_t_{dm}_{pt}_Era{shift}",
+        f"vsJetTau{dm}_{pt}{shift}",
+    )
+    for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
 emb_tau_id_eff_lt = [
-    ReplaceVariable(name, variation)
-    for shift in SHIFT_DIRECTIONS
-    for name, variation in [
-        (f"CMS_eff_t_emb_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
-        (f"CMS_eff_t_emb_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
-        (f"CMS_eff_t_emb_40-Inf_Era{shift}", f"vsJetTau40toInf{shift}"),
-    ]
+    ReplaceVariable(
+        f"CMS_eff_t_emb_{dm}_{pt}_Era{shift}",
+        f"vsJetTau{dm}{pt}{shift}",  # (NO underscore here) #FIXME
+    )
+    for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
-
-# tauid variations used for correlation with mc ones
 emb_tau_id_eff_lt_corr = [
-    ReplaceVariable(name, variation)
-    for shift in SHIFT_DIRECTIONS
-    for name, variation in [
-        (f"CMS_eff_t_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
-        (f"CMS_eff_t_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
-        (f"CMS_eff_t_40-500_Era{shift}", f"vsJetTau40toInf{shift}"),
-    ]
+    ReplaceVariable(
+        f"CMS_eff_t_{dm}_{pt}_Era{shift}",
+        f"vsJetTau{dm}{pt}{shift}",  # (NO underscore here) #FIXME
+    )
+    for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
+# ---
 tau_id_eff_tt = [
     ReplaceVariable(name, variation)
     for shift in SHIFT_DIRECTIONS
@@ -597,70 +571,163 @@ top_pt = [
 # Variations on the jet backgrounds estimated with the fake factor method.
 ff_variations_lt = [
     ReplaceCutAndAddWeight(
-        f"anti_iso_CMS_{syst}{shift}_Channel_Era",
+        f"anti_iso_CMS_{syst}_Channel_Era{shift}",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(
             f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__{syst}{shift}",
-            f"fake_factor",
+            "fake_factor",
         )
     )
     for shift in SHIFT_DIRECTIONS
     for syst in [
-        'QCDFFunc',
-        'QCDFFmcSubUnc',
-        'WjetsFFunc',
-        'WjetsFFmcSubUnc',
-        'ttbarFFunc',
-        'process_fractionsfracQCDUnc',
-        'process_fractionsfracWjetsUnc',
-        'process_fractionsfracTTbarUnc',
-        'QCD_DR_SR_Corr',
-        'QCD_non_closure_tau_decaymode_2_Corr',
-        'QCD_non_closure_mass_2_Corr',
-        'QCD_non_closure_eta_1_Corr',
-        'QCD_non_closure_eta_2_Corr',
-        'QCD_non_closure_jpt_1_Corr',
-        'QCD_non_closure_jeta_1_Corr',
-        'QCD_non_closure_jpt_2_Corr',
-        'QCD_non_closure_jeta_2_Corr',
-        'QCD_non_closure_met_Corr',
-        'QCD_non_closure_deltaEta_ditaupair_Corr',
-        'QCD_non_closure_deltaR_ditaupair_Corr',
-        'QCD_non_closure_pt_ttjj_Corr',
-        'QCD_non_closure_mt_tot_Corr',
-        'QCD_non_closure_iso_1_Corr',
-        'Wjets_DR_SR_Corr',
-        'Wjets_non_closure_tau_decaymode_2_Corr',
-        'Wjets_non_closure_mass_2_Corr',
-        'Wjets_non_closure_eta_1_Corr',
-        'Wjets_non_closure_eta_2_Corr',
-        'Wjets_non_closure_jpt_1_Corr',
-        'Wjets_non_closure_jeta_1_Corr',
-        'Wjets_non_closure_jpt_2_Corr',
-        'Wjets_non_closure_jeta_2_Corr',
-        'Wjets_non_closure_met_Corr',
-        'Wjets_non_closure_deltaEta_ditaupair_Corr',
-        'Wjets_non_closure_deltaR_ditaupair_Corr',
-        'Wjets_non_closure_pt_ttjj_Corr',
-        'Wjets_non_closure_mt_tot_Corr',
-        'Wjets_non_closure_iso_1_Corr',
-        'ttbar_non_closure_nbtag_Corr',
-        'ttbar_non_closure_tau_decaymode_2_Corr',
-        'ttbar_non_closure_mass_2_Corr',
-        'ttbar_non_closure_eta_1_Corr',
-        'ttbar_non_closure_eta_2_Corr',
-        'ttbar_non_closure_jpt_1_Corr',
-        'ttbar_non_closure_jeta_1_Corr',
-        'ttbar_non_closure_jpt_2_Corr',
-        'ttbar_non_closure_jeta_2_Corr',
-        'ttbar_non_closure_met_Corr',
-        'ttbar_non_closure_deltaEta_ditaupair_Corr',
-        'ttbar_non_closure_pt_tt_Corr',
-        'ttbar_non_closure_pt_ttjj_Corr',
-        'ttbar_non_closure_deltaR_ditaupair_Corr',
-        'ttbar_non_closure_mt_tot_Corr',
-        'ttbar_non_closure_iso_1_Corr'
+        "QCDFFunc",
+        "QCDFFmcSubUnc",
+        "WjetsFFunc",
+        "WjetsFFmcSubUnc",
+        "ttbarFFunc",
+        "process_fractionsfracQCDUnc",
+        "process_fractionsfracWjetsUnc",
+        "process_fractionsfracTTbarUnc",
+        "QCD_DR_SR_CorrStat1Sigma",
+        "QCD_DR_SR_CorrSystMCShift",
+        "QCD_DR_SR_CorrSystBandAsym",
+        "QCD_non_closure_tau_decaymode_2_CorrStat1Sigma",
+        "QCD_non_closure_tau_decaymode_2_CorrSystMCShift",
+        "QCD_non_closure_eta_1_CorrStat1Sigma",
+        "QCD_non_closure_eta_1_CorrSystMCShift",
+        "QCD_non_closure_eta_1_CorrSystBandAsym",
+        "QCD_non_closure_eta_2_CorrStat1Sigma",
+        "QCD_non_closure_eta_2_CorrSystMCShift",
+        "QCD_non_closure_eta_2_CorrSystBandAsym",
+        "QCD_non_closure_jeta_1_CorrStat1Sigma",
+        "QCD_non_closure_jeta_1_CorrSystMCShift",
+        "QCD_non_closure_jeta_1_CorrSystBandAsym",
+        "QCD_non_closure_jeta_2_CorrStat1Sigma",
+        "QCD_non_closure_jeta_2_CorrSystMCShift",
+        "QCD_non_closure_jeta_2_CorrSystBandAsym",
+        "QCD_non_closure_jpt_1_CorrStat1Sigma",
+        "QCD_non_closure_jpt_1_CorrSystMCShift",
+        "QCD_non_closure_jpt_1_CorrSystBandAsym",
+        "QCD_non_closure_jpt_2_CorrStat1Sigma",
+        "QCD_non_closure_jpt_2_CorrSystMCShift",
+        "QCD_non_closure_jpt_2_CorrSystBandAsym",
+        "QCD_non_closure_met_CorrStat1Sigma",
+        "QCD_non_closure_met_CorrSystMCShift",
+        "QCD_non_closure_met_CorrSystBandAsym",
+        "QCD_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+        "QCD_non_closure_deltaEta_ditaupair_CorrSystMCShift",
+        "QCD_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+        "QCD_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+        "QCD_non_closure_deltaR_ditaupair_CorrSystMCShift",
+        "QCD_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+        "QCD_non_closure_deltaR_1j1_CorrStat1Sigma",
+        "QCD_non_closure_deltaR_1j1_CorrSystMCShift",
+        "QCD_non_closure_deltaR_1j1_CorrSystBandAsym",
+        "QCD_non_closure_deltaR_12j1_CorrStat1Sigma",
+        "QCD_non_closure_deltaR_12j1_CorrSystMCShift",
+        "QCD_non_closure_deltaR_12j1_CorrSystBandAsym",
+        "QCD_non_closure_pt_ttjj_CorrStat1Sigma",
+        "QCD_non_closure_pt_ttjj_CorrSystMCShift",
+        "QCD_non_closure_pt_ttjj_CorrSystBandAsym",
+        "QCD_non_closure_mass_2_CorrStat1Sigma",
+        "QCD_non_closure_mass_2_CorrSystMCShift",
+        "QCD_non_closure_mass_2_CorrSystBandAsym",
+        "QCD_non_closure_mt_tot_CorrStat1Sigma",
+        "QCD_non_closure_mt_tot_CorrSystMCShift",
+        "QCD_non_closure_mt_tot_CorrSystBandAsym",
+        "QCD_non_closure_m_vis_CorrStat1Sigma",
+        "QCD_non_closure_m_vis_CorrSystMCShift",
+        "QCD_non_closure_m_vis_CorrSystBandAsym",
+        "QCD_non_closure_iso_1_CorrStat1Sigma",
+        "QCD_non_closure_iso_1_CorrSystMCShift",
+        "QCD_non_closure_iso_1_CorrSystBandAsym",
+        "Wjets_DR_SR_CorrStat1Sigma",
+        "Wjets_DR_SR_CorrSystMCShift",
+        "Wjets_DR_SR_CorrSystBandAsym",
+        "Wjets_non_closure_tau_decaymode_2_CorrStat1Sigma",
+        "Wjets_non_closure_tau_decaymode_2_CorrSystMCShift",
+        "Wjets_non_closure_eta_1_CorrStat1Sigma",
+        "Wjets_non_closure_eta_1_CorrSystMCShift",
+        "Wjets_non_closure_eta_1_CorrSystBandAsym",
+        "Wjets_non_closure_eta_2_CorrStat1Sigma",
+        "Wjets_non_closure_eta_2_CorrSystMCShift",
+        "Wjets_non_closure_eta_2_CorrSystBandAsym",
+        "Wjets_non_closure_jeta_1_CorrStat1Sigma",
+        "Wjets_non_closure_jeta_1_CorrSystMCShift",
+        "Wjets_non_closure_jeta_1_CorrSystBandAsym",
+        "Wjets_non_closure_jeta_2_CorrStat1Sigma",
+        "Wjets_non_closure_jeta_2_CorrSystMCShift",
+        "Wjets_non_closure_jeta_2_CorrSystBandAsym",
+        "Wjets_non_closure_jpt_1_CorrStat1Sigma",
+        "Wjets_non_closure_jpt_1_CorrSystMCShift",
+        "Wjets_non_closure_jpt_1_CorrSystBandAsym",
+        "Wjets_non_closure_jpt_2_CorrStat1Sigma",
+        "Wjets_non_closure_jpt_2_CorrSystMCShift",
+        "Wjets_non_closure_jpt_2_CorrSystBandAsym",
+        "Wjets_non_closure_met_CorrStat1Sigma",
+        "Wjets_non_closure_met_CorrSystMCShift",
+        "Wjets_non_closure_met_CorrSystBandAsym",
+        "Wjets_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+        "Wjets_non_closure_deltaEta_ditaupair_CorrSystMCShift",
+        "Wjets_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+        "Wjets_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+        "Wjets_non_closure_deltaR_ditaupair_CorrSystMCShift",
+        "Wjets_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+        "Wjets_non_closure_deltaR_1j1_CorrStat1Sigma",
+        "Wjets_non_closure_deltaR_1j1_CorrSystMCShift",
+        "Wjets_non_closure_deltaR_1j1_CorrSystBandAsym",
+        "Wjets_non_closure_deltaR_12j1_CorrStat1Sigma",
+        "Wjets_non_closure_deltaR_12j1_CorrSystMCShift",
+        "Wjets_non_closure_deltaR_12j1_CorrSystBandAsym",
+        "Wjets_non_closure_pt_ttjj_CorrStat1Sigma",
+        "Wjets_non_closure_pt_ttjj_CorrSystMCShift",
+        "Wjets_non_closure_pt_ttjj_CorrSystBandAsym",
+        "Wjets_non_closure_mass_2_CorrStat1Sigma",
+        "Wjets_non_closure_mass_2_CorrSystMCShift",
+        "Wjets_non_closure_mass_2_CorrSystBandAsym",
+        "Wjets_non_closure_mt_tot_CorrStat1Sigma",
+        "Wjets_non_closure_mt_tot_CorrSystMCShift",
+        "Wjets_non_closure_mt_tot_CorrSystBandAsym",
+        "Wjets_non_closure_m_vis_CorrStat1Sigma",
+        "Wjets_non_closure_m_vis_CorrSystMCShift",
+        "Wjets_non_closure_m_vis_CorrSystBandAsym",
+        "Wjets_non_closure_iso_1_CorrStat1Sigma",
+        "Wjets_non_closure_iso_1_CorrSystMCShift",
+        "Wjets_non_closure_iso_1_CorrSystBandAsym",
+        "ttbar_non_closure_tau_decaymode_2_CorrStat1Sigma",
+        "ttbar_non_closure_eta_1_CorrStat1Sigma",
+        "ttbar_non_closure_eta_1_CorrSystBandAsym",
+        "ttbar_non_closure_eta_2_CorrStat1Sigma",
+        "ttbar_non_closure_eta_2_CorrSystBandAsym",
+        "ttbar_non_closure_jeta_1_CorrStat1Sigma",
+        "ttbar_non_closure_jeta_1_CorrSystBandAsym",
+        "ttbar_non_closure_jeta_2_CorrStat1Sigma",
+        "ttbar_non_closure_jeta_2_CorrSystBandAsym",
+        "ttbar_non_closure_jpt_1_CorrStat1Sigma",
+        "ttbar_non_closure_jpt_1_CorrSystBandAsym",
+        "ttbar_non_closure_jpt_2_CorrStat1Sigma",
+        "ttbar_non_closure_jpt_2_CorrSystBandAsym",
+        "ttbar_non_closure_met_CorrStat1Sigma",
+        "ttbar_non_closure_met_CorrSystBandAsym",
+        "ttbar_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+        "ttbar_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+        "ttbar_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+        "ttbar_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+        "ttbar_non_closure_deltaR_1j1_CorrStat1Sigma",
+        "ttbar_non_closure_deltaR_1j1_CorrSystBandAsym",
+        "ttbar_non_closure_deltaR_12j1_CorrStat1Sigma",
+        "ttbar_non_closure_deltaR_12j1_CorrSystBandAsym",
+        "ttbar_non_closure_pt_ttjj_CorrStat1Sigma",
+        "ttbar_non_closure_pt_ttjj_CorrSystBandAsym",
+        "ttbar_non_closure_mass_2_CorrStat1Sigma",
+        "ttbar_non_closure_mass_2_CorrSystBandAsym",
+        "ttbar_non_closure_mt_tot_CorrStat1Sigma",
+        "ttbar_non_closure_mt_tot_CorrSystBandAsym",
+        "ttbar_non_closure_m_vis_CorrStat1Sigma",
+        "ttbar_non_closure_m_vis_CorrSystBandAsym",
+        "ttbar_non_closure_iso_1_CorrStat1Sigma",
+        "ttbar_non_closure_iso_1_CorrSystBandAsym",
     ]
 ]
 
@@ -668,40 +735,59 @@ ff_variations_lt = [
 
 # Propagation of tau ES systematics on jetFakes process
 # lt channel
-ff_variations_tau_es_lt = [
+ff_variations_tau_es_lt_mc = [
     ReplaceVariableReplaceCutAndAddWeight(
-        name,
-        variation,
+        f"anti_iso_CMS_scale_t_{dm}_{pt}_Channel_Era{shift}",
+        f"tauEs{dm}_{pt}{shift}",
         "tau_iso",
-        Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
-        Weight(f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__{variation}", "fake_factor")
+        Cut(
+            f"id_tau_vsJet_Tight_2__tauEs{dm}_{pt}{shift} < 0.5 && id_tau_vsJet_VLoose_2__tauEs{dm}_{pt}{shift} > 0.5",
+            "tau_anti_iso"
+        ),
+        Weight(
+            # FF Weight uses variables WITH underscores (Based on your observation)
+            f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__tauEs{dm}_{pt}{shift}",
+            "fake_factor"
+        )
     )
-    for shift in SHIFT_DIRECTIONS
-    for name, variation in [
-        (f"anti_iso_CMS_scale_t_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
-        (f"anti_iso_CMS_scale_t_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
-        (f"anti_iso_CMS_scale_t_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
-        (f"anti_iso_CMS_scale_t_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
-    ]
+    for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
-
 # lt for emb only for correlation
 ff_variations_tau_es_emb_lt = [
     ReplaceVariableReplaceCutAndAddWeight(
-        name,
-        variation,
+        f"anti_iso_CMS_scale_t_emb_{dm}_{pt}_Channel_Era{shift}",
+        f"tauEs{dm}{pt}{shift}",  # (NO underscore here) #FIXME
         "tau_iso",
-        Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
-        Weight(f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__{variation}", "fake_factor"),
+        Cut(
+            f"id_tau_vsJet_Tight_2__tauEs{dm}{pt}{shift} < 0.5 && id_tau_vsJet_VLoose_2__tauEs{dm}{pt}{shift} > 0.5",
+            "tau_anti_iso"
+        ),
+        Weight(
+            f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__tauEs{dm}{pt}{shift}",
+            "fake_factor"
+        ),
     )
-    for shift in SHIFT_DIRECTIONS
-    for name, variation in [
-        (f"anti_iso_CMS_scale_t_emb_1prong_Era{shift}", f"tauEs1prong0pizero{shift}"),
-        (f"anti_iso_CMS_scale_t_emb_1prong1pizero_Era{shift}", f"tauEs1prong1pizero{shift}"),
-        (f"anti_iso_CMS_scale_t_emb_3prong_Era{shift}", f"tauEs3prong0pizero{shift}"),
-        (f"anti_iso_CMS_scale_t_emb_3prong1pizero_Era{shift}", f"tauEs3prong1pizero{shift}"),
-    ]
+    for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
+ff_variations_tau_es_emb_lt_corr = [
+    ReplaceVariableReplaceCutAndAddWeight(
+        f"anti_iso_CMS_scale_t_{dm}_{pt}_Channel_Era{shift}",     # Hist Name: Standard MC
+        f"tauEs{dm}{pt}{shift}",                                   # Internal: No Underscore
+        "tau_iso",
+        Cut(
+            f"id_tau_vsJet_Tight_2__tauEs{dm}{pt}{shift} < 0.5 && id_tau_vsJet_VLoose_2__tauEs{dm}{pt}{shift} > 0.5",
+            "tau_anti_iso"
+        ),
+        Weight(
+            f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__tauEs{dm}{pt}{shift}",
+            "fake_factor"
+        ),
+    )
+    for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
+]
+
+
+
 
 # # tt channel
 ff_variations_tau_es_tt = [
@@ -1030,6 +1116,8 @@ class _VariationCollection(metaclass=VariationCollectionMeta):
         return results
 
 
+# ------------------------------------------------------------------------------------------
+
 class SemiLeptonicFFEstimations(_VariationCollection):
     anti_iso_lt = anti_iso_lt
     same_sign_anti_iso_lt = same_sign_anti_iso_lt
@@ -1060,29 +1148,23 @@ class Recoil(_VariationCollection):
 
 
 class TauEnergyScale(_VariationCollection):
-    tau_es_3prong = tau_es_3prong
-    tau_es_3prong1pizero = tau_es_3prong1pizero
-    tau_es_1prong = tau_es_1prong
-    tau_es_1prong1pizero = tau_es_1prong1pizero
+    tau_es_pt_dm_binned = tau_es_pt_dm_binned
 
 
 class TauEmbeddingEnergyScale(_VariationCollection):
-    emb_tau_es_3prong = emb_tau_es_3prong
-    emb_tau_es_3prong1pizero = emb_tau_es_3prong1pizero
-    emb_tau_es_1prong = emb_tau_es_1prong
-    emb_tau_es_1prong1pizero = emb_tau_es_1prong1pizero
+    emb_tau_es_pt_dm_binned = emb_tau_es_pt_dm_binned
 
 
 class FakeFactorLT(_VariationCollection):
     ff_variations_lt = ff_variations_lt
+    ff_variations_tau_es_lt_mc = ff_variations_tau_es_lt_mc
+    ff_variations_tau_es_emb_lt = ff_variations_tau_es_emb_lt
+    ff_variations_tau_es_emb_lt_corr = ff_variations_tau_es_emb_lt_corr
 
 
 class TauIDAndTriggerEfficiency(_VariationCollection):
     emb_tau_id_eff_tt = emb_tau_id_eff_tt
     tau_id_eff_tt = tau_id_eff_tt
-    # tau_trigger_eff_tt_emb = tau_trigger_eff_tt_emb
-    # tau_trigger_eff_tt = tau_trigger_eff_tt
-    # emb_decay_mode_eff_tt = emb_decay_mode_eff_tt
 
 
 # ------------------------------------------------------------------------------------------
@@ -1096,36 +1178,13 @@ class FakeProcessEstimationVariations(_VariationCollection):
     abcd_method = abcd_method
 
 
-class EnergyScaleVariations(_VariationCollection):
-    tau_es_3prong = tau_es_3prong
-    tau_es_3prong1pizero = tau_es_3prong1pizero
-    tau_es_1prong = tau_es_1prong
-    tau_es_1prong1pizero = tau_es_1prong1pizero
-    mu_fake_es_inc = mu_fake_es_inc
-    ele_fake_es = ele_fake_es
-    emb_tau_es_3prong = emb_tau_es_3prong
-    emb_tau_es_3prong1pizero = emb_tau_es_3prong1pizero
-    emb_tau_es_1prong = emb_tau_es_1prong
-    emb_tau_es_1prong1pizero = emb_tau_es_1prong1pizero
-    jet_es = jet_es
-    # TODO add missing ES
-    # mu_fake_es_1prong = mu_fake_es_1prong
-    # mu_fake_es_1prong1pizero = mu_fake_es_1prong1pizero
-    # ele_es = ele_es
-    # ele_res = ele_res
-    emb_e_es,
-    # ele_fake_es_1prong = ele_fake_es_1prong
-    # ele_fake_es_1prong1pizero = ele_fake_es_1prong1pizero
-    # ele_fake_es = ele_fake_es
-
-
 class METVariations(_VariationCollection):
     met_unclustered = met_unclustered
     recoil_resolution = recoil_resolution
     recoil_response = recoil_response
 
 
-class EffifiencyVariations(_VariationCollection):
+class EfficiencyVariations(_VariationCollection):
     tau_id_eff_lt = tau_id_eff_lt
     tau_id_eff_tt = tau_id_eff_tt
     emb_tau_id_eff_lt = emb_tau_id_eff_lt
@@ -1165,208 +1224,9 @@ class AdditionalVariations(_VariationCollection):
 class JetFakeVariations(_VariationCollection):
     # TODO add jetfake uncertainties
     ff_variations_lt = ff_variations_lt
-    ff_variations_tau_es_lt = ff_variations_tau_es_lt
+    ff_variations_tau_es_lt_mc = ff_variations_tau_es_lt_mc
     ff_variations_tau_es_emb_lt = ff_variations_tau_es_emb_lt
+    ff_variations_tau_es_emb_lt_corr = ff_variations_tau_es_emb_lt_corr
     # ff_variations_tt = ff_variations_tt
     # qcd_variations_em = qcd_variations_em
     # ff_variations_tau_es_tt = ff_variations_tau_es_tt
-
-# ------------------------------------------------------------------------------------------
-
-# TODO: TBD, needed or not, collection:
-
-# # fake met scaling in embedded samples
-# emb_met_scale = [  # TODO: Check if needed or is replaced
-#         ReplaceVariable("scale_embed_metUp", "emb_scale_metUp"),
-#         ReplaceVariable("scale_embed_metDown", "emb_scale_metDown")
-#         ]
-# # cross triggers
-# trigger_eff_mt = [  # TODO: Check if needed or is replaced
-#     *[
-#         ReplaceWeight(
-#             name,
-#             "triggerweight",
-#             Weight(weight, "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for name, weight in [
-#             (f"CMS_eff_trigger_mt_Era{shift}", f"mtau_triggerweight_ic_singlelep_{shift.lower()}"),
-#             (f"CMS_eff_xtrigger_l_mt_Era{shift}", f"mtau_triggerweight_ic_crosslep_{shift.lower()}"),
-#             (f"CMS_eff_trigger_single_t_Era{shift}", f"mtau_triggerweight_ic_singletau_{shift.lower()}")
-#         ]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             f"CMS_eff_xtrigger_t_mt_dm{dm}_Era{shift}",
-#             "triggerweight",
-#             Weight(f"mtau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for dm in [0, 1, 10, 11]
-#     ],
-# ]
-# trigger_eff_mt_emb = [  # TODO: Check if needed or is replaced
-#     *[
-#         ReplaceWeight(
-#             name,
-#             "triggerweight",
-#             Weight(weight, "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for name, weight in [
-#             (f"CMS_eff_trigger_emb_mt_Era{shift}", f"mtau_triggerweight_ic_singlelep_{shift.lower()}"),
-#             (f"CMS_eff_xtrigger_l_emb_mt_Era{shift}", f"mtau_triggerweight_ic_crosslep_{shift.lower()}"),
-#             (f"CMS_eff_trigger_single_t_emb_Era{shift}", f"mtau_triggerweight_ic_singletau_{shift.lower()}")
-#         ]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             f"CMS_eff_xtrigger_t_emb_mt_dm{dm}_Era{shift}",
-#             "triggerweight",
-#             Weight(f"mtau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for dm in [0, 1, 10, 11]
-#     ]
-# ]
-# trigger_eff_et = [  # TODO: Check if needed or is replaced
-#     *[
-#         ReplaceWeight(
-#             name,
-#             "triggerweight",
-#             Weight(weight, "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for name, weight in [
-#             (f"CMS_eff_trigger_et_Era{shift}", f"etau_triggerweight_ic_singlelep_{shift.lower()}"),
-#             (f"CMS_eff_xtrigger_l_et_Era{shift}", f"etau_triggerweight_ic_crosslep_{shift.lower()}"),
-#             (f"CMS_eff_trigger_single_t_Era{shift}", f"etau_triggerweight_ic_singletau_{shift.lower()}")
-#         ]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             f"CMS_eff_xtrigger_t_et_dm{dm}_Era{shift}",
-#             "triggerweight",
-#             Weight(f"etau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for dm in [0, 1, 10, 11]
-#     ]
-# ]
-# trigger_eff_et_emb = [  # TODO: Check if needed or is replaced
-#     *[
-#         ReplaceWeight(
-#             name,
-#             "triggerweight",
-#             Weight(weight, "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for name, weight in [
-#             (f"CMS_eff_trigger_emb_et_Era{shift}", f"etau_triggerweight_ic_singlelep_{shift.lower()}"),
-#             (f"CMS_eff_xtrigger_l_emb_et_Era{shift}", f"etau_triggerweight_ic_crosslep_{shift.lower()}"),
-#             (f"CMS_eff_trigger_single_t_emb_Era{shift}", f"etau_triggerweight_ic_singletau_{shift.lower()}")
-#         ]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             f"CMS_eff_xtrigger_t_emb_et_dm{dm}_Era{shift}",
-#             "triggerweight",
-#             Weight(f"etau_triggerweight_ic_dm{dm}_{shift.lower()}", "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for dm in [0, 1, 10, 11]
-#     ]
-# ]
-# tau_trigger_eff_tt = [  # TODO: Check if needed or is replaced
-#     *[
-#         ReplaceWeight(
-#             name,
-#             "triggerweight",
-#             Weight(weight, "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for dm in [0, 1, 10, 11]
-#         for name, weight in [
-#             (f"CMS_eff_xtrigger_t_tt_dm{dm}_Era{shift}", f"tautau_triggerweight_ic_lowpt_dm{dm}_{shift.lower()}")
-#             (f"CMS_eff_xtrigger_t_tt_dm{dm}_highpT_Era{shift}", f"tautau_triggerweight_ic_highpt_dm{dm}_{shift.lower()}")
-#         ]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             f"CMS_eff_trigger_single_t_Era{shift}",
-#             "triggerweight",
-#             Weight(f"tautau_triggerweight_ic_singletau_{shift.lower()}", "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#     ]
-# ]
-# tau_trigger_eff_tt_emb = [  # TODO: Check if needed or is replaced
-#     *[
-#         ReplaceWeight(
-#             name,
-#             "triggerweight",
-#             Weight(weight, "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#         for dm in [0, 1, 10, 11]
-#         for name, weight in [
-#             (f"CMS_eff_xtrigger_t_emb_tt_dm{dm}_Era{shift}", f"tautau_triggerweight_ic_lowpt_dm{dm}_{shift.lower()}"),
-#             (f"CMS_eff_xtrigger_t_emb_tt_dm{dm}_highpT_Era{shift}", f"tautau_triggerweight_ic_highpt_dm{dm}_{shift.lower()}")
-#         ]
-#     ],
-#     *[
-#         ReplaceWeight(
-#             f"CMS_eff_trigger_single_t_emb_Era{shift}",
-#             "triggerweight",
-#             Weight(f"tautau_triggerweight_ic_singletau_{shift.lower()}", "triggerweight"),
-#         )
-#         for shift in SHIFT_DIRECTIONS
-#     ]
-# ]
-# # embedded lt eff by decay mode
-# emb_decay_mode_eff_lt = [  # TODO: Check if needed or is replaced,  add embeddedDecayModeWeight, Needed or covered by something other?
-#     ReplaceWeight(
-#         name,
-#         "decayMode_SF",
-#         Weight(weight, "decayMode_SF"),
-#     )
-#     for shift in SHIFT_DIRECTIONS
-#     for name, weight in [
-#         (f"CMS_3ProngEff_Era{shift}", f"(pt_2<100)*embeddedDecayModeWeight_eff{shift}_pi0Nom+(pt_2>=100)"),
-#         (f"CMS_1ProngPi0Eff_Era{shift}", f"(pt_2<100)*embeddedDecayModeWeight_effNom_pi0{shift}+(pt_2>=100)"),
-#     ]
-# ]
-# _emb_decay_mode_eff_tt = [  # TODO: Check if needed or is replaced,  add embeddedDecayModeWeight, Needed or covered by something other?
-#     ReplaceWeight(
-#         "CMS_3ProngEff_EraUp",
-#         "decayMode_SF",
-#         Weight(
-#             "(pt_2>=100)+(pt_1<100)*embeddedDecayModeWeight_effUp_pi0Nom+(pt_1>=100)*(pt_2<100)*((decayMode_2==0)*0.983+(decayMode_2==1)*0.983*1.051+(decayMode_2==10)*0.983*0.983*0.983+(decayMode_2==11)*0.983*0.983*0.983*1.051)",
-#             "decayMode_SF",
-#         ),
-#     ),
-#     ReplaceWeight(
-#         "CMS_3ProngEff_EraDown",
-#         "decayMode_SF",
-#         Weight(
-#             "(pt_2>=100)+(pt_1<100)*embeddedDecayModeWeight_effDown_pi0Nom+(pt_1>=100)*(pt_2<100)*((decayMode_2==0)*0.967+(decayMode_2==1)*0.967*1.051+(decayMode_2==10)*0.967*0.967*0.967+(decayMode_2==11)*0.967*0.967*0.967*1.051)",
-#             "decayMode_SF",
-#         ),
-#     ),
-#     ReplaceWeight(
-#         "CMS_1ProngPi0Eff_EraUp",
-#         "decayMode_SF",
-#         Weight(
-#             "(pt_2>=100)+(pt_1<100)*embeddedDecayModeWeight_effNom_pi0Up+(pt_1>=100)*(pt_2<100)*((decayMode_2==0)*0.975+(decayMode_2==1)*0.975*1.065+(decayMode_2==10)*0.975*0.975*0.975+(decayMode_2==11)*0.975*0.975*0.975*1.065)",
-#             "decayMode_SF",
-#         ),
-#     ),
-#     ReplaceWeight(
-#         "CMS_1ProngPi0Eff_EraDown",
-#         "decayMode_SF",
-#         Weight(
-#             "(pt_2>=100)+(pt_1<100)*embeddedDecayModeWeight_effNom_pi0Down+(pt_1>=100)*(pt_2<100)*((decayMode_2==0)*0.975+(decayMode_2==1)*0.975*1.037+(decayMode_2==10)*0.975*0.975*0.975+(decayMode_2==11)*0.975*0.975*0.975*1.037)",
-#             "decayMode_SF",
-#         ),
-#     ),
-# ]

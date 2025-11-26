@@ -40,6 +40,47 @@ training_variables:
   - is_2016postVFP
   # ---
   - tau_decaymode_2
+  # ---
+  - phi_1
+  - iso_1
+  - phi_2
+  - mass_2
+  - jphi_1
+  - jphi_2
+  - bpt_1
+  - beta_1
+  - bphi_1
+  - btag_value_1
+  - bpt_2
+  - beta_2
+  - bphi_2
+  - btag_value_2
+  - pzetamissvis
+  - deltaPhi_ditaupair
+  - deltaPhi_jj 
+  - phi_fastmtt
+  - pt_fastmtt
+  - deltaR_1j1
+  - deltaR_1j2
+  - deltaR_2j1
+  - deltaR_2j2
+  - deltaR_12j1
+  - deltaR_12j2
+  - deltaR_12jj
+  - deltaEta_1j1
+  - deltaEta_1j2
+  - deltaEta_2j1
+  - deltaEta_2j2
+  - deltaEta_12j1
+  - deltaEta_12j2
+  - deltaEta_12jj
+  - deltaPhi_1j1
+  - deltaPhi_1j2
+  - deltaPhi_2j1
+  - deltaPhi_2j2
+  - deltaPhi_12j1
+  - deltaPhi_12j2
+  - deltaPhi_12jj
 
 config_modifications:
   general:
@@ -104,9 +145,6 @@ dataset_modifications:
         - is_qqH__qqH125_vbf_htautau_bin204_selection
         - is_qqH__qqH125_vbf_htautau_bin205_selection
       is_vbf_htautau_bin206:
-      is_ggh_htautau_bin110to112:
-        - is_ggH__ggH125_ggh_htautau_bin110_selection
-        - is_ggH__ggH125_ggh_htautau_bin111_selection
         - is_qqH__qqH125_vbf_htautau_bin206_selection
       is_vbf_htautau_bin207to208:
         - is_qqH__qqH125_vbf_htautau_bin207_selection
