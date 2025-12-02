@@ -3,8 +3,6 @@ import itertools
 import logging
 import re
 from copy import deepcopy
-import logging
-import itertools
 
 from config.logging_setup_configs import setup_logging
 from ntuple_processor import Unit, dataset_from_crownoutput

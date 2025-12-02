@@ -318,10 +318,10 @@ def get_quantized_1d_bins(data, target_nbins, min_yield_fraction=0.15, high_cuto
 
 def calculate_1d_binning_from_numpy(channel, var_data_np, variables, percentiles):
     binning, bad_values = {}, [-11.0, -999.0, -10.0, -1.0]  # usually it is -10
-    
+
     for v in tqdm(variables, desc="Calculating 1D binning"):
         values_clean = var_data_np[v][~np.isin(var_data_np[v], bad_values)]
-        
+
         if len(values_clean) == 0:
             logger.fatal(f"No valid values for variable {v} in channel {channel}.")
             raise Exception
@@ -338,7 +338,7 @@ def calculate_1d_binning_from_numpy(channel, var_data_np, variables, percentiles
 
         borders[0] -= abs(borders[0] * 1e-4) if borders[0] != 0 else 1e-4
         borders[-1] += abs(borders[-1] * 1e-4) if borders[-1] != 0 else 1e-4
-        
+
         binning[v] = {
             "bins": borders,
             "expression": v,
@@ -364,46 +364,56 @@ def get_quantized_slice_bins(data, num_slices, high_cutoff=50):
 
     counts = Counter(data)
     sorted_unique_vals = sorted(counts.keys())
-    
+
     total_events = len(data)
     target_per_slice = total_events / num_slices
-    
+
     edges = [sorted_unique_vals[0] - 0.5]
     cumulative_events = 0
-    
+
     for i, val in enumerate(sorted_unique_vals):
         # Look ahead to see if adding this value would be a good cut point
         if cumulative_events >= target_per_slice:
             edges.append(val - 0.5)
             cumulative_events = 0
         cumulative_events += counts[val]
-    
+
     edges.append(high_cutoff + 0.5)
-    
+
     final_edges = sorted(list(set(edges)))
     if len(final_edges) < num_slices:
         logger.warning("Quantized binning created fewer slices than requested. Check data distribution.")
 
     return final_edges
 
-    
+
 def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_primary_slices=5, target_total_bins=25):
     new_binning = binning.copy()
+    correlations = {}
 
     for v1, v2 in tqdm(list(itertools.combinations(variables, 2)), desc="Calculating 2D unrolled binning"):
         val1_raw, val2_raw = var_data_np[v1], var_data_np[v2]
         v1_min, v1_max = binning[v1]['bins'][0], binning[v1]['bins'][-1]
         v2_min, v2_max = binning[v2]['bins'][0], binning[v2]['bins'][-1]
         bad_values = [-11.0, -999.0, -10.0, -1.0]
-        final_mask = (
-            ~np.isin(val1_raw, bad_values) &
-            ~np.isin(val2_raw, bad_values) &
-            (val1_raw > v1_min) &
-            (val1_raw < v1_max) &
-            (val2_raw > v2_min) &
-            (val2_raw < v2_max)
+        final_mask = np.logical_and(
+            ~np.isin(val1_raw, bad_values),
+            ~np.isin(val2_raw, bad_values),
+            (val1_raw > v1_min),
+            (val1_raw < v1_max),
+            (val2_raw > v2_min),
+            (val2_raw < v2_max),
         )
         val1_local, val2_local = val1_raw[final_mask], val2_raw[final_mask]
+
+        try:
+            corr_val = np.corrcoef(val1_local, val2_local)[0, 1]
+            if np.isnan(corr_val):
+                corr_val = 0.0
+        except Exception:
+            corr_val = 0.0
+
+        correlations[f"{v1}_{v2}"] = float(corr_val)
 
         if len(val1_local) < target_total_bins:
             continue
@@ -424,7 +434,7 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
             else:
                 v_slice_name, v_cont_name = v2, v1
                 slice_data, cont_data = val2_local, val1_local
-        
+
         # Define primary slices for v_slice
         slice_is_quantized_check = is_quantized(slice_data)
         if slice_is_quantized_check:
@@ -433,13 +443,14 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
             noise = np.random.normal(0, 1e-9, slice_data.shape)
             slice_edges = np.percentile(slice_data + noise, np.linspace(0, 100, num_primary_slices + 1))
         slice_edges = sorted(list(set(slice_edges)))
-        if len(slice_edges) < 2: continue
+        if len(slice_edges) < 2:
+            continue
 
         # Pre-calculate the adaptive number of sub-bins and their edges for each slice
         slice_info, total_valid_events = [], len(slice_data)
         global_target_yield = max(1, total_valid_events / target_total_bins) if target_total_bins > 0 else 1
         for i in range(len(slice_edges) - 1):
-            start, end = slice_edges[i], slice_edges[i+1]
+            start, end = slice_edges[i], slice_edges[i + 1]
             is_last = (i == len(slice_edges) - 2)
             mask = (slice_data >= start) & (slice_data <= end if is_last else slice_data < end)
             cont_in_slice = cont_data[mask]
@@ -447,7 +458,8 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
                 slice_info.append({'valid': False})
                 continue
             num_sub_bins = int(round(len(cont_in_slice) / global_target_yield))
-            if num_sub_bins < 1: num_sub_bins = 1
+            if num_sub_bins < 1:
+                num_sub_bins = 1
             noise = np.random.normal(0, 1e-9, cont_in_slice.shape)
             secondary_edges = np.percentile(cont_in_slice + noise, np.linspace(0, 100, num_sub_bins + 1))
             slice_info.append({'valid': True, 'num_sub_bins': num_sub_bins, 'secondary_edges': secondary_edges})
@@ -455,24 +467,25 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
         # Build the nested expression for bin index
         expression_parts, slice_conditions, bin_offset = [], [], 0
         for i, info in enumerate(slice_info):
-            if not info['valid']: continue
-            start_slice, end_slice = slice_edges[i], slice_edges[i+1]
+            if not info['valid']:
+                continue
+            start_slice, end_slice = slice_edges[i], slice_edges[i + 1]
             is_last_slice = (i == len(slice_edges) - 2)
-            
+
             sub_bin_expr_parts = []
             for j in range(info['num_sub_bins']):
-                start_sub, end_sub = info['secondary_edges'][j], info['secondary_edges'][j+1]
+                start_sub, end_sub = info['secondary_edges'][j], info['secondary_edges'][j + 1]
                 is_last_sub = (j == info['num_sub_bins'] - 1)
                 sub_cond = f"((({v1} > -10) && ({v2} > -10)) && (({v_cont_name} >= {start_sub}) && ({v_cont_name} {'<=' if is_last_sub else '<'} {end_sub})))"
                 sub_bin_expr_parts.append(f"{j}*{sub_cond}")
-            
+
             sub_bin_index_expr = f"({' + '.join(sub_bin_expr_parts)})"
-            
+
             slice_condition = f"((({v1} > -10) && (({v2} > -10)) && ({v_slice_name} >= {start_slice}) && ({v_slice_name} {'<=' if is_last_slice else '<'} {end_slice})))"
             slice_conditions.append(slice_condition)
 
             expression_parts.append(f"({bin_offset + 1} + {sub_bin_index_expr}) * {slice_condition}")
-            
+
             bin_offset += info['num_sub_bins']
 
         if not expression_parts:
@@ -484,9 +497,8 @@ def add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np, num_prim
             "cut": f"(({v1} > {v1_min}) && ({v1} < {v1_max}) && ({v2} > {v2_min}) && ({v2} < {v2_max}))",
         }
 
-    return to_python_native(new_binning)
+    return to_python_native(new_binning), correlations
 
-  
 
 def main(args):
     skim_file_path = os.path.join(args.output_folder, f".skimmed_{args.era}_{args.channel}.root")
@@ -494,7 +506,7 @@ def main(args):
         variables = args.variables[0].split(",")
     else:
         variables = args.variables
-    
+
     logger.info("Processing era {}".format(args.era))
     logger.info("Processing channel {}".format(args.channel))
     logger.info("Variables: {}".format(variables))
@@ -545,7 +557,7 @@ def main(args):
     var_data_np = extract_data_from_chain(chain, variables, cache_path=skim_file_path.replace(".root", "_variables.pkl"))
 
     percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
-    
+
     outputfile = os.path.join(args.output_folder, f"binning_{args.era}_{args.channel}.yaml")
     binning = calculate_1d_binning_from_numpy(args.channel, var_data_np, variables, percentiles)
     with open(outputfile, "w") as f:
@@ -554,10 +566,11 @@ def main(args):
     logger.info(f"Done: 1d binning, written to {outputfile}")
 
     outputfile2d = os.path.join(args.output_folder, f"binning_{args.era}_{args.channel}_2D.yaml")
-    binning = add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np)
+    binning, correlations = add_2d_unrolled_binning_from_numpy(variables, binning, var_data_np)
     with open(outputfile2d, "w") as f:
         yaml.dump(binning, f, default_flow_style=False)
-
+    with open(outputfile2d.replace(".yaml", "_correlations.yaml"), "w") as f:
+        yaml.dump(correlations, f, default_flow_style=False)
     logger.info(f"Done: 2d unrolled binning, written to {outputfile2d}")
 
 

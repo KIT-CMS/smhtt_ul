@@ -194,6 +194,8 @@ if [[ $MODE == "DATACARD" ]]; then
         GOF_CATEGORY_NAME=${CHANNEL}_${VARIABLE}
         FILENAME="${ERA}-${CHANNEL}-synced-${VARIABLE}.root"
         # ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
+
+        CMSSW_BASE=CMSSW_14_1_0_pre4
         ${CMSSW_BASE}/bin/el9_amd64_gcc12/MorphingSMRun2Legacy \
             --base_path=$PWD \
             --input_folder_mt=$shapes_output_synced \
@@ -216,10 +218,23 @@ if [[ $MODE == "DATACARD" ]]; then
             --train_emb=1
         THIS_PWD=${PWD}
         echo $THIS_PWD
+
         cd $datacard_output/${CHANNEL}
         for FILE in */*.txt; do
-            sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+            if ! grep -q "autoMCStats" "$FILE"; then
+                sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+            fi
         done
+        
+        if [ -d "$datacard_output/cmb" ]; then
+            cd $datacard_output/cmb
+            for FILE in */*.txt; do
+                if ! grep -q "autoMCStats" "$FILE"; then
+                    sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
+                fi
+            done
+        fi
+
         cd $THIS_PWD
 
         echo "[INFO] Create Workspace for datacard"
@@ -229,7 +244,7 @@ if [[ $MODE == "DATACARD" ]]; then
     export -f run_morphing
     export NTUPLETAG TAG ERA CHANNEL shapes_output_synced CMSSW_BASE FORCE_REPROCESSING
 
-    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 60 -I {} bash -c 'run_morphing "{}"'
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 50 -I {} bash -c 'run_morphing "{}"'
 
     wait
 
@@ -282,34 +297,60 @@ if [[ $MODE == "GOF" ]]; then
     source utils/setup_cmssw.sh
 
     run_gof_for_variable() {
+        local DRY_RUN=0 # Set to 1 to print intentions only, 0 to execute
         VARIABLE=$1
         
         ID=${ERA}_${CHANNEL}_${VARIABLE}
-
         local output_dir="output/gof/${NTUPLETAG}-${TAG}/${ID}"
-        local final_json="$output_dir/gof.json"
-        local final_plot_pdf="$output_dir/gof.pdf"
-        local final_plot_png="$output_dir/gof.png"
-        local final_root_file="$output_dir/higgsCombineTest.${ID}.GoodnessOfFit.mH125.root"
-
-        if [[ -z "${FORCE_REPROCESSING}" && (-f "$final_json" && (-f "$final_plot_pdf" || -f "$final_plot_png") && -f "$final_root_file") ]]; then
-            echo "[INFO] All output files for ${VARIABLE} in ${output_dir} already exist. Skipping."
-            return 0
-        fi
+        
+        mkdir -p "$output_dir"
 
         datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
         WORKSPACE=$datacard_output/${CHANNEL}/125/workspace.root
         MASS=125
         NUM_TOYS=100 # multiply x10 later on
 
-        FREEZE_OPTS="--setParameters r=0 --freezeParameters r,${THEORY_NUISANCES_TO_FREEZE} --fixedSignalStrength=0"
+        # ADDITIONAL_FREEZE="rgx{.*CMS_*.*CorrSystMCShift.*}"
 
-        # for ALGO in "saturated" "KS" "AD"; do
-        for ALGO in "saturated"; do
+        FREEZE_OPTS="--setParameters r=0 --freezeParameters r,${THEORY_NUISANCES_TO_FREEZE} --fixedSignalStrength=0"
+        GOF_OPTS=(
+            "--cminDefaultMinimizerStrategy" "2"
+            "--cminDefaultMinimizerTolerance" "0.1"
+            "--cminPreScan"
+            "--cminFallbackAlgo" "Minuit2,Migrad,0:0.01,Minuit2,Migrad,0:0.01"
+            "--X-rtd" "FITTER_NEW_CROSSING_ALGO"
+            "--X-rtd" "FITTER_NEVER_GIVE_UP"
+            "--X-rtd" "MINIMIZER_analytic"
+            "--X-rtd" "SIMPLE_RUNTIME_CHANGES"
+        )
+
+        for ALGO in "saturated" "KS" "AD"; do
+            
             if [[ "$ALGO" == "saturated" ]]; then
-                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE ${FREEZE_OPTS} -v 1 -V
+                check_json="$output_dir/gof.json"
             else
-                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE --plots ${FREEZE_OPTS} -v 1 -V
+                check_json="$output_dir/gof_${ALGO}.json"
+            fi
+
+            if [[ "${FORCE_REPROCESSING}" != "1" && -f "$check_json" ]]; then
+                 continue
+            fi
+
+            if [[ "$DRY_RUN" == "1" ]]; then
+                echo "[DRY_RUN] Will perform GOF for variable: '${VARIABLE}' using algorithm: '${ALGO}' (File missing or Forced)"
+                continue
+            fi
+            # ---------------------
+
+            echo "[INFO] Running GOF for ${VARIABLE} with algorithm ${ALGO}..."
+
+            # ... EXECUTION START ...
+            if [[ "$ALGO" == "saturated" ]]; then
+                combine -M GoodnessOfFit -n Test.${ID} -d $WORKSPACE -m $MASS \
+                    --algo=$ALGO --plots ${FREEZE_OPTS} -V "${GOF_OPTS[@]}" -v 0
+            else
+                combine -M GoodnessOfFit -n Test.${ID} -d $WORKSPACE -m $MASS \
+                    --algo=$ALGO --plots ${FREEZE_OPTS} -V "${GOF_OPTS[@]}" -v 0
             fi
 
             TOYSOPT=""
@@ -317,24 +358,24 @@ if [[ $MODE == "GOF" ]]; then
                 TOYSOPT="--toysFrequentist"
             fi
 
-            for SEED in {1230..1239}; do
-                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s ${SEED} -t $NUM_TOYS $TOYSOPT -V ${FREEZE_OPTS} >/dev/null &
+            for SEED in {1930..1939}; do
+                combine -M GoodnessOfFit -n Test.${ID} --algo=$ALGO -m $MASS -d $WORKSPACE -s ${SEED} -t $NUM_TOYS $TOYSOPT -V ${FREEZE_OPTS} "${GOF_OPTS[@]}" >/dev/null &
             done
             wait
 
             DATA_FILE="higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root"
             INPUT_FILES=()
 
-            for SEED in {1230..1239}; do
+            for SEED in {1930..1939}; do
                 TOY_FILE="higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.${SEED}.root"
                 INPUT_FILES+=("$DATA_FILE" "$TOY_FILE")
             done
 
             # Collect results
-            combineTool.py -M CollectGoodnessOfFit --input "${INPUT_FILES[@]}"
+            combineTool.py -M CollectGoodnessOfFit --input "${INPUT_FILES[@]}" \
                 --output output/gof/${NTUPLETAG}-${TAG}/${ID}/gof_${ALGO}.json
 
-            mv higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.123?.root output/gof/${NTUPLETAG}-${TAG}/${ID}/
+            mv higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.193?.root output/gof/${NTUPLETAG}-${TAG}/${ID}/
             if [[ "$ALGO" == "saturated" ]]; then
                 mv output/gof/${NTUPLETAG}-${TAG}/${ID}/gof_${ALGO}.json output/gof/${NTUPLETAG}-${TAG}/${ID}/gof.json
             fi
@@ -342,7 +383,8 @@ if [[ $MODE == "GOF" ]]; then
             # Plot
             if [[ "$ALGO" != "saturated" ]]; then
                 plotGof.py --statistic $ALGO --mass $MASS.0 --output gof_${ALGO} output/gof/${NTUPLETAG}-${TAG}/${ID}/gof_${ALGO}.json
-                mv htt_${CHANNEL}_300_${ERA}gof_${ALGO}.p{df,ng} output/gof/${NTUPLETAG}-${TAG}/${ID}/
+                mv htt_${CHANNEL}_*_${ERA}gof_${ALGO}.p{df,ng} output/gof/${NTUPLETAG}-${TAG}/${ID}/ 2>/dev/null || true
+                
                 python3 plotting/gof/plot_gof_metrics.py -e $ERA -g $ALGO -o output/gof/${NTUPLETAG}-${TAG}/${ID}/ -i output/gof/${NTUPLETAG}-${TAG}/${ID}/higgsCombineTest.${ID}.GoodnessOfFit.mH$MASS.root
             else
                 plotGof.py --statistic $ALGO --mass $MASS.0 --output output/gof/${NTUPLETAG}-${TAG}/${ID}/gof output/gof/${NTUPLETAG}-${TAG}/${ID}/gof.json
@@ -353,7 +395,8 @@ if [[ $MODE == "GOF" ]]; then
     export -f run_gof_for_variable
     export NTUPLETAG TAG ERA CHANNEL THEORY_NUISANCES_TO_FREEZE FORCE_REPROCESSING
 
-    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 1 -I {} bash -c 'run_gof_for_variable "{}"'
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 6 -I {} bash -c 'run_gof_for_variable "{}"'
+    # run_gof_for_variable m_vis
 
     wait
 
@@ -371,10 +414,13 @@ if [[ $MODE == "GOF-SUMMARY" ]]; then
     python3 gof/plot_gof_summary.py --variables $VARIABLES --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL
 
 fi
-
+    
 if [[ $MODE == "POSTFIT" ]]; then
     source utils/setup_cmssw.sh
-    for VARIABLE in ${VARIABLES//,/ }; do
+
+    run_postfit_for_variable() {
+        VARIABLE=$1
+        
         ID=${ERA}_${CHANNEL}_${VARIABLE}
         datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
         WORKSPACE=$datacard_output/${CHANNEL}/125/workspace.root
@@ -382,10 +428,12 @@ if [[ $MODE == "POSTFIT" ]]; then
         final_postfit_file="${datacard_output}/${ID}-datacard-shapes-postfit-b.root"
         if [[ -z "${FORCE_REPROCESSING}" && (-f "$final_postfit_file") ]]; then
             echo "[INFO] Final post-fit file for ${VARIABLE} already exists. Skipping."
-            continue
+            return 0
         fi
 
         echo "[INFO] Processing variable: ${VARIABLE}"
+
+        ADDITIONAL_FREEZE="CMS_QCD_DR_SR_CorrSystMCShift_mt_Run2018"
 
         combine \
             -M FitDiagnostics \
@@ -393,38 +441,52 @@ if [[ $MODE == "POSTFIT" ]]; then
             --robustFit 1 \
             --robustHesse 1 \
             -n .$ID \
-            --verbose 2 \
-            --setParameters r=0 --freezeParameters r,${THEORY_NUISANCES_TO_FREEZE} \
+            --verbose 0 \
+            --setParameters r=0 --freezeParameters r,${THEORY_NUISANCES_TO_FREEZE},${ADDITIONAL_FREEZE} \
             --X-rtd MINIMIZER_analytic \
-            --setRobustFitAlgo=Minuit2,Migrad  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP \
+            --setRobustFitAlgo=Minuit2,Migrad  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd SIMPLE_RUNTIME_CHANGES \
             --cminFallbackAlgo Minuit2,Migrad,0:0.001,Minuit2,Migrad,0:0.01 --cminPreScan \
             --saveShapes --saveWithUncertainties \
             --saveNormalizations --cminDefaultMinimizerTolerance 0.1 \
             --stepSize=0.01 \
-            --cminDefaultMinimizerStrategy 2 2>&1 |
+            --cminDefaultMinimizerStrategy 0 2>&1 |
             tee .${ID}-${VARIABLE}.log
         
-        if [ $? -ne 0 ]; then
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
             echo "[ERROR] The combine fit failed for variable: ${VARIABLE}. Check the log file .${ID}-${VARIABLE}.log for details. Skipping."
             rm -f fitDiagnostics.${ID}.root
-            continue
+            return 1
         fi
 
         FITFILE=${datacard_output}/fitDiagnostics.${ID}.MultiDimFit.mH125.root
         mv fitDiagnostics.${ID}.root $FITFILE
-        echo "done 1"
-        # python ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py \
+
         python3 diffNuisances.py \
             ${datacard_output}/fitDiagnostics.${ID}.MultiDimFit.mH125.root -a \
             -f html >${datacard_output}/nuisances.html
-	    PostFitShapesFromWorkspace -m 125 -w $WORKSPACE \
+        
+        PostFitShapesFromWorkspace -m 125 -w $WORKSPACE \
             --output ${datacard_output}/${ID}-datacard-shapes-prefit.root \
             -d ${datacard_output}/cmb/125/htt_${CHANNEL}_300_${ERA}.txt
+        
         PostFitShapesFromWorkspace -m 125 -w $WORKSPACE \
             --output ${datacard_output}/${ID}-datacard-shapes-postfit-b.root \
             -f ${datacard_output}/fitDiagnostics.${ID}.MultiDimFit.mH125.root:fit_b --postfit --sampling \
             -d ${datacard_output}/cmb/125/htt_${CHANNEL}_300_${ERA}.txt
-    done
+            
+        echo "Finished processing $VARIABLE"
+    }
+
+    # Variables needed inside the function
+    export -f run_postfit_for_variable
+    export ERA CHANNEL NTUPLETAG TAG THEORY_NUISANCES_TO_FREEZE FORCE_REPROCESSING
+
+    echo "[INFO] Starting parallel PostFit processing..."
+    
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 60 -I {} bash -c 'run_postfit_for_variable "{}"'
+    # run_postfit_for_variable m_fastmtt_njets
+
+    echo "[INFO] All PostFit jobs complete."
     exit 0
 fi
 

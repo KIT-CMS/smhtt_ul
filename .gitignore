@@ -13,6 +13,9 @@ impacts*/
 *.bak.*
 *.original
 *.archive
+*.check_if_needed
+*.vscode
+*.ipynb
 /split_graph_processing/tmp/*
 /split_graph_processing/condor_jobs/*
 
