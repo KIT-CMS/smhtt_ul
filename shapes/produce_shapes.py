@@ -686,10 +686,10 @@ def main(args):
                 args.graph_filename = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
         if args.graph_dir is None:
             args.graph_dir = "."
-        
+
         os.makedirs(args.graph_dir, exist_ok=True)
         graph_file = os.path.join(args.graph_dir, args.graph_filename)
-        
+
         logger.info(f"Writing created graphs to file {graph_file}")
         with open(graph_file, "wb") as file:
             pickle.dump(graphs, file)
@@ -701,7 +701,7 @@ def main(args):
             _p = pathlib.Path(args.output_file).parent / "partial_graph_results"
             _p.mkdir(exist_ok=True)
             arguments = [
-                (deepcopy(_graph), _p / f"_out_{idx}.root", args) 
+                (deepcopy(_graph), _p / f"_out_{idx}.root", args)
                 for idx, _graph in tqdm(enumerate(graphs))
                 if not (_p / f"_out_{idx}.root").exists()
             ]

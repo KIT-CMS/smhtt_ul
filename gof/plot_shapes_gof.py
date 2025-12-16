@@ -106,6 +106,27 @@ def check_for_zero_bins(hist):
     return hist
 
 
+def derive_2d_gof_label(variable, label_dict):
+    # If 1D variable, return single item list
+    if variable in label_dict:
+        return [label_dict[variable]]
+
+    # If 2D variable, try to split and return 3 items
+    parts = variable.split('_')
+    for i in range(1, len(parts)):
+        var1 = "_".join(parts[:i])
+        var2 = "_".join(parts[i:])
+
+        if var1 in label_dict and var2 in label_dict:
+            return [
+                "Bin number of unrolled",
+                label_dict[var1],
+                label_dict[var2]
+            ]
+
+    # Fallback
+    return [variable]
+
 
 def main(args):
     #### plot signals
@@ -393,27 +414,30 @@ def main(args):
             if args.linear != True:
                 plot.subplot(1).setYlims(0.1, split_dict[channel])
                 plot.subplot(1).setLogY()
-                plot.subplot(1).setYlabel(
-                    "")  # otherwise number labels are not drawn on axis
-            if args.gof_variable != None and not args.linear:
-                gof_linear_vars = ["njets", "nbtag", "DiTauDeltaR", "jdeta"]
-                if args.gof_variable not in gof_linear_vars:
-                    plot.subplot(0).setLogX()
-                    plot.subplot(1).setLogX()
-                    plot.subplot(2).setLogX()
-                if args.gof_variable in styles.x_label_dict[args.channels[0]]:
-                    x_label = styles.x_label_dict[args.channels[0]][
-                        args.gof_variable]
+                plot.subplot(1).setYlabel("")  # otherwise number labels are not drawn on axis
+
+            custom_x_labels = []
+
+            if args.gof_variable is not None:
+                # Log X-axis logic
+                if not args.linear:
+                    gof_linear_vars = ["njets", "nbtag", "DiTauDeltaR", "jdeta"]
+                    if args.gof_variable not in gof_linear_vars:
+                        plot.subplot(0).setLogX()
+                        plot.subplot(1).setLogX()
+                        plot.subplot(2).setLogX()
+
+                # Derive Labels (Returns a list)
+                labels_list = derive_2d_gof_label(args.gof_variable, styles.x_label_dict[args.channels[0]])
+
+                if len(labels_list) > 1:
+                    # Multi-line: Suppress default label and make space
+                    plot.subplot(2).setXlabel("")
+                    plot.subplot(2)._pad.SetBottomMargin(0.20)  # Increase margin for 3 lines
+                    custom_x_labels = labels_list
                 else:
-                    x_label = args.gof_variable
-                plot.subplot(2).setXlabel(x_label)
-            elif args.gof_variable != None and args.linear:
-                if args.gof_variable in styles.x_label_dict[args.channels[0]]:
-                    x_label = styles.x_label_dict[args.channels[0]][
-                        args.gof_variable]
-                else:
-                    x_label = args.gof_variable
-                plot.subplot(2).setXlabel(x_label)
+                    # Single-line: Use standard behavior
+                    plot.subplot(2).setXlabel(labels_list[0])
             else:
                 plot.subplot(2).setXlabel("NN output")
             if args.normalize_by_bin_width:
@@ -456,6 +480,22 @@ def main(args):
             plot.subplot(2).Draw([
                 "total_bkg", "data_obs"
             ])
+            if custom_x_labels:
+                plot.subplot(2)._pad.cd()
+                latex = ROOT.TLatex()
+                latex.SetNDC()
+                latex.SetTextFont(42)
+                latex.SetTextSize(0.04)
+                # 33 = Right aligned, Top aligned (Coordinates are Top-Right of text block)
+                latex.SetTextAlign(33)
+
+                # Position: Right aligned to the right frame border
+                x_pos = 1.0 - plot.subplot(2)._pad.GetRightMargin() - 0.01
+                # Start drawing below the axis (Axis is at BottomMargin)
+                y_start = plot.subplot(2)._pad.GetBottomMargin() - 0.05
+                line_height = 0.05
+                for i, line in enumerate(custom_x_labels):
+                    latex.DrawLatex(x_pos, y_start - (i * line_height), line)
 
             # create legends
             suffix = ["", "_top"]
