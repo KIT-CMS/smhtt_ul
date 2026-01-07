@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import gc
 from functools import partial
 from pathlib import Path
 
@@ -15,7 +16,7 @@ from src.dataset_manipulation import (
     exemplary_remove_cut_regions,
     get_fold_conditions,
 )
-from src.helper import Iterate, Keys, PipeDict
+from src.helper import Iterate, Keys, PipeDict, downcast_dataframe
 from tqdm import tqdm
 
 try:
@@ -103,10 +104,10 @@ def collect_filtered_plain_dataframes(
             additional_columns=additional_columns + list(Keys.EVENT_IDENTIFIER_COLUMNS),
             filters=None,
             description=f"{channel}_{era}_{process}_{subprocess}",
-            max_workers=32,
+            max_workers=16,
         ).filter_dataframe(
             filter_function=any_cut,
-        )
+        ),
     )
 
 
@@ -204,6 +205,12 @@ def create_process_folds(
     else:
         logger.info(f"Folds for {channel} {era} {process} - {subprocess} already exist in {filepath('_folds')}, skipping creation.")
 
+    try:
+        del add
+        gc.collect()
+    except UnboundLocalError:
+        pass
+
 
 def combine_folds(
     class_weighted: bool = True,
@@ -214,7 +221,7 @@ def combine_folds(
 
         fold = pd.concat(
             [
-                pd.read_feather(it).reset_index(drop=True)
+                downcast_dataframe(pd.read_feather(it)).reset_index(drop=True)
                 for it in tqdm(
                     Path(filepath("_folds")).glob(f"__{fold_name}__*.feather"),
                     desc=f"Loading fold {fold_name} parts",
@@ -266,11 +273,17 @@ if __name__ == "__main__":
 
     SUBPROCESSES_TO_SKIP = args.common_setup_config.recursive_get(["dataset_modifications", "subprocesses_to_skip"], set())
 
-    for items in [
+    processing_pipeline = (
         collect_filtered_plain_dataframes(config, channel, era, process, subprocess, subprocess_dict)
         for channel, era, process, subprocess, subprocess_dict in Iterate.subprocesses(config)
         if subprocess not in SUBPROCESSES_TO_SKIP
-    ]:
+    )
+
+    for items in processing_pipeline:
         create_process_folds(config, *items, args.common_setup_config)
+
+        items[-1]._dataframe = None
+        del items
+        gc.collect()
 
     combine_folds()

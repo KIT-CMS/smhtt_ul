@@ -209,8 +209,8 @@ if [[ ${MODE} == "SHAPES" ]]; then
     --directory ${NTUPLES}
     --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} ${MULTIFRIENDS}
     --era ${ERA}
-    --num-processes 30
-    --num-threads 60
+    --num-processes 8
+    --num-threads 20
     --optimization-level 2
     --control-plots
     --control-plot-set ${USED_VARIABLES}
@@ -225,11 +225,17 @@ if [[ ${MODE} == "SHAPES" ]]; then
     # --skip-systematic-variations
     # the following two options should be mutually exclusive
     # --- 1 ---
-    --only-create-graphs
-    --graph-filename ${GRAPH_FILENAME}
+    # --only-create-graphs
+    # --graph-filename ${GRAPH_FILENAME}
+    # --- 1.5 ---
+    --gof-inputs
+    --do-2dGofs
     # --- 2 ---
     # --collect-config-only
     # --config-output-file ${CHANNEL}_${ERA}_${NTUPLETAG}_${TAG}.yaml
+    # --- 3 ---
+    # --run-splitted
+    # --incremental-hadd
   )
 
   "${BASE_COMMAND[@]}"

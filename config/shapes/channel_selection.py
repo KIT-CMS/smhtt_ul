@@ -37,6 +37,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["tau_iso"] = "(id_tau_vsJet_Tight_2 > 0.5)"
             cuts["muon_iso"] = "(iso_1 < 0.15)"
             cuts["mt_cut"] = "(mt_1 < 65)"
+            cuts["m_vis_cut"] = "(m_vis > 40)"
 
             if "DR;ff" in selection_option:
                 modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=channel)

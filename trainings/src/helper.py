@@ -20,18 +20,42 @@ logger = setup_logging(logger=logging.getLogger(__name__))
 TRAINING_VARIABLES = [
     "pt_1",
     "pt_2",
-    "m_vis",
-    "njets",
-    "nbtag",
+    "eta_1",
+    "eta_2",
     "jpt_1",
     "jpt_2",
     "jeta_1",
     "jeta_2",
     "m_fastmtt",
-    "pt_vis",
+    "m_vis",
     "mjj",
-    "deltaR_ditaupair",
+    "pt_vis",
     "pt_dijet",
+    "pt_tt",
+    "pt_ttjj",
+    "njets",
+    "nbtag",
+    "met",
+    "deltaEta_ditaupair",
+    "deltaR_ditaupair",
+    "mt_2",
+    "pt_fastmtt",
+    "mt_tot",
+    "pzetamissvis",
+    "deltaR_jj",
+    "deltaEta_jj",
+    "deltaR_12j1",
+    "deltaR_2j1",
+    "deltaR_1j2",
+    "deltaEta_1j1",
+    "deltaEta_1j2",
+    "deltaEta_2j1",
+    "deltaEta_2j2",
+    "deltaEta_12j1",
+    "deltaEta_12j2",
+    "deltaR_12j2",
+    "deltaR_1j1",
+    "deltaR_2j2",
     # -- label flags ---
     "is_data",
     "is_dyjets",
@@ -45,7 +69,18 @@ TRAINING_VARIABLES = [
     "is_2017",
     "is_2016preVFP",
     "is_2016postVFP",
+    # ---
 ]
+
+
+def downcast_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    fcols = df.select_dtypes('float64').columns
+    icols = df.select_dtypes('int64').columns
+
+    df[fcols] = df[fcols].astype(np.float32)
+    df[icols] = df[icols].astype(np.int32)
+
+    return df
 
 
 class Keys:

@@ -244,6 +244,8 @@ def add_processes(
     if channel != "mm":
         add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
         add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
+
+        # return None
         # ---
         for b in range(100, 117):
             add_fn(name=f"ggh_b{b}", dataset=datasets["ggH"], selections=select_fn(*getattr(selection.ggH125, f"bin{b}")))

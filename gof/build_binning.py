@@ -282,11 +282,7 @@ class BinningStrategyTargetBinning:
             borders[0] -= abs(borders[0] * 1e-4) if borders[0] != 0 else 1e-4
             borders[-1] += abs(borders[-1] * 1e-4) if borders[-1] != 0 else 1e-4
 
-            binning[v] = {
-                "bins": borders,
-                "expression": v,
-                "cut": f"({v}>{borders[0]})&&({v}<{borders[-1]})"
-            }
+            binning[v] = {"bins": borders, "expression": v, "cut": f"({v}>{borders[0]})&&({v}<{borders[-1]})"}
         return to_python_native(binning)
 
     @staticmethod
@@ -336,16 +332,16 @@ class BinningStrategyTargetBinning:
 
         for v1, v2 in tqdm(list(itertools.combinations(variables, 2)), desc="Calculating 2D unrolled binning"):
             val1_raw, val2_raw = var_data_np[v1], var_data_np[v2]
-            v1_min, v1_max = binning[v1]['bins'][0], binning[v1]['bins'][-1]
-            v2_min, v2_max = binning[v2]['bins'][0], binning[v2]['bins'][-1]
+            v1_min, v1_max = binning[v1]["bins"][0], binning[v1]["bins"][-1]
+            v2_min, v2_max = binning[v2]["bins"][0], binning[v2]["bins"][-1]
             bad_values = [-11.0, -999.0, -10.0, -1.0]
             final_mask = (
-                ~np.isin(val1_raw, bad_values) &
-                ~np.isin(val2_raw, bad_values) &
-                (val1_raw > v1_min) &
-                (val1_raw < v1_max) &
-                (val2_raw > v2_min) &
-                (val2_raw < v2_max)
+                ~np.isin(val1_raw, bad_values)
+                & ~np.isin(val2_raw, bad_values)
+                & (val1_raw > v1_min)
+                & (val1_raw < v1_max)
+                & (val2_raw > v2_min)
+                & (val2_raw < v2_max)
             )
             val1_local, val2_local = val1_raw[final_mask], val2_raw[final_mask]
 
@@ -394,32 +390,34 @@ class BinningStrategyTargetBinning:
             global_target_yield = max(1, total_valid_events / target_total_bins) if target_total_bins > 0 else 1
             for i in range(len(slice_edges) - 1):
                 start, end = slice_edges[i], slice_edges[i + 1]
-                is_last = (i == len(slice_edges) - 2)
+                is_last = i == len(slice_edges) - 2
                 mask = (slice_data >= start) & (slice_data <= end if is_last else slice_data < end)
                 cont_in_slice = cont_data[mask]
                 if len(cont_in_slice) < 2:
-                    slice_info.append({'valid': False})
+                    slice_info.append({"valid": False})
                     continue
                 num_sub_bins = int(round(len(cont_in_slice) / global_target_yield))
                 if num_sub_bins < 1:
                     num_sub_bins = 1
                 noise = np.random.normal(0, 1e-9, cont_in_slice.shape)
                 secondary_edges = np.percentile(cont_in_slice + noise, np.linspace(0, 100, num_sub_bins + 1))
-                slice_info.append({'valid': True, 'num_sub_bins': num_sub_bins, 'secondary_edges': secondary_edges})
+                slice_info.append({"valid": True, "num_sub_bins": num_sub_bins, "secondary_edges": secondary_edges})
 
             # Build the nested expression for bin index
             expression_parts, slice_conditions, bin_offset = [], [], 0
             for i, info in enumerate(slice_info):
-                if not info['valid']:
+                if not info["valid"]:
                     continue
                 start_slice, end_slice = slice_edges[i], slice_edges[i + 1]
-                is_last_slice = (i == len(slice_edges) - 2)
+                is_last_slice = i == len(slice_edges) - 2
 
                 sub_bin_expr_parts = []
-                for j in range(info['num_sub_bins']):
-                    start_sub, end_sub = info['secondary_edges'][j], info['secondary_edges'][j + 1]
-                    is_last_sub = (j == info['num_sub_bins'] - 1)
-                    sub_cond = f"((({v1} != -10) && ({v2} != -10)) && (({v_cont_name} >= {start_sub}) && ({v_cont_name} {'<=' if is_last_sub else '<'} {end_sub})))"
+                for j in range(info["num_sub_bins"]):
+                    start_sub, end_sub = info["secondary_edges"][j], info["secondary_edges"][j + 1]
+                    is_last_sub = j == info["num_sub_bins"] - 1
+                    sub_cond = (
+                        f"((({v1} != -10) && ({v2} != -10)) && (({v_cont_name} >= {start_sub}) && ({v_cont_name} {'<=' if is_last_sub else '<'} {end_sub})))"
+                    )
                     sub_bin_expr_parts.append(f"{j}*{sub_cond}")
 
                 sub_bin_index_expr = f"({' + '.join(sub_bin_expr_parts)})"
@@ -429,14 +427,212 @@ class BinningStrategyTargetBinning:
 
                 expression_parts.append(f"({bin_offset + 1} + {sub_bin_index_expr}) * {slice_condition}")
 
-                bin_offset += info['num_sub_bins']
+                bin_offset += info["num_sub_bins"]
 
             if not expression_parts:
                 continue
 
             new_binning[f"{v1}_{v2}"] = {
                 "bins": np.arange(bin_offset + 1, dtype=float) + 0.5,  # everything else lands in bin 0
-                "expression": ' + '.join(expression_parts),
+                "expression": " + ".join(expression_parts),
+                "cut": f"(({v1} > {v1_min}) && ({v1} < {v1_max}) && ({v2} > {v2_min}) && ({v2} < {v2_max}))",
+            }
+
+        return to_python_native(new_binning), correlations
+
+
+class BinningStrategyYieldPerBin:
+    def __init__(self, target_yield_per_bin=100.0):
+        self.target_yield = float(target_yield_per_bin)
+        self.bad_values = [-11.0, -999.0, -10.0, -1.0, np.nan, np.inf]
+
+    def is_quantized(self, data, unique_threshold=30):
+        if len(data) == 0:
+            return False
+        unique_vals = np.unique(data)
+        is_integer_like = np.all(np.equal(np.mod(unique_vals, 1), 0))
+        return is_integer_like and len(unique_vals) < unique_threshold
+
+    def get_yield_based_edges(self, data, target_yield, is_quantized=False, high_cutoff=50):
+        total_events = len(data)
+        if total_events == 0:
+            return [-0.5, 0.5] if is_quantized else [0.0, 1.0]
+
+        if total_events < target_yield:
+            # Not enough data for even one full bin, return min/max
+            return [np.min(data) - (0.5 if is_quantized else 0), np.max(data) + (0.5 if is_quantized else 0)]
+
+        if is_quantized:
+            counts = Counter(data)  # Quantized: Accumulate integer values until yield is met
+            sorted_vals = sorted(counts.keys())
+
+            edges = [sorted_vals[0] - 0.5]
+            current_bin_yield = 0
+
+            for i, val in enumerate(sorted_vals):
+                current_bin_yield += counts[val]
+
+                if current_bin_yield >= target_yield:
+                    # Look ahead: Remaining data is too small for valid bin: merge it into the current one (loose constraint)
+                    # Try to keep strict and avoiding small tails.
+                    remaining_events = total_events - np.sum([counts[v] for v in sorted_vals[: i + 1]])
+
+                    if i < len(sorted_vals) - 1:
+                        if remaining_events > 0.5 * target_yield:  # If remaining events are very low
+                            edges.append(val + 0.5)
+                            current_bin_yield = 0
+
+            if edges[-1] < sorted_vals[-1] + 0.5:  # ensure max is covered
+                edges[-1] = sorted_vals[-1] + 0.5
+            elif edges[-1] > sorted_vals[-1] + 0.5:  # safety
+                edges[-1] = sorted_vals[-1] + 0.5
+
+            return sorted(list(set(edges)))
+
+        else:  # Continuous: Use percentiles based on ratio
+            n_bins = int(total_events / target_yield)
+            if n_bins < 1:
+                n_bins = 1
+
+            p_values = np.linspace(0, 100, n_bins + 1)
+            edges = np.percentile(data, p_values)
+
+            edges = sorted(list(set(edges)))
+
+            # padding fix
+            edges[0] -= abs(edges[0] * 1e-4) if edges[0] != 0 else 1e-4
+            edges[-1] += abs(edges[-1] * 1e-4) if edges[-1] != 0 else 1e-4
+
+            return edges
+
+    def calculate_1d_binning_from_numpy(self, channel, var_data_np, variables, percentiles=None):
+        binning = {}
+
+        for v in tqdm(variables, desc="Calculating 1D Yield-Based Binning"):
+            raw_vals = var_data_np[v]
+            values_clean = raw_vals[~np.isin(raw_vals, self.bad_values)]
+
+            if len(values_clean) == 0:
+                logger.warning(f"No valid values for variable {v}. Using dummy bins.")
+                borders = [0.0, 1.0]
+            else:
+                quantized = self.is_quantized(values_clean)
+                borders = self.get_yield_based_edges(values_clean, self.target_yield, is_quantized=quantized)
+
+            binning[v] = {"bins": borders, "expression": v, "cut": f"(({v} > {borders[0]} ) && ( {v} < {borders[-1]}))"}
+
+        return to_python_native(binning)
+
+    def add_2d_unrolled_binning_from_numpy(self, variables, binning, var_data_np):
+        new_binning, correlations = binning.copy(), {}
+
+        for v1, v2 in tqdm(list(itertools.combinations(variables, 2)), desc="Calculating 2D Yield-Based Binning"):
+            val1_raw, val2_raw = var_data_np[v1], var_data_np[v2]
+            v1_min, v1_max = binning[v1]["bins"][0], binning[v1]["bins"][-1]
+            v2_min, v2_max = binning[v2]["bins"][0], binning[v2]["bins"][-1]
+
+            mask = (
+                ~np.isin(val1_raw, self.bad_values)
+                & ~np.isin(val2_raw, self.bad_values)
+                & (val1_raw > v1_min)
+                & (val1_raw < v1_max)
+                & (val2_raw > v2_min)
+                & (val2_raw < v2_max)
+            )
+            val1_local, val2_local = val1_raw[mask], val2_raw[mask]
+
+            total_valid_events = len(val1_local)
+
+            try:
+                corr_val = np.corrcoef(val1_local, val2_local)[0, 1]
+                correlations[f"{v1}_{v2}"] = float(0.0 if np.isnan(corr_val) else corr_val)
+            except Exception as e:
+                logger.warning(f"Could not compute correlation for {v1} and {v2}: {e}")
+                correlations[f"{v1}_{v2}"] = 0.0
+
+            if total_valid_events < self.target_yield:
+                continue
+
+            dynamic_slice_yield = np.sqrt(total_valid_events * self.target_yield)
+
+            # Ensure slice yield isn't smaller than target yield (need at least 1 bin per slice)
+            if dynamic_slice_yield < self.target_yield:
+                dynamic_slice_yield = self.target_yield
+
+            # Priority: Quantized > Continuous. If both same, larger range or alphabetical
+            v1_quant = "njets" in v1 or "nbtag" in v1 or self.is_quantized(val1_local)
+            v2_quant = "njets" in v2 or "nbtag" in v2 or self.is_quantized(val2_local)
+
+            if v1_quant and not v2_quant:
+                v_slice_name, v_cont_name = v1, v2
+                slice_data, cont_data = val1_local, val2_local
+            elif v2_quant and not v1_quant:
+                v_slice_name, v_cont_name = v2, v1
+                slice_data, cont_data = val2_local, val1_local
+            else:  # Both continuous or both quantized
+                if len(val1_local) <= len(val2_local):  # fallback
+                    v_slice_name, v_cont_name = v1, v2
+                    slice_data, cont_data = val1_local, val2_local
+                else:
+                    v_slice_name, v_cont_name = v2, v1
+                    slice_data, cont_data = val2_local, val1_local
+
+            # 4. Determine Primary Slices (Slicing Variable)
+            slice_is_quantized_check = self.is_quantized(slice_data)
+
+            slice_edges = self.get_yield_based_edges(slice_data, target_yield=dynamic_slice_yield, is_quantized=slice_is_quantized_check)
+
+            bin_offset = 0
+            expression_parts = []
+
+            for i in range(len(slice_edges) - 1):
+                start, end = slice_edges[i], slice_edges[i + 1]
+                is_last_slice = i == len(slice_edges) - 2
+
+                # Filter data in this slice
+                slice_mask = (slice_data >= start) & (slice_data <= end if is_last_slice else slice_data < end)
+                cont_in_slice = cont_data[slice_mask]
+
+                # Calculate sub-bins based on ACTUAL yield in this slice
+                n_events_slice = len(cont_in_slice)
+
+                if n_events_slice < self.target_yield * 0.5:
+                    num_sub_bins = 1
+                else:
+                    num_sub_bins = int(round(n_events_slice / self.target_yield))
+                    if num_sub_bins < 1:
+                        num_sub_bins = 1
+
+                # Calculate edges for continuous variable in this slice
+                noise = np.random.normal(0, 1e-9, cont_in_slice.shape)  # Break ties in percentiles
+                secondary_edges = np.percentile(cont_in_slice + noise, np.linspace(0, 100, num_sub_bins + 1))
+
+                # Build Expression Strings
+                sub_bin_expr_parts = []
+                for j in range(num_sub_bins):
+                    sub_start, sub_end = secondary_edges[j], secondary_edges[j + 1]
+                    is_last_sub = j == num_sub_bins - 1
+
+                    sub_cond = (
+                        f"((({v1} != -10) && ({v2} != -10)) && (({v_cont_name} >= {sub_start}) && ({v_cont_name} {'<=' if is_last_sub else '<'} {sub_end})))"
+                    )
+                    sub_bin_expr_parts.append(f"{j}*{sub_cond}")
+
+                sub_bin_index_expr = f"({' + '.join(sub_bin_expr_parts)})"
+                slice_condition = (
+                    f"((({v1} != -10) && (({v2} != -10)) && ({v_slice_name} >= {start}) && ({v_slice_name} {'<=' if is_last_slice else '<'} {end})))"
+                )
+
+                expression_parts.append(f"({bin_offset + 1} + {sub_bin_index_expr}) * {slice_condition}")
+
+                bin_offset += num_sub_bins
+
+            if not expression_parts:
+                continue
+
+            new_binning[f"{v1}_{v2}"] = {
+                "bins": np.arange(bin_offset + 1, dtype=float) + 0.5,
+                "expression": " + ".join(expression_parts),
                 "cut": f"(({v1} > {v1_min}) && ({v1} < {v1_max}) && ({v2} > {v2_min}) && ({v2} < {v2_max}))",
             }
 
@@ -464,10 +660,15 @@ def main(args):
     var_data_np = build_binning_helper.extract_data_from_chain(chain, variables, cache_path=skim_file_path.replace(".root", "_variables.pkl"))
 
     strategy = BinningStrategyTargetBinning()
+    # strategy = BinningStrategyYieldPerBin(3000)
 
     if isinstance(strategy, BinningStrategyTargetBinning):
         percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
         binning_1d = strategy.calculate_1d_binning_from_numpy(args.channel, var_data_np, variables, percentiles)
+        binning_2d, correlations = strategy.add_2d_unrolled_binning_from_numpy(variables, binning_1d, var_data_np)
+
+    if isinstance(strategy, BinningStrategyYieldPerBin):
+        binning_1d = strategy.calculate_1d_binning_from_numpy(args.channel, var_data_np, variables)
         binning_2d, correlations = strategy.add_2d_unrolled_binning_from_numpy(variables, binning_1d, var_data_np)
 
     outputfile = os.path.join(args.output_folder, f"binning_{args.era}_{args.channel}.yaml")
