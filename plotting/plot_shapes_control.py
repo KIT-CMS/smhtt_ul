@@ -143,6 +143,8 @@ def main(info):
         era = "Run2023postBPix"
     elif "2024" in args.era:
         era = "Run2024"
+    elif "2025" in args.era:
+        era = "Run2025"
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
@@ -205,25 +207,25 @@ def main(info):
         for i in plot_idx_to_add_signal:
             ggH = rootfile.get(channel, "ggH125",category=cat).Clone()
             qqH = rootfile.get(channel, "qqH125",category=cat).Clone()
-            # VH = rootfile.get(channel, "VH125").Clone()
-            # ttH = rootfile.get(channel, "ttH125").Clone()
+            VH = rootfile.get(channel, "VH125",category=cat).Clone()
+            ttH = rootfile.get(channel, "ttH125",category=cat).Clone()
             # HWW = rootfile.get(channel, "HWW").Clone()
             if ggH.Integral() > 0:
                 ggH_scale = 10
             else:
                 ggH_scale = 0.0
             if qqH.Integral() > 0:
-                qqH_scale = 10
+                qqH_scale = 100
             else:
                 qqH_scale = 0.0
-            # if VH.Integral() > 0:
-            #     VH_scale = 10
-            # else:
-            #     VH_scale = 0.0
-            # if ttH.Integral() > 0:
-            #     ttH_scale = 10
-            # else:
-            #     ttH_scale = 0.0
+            if VH.Integral() > 0:
+                 VH_scale = 10000
+            else:
+                VH_scale = 0.0
+            if ttH.Integral() > 0:
+                ttH_scale = 1000
+            else:
+                ttH_scale = 0.0
             # if HWW.Integral() > 0:
             #     HWW_scale = 10
             # else:
@@ -232,32 +234,33 @@ def main(info):
             if i in [0,1]:
                 ggH.Scale(ggH_scale)
                 qqH.Scale(qqH_scale)
-                # VH.Scale(VH_scale)
-                # ttH.Scale(ttH_scale)
+                VH.Scale(VH_scale)
+                ttH.Scale(ttH_scale)
                 # HWW.Scale(HWW_scale)
             plot.subplot(i).add_hist(ggH, "ggH")
             plot.subplot(i).add_hist(ggH, "ggH_top")
             plot.subplot(i).add_hist(qqH, "qqH")
             plot.subplot(i).add_hist(qqH, "qqH_top")
-            # plot.subplot(i).add_hist(VH, "VH")
-            # plot.subplot(i).add_hist(VH, "VH_top")
-            # plot.subplot(i).add_hist(ttH, "ttH")
-            # plot.subplot(i).add_hist(ttH, "ttH_top")
+            plot.subplot(i).add_hist(VH, "VH")
+            plot.subplot(i).add_hist(VH, "VH_top")
+            plot.subplot(i).add_hist(ttH, "ttH")
+            plot.subplot(i).add_hist(ttH, "ttH_top")
             # plot.subplot(i).add_hist(HWW, "HWW")
             # plot.subplot(i).add_hist(HWW, "HWW_top")
 
+        # Set signal style to simple colored line, no neon effect
         plot.subplot(0 if args.linear else 1).setGraphStyle(
-            "ggH", "hist", linecolor=styles.color_dict["ggH"], linewidth=3)
-        plot.subplot(0 if args.linear else 1).setGraphStyle("ggH_top", "hist", linecolor=0)
+            "ggH", "hist", linecolor=styles.color_dict["ggH"], linewidth=2, fillstyle=0)
+        plot.subplot(0 if args.linear else 1).setGraphStyle("ggH_top", "hist", linecolor=0, linewidth=0, fillstyle=0)
         plot.subplot(0 if args.linear else 1).setGraphStyle(
-            "qqH", "hist", linecolor=styles.color_dict["qqH"], linewidth=3)
-        plot.subplot(0 if args.linear else 1).setGraphStyle("qqH_top", "hist", linecolor=0)
-        # plot.subplot(0 if args.linear else 1).setGraphStyle(
-        #     "VH", "hist", linecolor=styles.color_dict["VH"], linewidth=3)
-        # plot.subplot(0 if args.linear else 1).setGraphStyle("VH_top", "hist", linecolor=0)
-        # plot.subplot(0 if args.linear else 1).setGraphStyle(
-        #     "ttH", "hist", linecolor=styles.color_dict["ttH"], linewidth=3)
-        # plot.subplot(0 if args.linear else 1).setGraphStyle("ttH_top", "hist", linecolor=0)
+            "qqH", "hist", linecolor=styles.color_dict["qqH"], linewidth=2, fillstyle=0)
+        plot.subplot(0 if args.linear else 1).setGraphStyle("qqH_top", "hist", linecolor=0, linewidth=0, fillstyle=0)
+        plot.subplot(0 if args.linear else 1).setGraphStyle(
+            "VH", "hist", linecolor=styles.color_dict["VH"], linewidth=2, fillstyle=0)
+        plot.subplot(0 if args.linear else 1).setGraphStyle("VH_top", "hist", linecolor=0, linewidth=0, fillstyle=0)
+        plot.subplot(0 if args.linear else 1).setGraphStyle(
+            "ttH", "hist", linecolor=styles.color_dict["ttH"], linewidth=2, fillstyle=0)
+        plot.subplot(0 if args.linear else 1).setGraphStyle("ttH_top", "hist", linecolor=0, linewidth=0, fillstyle=0)
         # plot.subplot(0 if args.linear else 1).setGraphStyle(
         #     "HWW", "hist", linecolor=styles.color_dict["HWW"], linewidth=3)
         # plot.subplot(0 if args.linear else 1).setGraphStyle("HWW_top", "hist", linecolor=0)
@@ -276,14 +279,14 @@ def main(info):
             "bkg_ggH",
             "hist",
             linecolor=styles.color_dict["ggH"],
-            linewidth=3)
-        plot.subplot(2).setGraphStyle("bkg_ggH_top", "hist", linecolor=0)
+            linewidth=2, fillstyle=0)
+        plot.subplot(2).setGraphStyle("bkg_ggH_top", "hist", linecolor=0, linewidth=0, fillstyle=0)
         plot.subplot(2).setGraphStyle(
             "bkg_qqH",
             "hist",
             linecolor=styles.color_dict["qqH"],
-            linewidth=3)
-        plot.subplot(2).setGraphStyle("bkg_qqH_top", "hist", linecolor=0)
+            linewidth=2, fillstyle=0)
+        plot.subplot(2).setGraphStyle("bkg_qqH_top", "hist", linecolor=0, linewidth=0, fillstyle=0)
 
     if args.add_signals:
         to_draw = [
@@ -305,10 +308,13 @@ def main(info):
         plot.subplot(1).normalizeByBinWidth()
 
     # set axes limits and labels
+    # Set y-axis maximum to 1.6 times the highest bin in either background or data
+    bkg_max = plot.subplot(0).get_hist("total_bkg").GetMaximum()
+    data_max = plot.subplot(0).get_hist("data_obs").GetMaximum()
+    max_bin = max(bkg_max, data_max)
     plot.subplot(0).setYlims(
         split_dict[channel],
-        max(1.6 * plot.subplot(0).get_hist("total_bkg").GetMaximum(),
-            split_dict[channel] * 2))
+        max(1.6 * max_bin, split_dict[channel] * 2))
 
     log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
 
@@ -320,7 +326,7 @@ def main(info):
             1.0,
             1000 * plot.subplot(0).get_hist("data_obs").GetMaximum())
 
-    plot.subplot(2).setYlims(0.45, 1.45)
+    plot.subplot(2).setYlims(0.75, 1.45)
     # if channel == "mm":
     #     plot.subplot(0).setLogY()
     #     plot.subplot(0).setYlims(1, 10**10)
@@ -416,8 +422,8 @@ def main(info):
         if args.add_signals:
             plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s #times gg#rightarrowH"%str(int(ggH_scale)), 'l')
             plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s #times qq#rightarrowH"%str(int(qqH_scale)), 'l')
-            # plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
-            # plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s #times ttH"%str(int(ttH_scale)), 'l')
+            plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
+            plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s #times ttH"%str(int(ttH_scale)), 'l')
             # # plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "%s #times H#rightarrowWW"%str(int(HWW_scale)), 'l')
         plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(3)
@@ -441,7 +447,8 @@ def main(info):
     plot.legend(3).Draw()
 
     # draw additional labels
-    plot.DrawCMS()
+    # guidelines https://cms-analysis.docs.cern.ch/guidelines/plotting/general/#labeling-guidelines
+    plot.DrawCMS(own_work=True, preliminary=False)
     if "2016postVFP" in args.era:
         plot.DrawLumi("16.8 fb^{-1} (2016UL postVFP, 13 TeV)")
     elif "2016preVFP" in args.era:
@@ -455,11 +462,17 @@ def main(info):
     elif "2022postEE" in args.era:
         plot.DrawLumi("26.67 fb^{-1} (2022 postEE, 13.6 TeV)")
     elif "2023preBPix" in args.era:
-        plot.DrawLumi("17.79 fb^{-1} (2023 preBPix, 13.6 TeV)")
+        plot.DrawLumi("18.06 fb^{-1} (2023 preBPix, 13.6 TeV)")
     elif "2023postBPix" in args.era:
-        plot.DrawLumi("9.45 fb^{-1} (2023 postBPix, 13.6 TeV)")
+        plot.DrawLumi("9.69 fb^{-1} (2023 postBPix, 13.6 TeV)")
     elif "2024" in args.era:
-        plot.DrawLumi("109.08 fb^{-1} (2024, 13.6 TeV)")
+        plot.DrawLumi("108.95 fb^{-1} (2024, 13.6 TeV)")
+    elif "CDE" in args.tag:
+        plot.DrawLumi("26.52 fb^{-1} (2024 CDE, 13.6 TeV)")
+    elif "FGHI" in args.tag:
+        plot.DrawLumi("82.43 fb^{-1} (2024 FGHI, 13.6 TeV)")
+    elif "2025" in args.era:
+        plot.DrawLumi("115.65 fb^{-1} (2025, 13.6 TeV)")
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
@@ -470,7 +483,7 @@ def main(info):
         begin_left=posChannelCategoryLabelLeft)
 
     print("Trying to save the created plot")
-    _path = os.path.join(f"/web/sgiappic/public_html/HTT/{args.era}_plots_{postfix}_{args.tag}", channel)
+    _path = os.path.join(f"/web/sgiappic/public_html/CMS_HTT/{args.era}/{args.tag}", channel)
     if not os.path.exists(_path):
         os.makedirs(_path, exist_ok=True)
     for _ext in ["pdf", "png"]:

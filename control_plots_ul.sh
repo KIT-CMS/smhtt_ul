@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ADDITIONAL_FRIENDS="xsec"
+ADDITIONAL_FRIENDS=""
 SELECTION_OPTION="CR"
 SELECTION_OPTION_ESTIMATION="CR"
 PLOTVERSION="all"
@@ -20,6 +20,7 @@ DEFAULT_VARIABLES_LIST=(
   nbtag njets
   q_1 pzetamissvis jet_hemisphere
   deltaR_ditaupair 
+  met_uncorrected
 )
 # deltaEta_ditaupair deltaPhi_ditaupair for fake factors: to add when i update CROWN
 
@@ -170,16 +171,41 @@ if [[ $MODE == "SHAPES" ]]; then
     mkdir -p ${shapes_output}
   fi
 
-  nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
-    --directory ${NTUPLES} \
-    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
-    --era ${ERA} --num-processes 30 --num-threads 60 \
-    --optimization-level 1 --control-plots \
-    --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
-    --output-file ${shapes_output} \
-    --xrootd --validation-tag ${TAG} \
-    --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" --apply-tauid \
-    --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}
+  if [ "${CHANNEL}" == "mt" ]; then
+    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
+      --directory ${NTUPLES} \
+      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+      --era ${ERA} --num-processes 10 --num-threads 20 \
+      --optimization-level 1 --control-plots \
+      --control-plot-set ${USED_VARIABLES} \
+      --output-file ${shapes_output} \
+      --xrootd --validation-tag ${TAG} \
+      --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" --apply-tauid \
+      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}  \
+      --skip-systematic-variations 
+  elif [ "${CHANNEL}" == "et" ]; then
+    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
+      --directory ${NTUPLES} \
+      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+      --era ${ERA} --num-processes 10 --num-threads 20 \
+      --optimization-level 1 --control-plots \
+      --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
+      --output-file ${shapes_output} \
+      --xrootd --validation-tag ${TAG} \
+      --vs-jet-wp "Medium" --vs-ele-wp "Tight" --apply-tauid \
+      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}
+  else # tt channel only for nows
+    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
+      --directory ${NTUPLES} \
+      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+      --era ${ERA} --num-processes 10 --num-threads 20 \
+      --optimization-level 1 --control-plots \
+      --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
+      --output-file ${shapes_output} \
+      --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" \
+      --xrootd --validation-tag ${TAG} --apply-tauid \
+      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}
+  fi
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                                                #"
@@ -187,7 +213,11 @@ if [[ $MODE == "SHAPES" ]]; then
     if [[ $CHANNEL == "mm" ]]; then
         python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd
     else
+      if [[ $FF_TYPE == "none"  ]]; then
         python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd #--do-emb-tt
+      else 
+        python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-ff #--do-emb-tt
+      fi
     fi
 fi
 
@@ -203,8 +233,8 @@ if [[ $MODE == "PLOT" ]]; then
                     --variables ${USED_VARIABLES} \
                     --channels ${CHANNEL} \
                     --tag ${TAG} \
-                    --nlo \
-                    --selection-option ${SELECTION_OPTION}"
+                    --selection-option ${SELECTION_OPTION} \
+                    --add-signals"
 
   if [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "emb+ff" ]]; then
     ${BASE_COMMAND} --embedding --fake-factor

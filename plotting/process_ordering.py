@@ -164,6 +164,18 @@ class ControlShapeBkgProcesses:
 
         return list(set(bkg_processes + ff_processes_covered_by_mc))
 
+    def get_classic_ff(self) -> List[str]:
+        """
+        Return the CLASSIC_FF list based on the channel.
+        """
+        if self._channel == "tt":
+            return ['jetFakes', 'ZL', 'ZTT', 'VVL', 'VVT', 'VVJ', 'W', 'TTL', 'TTT', 'TTJ']
+        elif self._channel in {"mt", "et"}:
+            return ['VVL', 'TTL', 'ZL', 'jetFakes', 'VVT', 'TTT', 'ZTT']
+        else:
+            raise ValueError(f"Unsupported channel: {self._channel}")
+
+
     def __call__(self) -> List[str]:
         if self._is_fully_classic:
             bkg_processes = self.FULLY_CLASSIC
@@ -173,6 +185,7 @@ class ControlShapeBkgProcesses:
             bkg_processes = self.EMB_FF
         elif self._is_classic_ff:
             bkg_processes = self.CLASSIC_FF
+            #bkg_processes = self.get_classic_ff() 
 
         for modify in self._pipe:
             bkg_processes = modify(bkg_processes)

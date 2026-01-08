@@ -75,11 +75,17 @@ def lumi_weight(era, **kwargs):
     elif era == "2022postEE":
         lumi = "26.67"
     elif era == "2023preBPix":
-        lumi = "17.79"
+        lumi = "18.06"
     elif era == "2023postBPix":
-        lumi = "9.45"
+        lumi = "9.69"
+    #elif era == "2024":
+    #    lumi = "26.52" #CDE
     elif era == "2024":
-        lumi = "109.08"
+        lumi = "82.43" #FGHI
+    #elif era == "2024":
+    #    lumi = "108.95" #full
+    elif era == "2025":
+        lumi = "115.65"
     else:
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
@@ -113,8 +119,6 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         print("This vs jet working point doen't exist. Please specify the correct vsJet discriminator ")
         raise ValueError("Given vs jet working point {} not defined.".format(vs_jet_wp))
 
-    vs_ele_discr = vs_ele_wp
-    vs_jet_discr = vs_jet_wp
     if channel == "em":
         isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
         idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
@@ -124,13 +128,13 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         trgweight = None
     elif channel == "et":
         isoweight = None #("iso_wgt_ele_1", "isoweight") #only for embedding??
-        idweight = ("id_wgt_ele_wp90nonIso_1", "idweight")
+        idweight = ("id_wgt_ele_wp90iso_1", "idweight")
         tauidweight = (
-            "((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
+            f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
         vsmu_weight = ("id_wgt_tau_vsMu_VLoose_2", "vsmuweight")
-        vsele_weight = ("id_wgt_tau_vsEle_Tight_2", "vseleweight")
+        vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_wp}_2", "vseleweight")
         if era == "2017":
             trgweight = (
                 "((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)",
@@ -139,17 +143,17 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         elif era == "2018":
             trgweight = ("trg_wgt_single_ele32orele35", "trgweight")
         else:
-            trgweight = ("trg_wgt_single_ele30", "trgweight")
+            trgweight = ("(pt_1>32)*(trg_wgt_single_ele30)", "trgweight")
     elif channel == "mt":
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
         tauidweight = (
-            f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))",
+            f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
         # tauidweight = None
         vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
-        vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_discr}_2", "vseleweight")
+        vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_wp}_2", "vseleweight")
         if era == "2016preVFP" or era == "2016postVFP":
             trgweight = ("((pt_1>23)* trg_wgt_single_mu22)", "trgweight")
         elif era == "2017":
@@ -160,12 +164,12 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
                 "trgweight",
             )
         else:
-            trgweight = ("(trg_wgt_single_mu24)", "trgweight")
+            trgweight = ("(pt_1>25)*(trg_wgt_single_mu24)", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None
         tauidweight = (
-            "((gen_match_1==5)*id_wgt_tau_vsJet_Tight_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_Tight_2 + (gen_match_2!=5))",
+            f"((gen_match_1==5)*id_wgt_tau_vsJet_{vs_jet_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
         vsmu_weight = (
@@ -173,10 +177,17 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             "vsmuweight",
         )
         vsele_weight = (
-            "((gen_match_1==5)*id_wgt_tau_vsEle_VVLoose_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsEle_VVLoose_1 + (gen_match_2!=5))",
+            f"((gen_match_1==5)*id_wgt_tau_vsEle_{vs_ele_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsEle_{vs_ele_wp}_2 + (gen_match_2!=5))",
             "vseleweight",
         )
-        trgweight = None
+        if era in ["2024_CDE", "2024_FGHI", "2024", "2025"]:
+            trgweight = (
+                "(trg_wgt_doubletau30_leg1 * trg_wgt_doubletau30_leg2)", "trgweight"
+            )
+        else:
+            trgweight = (
+            "(trg_wgt_doubletau35_leg1 * trg_wgt_doubletau35_leg2)", "trgweight"
+        )
     elif channel == "mm":
         isoweight = ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight")
         idweight = ("id_wgt_mu_1 * id_wgt_mu_2", "idweight")
@@ -288,7 +299,7 @@ def DY_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_DY
                 ),
             ]
         )
-    DY_process_weights.append(("ZPtReweightWeight[0]", "zPtReweightWeight"))
+    DY_process_weights.append(("zPtReweightWeight", "zPtReweightWeight"))
     return Selection(name="DY", weights=DY_process_weights)
 
 
@@ -310,8 +321,8 @@ def DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             # dy_stitching_weight(era),  # TODO add stitching weight
         ]
     )
-    DY_process_weights.append(("ZPtReweightWeight[0]", "zPtReweightWeight"))
-    return Selection(name="DY_NLO", weights=DY_process_weights)
+    DY_process_weights.append(("zPtReweightWeight", "zPtReweightWeight"))
+    return Selection(name="DYNLO", weights=DY_process_weights)
 
 
 def TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
@@ -529,7 +540,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -546,7 +557,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -566,7 +577,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -593,7 +604,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -610,7 +621,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
@@ -636,7 +647,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             ztt_embedded_weights.extend(
                 [
                     (
-                        f"((gen_match_1==5)*id_wgt_tau_vsJet_{vs_jet_discr}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))",
+                        f"((gen_match_1==5)*id_wgt_tau_vsJet_{vs_jet_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
                     )
                 ]
             )
@@ -1364,7 +1375,7 @@ def qqh_stitching_weight(era, **kwargs):
     return _get_stxs_stitching_weight(era=era, process="vbf_htautau", **kwargs)
 
 
-def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_ggH125=True, **kwargs):
+def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_ggH125=False, **kwargs):
     ggH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     if weight_stitching_ggH125:
         ggH125_weights.append(ggh_stitching_weight(era))
@@ -1389,7 +1400,7 @@ def ggH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitchin
     return Selection(name="ggH125", weights=ggH125_weights, cuts=ggH125_cuts)
 
 
-def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_qqH125=True, **kwargs):
+def qqH125_process_selection(channel, era, vs_jet_wp, vs_ele_wp, weight_stitching_qqH125=False, **kwargs):
     qqH125_weights = HTT_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     if weight_stitching_qqH125:
         qqH125_weights.append(qqh_stitching_weight(era))
@@ -1417,7 +1428,7 @@ def FF_training_process_selection(channel, era, **kwargs):
     weights = []
     if channel == "et" or channel == "mt":
         cuts = [
-            ("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+            (f"id_tau_vsJet_{vs_jet_wp}_2<0.5&&id_tau_vsJet_{vs_jet_wp}_2>0.5", "tau_anti_iso"),
         ]
         weights = [("fake_factor", "fake_factor")]
     elif channel == "tt":
@@ -1500,22 +1511,22 @@ def make_chainable_process_selection(base_selection: Callable) -> Callable:
 # DY
 DY = make_chainable_process_selection(DY_process_selection)
 ZTT, ZL, ZJ = ZTT_process_selection, ZL_process_selection, ZJ_process_selection
-#DY.TT, DY.L, DY.J = DY.wrap_next(ZTT), DY.wrap_next(ZL), DY.wrap_next(ZJ)
+DY.TT, DY.L, DY.J = DY.wrap_next(ZTT), DY.wrap_next(ZL), DY.wrap_next(ZJ)
 
 # DY_NLO
-DY_NLO = DY_NLO_process_selection #make_chainable_process_selection(DY_NLO_process_selection)
+DY_NLO = make_chainable_process_selection(DY_NLO_process_selection)
 ZTT_nlo, ZL_nlo, ZJ_nlo = ZTT_nlo_process_selection, ZL_nlo_process_selection, ZJ_nlo_process_selection
-#DY_NLO.TT, DY_NLO.L, DY_NLO.J = DY_NLO.wrap_next(ZTT_nlo), DY_NLO.wrap_next(ZL_nlo), DY_NLO.wrap_next(ZJ_nlo)
+DY_NLO.TT, DY_NLO.L, DY_NLO.J = DY_NLO.wrap_next(ZTT_nlo), DY_NLO.wrap_next(ZL_nlo), DY_NLO.wrap_next(ZJ_nlo)
 
 # TT
-TT = TT_process_selection #make_chainable_process_selection(TT_process_selection)
+TT = make_chainable_process_selection(TT_process_selection)
 TTT, TTL, TTJ = TTT_process_selection, TTL_process_selection, TTJ_process_selection
-#TT.T, TT.L, TT.J = TT.wrap_next(TTT), TT.wrap_next(TTL), TT.wrap_next(TTJ)
+TT.T, TT.L, TT.J = TT.wrap_next(TTT), TT.wrap_next(TTL), TT.wrap_next(TTJ)
 
 # VV
-VV = VV_process_selection #make_chainable_process_selection(VV_process_selection)
+VV = make_chainable_process_selection(VV_process_selection)
 VVT, VVL, VVJ = VVT_process_selection, VVL_process_selection, VVJ_process_selection
-#VV.J, VV.L, VV.T = VV.wrap_next(VVJ), VV.wrap_next(VVL), VV.wrap_next(VVT)
+VV.J, VV.L, VV.T = VV.wrap_next(VVJ), VV.wrap_next(VVL), VV.wrap_next(VVT)
 
 # qqH125
 qqH125 = make_chainable_process_selection(qqH125_process_selection)

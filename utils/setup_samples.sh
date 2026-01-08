@@ -53,6 +53,12 @@ SVFit_Friends_2024="$basedir/2024/friends/SVFit/"
 #FF_Friends_2024="$basedir/2024/friends/FakeFactors_v5/"
 NLOReweighting_Friends_2024="$basedir/2024/friends/NLOReweighting/"
 
+# Samples Run2025
+ARTUS_OUTPUTS_2025="$basedir/2025/ntuples/"
+SVFit_Friends_2025"$basedir/2025/friends/SVFit/"
+#FF_Friends_2025="$basedir/2025/friends/FakeFactors_v5/"
+NLOReweighting_Friends_2025="$basedir/2025/friends/NLOReweighting/"
+
 # ERA handling
 if [[ $E == *"2016"* ]]
 then
@@ -102,6 +108,12 @@ then
     SVFit_Friends=$SVFit_Friends_2024
     #FF_Friends=$FF_Friends_2024
     NLOReweighting_Friends=$NLOReweighting_Friends_2024
+elif [[ $E == *"2025"* ]]
+then
+    ARTUS_OUTPUTS=$ARTUS_OUTPUTS_2025
+    SVFit_Friends=$SVFit_Friends_2025
+    #FF_Friends=$FF_Friends_2025
+    NLOReweighting_Friends=$NLOReweighting_Friends_2025
 fi
 
 ### channels specific friend tree.

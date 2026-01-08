@@ -24,4 +24,6 @@ elif [[ $ERA == *"2023postBPix"* ]]; then
     NTUPLES=$KINGMAKER_BASEDIR
 elif [[ $ERA == *"2024"* ]]; then
     NTUPLES=$KINGMAKER_BASEDIR
+elif [[ $ERA == *"2025"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
 fi

@@ -179,17 +179,19 @@ __FF_OPTION_info__ = """
 """
 
 
+def set_jet_wp(jet_wp):
+    logger.info(f"Setting jet wp option to {jet_wp}")
+    RuntimeVariables.vs_jet_wp = jet_wp
+
 def set_ff_type(ff_type):
     if ff_type not in FF_OPTIONS:
         logger.error(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
         raise KeyError(f"Fake factor option {ff_type} not found in FF_OPTIONS.")
 
     logger.info(f"Setting fake factor option to {ff_type}= {FF_OPTIONS[ff_type]}")
-    # Only set FF_name_lt if present in the option (e.g. skip for 'none')
-    if "lt" in FF_OPTIONS[ff_type]:
-        RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
-    else:
-        RuntimeVariables.FF_name_lt = None
+    RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
+    RuntimeVariables.FF_name_tt_1 = FF_OPTIONS[ff_type]["tt_1"]
+    RuntimeVariables.FF_name_tt_2 = FF_OPTIONS[ff_type]["tt_2"]
     logger.warning(
         """
             Setting fake factor option for tt_1 and tt_2 is in parts not implemented yet.
@@ -219,6 +221,7 @@ class RuntimeVariables(object):
     FF_name_lt = FF_OPTIONS["fake_factor"]["lt"]
     FF_name_tt_1 = FF_OPTIONS["fake_factor"]["tt_1"]
     FF_name_tt_2 = FF_OPTIONS["fake_factor"]["tt_2"]
+    vs_jet_wp = ""
 
     def __new__(cls) -> "RuntimeVariables":
         if not hasattr(cls, "instance"):
@@ -321,7 +324,7 @@ abcd_method = [
         "abcd_anti_iso",
         "tau_iso",
         Cut(
-            "(id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+            f"(id_tau_vsJet_Medium_1>0.5 && id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)",
             "tau_anti_iso",
         ),
     ),
@@ -331,7 +334,7 @@ abcd_method = [
         [
             Cut("q_1*q_2>0", "ss"),
             Cut(
-                "(id_tau_vsJet_Tight_1>0.5 && id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)",
+                f"(id_tau_vsJet_Medium_1>0.5 && id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)",
                 "tau_anti_iso",
             ),
         ],
@@ -342,14 +345,14 @@ same_sign_anti_iso_lt = ReplaceMultipleCuts(
     ["os", "tau_iso"],
     [
         Cut("q_1*q_2>0", "ss"),
-        Cut("(id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
+        Cut(f"(id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)", "tau_anti_iso"),
     ]
 )
 anti_iso_lt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
     lambda: ReplaceCutAndAddWeight(
         "anti_iso",
         "tau_iso",
-        Cut("(id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)", "tau_anti_iso"),
+        Cut(f"(id_tau_vsJet_Medium_2<0.5 && id_tau_vsJet_VVVLoose_2>0.5)", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     )
 )
@@ -358,16 +361,17 @@ anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
         "anti_iso",
         "tau_iso",
         Cut(
-            """(
+            f"""(
                     (
-                        (id_tau_vsJet_Tight_1 < 0.5) &&
-                        (id_tau_vsJet_Tight_2 > 0.5) &&
-                        (id_tau_vsJet_VLoose_1 > 0.5)
+                        (id_tau_vsJet_Medium_1 < 0.5) &&
+                        (id_tau_vsJet_Medium_2 > 0.5) &&
+                        (id_tau_vsJet_VVVLoose_1 > 0.5)
+
                     ) ||
                     (
-                        (id_tau_vsJet_Tight_1 > 0.5) &&
-                        (id_tau_vsJet_Tight_2 < 0.5) &&
-                        (id_tau_vsJet_VLoose_2 > 0.5)
+                        (id_tau_vsJet_Medium_1 > 0.5) &&
+                        (id_tau_vsJet_Medium_2 < 0.5) &&
+                        (id_tau_vsJet_VVVLoose_2 > 0.5)
                     )
                 )""",
             "tau_anti_iso"
@@ -375,8 +379,8 @@ anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may
         Weight(
             f"""(
                 (0.5) * (
-                    ({RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Tight_1 < 0.5)) +
-                    ({RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Tight_2 < 0.5))
+                    ({RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Medium_1 < 0.5)) +
+                    ({RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Medium_2 < 0.5))
                 )
             )""",
             "fake_factor",
@@ -427,26 +431,53 @@ emb_tau_es_1prong1pizero = [
 
 # Jet energy scale split by sources.
 jet_es_hem = [
-    ReplaceVariable("CMS_scale_j_HEMIssue_EraUp", "jesUncHEMIssueUp"),
-    ReplaceVariable("CMS_scale_j_HEMIssue_EraDown", "jesUncHEMIssueDown"),
+#    ReplaceVariable("CMS_scale_j_HEMIssue_EraUp", "jesUncHEMIssueUp"),
+#    ReplaceVariable("CMS_scale_j_HEMIssue_EraDown", "jesUncHEMIssueDown"),
 ]
 jet_es = [
     ReplaceVariable(name, variation)
     for shift in SHIFT_DIRECTIONS
     for name, variation in [
         (f"CMS_scale_j_Total{shift}", f"jesUncTotal{shift}"),
-        (f"CMS_scale_j_Absolute{shift}", f"jesUncAbsolute{shift}"),
-        (f"CMS_scale_j_Absolute_Era{shift}", f"jesUncAbsoluteYear{shift}"),
+        (f"CMS_scale_j_SinglePionECAL{shift}", f"jesUncSinglePionECAL{shift}"),
+        (f"CMS_scale_j_SinglePionHCAL{shift}", f"jesUncSinglePionHCAL{shift}"),
+        (f"CMS_scale_j_AbsoluteMPFBias{shift}", f"jesUncAbsoluteMPFBias{shift}"),
+        (f"CMS_scale_j_AbsoluteScale{shift}", f"jesUncAbsoluteScale{shift}"),
+        (f"CMS_scale_j_Fragmentation{shift}", f"jesUncFragmentation{shift}"),
+        (f"CMS_scale_j_PileUpDataMC{shift}", f"jesUncPileUpDataMC{shift}"),
+        (f"CMS_scale_j_RelativeFSR{shift}", f"jesUncRelativeFSR{shift}"),
+        (f"CMS_scale_j_PileupPtRef{shift}", f"jesUncPileUpPtRef{shift}"),
+        (f"CMS_scale_j_AbsoluteStat{shift}", f"jesUncAbsoluteStat{shift}"),
+        (f"CMS_scale_j_TimePtEta{shift}", f"jesUncTimePtEta{shift}"),
+        (f"CMS_scale_j_RelativeStatFSR{shift}", f"jesUncRelativeStatFSR{shift}"),
         (f"CMS_scale_j_FlavorQCD{shift}", f"jesUncFlavorQCD{shift}"),
-        (f"CMS_scale_j_BBEC1{shift}", f"jesUncBBEC1{shift}"),
-        (f"CMS_scale_j_BBEC1_Era{shift}", f"jesUncBBEC1Year{shift}"),
-        (f"CMS_scale_j_HF{shift}", f"jesUncHF{shift}"),
-        (f"CMS_scale_j_HF_Era{shift}", f"jesUncHFYear{shift}"),
-        (f"CMS_scale_j_EC2{shift}", f"jesUncEC2{shift}"),
-        (f"CMS_scale_j_EC2_Era{shift}", f"jesUncEC2Year{shift}"),
+        (f"CMS_scale_j_PileupPtEC1{shift}", f"jesUncPileUpPtEC1{shift}"),
+        (f"CMS_scale_j_PileUpPtBB{shift}", f"jesUncPileUpPtBB{shift}"),
+        (f"CMS_scale_j_RelativePtBB{shift}", f"jesUncRelativePtBB{shift}"),
+        (f"CMS_scale_j_RelativeJEREC1{shift}", f"jesUncRelativeJEREC1{shift}"),
+        (f"CMS_scale_j_RelativePtEC1{shift}", f"jesUncRelativePtEC1{shift}"),
+        (f"CMS_scale_j_RelativeStatEC{shift}", f"jesUncRelativeStatEC{shift}"),
+        (f"CMS_scale_j_RelativePtHF{shift}", f"jesUncRelativePtHF{shift}"),
+        (f"CMS_scale_j_PileUpPtHF{shift}", f"jesUncPileUpPtHF{shift}"),
+        (f"CMS_scale_j_RelativeJERHF{shift}", f"jesUncRelativeJERHF{shift}"),
+        (f"CMS_scale_j_RelativeStatHF{shift}", f"jesUncRelativeStatHF{shift}"),
+        (f"CMS_scale_j_PileUpPtEC2{shift}", f"jesUncPileUpPtEC2{shift}"),
+        (f"CMS_scale_j_RelativeJEREC2{shift}", f"jesUncRelativeJEREC2{shift}"),
+        (f"CMS_scale_j_RelativePtEC2{shift}", f"jesUncRelativePtEC2{shift}"),
         (f"CMS_scale_j_RelativeBal{shift}", f"jesUncRelativeBal{shift}"),
-        (f"CMS_scale_j_RelativeSample_Era{shift}", f"jesUncRelativeSampleYear{shift}"),
-        (f"CMS_res_j_Era{shift}", f"jerUnc{shift}"),
+        (f"CMS_scale_j_RelativeSample{shift}", f"jesUncRelativeSample{shift}"),
+        #(f"CMS_scale_j_Absolute{shift}", f"jesUncAbsolute{shift}"),
+        #(f"CMS_scale_j_Absolute_Era{shift}", f"jesUncAbsoluteYear{shift}"),
+        #(f"CMS_scale_j_FlavorQCD{shift}", f"jesUncFlavorQCD{shift}"),
+        #(f"CMS_scale_j_BBEC1{shift}", f"jesUncBBEC1{shift}"),
+        #(f"CMS_scale_j_BBEC1_Era{shift}", f"jesUncBBEC1Year{shift}"),
+        #(f"CMS_scale_j_HF{shift}", f"jesUncHF{shift}"),
+        #(f"CMS_scale_j_HF_Era{shift}", f"jesUncHFYear{shift}"),
+        #(f"CMS_scale_j_EC2{shift}", f"jesUncEC2{shift}"),
+        #(f"CMS_scale_j_EC2_Era{shift}", f"jesUncEC2Year{shift}"),
+        #(f"CMS_scale_j_RelativeBal{shift}", f"jesUncRelativeBal{shift}"),
+        #(f"CMS_scale_j_RelativeSample_Era{shift}", f"jesUncRelativeSampleYear{shift}"),
+        #(f"CMS_res_j_Era{shift}", f"jerUnc{shift}"),
     ]
 ]
 
@@ -500,11 +531,27 @@ btagging = [
         (f"CMS_btag_b_HF{shift}", f"btagUncHF{shift}"),
         (f"CMS_btag_b_HFstats1_Era{shift}", f"btagUncHFstats1{shift}"),
         (f"CMS_btag_b_HFstats2_Era{shift}", f"btagUncHFstats2{shift}"),
-        (f"CMS_btag_j_LF{shift}", f"btagUncLF{shift}"),
+        (f"CMS_btag_j_LF_{shift}", f"btagUncLF{shift}"),
         (f"CMS_btag_j_LFstats1_Era{shift}", f"btagUncLFstats1{shift}"),
         (f"CMS_btag_j_LFstats2_Era{shift}", f"btagUncLFstats2{shift}"),
         (f"CMS_btag_c_CFerr1{shift}", f"btagUncCFerr1{shift}"),
         (f"CMS_btag_c_CFerr2{shift}", f"btagUncCFerr2{shift}"),
+    ]
+]
+
+btagging_2024 = [
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_btag_{shift}", f"btagUnc{shift}"),
+        (f"CMS_btag_fsr_{shift}", f"btagUncfsr{shift}"),
+        (f"CMS_btag_hdamp_{shift}", f"btagUnchdamp{shift}"),
+        (f"CMS_btag_isr_{shift}", f"btagUnisr{shift}"),
+        (f"CMS_btag_jer_{shift}", f"btagUncjer{shift}"),
+        (f"CMS_btag_jes_{shift}", f"btagUncjes{shift}"),
+        (f"CMS_btag_mass_{shift}", f"btagUncmass{shift}"),
+        (f"CMS_btag_stat_{shift}", f"btagUncstat{shift}"),
+        (f"CMS_btag_tune_{shift}", f"btagUnctune{shift}"),
     ]
 ]
 
@@ -625,8 +672,8 @@ zll_mt_fake_rate = [
 # # Trigger efficiency uncertainties.
 # mt
 trigger_eff_mt = [
-    ReplaceVariable("CMS_eff_trigger_mt_EraUp", "singleMuonTriggerSFUp"),
-    ReplaceVariable("CMS_eff_trigger_mt_EraDown", "singleMuonTriggerSFDown"),
+    ReplaceVariable("CMS_eff_trigger_mt_EraUp", "singleMuTriggerSFUP"),
+    ReplaceVariable("CMS_eff_trigger_mt_EraDown", "singleMuTriggerSFDOWN"),
 ]
 trigger_eff_mt_emb = [
     ReplaceVariable("CMS_eff_trigger_emb_mt_EraUp", "singleMuonTriggerSFUp"),
@@ -635,12 +682,22 @@ trigger_eff_mt_emb = [
 
 # et
 trigger_eff_et = [
-    ReplaceVariable("CMS_eff_trigger_et_EraUp", "singleElectronTriggerSFUp"),
-    ReplaceVariable("CMS_eff_trigger_et_EraDown", "singleElectronTriggerSFDown"),
+    ReplaceVariable("CMS_eff_trigger_et_EraUp", "singleEleTriggerSFUP"),
+    ReplaceVariable("CMS_eff_trigger_et_EraDown", "singleEleTriggerSFDOWN"),
 ]
 trigger_eff_et_emb = [
     ReplaceVariable("CMS_eff_trigger_emb_et_EraUp", "singleElectronTriggerSFUp"),
     ReplaceVariable("CMS_eff_trigger_emb_et_EraDown", "singleElectronTriggerSFDown"),
+]
+
+# tt
+trigger_eff_tt = [
+    ReplaceVariable("CMS_eff_trigger_tt_EraUp", "DoubleTauTriggerSFUP"),
+    ReplaceVariable("CMS_eff_trigger_tt_EraDown", "DoubleTauTriggerSFDOWN"),
+]
+trigger_eff_tt_emb = [
+    ReplaceVariable("CMS_eff_trigger_emb_tt_EraUp", "DoubleTauTriggerSFUp"),
+    ReplaceVariable("CMS_eff_trigger_emb_tt_EraDown", "DoubleTauTriggerSFDown"),
 ]
 
 # Embedding specific variations.
@@ -665,10 +722,21 @@ prefiring = [
     for shift in SHIFT_DIRECTIONS
 ]
 
-# Z pT reweighting
+# Z pT reweighting, assuming NNLO samples with 9 parameters
 zpt = [
-    SquareWeight("CMS_htt_dyShape_EraUp", "zPtReweightWeight"),
-    RemoveWeight("CMS_htt_dyShape_EraDown", "zPtReweightWeight"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_htt_dyShape_{shift}_1", f"zPtReweightWeight{shift}1"),
+        (f"CMS_htt_dyShape_{shift}_2", f"zPtReweightWeight{shift}2"),
+        (f"CMS_htt_dyShape_{shift}_3", f"zPtReweightWeight{shift}3"),
+        (f"CMS_htt_dyShape_{shift}_4", f"zPtReweightWeight{shift}4"),
+        (f"CMS_htt_dyShape_{shift}_5", f"zPtReweightWeight{shift}5"),
+        (f"CMS_htt_dyShape_{shift}_6", f"zPtReweightWeight{shift}6"),
+        (f"CMS_htt_dyShape_{shift}_7", f"zPtReweightWeight{shift}7"),
+        (f"CMS_htt_dyShape_{shift}_8", f"zPtReweightWeight{shift}8"),
+        (f"CMS_htt_dyShape_{shift}_9", f"zPtReweightWeight{shift}9"),
+    ]
 ]
 
 # Top pT reweighting
@@ -683,7 +751,7 @@ ff_variations_lt = [
     ReplaceCutAndAddWeight(
         f"anti_iso_CMS_{syst}{shift}_Channel_Era",
         "tau_iso",
-        Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+        Cut(f"id_tau_vsJet_Medium_2 < 0.5", "tau_anti_iso"),
         Weight(f"{RuntimeVariables.FF_name_lt}__{syst}{shift}", "fake_factor"),
     )
     for shift in SHIFT_DIRECTIONS
@@ -695,20 +763,17 @@ ff_variations_lt = [
         'ttbarFFunc',
         'process_fractionsfracQCDUnc',
         'process_fractionsfracWjetsUnc',
-        'process_fractionsfracTTbarUnc',
-        'QCD_non_closure_m_vis_Corr',
+        'process_fractionsfracTTbarUnc'
         'QCD_non_closure_mass_2_Corr',
         'QCD_non_closure_deltaR_ditaupair_Corr',
         'QCD_non_closure_iso_1_Corr',
         'QCD_non_closure_tau_decaymode_2_Corr',
-        # 'QCD_DR_SR_Corr',  # TODO: Add them when actually applying this correction!
-        'Wjets_non_closure_m_vis_Corr',
+        'QCD_DR_SR_Corr',  # TODO: Add them when actually applying this correction!
         'Wjets_non_closure_mass_2_Corr',
         'Wjets_non_closure_deltaR_ditaupair_Corr',
         'Wjets_non_closure_iso_1_Corr',
         'Wjets_non_closure_tau_decaymode_2_Corr',
-        # 'Wjets_DR_SR_Corr',  # TODO: Add them when actually applying this correction!
-        'ttbar_non_closure_m_vis_Corr',
+        'Wjets_DR_SR_Corr',  # TODO: Add them when actually applying this correction!
         'ttbar_non_closure_mass_2_Corr',
         'ttbar_non_closure_deltaR_ditaupair_Corr',
         'ttbar_non_closure_iso_1_Corr',
@@ -726,7 +791,7 @@ ff_variations_tau_es_lt = [
             name,
             variation,
             "tau_iso",
-            Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
+            Cut(f"id_tau_vsJet_Medium_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
             Weight(f"{RuntimeVariables.FF_name_lt}__{variation}", "fake_factor"),
         )
     )
@@ -746,7 +811,7 @@ ff_variations_tau_es_emb_lt = [
             name,
             variation,
             "tau_iso",
-            Cut(f"id_tau_vsJet_Tight_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
+            Cut(f"id_tau_vsJet_Medium_2__{variation} < 0.5 && id_tau_vsJet_VLoose_2__{variation} > 0.5", "tau_anti_iso"),
             Weight(f"{RuntimeVariables.FF_name_lt}__{variation}", "fake_factor"),
         )
     )
@@ -760,6 +825,29 @@ ff_variations_tau_es_emb_lt = [
 ]
 
 # # tt channel
+# Variations on the jet backgrounds estimated with the fake factor method.
+ff_variations_tt = [
+    ReplaceCutAndAddWeight(
+        f"anti_iso_CMS_{syst}{shift}_Channel_Era",
+        "tau_iso",
+        Cut(f"id_tau_vsJet_Medium_2 < 0.5", "tau_anti_iso"),
+        Weight(f"{RuntimeVariables.FF_name_lt}__{syst}{shift}", "fake_factor"),
+    )
+    for shift in SHIFT_DIRECTIONS
+    for syst in [
+        'QCDFFunc',
+        'QCDFFmcSubUnc',
+        'process_fractionsfracQCDUnc',
+        'QCD_non_closure_pt_2_Corr',
+        'QCD_DR_SR_Corr', 
+        'QCD_subleadingFFunc',
+        'QCD_subleadingFFmcSubUnc',
+        'process_fractions_subleadingfracQCDUnc',
+        'QCD_subleading_non_closure_pt_1_Corr',
+        'QCD_subleading_DR_SR_Corr',  
+    ]
+]
+
 ff_variations_tau_es_tt = [
     LazyVariable(  # requieres LazyVariation since Used.FF_name_tt may be defined later
         lambda: ReplaceVariableReplaceCutAndAddWeight(
@@ -769,14 +857,14 @@ ff_variations_tau_es_tt = [
             Cut(
                 f"""(
                         (
-                            (id_tau_vsJet_Tight_1__{variation} < 0.5) &&
-                            (id_tau_vsJet_Tight_2__{variation} > 0.5) &&
-                            (id_tau_vsJet_VLoose_1__{variation} > 0.5)
+                            (id_tau_vsJet_Medium_1__{variation} < 0.5) &&
+                            (id_tau_vsJet_Medium_2__{variation} > 0.5) &&
+                            (id_tau_vsJet_VVVLoose_1__{variation} > 0.5)
                         ) ||
                         (
-                            (id_tau_vsJet_Tight_1__{variation} > 0.5) &&
-                            (id_tau_vsJet_Tight_2__{variation} < 0.5) &&
-                            (id_tau_vsJet_VLoose_2__{variation} > 0.5)
+                            (id_tau_vsJet_Medium_1__{variation} > 0.5) &&
+                            (id_tau_vsJet_Medium_2__{variation} < 0.5) &&
+                            (id_tau_vsJet_VVVLoose_2__{variation} > 0.5)
                         )
                     )""",
                 "tau_anti_iso"
@@ -784,8 +872,8 @@ ff_variations_tau_es_tt = [
             Weight(
                 f"""(
                     (0.5) * (
-                        ({RuntimeVariables.FF_name_tt_1}__{variation} * (id_tau_vsJet_Tight_1__{variation} < 0.5)) +
-                        ({RuntimeVariables.FF_name_tt_2}__{variation} * (id_tau_vsJet_Tight_2__{variation} < 0.5))
+                        ({RuntimeVariables.FF_name_tt_1}__{variation} * (id_tau_vsJet_Medium_1__{variation} < 0.5)) +
+                        ({RuntimeVariables.FF_name_tt_2}__{variation} * (id_tau_vsJet_Medium_2__{variation} < 0.5))
                     )
                 )""",
                 "fake_factor",
@@ -802,7 +890,7 @@ ff_variations_tau_es_tt = [
 ]
 
 # tt channel emb process
-ff_variations_tau_es_tt = [
+ff_variations_tau_es_emb_tt = [
     LazyVariable(  # requieres LazyVariation since Used.FF_name_tt may be defined later
         lambda: ReplaceVariableReplaceCutAndAddWeight(
             name,
@@ -811,14 +899,14 @@ ff_variations_tau_es_tt = [
             Cut(
                 f"""(
                         (
-                            (id_tau_vsJet_Tight_1__{variation} < 0.5) &&
-                            (id_tau_vsJet_Tight_2__{variation} > 0.5) &&
-                            (id_tau_vsJet_VLoose_1__{variation} > 0.5)
+                            (id_tau_vsJet_Medium_1__{variation} < 0.5) &&
+                            (id_tau_vsJet_Medium_2__{variation} > 0.5) &&
+                            (id_tau_vsJet_VVVLoose_1__{variation} > 0.5)
                         ) ||
                         (
-                            (id_tau_vsJet_Tight_1__{variation} > 0.5) &&
-                            (id_tau_vsJet_Tight_2__{variation} < 0.5) &&
-                            (id_tau_vsJet_VLoose_2__{variation} > 0.5)
+                            (id_tau_vsJet_Medium_1__{variation} > 0.5) &&
+                            (id_tau_vsJet_Medium_2__{variation} < 0.5) &&
+                            (id_tau_vsJet_VVVLoose_2__{variation} > 0.5)
                         )
                     )""",
                 "tau_anti_iso"
@@ -826,8 +914,8 @@ ff_variations_tau_es_tt = [
             Weight(
                 f"""(
                     (0.5) * (
-                        ({RuntimeVariables.FF_name_tt_1}__{variation} * (id_tau_vsJet_Tight_1__{variation} < 0.5)) +
-                        ({RuntimeVariables.FF_name_tt_2}__{variation} * (id_tau_vsJet_Tight_2__{variation} < 0.5))
+                        ({RuntimeVariables.FF_name_tt_1}__{variation} * (id_tau_vsJet_Medium_1__{variation} < 0.5)) +
+                        ({RuntimeVariables.FF_name_tt_2}__{variation} * (id_tau_vsJet_Medium_2__{variation} < 0.5))
                     )
                 )""",
                 "fake_factor",
@@ -1197,13 +1285,12 @@ class FakeRateVariations(_VariationCollection):
 
 
 class TriggerEfficiencyVariations(_VariationCollection):
-    # TODO add trigger efficiency uncertainties
-    # tau_trigger_eff_tt = tau_trigger_eff_tt
-    # tau_trigger_eff_tt_emb = tau_trigger_eff_tt_emb
     trigger_eff_mt = trigger_eff_mt
     trigger_eff_et = trigger_eff_et
+    trigger_eff_tt = trigger_eff_tt
     trigger_eff_et_emb = trigger_eff_et_emb
     trigger_eff_mt_emb = trigger_eff_mt_emb
+    trigger_eff_tt_emb = trigger_eff_tt_emb
 
 
 # Additional uncertainties
@@ -1224,9 +1311,10 @@ class JetFakeVariations(_VariationCollection):
     ff_variations_lt = ff_variations_lt
     ff_variations_tau_es_lt = ff_variations_tau_es_lt
     ff_variations_tau_es_emb_lt = ff_variations_tau_es_emb_lt
-    # ff_variations_tt = ff_variations_tt
+    ff_variations_tt = ff_variations_tt
     # qcd_variations_em = qcd_variations_em
-    # ff_variations_tau_es_tt = ff_variations_tau_es_tt
+    ff_variations_tau_es_tt = ff_variations_tau_es_tt
+    ff_variations_tau_es_emb_tt = ff_variations_tau_es_emb_tt
 
 # ------------------------------------------------------------------------------------------
 

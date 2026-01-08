@@ -204,34 +204,23 @@ def add_processes(
 
     add_fn(name="data", dataset=datasets["data"], selections=select_fn())
     #add_fn(name="emb", dataset=datasets["EMB"], selections=select_fn(selection.ZTT_embedded))
-    #add_fn(name="ztt_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.TT))
-    #add_fn(name="zl_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.L))
-    #add_fn(name="zj_nlo", dataset=datasets["DYNLO"], selections=select_fn(*selection.DY_NLO.J))
-    #add_fn(name="ttl", dataset=datasets["TT"], selections=select_fn(*selection.TT.L))
-    #add_fn(name="ttt", dataset=datasets["TT"], selections=select_fn(*selection.TT.T))
-    #add_fn(name="ttj", dataset=datasets["TT"], selections=select_fn(*selection.TT.J))
-    #add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(*selection.VV.L))
-    #add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(*selection.VV.T))
-    #add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(*selection.VV.J))
+    add_fn(name="ztt", dataset=datasets["DY"], selections=select_fn(*selection.DY.TT))
+    add_fn(name="zl", dataset=datasets["DY"], selections=select_fn(*selection.DY.L))
+    add_fn(name="zj", dataset=datasets["DY"], selections=select_fn(*selection.DY.J))
+    add_fn(name="ttl", dataset=datasets["TT"], selections=select_fn(*selection.TT.L))
+    add_fn(name="ttt", dataset=datasets["TT"], selections=select_fn(*selection.TT.T))
+    add_fn(name="ttj", dataset=datasets["TT"], selections=select_fn(*selection.TT.J))
+    add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(*selection.VV.L))
+    add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(*selection.VV.T))
+    add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(*selection.VV.J))
     # TODO add ST?
-    #add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
-    #if channel != "mm":
-    #    add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
-    #    add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
-    #add_fn(name="emb", dataset=datasets["EMB"], selections=select_fn(selection.ZTT_embedded))
-    #add_fn(name="ztt", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZTT))
-    #add_fn(name="zl", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZL))
-    #add_fn(name="zj", dataset=datasets["DY"], selections=select_fn(selection.DY, selection.ZJ))
-    add_fn(name="ztt_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZTT_nlo))
-    add_fn(name="zl_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZL_nlo))
-    add_fn(name="zj_nlo", dataset=datasets["DYNLO"], selections=select_fn(selection.DY_NLO, selection.ZJ_nlo))
-    add_fn(name="ttl", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTL))
-    add_fn(name="ttt", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTT))
-    add_fn(name="ttj", dataset=datasets["TT"], selections=select_fn(selection.TT, selection.TTJ))
-    add_fn(name="vvl", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVL))
-    add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVT))
-    add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVJ))
     add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
+    #if channel != "mm":
+    add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
+    add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
+    add_fn(name="tth", dataset=datasets["ttH"], selections=select_fn(selection.ttH))
+    add_fn(name="vh", dataset=datasets["VH"], selections=select_fn(selection.VH))
+    #add_fn(name="emb", dataset=datasets["EMB"], selections=select_fn(selection.ZTT_embedded))
 
 
 def get_select_function(
@@ -471,12 +460,9 @@ def main(args):
         procS = {
             "data",
             #"emb",
-            #"ztt",
-            #"zl",
-            #"zj",
-            "ztt_nlo",
-            "zl_nlo",
-            "zj_nlo",
+            "ztt",
+            "zl",
+            "zj",
             "ttt",
             "ttl",
             "ttj",
@@ -484,10 +470,12 @@ def main(args):
             "vvl",
             "vvj",
             "w",
-            #"ggh",
-            #"qqh",
-            # "zh",
-            # "wh",
+            "ggh",
+            "qqh",
+            "tth",
+            "vh",
+            #"zh",
+            #"wh",
         }
     else:
         procS = args.process_selection
@@ -517,6 +505,7 @@ def main(args):
         "tth",
         "zh",
         "wh",
+        "vh",
         "gghww",
         "qqhww",
         "zhww",
@@ -524,7 +513,7 @@ def main(args):
     } & procS
     signalsS = sm_signalsS
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
-        signalsS = signalsS & {"ggh", "qqh"}
+        signalsS = signalsS & {"ggh", "qqh", "vh", "tth",}
 
     simulatedProcsDS = {
         chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
@@ -568,7 +557,6 @@ def main(args):
             # Book variations common to all channels.
             _book({"ggh"} & procS, [variations.ggh_acceptance, variations.ggh_muRmuF_acceptance])
             _book({"qqh"} & procS, [variations.qqh_acceptance, variations.qqh_muRmuF_acceptance])
-            _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging])
             _book(signalsS, variations.LHE_scale.unrolled())
 
             _book({"ztt", "zj", "zl", "w"} & procS | signalsS, variations.Recoil.unrolled())
@@ -579,7 +567,7 @@ def main(args):
             if channel in ["et", "mt", "tt"]:
                 _book(jetFakesDS[channel], [variations.jet_to_tau_fake])
                 _book((trueTauBkgS | leptonFakesS | signalsS) - {"zl"}, variations.TauEnergyScale.unrolled())
-                _book(embS, (variations.TauEnergyScale + variations.TauEmbeddingEnergyScale).unrolled())
+                #_book(embS, (variations.TauEnergyScale + variations.TauEmbeddingEnergyScale).unrolled())
 
             if channel in ["et", "mt"]:
                 _book((trueTauBkgS | leptonFakesS | signalsS) - {"zl"}, [variations.tau_id_eff_lt])
@@ -596,17 +584,17 @@ def main(args):
             if channel == "mt":
                 _book({"zl"} & procS, [variations.mu_fake_es_inc])
                 _book(simulatedProcsDS[channel], [variations.trigger_eff_mt])
-                _book(embS, [variations.trigger_eff_mt_emb])
+                #_book(embS, [variations.trigger_eff_mt_emb])
                 _book({"zl"} & procS, [variations.zll_mt_fake_rate])
 
             if channel == "et":
                 _book({"zl"} & procS, [variations.ele_fake_es])
                 _book(simulatedProcsDS[channel], [variations.trigger_eff_et])
-                _book(embS, [variations.trigger_eff_et_emb])
+                #_book(embS, [variations.trigger_eff_et_emb])
                 _book({"zl"} & procS, [variations.zll_et_fake_rate])
             if channel == "tt":
                 _book(trueTauBkgS | leptonFakesS | signalsS, [variations.tau_id_eff_tt])
-                # _book(simulatedProcsDS[channel], [variations.tau_trigger_eff_tt])  # TODO
+                _book(simulatedProcsDS[channel], [variations.tau_trigger_eff_tt])
                 # _book(embS, variations.TauIDAndTriggerEfficiency.unrolled())  # TODO
                 # _book(dataS | embS | trueTauBkgS, [variations.FakeFactorTT.unrolled()])  # TODO
 
@@ -618,6 +606,11 @@ def main(args):
 
             else:
                 _book(simulatedProcsDS[channel], [variations.jet_es_hem])
+
+            if "2024" in args.era or "2025" in args.era:
+                _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging_2024])
+            else:
+                _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging])
 
     # Step 2: convert units to graphs and merge them
     g_manager = GraphManager(unit_manager.booked_units, True)
@@ -663,5 +656,6 @@ if __name__ == "__main__":
     else:
         log_file = f"{args.output_file}.log"
     logger = setup_logging(logger=logging.getLogger(__name__))
+    variations.set_jet_wp(args.vs_jet_wp)
     variations.set_ff_type(args.ff_type)
     main(args)

@@ -15,7 +15,7 @@ def fake_factor_estimation(
     selection,
     variable,
     variation="Nominal",
-    is_embedding=True,
+    is_embedding=False,
     sub_scale=1.0,
     special="",
     doTauES=False,
