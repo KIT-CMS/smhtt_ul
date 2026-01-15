@@ -1,14 +1,20 @@
 import inspect
 import io
 import logging
-from contextlib import contextmanager
+import logging.handlers
+import multiprocessing
+import os
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from datetime import datetime
 from logging import LogRecord
-from typing import Generator, List, Type, Union
+from time import localtime, strftime
+from typing import Generator, List, Optional, Type, Union
 
 from rich.console import Console, ConsoleRenderable
 from rich.live import Live
 from rich.logging import RichHandler
 from rich.text import Text
+from rich.traceback import Traceback
 from tqdm import tqdm
 
 LOG_FILENAME = "routine_output.log"
@@ -23,11 +29,56 @@ BOLD_RED = "\x1b[31;1m"
 RESET = "\x1b[0m"
 
 
+def is_in_ipython():
+    try:
+        from IPython import get_ipython
+        if get_ipython() is not None:
+            return True
+    except ImportError:
+        pass
+    return False
+
+
 def capture_rich_renderable_as_string(renderable, width: int = 200) -> str:
     string_io = io.StringIO()
     capture_console = Console(file=string_io, record=True, width=width)
     capture_console.print(renderable)
     return string_io.getvalue()
+
+
+def worker_init(log_queue: multiprocessing.Queue, level: int = logging.INFO):
+    root = logging.getLogger()
+    if root.hasHandlers():
+        root.handlers.clear()
+    root.setLevel(level)
+    handler = logging.handlers.QueueHandler(log_queue)
+    root.addHandler(handler)
+
+
+class BufferedWorkerHandler(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.records = []
+
+    def emit(self, record):
+        self.records.append(record)
+
+
+class RealtimeInjector(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        if not getattr(record, 'summary', False):
+            record.realtime = True
+        return True
+
+
+class ConsoleDisplayFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return not getattr(record, 'summary', False)
+
+
+class FileDisplayFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return not getattr(record, 'realtime', False)
 
 
 class NoFileOnlyFilter(logging.Filter):
@@ -40,6 +91,8 @@ class CustomRichHandler(RichHandler):
         super().__init__(*args, **kwargs)
 
     def render_message(self, record: LogRecord, message: str) -> ConsoleRenderable:
+        if getattr(record, 'summary', False):
+            return Text.from_markup(message) if self.markup else Text(message)
         message_renderable = super().render_message(record, message)
         return Text.assemble(
             Text(f"{record.name} ", style="bold cyan"),
@@ -48,14 +101,38 @@ class CustomRichHandler(RichHandler):
 
 
 class MarkupStrippingRichHandler(CustomRichHandler):
-    """
-    A RichHandler that strips Rich markup from the log message before rendering.
-    Ideal for writing clean, plain-text log files.
-    """
     def render_message(self, record: LogRecord, message: str) -> ConsoleRenderable:
         """Strips markup from the message before passing it to the parent renderer."""
         plain_message = Text.from_markup(message).plain
         return super().render_message(record, plain_message)
+
+    def emit(self, record: LogRecord):
+        if getattr(record, 'summary', False):
+            try:
+                msg = self.format(record)
+                plain_msg = Text.from_markup(msg).plain
+                self.console.file.write(plain_msg + "\n")
+                self.console.file.flush()
+            except Exception:
+                self.handleError(record)
+            return
+        super().emit(record)
+
+    def render(self, *, record: LogRecord, traceback: Optional[Traceback], message_renderable: ConsoleRenderable) -> ConsoleRenderable:
+        if getattr(record, 'summary', False):
+            time_format = self._log_render.time_format
+            time_str = datetime.fromtimestamp(record.created).strftime(time_format)
+
+            level_text = self.get_level_text(record)
+            level_str = level_text.plain.ljust(8)
+            plain_str = str(message_renderable)
+            lines = plain_str.split('\n')
+            indented_lines = ['        ' + line for line in lines]
+            indented_str = '\n'.join(indented_lines)
+            indented_message = Text(indented_str)
+            return Text.assemble(Text(f"{time_str} {level_str}\n"), indented_message)
+        else:
+            return super().render(record=record, traceback=traceback, message_renderable=message_renderable)
 
 
 class _DuplicateFilter:
@@ -74,7 +151,18 @@ def setup_logging(
     logger: logging.Logger = logging.getLogger(""),
     level: Union[int, None] = logging.INFO,
     console_markup: bool = False,
+    queue: Union[multiprocessing.Queue, None] = None,
 ) -> logging.Logger:
+
+    if queue is not None:
+        if logger.hasHandlers():
+            logger.handlers.clear()
+        logger.setLevel(level or LOG_LEVEL)
+        handler = logging.handlers.QueueHandler(queue)
+        logger.addHandler(handler)
+        logger.propagate = False
+        return logger
+
     if output_file is None:
         output_file = LOG_FILENAME
     if level is None:
@@ -95,10 +183,11 @@ def setup_logging(
         markup=console_markup,
     )
     console_handler.addFilter(NoFileOnlyFilter())
+    console_handler.addFilter(ConsoleDisplayFilter())
     logger.addHandler(console_handler)
 
     log_file = open(output_file, "a")
-    file_console = Console(file=log_file, record=True, width=200)
+    file_console = Console(file=log_file, record=True, width=172)
     file_handler = MarkupStrippingRichHandler(
         console=file_console,
         show_time=True,
@@ -108,6 +197,7 @@ def setup_logging(
         rich_tracebacks=False,
         markup=False,
     )
+    file_handler.addFilter(FileDisplayFilter())
     logger.addHandler(file_handler)
 
     # Install the duplicate filter permanently if not already present.
@@ -181,6 +271,91 @@ class LogContext:
 
     def __init__(self, logger: logging.Logger) -> None:
         self.logger = logger
+
+    @contextmanager
+    def group_worker_logs(self, worker_name: str) -> Generator[None, None, None]:
+        class SimpleBuffer(logging.Handler):
+            def __init__(self):
+                super().__init__()
+                self.buffer = []
+
+            def emit(self, record):
+                msg_text = self.format(record)
+
+                filename = os.path.basename(record.pathname)
+                path_info = f"{filename}:{record.lineno}"
+
+                formatted_lines, lines, target_width, n_indent = [], msg_text.split("\n"), 172, 4
+
+                for i, line in enumerate(lines):
+                    indented_line = " " * n_indent + line
+                    if i == 0:
+                        current_len = len(indented_line)
+                        needed_padding = target_width - current_len - len(path_info)
+                        if needed_padding < 2:
+                            needed_padding = 2
+                        full_line = f"{indented_line}{' ' * needed_padding}{path_info}"
+                    else:
+                        full_line = indented_line
+                    formatted_lines.append(full_line)
+
+                self.buffer.append("\n".join(formatted_lines))
+
+        buffer = SimpleBuffer()
+        buffer.setFormatter(logging.Formatter(
+            "[%(asctime)s.%(msecs)03d] %(levelname)-8s %(name)s: %(message)s",
+            datefmt="%H:%M:%S"
+        ))
+        injector = RealtimeInjector()
+        self.logger.addHandler(buffer)
+        self.logger.addFilter(injector)
+        try:
+            yield
+        finally:
+            self.logger.removeHandler(buffer)
+            self.logger.removeFilter(injector)
+            if buffer.buffer:
+                block = "\n".join(buffer.buffer)
+                header = f"[bold cyan]{'=' * 30} START WORKER: {worker_name} {'=' * 30}[/]"
+                footer = f"[bold cyan]{'=' * 31} END WORKER: {worker_name} {'=' * 31}[/]"
+                self.logger.info(f"{header}\n{block}\n{footer}", extra={'summary': True})
+
+    @contextmanager
+    def _parallel_session(self) -> Generator[multiprocessing.Queue, None, None]:
+        manager = multiprocessing.Manager()
+        log_queue = manager.Queue()
+        listener = logging.handlers.QueueListener(
+            log_queue,
+            *self.logger.handlers,
+            respect_handler_level=True
+        )
+        listener.start()
+        try:
+            yield log_queue
+        finally:
+            listener.stop()
+
+    @contextmanager
+    def parallel_session(self) -> Generator[dict, None, None]:
+        manager = multiprocessing.Manager()
+        log_queue = manager.Queue()
+
+        listener = logging.handlers.QueueListener(
+            log_queue,
+            *self.logger.handlers,
+            respect_handler_level=True
+        )
+        listener.start()
+        pool_config = {
+            "initializer": worker_init,
+            "initargs": (log_queue, self.logger.level)
+        }
+
+        try:
+            yield pool_config
+        finally:
+            listener.stop()
+            manager.shutdown()
 
     @contextmanager
     def redirect_tqdm(self) -> Generator[None, None, None]:
@@ -282,3 +457,16 @@ class LogContext:
             yield
         except exceptions or (Exception,) as e:
             self.logger.error(f"{msg}: {type(e).__name__} - {e}", exc_info=True)
+
+    @contextmanager
+    def suppress_terminal_print(self) -> Generator[None, None, None]:
+        if is_in_ipython():
+            from IPython.display import display
+            from ipywidgets import Output
+
+            out = Output()
+            with out:
+                yield
+        else:
+            with open(os.devnull, 'w') as f, redirect_stdout(f), redirect_stderr(f):
+                yield
