@@ -16,6 +16,8 @@ from rich.logging import RichHandler
 from rich.text import Text
 from rich.traceback import Traceback
 from tqdm import tqdm
+import functools
+
 
 LOG_FILENAME = "routine_output.log"
 LOG_LEVEL = logging.INFO
@@ -53,6 +55,42 @@ def worker_init(log_queue: multiprocessing.Queue, level: int = logging.INFO):
     root.setLevel(level)
     handler = logging.handlers.QueueHandler(log_queue)
     root.addHandler(handler)
+
+
+def grouped_logs(arg=None):
+    def _apply_logging(func, extractor):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                if extractor:
+                    target = extractor(*args, **kwargs)
+                    if isinstance(target, logging.Logger):
+                        logger = target
+                        name = target.name
+                    else:
+                        name = str(target)
+                        logger = logging.getLogger(name)
+                else:
+                    name = func.__name__
+                    logger = logging.getLogger(name)
+            except Exception:
+                name = func.__name__
+                logger = logging.getLogger(name)
+
+            with LogContext(logger).grouped_logs(name):
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    if callable(arg) and getattr(arg, "__name__", "") != "<lambda>":
+        return _apply_logging(arg, None)
+
+    extractor = arg
+
+    def decorator(func):
+        return _apply_logging(func, extractor)
+
+    return decorator
 
 
 class BufferedWorkerHandler(logging.Handler):
@@ -149,7 +187,7 @@ class _DuplicateFilter:
 def setup_logging(
     output_file: Union[str, None] = None,
     logger: logging.Logger = logging.getLogger(""),
-    level: Union[int, None] = logging.INFO,
+    level: Union[int, None] = None,
     console_markup: bool = False,
     queue: Union[multiprocessing.Queue, None] = None,
 ) -> logging.Logger:
@@ -161,6 +199,11 @@ def setup_logging(
         handler = logging.handlers.QueueHandler(queue)
         logger.addHandler(handler)
         logger.propagate = False
+        return logger
+
+    root = logging.getLogger()
+    if any(isinstance(h, logging.handlers.QueueHandler) for h in root.handlers):
+        logger.setLevel(level or LOG_LEVEL)
         return logger
 
     if output_file is None:
@@ -273,7 +316,7 @@ class LogContext:
         self.logger = logger
 
     @contextmanager
-    def group_worker_logs(self, worker_name: str) -> Generator[None, None, None]:
+    def grouped_logs(self, worker_name: str) -> Generator[None, None, None]:
         class SimpleBuffer(logging.Handler):
             def __init__(self):
                 super().__init__()
@@ -319,21 +362,6 @@ class LogContext:
                 header = f"[bold cyan]{'=' * 30} START WORKER: {worker_name} {'=' * 30}[/]"
                 footer = f"[bold cyan]{'=' * 31} END WORKER: {worker_name} {'=' * 31}[/]"
                 self.logger.info(f"{header}\n{block}\n{footer}", extra={'summary': True})
-
-    @contextmanager
-    def _parallel_session(self) -> Generator[multiprocessing.Queue, None, None]:
-        manager = multiprocessing.Manager()
-        log_queue = manager.Queue()
-        listener = logging.handlers.QueueListener(
-            log_queue,
-            *self.logger.handlers,
-            respect_handler_level=True
-        )
-        listener.start()
-        try:
-            yield log_queue
-        finally:
-            listener.stop()
 
     @contextmanager
     def parallel_session(self) -> Generator[dict, None, None]:
@@ -470,3 +498,4 @@ class LogContext:
         else:
             with open(os.devnull, 'w') as f, redirect_stdout(f), redirect_stderr(f):
                 yield
+
