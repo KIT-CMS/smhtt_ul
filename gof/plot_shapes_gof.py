@@ -106,7 +106,7 @@ def check_for_zero_bins(hist):
     return hist
 
 
-def derive_2d_gof_label(variable, label_dict):
+def _derive_2d_gof_label(variable, label_dict):
     # If 1D variable, return single item list
     if variable in label_dict:
         return [label_dict[variable]]
@@ -125,6 +125,51 @@ def derive_2d_gof_label(variable, label_dict):
             ]
 
     # Fallback
+    return [variable]
+
+
+def derive_2d_gof_label(variable, label_dict):
+    """
+    A robust label deriver that finds dictionary keys matching 
+    components of a merged variable name, even with underscore mismatches.
+    """
+    # 1. Direct match (for 1D variables)
+    if variable in label_dict:
+        return [label_dict[variable]]
+
+    # 2. Key-Combination Match (The "Smart" way)
+    # This checks if the variable is composed of any two keys in the dictionary
+    # by iterating through all keys and checking for a prefix/suffix match.
+    all_keys = sorted(label_dict.keys(), key=len, reverse=True) # Check longest keys first
+    
+    for key1 in all_keys:
+        if variable.startswith(key1):
+            # Try finding the second part, with or without a joining underscore
+            remainder = variable[len(key1):]
+            
+            # Check for: key1 + key2
+            if remainder in label_dict:
+                return ["Bin number of unrolled", label_dict[key1], label_dict[remainder]]
+            
+            # Check for: key1 + "_" + key2
+            if remainder.startswith("_"):
+                remainder_no_under = remainder[1:]
+                if remainder_no_under in label_dict:
+                    return ["Bin number of unrolled", label_dict[key1], label_dict[remainder_no_under]]
+
+    # 3. Traditional Split Logic (Backup)
+    parts = variable.split('_')
+    for i in range(1, len(parts)):
+        var1 = "_".join(parts[:i])
+        var2 = "_".join(parts[i:])
+        if var1 in label_dict and var2 in label_dict:
+            return ["Bin number of unrolled", label_dict[var1], label_dict[var2]]
+
+    # 4. Final Fail-safe: Diagnostic logging
+    logger.error(f"Label lookup failed for: '{variable}'")
+    logger.debug(f"Available keys in dict: {list(label_dict.keys())}")
+    
+    # Return the raw name so the script doesn't crash, but you'll see the error
     return [variable]
 
 

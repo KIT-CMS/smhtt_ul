@@ -132,7 +132,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         isoweight = ("iso_wgt_mu_1", "isoweight")
         idweight = ("id_wgt_mu_1", "idweight")
         tauidweight = (
-            f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))",
+            f"((gen_match_2 == 5) * ((id_tau_vsJet_{vs_jet_discr}_2 > 0.5) * id_wgt_tau_vsJet_{vs_jet_discr}_2 + (id_tau_vsJet_{vs_jet_discr}_2 < 0.5)) + (gen_match_2 != 5))",
             "taubyIsoIdWeight",
         )
         # tauidweight = None
@@ -536,7 +536,9 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
             if apply_wps:
                 ztt_embedded_weights.extend(
                     [
-                        (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_discr}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+                        (
+                            f"((gen_match_2 == 5) * ((id_tau_vsJet_{vs_jet_discr}_2 > 0.5) * id_wgt_tau_vsJet_{vs_jet_discr}_2 + (id_tau_vsJet_{vs_jet_discr}_2 < 0.5)) + (gen_match_2 != 5))",
+                            "taubyIsoIdWeight")
                     ]
                 )
             if not apply_wps:
