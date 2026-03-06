@@ -262,6 +262,9 @@ class ROOTToPlain(object):
         chain = ROOT.TChain(tree_name)
         chain.Add(ntuple_file)
 
+        if chain.GetEntries() == 0:
+            return chain, None
+
         for friend in friend_files:
             fchain = ROOT.TChain(tree_name)
             fchain.Add(friend)
@@ -345,6 +348,11 @@ class ROOTToPlain(object):
         _, _, filters, definitions, additional_columns, *paths = args
 
         _, rdf = ROOTToPlain._build_single_rdf(tree_and_paths=paths)
+
+        if rdf is None:
+            logger.warning(f"File {paths[1]} is empty or missing. Skipping.")
+            return pd.DataFrame()
+
         rdf, columns = ROOTToPlain._define_and_collect_columns(
             rdf=rdf,
             filters=filters,
@@ -384,6 +392,11 @@ class ROOTToPlain(object):
         directory, index, filters, definitions, additional_columns, *paths = args
 
         _, rdf = ROOTToPlain._build_single_rdf(tree_and_paths=paths)
+
+        if rdf is None:
+            logger.warning(f"File {paths[1]} is empty or missing. Skipping.")
+            return []
+
         rdf, columns = ROOTToPlain._define_and_collect_columns(
             rdf=rdf,
             filters=filters,
@@ -452,14 +465,16 @@ class ROOTToPlain(object):
             )
 
             if self.dtype == "ROOT":
-                self.tree_name, self.columns = tree_and_filepaths[0][0], results[0]
+                valid_results = [(i, cols) for i, cols in enumerate(results) if cols]
+                self.tree_name, self.columns = tree_and_filepaths[0][0], valid_results[0][1]
                 self._dataframe = ROOT.RDataFrame(
                     self.tree_name,
                     [str(tmpdir.joinpath(f"{i}.root")) for i, _ in enumerate(results)],
                 )
 
             if self.dtype == "pandas":
-                self._dataframe = pd.concat(results, axis=0, ignore_index=True, sort=False)
+                valid_results = [df for df in results if not df.empty]
+                self._dataframe = pd.concat(valid_results, axis=0, ignore_index=True, sort=False)
 
             if self.raw_path is not None:
                 logger.info(f"Saving raw dataframe to {self.raw_path}")
