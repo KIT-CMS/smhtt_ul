@@ -95,6 +95,7 @@ def plot_style_reference(hist_data, output_folder, era="Run2", channel=""):
     - markerfacecolor="none" (Open Circles)
     - Fixed Y-limits (1, 1e6)
     - Log Scale
+    - Adds N bins and Total Events text to bottom left
     """
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -115,11 +116,10 @@ def plot_style_reference(hist_data, output_folder, era="Run2", channel=""):
 
         if is_unrolled_2d:
             # --- 2D Case (Events per Bin) ---
-            # Raw counts, exactly like the reference snippet
             y_vals = counts
             y_errs = errors
             ylabel = "Events / bin"
-            xlabel = var_name  # or f"Unrolled Bin Index ({var_name})"
+            xlabel = var_name
         else:
             # --- 1D Case (Events per Unit) ---
             # Normalize by width for proper density representation
@@ -147,6 +147,23 @@ def plot_style_reference(hist_data, output_folder, era="Run2", channel=""):
         # CMS Label
         hep.cms.label(loc=0, ax=ax, data=True, label="Work in Progress", rlabel=f"{era} {channel}")
 
+        # --- ADDED: Info Text (Bottom Left) ---
+        n_bins = len(counts)
+        total_events = np.sum(counts)  # Sum of raw counts, not y_vals (which might be density)
+
+        info_text = f"Bins: {n_bins}\nTotal Events: {total_events:.0f}"
+
+        ax.text(
+            0.04,
+            0.04,  # X, Y coordinates (4% from left, 4% from bottom)
+            info_text,
+            transform=ax.transAxes,  # Coordinate system: relative to axes (0 to 1)
+            fontsize=16,  # Standard CMS-style font size
+            verticalalignment="bottom",
+            horizontalalignment="left",
+        )
+        # --------------------------------------
+
         # Axes Styling
         ax.legend(loc="upper right")
         ax.set_yscale("log")
@@ -156,11 +173,9 @@ def plot_style_reference(hist_data, output_folder, era="Run2", channel=""):
 
         # Save
         save_path = os.path.join(output_folder, f"{var_name}.png")
-        # save_path_pdf = os.path.join(output_folder, f"{var_name}.pdf")
 
         logger.info(f"Saving plot to {save_path}")
         plt.savefig(save_path, bbox_inches="tight")
-        # plt.savefig(save_path_pdf, bbox_inches='tight')
         plt.close(fig)
 
 
