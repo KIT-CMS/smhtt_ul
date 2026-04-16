@@ -648,6 +648,12 @@ def main(args):
     else:
         variables = args.variables
 
+    variables_unique = list(dict.fromkeys(variables))
+    if len(variables_unique) != len(variables):
+        logger.warning(f"Removed duplicate variables from input list: {sorted(set(v for v in variables if variables.count(v) > 1))}")
+    variables = variables_unique
+    args.variables = variables
+
     logger.info("Processing era {}".format(args.era))
     logger.info("Processing channel {}".format(args.channel))
     logger.info("Variables: {}".format(variables))

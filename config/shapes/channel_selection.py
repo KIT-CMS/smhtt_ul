@@ -36,8 +36,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["againstElectronDiscriminator"] = "(id_tau_vsEle_VVLoose_2 > 0.5)"
             cuts["tau_iso"] = "(id_tau_vsJet_Tight_2 > 0.5)"
             cuts["muon_iso"] = "(iso_1 < 0.15)"
-            cuts["mt_cut"] = "(mt_1 < 65)"
-            cuts["m_vis_cut"] = "(m_vis > 40)"
+            cuts["mt_cut"] = "(mt_1 < 70)"
+            # cuts["m_vis_cut"] = "(m_vis > 40)"
             # TODO: dz cut???
             # TODO: dxy cut???
 

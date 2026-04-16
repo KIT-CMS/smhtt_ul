@@ -5,9 +5,11 @@ ADDITIONAL_MULTIFRIENDS=""
 SELECTION_OPTION="CR"
 SELECTION_OPTION_ESTIMATION="CR"
 PLOTVERSION="all"
-FF_TYPE="none"
+FF_TYPE="fake_factor"
 VARIABLES=""
 NANOAODVERSION="v9"
+LOCAL_CACHE="true"
+LOCAL_CACHE_WORKERS="10"
 DEFAULT_VARIABLES_LIST=(
   pt_1 eta_1 phi_1 tau_decaymode_1 mt_1 iso_1 mass_1
   pt_2 eta_2 phi_2 tau_decaymode_2 mt_2 iso_2 mass_2
@@ -21,9 +23,8 @@ DEFAULT_VARIABLES_LIST=(
   nbtag njets
   q_1 pzetamissvis jet_hemisphere
   deltaR_ditaupair deltaEta_ditaupair deltaPhi_ditaupair
-  deltaR_jj deltaR_1j1 deltaR_1j2 deltaR_2j1 deltaR_2j2 deltaR_12j1 deltaR_12j2 deltaR_12jj
-  deltaEta_jj deltaEta_1j1 deltaEta_1j2 deltaEta_2j1 deltaEta_2j2 deltaEta_12j1 deltaEta_12j2 deltaEta_12jj
-  deltaPhi_jj deltaPhi_1j1 deltaPhi_1j2 deltaPhi_2j1 deltaPhi_2j2 deltaPhi_12j1 deltaPhi_12j2 deltaPhi_12jj
+  deltaR_jj deltaR_1j1 deltaR_1j2 deltaR_2j1 deltaR_2j2 deltaR_12j1 deltaR_12j2
+  deltaEta_jj deltaEta_1j1 deltaEta_1j2 deltaEta_2j1 deltaEta_2j2 deltaEta_12j1 deltaEta_12j2
   eta_fastmtt m_fastmtt phi_fastmtt pt_fastmtt
 )
 
@@ -41,6 +42,8 @@ options=(
   "p:plotversion:"
   "v:variables:"
   "N:nanoaodversion:"
+  "L:locally"
+  "W:local_cache_workers:"
 )
 
 short_opts=""
@@ -92,6 +95,10 @@ while true; do
     VARIABLES="${2}"; shift 2; ;;
   -N | --nanoaodversion)
     NANOAODVERSION="${2}"; shift 2; ;;
+  -L | --locally)
+    LOCAL_CACHE="true"; shift; ;;
+  -W | --local_cache_workers)
+    LOCAL_CACHE_WORKERS="${2}"; shift 2; ;;
   --)
     shift
     break
@@ -120,6 +127,14 @@ fi
 if [ -z "${USED_VARIABLES}" ]; then
     echo "ERROR: The final variable list to be plotted is empty. Exiting." >&2
     exit 1
+fi
+
+LOCAL_CACHE_FLAG=""
+LOCAL_CACHE_WORKERS_FLAG=""
+if [[ "${LOCAL_CACHE}" == "true" ]]; then
+  echo "INFO: Local ntuple cache enabled. Using /ceph/${USER} when possible with ${LOCAL_CACHE_WORKERS} worker(s)."
+  LOCAL_CACHE_FLAG="--locally"
+  LOCAL_CACHE_WORKERS_FLAG="--local-cache-workers ${LOCAL_CACHE_WORKERS}"
 fi
 
 FRIENDS=""
@@ -215,7 +230,7 @@ if [[ ${MODE} == "SHAPES" ]]; then
     --control-plots
     --control-plot-set ${USED_VARIABLES}
     --output-file ${shapes_output}
-    --xrootd
+    --xrootd ${LOCAL_CACHE_FLAG} ${LOCAL_CACHE_WORKERS_FLAG}
     --validation-tag ${TAG}
     --vs-jet-wp "Tight"
     --vs-ele-wp "VVLoose"

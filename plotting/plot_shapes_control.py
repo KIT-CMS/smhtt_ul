@@ -153,12 +153,16 @@ def main(info):
 
     # get background histograms
     total_bkg = None
-    if args.category is None:
+    plot_category = args.category
+    if plot_category == "Nominal":
+        plot_category = None
+
+    if plot_category is None:
         stype = "Nominal"
         cat = None
     else:
         stype = "Nominal"  # or args.category if you want to plot a special category
-        cat = args.category  # in that case this should be set to None
+        cat = plot_category  # in that case this should be set to None
 
     for index, process in enumerate(bkg_processes):
         _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()

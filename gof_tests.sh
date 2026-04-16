@@ -5,9 +5,9 @@ set -o pipefail
 
 CHANNEL="mt"
 ERA="2018"
-NTUPLETAG="ff_and_cr_production_2018UL_mt__2025-09-10_w_syst_v2"
-TAG="2025-09-10__test_2d_gof_binning__v6"
-YAML_FILE="config/gof_binning_mp2/binning_${ERA}_${CHANNEL}_2D.yaml"
+NTUPLETAG="ff_and_cr_2018UL_mt__2026-03-27__v2"
+TAG="gof_ml_ff"
+YAML_FILE="config/gof_binning/binning_${ERA}_${CHANNEL}_2D.yaml"
 
 FORCE_REPROCESSING=0
 
@@ -16,16 +16,17 @@ MODE=$1
 # ---
 
 VARIABLES_LIST_1D=(
-  # deltaR_2j1 deltaR_2j2 deltaR_1j1 deltaR_1j2 deltaR_12jj
-  # deltaEta_1j1 deltaEta_1j2 deltaEta_2j1 deltaEta_2j2 deltaEta_12jj
-  jeta_1 jeta_2 deltaR_jj pt_ttjj pt_tt pt_fastmtt eta_fastmtt deltaEta_ditaupair met
-  deltaEta_jj jpt_1 jpt_2  
-  mjj pt_dijet mt_tot m_vis pt_vis m_fastmtt 
-  #
-  pt_1 eta_1 mt_1 pt_2 eta_2 mt_2
-  deltaR_ditaupair njets nbtag
+  pt_1 eta_1 mt_1
+  pt_2 eta_2 mt_2
+  jpt_1 jeta_1
+  jpt_2 jeta_2
+  pt_tt pt_vis pt_dijet pt_ttjj
+  mjj mt_tot m_vis met nbtag njets pzetamissvis
+  deltaR_ditaupair deltaEta_ditaupair
+  deltaR_jj deltaR_1j1 deltaR_1j2 deltaR_2j1 deltaR_2j2 deltaR_12j1 deltaR_12j2
+  deltaEta_jj deltaEta_1j1 deltaEta_1j2 deltaEta_2j1 deltaEta_2j2 deltaEta_12j1 deltaEta_12j2
+  eta_fastmtt m_fastmtt pt_fastmtt
 )
-
 
 echo "[INFO] Parsing variables from ${YAML_FILE} based on master 1D list..."
 mapfile -t all_yaml_keys < <(grep '^[^ ]' "$YAML_FILE" | sed 's/://')  # all keys from the YAML.
@@ -54,8 +55,6 @@ for key in "${all_yaml_keys[@]}"; do
     done
 done
 
-# VARIABLES_LIST=( pt_vis )
-
 VARIABLES_1D=$(IFS=, ; echo "${VARIABLES_LIST_1D[*]}")
 VARIABLES=$(IFS=, ; echo "${final_variables_list[*]}")
 
@@ -75,6 +74,21 @@ shapes_rootfile=${shapes_output}.root
 shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
 THEORY_NUISANCES_TO_FREEZE="rgx{BR_Htt.*},rgx{LHE_.*},rgx{PS_scale.*},rgx{THU_.*},rgx{ggH_scale.*},rgx{vbf_scale.*}"
+
+ROBUST_OPTS=(
+    "--robustFit" "1"
+    "--robustHesse" "1"
+    "--setRobustFitAlgo" "Minuit2,Migrad"
+    "--cminDefaultMinimizerStrategy" "2"
+    "--cminDefaultMinimizerTolerance" "0.1"
+    "--stepSize=0.01"
+    "--cminPreScan"
+    "--cminFallbackAlgo" "Minuit2,Migrad,0:0.01,Minuit2,Migrad,0:0.01"
+    "--X-rtd" "FITTER_NEW_CROSSING_ALGO"
+    "--X-rtd" "FITTER_NEVER_GIVE_UP"
+    "--X-rtd" "MINIMIZER_analytic"
+)
+
 
 # if the output folder does not exist, create it
 if [ ! -d "$shapes_output" ]; then
@@ -168,6 +182,10 @@ if [[ $MODE == "SYNC" ]]; then
         -i ${shapes_rootfile} \
         -o ${shapes_output_synced} \
         -n 40 --gof
+    
+    # for VARIABLE in ${VARIABLES//,/ }; do
+    #     python3 shapes/modify_jetFakes.py -i ${shapes_output_synced}/${ERA}-${CHANNEL}-synced-${VARIABLE}.root
+    # done
 
     inputfile="htt_${CHANNEL}.inputs-sm-Run${ERA}${POSTFIX}.root"
     hadd -f $shapes_output_synced/$inputfile $shapes_output_synced/${ERA}-${CHANNEL}*.root
@@ -215,7 +233,9 @@ if [[ $MODE == "DATACARD" ]]; then
             --output=$datacard_output \
             --train_ff=1 \
             --train_stage0=1 \
-            --train_emb=1
+            --train_emb=1 \
+            --ggh_wg1=1 \
+            --qqh_wg1=1
         THIS_PWD=${PWD}
         echo $THIS_PWD
 
@@ -245,6 +265,7 @@ if [[ $MODE == "DATACARD" ]]; then
     export NTUPLETAG TAG ERA CHANNEL shapes_output_synced CMSSW_BASE FORCE_REPROCESSING
 
     echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 50 -I {} bash -c 'run_morphing "{}"'
+    # run_morphing eta_1_deltaR_ditaupair
 
     wait
 
@@ -324,7 +345,8 @@ if [[ $MODE == "GOF" ]]; then
             "--X-rtd" "SIMPLE_RUNTIME_CHANGES"
         )
 
-        for ALGO in "saturated" "KS" "AD"; do
+        # for ALGO in "saturated" "KS" "AD"; do
+        for ALGO in "saturated"; do
             
             if [[ "$ALGO" == "saturated" ]]; then
                 check_json="$output_dir/gof.json"
@@ -347,15 +369,16 @@ if [[ $MODE == "GOF" ]]; then
             # ... EXECUTION START ...
             if [[ "$ALGO" == "saturated" ]]; then
                 combine -M GoodnessOfFit -n Test.${ID} -d $WORKSPACE -m $MASS \
-                    --algo=$ALGO --plots ${FREEZE_OPTS} -V "${GOF_OPTS[@]}" -v 0
+                    --algo=$ALGO --plots ${FREEZE_OPTS} -V "${GOF_OPTS[@]}" -v 2
             else
                 combine -M GoodnessOfFit -n Test.${ID} -d $WORKSPACE -m $MASS \
-                    --algo=$ALGO --plots ${FREEZE_OPTS} -V "${GOF_OPTS[@]}" -v 0
+                    --algo=$ALGO --plots ${FREEZE_OPTS} -V "${GOF_OPTS[@]}" -v 2
             fi
 
             TOYSOPT=""
             if [[ "$ALGO" == "saturated" ]]; then
                 TOYSOPT="--toysFrequentist"
+                #  --bypassFrequentistFit
             fi
 
             for SEED in {1930..1939}; do
@@ -396,15 +419,15 @@ if [[ $MODE == "GOF" ]]; then
     export NTUPLETAG TAG ERA CHANNEL THEORY_NUISANCES_TO_FREEZE FORCE_REPROCESSING
 
     echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 6 -I {} bash -c 'run_gof_for_variable "{}"'
-    # run_gof_for_variable m_vis
+    # run_gof_for_variable eta_1_deltaR_ditaupair
 
     wait
 
     echo "[INFO] All GOF jobs complete. Creating summary plot."
     source utils/setup_root.sh
-    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.00013225 --test-type gof
-    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.00013225 --test-type gof_KS
-    python3 gof/plot_gof_summary_updated.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --threshold 0.00013225 --test-type gof_AD    
+    python3 gof/plot_gof_summary_updated2.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --alpha 0.05 --test-type gof
+    # python3 gof/plot_gof_summary_updated2.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --alpha 0.05 --test-type gof_KS
+    # python3 gof/plot_gof_summary_updated2.py --variables $VARIABLES_1D --path output/gof/${NTUPLETAG}-${TAG}/ --era $ERA --channel $CHANNEL --alpha 0.05 --test-type gof_AD    
     exit 0
 fi
 
@@ -433,7 +456,7 @@ if [[ $MODE == "POSTFIT" ]]; then
 
         echo "[INFO] Processing variable: ${VARIABLE}"
 
-        ADDITIONAL_FREEZE="CMS_QCD_DR_SR_CorrSystMCShift_mt_Run2018"
+        ADDITIONAL_FREEZE="rgx{.*CMS_*.*CorrSystMCShift.*}"
 
         combine \
             -M FitDiagnostics \
@@ -442,13 +465,15 @@ if [[ $MODE == "POSTFIT" ]]; then
             --robustHesse 1 \
             -n .$ID \
             --verbose 0 \
+            --rMin -10 \
+            --rMax 30 \
             --setParameters r=0 --freezeParameters r,${THEORY_NUISANCES_TO_FREEZE},${ADDITIONAL_FREEZE} \
             --X-rtd MINIMIZER_analytic \
             --setRobustFitAlgo=Minuit2,Migrad  --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd SIMPLE_RUNTIME_CHANGES \
             --cminFallbackAlgo Minuit2,Migrad,0:0.001,Minuit2,Migrad,0:0.01 --cminPreScan \
             --saveShapes --saveWithUncertainties \
             --saveNormalizations --cminDefaultMinimizerTolerance 0.1 \
-            --stepSize=0.01 \
+            --stepSize=0.001 \
             --cminDefaultMinimizerStrategy 0 2>&1 |
             tee .${ID}-${VARIABLE}.log
         
@@ -483,18 +508,34 @@ if [[ $MODE == "POSTFIT" ]]; then
 
     echo "[INFO] Starting parallel PostFit processing..."
     
-    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 60 -I {} bash -c 'run_postfit_for_variable "{}"'
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 50 -I {} bash -c 'run_postfit_for_variable "{}"'
     # run_postfit_for_variable m_fastmtt_njets
 
     echo "[INFO] All PostFit jobs complete."
     exit 0
 fi
 
+    
 if [[ $MODE == "PLOT-POSTFIT" ]]; then
     source utils/setup_root.sh
-    SUMMARYFOLDER=output/gof/${NTUPLETAG}-${TAG}/plots
-    [ -d $SUMMARYFOLDER ] || mkdir -p $SUMMARYFOLDER
-    for VARIABLE in ${VARIABLES//,/ }; do
+    
+    export SUMMARYFOLDER="output/gof/${NTUPLETAG}-${TAG}/plots"
+    [ -d "$SUMMARYFOLDER" ] || mkdir -p "$SUMMARYFOLDER"
+
+    LOG_VARIABLES_ARRAY=(
+        mt_2 mt_tot
+        pt_1 pt_2 jpt_1 jpt_2
+        m_fastmtt met m_vis mjj
+        pt_vis pt_fastmtt pt_tt pt_ttjj pt_dijet
+    )
+    LOG_VARIABLES="${LOG_VARIABLES_ARRAY[*]}"
+    export LOG_VARIABLES
+
+    run_plot_postfit() {
+        VARIABLE=$1
+        
+        source utils/setup_root.sh
+
         ID=${ERA}_${CHANNEL}_${VARIABLE}
         datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
         PLOTDIR=${datacard_output}/plots
@@ -504,24 +545,47 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
 
         if [[ -z "${FORCE_REPROCESSING}" && (-f "$final_plot_pdf" || -f "$final_plot_png") ]]; then
             echo "[INFO] Post-fit plots for ${VARIABLE} already exist. Skipping."
-            [ -f "${SUMMARYFOLDER}/${ID}_postfit.pdf" ] || cp "${PLOTDIR}"/*.p{df,ng} $SUMMARYFOLDER &> /dev/null
-            continue
+            [ -f "${SUMMARYFOLDER}/${ID}_postfit.pdf" ] || cp "${PLOTDIR}"/*.p{df,ng} "$SUMMARYFOLDER" 2> /dev/null
+            return 0
         fi
 
         PREFITFILE=${datacard_output}/${ID}-datacard-shapes-prefit.root
         POSTFITFILE=${datacard_output}/${ID}-datacard-shapes-postfit-b.root
-        [ -d $PLOTDIR ] || mkdir -p $PLOTDIR
-        echo "[INFO] Using postfitshapes from $FILE"
+        
+        [ -d "$PLOTDIR" ] || mkdir -p "$PLOTDIR"
+        
+        echo "[INFO] Processing plots for variable: ${VARIABLE}"
+
+        AXIS_FLAG="-l"
+        if [[ " ${LOG_VARIABLES} " =~ " ${VARIABLE} " ]]; then
+            AXIS_FLAG=""
+        fi
+
         for OPTION in "" "--png"; do
-            python3 gof/plot_shapes_gof.py -i $PREFITFILE -c $CHANNEL -e $ERA $OPTION \
+            python3 gof/plot_shapes_gof.py -i "$PREFITFILE" -c $CHANNEL -e $ERA $OPTION \
                 --categories 'None' --fake-factor --embedding \
-                --gof-variable $VARIABLE -o ${PLOTDIR} -l
-            python3 gof/plot_shapes_gof.py -i $POSTFITFILE -c $CHANNEL -e $ERA $OPTION \
+                --gof-variable $VARIABLE -o "${PLOTDIR}" ${AXIS_FLAG} > /dev/null 2>&1
+            
+            python3 gof/plot_shapes_gof.py -i "$POSTFITFILE" -c $CHANNEL -e $ERA $OPTION \
                 --categories 'None' --fake-factor --embedding \
-                --gof-variable $VARIABLE -o ${PLOTDIR} -l
+                --gof-variable $VARIABLE -o "${PLOTDIR}" ${AXIS_FLAG} > /dev/null 2>&1
         done
-        cp ${PLOTDIR}/*.p{df,ng} $SUMMARYFOLDER
-    done
+
+        # Copy results to summary folder
+        # Use simple wildcard copy; ignore errors if no files found (unlikely)
+        cp "${PLOTDIR}"/*.p{df,ng} "$SUMMARYFOLDER" 2>/dev/null
+        
+        echo "[DONE] Finished plotting ${VARIABLE}"
+    }
+
+    export -f run_plot_postfit
+    export ERA CHANNEL NTUPLETAG TAG FORCE_REPROCESSING SUMMARYFOLDER
+
+    echo "[INFO] Starting parallel Plotting..."
+    
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -P 50 -I {} bash -c 'run_plot_postfit "{}"'
+
+    echo "[INFO] All plotting jobs complete."
     exit 0
 fi
 

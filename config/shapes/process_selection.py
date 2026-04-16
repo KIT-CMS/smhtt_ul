@@ -67,9 +67,9 @@ def lumi_weight(era, **kwargs):
     elif era == "2016postVFP":
         lumi = "16.8"
     elif era == "2017":
-        lumi = "41.529"
+        lumi = "42.07"
     elif era == "2018":
-        lumi = "59.83"
+        lumi = "59.56"
     else:
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
@@ -143,10 +143,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         elif era == "2017":
             trgweight = ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
         else:
-            trgweight = (
-                "((pt_1>=25 && pt_1<28)* trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
-                "trgweight",
-            )
+            trgweight = ("((pt_1>25) * trg_wgt_single_mu24ormu27)", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None

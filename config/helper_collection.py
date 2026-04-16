@@ -462,10 +462,11 @@ class RuntimeVariables(object):
         This class implements a singleton-like pattern by returning the same instance
         on every instantiation.
     """
-    
+
     FF_name_lt = None
     FF_name_tt_1 = None
     FF_name_tt_2 = None
+    USED_FF_VARIATIONS = "ml_coarse"
 
     def __new__(cls) -> "RuntimeVariables":
         if not hasattr(cls, "instance"):

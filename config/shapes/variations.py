@@ -1,6 +1,7 @@
 import inspect
 import logging
 from itertools import product
+from typing import Literal
 
 from config.helper_collection import LazyVariable, RuntimeVariables
 from config.logging_setup_configs import setup_logging
@@ -171,6 +172,395 @@ class FFHelper:
         # --------------------------------------------------------------------------------------
     }
 
+    USED_VARIATIONS: Literal["classic_coarse", "classic_fine", "ml_coarse", "ml_fine"] = "ml_coarse"
+
+    VARIATIONS = {
+        "classic_coarse": (
+            "QCDFFunc",
+            "QCDFFmcSubUnc",
+            "WjetsFFunc",
+            "WjetsFFmcSubUnc",
+            "ttbarFFunc",
+            "process_fractionsfracQCDUnc",
+            "process_fractionsfracWjetsUnc",
+            "process_fractionsfracTTbarUnc",
+            # ---
+            "QCD_DR_SR_CorrStat1Sigma",
+            "QCD_DR_SR_CorrSystMCShift",
+            "QCD_DR_SR_CorrSystBandAsym",
+            "Wjets_DR_SR_CorrStat1Sigma",
+            # "Wjets_DR_SR_CorrSystMCShift",
+            "Wjets_DR_SR_CorrSystBandAsym",
+            # ---
+            "QCD_non_closure_CorrStat1Sigma",
+            "QCD_non_closure_CorrSystMCShift",
+            "QCD_non_closure_CorrSystBandAsym",
+            # ---
+            "Wjets_non_closure_CorrStat1Sigma",
+            "Wjets_non_closure_CorrSystMCShift",
+            "Wjets_non_closure_CorrSystBandAsym",
+            # ---
+            "ttbar_non_closure_CorrStat1Sigma",
+            "ttbar_non_closure_CorrSystBandAsym",
+        ),
+        "classic_fine": (
+            "QCDFFunc",
+            "QCDFFmcSubUnc",
+            "WjetsFFunc",
+            "WjetsFFmcSubUnc",
+            "ttbarFFunc",
+            "process_fractionsfracQCDUnc",
+            "process_fractionsfracWjetsUnc",
+            "process_fractionsfracTTbarUnc",
+            # ---
+            "QCD_DR_SR_CorrStat1Sigma",
+            "QCD_DR_SR_CorrSystMCShift",
+            "QCD_DR_SR_CorrSystBandAsym",
+            "Wjets_DR_SR_CorrStat1Sigma",
+            "Wjets_DR_SR_CorrSystMCShift",
+            "Wjets_DR_SR_CorrSystBandAsym",
+            # ---
+            "QCD_non_closure_tau_decaymode_2_CorrStat1Sigma",
+            "QCD_non_closure_tau_decaymode_2_CorrSystMCShift",
+            "QCD_non_closure_eta_1_CorrStat1Sigma",
+            "QCD_non_closure_eta_1_CorrSystMCShift",
+            "QCD_non_closure_eta_1_CorrSystBandAsym",
+            "QCD_non_closure_eta_2_CorrStat1Sigma",
+            "QCD_non_closure_eta_2_CorrSystMCShift",
+            "QCD_non_closure_eta_2_CorrSystBandAsym",
+            "QCD_non_closure_jeta_1_CorrStat1Sigma",
+            "QCD_non_closure_jeta_1_CorrSystMCShift",
+            "QCD_non_closure_jeta_1_CorrSystBandAsym",
+            "QCD_non_closure_jeta_2_CorrStat1Sigma",
+            "QCD_non_closure_jeta_2_CorrSystMCShift",
+            "QCD_non_closure_jeta_2_CorrSystBandAsym",
+            "QCD_non_closure_jpt_1_CorrStat1Sigma",
+            "QCD_non_closure_jpt_1_CorrSystMCShift",
+            "QCD_non_closure_jpt_1_CorrSystBandAsym",
+            "QCD_non_closure_jpt_2_CorrStat1Sigma",
+            "QCD_non_closure_jpt_2_CorrSystMCShift",
+            "QCD_non_closure_jpt_2_CorrSystBandAsym",
+            "QCD_non_closure_met_CorrStat1Sigma",
+            "QCD_non_closure_met_CorrSystMCShift",
+            "QCD_non_closure_met_CorrSystBandAsym",
+            "QCD_non_closure_pt_tt_CorrStat1Sigma",
+            "QCD_non_closure_pt_tt_CorrSystMCShift",
+            "QCD_non_closure_pt_tt_CorrSystBandAsym",
+            "QCD_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+            "QCD_non_closure_deltaEta_ditaupair_CorrSystMCShift",
+            "QCD_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+            "QCD_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+            "QCD_non_closure_deltaR_ditaupair_CorrSystMCShift",
+            "QCD_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+            "QCD_non_closure_deltaR_1j1_CorrStat1Sigma",
+            "QCD_non_closure_deltaR_1j1_CorrSystMCShift",
+            "QCD_non_closure_deltaR_1j1_CorrSystBandAsym",
+            "QCD_non_closure_deltaR_12j1_CorrStat1Sigma",
+            "QCD_non_closure_deltaR_12j1_CorrSystMCShift",
+            "QCD_non_closure_deltaR_12j1_CorrSystBandAsym",
+            "QCD_non_closure_pt_ttjj_CorrStat1Sigma",
+            "QCD_non_closure_pt_ttjj_CorrSystMCShift",
+            "QCD_non_closure_pt_ttjj_CorrSystBandAsym",
+            "QCD_non_closure_mass_2_CorrStat1Sigma",
+            "QCD_non_closure_mass_2_CorrSystMCShift",
+            "QCD_non_closure_mass_2_CorrSystBandAsym",
+            "QCD_non_closure_mt_tot_CorrStat1Sigma",
+            "QCD_non_closure_mt_tot_CorrSystMCShift",
+            "QCD_non_closure_mt_tot_CorrSystBandAsym",
+            "QCD_non_closure_m_vis_CorrStat1Sigma",
+            "QCD_non_closure_m_vis_CorrSystMCShift",
+            "QCD_non_closure_m_vis_CorrSystBandAsym",
+            "QCD_non_closure_iso_1_CorrStat1Sigma",
+            "QCD_non_closure_iso_1_CorrSystMCShift",
+            "QCD_non_closure_iso_1_CorrSystBandAsym",
+            "Wjets_non_closure_tau_decaymode_2_CorrStat1Sigma",
+            "Wjets_non_closure_tau_decaymode_2_CorrSystMCShift",
+            "Wjets_non_closure_eta_1_CorrStat1Sigma",
+            "Wjets_non_closure_eta_1_CorrSystMCShift",
+            "Wjets_non_closure_eta_1_CorrSystBandAsym",
+            "Wjets_non_closure_eta_2_CorrStat1Sigma",
+            "Wjets_non_closure_eta_2_CorrSystMCShift",
+            "Wjets_non_closure_eta_2_CorrSystBandAsym",
+            "Wjets_non_closure_jeta_1_CorrStat1Sigma",
+            "Wjets_non_closure_jeta_1_CorrSystMCShift",
+            "Wjets_non_closure_jeta_1_CorrSystBandAsym",
+            "Wjets_non_closure_jeta_2_CorrStat1Sigma",
+            "Wjets_non_closure_jeta_2_CorrSystMCShift",
+            "Wjets_non_closure_jeta_2_CorrSystBandAsym",
+            "Wjets_non_closure_jpt_1_CorrStat1Sigma",
+            "Wjets_non_closure_jpt_1_CorrSystMCShift",
+            "Wjets_non_closure_jpt_1_CorrSystBandAsym",
+            "Wjets_non_closure_jpt_2_CorrStat1Sigma",
+            "Wjets_non_closure_jpt_2_CorrSystMCShift",
+            "Wjets_non_closure_jpt_2_CorrSystBandAsym",
+            "Wjets_non_closure_met_CorrStat1Sigma",
+            "Wjets_non_closure_met_CorrSystMCShift",
+            "Wjets_non_closure_met_CorrSystBandAsym",
+            "Wjets_non_closure_pt_tt_CorrStat1Sigma",
+            "Wjets_non_closure_pt_tt_CorrSystMCShift",
+            "Wjets_non_closure_pt_tt_CorrSystBandAsym",
+            "Wjets_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+            "Wjets_non_closure_deltaEta_ditaupair_CorrSystMCShift",
+            "Wjets_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+            "Wjets_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+            "Wjets_non_closure_deltaR_ditaupair_CorrSystMCShift",
+            "Wjets_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+            "Wjets_non_closure_deltaR_1j1_CorrStat1Sigma",
+            "Wjets_non_closure_deltaR_1j1_CorrSystMCShift",
+            "Wjets_non_closure_deltaR_1j1_CorrSystBandAsym",
+            "Wjets_non_closure_deltaR_12j1_CorrStat1Sigma",
+            "Wjets_non_closure_deltaR_12j1_CorrSystMCShift",
+            "Wjets_non_closure_deltaR_12j1_CorrSystBandAsym",
+            "Wjets_non_closure_pt_ttjj_CorrStat1Sigma",
+            "Wjets_non_closure_pt_ttjj_CorrSystMCShift",
+            "Wjets_non_closure_pt_ttjj_CorrSystBandAsym",
+            "Wjets_non_closure_mass_2_CorrStat1Sigma",
+            "Wjets_non_closure_mass_2_CorrSystMCShift",
+            "Wjets_non_closure_mass_2_CorrSystBandAsym",
+            "Wjets_non_closure_mt_tot_CorrStat1Sigma",
+            "Wjets_non_closure_mt_tot_CorrSystMCShift",
+            "Wjets_non_closure_mt_tot_CorrSystBandAsym",
+            "Wjets_non_closure_m_vis_CorrStat1Sigma",
+            "Wjets_non_closure_m_vis_CorrSystMCShift",
+            "Wjets_non_closure_m_vis_CorrSystBandAsym",
+            "Wjets_non_closure_iso_1_CorrStat1Sigma",
+            "Wjets_non_closure_iso_1_CorrSystMCShift",
+            "Wjets_non_closure_iso_1_CorrSystBandAsym",
+            "ttbar_non_closure_tau_decaymode_2_CorrStat1Sigma",
+            "ttbar_non_closure_eta_1_CorrStat1Sigma",
+            "ttbar_non_closure_eta_1_CorrSystBandAsym",
+            "ttbar_non_closure_eta_2_CorrStat1Sigma",
+            "ttbar_non_closure_eta_2_CorrSystBandAsym",
+            "ttbar_non_closure_jeta_1_CorrStat1Sigma",
+            "ttbar_non_closure_jeta_1_CorrSystBandAsym",
+            "ttbar_non_closure_jeta_2_CorrStat1Sigma",
+            "ttbar_non_closure_jeta_2_CorrSystBandAsym",
+            "ttbar_non_closure_jpt_1_CorrStat1Sigma",
+            "ttbar_non_closure_jpt_1_CorrSystBandAsym",
+            "ttbar_non_closure_jpt_2_CorrStat1Sigma",
+            "ttbar_non_closure_jpt_2_CorrSystBandAsym",
+            "ttbar_non_closure_met_CorrStat1Sigma",
+            "ttbar_non_closure_met_CorrSystBandAsym",
+            "ttbar_non_closure_pt_tt_CorrStat1Sigma",
+            "ttbar_non_closure_pt_tt_CorrSystBandAsym",
+            "ttbar_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+            "ttbar_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+            "ttbar_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+            "ttbar_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+            "ttbar_non_closure_deltaR_1j1_CorrStat1Sigma",
+            "ttbar_non_closure_deltaR_1j1_CorrSystBandAsym",
+            "ttbar_non_closure_deltaR_12j1_CorrStat1Sigma",
+            "ttbar_non_closure_deltaR_12j1_CorrSystBandAsym",
+            "ttbar_non_closure_pt_ttjj_CorrStat1Sigma",
+            "ttbar_non_closure_pt_ttjj_CorrSystBandAsym",
+            "ttbar_non_closure_mass_2_CorrStat1Sigma",
+            "ttbar_non_closure_mass_2_CorrSystBandAsym",
+            "ttbar_non_closure_mt_tot_CorrStat1Sigma",
+            "ttbar_non_closure_mt_tot_CorrSystBandAsym",
+            "ttbar_non_closure_m_vis_CorrStat1Sigma",
+            "ttbar_non_closure_m_vis_CorrSystBandAsym",
+            "ttbar_non_closure_iso_1_CorrStat1Sigma",
+            "ttbar_non_closure_iso_1_CorrSystBandAsym",
+        ),
+        "ml_coarse": (
+            "ff_QCD",
+            "ff_Wjets",
+            # "ff_ttbar",  # done on MC so no MC subtraction uncertainty here
+            # ---
+            "ff_QCDStat",
+            "ff_WjetsStat",
+            "ff_ttbarStat",
+            # ---
+            "fractions_QCD",
+            "fractions_Wjets",
+            "fractions_ttbar",
+            # ---
+            "fractions_QCDStat",
+            "fractions_WjetsStat",
+            "fractions_ttbarStat",
+            # ---
+            "QCD_DR_SR_correction",
+            "QCD_DR_SR_correctionStat",
+            # ---
+            # "Wjets_DR_SR_correction",  # done on MC so no MC subtraction uncertainty here
+            "Wjets_DR_SR_correctionStat",
+            # ---
+            "QCD_non_closure_CorrStat1Sigma",
+            "QCD_non_closure_CorrSystMCShift",
+            "QCD_non_closure_CorrSystBandAsym",
+            # ---
+            "Wjets_non_closure_CorrStat1Sigma",
+            "Wjets_non_closure_CorrSystMCShift",
+            "Wjets_non_closure_CorrSystBandAsym",
+            # ---
+            # "ttbar_non_closure_CorrSystMCShift",  # done on MC so no MC subtraction uncertainty here
+            "ttbar_non_closure_CorrStat1Sigma",
+            "ttbar_non_closure_CorrSystBandAsym",
+        ),
+        "ml_fine": (
+            "ff_QCD",
+            "ff_Wjets",
+            "ff_ttbar",
+            # ---
+            "ff_QCDStat",
+            "ff_WjetsStat",
+            "ff_ttbarStat",
+            # ---
+            "fractions_QCD",
+            "fractions_Wjets",
+            "fractions_ttbar",
+            "fractions_StatStat",
+            # ---
+            "QCD_DR_SR_correction",
+            "QCD_DR_SR_correctionStat",
+            # ---
+            "Wjets_DR_SR_correction",
+            "Wjets_DR_SR_correctionStat",
+            # ---
+            "QCD_non_closure_tau_decaymode_2_CorrStat1Sigma",
+            "QCD_non_closure_tau_decaymode_2_CorrSystMCShift",
+            "QCD_non_closure_eta_1_CorrStat1Sigma",
+            "QCD_non_closure_eta_1_CorrSystMCShift",
+            "QCD_non_closure_eta_1_CorrSystBandAsym",
+            "QCD_non_closure_eta_2_CorrStat1Sigma",
+            "QCD_non_closure_eta_2_CorrSystMCShift",
+            "QCD_non_closure_eta_2_CorrSystBandAsym",
+            "QCD_non_closure_jeta_1_CorrStat1Sigma",
+            "QCD_non_closure_jeta_1_CorrSystMCShift",
+            "QCD_non_closure_jeta_1_CorrSystBandAsym",
+            "QCD_non_closure_jeta_2_CorrStat1Sigma",
+            "QCD_non_closure_jeta_2_CorrSystMCShift",
+            "QCD_non_closure_jeta_2_CorrSystBandAsym",
+            "QCD_non_closure_jpt_1_CorrStat1Sigma",
+            "QCD_non_closure_jpt_1_CorrSystMCShift",
+            "QCD_non_closure_jpt_1_CorrSystBandAsym",
+            "QCD_non_closure_jpt_2_CorrStat1Sigma",
+            "QCD_non_closure_jpt_2_CorrSystMCShift",
+            "QCD_non_closure_jpt_2_CorrSystBandAsym",
+            "QCD_non_closure_met_CorrStat1Sigma",
+            "QCD_non_closure_met_CorrSystMCShift",
+            "QCD_non_closure_met_CorrSystBandAsym",
+            "QCD_non_closure_pt_tt_CorrStat1Sigma",
+            "QCD_non_closure_pt_tt_CorrSystMCShift",
+            "QCD_non_closure_pt_tt_CorrSystBandAsym",
+            "QCD_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+            "QCD_non_closure_deltaEta_ditaupair_CorrSystMCShift",
+            "QCD_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+            "QCD_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+            "QCD_non_closure_deltaR_ditaupair_CorrSystMCShift",
+            "QCD_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+            "QCD_non_closure_deltaR_1j1_CorrStat1Sigma",
+            "QCD_non_closure_deltaR_1j1_CorrSystMCShift",
+            "QCD_non_closure_deltaR_1j1_CorrSystBandAsym",
+            "QCD_non_closure_deltaR_12j1_CorrStat1Sigma",
+            "QCD_non_closure_deltaR_12j1_CorrSystMCShift",
+            "QCD_non_closure_deltaR_12j1_CorrSystBandAsym",
+            "QCD_non_closure_pt_ttjj_CorrStat1Sigma",
+            "QCD_non_closure_pt_ttjj_CorrSystMCShift",
+            "QCD_non_closure_pt_ttjj_CorrSystBandAsym",
+            "QCD_non_closure_mass_2_CorrStat1Sigma",
+            "QCD_non_closure_mass_2_CorrSystMCShift",
+            "QCD_non_closure_mass_2_CorrSystBandAsym",
+            "QCD_non_closure_mt_tot_CorrStat1Sigma",
+            "QCD_non_closure_mt_tot_CorrSystMCShift",
+            "QCD_non_closure_mt_tot_CorrSystBandAsym",
+            "QCD_non_closure_m_vis_CorrStat1Sigma",
+            "QCD_non_closure_m_vis_CorrSystMCShift",
+            "QCD_non_closure_m_vis_CorrSystBandAsym",
+            "QCD_non_closure_iso_1_CorrStat1Sigma",
+            "QCD_non_closure_iso_1_CorrSystMCShift",
+            "QCD_non_closure_iso_1_CorrSystBandAsym",
+            "Wjets_non_closure_tau_decaymode_2_CorrStat1Sigma",
+            "Wjets_non_closure_tau_decaymode_2_CorrSystMCShift",
+            "Wjets_non_closure_eta_1_CorrStat1Sigma",
+            "Wjets_non_closure_eta_1_CorrSystMCShift",
+            "Wjets_non_closure_eta_1_CorrSystBandAsym",
+            "Wjets_non_closure_eta_2_CorrStat1Sigma",
+            "Wjets_non_closure_eta_2_CorrSystMCShift",
+            "Wjets_non_closure_eta_2_CorrSystBandAsym",
+            "Wjets_non_closure_jeta_1_CorrStat1Sigma",
+            "Wjets_non_closure_jeta_1_CorrSystMCShift",
+            "Wjets_non_closure_jeta_1_CorrSystBandAsym",
+            "Wjets_non_closure_jeta_2_CorrStat1Sigma",
+            "Wjets_non_closure_jeta_2_CorrSystMCShift",
+            "Wjets_non_closure_jeta_2_CorrSystBandAsym",
+            "Wjets_non_closure_jpt_1_CorrStat1Sigma",
+            "Wjets_non_closure_jpt_1_CorrSystMCShift",
+            "Wjets_non_closure_jpt_1_CorrSystBandAsym",
+            "Wjets_non_closure_jpt_2_CorrStat1Sigma",
+            "Wjets_non_closure_jpt_2_CorrSystMCShift",
+            "Wjets_non_closure_jpt_2_CorrSystBandAsym",
+            "Wjets_non_closure_met_CorrStat1Sigma",
+            "Wjets_non_closure_met_CorrSystMCShift",
+            "Wjets_non_closure_met_CorrSystBandAsym",
+            "Wjets_non_closure_pt_tt_CorrStat1Sigma",
+            "Wjets_non_closure_pt_tt_CorrSystMCShift",
+            "Wjets_non_closure_pt_tt_CorrSystBandAsym",
+            "Wjets_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+            "Wjets_non_closure_deltaEta_ditaupair_CorrSystMCShift",
+            "Wjets_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+            "Wjets_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+            "Wjets_non_closure_deltaR_ditaupair_CorrSystMCShift",
+            "Wjets_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+            "Wjets_non_closure_deltaR_1j1_CorrStat1Sigma",
+            "Wjets_non_closure_deltaR_1j1_CorrSystMCShift",
+            "Wjets_non_closure_deltaR_1j1_CorrSystBandAsym",
+            "Wjets_non_closure_deltaR_12j1_CorrStat1Sigma",
+            "Wjets_non_closure_deltaR_12j1_CorrSystMCShift",
+            "Wjets_non_closure_deltaR_12j1_CorrSystBandAsym",
+            "Wjets_non_closure_pt_ttjj_CorrStat1Sigma",
+            "Wjets_non_closure_pt_ttjj_CorrSystMCShift",
+            "Wjets_non_closure_pt_ttjj_CorrSystBandAsym",
+            "Wjets_non_closure_mass_2_CorrStat1Sigma",
+            "Wjets_non_closure_mass_2_CorrSystMCShift",
+            "Wjets_non_closure_mass_2_CorrSystBandAsym",
+            "Wjets_non_closure_mt_tot_CorrStat1Sigma",
+            "Wjets_non_closure_mt_tot_CorrSystMCShift",
+            "Wjets_non_closure_mt_tot_CorrSystBandAsym",
+            "Wjets_non_closure_m_vis_CorrStat1Sigma",
+            "Wjets_non_closure_m_vis_CorrSystMCShift",
+            "Wjets_non_closure_m_vis_CorrSystBandAsym",
+            "Wjets_non_closure_iso_1_CorrStat1Sigma",
+            "Wjets_non_closure_iso_1_CorrSystMCShift",
+            "Wjets_non_closure_iso_1_CorrSystBandAsym",
+            "ttbar_non_closure_tau_decaymode_2_CorrStat1Sigma",
+            "ttbar_non_closure_eta_1_CorrStat1Sigma",
+            "ttbar_non_closure_eta_1_CorrSystBandAsym",
+            "ttbar_non_closure_eta_2_CorrStat1Sigma",
+            "ttbar_non_closure_eta_2_CorrSystBandAsym",
+            "ttbar_non_closure_jeta_1_CorrStat1Sigma",
+            "ttbar_non_closure_jeta_1_CorrSystBandAsym",
+            "ttbar_non_closure_jeta_2_CorrStat1Sigma",
+            "ttbar_non_closure_jeta_2_CorrSystBandAsym",
+            "ttbar_non_closure_jpt_1_CorrStat1Sigma",
+            "ttbar_non_closure_jpt_1_CorrSystBandAsym",
+            "ttbar_non_closure_jpt_2_CorrStat1Sigma",
+            "ttbar_non_closure_jpt_2_CorrSystBandAsym",
+            "ttbar_non_closure_met_CorrStat1Sigma",
+            "ttbar_non_closure_met_CorrSystBandAsym",
+            "ttbar_non_closure_pt_tt_CorrStat1Sigma",
+            "ttbar_non_closure_pt_tt_CorrSystBandAsym",
+            "ttbar_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
+            "ttbar_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
+            "ttbar_non_closure_deltaR_ditaupair_CorrStat1Sigma",
+            "ttbar_non_closure_deltaR_ditaupair_CorrSystBandAsym",
+            "ttbar_non_closure_deltaR_1j1_CorrStat1Sigma",
+            "ttbar_non_closure_deltaR_1j1_CorrSystBandAsym",
+            "ttbar_non_closure_deltaR_12j1_CorrStat1Sigma",
+            "ttbar_non_closure_deltaR_12j1_CorrSystBandAsym",
+            "ttbar_non_closure_pt_ttjj_CorrStat1Sigma",
+            "ttbar_non_closure_pt_ttjj_CorrSystBandAsym",
+            "ttbar_non_closure_mass_2_CorrStat1Sigma",
+            "ttbar_non_closure_mass_2_CorrSystBandAsym",
+            "ttbar_non_closure_mt_tot_CorrStat1Sigma",
+            "ttbar_non_closure_mt_tot_CorrSystBandAsym",
+            "ttbar_non_closure_m_vis_CorrStat1Sigma",
+            "ttbar_non_closure_m_vis_CorrSystBandAsym",
+            "ttbar_non_closure_iso_1_CorrStat1Sigma",
+            "ttbar_non_closure_iso_1_CorrSystBandAsym",
+        ),
+    }
+
     __FF_OPTION_info__ = """
         Different implementation of accessing full (FFHelper.FF_OPTIONS["fake_factor"]) and raw fake factors
         (FFHelper.FF_OPTIONS["raw_fake_factor"]) and their individual combinations with different corrections
@@ -223,6 +613,14 @@ class FFHelper:
                 Please make sure to set the fake factor for tt_1 and tt_2 accordingly if needed.
             """
         )
+
+    def set_ff_variations_type(self, variation_type):
+        RuntimeVariables.USED_FF_VARIATIONS = "ml_coarse"
+        if variation_type not in FFHelper.VARIATIONS:
+            logger.error(f"Fake factor variation type {variation_type} not found in FFHelper.VARIATIONS.")
+            raise KeyError(f"Fake factor variation type {variation_type} not found in FFHelper.VARIATIONS.")
+        logger.info(f"Setting fake factor variation type to {variation_type}= {FFHelper.VARIATIONS[variation_type]}")
+        RuntimeVariables.USED_FF_VARIATIONS = variation_type
 
 
 #  Variations needed for the various jet background estimations.
@@ -311,24 +709,15 @@ pileup_reweighting = [
 
 # Energy scales.
 tau_es_pt_dm_binned = [
-    ReplaceVariable(
-        f"CMS_scale_t_{dm}_{pt}_Era{shift}",
-        f"tauEs{dm}_{pt}{shift}"
-    )
+    ReplaceVariable(f"CMS_scale_t_{dm}_{pt}_Era{shift}", f"tauEs{dm}{pt}{shift}")
     for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
 emb_tau_es_pt_dm_binned = [
-    ReplaceVariable(
-        f"CMS_scale_t_emb_{dm}_{pt}_Era{shift}",
-        f"tauEs{dm}{pt}{shift}",  # (NO underscore here) #FIXME
-    )
+    ReplaceVariable(f"CMS_scale_t_emb_{dm}_{pt}_Era{shift}", f"tauEs{dm}{pt}{shift}")
     for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
 emb_tau_es_pt_dm_binned_corr = [
-    ReplaceVariable(
-        f"CMS_scale_t_{dm}_{pt}_Era{shift}",
-        f"tauEs{dm}{pt}{shift}",  # (NO underscore here) #FIXME
-    )
+    ReplaceVariable(f"CMS_scale_t_{dm}_{pt}_Era{shift}", f"tauEs{dm}{pt}{shift}")
     for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
 
@@ -449,24 +838,15 @@ mu_fake_es_inc = [
 # Efficiency corrections.
 # Tau ID efficiency.
 tau_id_eff_lt = [
-    ReplaceVariable(
-        f"CMS_eff_t_{dm}_{pt}_Era{shift}",
-        f"vsJetTau{dm}_{pt}{shift}",
-    )
+    ReplaceVariable(f"CMS_eff_t_{dm}_{pt}_Era{shift}", f"vsJetTau{dm}{pt}{shift}")
     for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
 emb_tau_id_eff_lt = [
-    ReplaceVariable(
-        f"CMS_eff_t_emb_{dm}_{pt}_Era{shift}",
-        f"vsJetTau{dm}{pt}{shift}",  # (NO underscore here) #FIXME
-    )
+    ReplaceVariable(f"CMS_eff_t_emb_{dm}_{pt}_Era{shift}", f"vsJetTau{dm}{pt}{shift}")
     for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
 emb_tau_id_eff_lt_corr = [
-    ReplaceVariable(
-        f"CMS_eff_t_{dm}_{pt}_Era{shift}",
-        f"vsJetTau{dm}{pt}{shift}",  # (NO underscore here) #FIXME
-    )
+    ReplaceVariable(f"CMS_eff_t_{dm}_{pt}_Era{shift}", f"vsJetTau{dm}{pt}{shift}")
     for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
 # ---
@@ -588,168 +968,7 @@ ff_variations_lt = [
         )
     )
     for shift in SHIFT_DIRECTIONS
-    for syst in [
-        "QCDFFunc",
-        "QCDFFmcSubUnc",
-        "WjetsFFunc",
-        "WjetsFFmcSubUnc",
-        "ttbarFFunc",
-        "process_fractionsfracQCDUnc",
-        "process_fractionsfracWjetsUnc",
-        "process_fractionsfracTTbarUnc",
-        # ---
-        "QCD_DR_SR_CorrStat1Sigma",
-        "QCD_DR_SR_CorrSystMCShift",
-        "QCD_DR_SR_CorrSystBandAsym",
-        "Wjets_DR_SR_CorrStat1Sigma",
-        "Wjets_DR_SR_CorrSystMCShift",
-        "Wjets_DR_SR_CorrSystBandAsym",
-        # ---
-        "QCD_non_closure_CorrStat1Sigma",
-        "QCD_non_closure_CorrSystMCShift",
-        "QCD_non_closure_CorrSystBandAsym",
-        # ---
-        "Wjets_non_closure_CorrStat1Sigma",
-        "Wjets_non_closure_CorrSystMCShift",
-        "Wjets_non_closure_CorrSystBandAsym",
-        # ---
-        "ttbar_non_closure_CorrStat1Sigma",
-        "ttbar_non_closure_CorrSystBandAsym",
-        # --- individual ones only needed if granularity is considered as fine
-        # "QCD_non_closure_tau_decaymode_2_CorrStat1Sigma",
-        # "QCD_non_closure_tau_decaymode_2_CorrSystMCShift",
-        # "QCD_non_closure_eta_1_CorrStat1Sigma",
-        # "QCD_non_closure_eta_1_CorrSystMCShift",
-        # "QCD_non_closure_eta_1_CorrSystBandAsym",
-        # "QCD_non_closure_eta_2_CorrStat1Sigma",
-        # "QCD_non_closure_eta_2_CorrSystMCShift",
-        # "QCD_non_closure_eta_2_CorrSystBandAsym",
-        # "QCD_non_closure_jeta_1_CorrStat1Sigma",
-        # "QCD_non_closure_jeta_1_CorrSystMCShift",
-        # "QCD_non_closure_jeta_1_CorrSystBandAsym",
-        # "QCD_non_closure_jeta_2_CorrStat1Sigma",
-        # "QCD_non_closure_jeta_2_CorrSystMCShift",
-        # "QCD_non_closure_jeta_2_CorrSystBandAsym",
-        # "QCD_non_closure_jpt_1_CorrStat1Sigma",
-        # "QCD_non_closure_jpt_1_CorrSystMCShift",
-        # "QCD_non_closure_jpt_1_CorrSystBandAsym",
-        # "QCD_non_closure_jpt_2_CorrStat1Sigma",
-        # "QCD_non_closure_jpt_2_CorrSystMCShift",
-        # "QCD_non_closure_jpt_2_CorrSystBandAsym",
-        # "QCD_non_closure_met_CorrStat1Sigma",
-        # "QCD_non_closure_met_CorrSystMCShift",
-        # "QCD_non_closure_met_CorrSystBandAsym",
-        # "QCD_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
-        # "QCD_non_closure_deltaEta_ditaupair_CorrSystMCShift",
-        # "QCD_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
-        # "QCD_non_closure_deltaR_ditaupair_CorrStat1Sigma",
-        # "QCD_non_closure_deltaR_ditaupair_CorrSystMCShift",
-        # "QCD_non_closure_deltaR_ditaupair_CorrSystBandAsym",
-        # "QCD_non_closure_deltaR_1j1_CorrStat1Sigma",
-        # "QCD_non_closure_deltaR_1j1_CorrSystMCShift",
-        # "QCD_non_closure_deltaR_1j1_CorrSystBandAsym",
-        # "QCD_non_closure_deltaR_12j1_CorrStat1Sigma",
-        # "QCD_non_closure_deltaR_12j1_CorrSystMCShift",
-        # "QCD_non_closure_deltaR_12j1_CorrSystBandAsym",
-        # "QCD_non_closure_pt_ttjj_CorrStat1Sigma",
-        # "QCD_non_closure_pt_ttjj_CorrSystMCShift",
-        # "QCD_non_closure_pt_ttjj_CorrSystBandAsym",
-        # "QCD_non_closure_mass_2_CorrStat1Sigma",
-        # "QCD_non_closure_mass_2_CorrSystMCShift",
-        # "QCD_non_closure_mass_2_CorrSystBandAsym",
-        # "QCD_non_closure_mt_tot_CorrStat1Sigma",
-        # "QCD_non_closure_mt_tot_CorrSystMCShift",
-        # "QCD_non_closure_mt_tot_CorrSystBandAsym",
-        # "QCD_non_closure_m_vis_CorrStat1Sigma",
-        # "QCD_non_closure_m_vis_CorrSystMCShift",
-        # "QCD_non_closure_m_vis_CorrSystBandAsym",
-        # "QCD_non_closure_iso_1_CorrStat1Sigma",
-        # "QCD_non_closure_iso_1_CorrSystMCShift",
-        # "QCD_non_closure_iso_1_CorrSystBandAsym",
-        # "Wjets_non_closure_tau_decaymode_2_CorrStat1Sigma",
-        # "Wjets_non_closure_tau_decaymode_2_CorrSystMCShift",
-        # "Wjets_non_closure_eta_1_CorrStat1Sigma",
-        # "Wjets_non_closure_eta_1_CorrSystMCShift",
-        # "Wjets_non_closure_eta_1_CorrSystBandAsym",
-        # "Wjets_non_closure_eta_2_CorrStat1Sigma",
-        # "Wjets_non_closure_eta_2_CorrSystMCShift",
-        # "Wjets_non_closure_eta_2_CorrSystBandAsym",
-        # "Wjets_non_closure_jeta_1_CorrStat1Sigma",
-        # "Wjets_non_closure_jeta_1_CorrSystMCShift",
-        # "Wjets_non_closure_jeta_1_CorrSystBandAsym",
-        # "Wjets_non_closure_jeta_2_CorrStat1Sigma",
-        # "Wjets_non_closure_jeta_2_CorrSystMCShift",
-        # "Wjets_non_closure_jeta_2_CorrSystBandAsym",
-        # "Wjets_non_closure_jpt_1_CorrStat1Sigma",
-        # "Wjets_non_closure_jpt_1_CorrSystMCShift",
-        # "Wjets_non_closure_jpt_1_CorrSystBandAsym",
-        # "Wjets_non_closure_jpt_2_CorrStat1Sigma",
-        # "Wjets_non_closure_jpt_2_CorrSystMCShift",
-        # "Wjets_non_closure_jpt_2_CorrSystBandAsym",
-        # "Wjets_non_closure_met_CorrStat1Sigma",
-        # "Wjets_non_closure_met_CorrSystMCShift",
-        # "Wjets_non_closure_met_CorrSystBandAsym",
-        # "Wjets_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
-        # "Wjets_non_closure_deltaEta_ditaupair_CorrSystMCShift",
-        # "Wjets_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
-        # "Wjets_non_closure_deltaR_ditaupair_CorrStat1Sigma",
-        # "Wjets_non_closure_deltaR_ditaupair_CorrSystMCShift",
-        # "Wjets_non_closure_deltaR_ditaupair_CorrSystBandAsym",
-        # "Wjets_non_closure_deltaR_1j1_CorrStat1Sigma",
-        # "Wjets_non_closure_deltaR_1j1_CorrSystMCShift",
-        # "Wjets_non_closure_deltaR_1j1_CorrSystBandAsym",
-        # "Wjets_non_closure_deltaR_12j1_CorrStat1Sigma",
-        # "Wjets_non_closure_deltaR_12j1_CorrSystMCShift",
-        # "Wjets_non_closure_deltaR_12j1_CorrSystBandAsym",
-        # "Wjets_non_closure_pt_ttjj_CorrStat1Sigma",
-        # "Wjets_non_closure_pt_ttjj_CorrSystMCShift",
-        # "Wjets_non_closure_pt_ttjj_CorrSystBandAsym",
-        # "Wjets_non_closure_mass_2_CorrStat1Sigma",
-        # "Wjets_non_closure_mass_2_CorrSystMCShift",
-        # "Wjets_non_closure_mass_2_CorrSystBandAsym",
-        # "Wjets_non_closure_mt_tot_CorrStat1Sigma",
-        # "Wjets_non_closure_mt_tot_CorrSystMCShift",
-        # "Wjets_non_closure_mt_tot_CorrSystBandAsym",
-        # "Wjets_non_closure_m_vis_CorrStat1Sigma",
-        # "Wjets_non_closure_m_vis_CorrSystMCShift",
-        # "Wjets_non_closure_m_vis_CorrSystBandAsym",
-        # "Wjets_non_closure_iso_1_CorrStat1Sigma",
-        # "Wjets_non_closure_iso_1_CorrSystMCShift",
-        # "Wjets_non_closure_iso_1_CorrSystBandAsym",
-        # "ttbar_non_closure_tau_decaymode_2_CorrStat1Sigma",
-        # "ttbar_non_closure_eta_1_CorrStat1Sigma",
-        # "ttbar_non_closure_eta_1_CorrSystBandAsym",
-        # "ttbar_non_closure_eta_2_CorrStat1Sigma",
-        # "ttbar_non_closure_eta_2_CorrSystBandAsym",
-        # "ttbar_non_closure_jeta_1_CorrStat1Sigma",
-        # "ttbar_non_closure_jeta_1_CorrSystBandAsym",
-        # "ttbar_non_closure_jeta_2_CorrStat1Sigma",
-        # "ttbar_non_closure_jeta_2_CorrSystBandAsym",
-        # "ttbar_non_closure_jpt_1_CorrStat1Sigma",
-        # "ttbar_non_closure_jpt_1_CorrSystBandAsym",
-        # "ttbar_non_closure_jpt_2_CorrStat1Sigma",
-        # "ttbar_non_closure_jpt_2_CorrSystBandAsym",
-        # "ttbar_non_closure_met_CorrStat1Sigma",
-        # "ttbar_non_closure_met_CorrSystBandAsym",
-        # "ttbar_non_closure_deltaEta_ditaupair_CorrStat1Sigma",
-        # "ttbar_non_closure_deltaEta_ditaupair_CorrSystBandAsym",
-        # "ttbar_non_closure_deltaR_ditaupair_CorrStat1Sigma",
-        # "ttbar_non_closure_deltaR_ditaupair_CorrSystBandAsym",
-        # "ttbar_non_closure_deltaR_1j1_CorrStat1Sigma",
-        # "ttbar_non_closure_deltaR_1j1_CorrSystBandAsym",
-        # "ttbar_non_closure_deltaR_12j1_CorrStat1Sigma",
-        # "ttbar_non_closure_deltaR_12j1_CorrSystBandAsym",
-        # "ttbar_non_closure_pt_ttjj_CorrStat1Sigma",
-        # "ttbar_non_closure_pt_ttjj_CorrSystBandAsym",
-        # "ttbar_non_closure_mass_2_CorrStat1Sigma",
-        # "ttbar_non_closure_mass_2_CorrSystBandAsym",
-        # "ttbar_non_closure_mt_tot_CorrStat1Sigma",
-        # "ttbar_non_closure_mt_tot_CorrSystBandAsym",
-        # "ttbar_non_closure_m_vis_CorrStat1Sigma",
-        # "ttbar_non_closure_m_vis_CorrSystBandAsym",
-        # "ttbar_non_closure_iso_1_CorrStat1Sigma",
-        # "ttbar_non_closure_iso_1_CorrSystBandAsym",
-    ]
+    for syst in FFHelper.VARIATIONS[RuntimeVariables.USED_FF_VARIATIONS]
 ]
 
 # TODO: Check if variations are applied
@@ -759,15 +978,14 @@ ff_variations_lt = [
 ff_variations_tau_es_lt_mc = [
     ReplaceVariableReplaceCutAndAddWeight(
         f"anti_iso_CMS_scale_t_{dm}_{pt}_Channel_Era{shift}",
-        f"tauEs{dm}_{pt}{shift}",
+        f"tauEs{dm}{pt}{shift}",
         "tau_iso",
         Cut(
-            f"id_tau_vsJet_Tight_2__tauEs{dm}_{pt}{shift} < 0.5 && id_tau_vsJet_VLoose_2__tauEs{dm}_{pt}{shift} > 0.5",
+            f"id_tau_vsJet_Tight_2__tauEs{dm}{pt}{shift} < 0.5 && id_tau_vsJet_VLoose_2__tauEs{dm}{pt}{shift} > 0.5",
             "tau_anti_iso"
         ),
         Weight(
-            # FF Weight uses variables WITH underscores (Based on your observation)
-            f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__tauEs{dm}_{pt}{shift}",
+            f"{FFHelper.FF_OPTIONS['fake_factor']['lt']}__tauEs{dm}{pt}{shift}",
             "fake_factor"
         )
     )
@@ -792,8 +1010,8 @@ ff_variations_tau_es_emb_lt = [
 ]
 ff_variations_tau_es_emb_lt_corr = [
     ReplaceVariableReplaceCutAndAddWeight(
-        f"anti_iso_CMS_scale_t_{dm}_{pt}_Channel_Era{shift}",     # Hist Name: Standard MC
-        f"tauEs{dm}{pt}{shift}",                                   # Internal: No Underscore
+        f"anti_iso_CMS_scale_t_{dm}_{pt}_Channel_Era{shift}",
+        f"tauEs{dm}{pt}{shift}",
         "tau_iso",
         Cut(
             f"id_tau_vsJet_Tight_2__tauEs{dm}{pt}{shift} < 0.5 && id_tau_vsJet_VLoose_2__tauEs{dm}{pt}{shift} > 0.5",
@@ -806,9 +1024,6 @@ ff_variations_tau_es_emb_lt_corr = [
     )
     for dm, pt, shift in product(decay_modes, pt_bins, SHIFT_DIRECTIONS)
 ]
-
-
-
 
 # # tt channel
 ff_variations_tau_es_tt = [

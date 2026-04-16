@@ -75,9 +75,32 @@ def modify_jetfakes_systematics(file_path, factor=2.0):
                 is_target_systematic = all(
                     [
                         item_name.startswith("jetFakes_"),
-                        "_non_closure_" in item_name,
                         (item_name.endswith("Up") or item_name.endswith("Down")),
-                        "1Sigma" in item_name,
+                        ("_non_closure_" in item_name and "Stat1Sigma" in item_name) or
+                        any(
+                            subit in item_name for subit in [
+                                # ml derived part only the stat part
+                                # "ff_QCD",
+                                # "ff_Wjets",
+                                # "ff_ttbar",
+                                # ---
+                                "ff_QCDStat",
+                                "ff_WjetsStat",
+                                "ff_ttbarStat",
+                                # ---
+                                # "fractions_QCD",
+                                # "fractions_Wjets",
+                                # "fractions_ttbar",
+                                "fractions_StatStat",
+                                # ---
+                                # "QCD_DR_SR_correction",
+                                "QCD_DR_SR_correctionStat",
+                                # ---
+                                # "Wjets_DR_SR_correction",
+                                "Wjets_DR_SR_correctionStat",
+                                # ---
+                            ]
+                        )
                     ]
                 )
 
@@ -88,26 +111,19 @@ def modify_jetfakes_systematics(file_path, factor=2.0):
                     logger.info(f"  - Modifying: {item_name}")
                     syst_hist = item_obj
 
-                    if item_name.endswith("Up"):
-                        diff = syst_hist.Clone(f"{item_name}_diff")
-                        diff.Add(nominal_hist, -1)
-                        diff.Scale(factor)
-                        new_syst_hist = nominal_hist.Clone(item_name)
-                        new_syst_hist.Add(diff)
-                    else:  # Down variation
-                        diff = nominal_hist.Clone(f"{item_name}_diff")
-                        diff.Add(syst_hist, -1)
-                        diff.Scale(factor)
-                        new_syst_hist = nominal_hist.Clone(item_name)
-                        new_syst_hist.Add(diff, -1)
+                    # Stretch each bin away from the nominal by a factor,
+                    # preserving the per-bin sign of the original variation.
+                    new_syst_hist = syst_hist.Clone(item_name)
+                    for bin_idx in range(new_syst_hist.GetNcells()):
+                        nominal_val = nominal_hist.GetBinContent(bin_idx)
+                        syst_val = syst_hist.GetBinContent(bin_idx)
+                        delta = syst_val - nominal_val
+                        new_syst_hist.SetBinContent(bin_idx, nominal_val + factor * delta)
 
-                    # Write the newly created, modified histogram to the output file
                     new_syst_hist.Write()
-                    # Clean up temporary clones to prevent memory issues
-                    del new_syst_hist, diff
+                    del new_syst_hist  # Clean up temporary clone to prevent memory issues
                 else:
-                    # If it's not a target systematic, just copy it to the new file
-                    item_obj.Write()
+                    item_obj.Write()  # If it's not a target systematic, just copy it to the new file
 
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
