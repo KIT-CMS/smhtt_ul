@@ -17,7 +17,7 @@ import shapes.utils as shape_utils
 import config.ntuple_processor_config_helper as ntuple_processor_config_helper
 from config.helper_collection import PreserveROOTPathsAsStrings
 from config.logging_setup_configs import setup_logging
-from config.shapes.category_selection import categorization as default_categorization
+from config.shapes.category_selection import get_categorization
 from config.shapes.channel_selection import channel_selection
 from config.shapes.control_binning import control_binning as default_control_binning
 from config.shapes.file_names import files
@@ -32,8 +32,9 @@ def parse_arguments():
     parser.add_argument("--era", required=True, type=str, help="Experiment era.")
     parser.add_argument(
         "--channels",
-        default=[],
-        type=lambda channellist: [channel for channel in channellist.split(",")],
+        required=True,
+        default=None,
+        type=str,
         help="Channels to be considered, seperated by a comma without space",
     )
     parser.add_argument(
@@ -43,7 +44,7 @@ def parse_arguments():
         "--vs-ele-wp", required=True, type=str, help="Vs Mu Fake rate WP."
     )
     parser.add_argument(
-        "--apply-tauid", action="store_true", help="Flag that specifies if we apply tau id scale factors or not"
+        "--apply-tauid", action="store_true", help="Flag that specifies if we apply tau id scale factors or not for ZTT Embedding !!!"
     )
     parser.add_argument(
         "--directory", required=True, type=str, help="Directory with Artus outputs."
@@ -135,8 +136,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--control-plot-set",
-        default=[],
-        type=lambda varlist: [variable for variable in varlist.split(",")],
+        nargs="+",
+        required=True,
         help="Variables the shapes should be produced for.",
     )
     parser.add_argument(
@@ -146,8 +147,9 @@ def parse_arguments():
     )
     parser.add_argument(
         "--process-selection",
-        default=None,
-        type=lambda proclist: set([process.lower() for process in proclist.split(",")]),
+        # default=[],
+        nargs="+",
+        required=True,
         help="Subset of processes to be processed.",
     )
     parser.add_argument(
@@ -192,8 +194,15 @@ def parse_arguments():
     parser.add_argument(
         "--ff-type",
         help=f"Set to the type of fake factor used.\n{variations.__FF_OPTION_info__}",
-        default="fake_factor"
+        default="none",
     )
+    parser.add_argument(
+        "--special-analysis",
+        help="Can be set to a special analysis name to only run that analysis.",
+        choices=["TauID", "TauES", "TauID_ES"],
+        default=None,
+    )
+        
     return parser.parse_args()
 
 
@@ -202,7 +211,7 @@ def add_processes(
     datasets: dict,
     select_fn: callable,
     channel: str,
-) -> None:
+) -> None: 
 
     add_fn(name="data", dataset=datasets["data"], selections=select_fn())
     add_fn(name="hh2b2tau", dataset=datasets["HH2B2Tau"], selections=select_fn(selection.HH2B2Tau))
@@ -229,17 +238,16 @@ def add_processes(
     add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVT))
     add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVJ))
     # add_fn(name="vv", dataset=datasets["VV"], selections=select_fn(selection.VV))
-    add_fn(name="vvvl", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVL))
-    add_fn(name="vvvt", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVT))
-    add_fn(name="vvvj", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVJ))
+    # add_fn(name="vvvl", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVL))
+    # add_fn(name="vvvt", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVT))
+    # add_fn(name="vvvj", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVJ))
     # add_fn(name="vvv", dataset=datasets["VVV"], selections=select_fn(selection.VVV))
     add_fn(name="vh", dataset=datasets["VH"], selections=select_fn(selection.VH))
-    add_fn(name="ewk", dataset=datasets["EWK"], selections=select_fn(selection.EWK))
-    add_fn(name="ttvl", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVL))
-    add_fn(name="ttvt", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVT))
-    add_fn(name="ttvj", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVJ))
+    # add_fn(name="ewk", dataset=datasets["EWK"], selections=select_fn(selection.EWK))
+    # add_fn(name="ttvl", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVL))
+    # add_fn(name="ttvt", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVT))
+    # add_fn(name="ttvj", dataset=datasets["TTV"], selections=select_fn(selection.TTV, selection.TTVJ))
     # add_fn(name="ttv", dataset=datasets["TTV"], selections=select_fn(selection.TTV))
-
 
 def get_analysis_units(
     channel: str,
@@ -263,7 +271,7 @@ def get_analysis_units(
     )
     _selection_memo = {}
     _channel_selection = channel_selection(**_selection_kwargs)
-
+    print(datasets)
     def select(*args):
         _selection = [_channel_selection]
         for _process in args:
@@ -344,7 +352,6 @@ def get_control_units(
     )
     _selection_memo = {}
     _channel_selection = channel_selection(**_selection_kwargs)
-
     def select(*args):
         _selection = [_channel_selection]
         for _process in args:
@@ -365,7 +372,6 @@ def get_control_units(
         select_fn=select,
         channel=channel,
     )
-
     return control_units
 
 
@@ -404,12 +410,14 @@ def collect_config(
             default_flow_style=False,
             Dumper=PreserveROOTPathsAsStrings,
         )
-    logger.info(f"Configuration written to {args.config_output_file}")
+    logger.info(f"Configuration should be written to {args.config_output_file} and is written to {_path}.")
     logger.info("Due to a bug in ROOT/xrd the script won't exit properly. Please kill it manually. (i.e. Ctrl+z && kill %1)")
+    os._exit(0)
 
 
 def main(args):
     # Parse given arguments.
+    dcache = "root://cmsdcache-kit-disk.gridka.de"
     friend_directories = {
         "et": args.et_friend_directory,
         "mt": args.mt_friend_directory,
@@ -430,9 +438,11 @@ def main(args):
     nominals[args.era] = {}
     nominals[args.era]["datasets"] = {}
     nominals[args.era]["units"] = {}
-
     # Step 1: create units and book actions
-    for channel in args.channels:
+    logger.info("Step 1: create units and book actions.")
+    channels_str = args.channels
+    channels = channels_str.split(",")
+    for channel in channels:
         nominals[args.era]["datasets"][channel] = shape_utils.get_nominal_datasets(
             era=args.era,
             channel=channel,
@@ -452,7 +462,6 @@ def main(args):
             vs_ele_wp=args.vs_ele_wp,
             selection_option=args.selection_option,
         )
-
         if args.control_plots:
             nominals[args.era]["units"][channel] = get_control_units(
                 **common_kwargs,
@@ -469,7 +478,7 @@ def main(args):
         else:
             nominals[args.era]["units"][channel] = get_analysis_units(
                 **common_kwargs,
-                categorization=default_categorization,
+                categorization=get_categorization(),
             )
 
     if args.process_selection is None:
@@ -507,23 +516,25 @@ def main(args):
             "ttvj",
             # "ttv",
         }
-        # if "et" in args.channels:
+        # if "et" in channels:
         #     procS = procS - {"w"}
     else:
-        procS = args.process_selection
-    if "mm" in args.channels or "ee" in args.channels:
+        procS = set(args.process_selection)
+        
+    if "mm" in channels or "ee" in channels:
         procS = {
             "data",
             "zl",
-            "zl_nlo",
             "ttl",
             "vvl",
             "stl",
             "w",
-            # "w_nlo",
-            # "emb",
+            "ggh",
+            "qqh",
+            "tth",
+            "vh",
+            'hh2b2tau'
         } & procS
-
     dataS = {"data"} & procS
     # embS = {"emb"} & procS
     jetFakesDS = {
@@ -566,7 +577,7 @@ def main(args):
             enable_check=args.enable_booking_check,
         )
 
-    for channel in args.channels:
+    for channel in channels:
         _book_histogram(processes=signalsS, variations=[])
         # if channel == "mt" and args.special_analysis in {"TauES", "TauID"}:
         #     TauES_TauID_histogram_booking(
@@ -580,7 +591,7 @@ def main(args):
             for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS | other, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
-                    variations=[variations.abcd_method_lt, variations.same_sign],
+                    variations=[variations.abcd_method_lt, variations.same_sign, variations.anti_iso_lt],
                     # variations=variations.SemiLeptonicFFEstimations.unrolled(),
                 )
         elif channel == "tt":
@@ -589,12 +600,12 @@ def main(args):
                     processes=procs,
                     # variations=[variations.same_sign],
                     # variations=variations.FullyHadronicFFEstimations.unrolled(),
-                    variations=[variations.abcd_method_tt, variations.same_sign],
+                    variations=[variations.abcd_method_tt, variations.same_sign, variations.anti_iso_tt],
                 )
         elif channel == "em":
             _book_histogram(
                 processes=dataS | simulatedProcsDS[channel] - signalsS,
-                variations=[variations.same_sign_em],
+                variations=[variations.same_sign],
             )
         elif channel == "mm" and args.special_analysis == "TauES":
             _book_histogram(processes={"data", "zl", "w", "ttl"}, variations=[])
@@ -759,10 +770,11 @@ def main(args):
                 _book_histogram(simulatedProcsDS[channel], [variations.prefiring])
 
             if "2018" in args.era:
-                _book(simulatedProcsDS[channel], [variations.jet_es_hem])
+                _book_histogram(simulatedProcsDS[channel], [variations.jet_es_hem]) # This correct???
 
 
     # Step 2: convert units to graphs and merge them
+    logger.info("Step 2: convert units to graphs and merge them.")
     g_manager = GraphManager(unit_manager.booked_units, True)
     g_manager.optimize(args.optimization_level)
     graphs = g_manager.graphs
@@ -770,34 +782,34 @@ def main(args):
         print(f"{graph}")
 
     if args.collect_config_only:
-        if len(args.channels) > 1:
+        if len(channels) > 1:
             raise NotImplementedError("Collecting config for multiple channels is not implemented yet.")
         collect_config(
             graphs=graphs,
             era=args.era,
-            channel=args.channels[0],
+            channel=channels[0],
             filename=args.config_output_file,
         )
         return
 
     if args.collect_config_only:
-        if len(args.channels) > 1:
+        if len(channels) > 1:
             raise NotImplementedError("Collecting config for multiple channels is not implemented yet.")
         collect_config(
             graphs=graphs,
             era=args.era,
-            channel=args.channels[0],
+            channel=channels[0],
             filename=args.config_output_file,
         )
         return
 
     if args.only_create_graphs:
-        _channels = ",".join(args.channels)
+        _channels = ",".join(channels)
         _processes = ",".join(sorted(procS))
         if args.control_plots or args.gof_inputs:
-            graph_file_name = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+            graph_file_name = f"control_unit_graphs-{args.era}-{_channels}-{args.validation_tag}.pkl"
         else:
-            graph_file_name = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+            graph_file_name = f"analysis_unit_graphs-{args.era}-{_channels}-{args.validation_tag}.pkl"
         if args.graph_dir is not None:
             graph_file = os.path.join(args.graph_dir, graph_file_name)
         else:
@@ -816,6 +828,6 @@ if __name__ == "__main__":
         log_file = args.output_file.replace(".root", ".log")
     else:
         log_file = f"{args.output_file}.log"
-    logger = setup_logging(logger=logging.getLogger(__name__))
+    logger = setup_logging(output_file=log_file, logger=logging.getLogger(__name__), level=logging.DEBUG)
     variations.set_ff_type(args.ff_type)
     main(args)

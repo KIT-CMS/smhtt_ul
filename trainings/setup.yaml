@@ -1,0 +1,107 @@
+training_variables:
+  - "bpair_btag_value_1"
+  - "bpair_btag_value_2"
+  - "bpair_deltaR"
+  - "bpair_eta_1"
+  - "bpair_eta_2"
+  - "bpair_m_inv"
+  - "bpair_phi_1"
+  - "bpair_phi_2"
+  - "bpair_pt_1"
+  - "bpair_pt_2"
+  - "bpair_pt_dijet"
+  - "deltaR_ditaupair"
+  - "eta_1"
+  - "eta_2"
+  - "is_data"
+  - "is_dyjets"
+  - "is_ggh_htautau"
+  - "is_ttbar"
+  - "is_vbf_htautau"
+  - "is_wjets"
+  - "iso_1"
+  - "iso_2"
+  - "jet_hemisphere"
+  - "jeta_1"
+  - "jeta_2"
+  - "jphi_1"
+  - "jphi_2"
+  - "jpt_1"
+  - "jpt_2"
+  - "m_vis"
+  - "mass_1"
+  - "mass_2"
+  - "mass_tautaubb"
+  - "met"
+  - "metphi"
+  - "mjj"
+  - "mt_1"
+  - "mt_2"
+  - "mt_tot"
+  - "nbtag"
+  - "njets"
+  - "pfmet"
+  - "phi_1"
+  - "phi_2"
+  - "pt_1"
+  - "pt_2"
+  - "pt_dijet"
+  - "pt_tautaubb"
+  - "pt_vis"
+  - "pzetamissvis"
+  - "tau_decaymode_1"
+  - "tau_decaymode_2"
+  - "m_fastmtt"
+  - "pt_fastmtt"
+  - "eta_fastmtt"
+  - "phi_fastmtt"
+  # - "q_1"
+  # - "q_2"
+config_modifications:
+  general:
+    remove_from_config: ["W", "DYNLO"]
+    rename:
+      processes:
+        data: jetFakes
+      subprocesses:
+        data: jetFakes
+    add_era_and_process_name_flags: true
+  specific:
+    add_anti_iso_cut_and_weight_version: true
+
+dataset_modifications:
+  subprocesses_to_skip: # due to FFs (jetFakes)
+    - DY-ZJ
+    - TT-TTJ
+    - VV-VVJ
+    - ST-STJ
+  labels:
+    renaming_map:
+      # "is_ggh_htautau": "is_ggH__ggH125",
+      # "is_vbf_htautau": "is_VBF__VBF125",  
+      is_dyjets: is_DY__DY_ZL
+      is_ttbar: is_TT__TT_TTL
+      is_diboson: is_VV__VV_VVL
+      is_jetFakes: is_data
+      # is_DY__DY_ZJ: is_DY__DY_ZJ
+      is_DY__DY_ZL: is_DY__DY_ZL
+      is_DY__DY_ZTT: is_DY__DY_ZTT
+      is_HH2B2Tau__HH2B2Tau: is_HH2B2Tau__HH2B2Tau
+      # is_ST__ST_STJ: is_ST__ST_STJ
+      is_ST__ST_STL: is_ST__ST_STL
+      is_ST__ST_STT: is_ST__ST_STT
+      # is_TT__TT_TTJ: is_TT__TT_TTJ
+      is_TT__TT_TTL: is_TT__TT_TTL
+      is_TT__TT_TTT: is_TT__TT_TTT
+      is_VH__VH125: is_VH__VH125
+      # is_VV__VV_VVJ: is_VV__VV_VVJ
+      is_VV__VV_VVL: is_VV__VV_VVL
+      is_VV__VV_VVT: is_VV__VV_VVT
+      is_ggH__ggH125: is_ggH__ggH125
+      is_jetFakes__jetFakes: is_jetFakes__jetFakes
+      is_qqH__qqH125: is_qqH__qqH125
+      is_ttH__ttH125: is_ttH__ttH125
+  selections:
+    is_jetFakes: anti_iso
+    # everything not mentioned here but present in labels renaming_mapping is set to nominal
+
