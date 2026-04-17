@@ -415,6 +415,8 @@ def main(args):
         if "Nominal" not in variation:
             name_output += "_" + variation
         if process == "jetFakes":  # Check for the incorrect pattern
+            if "_Channel" in name_output and "scale_t_" in name_output:
+                name_output = name_output.replace("_Channel", "")  # TODO FIXME
             if "Down_" in name_output:
                 parts = name_output.split("Down_")
                 if len(parts) == 2:

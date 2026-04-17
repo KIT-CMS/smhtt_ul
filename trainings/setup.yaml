@@ -37,6 +37,9 @@ training_variables:
   - deltaEta_2j2
   - deltaEta_12j1
   - deltaEta_12j2
+  # --- potentially to remove since not important
+  - mass_2
+  - tau_decaymode_2
   # -- label flags ---
   - is_data
   - is_dyjets
