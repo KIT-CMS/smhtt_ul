@@ -1511,12 +1511,18 @@ qqH125 = make_chainable_process_selection(qqH125_process_selection)
 for b in range(200, 211):
     exec(f"qqH125_{b} = get_stxs_bin_selection('vbf_htautau', {b})")
     exec(f"qqH125.bin{b} = qqH125.wrap_next(qqH125_{b})")
+qqH125.bin201to202 = qqH125.wrap_next(get_stxs_bin_selection('vbf_htautau', 201, 202))
+qqH125.bin203to210 = qqH125.wrap_next(get_stxs_bin_selection('vbf_htautau', 203, 210))
 
 # ggH125
 ggH125 = make_chainable_process_selection(ggH125_process_selection)
 for b in range(100, 117):
     exec(f"ggH125_{b} = get_stxs_bin_selection('ggh_htautau', {b})")
     exec(f"ggH125.bin{b} = ggH125.wrap_next(ggH125_{b})")
+ggH125.bin101to104 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 101, 104))
+ggH125.bin105to106 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 105, 106))
+ggH125.bin107to109 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 107, 109))
+ggH125.bin110to116 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 110, 116))
 
 # Individual and miscellaneous
 ZTT_embedded = ZTT_embedded_process_selection

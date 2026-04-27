@@ -54,6 +54,12 @@ def parse_arguments() -> argparse.Namespace:
         help="Enable njets split categories for control-shape production.",
     )
     parser.add_argument(
+        "--analysis-units",
+        dest="analysis_units",
+        action="store_true",
+        help="Produce analysis units instead of control-plot units.",
+    )
+    parser.add_argument(
         "--plotcategory",
         "--category",
         dest="plotcategory",
@@ -106,6 +112,8 @@ def parse_arguments() -> argparse.Namespace:
         parser.error("--graph-filename requires --only-create-graphs")
     if arguments.config_output_file and arguments.shape_meta_mode != "collect_config_only":
         parser.error("--config-output-file requires --collect-config-only")
+    if arguments.analysis_units and arguments.control_plots_njet_split:
+        parser.error("--control-plots-njet-split is only valid for control-plot unit production")
 
     return arguments
 
@@ -203,7 +211,8 @@ def main() -> None:
     xsec_friend = os.environ["XSEC_FRIENDS"]
     logger.info(f"Using xsec friend directory: {xsec_friend}")
 
-    output_shapes_name = f"control_shapes-{arguments.era}-{arguments.channel}-{arguments.ntupletag}-{arguments.tag}"
+    unit_kind = "analysis" if arguments.analysis_units else "control"
+    output_shapes_name = f"{unit_kind}_shapes-{arguments.era}-{arguments.channel}-{arguments.ntupletag}-{arguments.tag}"
     shapes_output_path = Path("output") / f"{arguments.era}-{arguments.channel}-{arguments.ntupletag}-{arguments.tag}" / output_shapes_name
     shape_rootfile = f"{shapes_output_path}.root"
 
@@ -217,16 +226,19 @@ def main() -> None:
         logger.info(f"XSEC_FRIENDS: {xsec_friend}")
 
         xsec_command = f"""
-            nice -n 19 python3 friends/build_friend_tree.py 
-            --basepath {os.environ['KINGMAKER_BASEDIR_XROOTD']} 
-            --outputpath root://cmsdcache-kit-disk.gridka.de/{xsec_friend} 
-            --dataset-config datasets/nanoAOD_{arguments.nanoaodversion}/datasets.json 
+            nice -n 19 python3 friends/build_friend_tree.py
+            --basepath {os.environ['KINGMAKER_BASEDIR_XROOTD']}
+            --outputpath root://cmsdcache-kit-disk.gridka.de/{xsec_friend}
+            --dataset-config datasets/nanoAOD_{arguments.nanoaodversion}/datasets.json
             --nthreads 20
         """
         execute_bash_string(xsec_command, repository_root)
 
     elif arguments.mode == "SHAPES":
-        logger.info(f"Producing shapes for {arguments.channel}-{arguments.era}-{arguments.ntupletag}", extra={"summary": True})
+        logger.info(
+            f"Producing {unit_kind} units for {arguments.channel}-{arguments.era}-{arguments.ntupletag}",
+            extra={"summary": True},
+        )
         (repository_root / shapes_output_path).parent.mkdir(parents=True, exist_ok=True)
         graph_filename = arguments.graph_filename or f"{arguments.channel}_{arguments.era}_{arguments.ntupletag}_{arguments.tag}.pkl"
 
@@ -253,9 +265,10 @@ def main() -> None:
             meta_flags = "--run-splitted --incremental-hadd"
 
         control_plots_flag = ""
-        if not arguments.shape_meta_mode == "gof_inputs":
+        if not arguments.analysis_units and not arguments.shape_meta_mode == "gof_inputs":
             control_plots_flag = "--control-plots"
         control_split_flag = "--control-plots-njet-split" if arguments.control_plots_njet_split else ""
+        control_plot_set_flag = f"--control-plot-set {used_variables}" if not arguments.analysis_units else ""
 
         shapes_command = f"""
             nice -n 19 python shapes/produce_shapes.py
@@ -268,7 +281,7 @@ def main() -> None:
             --optimization-level 2
             {control_plots_flag}
             {control_split_flag}
-            --control-plot-set {used_variables}
+            {control_plot_set_flag}
             --output-file {shapes_output_path}
             --xrootd {cache_flags}
             --validation-tag {arguments.tag}
@@ -330,12 +343,12 @@ def main() -> None:
         plot_version = arguments.plotversion
         if plot_version in ["all", "emb+ff"]:
             execute_bash_string(f"{base_plot_cmd} --embedding --fake-factor", repository_root)
-        if plot_version in ["all", "emb+classic"]:
-            execute_bash_string(f"{base_plot_cmd} --embedding", repository_root)
+        # if plot_version in ["all", "emb+classic"]:
+        #     execute_bash_string(f"{base_plot_cmd} --embedding", repository_root)
         # if plot_version in ["all", "classic+ff"]:
         #     execute_bash_string(f"{base_plot_cmd} --fake-factor", repository_root)
-        if plot_version in ["all", "classic+classic"]:
-            execute_bash_string(base_plot_cmd, repository_root)
+        # if plot_version in ["all", "classic+classic"]:
+        #     execute_bash_string(base_plot_cmd, repository_root)
 
 
 if __name__ == "__main__":

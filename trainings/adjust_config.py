@@ -82,7 +82,11 @@ if __name__ == "__main__":
             subprocesses=rename.get("subprocesses", {}),
             shifts=rename.get("shifts", {}),
         )
-        .pipe(ConfigModification.general.add_era_and_process_name_flags)
+        .pipe(
+            ConfigModification.specific.filter_uncertainties,
+            keep_variations=args.common_setup_config.recursive_get(["config_modifications", "specific", "keep_variations"])
+        )
+        .pipe(ConfigModification.general.addding_additional_flags)
         .pipe(ConfigModification.specific.add_anti_iso_cut_and_weight_version)
         .pipe(ConfigModification.specific.convert_weights_and_cuts_to_common)
         .pipe(ConfigModification.specific.add_set_of_training_variables, training_variables=training_variables)

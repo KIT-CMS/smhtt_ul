@@ -1,4 +1,5 @@
 training_variables:
+  - event_parity
   - pt_1
   - pt_2
   - eta_1
@@ -19,6 +20,7 @@ training_variables:
   - met
   - deltaEta_ditaupair
   - deltaR_ditaupair
+  - mt_1
   - mt_2
   - pt_fastmtt
   - mt_tot
@@ -65,7 +67,52 @@ config_modifications:
     add_era_and_process_name_flags: true
   specific:
     add_anti_iso_cut_and_weight_version: true
-
+    keep_variations:
+      # ---
+      - .*anti_iso$
+      - .*same_sign$
+      - .*same_sign_anti_iso$
+      # ---
+      - .*BR_htt.*
+      - .*CMS_PileUp
+      - .*CMS_QCD_DR_SR_correction.*
+      - .*CMS_QCD_non_closure_Corr.*
+      - .*CMS_Wjets_DR_SR_correctionStat_.*
+      - .*CMS_Wjets_non_closure_Corr.*
+      - .*CMS_ZLShape_mt_.*
+      - .*CMS_btag_.*
+      - .*CMS_eff_m.*
+      - .*CMS_eff_t_.*
+      - .*CMS_eff_trigger_.*
+      - .*CMS_fake_m_WH.*
+      - .*CMS_ff_QCD.*
+      - .*CMS_ff_Wjets.*
+      - .*CMS_ff_ttbarStat.*
+      - .*CMS_fractions_.*
+      - .*CMS_htt_.*
+      - .*CMS_res_j_.*
+      - .*CMS_scale_j_Absolute
+      - .*CMS_scale_j_Absolute_.*2018
+      - .*CMS_scale_j_BBEC1
+      - .*CMS_scale_j_BBEC1_.*2018
+      - .*CMS_scale_j_EC2
+      - .*CMS_scale_j_EC2_.*2018
+      - .*CMS_scale_j_FlavorQCD
+      - .*CMS_scale_j_HEMIssue_.*2018
+      - .*CMS_scale_j_HF
+      - .*CMS_scale_j_HF_.*2018
+      - .*CMS_scale_j_RelativeBal
+      - .*CMS_scale_j_RelativeSample_.*2018
+      - .*CMS_scale_met_unclustered_.*2018
+      - .*CMS_scale_t_.*
+      - .*CMS_ttbar_non_closure_CorrStat.*
+      - .*CMS_ttbar_non_closure_CorrSystBandAsym.*
+      - .*LHE_.*
+      - .*PS_.*
+      - .*THU_.*
+      - .*ggH_scale_.*
+      - .*vbf_scale_.*
+      - .*lumi_.*
 dataset_modifications:
   subprocesses_to_skip:
     - DY-ZJ
@@ -78,52 +125,13 @@ dataset_modifications:
     - ggH125
   labels:
     renaming_map:
-      # "is_ggh_htautau": "is_ggH__ggH125",
-      # "is_vbf_htautau": "is_VBF__VBF125",  
       is_dyjets: is_DY__DY_ZL
       is_embedding: is_EMB__Embedded
       is_ttbar: is_TT__TT_TTL
       is_diboson: is_VV__VV_VVL
       is_jetFakes: is_data
-      is_ggh_htautau_bin101to104:
-        - is_ggH__ggH125_ggh_htautau_bin101_selection
-        - is_ggH__ggH125_ggh_htautau_bin102_selection
-        - is_ggH__ggH125_ggh_htautau_bin103_selection
-        - is_ggH__ggH125_ggh_htautau_bin104_selection
-      is_ggh_htautau_bin105:
-        - is_ggH__ggH125_ggh_htautau_bin105_selection
-      is_ggh_htautau_bin106:
-        - is_ggH__ggH125_ggh_htautau_bin106_selection
-      is_ggh_htautau_bin107:
-        - is_ggH__ggH125_ggh_htautau_bin107_selection
-      is_ggh_htautau_bin108:
-        - is_ggH__ggH125_ggh_htautau_bin108_selection
-      is_ggh_htautau_bin109:
-        - is_ggH__ggH125_ggh_htautau_bin109_selection
-      is_ggh_htautau_bin110to112:
-        - is_ggH__ggH125_ggh_htautau_bin110_selection
-        - is_ggH__ggH125_ggh_htautau_bin111_selection
-        - is_ggH__ggH125_ggh_htautau_bin112_selection
-      is_ggh_htautau_bin113to116:
-        - is_ggH__ggH125_ggh_htautau_bin113_selection
-        - is_ggH__ggH125_ggh_htautau_bin114_selection
-        - is_ggH__ggH125_ggh_htautau_bin115_selection
-        - is_ggH__ggH125_ggh_htautau_bin116_selection
-      is_vbf_htautau_bin201to202:
-        - is_qqH__qqH125_vbf_htautau_bin201_selection
-        - is_qqH__qqH125_vbf_htautau_bin202_selection
-      is_vbf_htautau_bin203to205:
-        - is_qqH__qqH125_vbf_htautau_bin203_selection
-        - is_qqH__qqH125_vbf_htautau_bin204_selection
-        - is_qqH__qqH125_vbf_htautau_bin205_selection
-      is_vbf_htautau_bin206:
-        - is_qqH__qqH125_vbf_htautau_bin206_selection
-      is_vbf_htautau_bin207to208:
-        - is_qqH__qqH125_vbf_htautau_bin207_selection
-        - is_qqH__qqH125_vbf_htautau_bin208_selection
-      is_vbf_htautau_bin209to210:
-        - is_qqH__qqH125_vbf_htautau_bin209_selection
-        - is_qqH__qqH125_vbf_htautau_bin210_selection
+      # --- signals ---
+      # --- inclusive ---
       is_vbf_htautau:
         - is_qqH__qqH125_vbf_htautau_bin201_selection
         - is_qqH__qqH125_vbf_htautau_bin202_selection
@@ -135,7 +143,48 @@ dataset_modifications:
         - is_qqH__qqH125_vbf_htautau_bin208_selection
         - is_qqH__qqH125_vbf_htautau_bin209_selection
         - is_qqH__qqH125_vbf_htautau_bin210_selection
-      is_ggh_htauau_bin101to104:
+      is_ggh_htautau:
+        - is_ggH__ggH125_ggh_htautau_bin101_selection
+        - is_ggH__ggH125_ggh_htautau_bin102_selection
+        - is_ggH__ggH125_ggh_htautau_bin103_selection
+        - is_ggH__ggH125_ggh_htautau_bin104_selection
+        - is_ggH__ggH125_ggh_htautau_bin105_selection
+        - is_ggH__ggH125_ggh_htautau_bin106_selection
+        - is_ggH__ggH125_ggh_htautau_bin107_selection
+        - is_ggH__ggH125_ggh_htautau_bin108_selection
+        - is_ggH__ggH125_ggh_htautau_bin109_selection
+        - is_ggH__ggH125_ggh_htautau_bin110_selection
+        - is_ggH__ggH125_ggh_htautau_bin111_selection
+        - is_ggH__ggH125_ggh_htautau_bin112_selection
+        - is_ggH__ggH125_ggh_htautau_bin113_selection
+        - is_ggH__ggH125_ggh_htautau_bin114_selection
+        - is_ggH__ggH125_ggh_htautau_bin115_selection
+        - is_ggH__ggH125_ggh_htautau_bin116_selection
+      # --- potential groupings vbf ---
+      is_vbf_htautau_bin201to202:
+        - is_qqH__qqH125_vbf_htautau_bin201_selection
+        - is_qqH__qqH125_vbf_htautau_bin202_selection
+      is_vbf_htautau_bin203to210:
+        - is_qqH__qqH125_vbf_htautau_bin203_selection
+        - is_qqH__qqH125_vbf_htautau_bin204_selection
+        - is_qqH__qqH125_vbf_htautau_bin205_selection
+        - is_qqH__qqH125_vbf_htautau_bin206_selection
+        - is_qqH__qqH125_vbf_htautau_bin207_selection
+        - is_qqH__qqH125_vbf_htautau_bin208_selection
+        - is_qqH__qqH125_vbf_htautau_bin209_selection
+        - is_qqH__qqH125_vbf_htautau_bin210_selection
+      is_vbf_htautau_bin203to205:
+        - is_qqH__qqH125_vbf_htautau_bin203_selection
+        - is_qqH__qqH125_vbf_htautau_bin204_selection
+        - is_qqH__qqH125_vbf_htautau_bin205_selection
+      is_vbf_htautau_bin206to210:
+        - is_qqH__qqH125_vbf_htautau_bin206_selection
+        - is_qqH__qqH125_vbf_htautau_bin207_selection
+        - is_qqH__qqH125_vbf_htautau_bin208_selection
+        - is_qqH__qqH125_vbf_htautau_bin209_selection
+        - is_qqH__qqH125_vbf_htautau_bin210_selection
+      # --- potential groupings ggh
+      is_ggh_htautau_bin101to104:
         - is_ggH__ggH125_ggh_htautau_bin101_selection
         - is_ggH__ggH125_ggh_htautau_bin102_selection
         - is_ggH__ggH125_ggh_htautau_bin103_selection
@@ -147,6 +196,15 @@ dataset_modifications:
         - is_ggH__ggH125_ggh_htautau_bin107_selection
         - is_ggH__ggH125_ggh_htautau_bin108_selection
         - is_ggH__ggH125_ggh_htautau_bin109_selection
+      is_ggh_htautau_bin110to112:
+        - is_ggH__ggH125_ggh_htautau_bin110_selection
+        - is_ggH__ggH125_ggh_htautau_bin111_selection
+        - is_ggH__ggH125_ggh_htautau_bin112_selection
+      is_ggh_htautau_bin113to116:
+        - is_ggH__ggH125_ggh_htautau_bin113_selection
+        - is_ggH__ggH125_ggh_htautau_bin114_selection
+        - is_ggH__ggH125_ggh_htautau_bin115_selection
+        - is_ggH__ggH125_ggh_htautau_bin116_selection
       is_ggh_htautau_bin110to116:
         - is_ggH__ggH125_ggh_htautau_bin110_selection
         - is_ggH__ggH125_ggh_htautau_bin111_selection
@@ -155,6 +213,59 @@ dataset_modifications:
         - is_ggH__ggH125_ggh_htautau_bin114_selection
         - is_ggH__ggH125_ggh_htautau_bin115_selection
         - is_ggH__ggH125_ggh_htautau_bin116_selection
+      # --- individual ---
+      is_ggh_htautau_bin101:
+        - is_ggH__ggH125_ggh_htautau_bin101_selection
+      is_ggh_htautau_bin102:
+        - is_ggH__ggH125_ggh_htautau_bin102_selection
+      is_ggh_htautau_bin103:
+        - is_ggH__ggH125_ggh_htautau_bin103_selection
+      is_ggh_htautau_bin104:
+        - is_ggH__ggH125_ggh_htautau_bin104_selection
+      is_ggh_htautau_bin105:
+        - is_ggH__ggH125_ggh_htautau_bin105_selection
+      is_ggh_htautau_bin106:
+        - is_ggH__ggH125_ggh_htautau_bin106_selection
+      is_ggh_htautau_bin107:
+        - is_ggH__ggH125_ggh_htautau_bin107_selection
+      is_ggh_htautau_bin108:
+        - is_ggH__ggH125_ggh_htautau_bin108_selection
+      is_ggh_htautau_bin109:
+        - is_ggH__ggH125_ggh_htautau_bin109_selection
+      is_ggh_htautau_bin110:
+        - is_ggH__ggH125_ggh_htautau_bin110_selection
+      is_ggh_htautau_bin111:
+        - is_ggH__ggH125_ggh_htautau_bin111_selection
+      is_ggh_htautau_bin112:
+        - is_ggH__ggH125_ggh_htautau_bin112_selection
+      is_ggh_htautau_bin113:
+        - is_ggH__ggH125_ggh_htautau_bin113_selection
+      is_ggh_htautau_bin114:
+        - is_ggH__ggH125_ggh_htautau_bin114_selection
+      is_ggh_htautau_bin115:
+        - is_ggH__ggH125_ggh_htautau_bin115_selection
+      is_ggh_htautau_bin116:
+        - is_ggH__ggH125_ggh_htautau_bin116_selection
+      is_vbf_htautau_bin201:
+        - is_qqH__qqH125_vbf_htautau_bin201_selection
+      is_vbf_htautau_bin202:
+        - is_qqH__qqH125_vbf_htautau_bin202_selection
+      is_vbf_htautau_bin203:
+        - is_qqH__qqH125_vbf_htautau_bin203_selection
+      is_vbf_htautau_bin204:
+        - is_qqH__qqH125_vbf_htautau_bin204_selection
+      is_vbf_htautau_bin205:
+        - is_qqH__qqH125_vbf_htautau_bin205_selection
+      is_vbf_htautau_bin206:
+        - is_qqH__qqH125_vbf_htautau_bin206_selection
+      is_vbf_htautau_bin207:
+        - is_qqH__qqH125_vbf_htautau_bin207_selection
+      is_vbf_htautau_bin208:
+        - is_qqH__qqH125_vbf_htautau_bin208_selection
+      is_vbf_htautau_bin209:
+        - is_qqH__qqH125_vbf_htautau_bin209_selection
+      is_vbf_htautau_bin210:
+        - is_qqH__qqH125_vbf_htautau_bin210_selection
   selections:
     is_dyjets: anti_iso+nominal
     is_embedding: anti_iso+nominal

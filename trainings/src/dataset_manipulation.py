@@ -104,13 +104,15 @@ def exemplary_remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd
     for region in regions:
         cut_column = tuple_column(Keys.NOMINAL, region, Keys.CUT)
         if cut_column in df.columns:
-            df = df[~df[cut_column].astype(bool)].copy()
-            for column in df.columns:
-                _level0, _level1, *_ = column
-                if (_level0, _level1) == (Keys.NOMINAL, region):
-                    df = df.drop(column, axis=1)
+            df = df[~df[cut_column].astype(bool)]
+            columns_to_drop = [
+                column for column in df.columns
+                if (column[0], column[1]) == (Keys.NOMINAL, region)
+            ]
+            if columns_to_drop:
+                df.drop(columns=columns_to_drop, inplace=True)
 
-    return df.copy()
+    return df
 
 
 def exemplary_custom_selection(df: pd.DataFrame, selections: Union[None, dict] = None) -> pd.DataFrame:
@@ -166,7 +168,7 @@ class ROOTToPlain(object):
         dtype: Literal["pandas", "ROOT"] = "pandas",
         tree_name: Union[str, None] = None,
     ) -> None:
-        self.raw_path = Path(raw_path)
+        self.raw_path = Path(raw_path) if raw_path is not None else None
         self.filtered_path = Path(filtered_path)
         self._dataframe = None
         self.dataframe_path = None
@@ -345,13 +347,19 @@ class ROOTToPlain(object):
         Returns:
             pd.DataFrame: A pandas DataFrame with the collected columns.
         """
-        _, _, filters, definitions, additional_columns, *paths = args
+        _, _, filters, definitions, additional_columns, fallback_definitions, *paths = args
 
         _, rdf = ROOTToPlain._build_single_rdf(tree_and_paths=paths)
 
         if rdf is None:
             logger.warning(f"File {paths[1]} is empty or missing. Skipping.")
             return pd.DataFrame()
+
+        if fallback_definitions:
+            available_columns = set(str(c) for c in rdf.GetColumnNames())
+            for col_name, default_val in fallback_definitions.items():
+                if col_name not in available_columns:
+                    rdf = rdf.Define(col_name, default_val)
 
         rdf, columns = ROOTToPlain._define_and_collect_columns(
             rdf=rdf,
@@ -362,16 +370,19 @@ class ROOTToPlain(object):
 
         data = rdf.AsNumpy(columns)
 
-        new_data = {}
-        for k, v in data.items():
+        for k in list(data.keys()):
+            v = data.pop(k)
             if v.dtype == np.float64:
-                new_data[k] = v.astype(np.float32)
+                if "weight" not in k.lower():
+                    data[k] = v.astype(np.float32)
+                else:
+                    data[k] = v
             elif v.dtype == np.int64:
-                new_data[k] = v.astype(np.int32)
+                data[k] = v.astype(np.int32)
             else:
-                new_data[k] = v
+                data[k] = v
 
-        return pd.DataFrame(new_data)
+        return pd.DataFrame(data)
 
     @staticmethod
     def _single_ROOTDataFrame(
@@ -389,13 +400,19 @@ class ROOTToPlain(object):
         Returns:
             List[str]: A list of collected columns.
         """
-        directory, index, filters, definitions, additional_columns, *paths = args
+        directory, index, filters, definitions, additional_columns, fallback_definitions, *paths = args
 
         _, rdf = ROOTToPlain._build_single_rdf(tree_and_paths=paths)
 
         if rdf is None:
             logger.warning(f"File {paths[1]} is empty or missing. Skipping.")
             return []
+
+        if fallback_definitions:
+            available_columns = set(str(c) for c in rdf.GetColumnNames())
+            for col_name, default_val in fallback_definitions.items():
+                if col_name not in available_columns:
+                    rdf = rdf.Define(col_name, default_val)
 
         rdf, columns = ROOTToPlain._define_and_collect_columns(
             rdf=rdf,
@@ -413,6 +430,7 @@ class ROOTToPlain(object):
         filters: Union[Iterable[Tuple[str, str]], Dict[str, str], Iterable[str], None] = None,
         definitions: Union[Iterable[Tuple[str, str]], Dict[str, str], None] = None,
         additional_columns: Union[None, Iterable[str]] = None,
+        fallback_definitions: Union[Dict[str, str], None] = None,
         max_workers: int = 16,
         description: str = "",
     ) -> "ROOTToPlain":
@@ -434,9 +452,12 @@ class ROOTToPlain(object):
         Returns:
             ROOTToRaw: The current instance of the ROOTToRaw class.
         """
-        if self.raw_path is not None and self.raw_path.exists():
-            logger.info(f"Raw dataframe already exists at {self.raw_path}")
-            self.dataframe_path = self.raw_path
+
+        target_path = self.raw_path if self.raw_path is not None else self.filtered_path
+
+        if target_path is not None and target_path.exists():
+            logger.info(f"Dataframe already exists at {target_path}")
+            self.dataframe_path = target_path
             return self
 
         logger.info(f"Creating {self.raw_path} from provided files")
@@ -452,6 +473,7 @@ class ROOTToPlain(object):
                         filters,
                         definitions,
                         additional_columns,
+                        fallback_definitions,
                         *tree_and_filepaths,
                     )
                     for idx, tree_and_filepaths in enumerate(tree_and_filepaths)
@@ -474,25 +496,28 @@ class ROOTToPlain(object):
 
             if self.dtype == "pandas":
                 valid_results = [df for df in results if not df.empty]
-                self._dataframe = pd.concat(valid_results, axis=0, ignore_index=True, sort=False)
+                if not valid_results:
+                    self._dataframe = results[0] if results else pd.DataFrame()
+                else:
+                    self._dataframe = pd.concat(valid_results, axis=0, ignore_index=True, sort=False)
 
-            if self.raw_path is not None:
-                logger.info(f"Saving raw dataframe to {self.raw_path}")
-                self.raw_path.parent.mkdir(parents=True, exist_ok=True)
+            if target_path is not None:
+                logger.info(f"Saving dataframe to {target_path}")
+                target_path.parent.mkdir(parents=True, exist_ok=True)
 
                 if self.dtype == "pandas":
-                    self._dataframe.to_feather(str(self.raw_path))
+                    self._dataframe.to_feather(str(target_path))
 
                 if self.dtype == "ROOT":
-                    self._dataframe.Snapshot(self.tree_name, str(self.raw_path), self.columns)
+                    self._dataframe.Snapshot(self.tree_name, str(target_path), self.columns)
 
-                self.dataframe_path = self.raw_path
+                self.dataframe_path = target_path
 
         return self
 
     def filter_dataframe(
         self,
-        filter_function: Union[Iterable[Callable], Callable, str, Iterable[str]],
+        filter_function: Union[Iterable[Callable], Callable, str, Iterable[str], None],
     ) -> "ROOTToPlain":
         """
         Applys a filter to the dataframe. The filter can be a single function, a list of functions,
@@ -500,7 +525,7 @@ class ROOTToPlain(object):
         and saves it to the filtered_path if provided.
 
         Args:
-            filter_function (Union[Iterable[Callable], Callable, str, Iterable[str]]): The filter function(s) to be applied.
+            filter_function (Union[Iterable[Callable], Callable, str, Iterable[str], None]): The filter function(s) to be applied.
 
         Returns:
             ROOTToPlain: The current instance of the ROOTToPlain class.
@@ -510,40 +535,45 @@ class ROOTToPlain(object):
             self.dataframe_path = self.filtered_path
             return self
 
-        assert self._dataframe is not None or self.raw_path.exists(), "Dataframe is None. Please call setup_raw_dataframe first."
+        assert self._dataframe is not None or (self.raw_path is not None and self.raw_path.exists()), "Dataframe is None. Please call setup_raw_dataframe first."
         logger.info(f"Filtering dataframe with {filter_function}")
 
         if self.dtype == "pandas":
-            initial_shape, mask = self.dataframe.shape, True
+            if filter_function is None:
+                logger.info("No filter function provided. Skipping filtering.")
+            else:
+                initial_shape, mask = self.dataframe.shape, True
+                if isinstance(filter_function, (list, tuple)):
+                    assert all(callable(it) for it in filter_function), "filter_funciton must be a callable function"
+                    for _filter_function in filter_function:
+                        mask &= _filter_function(self._dataframe)
+                elif isinstance(filter_function, dict):
+                    assert all(callable(it) for it in filter_function.values()), "filter_funciton must be a callable function"
+                    for _filter_function in filter_function.values():
+                        mask &= _filter_function(self._dataframe)
+                elif callable(filter_function):
+                    mask = filter_function(self._dataframe)
 
-            if isinstance(filter_function, (list, tuple)):
-                assert all(callable(it) for it in filter_function), "filter_funciton must be a callable function"
-                for _filter_function in filter_function:
-                    mask &= _filter_function(self._dataframe)
-            elif isinstance(filter_function, dict):
-                assert all(callable(it) for it in filter_function.values()), "filter_funciton must be a callable function"
-                for _filter_function in filter_function.values():
-                    mask &= _filter_function(self._dataframe)
-            elif callable(filter_function):
-                mask = filter_function(self._dataframe)
-
-            self._dataframe = self._dataframe[mask]
-            logger.info(f"Filtered dataframe shape: {initial_shape} -> {self._dataframe.shape}")
+                self._dataframe = self._dataframe[mask]
+                logger.info(f"Filtered dataframe shape: {initial_shape} -> {self._dataframe.shape}")
 
         if self.dtype == "ROOT":
             initial_shape = self.dataframe.Count()
 
-            if isinstance(filter_function, (list, tuple)):
-                assert all(isinstance(it, str) for it in filter_function), "filter_funciton must be a string"
-                filter_function = " && ".join([f"({it})" for it in filter_function])
-            elif isinstance(filter_function, dict):
-                assert all(isinstance(it, str) for it in filter_function.values()), "filter_funciton must be a string"
-                filter_function = " && ".join([f"({it})" for it in filter_function.values()])
-            elif isinstance(filter_function, str):
-                pass
+            if filter_function is None:
+                logger.info("No filter function provided. Skipping filtering.")
+            else:
+                if isinstance(filter_function, (list, tuple)):
+                    assert all(isinstance(it, str) for it in filter_function), "filter_funciton must be a string"
+                    filter_function = " && ".join([f"({it})" for it in filter_function])
+                elif isinstance(filter_function, dict):
+                    assert all(isinstance(it, str) for it in filter_function.values()), "filter_funciton must be a string"
+                    filter_function = " && ".join([f"({it})" for it in filter_function.values()])
+                elif isinstance(filter_function, str):
+                    pass
 
-            self._dataframe = self._dataframe.Filter(filter_function)
-            logger.info(f"Filtered dataframe shape: {initial_shape} -> {self._dataframe.Count()}")
+                self._dataframe = self._dataframe.Filter(filter_function)
+                logger.info(f"Filtered dataframe shape: {initial_shape} -> {self._dataframe.Count()}")
 
         if self.filtered_path is not None:
             logger.info(f"Saving filtered dataframe to {self.filtered_path}")
@@ -671,13 +701,13 @@ class ProcessDataFrameManipulation:
             for column, labels in renaming_map.items():
                 if isinstance(labels, str):
                     labels = [labels]
-                df[tuple_column(Keys.LABELS, column)] = (self.subprocess_df[labels].astype(bool).any(axis=1)).astype(np.int32).values
+                df[tuple_column(Keys.LABELS, column)] = (self.subprocess_df[labels].astype(bool).any(axis=1)).astype(np.int32, copy=False).values
 
         else:
             logger.warning("No renaming map provided. Performing a copy of all label-like columns starting with 'is_'")
             for label in self.from_config.label_columns:
                 column = tuple_column(Keys.LABELS, label)
-                df[column] = self.subprocess_df[label].astype(np.int32).values
+                df[column] = self.subprocess_df[label].astype(np.int32, copy=False).values
 
             for label in (item for item in self.subprocess_dict if item.startswith("is_")):
                 column = tuple_column(Keys.LABELS, label)
@@ -703,7 +733,7 @@ class ProcessDataFrameManipulation:
 
         for variable in self.from_config.variable_columns:
             column = tuple_column(Keys.NOMINAL, Keys.VARIABLES, renaming_map.get(variable, variable))
-            df[column] = self.subprocess_df[variable].astype(np.float32).values
+            df[column] = self.subprocess_df[variable].astype(np.float32, copy=False).values
 
         return df
 
@@ -718,16 +748,16 @@ class ProcessDataFrameManipulation:
             pd.DataFrame: DataFrame with added nominal weight and cut.
         """
         weight, cut = self.subprocess_dict[Keys.NOMINAL][Keys.WEIGHT], self.subprocess_dict[Keys.NOMINAL][Keys.CUT]
-        df[tuple_column(Keys.NOMINAL, Keys.WEIGHT)] = self.subprocess_df[weight].astype(np.float32).values
-        df[tuple_column(Keys.NOMINAL, Keys.CUT)] = self.subprocess_df[cut].astype(np.float32).values
+        df[tuple_column(Keys.NOMINAL, Keys.WEIGHT)] = self.subprocess_df[weight].astype(np.float64, copy=False).values
+        df[tuple_column(Keys.NOMINAL, Keys.CUT)] = self.subprocess_df[cut].astype(np.float32, copy=False).values
 
         try:
             anti_iso_weight, anti_iso_cut = (
                 self.subprocess_dict[Keys.NOMINAL][Keys.ANTI_ISO_WEIGHT],
                 self.subprocess_dict[Keys.NOMINAL][Keys.ANTI_ISO_CUT],
             )
-            df[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_CUT)] = self.subprocess_df[anti_iso_cut].astype(np.float32).values
-            df[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_WEIGHT)] = self.subprocess_df[anti_iso_weight].astype(np.float32).values
+            df[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_CUT)] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
+            df[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_WEIGHT)] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
         except KeyError:
             pass
 
@@ -772,11 +802,13 @@ class ProcessDataFrameManipulation:
             pd.DataFrame: DataFrame with added additional cuts and weights.
         """
         names = list(set(self.subprocess_dict.keys()) - {Keys.NOMINAL, Keys.UNCERTAINTIES})
-        for name in [item for item in names if not item.startswith("is_")]:
+        for name in [item for item in names if not item.startswith("is_") or not item == "event_parity"]:
+            if not isinstance(self.subprocess_dict[name], dict):
+                continue
             cut = self.subprocess_dict[name][Keys.CUT]
             weight = self.subprocess_dict[name][Keys.WEIGHT]
-            df[tuple_column(Keys.NOMINAL, name, Keys.CUT)] = self.subprocess_df[cut].astype(np.float32).values
-            df[tuple_column(Keys.NOMINAL, name, Keys.WEIGHT)] = self.subprocess_df[weight].astype(np.float32).values
+            df[tuple_column(Keys.NOMINAL, name, Keys.CUT)] = self.subprocess_df[cut].astype(np.float32, copy=False).values
+            df[tuple_column(Keys.NOMINAL, name, Keys.WEIGHT)] = self.subprocess_df[weight].astype(np.float64, copy=False).values
 
         return df
 
@@ -813,13 +845,13 @@ class ProcessDataFrameManipulation:
 
                 try:
                     if (weight := uncertainty_dict[direction].get(Keys.WEIGHT)):
-                        df[weight_column] = self.subprocess_df[weight].astype(np.float32).values
+                        df[weight_column] = self.subprocess_df[weight].astype(np.float64, copy=False).values
                     if (cut := uncertainty_dict[direction].get(Keys.CUT)):
-                        df[cut_column] = self.subprocess_df[cut].astype(np.float32).values
+                        df[cut_column] = self.subprocess_df[cut].astype(np.float32, copy=False).values
                     if (anti_iso_weight := uncertainty_dict[direction].get(Keys.ANTI_ISO_WEIGHT)):
-                        df[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(np.float32).values
+                        df[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
                     if (anti_iso_cut := uncertainty_dict[direction].get(Keys.ANTI_ISO_CUT)):
-                        df[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(np.float32).values
+                        df[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
 
                     logger.debug(f"Adding {uncertainty_name}\n\t\t{weight=}\n\t\t{cut=}\n\t\t{anti_iso_weight=}\n\t\t{anti_iso_cut=}")
                 except KeyError:
@@ -859,19 +891,19 @@ class ProcessDataFrameManipulation:
                 )
                 try:
                     if (weight := uncertainty_dict[direction].get(Keys.WEIGHT)):
-                        df[weight_column] = self.subprocess_df[weight].astype(np.float32).values
+                        df[weight_column] = self.subprocess_df[weight].astype(np.float64, copy=False).values
                     if (cut := uncertainty_dict[direction].get(Keys.CUT)):
-                        df[cut_column] = self.subprocess_df[cut].astype(np.float32).values
+                        df[cut_column] = self.subprocess_df[cut].astype(np.float32, copy=False).values
                     if (anti_iso_weight := uncertainty_dict[direction].get(Keys.ANTI_ISO_WEIGHT)):
-                        df[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(np.float32).values
+                        df[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
                     if (anti_iso_cut := uncertainty_dict[direction].get(Keys.ANTI_ISO_CUT)):
-                        df[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(np.float32).values
+                        df[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
 
                     shfted_variables_collection = []
                     for variable in self.from_config.all_shifted_variables:
                         variable_column = tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.VARIABLES, variable)
                         shifted_variable = uncertainty_dict[direction][Keys.VARIABLES][variable]
-                        df[variable_column] = self.subprocess_df[shifted_variable].astype(np.float32).values
+                        df[variable_column] = self.subprocess_df[shifted_variable].astype(np.float32, copy=False).values
                         shfted_variables_collection.append((variable, shifted_variable))
 
                     logger.debug(
@@ -1007,12 +1039,28 @@ class CombinedDataFrameManipulation:
             with LogContext(logger).duplicate_filter():
                 logger.info("Adding class weights to nominal weights")
 
-            dfs.loc[:, tuple_column(Keys.NOMINAL, Keys.CLASS_WEIGHT)] = get_class_weights(
-                weights=dfs[tuple_column(Keys.NOMINAL, Keys.WEIGHT)],
-                Y=dfs.loc[:, (Keys.LABELS,)].values.argmax(axis=1),
-                classes=np.unique(dfs.loc[:, (Keys.LABELS,)].values.argmax(axis=1)),
-                class_weighted=class_weighted,
-            ).astype(np.float32).values
+            Y_array = dfs.loc[:, (Keys.LABELS,)].values.argmax(axis=1)
+
+            dfs.loc[:, tuple_column(Keys.NOMINAL, Keys.CLASS_WEIGHT)] = 1.0
+            dfs.loc[:, tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_CLASS_WEIGHT)] = 1.0
+
+            if (nominal_cut_column := tuple_column(Keys.NOMINAL, Keys.CUT)) in dfs.columns:
+                if (mask := dfs[nominal_cut_column].astype(bool).values).any():
+                    dfs.loc[mask, tuple_column(Keys.NOMINAL, Keys.CLASS_WEIGHT)] = get_class_weights(
+                        weights=dfs.loc[mask, tuple_column(Keys.NOMINAL, Keys.WEIGHT)],
+                        Y=Y_array[mask],
+                        classes=np.unique(Y_array[mask]),
+                        class_weighted=class_weighted,
+                    ).astype(np.float64)
+
+            if (anti_iso_cut_column := tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_CUT)) in dfs.columns:
+                if (mask := dfs[anti_iso_cut_column].astype(bool).values).any():
+                    dfs.loc[mask, tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_CLASS_WEIGHT)] = get_class_weights(
+                        weights=dfs.loc[mask, tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_WEIGHT)],
+                        Y=Y_array[mask],
+                        classes=np.unique(Y_array[mask]),
+                        class_weighted=class_weighted,
+                    ).astype(np.float64)
 
             return dfs
         else:

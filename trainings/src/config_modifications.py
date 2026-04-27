@@ -280,7 +280,7 @@ class _GeneralConfigManipulation(object):
         return config
 
     @staticmethod
-    def add_era_and_process_name_flags(config):
+    def addding_additional_flags(config):
         """
         Adds flags for each era and process name to the configuration.
 
@@ -306,6 +306,9 @@ class _GeneralConfigManipulation(object):
                 config[channel][era][process][subprocess][key] = f"(float){flag}."
                 logger.info(f"Adding {key} flag for {channel} {era} {process}")
 
+            config[channel][era][process][Keys.COMMON]["event_parity"] = "(event % 2)"
+            logger.info(f"Adding event_parity flag for {channel} {era} {process}")
+
         return config
 
 
@@ -313,6 +316,62 @@ class _SpecificConfigManipulation(object):
     """
     Collection of specific configuration manipulation methods, to be applied after the general ones.
     """
+    @staticmethod
+    def filter_uncertainties(config: dict, keep_variations: Union[List[str], None] = None) -> dict:
+        """
+        Filters uncertainties based on a list of regex patterns or substrings.
+
+        Args:
+            config (dict): The configuration dictionary.
+            keep_variations (list): List of strings/regexes of variations to keep.
+        """
+        if not keep_variations:
+            return config
+
+        config = deepcopy(config)
+        patterns = [re.compile(p) for p in keep_variations]
+
+        kept, discarded = set(), set()
+        protected_keys = {Keys.NOMINAL, Keys.PATHS, Keys.COMMON, Keys.VARIABLES, Keys.NOMINAL_VARIABLES}
+
+        for *_, subprocess_dict in Iterate.subprocesses(config):
+            keys_to_remove = []
+            for key, val in subprocess_dict.items():
+                if key in protected_keys or str(key).startswith("is_") or not isinstance(val, dict):
+                    continue
+
+                if any(p.search(key) for p in patterns):
+                    kept.add(key)
+                else:
+                    discarded.add(key)
+                    keys_to_remove.append(key)
+
+            for key in keys_to_remove:
+                del subprocess_dict[key]
+
+        unc_pattern = re.compile(r"^(.*?)(Up|Down)(?:_.*)?$")
+
+        def get_base(name):
+            m = unc_pattern.match(name)
+            return m.group(1) if m else name
+
+        kept_bases = sorted(list(set(get_base(k) for k in kept)))
+        discarded_bases = sorted(list(set(get_base(k) for k in discarded)))
+
+        logger.info(19 * "-")
+
+        logger.info(f"KEPT VARIATIONS (Base Names) -[{len(kept_bases)}]:")
+        for k in kept_bases:
+            logger.info(f"  [+] {k}")
+
+        logger.info(f"DISCARDED VARIATIONS (Base Names) - [{len(discarded_bases)}]:")
+        for k in discarded_bases:
+            logger.info(f"  [-] {k}")
+
+        logger.info(19 * "-")
+
+        return config
+
     @staticmethod
     def convert_weights_and_cuts_to_common(config: dict) -> dict:
         """
@@ -414,7 +473,7 @@ class _SpecificConfigManipulation(object):
 
                 for variable in shift_dict.get("var", []):
                     basename, *shift = variable.split("__")
-                    if shift:
+                    if basename in default_variables and shift:
                         variables_dict[basename] = variable
 
                 if variables_dict == default_variables:

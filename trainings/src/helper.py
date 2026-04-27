@@ -74,11 +74,13 @@ TRAINING_VARIABLES = [
 
 
 def downcast_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    fcols = df.select_dtypes('float64').columns
+    fcols = [column for column in df.select_dtypes('float64').columns if "weight" not in str(column).lower()]
     icols = df.select_dtypes('int64').columns
 
-    df[fcols] = df[fcols].astype(np.float32)
-    df[icols] = df[icols].astype(np.int32)
+    if fcols:
+        df[fcols] = df[fcols].astype(np.float32)
+    if len(icols) > 0:
+        df[icols] = df[icols].astype(np.int32)
 
     return df
 
@@ -106,6 +108,7 @@ class Keys:
     VARIABLES = "variables"
     WEIGHT = "weight"
     CLASS_WEIGHT = "class_weight"
+    ANTI_ISO_CLASS_WEIGHT = "anti_iso_class_weight"
     CUT = "cut"
     UP = "up"
     DOWN = "down"
@@ -385,7 +388,8 @@ def get_class_weights(
     classes: tuple = (0, 1),
     class_weighted: bool = True,
 ) -> Union[pd.Series, np.ndarray]:
-    _weights = np.zeros_like(weights)
+    _weights = np.zeros_like(weights).astype(np.float64)
+    __weights = weights.values.astype(np.float64) if isinstance(weights, pd.Series) else weights.astype(np.float64)
     for _class in classes:
-        _weights[Y == _class] = weights.sum() / weights[Y == _class].sum()
-    return _weights * (weights if class_weighted else 1.0)
+        _weights[Y == _class] = __weights.sum() / __weights[Y == _class].sum()
+    return _weights * (__weights if class_weighted else 1.0)

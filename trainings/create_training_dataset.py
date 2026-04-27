@@ -62,6 +62,7 @@ def collect_filtered_plain_dataframes(
     process: str,
     subprocess: str,
     subprocess_dict: dict,
+    drop_raw: bool = True,
 ) -> tuple:
     """
     TODO: Update docstring
@@ -80,35 +81,45 @@ def collect_filtered_plain_dataframes(
     Returns:
         dict: A dictionary containing the filtered plain dataframes.
     """
-    def any_cut(df):
-        pattern = "__common__cut__"
-        return df[[it for it in df.columns if it.startswith(pattern)]].any(axis=1)
 
     tree_and_filepaths_tuples = list(Iterate.rdf_files(config[channel][era][process][Keys.PATHS]))
     definitions_tuples = list(Iterate.common_dict(config[channel][era][process][Keys.COMMON]))
     subprocess_flag_tuples = [it for it in subprocess_dict.items() if it[0].startswith("is_")]
     additional_columns = list(config[channel][era][process][Keys.VARIABLES].keys())
 
-    return (
-        channel,
-        era,
-        process,
-        subprocess,
-        subprocess_dict,
-        ROOTToPlain(
-            raw_path=filepath("raw", f"{channel}_{era}_{process}_{subprocess}"),
-            filtered_path=filepath("filtered", f"{channel}_{era}_{process}_{subprocess}"),
-        ).setup_raw_dataframe(
-            tree_and_filepaths=tree_and_filepaths_tuples,
-            definitions=definitions_tuples + subprocess_flag_tuples,
-            additional_columns=additional_columns + list(Keys.EVENT_IDENTIFIER_COLUMNS),
-            filters=None,
-            description=f"{channel}_{era}_{process}_{subprocess}",
-            max_workers=16,
-        ).filter_dataframe(
-            filter_function=any_cut,
-        ),
+    raw_path = None if drop_raw else filepath("raw", f"{channel}_{era}_{process}_{subprocess}")
+    filtered_path = filepath("filtered", f"{channel}_{era}_{process}_{subprocess}")
+
+    cut_columns = [k for k, _ in definitions_tuples if "__common__cut__" in k]
+
+    base_fallback_weights = [
+        "ps_weight__FsrWeight",
+        "ps_weight__IsrWeight",
+    ]
+
+    fallback_defs = {}
+    for weight in base_fallback_weights:
+        fallback_defs[weight] = "1.0f"  # Nominal -> 1.0f
+        fallback_defs[f"{weight}Up"] = weight  # Up -> Nominal
+        fallback_defs[f"{weight}Down"] = weight  # Down -> Nominal
+
+    r2p = ROOTToPlain(raw_path=raw_path, filtered_path=filtered_path).setup_raw_dataframe(
+        tree_and_filepaths=tree_and_filepaths_tuples,
+        definitions=definitions_tuples + subprocess_flag_tuples,
+        additional_columns=additional_columns + list(Keys.EVENT_IDENTIFIER_COLUMNS),
+        fallback_definitions=fallback_defs,
+        filters={"any_cut": " || ".join(cut_columns)} if cut_columns else {"any_cut": "false"},
+        description=f"{channel}_{era}_{process}_{subprocess}",
+        max_workers=32,
     )
+
+    if not drop_raw:
+        def any_cut(df):
+            pattern = "__common__cut__"
+            return df[[it for it in df.columns if it.startswith(pattern)]].any(axis=1)
+        r2p.filter_dataframe(filter_function=any_cut)
+
+    return (channel, era, process, subprocess, subprocess_dict, r2p)
 
 
 def create_process_folds(
@@ -148,10 +159,15 @@ def create_process_folds(
     }
 
     if not all(filename.exists() for filename in filenames.values()):
+
+        raw_df = plain_subprocess_dataframe_obj.dataframe.reset_index(drop=True)
+        plain_subprocess_dataframe_obj._dataframe = None
+        gc.collect()
+
         add = ProcessDataFrameManipulation(
             config=config,
             subprocess_dict=subprocess_dict,
-            subprocess_df=plain_subprocess_dataframe_obj.dataframe.reset_index(drop=True),
+            subprocess_df=raw_df,
             process_name=process,
             subprocess_name=subprocess,
         )
@@ -190,7 +206,11 @@ def create_process_folds(
                     ["dataset_modifications", "selections"]
                 )
             )
-        )
+        ).copy()
+
+        add.subprocess_df = None
+        del raw_df
+        gc.collect()
 
         msg = f"Creating folds for {channel} {era} {process} - {subprocess}"
 
@@ -199,8 +219,16 @@ def create_process_folds(
                 df=process_df,
                 condition=fold_condition,
             )
+            df = df.reset_index(drop=True).copy()
             msg += f"\n\t{fold_name}: {df.shape}"
             df.to_feather(filenames[fold_name])
+
+            del df
+            gc.collect()
+
+        del process_df
+        gc.collect()
+
         logger.info(msg)
     else:
         logger.info(f"Folds for {channel} {era} {process} - {subprocess} already exist in {filepath('_folds')}, skipping creation.")
@@ -219,14 +247,14 @@ def combine_folds(
     for fold_name in get_fold_conditions().keys():
         logger.info(f"Start processing fold {fold_name}")
 
+        fold_files = list(Path(filepath("_folds")).glob(f"__{fold_name}__*.feather"))
+        if not fold_files:
+            logger.warning(f"No feather files found for fold {fold_name}, skipping.")
+            continue
+
         fold = pd.concat(
-            [
-                downcast_dataframe(pd.read_feather(it)).reset_index(drop=True)
-                for it in tqdm(
-                    Path(filepath("_folds")).glob(f"__{fold_name}__*.feather"),
-                    desc=f"Loading fold {fold_name} parts",
-                )
-            ]
+            downcast_dataframe(pd.read_feather(it)).reset_index(drop=True)
+            for it in tqdm(fold_files, desc=f"Loading fold {fold_name} parts")
         ).reset_index(drop=True)
         logger.info(f"Combining fold {fold_name} to shape {fold.shape}")
 
@@ -247,6 +275,9 @@ def combine_folds(
         fold.to_feather(filepath("folds", f"{fold_name}"))
         logger.info(f"Saved combined fold {fold_name} at {filepath('folds', f'{fold_name}')}")
 
+        del fold
+        gc.collect()
+
 
 if __name__ == "__main__":
 
@@ -266,11 +297,6 @@ if __name__ == "__main__":
         args.common_setup_config = {}
 
     args.common_setup_config = PipeDict(args.common_setup_config)
-
-    WEIGHT_AND_CUT_CONTAINING = {"ps_weight__FsrWeight", "ps_weight__IsrWeight"}
-    Iterate.common_dict = partial(Iterate.common_dict, ignore_weight_and_cuts=WEIGHT_AND_CUT_CONTAINING)
-    logger.warning(f"Ignoring cuts and weights of {WEIGHT_AND_CUT_CONTAINING}, until fixed!")
-
     SUBPROCESSES_TO_SKIP = args.common_setup_config.recursive_get(["dataset_modifications", "subprocesses_to_skip"], set())
 
     processing_pipeline = (
