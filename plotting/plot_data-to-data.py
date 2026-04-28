@@ -9,6 +9,7 @@ import copy
 import re
 import logging
 import ROOT
+import math
 
 # Set ROOT to batch mode so it doesn't open all the plots
 ROOT.gROOT.SetBatch(True)
@@ -31,11 +32,45 @@ def make_dir_if_not_exists(directory):
 def file_exists(file_path):
     return os.path.isfile(file_path)
 
+
+def chi2_between(h_ref, h_cmp):
+    """Compute binned chi2 between two TH1 (shape histograms).
+    Uses bin errors from the histograms (assumed already scaled/normalized).
+    Returns (chi2, ndf, pvalue, mean_pull, rms_pull).
+    """
+    nbins = h_ref.GetNbinsX()
+    chi2 = 0.0
+    n_used = 0
+    pulls = []
+    for ib in range(1, nbins + 1):
+        cref = h_ref.GetBinContent(ib)
+        ccmp = h_cmp.GetBinContent(ib)
+        err_ref = h_ref.GetBinError(ib)
+        err_cmp = h_cmp.GetBinError(ib)
+        var = err_ref * err_ref + err_cmp * err_cmp
+        if var <= 0:
+            continue
+        delta = ccmp - cref
+        chi2 += (delta * delta) / var
+        pulls.append(delta / math.sqrt(var))
+        n_used += 1
+
+    if n_used <= 1:
+        ndf = 1
+    else:
+        ndf = n_used - 1
+
+    # p-value: probability to obtain chi2 greater than observed
+    pval = ROOT.TMath.Prob(chi2, int(max(1, ndf)))
+    mean_pull = float(sum(pulls)) / len(pulls) if pulls else 0.0
+    rms_pull = math.sqrt(sum((p - mean_pull) ** 2 for p in pulls) / len(pulls)) if pulls else 0.0
+    return chi2, ndf, pval, mean_pull, rms_pull
+
 # directory with final stage files
 DIRECTORY = "/work/sgiappic/smhtt_ul/output/"
 
 #directory where you want your plots to go
-DIR_PLOTS = '/web/sgiappic/public_html/CMS_HTT/Run2024/data-to-data/' 
+DIR_PLOTS = '/web/sgiappic/public_html/CMS_HTT/data-to-data/2024+25_260220/' 
 LOGY = False
 
 #now you can list all the histograms that you want to plot
@@ -51,12 +86,26 @@ VARIABLES_LIST = [
     "met", "metphi", "mTdileptonMET", "metSumEt",
     "nbtag", "njets",
     "q_1", "pzetamissvis", "jet_hemisphere",
-    "deltaR_ditaupair",
+    "deltaR_ditaupair", "met_uncorrected",
+    "met_raw",
+    "TypeIMET_pt",
+    "Jet_rawPt",
+    "Jet_pt_corrected",
+    "Jet_pt",
+    "Jet_eta",
+    "Jet_phi",
+    "CorrT1METJet_rawPt",
+    "CorrT1METJet_eta",
+    "CorrT1METJet_phi",
 ]
 
 era = [
+    #"2022preEE",
+    #"2022postEE",
+    #"2023preBPix",
+    #"2023postBPix",
     "2024",
-    "2025"
+    "2025",
 ]
 
 tag = [
@@ -71,14 +120,23 @@ channel = [
 ]
 
 scolors = {
+    "2022preEE":ROOT.kAzure+6,
+    "2022postEE":ROOT.kAzure-8,
+    "2023preBPix":ROOT.kTeal-8,
+    "2023postBPix":ROOT.kTeal-6,
     "2024CDE":ROOT.kViolet-9,
-    "2024FGHI":ROOT.kAzure+6,
-    "2025":ROOT.kTeal+5,
+    "2024FGHI":ROOT.kBlue-9,
+    "2025":ROOT.kPink+1,
 }
 
 slegend = {
+    "2022preEE":"2022preEE data",
+    "2022postEE":"2022postEE data",
+    "2023preBPix":"2023preBPix data",
+    "2023postBPix":"2023postBPix data",
     "2024CDE":"2024CDE data",
     "2024FGHI":"2024FGHI data",
+    "2024":"2024 data",
     "2025":"2025 data",
 }
 
@@ -99,7 +157,7 @@ for ch in channel:
         canvas.cd()
         pad.cd()
 
-        nsig = 3
+        nsig = len(era) +1
 
         #legend coordinates and style
         legsize = 0.04*nsig
@@ -114,24 +172,36 @@ for ch in channel:
         #global arrays for histos and colors
         histos = []
         colors = []
-        legend = []
 
         #loop over files for signals and backgrounds and assign corresponding colors and titles
         for s in era:
             if s=="2024":
-                for t in tag:
-                    fin_ll = f"{DIRECTORY}/{s}-{ch}-htt_251211_2024-25_v2-251211_{t}/control_shapes-{s}-{ch}-htt_251211_2024-25_v2-251211_{t}.root"
+                #for t in tag:
+                    t = "CDE"
+                    fin_ll = f"{DIRECTORY}/{s}-{ch}-htt_260218_2024-25_3-260219_{t}/control_shapes-{s}-{ch}-htt_260218_2024-25_3-260219_{t}.root"
                     tf_ll = ROOT.TFile.Open(fin_ll, 'READ')
                     h = tf_ll.Get(f"data#{ch}#Nominal#{variable}")
                     hh = copy.deepcopy(h)
                     hh.SetDirectory(0)
+                    t = "FGHI"
+                    fin = f"{DIRECTORY}/{s}-{ch}-htt_260218_2024-25_3-260219_{t}/control_shapes-{s}-{ch}-htt_260218_2024-25_3-260219_{t}.root"
+                    tf = ROOT.TFile.Open(fin, 'READ')
+                    h1 = tf_ll.Get(f"data#{ch}#Nominal#{variable}")
+                    hh1 = copy.deepcopy(h)
+                    hh1.SetDirectory(0)
+                    hh.Add(hh1)
                     if hh.Integral()>0:
                         hh.Scale(1./(hh.Integral()))
                     histos.append(hh)
                     colors.append(scolors[s+t])
-                    leg.AddEntry(histos[-1], slegend[s+t], "l")
+                    leg.AddEntry(histos[-1], slegend[s], "l")
             else:
-                fin_ll = f"{DIRECTORY}/{s}-{ch}-htt_251211_2024-25_v2-251211/control_shapes-{s}-{ch}-htt_251211_2024-25_v2-251211.root"
+                ntuple_tag = "htt_260219_2022-23_v2"
+                histo_tag = "260219"
+                if s=="2025":
+                    ntuple_tag = "htt_260218_2024-25_3"
+                    histo_tag = "260219"
+                fin_ll = f"{DIRECTORY}/{s}-{ch}-{ntuple_tag}-{histo_tag}/control_shapes-{s}-{ch}-{ntuple_tag}-{histo_tag}.root"
                 tf_ll = ROOT.TFile.Open(fin_ll, 'READ')
                 h = tf_ll.Get(f"data#{ch}#Nominal#{variable}")
                 hh = copy.deepcopy(h)
@@ -141,13 +211,15 @@ for ch in channel:
                 histos.append(hh)
                 colors.append(scolors[s])
                 leg.AddEntry(histos[-1], slegend[s], "l")
+
+        nsig = len(histos)
             
         # add the signal histograms
         for i in range(nsig):
             h = histos[i]
-            max = 0 
-            if h.GetMaximum() > max :
-                max = h.GetMaximum() 
+            max_val = 0 
+            if h.GetMaximum() > max_val :
+                max_val = h.GetMaximum() 
         for i in range(nsig):
             h = histos[i]
             h.SetLineWidth(3)
@@ -161,7 +233,7 @@ for ch in channel:
                 h.GetYaxis().SetTitleOffset(1.2)
                 h.GetXaxis().SetTitle(variable)
                 #h.GetXaxis().SetTitleOffset(1.2)
-                h.GetYaxis().SetRangeUser(0, max*1.5)
+                h.GetYaxis().SetRangeUser(0, max_val*1.5)
                 h.SetTitle("")
                 h.SetStats(0)
             else: 
@@ -183,13 +255,14 @@ for ch in channel:
         #### ratio plot ####
         pad2.cd()
  
-        legend2size = 0.1*(nsig-1)
-        legend2 = ROOT.TLegend(0.16, 0.90 - legend2size, 0.45, 0.90)
+        legend2size = 0.01*(nsig-1)
+        legend2 = ROOT.TLegend(0.16, 0.75 - legend2size, 0.90, 0.85)
         legend2.SetFillColor(0)
         legend2.SetFillStyle(0)
         legend2.SetLineColor(0)
         legend2.SetShadowColor(0)
-        legend2.SetTextSize(0.04)
+        legend2.SetTextSize(0.06)
+        legend2.SetNColumns(2)
         legend2.SetTextFont(42)
 
         #dummy plot
@@ -208,11 +281,11 @@ for ch in channel:
         dummy.SetLineWidth(0)
         #dummy.SetMarkerSize(0)
 
-        dummy.GetYaxis().SetTitle("Ratio with 2024CDE")
+        dummy.GetYaxis().SetTitle(f"Ratio with {era[0]}")
         dummy.GetYaxis().SetTitleSize(0.093)
         dummy.GetYaxis().CenterTitle()
         #adjust the range for the ratio here
-        dummy.GetYaxis().SetRangeUser(0.8,1.2)
+        dummy.GetYaxis().SetRangeUser(0.4,1.6)
         dummy.GetYaxis().SetLabelSize(0.095)
         dummy.GetYaxis().SetNdivisions(5)
         dummy.GetYaxis().SetTitleOffset(0.6)
@@ -230,12 +303,13 @@ for ch in channel:
             ratio.Divide(histos[0])
             ratio.SetLineWidth(3)
             ratio.SetLineColor(colors[i])
-            #print(f"{legend[i]}")
             ratio.Draw("hist same")
             ratio_list.append(ratio)
-            #legend2.AddEntry(ratio, legend[i], "l")
+            # compute chi2 for this comparison and add to ratio legend
+            chi2, ndf, pval, mean_pull, rms_pull = chi2_between(histos[0], histos[i])
+            legend2.AddEntry(ratio, '#chi^{2}'+f'/ndf={chi2:.1f}/{ndf} = {chi2/ndf:.2f}, p={pval:.3f}', "l")
 
-        #legend2.Draw()
+        legend2.Draw()
         pad2.SetLeftMargin(0.14)
         pad2.SetRightMargin(0.08)
         pad2.GetFrame().SetBorderSize(12)
@@ -270,6 +344,8 @@ for ch in channel:
         latex.SetTextAlign(31)
         latex.SetTextSize(0.03)
         latex.DrawLatex(0.92, 0.92, 'CMS'+'#bf{ Own work}')
+
+        # chi2 values are shown in the ratio legend entries above
 
         canvas.RedrawAxis()
         canvas.Modified()

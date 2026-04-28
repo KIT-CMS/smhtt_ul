@@ -202,7 +202,8 @@ def calculate_stxs_N_and_negative_fractions(
     stage: str = "1p2",
     granularity: str = "coarse",
     specific_process: Union[None, Iterable[str]] = ("ggh_htautau", "vbf_htautau"),
-    specific_era: Union[None, Iterable[str]] = ("2018", "2017", "2016preVFP", "2016postVFP"),
+    specific_era: Union[None, Iterable[str]] = ("2018", "2017", "2016preVFP", "2016postVFP", "2022preEE", "2022postEE", 
+                                                "2023preBPix", "2023postBPix", "2024", "2025"),
     n_workers: int = 20,
 ) -> dict:
     """
@@ -235,7 +236,8 @@ def calculate_stxs_N_and_negative_fractions(
 
     logger.info("Calculating STXS N_events, negative fractions, xsec_fraction per bin...")
 
-    ERAS = ["2016preVFP", "2016postVFP", "2017", "2018"]
+    ERAS = ["2016preVFP", "2016postVFP", "2017", "2018", 
+        "2022preEE", "2022postEE", "2023preBPix", "2023postBPix", "2024", "2025"]
     BINS = {
         "ggh_htautau": {
             "1p2": {

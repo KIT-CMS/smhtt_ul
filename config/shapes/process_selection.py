@@ -78,14 +78,16 @@ def lumi_weight(era, **kwargs):
         lumi = "18.06"
     elif era == "2023postBPix":
         lumi = "9.69"
-    #elif era == "2024":
-    #    lumi = "26.52" #CDE
+    # elif era == "2024":
+    #      lumi = "3.625" #Muon 0 only
+    # elif era == "2024":
+    #      lumi = "26.52" #CDE
+    # elif era == "2024":
+    #     lumi = "82.43" #FGHI
     elif era == "2024":
-        lumi = "82.43" #FGHI
-    #elif era == "2024":
-    #    lumi = "108.95" #full
+       lumi = "219.7" #lumi = "109.85"
     elif era == "2025":
-        lumi = "115.65"
+        lumi = "220.94" #lumi = "110.47" 
     else:
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
@@ -120,20 +122,20 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
         raise ValueError("Given vs jet working point {} not defined.".format(vs_jet_wp))
 
     if channel == "em":
-        isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
-        idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
+        isoweight = ("iso_wgt_mu_2", "isoweight") #iso_wgt_ele_1 * 
+        idweight = ("id_wgt_ele_wp90iso_1 * id_wgt_mu_2", "idweight")
         tauidweight = None
         vsmu_weight = None
         vsele_weight = None
-        trgweight = None
+        trgweight = trgweight = ("(pt_1>26)*(trg_wgt_single_mu24)", "trgweight")
     elif channel == "et":
-        isoweight = None #("iso_wgt_ele_1", "isoweight") #only for embedding??
+        isoweight = None # ("iso_wgt_ele_1", "isoweight") only for embedding
         idweight = ("id_wgt_ele_wp90iso_1", "idweight")
         tauidweight = (
             f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        vsmu_weight = ("id_wgt_tau_vsMu_VLoose_2", "vsmuweight")
+        vsmu_weight = (f"id_wgt_tau_vsMu_VLoose_{vs_ele_wp}_2", "vsmuweight")
         vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_wp}_2", "vseleweight")
         if era == "2017":
             trgweight = (
@@ -151,8 +153,8 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        # tauidweight = None
-        vsmu_weight = ("id_wgt_tau_vsMu_Tight_2", "vsmuweight")
+        tauidweight = None
+        vsmu_weight = (f"id_wgt_tau_vsMu_Tight_{vs_ele_wp}_2", "vsmuweight")
         vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_wp}_2", "vseleweight")
         if era == "2016preVFP" or era == "2016postVFP":
             trgweight = ("((pt_1>23)* trg_wgt_single_mu22)", "trgweight")
@@ -164,7 +166,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
                 "trgweight",
             )
         else:
-            trgweight = ("(pt_1>25)*(trg_wgt_single_mu24)", "trgweight")
+            trgweight = ("(pt_1>26)*(trg_wgt_single_mu24)", "trgweight")
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -173,20 +175,20 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             "taubyIsoIdWeight",
         )
         vsmu_weight = (
-            "((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_1 + (gen_match_2!=5))",
+            f"((gen_match_1==5)*id_wgt_tau_vsMu_VLoose_{vs_ele_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsMu_VLoose_{vs_ele_wp}_1 + (gen_match_2!=5))",
             "vsmuweight",
         )
         vsele_weight = (
             f"((gen_match_1==5)*id_wgt_tau_vsEle_{vs_ele_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsEle_{vs_ele_wp}_2 + (gen_match_2!=5))",
             "vseleweight",
         )
-        if era in ["2024_CDE", "2024_FGHI", "2024", "2025"]:
+        if era in ["2024", "2025"]:
             trgweight = (
-                "(trg_wgt_doubletau30_leg1 * trg_wgt_doubletau30_leg2)", "trgweight"
+                "(trg_wgt_doubletau30_leg1 * trg_wgt_doubletau30_leg2 * (pt_1 > 35) * (pt_2 > 35))", "trgweight"
             )
         else:
             trgweight = (
-            "(trg_wgt_doubletau35_leg1 * trg_wgt_doubletau35_leg2)", "trgweight"
+            "(trg_wgt_doubletau35_leg1 * trg_wgt_doubletau35_leg2 * (pt_1 > 40) * (pt_2 > 40))", "trgweight"
         )
     elif channel == "mm":
         isoweight = ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight")
@@ -202,7 +204,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
             trgweight = ("trg_wgt_single_mu22", "trgweight")
     elif channel == "ee":
         isoweight = ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight")
-        idweight = ("id_wgt_ele_1 * id_wgt_ele_2", "idweight")
+        idweight = ("id_wgt_ele_wp90iso_1 * id_wgt_ele_2", "idweight")
         tauidweight = None
         vsmu_weight = None
         vsele_weight = None
@@ -524,8 +526,8 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
         print("This vs jet working point doen't exist. Please specify the correct vsJet discriminator ")
     vs_jet_discr = vs_jet_wp
     ztt_embedded_weights = [
-        ("emb_genweight", "emb_genweight"),
-        ("emb_idsel_wgt_1*emb_idsel_wgt_2*emb_triggersel_wgt", "emb_selection_weight"),
+        # ("emb_genweight", "emb_genweight"),
+        # ("emb_idsel_wgt_1*emb_idsel_wgt_2*emb_triggersel_wgt", "emb_selection_weight"),
     ]
     if "mt" in channel:
         if era == "2017":
@@ -582,6 +584,25 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                 )
             if not apply_wps:
                 pass
+        elif era in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix", "2024", "2025"]:
+            ztt_embedded_weights.extend(
+                [
+                    ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
+                    # ("iso_wgt_mu_1", "isoweight"),
+                    # ("id_wgt_mu_1", "idweight"),
+                    ("(0.25)", "scale"),
+                    ("(trg_wgt_single_mu24 )", "trgweight"),
+                ]
+            )
+            # if apply_wps:
+            #     ztt_embedded_weights.extend(
+            #         [
+            #             # (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
+            #             (f"(id_wgt_tau_vsJet_{vs_jet_wp}_2)", "taubyIsoIdWeight")
+            #         ]
+            #     )
+            # if not apply_wps:
+            #     pass
         else:
             raise ValueError(
                 f"Embedded process selection for given era {era} not yet implemented"
@@ -592,7 +613,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                 [
                     ("gen_match_1==3 && gen_match_2==5", "emb_veto"),
                     ("iso_wgt_ele_1", "isoweight"),
-                    ("id_wgt_ele_1", "idweight"),
+                    ("id_wgt_ele_wp90iso_1", "idweight"),
                     # ("trg_wgt_single_ele35", "trgweight"),
                     (
                         "((pt_1>=33&&pt_1<36)*trg_wgt_single_ele32)+((pt_1>=36)*trg_wgt_single_ele35)",
@@ -614,7 +635,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                 [
                     ("gen_match_1==3 && gen_match_2==5", "emb_veto"),
                     ("iso_wgt_ele_1", "isoweight"),
-                    ("id_wgt_ele_1", "idweight"),
+                    ("id_wgt_ele_wp90iso_1", "idweight"),
                     ("trg_wgt_single_ele32orele35", "trgweight"),
                 ]
             )
@@ -659,7 +680,9 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                 # TODO trigger weights for em
                 ("(gen_match_1==3 && gen_match_2==4)", "emb_gen_match"),
                 ("iso_wgt_ele_1 * iso_wgt_mu_2", "isoweight"),
-                ("id_wgt_ele_1 * id_wgt_mu_2", "idweight"),
+                ("id_wgt_ele_wp90iso_1 * id_wgt_mu_2", "idweight"),
+                ("iso_wgt_mu_2", "isoweight"),
+                ("d_wgt_mu_2", "idweight"),
                 # triggerweight_emb(channel, era, vs_jet_wp, vs_ele_wp),
             ]
         )
@@ -693,7 +716,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                     # TODO trigger weights for em
                     ("(gen_match_1==1 && gen_match_2==1)", "emb_gen_match"),
                     ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight"),
-                    ("id_wgt_ele_1 * id_wgt_ele_2", "idweight"),
+                    ("id_wgt_ele_wp90iso_1 * id_wgt_ele_2", "idweight"),
                     ("trg_wgt_single_ele35", "trgweight"),
                     # triggerweight_emb(channel, era, vs_jet_wp, vs_ele_wp),
                 ]
@@ -704,17 +727,17 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp, **kwargs)
                     # TODO trigger weights for em
                     ("(gen_match_1==1 && gen_match_2==1)", "emb_gen_match"),
                     ("iso_wgt_ele_1 * iso_wgt_ele_2", "isoweight"),
-                    ("id_wgt_ele_1 * id_wgt_ele_2", "idweight"),
+                    ("id_wgt_ele_wp90iso_1 * id_wgt_ele_2", "idweight"),
                     ("trg_wgt_single_ele25", "trgweight"),
                     # triggerweight_emb(channel, era, vs_jet_wp, vs_ele_wp),
                 ]
             )
 
     ztt_embedded_cuts = [
-        (
-            "((gen_match_1>2 && gen_match_1<6) && (gen_match_2>2 && gen_match_2<6))",
-            "dy_genuine_tau",
-        )
+        # (
+        #     "((gen_match_1>2 && gen_match_1<6) && (gen_match_2>2 && gen_match_2<6))",
+        #     "dy_genuine_tau",
+        # )
     ]
 
     return Selection(
@@ -1311,12 +1334,13 @@ def _get_stxs_stitching_weight(
     process,
     full_recreation=True,
     stage="1p2",
-    granularity="coarse",
+    granularity="fine",
     nanoAOD_version="v9",
     **kwargs,
 ):
     if full_recreation:
-        specific_era = ("2018", "2017", "2016preVFP", "2016postVFP")  # (era,),
+        specific_era = ("2018", "2017", "2016preVFP", "2016postVFP", "2022preEE", "2022postEE",
+                        "2023preBPix", "2023postBPix", "2024", "2025")  # (era,),
         specific_process = ("ggh_htautau", "vbf_htautau")  # (process,),
     else:
         specific_era = (era,)
@@ -1432,8 +1456,54 @@ def FF_training_process_selection(channel, era, **kwargs):
         ]
         weights = [("fake_factor", "fake_factor")]
     elif channel == "tt":
-        # TODO
-        raise NotImplementedError("FF training not implemented for tt")
+        Cut(
+            f"""(
+                    (
+                        (id_tau_vsJet_Medium_1 < 0.5) &&
+                        (id_tau_vsJet_Medium_2 > 0.5) &&
+                        (id_tau_vsJet_VVVLoose_1 > 0.5)
+
+                    ) ||
+                    (
+                        (id_tau_vsJet_Medium_1 > 0.5) &&
+                        (id_tau_vsJet_Medium_2 < 0.5) &&
+                        (id_tau_vsJet_VVVLoose_2 > 0.5)
+                    )
+                )""",
+            "tau_anti_iso"
+        ),
+        Weight(
+            f"""(
+                (0.5) * (
+                    ({RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Medium_1 < 0.5)) +
+                    ({RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Medium_2 < 0.5))
+                )
+            )""",
+            "fake_factor",
+        ),
+        cuts = [
+            (f"""(
+                    (
+                        (id_tau_vsJet_Medium_1 < 0.5) &&
+                        (id_tau_vsJet_Medium_2 > 0.5) &&
+                        (id_tau_vsJet_VVVLoose_1 > 0.5)
+
+                    ) ||
+                    (
+                        (id_tau_vsJet_Medium_1 > 0.5) &&
+                        (id_tau_vsJet_Medium_2 < 0.5) &&
+                        (id_tau_vsJet_VVVLoose_2 > 0.5)
+                    )
+                )""",
+            "tau_anti_iso"),
+        ]
+        weights = [f"""(
+                (0.5) * (
+                    ({RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Medium_1 < 0.5)) +
+                    ({RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Medium_2 < 0.5))
+                )
+            )""",
+            "fake_factor",]
     elif channel == "em":
         raise NotImplementedError("FF training not implemented for em")
     else:

@@ -1,7 +1,7 @@
 import logging
 import re
 from copy import deepcopy
-from typing import List, Tuple, Union
+from typing import Callable, Iterable, List, Tuple, Union
 
 import yaml
 from src.helper import Iterate, Keys, find_variable_expansions, modify_tau_iso_string
@@ -14,6 +14,26 @@ except ModuleNotFoundError:
     from config.logging_setup_configs import setup_logging
 
 logger = setup_logging(logger=logging.getLogger(__name__))
+
+
+def remove_keys(obj: Iterable, keys_to_remove: Union[Callable, ]):
+    """
+    Recursively remove specified keys from nested dicts/lists.
+
+    Args:
+        obj (Iterable): nested object
+        keys_to_remove (Union[Callable, Iterable]): keys or condition marked for removal
+    Returns:
+        Cleaned object
+    """
+    match = keys_to_remove if callable(keys_to_remove) else lambda k: k in set(keys_to_remove)
+
+    if isinstance(obj, dict):
+        return {k: remove_keys(v, match) for k, v in obj.items() if not match(k)}
+    elif isinstance(obj, list):
+        return [remove_keys(item, match) for item in obj]
+    else:
+        return obj
 
 
 class MissingCutOrWeight(Exception):
@@ -101,7 +121,7 @@ class _GeneralConfigManipulation(object):
             x (dict): The dictionary to modify.
             level (int): The current level in the recursion.
             level_keys (list[str]): The list of keys for each level.
-            criteria (dict): The criteria for removal at each level. 
+            criteria (dict): The criteria for removal at each level.
         """
         if level >= len(level_keys):
             return None
@@ -392,6 +412,11 @@ class _SpecificConfigManipulation(object):
                         raise AssertionError(f"{variable} appears multiple times in under different names ({matches}) aborting.")
                     variables_dict[variable] = matches[0] if matches else variable
 
+                for variable in shift_dict.get("var", []):
+                    basename, *shift = variable.split("__")
+                    if shift:
+                        variables_dict[basename] = variable
+
                 if variables_dict == default_variables:
                     config[channel][era][process][subprocess][shift_name][Keys.VARIABLES] = f"__{Keys.NOMINAL_VARIABLES}__"
                 else:
@@ -451,8 +476,8 @@ class _SpecificConfigManipulation(object):
     @staticmethod
     def add_anti_iso_cut_and_weight_version(
         config: dict,
-        cut_tight_wp: str = "Tight",
-        cut_loose_wp: str = "VLoose",
+        cut_tight_wp: str = "Medium",
+        cut_loose_wp: str = "VVVLoose",
         fake_factor_string: str = "fake_factor_2",
         ignore_fake_factor_string_for_processes: Tuple[str, ...] = ("ggH", "qqH"),
         ignore_anti_iso_string_for_processes: Tuple[str, ...] = tuple(),

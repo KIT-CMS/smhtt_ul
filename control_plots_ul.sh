@@ -21,8 +21,21 @@ DEFAULT_VARIABLES_LIST=(
   q_1 pzetamissvis jet_hemisphere
   deltaR_ditaupair 
   met_uncorrected
+  deltaR_jj
+  deltaEta_jj
+  deltaR_1j1
+  deltaR_2j2
+  deltaR_2j1
+  deltaR_1j2
+  deltaR_12j1
+  deltaR_12j2
+  deltaEta_1j1
+  deltaEta_1j2
+  deltaEta_2j1
+  deltaEta_2j2
+  deltaEta_12j1
+  deltaEta_12j2
 )
-# deltaEta_ditaupair deltaPhi_ditaupair for fake factors: to add when i update CROWN
 
 options=(
   "c:channel:"
@@ -120,7 +133,8 @@ FRIENDS=""
 if [ -n "${ADDITIONAL_FRIENDS}" ]; then
   echo "INFO: Constructing friend directory paths for: ${ADDITIONAL_FRIENDS}"
   for tag in ${ADDITIONAL_FRIENDS}; do
-    path="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/${tag}/"
+    # path="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/${tag}/"
+    path="/ceph/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/${tag}/"
     FRIENDS+="${path} "
   done
   FRIENDS="${FRIENDS% }"
@@ -156,11 +170,11 @@ echo "##########################################################################
   echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
   nice -n 19 python3 friends/build_friend_tree.py \
     --basepath ${KINGMAKER_BASEDIR_XROOTD} \
-    --outputpath root://cmsdcache-kit-disk.gridka.de/${XSEC_FRIENDS} \
+    --outputpath ${XSEC_FRIENDS} \
     --dataset-config "datasets/nanoAOD_${NANOAODVERSION}/datasets.json" \
     --nthreads 20
 fi
-
+# output path of xsec frinds also to local now , not root://cmsdcache-kit-disk.gridka.de/
 if [[ $MODE == "SHAPES" ]]; then
     echo "##############################################################################################"
     echo "#      Producing shapes for ${CHANNEL}-${ERA}-${NTUPLETAG}                                   #"
@@ -179,10 +193,10 @@ if [[ $MODE == "SHAPES" ]]; then
       --optimization-level 1 --control-plots \
       --control-plot-set ${USED_VARIABLES} \
       --output-file ${shapes_output} \
-      --xrootd --validation-tag ${TAG} \
+      --validation-tag ${TAG} \
       --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" --apply-tauid \
       --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}  \
-      --skip-systematic-variations 
+      --skip-systematic-variations  #--xrootd
   elif [ "${CHANNEL}" == "et" ]; then
     nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
       --directory ${NTUPLES} \
@@ -191,10 +205,10 @@ if [[ $MODE == "SHAPES" ]]; then
       --optimization-level 1 --control-plots \
       --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
       --output-file ${shapes_output} \
-      --xrootd --validation-tag ${TAG} \
+      --validation-tag ${TAG} \
       --vs-jet-wp "Medium" --vs-ele-wp "Tight" --apply-tauid \
-      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}
-  else # tt channel only for nows
+      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} #--xrootd
+  else # tt channel only, the rest do not use the tau discriminator anyway
     nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
       --directory ${NTUPLES} \
       --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
@@ -203,8 +217,8 @@ if [[ $MODE == "SHAPES" ]]; then
       --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
       --output-file ${shapes_output} \
       --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" \
-      --xrootd --validation-tag ${TAG} --apply-tauid \
-      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}
+      --validation-tag ${TAG} --apply-tauid \
+      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} # --xrootd
   fi
 
     echo "##############################################################################################"
@@ -234,7 +248,7 @@ if [[ $MODE == "PLOT" ]]; then
                     --channels ${CHANNEL} \
                     --tag ${TAG} \
                     --selection-option ${SELECTION_OPTION} \
-                    --add-signals"
+                    --add-signals " #--category same_sign
 
   if [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "emb+ff" ]]; then
     ${BASE_COMMAND} --embedding --fake-factor
@@ -246,3 +260,86 @@ if [[ $MODE == "PLOT" ]]; then
     ${BASE_COMMAND}
   fi
 fi
+
+if [[ $MODE == "PRETRAIN" ]]; then
+    echo "##############################################################################################"
+    echo "#      Producing training set for ${CHANNEL}-${ERA}-${NTUPLETAG}                             #"
+    echo "##############################################################################################"
+
+  mkdir -p /ceph/sgiappic/Htt_training/${TAG}
+
+  if [ "${CHANNEL}" == "mt" ]; then
+    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
+      --directory ${NTUPLES} \
+      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+      --era ${ERA} --num-processes 10 --num-threads 20 \
+      --optimization-level 1 --control-plots \
+      --control-plot-set ${USED_VARIABLES} \
+      --output-file ${shapes_output} \
+      --validation-tag ${TAG} \
+      --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" --apply-tauid \
+      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}  \
+      --skip-systematic-variations --collect-config-only \
+      --config-output-file /ceph/sgiappic/Htt_training/${TAG}/config.yaml
+  elif [ "${CHANNEL}" == "et" ]; then
+    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
+      --directory ${NTUPLES} \
+      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+      --era ${ERA} --num-processes 10 --num-threads 20 \
+      --optimization-level 1 --control-plots \
+      --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
+      --output-file ${shapes_output} \
+      --validation-tag ${TAG} \
+      --vs-jet-wp "Medium" --vs-ele-wp "Tight" --apply-tauid \
+      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} \
+      --skip-systematic-variations --collect-config-only \
+      --config-output-file /ceph/sgiappic/Htt_training/${TAG}/config.yaml
+  else # tt channel only, the rest do not use the tau discriminator anyway
+    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
+      --directory ${NTUPLES} \
+      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+      --era ${ERA} --num-processes 10 --num-threads 20 \
+      --optimization-level 1 --control-plots \
+      --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
+      --output-file ${shapes_output} \
+      --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" \
+      --validation-tag ${TAG} --apply-tauid \
+      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} \
+      --skip-systematic-variations --collect-config-only \
+      --config-output-file /ceph/sgiappic/Htt_training/${TAG}/config.yaml
+  fi
+
+    nice -n 19 python trainings/adjust_config.py --config /ceph/sgiappic/Htt_training/${TAG}/${ERA}__${CHANNEL}__config.yaml \
+        --modified-config /ceph/sgiappic/Htt_training/${TAG}/${ERA}__${CHANNEL}__mod_config.yaml \
+        --common-setup-config trainings/setup.yaml
+
+    nice -n 19  python trainings/create_training_dataset.py \
+      --config /ceph/sgiappic/Htt_training/${TAG}/${ERA}__${CHANNEL}__mod_config.yaml \
+      --base-dataset-directory /ceph/sgiappic/Htt_training/${TAG}/dataset/ \
+      --common-setup-config trainings/setup.yaml --recreate
+fi
+
+if [[ $MODE == "TRAIN" ]]; then
+    echo "##############################################################################################"
+    echo "#      Train set for ${CHANNEL}-${NTUPLETAG}                                                 #"
+    echo "##############################################################################################"
+
+    source /work/sgiappic/MiniForge/etc/profile.d/conda.sh
+    conda activate smhtt-training
+
+    nice -n 19 python trainings/train_multiclass_nn.py \
+      --dataset-dir /ceph/sgiappic/Htt_training/${TAG}/dataset/_folds \
+      --setup-config trainings/setup.yaml --channel ${CHANNEL} \
+      --output-dir /ceph/sgiappic/Htt_training/${TAG}/models/ \
+      --fold 0 --epochs 400 --abs-weights \
+      --class-scheme coarse --equalise-class-weights --equalise-era-weights \
+      --layers 512,512,256,128 --learning-rate 1e-3 --dropout 0.4 \
+      --focal-loss --focal-gamma 1.0 \
+      --warmup-epochs 10 --label-smoothing 0.0 \
+      --early-stopping 100 --batch-size 4096 \
+      --gpu 0
+
+    python trainings/plot_bkg_scores.py \
+    --input /ceph/sgiappic/Htt_training/${TAG}/models/${CHANNEL}/fold0_bkg_scores.npz \
+    --era Run2022-23
+  fi

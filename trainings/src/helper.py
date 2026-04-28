@@ -1,39 +1,93 @@
 import concurrent.futures
+import logging
 import re
 from typing import Any, Callable, Generator, List, Optional, Tuple, Union
 
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
+try:
+    from config.logging_setup_configs import setup_logging
+except ModuleNotFoundError:
+    import sys
+    sys.path.extend([".", "..", "../.."])
+    from config.logging_setup_configs import setup_logging
+
+
+logger = setup_logging(logger=logging.getLogger(__name__))
 
 TRAINING_VARIABLES = [
     "pt_1",
     "pt_2",
-    "m_vis",
-    "njets",
-    "nbtag",
+    "eta_1",
+    "eta_2",
     "jpt_1",
     "jpt_2",
     "jeta_1",
     "jeta_2",
-    # "m_fastmtt",
-    "pt_vis",
+    "m_fastmtt",
+    "m_vis",
     "mjj",
-    "deltaR_ditaupair",
+    "pt_vis",
     "pt_dijet",
+    "pt_tt",
+    "pt_ttjj",
+    "njets",
+    "nbtag",
+    "met",
+    "deltaEta_ditaupair",
+    "deltaR_ditaupair",
+    "mt_2",
+    "pt_fastmtt",
+    "mt_tot",
+    "pzetamissvis",
+    "deltaR_jj",
+    "deltaEta_jj",
+    "deltaR_12j1",
+    "deltaR_2j1",
+    "deltaR_1j2",
+    "deltaEta_1j1",
+    "deltaEta_1j2",
+    "deltaEta_2j1",
+    "deltaEta_2j2",
+    "deltaEta_12j1",
+    "deltaEta_12j2",
+    "deltaR_12j2",
+    "deltaR_1j1",
+    "deltaR_2j2",
     # -- label flags ---
     "is_data",
     "is_dyjets",
+    "is_dy_zl",
     "is_embedding",
     "is_ggh_htautau",
     "is_ttbar",
     "is_vbf_htautau",
     "is_wjets",
     # --- era flags ---
+    "is_2025",
+    "is_2024",
+    "is_2023postBPix",
+    "is_2023preBPix",
+    "is_2022postEE",
+    "is_2022preEE",
     "is_2018",
     "is_2017",
     "is_2016preVFP",
     "is_2016postVFP",
+    # ---
 ]
+
+
+def downcast_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    fcols = df.select_dtypes('float64').columns
+    icols = df.select_dtypes('int64').columns
+
+    df[fcols] = df[fcols].astype(np.float32)
+    df[icols] = df[icols].astype(np.int32)
+
+    return df
 
 
 class Keys:
@@ -41,7 +95,7 @@ class Keys:
     Collection of keys used in the configuration files and for columns in training dataframes.
     To be adjusted according to the actual analysis if needed.
     """
-    ERAS = {"2016preVFP", "2016postVFP", "2017", "2018"}
+    ERAS = {"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix", "2024", "2025"}
     CHANNELS = {"mt", "et", "tt"}
 
     COMMON = "common"
@@ -58,10 +112,12 @@ class Keys:
 
     VARIABLES = "variables"
     WEIGHT = "weight"
+    CLASS_WEIGHT = "class_weight"
     CUT = "cut"
     UP = "up"
     DOWN = "down"
 
+    ANTI_ISO = "anti_iso"
     ANTI_ISO_CUT = "anti_iso_cut"
     ANTI_ISO_WEIGHT = "anti_iso_weight"
 
@@ -111,7 +167,7 @@ def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", loose_wp: str
     pattern_to_replace = re.compile(pattern_to_replace_str)
 
     def replacer(match):
-        opt_suffix = match.group(1) if match.group(1) else "" # Get the captured suffix or empty string
+        opt_suffix = match.group(1) if match.group(1) else ""  # Get the captured suffix or empty string
         return f"(id_tau_vsJet_{tight_wp}_2{opt_suffix}<0.5&&id_tau_vsJet_{loose_wp}_2{opt_suffix}>0.5)"
 
     modified_str, num_subs = pattern_to_replace.subn(replacer, input_str)
@@ -119,8 +175,7 @@ def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", loose_wp: str
     if num_subs == 0:
         append_str = f"(id_tau_vsJet_{tight_wp}_2<0.5&&id_tau_vsJet_{loose_wp}_2>0.5)"
 
-
-        if not input_str: # If original string is empty
+        if not input_str:  # If original string is empty
             return append_str
         else:
             return f"{input_str} && {append_str}"
@@ -200,9 +255,11 @@ class Iterate:
         skip_subprocesses = {"paths", "common", "variables", "nominal_variables"}
         for channel, channel_dict in config.items():
             if channel not in Keys.CHANNELS or not isinstance(channel_dict, dict):
+                print(f"[DEBUG Iterate.subprocesses] Skipping channel '{channel}' (not in Keys.CHANNELS={Keys.CHANNELS} or not a dict)")
                 continue
             for era, era_dict in channel_dict.items():
                 if era not in Keys.ERAS or not isinstance(era_dict, dict):
+                    print(f"[DEBUG Iterate.subprocesses] Skipping era '{era}' in channel '{channel}' (not in Keys.ERAS={Keys.ERAS} or not a dict)")
                     continue
                 for process, process_dict in era_dict.items():
                     if not isinstance(process_dict, dict):
@@ -310,3 +367,34 @@ class PipeDict(dict):
     """
     def pipe(self, func: callable, *args: Any, **kwargs: Any) -> dict:
         return func(self, *args, **kwargs)
+
+    def conditional_pipe(self, condition: bool, func: callable, *args: Any, **kwargs: Any) -> dict:
+        if condition:
+            return self.pipe(func, *args, **kwargs)
+        return self
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key not in self:
+            logger.warning(f"Key '{key}' not found in the dictionary. Returning default value: {default}")
+        return super().get(key, default)
+
+    def recursive_get(self, keys: List[str], default: Any = None) -> Any:
+        current = self
+        for key in keys:
+            if not isinstance(current, dict) or key not in current:
+                logger.warning(f"Key path '{' -> '.join(keys)}' not found. Returning default value: {default}")
+                return default
+            current = current[key]
+        return current
+
+
+def get_class_weights(
+    weights: Union[pd.Series, np.ndarray],
+    Y: Union[pd.Series, np.ndarray],
+    classes: tuple = (0, 1),
+    class_weighted: bool = True,
+) -> Union[pd.Series, np.ndarray]:
+    _weights = np.zeros_like(weights)
+    for _class in classes:
+        _weights[Y == _class] = weights.sum() / weights[Y == _class].sum()
+    return _weights * (weights if class_weighted else 1.0)

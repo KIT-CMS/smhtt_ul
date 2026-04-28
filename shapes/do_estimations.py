@@ -268,7 +268,7 @@ def main(args):
                         for variation, scale in zip(
                             ["subtrMCUp", "subtrMCDown"], [0.8, 1.2]
                         ):
-                            for use_emb in [True, False]:
+                            for use_emb in [False]:
                                 estimated_hist = qcd_estimation(
                                     **common_kwargs,
                                     variation=variation,

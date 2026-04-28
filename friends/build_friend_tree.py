@@ -84,19 +84,35 @@ def job_wrapper(args):
 
 
 def check_file_exists_remote(serverpath, file_path):
-    server_url = serverpath.split("store")[0][:-1]
-    file_path = (
-        "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
-    )
-    # print(f"Checking if {file_path} exists in {server_url}")
-    myclient = client.FileSystem(server_url)
-    status, listing = myclient.stat(file_path, DirListFlags.STAT)
-    if status.ok:
-        # print(f"{file_path} exists")
-        return True
+    """
+    Check if a remote file exists. Works for both remote (XRootD) and local paths.
+    
+    Args:
+        serverpath: Base server/path (can be remote XRootD or local)
+        file_path: Full file path to check
+    
+    Returns:
+        bool: True if file exists, False otherwise
+    """
+    # Check if path is remote (XRootD) or local
+    if serverpath.startswith("root://"):
+        # Remote XRootD path
+        server_url = serverpath.split("store")[0][:-1] if "store" in serverpath else serverpath.rstrip("/")
+        remote_file_path = (
+            "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
+            if "store" in serverpath
+            else file_path
+        )
+        try:
+            myclient = client.FileSystem(server_url)
+            status, listing = myclient.stat(remote_file_path, DirListFlags.STAT)
+            return status.ok
+        except Exception as e:
+            print(f"Error checking remote file {remote_file_path}: {e}")
+            return False
     else:
-        # print(f"{file_path} does not exist")
-        return False
+        # Local path
+        return os.path.exists(file_path)
 
 
 def friend_producer(
@@ -190,7 +206,7 @@ def upload_file(redirector, input_file, output_file, max_retries=5):
                 n += 1
         else:
             if not os.path.exists(os.path.dirname(output_file)):
-                os.makedirs(os.path.dirname(output_file))
+                os.makedirs(os.path.dirname(output_file), exist_ok=True)
             os.system(f"mv {input_file} {output_file}")
             success = True
 

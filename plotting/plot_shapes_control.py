@@ -169,8 +169,8 @@ def main(info):
         stype = "Nominal"
         cat = None
     else:
-        stype = "Nominal"  # or args.category if you want to plot a special category
-        cat = args.category  # in that case this should be set to None
+        stype = args.category  # or args.category if you want to plot a special category
+        cat = None  # in that case this should be set to None
 
     for index, process in enumerate(bkg_processes):
         _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
@@ -318,7 +318,7 @@ def main(info):
 
     log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
 
-    # log_quantities += variables
+    #log_quantities += variables
 
     if variable in log_quantities:
         plot.subplot(0).setLogY()
@@ -402,7 +402,7 @@ def main(info):
     suffix = ["", "_top"]
     for i in range(2):
 
-        plot.add_legend(width=0.6, height=0.15)
+        plot.add_legend(width=0.55, height=0.15)
         for process in legend_bkg_processes:
             if "mm" in channel and process == "EMB":
                 plot.legend(i).add_entry(
@@ -420,15 +420,15 @@ def main(info):
                 )
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         if args.add_signals:
-            plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s #times gg#rightarrowH"%str(int(ggH_scale)), 'l')
-            plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s #times qq#rightarrowH"%str(int(qqH_scale)), 'l')
-            plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
-            plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s #times ttH"%str(int(ttH_scale)), 'l')
+            plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s#times gg#rightarrowH"%str(int(ggH_scale)), 'l')
+            plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s#times qq#rightarrowH"%str(int(qqH_scale)), 'l')
+            #plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
+            #plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s #times ttH"%str(int(ttH_scale)), 'l')
             # # plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "%s #times H#rightarrowWW"%str(int(HWW_scale)), 'l')
         plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(3)
+        plot.legend(i).setAlpha(0.0)
     plot.legend(0).Draw()
-    plot.legend(1).setAlpha(0.0)
     plot.legend(1).Draw()
 
     for i in range(2):
@@ -448,7 +448,7 @@ def main(info):
 
     # draw additional labels
     # guidelines https://cms-analysis.docs.cern.ch/guidelines/plotting/general/#labeling-guidelines
-    plot.DrawCMS(own_work=True, preliminary=False)
+    plot.DrawCMS(subtext = "(CMS data/simulation)", own_work=False, preliminary=False)
     if "2016postVFP" in args.era:
         plot.DrawLumi("16.8 fb^{-1} (2016UL postVFP, 13 TeV)")
     elif "2016preVFP" in args.era:
@@ -466,13 +466,14 @@ def main(info):
     elif "2023postBPix" in args.era:
         plot.DrawLumi("9.69 fb^{-1} (2023 postBPix, 13.6 TeV)")
     elif "2024" in args.era:
-        plot.DrawLumi("108.95 fb^{-1} (2024, 13.6 TeV)")
-    elif "CDE" in args.tag:
-        plot.DrawLumi("26.52 fb^{-1} (2024 CDE, 13.6 TeV)")
-    elif "FGHI" in args.tag:
-        plot.DrawLumi("82.43 fb^{-1} (2024 FGHI, 13.6 TeV)")
+        if "CDE" in args.tag:
+            plot.DrawLumi("26.52 fb^{-1} (2024 CDE, 13.6 TeV)")
+        elif "FGHI" in args.tag:
+            plot.DrawLumi("82.43 fb^{-1} (2024 FGHI, 13.6 TeV)")
+        else:
+            plot.DrawLumi("109.85 fb^{-1} (2024, 13.6 TeV)")
     elif "2025" in args.era:
-        plot.DrawLumi("115.65 fb^{-1} (2025, 13.6 TeV)")
+        plot.DrawLumi("110.47 fb^{-1} (2025, 13.6 TeV)") 
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
@@ -480,6 +481,7 @@ def main(info):
     posChannelCategoryLabelLeft = None
     plot.DrawChannelCategoryLabel(
         "%s, %s" % (channel_dict[channel], "inclusive"),
+        #"%s" % ("Private work (CMS data/simulation)"),
         begin_left=posChannelCategoryLabelLeft)
 
     print("Trying to save the created plot")

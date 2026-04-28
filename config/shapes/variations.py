@@ -312,11 +312,11 @@ class LazyVariable:
 #  Variations needed for the various jet background estimations.
 # TODO: In order to properly use this variation friend trees with the correct weights need to be created.
 same_sign = ReplaceCut("same_sign", "os", Cut("q_1*q_2>0", "ss"))
-same_sign_em = ReplaceCutAndAddWeight(
+same_sign_em = ReplaceCut(
     "same_sign",
     "os",
     Cut("q_1*q_2>0", "ss"),
-    Weight("em_qcd_osss_binned_Weight", "qcd_weight"),
+    #Weight("em_qcd_osss_binned_Weight", "qcd_weight"),
 )
 abcd_method = [
     ReplaceCut("abcd_same_sign", "os", Cut("q_1*q_2>0", "ss")),

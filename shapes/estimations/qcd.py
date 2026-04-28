@@ -88,7 +88,7 @@ def qcd_estimation(
         procs_to_subtract.extend(["ZL", "ZJ", "TTL", "TTJ", "VVL", "VVJ"])
     else:  # fully-leptonic - a bunch of extra cases... TODO: can this be removed?
         if "em" in channel:
-            procs_to_subtract.extend(["Z", "TTL", "VVL"])
+            procs_to_subtract.extend(["ZL", "TTL", "VVL"])
         elif channel in {"mm", "ee"} and not is_embedding:
             procs_to_subtract = ["ZL", "W", "VVL", "TTL"]  # caution: replaced! no EMB or EMB MC equivalent
 

@@ -14,7 +14,13 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts["dilepton_veto"] = "(dilepton_veto < 0.5)"
     cuts["os"] = "((q_1 * q_2) < 0)"
     cuts["jet_vetomap"] = "(Jet_vetomap < 0.5)"
-    cuts["met_mask"] = "(met_mask > 0.5)"
+    # cuts["met_mask"] = "(met_mask > 0.5)"
+    # event selection for mc in 2024 campaign to have statistically ortogonal events
+    # now a filter so no need to add here
+    # if era == "2024":
+    #     cuts["mc_event_mask"] = "((EventCut_mask < 0.5) && (is_data < 0.5)) || (is_data > 0.5)"
+    # elif era == "2025":
+    #     cuts["mc_event_mask"] = "((EventCut_mask > 0.5) && (is_data < 0.5)) || (is_data > 0.5)"
 
     if "DR;ff" in selection_option:
         modify_for_ff_DR(obj=cuts, region=selection_option.split(";")[-1], channel=None)
@@ -34,7 +40,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
 
     if special is None:
         if "mt" in channel:
-            cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_Tight_2 > 0.5)"
+            cuts["againstMuonDiscriminator"] = f"(id_tau_vsMu_Tight_{vs_ele_wp}_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = f"(id_tau_vsEle_{vs_ele_wp}_2 > 0.5)"
             cuts["tau_iso"] = f"(id_tau_vsJet_{vs_jet_wp}_2 > 0.5)"
             cuts["muon_iso"] = "(iso_1 < 0.15)"
@@ -91,7 +97,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
 
             return Selection(name="mt", cuts=cuts)
         if "et" in channel:
-            cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_VLoose_2 > 0.5)"
+            cuts["againstMuonDiscriminator"] = f"(id_tau_vsMu_VLoose_{vs_ele_wp}_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = f"(id_tau_vsEle_{vs_ele_wp}_2 > 0.5)"
             cuts["tau_iso"] = f"(id_tau_vsJet_{vs_jet_wp}_2 > 0.5)"
             cuts["ele_iso"] = "(iso_1 < 0.15)"
@@ -146,7 +152,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
 
             return Selection(name="et", cuts=cuts)
         if "tt" in channel:
-            cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_VLoose_1 > 0.5) && (id_tau_vsMu_VLoose_2 > 0.5)"
+            cuts["againstMuonDiscriminator"] = f"(id_tau_vsMu_VLoose_{vs_ele_wp}_1 > 0.5) && (id_tau_vsMu_VLoose_{vs_ele_wp}_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = f"(id_tau_vsEle_{vs_ele_wp}_1 > 0.5) && (id_tau_vsEle_{vs_ele_wp}_2 > 0.5)"
             cuts["tau_iso"] = f"(id_tau_vsJet_{vs_jet_wp}_1 > 0.5) && (id_tau_vsJet_{vs_jet_wp}_2 > 0.5)"
 
@@ -167,7 +173,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                 )"""
             elif era in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]:
                 cuts["trg_selection"] = "(trg_double_tau35_mediumiso_hps > 0.5) && (pt_1 > 40) && (pt_2 > 40)"
-            elif era in ["2024","2024_CDE","2024_FGHI","2025"]:
+            elif era in ["2024","2025"]:
                 cuts["trg_selection"] = "(trg_double_tau30_mediumiso_pnet > 0.5 && pt_1 > 35 && pt_2 > 35)"
             else:
                 logger.error(f"Given era {era} does not exist")
@@ -176,8 +182,8 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             return Selection(name="tt", cuts=cuts)
         if "em" in channel:
             cuts["ele_iso"] = "(iso_1 < 0.15)"
-            cuts["muon_iso"] = "(iso_2 < 0.2)"
-            cuts["electron_eta"] = "(abs(eta_1) < 2.4)"
+            cuts["muon_iso"] = "(iso_2 < 0.15)"
+            cuts["electron_eta"] = "(abs(eta_1) < 2.5)"
 
             if era == "2016preVFP" or era == "2016postVFP":
                 print(f" *** No triggers for {era} implemented yet ***")
@@ -194,6 +200,16 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                         (trg_cross_mu8ele23 == 1) &&
                         (pt_1 > 24) &&
                         (pt_2 > 15)
+                    )
+                )"""
+            elif era in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix", "2024", "2025"]:
+                cuts["trg_selection"] = """(
+                    (pt_2 > 26) &&
+                    (
+                        (pt_1 > 25) &&
+                        (
+                            (trg_single_mu24 > 0.5)
+                        )
                     )
                 )"""
             else:
@@ -289,7 +305,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     if special == "TauID":
         assert channel in {"mt", "mm"}, "TauID measurement is only available for mt (with mm control region)"
         if channel == "mt":
-            cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_Tight_2 > 0.5)"
+            cuts["againstMuonDiscriminator"] = f"(id_tau_vsMu_Tight_{vs_ele_wp}_2 > 0.5)"
             cuts["againstElectronDiscriminator"] = f"(id_tau_vsEle_{vs_ele_wp}_2 > 0.5)"
             cuts["tau_iso"] = f"(id_tau_vsJet_{vs_jet_wp}_2 > 0.5)"
             cuts["muon_iso"] = "(iso_1 < 0.15)"
@@ -363,7 +379,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     elif special == "TauES":
         assert channel == "mt", "TauID measurement is only available for mt"
 
-        cuts["againstMuonDiscriminator"] = "(id_tau_vsMu_Tight_2 > 0.5)"
+        cuts["againstMuonDiscriminator"] = f"(id_tau_vsMu_Tight_{vs_ele_wp}_2 > 0.5)"
         cuts["againstElectronDiscriminator"] = f"(id_tau_vsEle_{vs_ele_wp}_2 > 0.5)"
         cuts["tau_iso"] = f"(id_tau_vsJet_{vs_jet_wp}_2 > 0.5)"
         cuts["muon_iso"] = "(iso_1 < 0.15)"
