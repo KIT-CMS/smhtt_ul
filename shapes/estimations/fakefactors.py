@@ -20,6 +20,7 @@ def fake_factor_estimation(
     special="",
     doTauES=False,
     selection_option="CR",
+    floor_negative=True,
 ):
 
     if is_embedding:
@@ -130,5 +131,10 @@ def fake_factor_estimation(
     )
     base_hist.SetName(variation_name)
     base_hist.SetTitle(variation_name)
+    if floor_negative:
+        for i in range(1, base_hist.GetNbinsX() + 1):
+            if base_hist.GetBinContent(i) < 0:
+                base_hist.SetBinContent(i, 0.0)
+                base_hist.SetBinError(i, 0.0)
     logger.debug("Finished estimation of shape %s.", variation_name)
     return base_hist

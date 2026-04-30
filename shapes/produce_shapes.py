@@ -28,6 +28,11 @@ from ntuple_processor import GraphManager, RunManager, UnitManager
 from ntuple_processor.utils import Selection
 
 
+WITH_SPLIT_SIGNAL = False
+WITH_SPLIT_SIGNAL_PRUNED = True
+WITH_SPLIT_SIGNAL_STAGE0 = False
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Produce shapes for the legacy MSSM analysis."
@@ -274,15 +279,24 @@ def add_processes(
     # TODO add ST?
     add_fn(name="w", dataset=datasets["W"], selections=select_fn(selection.W))
     if channel != "mm":
-        add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
-        add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
+        if WITH_SPLIT_SIGNAL_STAGE0:
+            add_fn(name="qqh", dataset=datasets["qqH"], selections=select_fn(selection.qqH125))
+            add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
 
-        return None
-        # ---
-        for b in range(100, 117):
-            add_fn(name=f"ggh_b{b}", dataset=datasets["ggH"], selections=select_fn(*getattr(selection.ggH125, f"bin{b}")))
-        for b in range(200, 211):
-            add_fn(name=f"qqh_b{b}", dataset=datasets["qqH"], selections=select_fn(*getattr(selection.qqH125, f"bin{b}")))
+        if WITH_SPLIT_SIGNAL:
+            for b in range(100, 117):
+                add_fn(name=f"ggh_b{b}", dataset=datasets["ggH"], selections=select_fn(*getattr(selection.ggH125, f"bin{b}")))
+            for b in range(200, 211):
+                add_fn(name=f"qqh_b{b}", dataset=datasets["qqH"], selections=select_fn(*getattr(selection.qqH125, f"bin{b}")))
+
+        if WITH_SPLIT_SIGNAL_PRUNED:
+            add_fn(name="qqh_bin201to202", dataset=datasets["qqH"], selections=select_fn(*selection.qqH125.bin201to202))
+            add_fn(name="qqh_bin203to210", dataset=datasets["qqH"], selections=select_fn(*selection.qqH125.bin203to210))
+
+            add_fn(name="ggh_bin101to104", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin101to104))
+            add_fn(name="ggh_bin105to106", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin105to106))
+            add_fn(name="ggh_bin107to109", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin107to109))
+            add_fn(name="ggh_bin110to116", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin110to116))
 
 
 def get_select_function(
@@ -580,8 +594,15 @@ def main(args):
             "vvl",
             "vvj",
             "w",
-            "ggh",
-            "qqh",
+            # ---
+            *(["ggh"] if WITH_SPLIT_SIGNAL_STAGE0 else []),
+            *(["qqh"] if WITH_SPLIT_SIGNAL_STAGE0 else []),
+            # ---
+            *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
+            *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
+            # ---
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         }
     else:
         procS = args.process_selection
@@ -606,30 +627,34 @@ def main(args):
     leptonFakesS = {"zl", "ttl", "vvl", "zl_nlo"} & procS
     trueTauBkgS = {"ztt", "ttt", "vvt", "ztt_nlo"} & procS
     sm_signalsS = {
-        "ggh",
-        "qqh",
-        "tth",
-        "zh",
-        "wh",
-        "gghww",
-        "qqhww",
-        "zhww",
-        "whww",
-        # *[f"ggh_b{b}" for b in range(100, 117)],
-        # *[f"qqh_b{b}" for b in range(200, 211)],
+        *(["ggh"] if WITH_SPLIT_SIGNAL_STAGE0 else []),
+        *(["qqh"] if WITH_SPLIT_SIGNAL_STAGE0 else []),
+        # ---
+        *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
+        *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
+        # ---
+        *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+        *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
     } & procS
-    signalsS = sm_signalsS | set(
+    signalsS = sm_signalsS | set(  # this part is not necessary?
         [
-            # *[f"ggh_b{b}" for b in range(100, 117)],
-            # *[f"qqh_b{b}" for b in range(200, 211)],
+            *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
+            *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
+            # ---
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         ]
     )
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
         signalsS = signalsS & {
-            "ggh",
-            "qqh",
-            # *[f"ggh_b{b}" for b in range(100, 117)],
-            # *[f"qqh_b{b}" for b in range(200, 211)],
+            *(["ggh"] if WITH_SPLIT_SIGNAL_STAGE0 else []),
+            *(["qqh"] if WITH_SPLIT_SIGNAL_STAGE0 else []),
+            # ---
+            *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
+            *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
+            # ---
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         }
 
     simulatedProcsDS = {
