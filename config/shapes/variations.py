@@ -182,13 +182,15 @@ def set_ff_type(ff_type):
 
     logger.info(f"Setting fake factor option to {ff_type}= {FF_OPTIONS[ff_type]}")
     RuntimeVariables.FF_name_lt = FF_OPTIONS[ff_type]["lt"]
-    logger.warning(
+    RuntimeVariables.FF_name_tt_1 = FF_OPTIONS[ff_type]["tt_1"]
+    RuntimeVariables.FF_name_tt_2 = FF_OPTIONS[ff_type]["tt_2"]
+    logger.info(
+        f"""
+        Setting fake factor option to {ff_type} for lt channel: {RuntimeVariables.FF_name_lt}
+        Setting fake factor option to {ff_type} for tt_1 channel: {RuntimeVariables.FF_name_tt_1}
+        Setting fake factor option to {ff_type} for tt_2 channel: {RuntimeVariables.FF_name_tt_2}
         """
-            Setting fake factor option for tt_1 and tt_2 is in parts not implemented yet.
-            Will not change the fake factor for tt_1 and tt_2 for now, only for lt.
-            Please make sure to set the fake factor for tt_1 and tt_2 accordingly if needed.
-        """
-    )
+        )
 
 
 class RuntimeVariables(object):
@@ -385,28 +387,58 @@ anti_iso_tt_mcl = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt
         Weight(RuntimeVariables.FF_name_tt_2, "fake_factor"),
     )
 )
-anti_iso_tt = LazyVariable(  # requieres LazyVariation since Used.FF_name_lt may be defined later
-    lambda: ReplaceCutAndAddWeight(
-        "anti_iso",
-        "tau_iso",
-        Cut(
-            """(
-                    (
-                        (id_tau_vsJet_Medium_1 < 0.5) &&
-                        (id_tau_vsJet_Medium_2 > 0.5) &&
-                        (id_tau_vsJet_VVVLoose_1 > 0.5)
-                    ) ||
-                    (
-                        (id_tau_vsJet_Medium_1 > 0.5) &&
-                        (id_tau_vsJet_Medium_2 < 0.5) &&
-                        (id_tau_vsJet_VVVLoose_2 > 0.5)
-                    )
-                )""",
-            "tau_anti_iso"
-        ),
-        Weight(f"0.5 * {RuntimeVariables.FF_name_tt_1} * (id_tau_vsJet_Medium_1 < 0.5) + 0.5 * {RuntimeVariables.FF_name_tt_2} * (id_tau_vsJet_Medium_2 < 0.5)", "fake_factor"),
-    )
+anti_iso_tt_raw = ReplaceCutAndAddWeight(
+    "anti_iso",
+    "tau_iso",
+    Cut(
+        """(
+                (
+                    (id_tau_vsJet_Medium_1 < 0.5) &&
+                    (id_tau_vsJet_Medium_2 > 0.5) &&
+                    (id_tau_vsJet_VVVLoose_1 > 0.5)
+                ) ||
+                (
+                    (id_tau_vsJet_Medium_1 > 0.5) &&
+                    (id_tau_vsJet_Medium_2 < 0.5) &&
+                    (id_tau_vsJet_VVVLoose_2 > 0.5)
+                )
+            )""",
+        "tau_anti_iso"
+    ),
+    Weight(f"0.5 * raw_fake_factor_1 * (id_tau_vsJet_Medium_1 < 0.5) + 0.5 * raw_fake_factor_2 * (id_tau_vsJet_Medium_2 < 0.5)", "fake_factor"),
 )
+
+anti_iso_tt_corrected = ReplaceCutAndAddWeight(
+    "anti_iso",
+    "tau_iso",
+    Cut(
+        """(
+                (
+                    (id_tau_vsJet_Medium_1 < 0.5) &&
+                    (id_tau_vsJet_Medium_2 > 0.5) &&
+                    (id_tau_vsJet_VVVLoose_1 > 0.5)
+                ) ||
+                (
+                    (id_tau_vsJet_Medium_1 > 0.5) &&
+                    (id_tau_vsJet_Medium_2 < 0.5) &&
+                    (id_tau_vsJet_VVVLoose_2 > 0.5)
+                )
+            )""",
+        "tau_anti_iso"
+    ),
+    Weight(f"0.5 * fake_factor_1 * (id_tau_vsJet_Medium_1 < 0.5) + 0.5 * fake_factor_2 * (id_tau_vsJet_Medium_2 < 0.5)", "fake_factor"),
+)
+
+def get_anti_iso_tt():
+    if RuntimeVariables.FF_name_tt_2 == FF_OPTIONS["fake_factor"]["tt_2"]:
+        logger.info("Using anti_iso_tt_corrected for anti_iso_tt since FF_name_tt_2 is set to fake_factor")
+        return anti_iso_tt_corrected
+    else:
+        logger.info("Using anti_iso_tt_raw for anti_iso_tt since FF_name_tt_2 is not set to fake_factor")
+        return anti_iso_tt_raw
+
+anti_iso_tt = LazyVariable(get_anti_iso_tt)
+
 # Pileup reweighting
 pileup_reweighting = [
     ReplaceVariable("CMS_PileUpUp", "PileUpUp"),
