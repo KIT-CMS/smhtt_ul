@@ -3,12 +3,11 @@ CHANNEL=$1
 ERA=$2
 NTUPLETAG=$3
 TAG=$4
-NNSCORE_FRIENDS=$5
-MODE=$6
+MODE=$5
 
 POSTFIX="-ML"
 ulimit -s unlimited
-source utils/setup_ul_samples.sh $NTUPLETAG $ERA
+source utils/setup_ul_samples_hh.sh $NTUPLETAG $ERA
 
 # Datacard Setup
 datacard_output="datacards/${NTUPLETAG}/${TAG}"
@@ -23,8 +22,7 @@ shapes_rootfile_synced=${shapes_output_synced}_synced.root
 
 VARIABLES="NN_score"
 
-# TODO: How to use this variables?
-# VARIABLES="iso_1,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
+DEFAULT_VARIABLES="iso_1,iso_2,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2,m_vis,jpt_1,jeta_1,jphi_1,jpt_2,jeta_2,jphi_2,nbtag,pt_tautau,pt_tautaubb,pt_vis,pt_dijet,mjj,mt_tot,m_vis,mass_tautaubb,met,njets,deltaR_ditaupair,sum_deltaR_tt_bb,bpair_deltaR,bpair_m_inv,bpair_pt_dijet"
 
 # if the output folder does not exist, create it
 if [ ! -d "$shapes_output" ]; then
@@ -33,10 +31,11 @@ fi
 
 # print the paths to be used
 echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
-# echo "BASEDIR: ${BASEDIR}"
+echo "BASEDIR: ${BASEDIR}"
 echo "output_shapes: ${output_shapes}"
 echo "FRIENDS: ${FRIENDS}"
-echo "NNSCORE_FRIENDS: $MULTI_FRIENDS_BASE_DIR$NNSCORE_FRIENDS"
+echo "NNSCORE_FRIENDS: $NN_FRIENDS_EQUAL_EVENTS"
+echo "FFRIENDS: $FF_FRIENDS"
 echo "###################################"
 echo "#           Mode ${MODE}          #"
 echo "###################################"
@@ -68,19 +67,10 @@ fi
 
 if [[ $MODE == "XSEC" ]]; then
     source utils/setup_root.sh
-    # if the xsec friends directory does not exist, create it
-    if [ ! -d "$XSEC_FRIENDS" ]; then
-        mkdir -p $XSEC_FRIENDS
-    fi
-    # if th xsec friends dir is empty, run the xsec friends script
-    if [ "$(ls -A $XSEC_FRIENDS)" ]; then
-        echo "xsec friends dir already exists"
-    else
-        echo "xsec friends dir is empty"
-        echo "running xsec friends script"
-        python3 friends/build_friend_tree.py --basepath $BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
-    fi
-    exit 0
+    echo "##############################################################################################"
+    echo "#      Checking xsec friends directory                                                       #"
+    echo "##############################################################################################"
+    python3 friends/build_friend_tree.py --basepath "${NTUPLES}" --outputpath $XSEC_FRIENDS --nthreads 20
 elif [[ $MODE == "XSEC_XROOTD" ]]; then
     source utils/setup_root.sh
     # if the xsec friends directory does not exist, create it
@@ -100,37 +90,97 @@ elif [[ $MODE == "XSEC_XROOTD" ]]; then
     exit 0
 fi
 
-if [[ $MODE == "CONTROL" ]]; then
+# DEFAULT_VARIABLES_LIST=(
+# pt_1 eta_1 phi_1 tau_decaymode_1 mt_1 iso_1 mass_1
+#   pt_2 eta_2 phi_2 tau_decaymode_2 mt_2 iso_2 mass_2
+#   jpt_1 jeta_1 jphi_1 jphi_2
+#   jpt_2 jeta_2 
+#   bpair_btag_value_1 
+#   bpair_btag_value_2
+#   pt_tautau pt_tautaubb pt_vis pt_dijet
+#   mjj mt_tot m_vis mass_tautaubb
+#   met metphi  metSumEt
+#   njets nbjets pt_fastmtt eta_fastmtt phi_fastmtt m_fastmtt
+#   deltaR_ditaupair sum_deltaR_tt_bb bpair_deltaR bpair_m_inv bpair_pt_dijet
+#   )
+
+if [[ $MODE == "CONTROL_SDA" ]]; then
     source utils/setup_root.sh
-    python shapes/produce_shapes.py --channels $CHANNEL \
-        --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $XSEC_FRIENDS --xrootd \
-        --era $ERA --num-processes 4 --num-threads 6 \
-        --optimization-level 1 --skip-systematic-variations \
-        --output-file $shapes_output --control-plots --control-plot-set pt_1 \
-        --vs-jet-wp Medium --vs-ele-wp VVLoose --validation-tag $TAG
+    if [ ! -d "output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}" ]; then
+        mkdir -p "output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+    fi
+    output_shapes="sda_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+    shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
+    # python shapes/produce_shapes.py --channels $CHANNEL \
+    #     --directory $NTUPLES \
+    #     --${CHANNEL}-friend-directory $XSEC_FRIENDS $FF_FRIENDS \
+    #     --era $ERA --num-processes 12 --num-threads 16 \
+    #     --optimization-level 1 --skip-systematic-variations \
+    #     --output-file $shapes_output --control-plots --control-plot-set $DEFAULT_VARIABLES \
+    #     --vs-jet-wp Medium --vs-ele-wp VVLoose --validation-tag $TAG --ff-type fake_factor --collect-config-only --config-output-file ${CHANNEL}_config_ff.yaml
 
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd # --do-emb-tt --do-ff 
+    # python trainings/adjust_config.py --configs ${ERA}__${CHANNEL}__${CHANNEL}_config_ff.yaml --modified-config ${ERA}__${CHANNEL}_config_ff_adjusted.yaml --common-setup-config trainings/setup.yaml
 
+    python trainings/create_training_dataset.py --config ${ERA}__${CHANNEL}_config_ff_adjusted.yaml \
+        --base-dataset-directory "/ceph/${USER}/smhtt_ul_ML/data/${TAG}/${CHANNEL}" --common-setup-config trainings/setup.yaml
+
+
+    # python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd --do-ff # --do-emb-tt
+
+    # python3 plotting/plot_shapes_control_sda.py -l --era Run${ERA} --input ${shapes_output}.root \
+    # --variables ${DEFAULT_VARIABLES} --channels ${CHANNEL} --tag ${TAG} --add-signals --fake-factor --ff-type ff
     # now plot the shapes by looping over the categories
-    for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
-        python3 plotting/plot_ml_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --channel ${CHANNEL} --category ${category} --output-dir output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/controlplots --normalize-by-bin-width # --embedding --fake-factor 
-    done
+    # for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
+    #     python3 plotting/plot_ml_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root \
+    #      --channel ${CHANNEL} --category ${category} --output-dir output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/controlplots \
+    #      --normalize-by-bin-width # --embedding --fake-factor 
+    # done
 fi
 
-if [[ $MODE == "LOCAL" ]]; then
+if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
+    procs=("data" "hh2b2tau" "ztt" "zl" "zj" "w" "stl" "stt" "stj" "ggh" "qqh" "ttl" "ttt" "ttj" "tth" "vvl" "vvt" "vvj" "vh")
+    
+    # for CHANNEL in "${CHANNELS[@]}"
+    # do
+    if [ ! -d "output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}" ]; then
+        mkdir -p "output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+    fi
+    output_shapes="sda_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+    shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
+    # python shapes/produce_shapes.py --channels ${CHANNEL} \
+    #     --directory ${NTUPLES} --process-selection "${procs[@]}" \
+    #     --${CHANNEL}-friend-directory ${XSEC_FRIENDS} \
+    #     --era ${ERA} --num-processes 16 --num-threads 24 \
+    #     --optimization-level 2 --skip-systematic-variations \
+    #     --output-file ${shapes_output} --control-plots --control-plot-set ${DEFAULT_VARIABLES_LIST[@]}  \
+    #     --vs-jet-wp ${WP} --vs-ele-wp ${WP_VSe} --validation-tag ${TAG} --apply-tauid #--ff-type fake_factor 
+
+    # python shapes/do_estimations.py -e ${ERA} -i ${shapes_output}.root --do-qcd #--do-ff #--do-emb-tt
+
+    # now plot the shapes by looping over the categories
+    python3 plotting/plot_shapes_control_jvss.py -l --era Run${ERA} --input ${shapes_output}.root --channels ${CHANNEL} --tag ${TAG} --variables ${DEFAULT_VARIABLES_LIST[@]} --add-signals #--fake-factor # --embedding --category ${category}
+       
+    # done
+fi
+
+
+if [[ $MODE == "LOCAL" ]]; then
+    # procs=("data" "hh2b2tau" "ztt" "zl" "zj" "w" "stl" "stt" "stj" "ggh" "qqh" "ttl" "ttt" "ttj" "tth" "vvl" "vvt" "vvj" "vh")--process-selection "${procs[@]}" --control-plot-set "NN_score"
+    source utils/setup_root.sh
+    ml_output_shapes="sda_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+    ml_shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${ml_output_shapes}
     python shapes/produce_shapes.py --channels $CHANNEL \
         --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $XSEC_FRIENDS $FASTMTT_FRIENDS $MULTI_FRIENDS_BASE_DIR$NNSCORE_FRIENDS \
-        --era $ERA --num-processes 4 --num-threads 12 \
-        --optimization-level 1 \
-        --output-file $shapes_output \
+        --${CHANNEL}-friend-directory $XSEC_FRIENDS $NN_FRIENDS_EQUAL_EVENTS $FF_FRIENDS \
+        --era $ERA --num-processes 12 --num-threads 18 \
+        --optimization-level 2 \
+        --output-file $ml_shapes_output  \
         --skip-systematic-variations \
-        --xrootd --validation-tag $TAG \
-        --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" 
+        --validation-tag $TAG \
+        --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" --ff-type fake_factor
 
-    python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd 
+    python shapes/do_estimations.py -e $ERA -i ${ml_shapes_output}.root --do-qcd --do-ff
 fi
 
 if [[ $MODE == "CONDOR" ]]; then
@@ -149,27 +199,31 @@ fi
 
 if [[ $MODE == "PLOT_ANALYSIS_SHAPES" ]]; then
     source utils/setup_root.sh
+    ml_output_shapes="sda_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+    ml_shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${ml_output_shapes}
     # python plotting/plot_shapes_tauID.py -i ${shapes_rootfile} -o ${plots_output}/analysis-shapes -c ${CHANNEL} -e $ERA
-    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "HH2B2Tau" -o ${analysis_plots_output} --blind
-    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "DY" -o ${analysis_plots_output}
-    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "ST" -o ${analysis_plots_output}
-    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "TT" -o ${analysis_plots_output}
-    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "VV" -o ${analysis_plots_output}
-    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --add-signals --category "Other" -o ${analysis_plots_output}
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${ml_shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --add-signals --category "HH2B2Tau" --blind --fake-factor
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${ml_shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --add-signals --category "DY" --fake-factor
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${ml_shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --add-signals --category "ST"  --fake-factor
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${ml_shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --add-signals --category "TT"  --fake-factor
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${ml_shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --add-signals --category "VV"  --fake-factor
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${ml_shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --add-signals --category "jetFakesMC"  --fake-factor
+    python3 plotting/plot_shapes_analysis.py -l --era Run${ERA} --input ${ml_shapes_output}.root --variables ${VARIABLES} --channels ${CHANNEL} --tag ${TAG} --add-signals --category "Other" --fake-factor
 
 fi
 
 if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
     # python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-qcd # --do-emb-tt --do-ff 
-
+    ml_output_shapes="sda_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
+    ml_shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${ml_output_shapes}
     # if the output folder does not exist, create it
     if [ ! -d "$shapes_output_synced" ]; then
         mkdir -p $shapes_output_synced
     fi
 
     python shapes/convert_to_synced_shapes.py -e $ERA \
-        -i ${shapes_rootfile} \
+        -i ${ml_shapes_output}.root \
         -o ${shapes_output_synced} \
         -n 1 \
         --mc

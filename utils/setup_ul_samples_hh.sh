@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+NTUPLETAG=$1
+ERA=$2
+
+KINGMAKER_BASEDIR="/ceph/jvoss/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+KINGMAKER_BASEDIR_XROOTD="root://cmsdcache-kit-disk.gridka.de/${KINGMAKER_BASEDIR}"
+# BASEDIR="/ceph/sdaigler/CROWN/${NTUPLETAG}/CROWNRun/"
+
+FRIENDS_BASE_DIR="/ceph/jvoss/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/"
+MULTI_FRIENDS_BASE_DIR="/ceph/jvoss/CROWN/ntuples/${NTUPLETAG}/CROWNMultiFriends/"
+XSEC_FRIENDS="${FRIENDS_BASE_DIR}xsec/"
+# FASTMTT_FRIENDS="${FRIENDS_BASE_DIR}fastmtt/"
+NN_FRIENDS_EQUAL_EVENTS="${FRIENDS_BASE_DIR}ML_Friends_FF_30_04_26/"
+# NN_FRIENDS_EQUAL_WEIGHTS="${MULTI_FRIENDS_BASE_DIR}ml_equal_weights/"
+FF_FRIENDS="${FRIENDS_BASE_DIR}ff_newv12_2018_v5/"
+
+if [[ $ERA == *"2016"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
+elif [[ $ERA == *"2017"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
+elif [[ $ERA == *"2018"* ]]; then
+    NTUPLES=$KINGMAKER_BASEDIR
+fi

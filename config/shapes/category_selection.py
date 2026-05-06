@@ -29,8 +29,12 @@ category_template = {
         "index": 4,
         "binning": standard_binning,
     },
-    "Other": {
+    "jetFakesMC": {
         "index": 5,
+        "binning": standard_binning,
+    },
+    "Other": {
+        "index": 6,
         "binning": standard_binning,
     },
 }

@@ -84,6 +84,10 @@ def job_wrapper(args):
 
 
 def check_file_exists_remote(serverpath, file_path):
+    if "store" not in serverpath and "/ceph" in serverpath:
+        # Not a valid remote XRootD path, but on ceph
+        return False
+    
     server_url = serverpath.split("store")[0][:-1]
     file_path = (
         "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
@@ -190,7 +194,7 @@ def upload_file(redirector, input_file, output_file, max_retries=5):
                 n += 1
         else:
             if not os.path.exists(os.path.dirname(output_file)):
-                os.makedirs(os.path.dirname(output_file))
+                os.makedirs(os.path.dirname(output_file), exist_ok=True)
             os.system(f"mv {input_file} {output_file}")
             success = True
 

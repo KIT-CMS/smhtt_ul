@@ -1299,12 +1299,26 @@ def FF_training_process_selection(channel, era, **kwargs):
     weights = []
     if channel == "et" or channel == "mt":
         cuts = [
-            ("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
+            (f"id_tau_vsJet_Medium_2<0.5&&id_tau_vsJet_VVVLoose_2>0.5", "tau_anti_iso"),
         ]
-        weights = [("fake_factor", "fake_factor")]
+        weights = [("fake_factor_2", "fake_factor")]
     elif channel == "tt":
-        # TODO
-        raise NotImplementedError("FF training not implemented for tt")
+        cuts = [
+            ("""(
+                    (
+                        (id_tau_vsJet_Medium_1 < 0.5) &&
+                        (id_tau_vsJet_Medium_2 > 0.5) &&
+                        (id_tau_vsJet_VVVLoose_1 > 0.5)
+                    ) ||
+                    (
+                        (id_tau_vsJet_Medium_1 > 0.5) &&
+                        (id_tau_vsJet_Medium_2 < 0.5) &&
+                        (id_tau_vsJet_VVVLoose_2 > 0.5)
+                    )
+                )""",
+            "tau_anti_iso"),
+        ]
+        weights = [("0.5 * fake_factor_1 * (id_tau_vsJet_Medium_1 < 0.5) + 0.5 * fake_factor_2 * (id_tau_vsJet_Medium_2 < 0.5)", "fake_factor")]
     elif channel == "em":
         raise NotImplementedError("FF training not implemented for em")
     else:

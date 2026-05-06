@@ -30,7 +30,7 @@ hep.style.use("CMS")
 # Expected 50.0%: r < 13.6875                                                                                                                                                                                                                                                  
 # Expected 84.0%: r < 20.0709                                                                                                                                                                                                                                                  
 # Expected 97.5%: r < 28.2366 
-tt_cl_equal_events = [6.9507, 9.4770, 13.6875, 20.0709, 28.2366]
+tt_cl_equal_events = [6.7188, 9.2383, 13.4375, 19.8114, 28.0341]
 
 # mt
 # Expected  2.5%: r < 12.1213
@@ -45,8 +45,8 @@ tt_cl_equal_events = [6.9507, 9.4770, 13.6875, 20.0709, 28.2366]
 # Expected 16.0%: r < 17.0443                                                                                                                                                                                                                                                  
 # Expected 50.0%: r < 24.3125                                                                                                                                                                                                                                                  
 # Expected 84.0%: r < 35.2634                                                                                                                                                                                                                                                  
-# Expected 97.5%: r < 49.0084 
-mt_cl_equal_events = [12.5361, 17.0443, 24.3125, 35.2634, 49.0084]
+# Expected 97.5%: r < 49.0084
+mt_cl_equal_events = [11.7114, 16.0568, 23.0625, 33.6342, 47.1775]
 
 
 # et
@@ -62,8 +62,8 @@ mt_cl_equal_events = [12.5361, 17.0443, 24.3125, 35.2634, 49.0084]
 # Expected 16.0%: r < 21.7422                                                                                                                                                                                                                                                  
 # Expected 50.0%: r < 31.6250                                                                                                                                                                                                                                                  
 # Expected 84.0%: r < 46.7520                                                                                                                                                                                                                                                  
-# Expected 97.5%: r < 66.2478   
-et_cl_equal_events = [15.8125, 21.7422, 31.6250, 46.7520, 66.2478]
+# Expected 97.5%: r < 66.2478
+et_cl_equal_events = [15.1250, 20.7969, 30.2500, 44.8399, 63.6246]
 
 # all together
 # Expected  2.5%: r < 5.8069
@@ -79,7 +79,7 @@ et_cl_equal_events = [15.8125, 21.7422, 31.6250, 46.7520, 66.2478]
 # Expected 50.0%: r < 10.6562
 # Expected 84.0%: r < 15.3711
 # Expected 97.5%: r < 21.2927
-all_cl_equal_events = [5.4946, 7.4706, 10.6562, 15.3711, 21.2927]
+all_cl_equal_events = [5.2852, 7.1858, 10.2500, 14.8668, 20.6617]
 
 
 ##############################
@@ -849,38 +849,38 @@ if __name__ == "__main__":
 	training_type = "equal_events"
 	plot_intervals(outdir=output_dir, training_type=training_type)
 
-	training_type = "equal_weights"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "equal_weights"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
      
-	training_type = "custom_events"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "custom_events"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
 
-	training_type = "custom_weights"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "custom_weights"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
      
-	training_type = "equal_events_sys"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "equal_events_sys"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
      
-	training_type = "equal_weights_sys"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "equal_weights_sys"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
 
-	training_type = "custom_events_sys"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "custom_events_sys"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
 
-	training_type = "custom_weights_sys"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "custom_weights_sys"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
 
-	training_type = "equal_events_scaled_137"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "equal_events_scaled_137"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
       
-	training_type = "equal_events_scaled_137_sys"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "equal_events_scaled_137_sys"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
       
-	training_type = "equal_events_scaled_430"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "equal_events_scaled_430"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
 
-	training_type = "equal_events_scaled_430_sys"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "equal_events_scaled_430_sys"
+	# plot_intervals(outdir=output_dir, training_type=training_type)
      
-	training_type = "equal_events_scaled_500_sys"
-	plot_intervals(outdir=output_dir, training_type=training_type)
+	# training_type = "equal_events_scaled_500_sys"
+	# plot_intervals(outdir=output_dir, training_type=training_type)

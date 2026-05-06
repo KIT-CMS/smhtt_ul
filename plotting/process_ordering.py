@@ -61,9 +61,9 @@ def sorted_bkg_processes(x: List[str], /, *, ordering: Union[None, dict[float, s
 
 class ControlShapeBkgProcesses:
     #                                    | FF-processes -------------->| EMB-processes --->|
-    FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT', 'STT', 'STJ', 'STL', 'VVVT', 'VVVJ', 'VVVL', 'TTVT', 'TTVJ', 'TTVL', 'EWK',  "ggH", "qqH", "ttH", "VH"]
+    FULLY_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCD', 'W', 'VVT', 'TTT', 'ZTT', 'STT', 'STJ', 'STL',  "ggH", "qqH", "ttH", "VH"] # 'VVVT', 'VVVJ', 'VVVL', 'TTVT', 'TTVJ', 'TTVL', 'EWK',
     EMB_FF = ['VVL', 'TTL', 'ZL', 'jetFakesEMB', 'EMB']
-    CLASSIC_FF = ['VVL', 'TTL', 'ZL', 'jetFakes', 'VVT', 'TTT', 'ZTT']
+    CLASSIC_FF = ['STL', 'VVL', 'TTL', 'ZL', 'jetFakes', 'STT', 'VVT', 'TTT', 'ZTT',"ggH", "qqH", "ttH", "VH"]
     EMB_CLASSIC = ['VVL', 'TTL', 'ZL', 'ZJ', 'VVJ', 'TTJ', 'QCDEMB', 'W', 'EMB']
 
     LO_NLO_PROCESSES = {

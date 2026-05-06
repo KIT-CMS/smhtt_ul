@@ -147,7 +147,7 @@ def abcd_estimation(
     selection,
     variable,
     variation="Nominal",
-    is_embedding=True,
+    is_embedding=False,
     transposed=False,
     is_nlo=False,
 ):
@@ -166,7 +166,7 @@ def abcd_estimation(
     procs_to_subtract = []
     procs_to_subtract.extend(["EMB"] if is_embedding else ["ZTT", "TTT", "VVT", "STT"])  # EMB or MC
     if channel in {"et", "mt", "tt"}:  # semi-leptonic and fully-hadronic
-        procs_to_subtract.extend(["ZL", "ZJ", "TTL", "TTVL", "TTJ", "TTVJ", "VVL", "VVVL", "VVJ", "STL", "STJ", "W"])
+        procs_to_subtract.extend(["ZL", "ZJ", "TTL",  "TTJ",  "VVL",  "VVJ", "STL", "STJ", "W"]) # "TTVL", "TTVJ","VVVL",
     else:  # fully-leptonic - a bunch of extra cases... TODO: can this be removed?
         if "em" in channel:
             procs_to_subtract.extend(["ZL", "TTL", "TTVL", "VVL", "VVVL", "STL", "W"])

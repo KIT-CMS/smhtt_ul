@@ -11,7 +11,7 @@ from shapes.estimations.additionals import qqH_merge_estimation
 from shapes.estimations.fakefactors import fake_factor_estimation
 from shapes.estimations.qcd import qcd_estimation, abcd_estimation
 from shapes.estimations.ttbar_emb import emb_ttbar_contamination_estimation
-from config.logging_setup_configs import setup_logging, duplicate_filter_context
+from config.logging_setup_configs import setup_logging #, duplicate_filter_context
 
 
 def parse_args():
@@ -346,52 +346,50 @@ def main(args):
         logger.debug("%s", json.dumps(ff_inputs, sort_keys=True, indent=4))
         for ch in ff_inputs:
             for cat in ff_inputs[ch]:
-                logger.info("Do estimation for category %s", cat)
-                with duplicate_filter_context(logger):
-                    for var in ff_inputs[ch][cat]:
-                        for variation in ff_inputs[ch][cat][var]:
+                logger.info(f"Do estimation for category {cat}")
+                #with duplicate_filter_context(logger):
+                for var in ff_inputs[ch][cat]:
+                    for variation in ff_inputs[ch][cat][var]:
 
-                            if "same_sign_anti_iso" in variation:
-                                # Skip same sign anti iso variations since this is only used
-                                # for the qcd estimation of anti iso region for DR ff.
-                                # and is accessible via QCD#anti_iso# variation
-                                continue
-
-                            _fake_factor_estimation = partial(
-                                fake_factor_estimation,
-                                rootfile=input_file,
-                                channel=ch,
-                                selection=cat,
-                                variable=var,
-                                selection_option=args.selection_option,
-                            )
+                        if "same_sign_anti_iso" in variation:
+                            # Skip same sign anti iso variations since this is only used
+                            # for the qcd estimation of anti iso region for DR ff.
+                            # and is accessible via QCD#anti_iso# variation
+                            continue
+                        _fake_factor_estimation = partial(
+                            fake_factor_estimation,
+                            rootfile=input_file,
+                            channel=ch,
+                            selection=cat,
+                            variable=var,
+                            is_embedding=False,
+                            selection_option=args.selection_option,
+                        )
+                        estimated_hist = _fake_factor_estimation(
+                            variation=variation,
+                        )
+                        estimated_hist.Write()
+                        estimated_hist = _fake_factor_estimation(
+                            variation=variation,
+                        )
+                        estimated_hist.Write()
+                        for variation, scale in zip(
+                            [
+                                "CMS_ff_total_sub_syst_Channel_EraUp",
+                                "CMS_ff_total_sub_syst_Channel_EraDown",
+                            ],
+                            [0.9, 1.1],
+                        ):
                             estimated_hist = _fake_factor_estimation(
                                 variation=variation,
+                                sub_scale=scale,
                             )
                             estimated_hist.Write()
                             estimated_hist = _fake_factor_estimation(
                                 variation=variation,
-                                is_embedding=False,
+                                sub_scale=scale,
                             )
                             estimated_hist.Write()
-                            for variation, scale in zip(
-                                [
-                                    "CMS_ff_total_sub_syst_Channel_EraUp",
-                                    "CMS_ff_total_sub_syst_Channel_EraDown",
-                                ],
-                                [0.9, 1.1],
-                            ):
-                                estimated_hist = _fake_factor_estimation(
-                                    variation=variation,
-                                    sub_scale=scale,
-                                )
-                                estimated_hist.Write()
-                                estimated_hist = _fake_factor_estimation(
-                                    variation=variation,
-                                    is_embedding=False,
-                                    sub_scale=scale,
-                                )
-                                estimated_hist.Write()
 
     logger.info("Successfully finished estimations.")
     input_file.Close()

@@ -226,9 +226,9 @@ def add_processes(
     add_fn(name="vvt", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVT))
     add_fn(name="vvj", dataset=datasets["VV"], selections=select_fn(selection.VV, selection.VVJ))
     # add_fn(name="vv", dataset=datasets["VV"], selections=select_fn(selection.VV))
-    add_fn(name="vvvl", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVL))
-    add_fn(name="vvvt", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVT))
-    add_fn(name="vvvj", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVJ))
+    # add_fn(name="vvvl", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVL))
+    # add_fn(name="vvvt", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVT))
+    # add_fn(name="vvvj", dataset=datasets["VVV"], selections=select_fn(selection.VVV, selection.VVVJ))
     # add_fn(name="vvv", dataset=datasets["VVV"], selections=select_fn(selection.VVV))
     add_fn(name="vh", dataset=datasets["VH"], selections=select_fn(selection.VH))
     add_fn(name="ewk", dataset=datasets["EWK"], selections=select_fn(selection.EWK))
@@ -403,7 +403,7 @@ def collect_config(
         )
     logger.info(f"Configuration written to {args.config_output_file}")
     logger.info("Due to a bug in ROOT/xrd the script won't exit properly. Please kill it manually. (i.e. Ctrl+z && kill %1)")
-
+    exit(0)
 
 def main(args):
     # Parse given arguments.
@@ -494,14 +494,14 @@ def main(args):
             "vvj",
             # "vv",
             "vh",
-            "vvvl",
-            "vvvt",
-            "vvvj",
+            # "vvvl",
+            # "vvvt",
+            # "vvvj",
             # "vvv",
-            "ewk",
-            "ttvl",
-            "ttvt",
-            "ttvj",
+            # "ewk",
+            # "ttvl",
+            # "ttvt",
+            # "ttvj",
             # "ttv",
         }
         # if "et" in args.channels:
@@ -577,7 +577,7 @@ def main(args):
             for procs in [dataS | trueTauBkgS | leptonFakesS | singleHiggsS | ewkS | other, jetFakesDS[channel]]:
                 _book_histogram(
                     processes=procs,
-                    variations=[variations.abcd_method_lt, variations.same_sign],
+                    variations=[variations.abcd_method_lt, variations.same_sign, variations.anti_iso_lt],
                     # variations=variations.SemiLeptonicFFEstimations.unrolled(),
                 )
         elif channel == "tt":
@@ -586,7 +586,7 @@ def main(args):
                     processes=procs,
                     # variations=[variations.same_sign],
                     # variations=variations.FullyHadronicFFEstimations.unrolled(),
-                    variations=[variations.abcd_method_tt, variations.same_sign],
+                    variations=[variations.abcd_method_tt, variations.same_sign, variations.anti_iso_tt],
                 )
         elif channel == "em":
             _book_histogram(
@@ -756,7 +756,7 @@ def main(args):
                 _book_histogram(simulatedProcsDS[channel], [variations.prefiring])
 
             if "2018" in args.era:
-                _book(simulatedProcsDS[channel], [variations.jet_es_hem])
+                _book_histogram(simulatedProcsDS[channel], [variations.jet_es_hem])
 
 
     # Step 2: convert units to graphs and merge them
@@ -765,17 +765,6 @@ def main(args):
     graphs = g_manager.graphs
     for graph in graphs:
         print(f"{graph}")
-
-    if args.collect_config_only:
-        if len(args.channels) > 1:
-            raise NotImplementedError("Collecting config for multiple channels is not implemented yet.")
-        collect_config(
-            graphs=graphs,
-            era=args.era,
-            channel=args.channels[0],
-            filename=args.config_output_file,
-        )
-        return
 
     if args.collect_config_only:
         if len(args.channels) > 1:

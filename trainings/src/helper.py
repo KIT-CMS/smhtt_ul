@@ -1,45 +1,65 @@
 import concurrent.futures
+import logging
+import multiprocessing
 import re
-from typing import Any, Callable, Generator, List, Optional, Tuple, Union
-
+import time
+from typing import Any, Callable, Generator, List, Optional, Tuple, Union, Iterator
+import os
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
-VARS_TAUS = "iso_1,iso_2,mass_1,mass_2,pt_1,pt_2,eta_1,eta_2,phi_1,phi_2,tau_decaymode_1,tau_decaymode_2"
-VARS_TAUS = VARS_TAUS.split(",")
-VARS_TAU_PAIR = "m_vis,mt_1,mt_2,mt_1_pf,mt_2_pf,pfmet,met,pzetamissvis,metphi,deltaR_ditaupair,pt_vis,mtt_coll_approx"
-VARS_TAU_PAIR = VARS_TAU_PAIR.split(",")
-VARS_JETS="jpt_1,jpt_2,jeta_1,jeta_2,jphi_1,jphi_2,mjj,njets,pt_dijet,jet_hemisphere"
-VARS_JETS = VARS_JETS.split(",")
-VARS_BJETS="nbtag,bpair_pt_1,bpair_pt_2,bpair_eta_1,bpair_eta_2,bpair_phi_1,bpair_phi_2,bpair_btag_value_1,bpair_btag_value_2,bpair_m_inv,bpair_pt_dijet,bpair_deltaR"
-VARS_BJETS = VARS_BJETS.split(",")
-# VARS_DISTANCES="deltaPhi_met_tau1,deltaPhi_met_tau2,deltaPhi_met_fatjet,deltaPhi_met_bjet1,deltaPhi_met_bjet2,deltaR_tau1_fatjet,deltaR_tau2_fatjet,balance_pT_fatjet_Z,deltaR_bjet1_fatjet,deltaR_bjet2_fatjet,deltaR_tau1_bjet1,deltaR_tau1_bjet2,deltaR_tau2_bjet1,deltaR_tau2_bjet2"
-VARS_BBTT="mt_tot,pt_tautaubb,mass_tautaubb"
-VARS_BBTT = VARS_BBTT.split(",")
-# VARS_KINFIT="kinfit_mX,kinfit_mY,kinfit_chi2,kinfit_convergence,kinfit_mX_YToBB,kinfit_mY_YToBB,kinfit_chi2_YToBB,kinfit_convergence_YToBB,kinfit_mX_YToTauTau,kinfit_mY_YToTauTau,kinfit_chi2_YToTauTau,kinfit_convergence_YToTauTau"
-VARS_FASTMTT="m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt"
-VARS_FASTMTT = VARS_FASTMTT.split(",")
-
-ALL_VARIABLES = (
-    VARS_TAUS + VARS_TAU_PAIR + VARS_JETS + VARS_BJETS + VARS_BBTT + VARS_FASTMTT
-)
+try:
+    from config.logging_setup_configs import setup_logging
+except ModuleNotFoundError:
+    import sys
+    sys.path.extend([".", "..", "../.."])
+    from config.logging_setup_configs import setup_logging
 
 
-TRAINING_VARIABLES = ALL_VARIABLES + [
+logger = setup_logging(logger=logging.getLogger(__name__))
+
+TRAINING_VARIABLES = [
     # "pt_1",
     # "pt_2",
-    # "m_vis",
-    # "njets",
-    # "nbtag",
+    # "eta_1",
+    # "eta_2",
     # "jpt_1",
     # "jpt_2",
     # "jeta_1",
     # "jeta_2",
     # "m_fastmtt",
-    # "pt_vis",
+    # "m_vis",
     # "mjj",
-    # "deltaR_ditaupair",
+    # "pt_vis",
     # "pt_dijet",
-
+    # "pt_tt",
+    # "pt_ttjj",
+    # "njets",
+    # "nbtag",
+    # "met",
+    # "deltaEta_ditaupair",
+    # "deltaR_ditaupair",
+    # "mt_2",
+    # "pt_fastmtt",
+    # "eta_fastmtt",
+    # "phi_fastmtt",
+    # "mt_tot",
+    # "pzetamissvis",
+    # "deltaR_jj",
+    # "deltaEta_jj",
+    # "deltaR_1j1",
+    # "deltaR_2j2",
+    # "deltaR_2j1",
+    # "deltaR_1j2",
+    # "deltaR_12j1",
+    # "deltaR_12j2",
+    # "deltaEta_1j1",
+    # "deltaEta_1j2",
+    # "deltaEta_2j1",
+    # "deltaEta_2j2",
+    # "deltaEta_12j1",
+    # "deltaEta_12j2",
     # -- label flags ---
     "is_data",
     "is_dyjets",
@@ -50,10 +70,41 @@ TRAINING_VARIABLES = ALL_VARIABLES + [
     "is_wjets",
     # --- era flags ---
     "is_2018",
-    "is_2017",
-    "is_2016preVFP",
-    "is_2016postVFP",
+    # "is_2017",
+    # "is_2016preVFP",
+    # "is_2016postVFP",
+    # --- sda vars ---
+    "bpair_btag_value_1",
+    "bpair_btag_value_2",
+    "bpair_deltaR",
+    "bpair_m_inv",
+    "bpair_pt_1",
+    "bpair_pt_dijet",
+    "deltaR_ditaupair",
+    "jpt_1",
+    "m_fastmtt",
+    "mjj",
+    "nbtag",
+    "njets",
+    "pt_fastmtt",
+    "mtt_coll_approx",
+    "m_vis",
+    "mt_tot",
+    "jpt_2",
+    "pt_1",
+    "pt_dijet",
+    "pt_vis",
 ]
+
+
+def downcast_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    fcols = df.select_dtypes('float64').columns
+    icols = df.select_dtypes('int64').columns
+
+    df[fcols] = df[fcols].astype(np.float32)
+    df[icols] = df[icols].astype(np.int32)
+
+    return df
 
 
 class Keys:
@@ -78,13 +129,17 @@ class Keys:
 
     VARIABLES = "variables"
     WEIGHT = "weight"
+    CLASS_WEIGHT = "class_weight"
     CUT = "cut"
     UP = "up"
     DOWN = "down"
 
-    ID = "id"
+    ANTI_ISO = "anti_iso"
+    ANTI_ISO_CUT = "anti_iso_cut"
+    ANTI_ISO_WEIGHT = "anti_iso_weight"
 
-    ADDITIONAL_NOMINALS = ["abcd_anti_iso", "abcd_same_sign", "abcd_same_sign_anti_iso"]
+    ID = "id"
+    EVENT_IDENTIFIER_COLUMNS = ["event"]
 
 
 def find_variable_expansions(full_expression: str, substring: str) -> list[str]:
@@ -102,6 +157,49 @@ def find_variable_expansions(full_expression: str, substring: str) -> list[str]:
     return pattern.findall(full_expression)
 
 
+def modify_tau_iso_string(input_str: str, tight_wp: str = "Tight", loose_wp: str = "VLoose") -> str:
+    """
+    Modifies a string containing tau isolation conditions.
+
+    1. Replaces (id_tau_vsJet_Tight_2>0.5) or (id_tau_vsJet_Tight_2==1)
+       with (id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5).
+    2. Handles optional suffixes like __something, applying them to both new variables.
+    3. If no such pattern is found, appends the anti-iso variant.
+    4. If an anti-iso variant already exists (with or without suffix), does nothing.
+    5. Tight and VLoose working points are configurable.
+    6. The _2 suffix is always present.
+    """
+
+    escaped_tight_wp = re.escape(tight_wp)
+    escaped_loose_wp = re.escape(loose_wp)
+
+    anti_iso_exists_pattern = re.compile(
+        rf"\((?:id_tau_vsJet_{escaped_tight_wp}_2((?:__[a-zA-Z0-9_]+)?)\s*<\s*0\.5)\s*&&\s*(?:id_tau_vsJet_{escaped_loose_wp}_2\1\s*>\s*0\.5)\)"
+    )
+    if anti_iso_exists_pattern.search(input_str):
+        return input_str  # Do nothing if already in anti-iso form
+
+    pattern_to_replace_str = \
+        rf"\(id_tau_vsJet_{escaped_tight_wp}_2((?:__[a-zA-Z0-9_]+)?)\s*(?:>0\.5|==1)\)"
+    pattern_to_replace = re.compile(pattern_to_replace_str)
+
+    def replacer(match):
+        opt_suffix = match.group(1) if match.group(1) else ""  # Get the captured suffix or empty string
+        return f"(id_tau_vsJet_{tight_wp}_2{opt_suffix}<0.5&&id_tau_vsJet_{loose_wp}_2{opt_suffix}>0.5)"
+
+    modified_str, num_subs = pattern_to_replace.subn(replacer, input_str)
+
+    if num_subs == 0:
+        append_str = f"(id_tau_vsJet_{tight_wp}_2<0.5&&id_tau_vsJet_{loose_wp}_2>0.5)"
+
+        if not input_str:  # If original string is empty
+            return append_str
+        else:
+            return f"{input_str} && {append_str}"
+    else:
+        return modified_str
+
+
 class RuntimeVariables(object):
     """
     A singleton-like container class holding variables that can be adjusted at runtime.
@@ -117,40 +215,80 @@ class RuntimeVariables(object):
             return cls.instance
 
 
+def _worker_wrapper(func: Callable, args: Any, task_id: int):
+    """Wrapper to safely execute and track the status of a single worker."""
+    pid = os.getpid()
+    print(f"[Worker PID {pid} | Task {task_id}] STARTED.", flush=True)
+    start_time = time.time()
+    
+    try:
+        # Pass the args to the actual function
+        result = func(args)
+        
+        duration = time.time() - start_time
+        print(f"[Worker PID {pid} | Task {task_id}] FINISHED in {duration:.1f}s.", flush=True)
+        return task_id, result, None
+        
+    except Exception as e:
+        duration = time.time() - start_time
+        print(f"[Worker PID {pid} | Task {task_id}] FAILED after {duration:.1f}s with Error: {e}", flush=True)
+        return task_id, None, e
+
 def optional_process_pool(
     args_list: List[Tuple[Any, ...]],
     function: Callable,
     max_workers: Union[int, None] = None,
     description: Union[str, None] = None,
-) -> List[Any]:
+) -> Iterator[Any]:
     """
-    Running a function with a list of arguments in parallel using multiprocessing if
-    the list of arguments is longer than one and multiprocessing is enabled.
-
-    Args:
-        args_list: List of tuples with arguments for the function
-        function: Function to be executed
-        max_workers: Number of workers to be used in the multiprocessing pool (default: None)
-
-    Return:
-        List of results of the function
-
+    ToDo
     """
 
-    if len(args_list) == 1 or not RuntimeVariables.USE_MULTIPROCESSING:
-        results = [function(args) for args in args_list]
+    if len(args_list) == 1 or not getattr(RuntimeVariables, 'USE_MULTIPROCESSING', True):
+        for args in args_list:
+            yield function(args)
     else:
-        n = max_workers if max_workers is not None else len(args_list)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=n) as executor:
-            results = list(
-                tqdm(
-                    executor.map(function, args_list),
-                    total=len(args_list),
-                    desc=description,
-                )
-            )
+        if max_workers is None:
+            max_workers = min(len(args_list), os.cpu_count() or 1)
+            
+        logger.info(f"Setting up multiprocessing Pool. Workers: {max_workers}, Tasks: {len(args_list)}")
+        
+        context = multiprocessing.get_context("spawn")
+        
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=max_workers, 
+            mp_context=context
+        ) as executor:
+            
+            # 1. Submit all tasks manually so we can assign them IDs for logging
+            future_to_task_id = {}
+            for i, args in enumerate(args_list):
+                # Pass the function, args, and an ID to our wrapper
+                future = executor.submit(_worker_wrapper, function, args, i)
+                future_to_task_id[future] = i
+            
+            logger.info("All tasks submitted to workers. Waiting for first completion...")
 
-    return results
+            # 2. Use as_completed to yield results IMMEDIATELY when any worker finishes
+            # This prevents the pool from deadlocking if Task 1 hangs but Task 2 is done.
+            for future in tqdm(
+                concurrent.futures.as_completed(future_to_task_id),
+                total=len(args_list),
+                desc=description,
+            ):
+                # task_id = future_to_task_id[future]
+                
+                # Extract the wrapped result
+                returned_task_id, result, exception = future.result()
+                del future # Free memory immediately after getting the result
+                
+                if exception is not None:
+                    logger.error(f"Task {returned_task_id} failed fatally. Raising exception to main thread.")
+                    raise exception
+                
+                logger.info(f"Main thread received result for Task {returned_task_id}.")
+                yield result
+                del result # Free memory immediately after yielding the result
 
 
 class Iterate:
@@ -284,3 +422,34 @@ class PipeDict(dict):
     """
     def pipe(self, func: callable, *args: Any, **kwargs: Any) -> dict:
         return func(self, *args, **kwargs)
+
+    def conditional_pipe(self, condition: bool, func: callable, *args: Any, **kwargs: Any) -> dict:
+        if condition:
+            return self.pipe(func, *args, **kwargs)
+        return self
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key not in self:
+            logger.warning(f"Key '{key}' not found in the dictionary. Returning default value: {default}")
+        return super().get(key, default)
+
+    def recursive_get(self, keys: List[str], default: Any = None) -> Any:
+        current = self
+        for key in keys:
+            if not isinstance(current, dict) or key not in current:
+                logger.warning(f"Key path '{' -> '.join(keys)}' not found. Returning default value: {default}")
+                return default
+            current = current[key]
+        return current
+
+
+def get_class_weights(
+    weights: Union[pd.Series, np.ndarray],
+    Y: Union[pd.Series, np.ndarray],
+    classes: tuple = (0, 1),
+    class_weighted: bool = True,
+) -> Union[pd.Series, np.ndarray]:
+    _weights = np.zeros_like(weights)
+    for _class in classes:
+        _weights[Y == _class] = weights.sum() / weights[Y == _class].sum()
+    return _weights * (weights if class_weighted else 1.0)

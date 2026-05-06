@@ -3,11 +3,11 @@ from functools import partial
 import logging
 import ROOT
 from .defaults import _name_string, _process_map, _dataset_map
-from config.logging_setup_configs import duplicate_filter_context
+# from config.logging_setup_configs import duplicate_filter_context
 
 from config.logging_setup_configs import setup_logging
 
-logger = setup_logging(logger=logging.getLogger(__name__))
+logger = setup_logging(logger=logging.getLogger(__name__), level=logging.DEBUG)
 
 
 def fake_factor_estimation(
@@ -16,7 +16,7 @@ def fake_factor_estimation(
     selection,
     variable,
     variation="Nominal",
-    is_embedding=True,
+    is_embedding=False,
     sub_scale=1.0,
     special="",
     doTauES=False,
@@ -131,5 +131,5 @@ def fake_factor_estimation(
     )
     base_hist.SetName(variation_name)
     base_hist.SetTitle(variation_name)
-    logger.debug("Finished estimation of shape %s.", variation_name)
+    logger.info("Finished estimation of shape %s.", variation_name)
     return base_hist

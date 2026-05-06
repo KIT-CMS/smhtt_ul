@@ -1,35 +1,39 @@
 set -euo pipefail
 
-TAG=$1
-NNSCORE_FRIENDS=$2
-USE_SYSTEMATICS=${3:-no}
+TAG=Simon_ML_v12_04_05_26_ff_v2
+# NNSCORE_FRIENDS=ML_Friends_FF_30_04_26
+USE_SYSTEMATICS=${4:-no}
 
 export USE_SYSTEMATICS
 
 echo "[INFO] Using tag: $TAG"
-echo "[INFO] Using NN score friends: $NNSCORE_FRIENDS"
+# echo "[INFO] Using NN score friends: $NNSCORE_FRIENDS"
 echo "[INFO] Using systematic uncertainties (yes, no): $USE_SYSTEMATICS"
 
 ERA=2018
-NTUPLETAG=all-v4
+NTUPLETAG=sda_v12_16_04_26_v2
 
-# analysis shapes
-bash run_analysis.sh et $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS LOCAL
-bash run_analysis.sh mt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS LOCAL
-bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS LOCAL
+#XSEC
+# bash run_analysis.sh tt $ERA $NTUPLETAG $TAG XSEC
 
-# sync shapes
-bash run_analysis.sh et $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS SYNC
-bash run_analysis.sh mt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS SYNC
-bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS SYNC
+for CH in mt tt et; do
+    #CTRL
+    # bash run_analysis.sh $CH $ERA $NTUPLETAG $TAG CTRL
+    # bash run_analysis.sh $CH $ERA $NTUPLETAG $TAG CONTROL_SDA
 
-# plot sync shapes
-bash run_analysis.sh et $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS PLOT_ANALYSIS_SHAPES
-bash run_analysis.sh mt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS PLOT_ANALYSIS_SHAPES
-bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS PLOT_ANALYSIS_SHAPES
+
+    # # analysis shapes
+    # bash run_analysis.sh $CH $ERA $NTUPLETAG $TAG LOCAL
+
+    # # sync shapes
+    # bash run_analysis.sh $CH $ERA $NTUPLETAG $TAG SYNC
+    # plot sync shap
+    bash run_analysis.sh $CH $ERA $NTUPLETAG $TAG PLOT_ANALYSIS_SHAPES
+done
+
 
 # produce datacards (channel is ignored -> run with tt will produce for all channels)
-bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS DATACARD-PY-SYST
+# bash run_analysis.sh tt $ERA $NTUPLETAG $TAG DATACARD-PY-SYST
 
 # fit (channel is ignored -> run with tt will produce for all channels)
-bash run_analysis.sh tt $ERA $NTUPLETAG $TAG $NNSCORE_FRIENDS FIT-HH
+# bash run_analysis.sh tt $ERA $NTUPLETAG $TAG FIT-HH
