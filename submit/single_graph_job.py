@@ -86,6 +86,7 @@ def main(args):
 if __name__ == "__main__":
     args = parse_args()
     pathname = "log/{id}/".format(id=os.path.basename(args.input).replace(".pkl", ""))
+    # os.makedirs(os.path.dirname(pathname), exist_ok=True)
     setup_logging(
         os.path.join(
             pathname,

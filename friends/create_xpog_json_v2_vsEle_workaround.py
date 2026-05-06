@@ -11,6 +11,7 @@ from typing import Union
 ROOT.PyConfig.IgnoreCommandLineOptions = True  # disable ROOT internal argument parser
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 class CorrectionSet(object):
     def __init__(self, name):
@@ -208,7 +209,7 @@ class TauID(Correction):
             "output": {
                 "name": "sf",
                 "type": "real",
-                "description": "pT-dependent scale factor",
+                "description": "DM-pT-dependent or DM-dependent scale factor",
             },
             "data": None,
         }
@@ -253,8 +254,8 @@ class TauID(Correction):
                                                 "input": "syst",
                                                 "content": [
                                                     {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="id")},
-                                                    {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="id")},
-                                                    {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="id")},
+                                                    {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="id")},
+                                                    {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="id")},
                                                                     ],
                                                                 } for pt in self.dm_pt_bin_lists[wp]["VVLoose"][dm][:-1]
                                                             ],
@@ -356,8 +357,8 @@ class TauID(Correction):
                                                 "input": "syst",
                                                 "content": [
                                                     {"key": "nom","value": self.get_tau_sf(dm,"nom", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="id")},
-                                                    {"key": "up","value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="id")},
-                                                    {"key": "down","value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="id")},
+                                                    {"key": "up","value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="id")},
+                                                    {"key": "down","value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="id")},
                                                                     ],
                                                                 }
                                                             ],
@@ -384,7 +385,7 @@ class TauID(Correction):
         self.correctionset = {
             "version": 0,
             "name": self.name,
-            "description": "dm-pt-dependent tau ID scale factor for tau embedded samples",
+            "description": "dm-pt-dependent tau ES scale factor for tau embedded samples",
             "inputs": [
                 { "name": "pt",
                 "type": "real",
@@ -490,8 +491,8 @@ class TauID(Correction):
                                                                 "input": "syst",
                                                                 "content": [
                                                                     {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="es")},
-                                                                    {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="es")},
-                                                                    {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="es")},
+                                                                    {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="es")},
+                                                                    {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="es")},
                                                                                             ],
                                                                                         } for pt in self.dm_pt_bin_lists[wp]["VVLoose"][dm][:-1]
                                                                                     ],
@@ -521,7 +522,7 @@ class TauID(Correction):
         self.correctionset = {
             "version": 0,
             "name": self.name,
-            "description": "dm-dependent tau ID scale factor for tau embedded samples",
+            "description": "dm-dependent tau ES scale factor for tau embedded samples",
             "inputs": [
                 { "name": "pt",
                 "type": "real",
@@ -627,8 +628,8 @@ class TauID(Correction):
                                                                 "input": "syst",
                                                                 "content": [
                                                                     {"key": "nom", "value": self.get_tau_sf(dm, "nom", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="es")},
-                                                                    {"key": "up", "value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="es")},
-                                                                    {"key": "down", "value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="es")},
+                                                                    {"key": "up", "value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="es")},
+                                                                    {"key": "down", "value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="es")},
                                                                                             ],
                                                                                         }
                                                                                     ],
@@ -662,25 +663,26 @@ class TauID(Correction):
                 return (100 + val)/100
             else:
                 raise ValueError(f"Invalid id_es: {id_es}")
-
+        vsEle_correction_up = 1.0 if wp_VSe == "VVLoose" else 1.1
+        vsEle_correction_down = 1.0 if wp_VSe == "VVLoose" else 0.9
         if isPt:
             if variable == 20:
                 dm_pt = f"DM{dm}_PT{variable}_40"
             elif variable == 40:
                 dm_pt = f"DM{dm}_PT{variable}_200"
-            data = self.data[wp][wp_VSe]
+            data = self.data[wp]["VVLoose"]
             for bin in data[dm_pt].keys():
                 if variable == bin:
                     if variation == "nom":
                         return _convert_tes_to_factor(data[dm_pt][bin]["r"], id_es=id_es)
                     elif variation == "up":
-                        return _convert_tes_to_factor(data[dm_pt][bin]["u"], id_es=id_es)
+                        return _convert_tes_to_factor(data[dm_pt][bin]["u"], id_es=id_es) * vsEle_correction_up
                     elif variation == "down":
-                        return _convert_tes_to_factor(data[dm_pt][bin]["d"], id_es=id_es)
+                        return _convert_tes_to_factor(data[dm_pt][bin]["d"], id_es=id_es) * vsEle_correction_down
                     else:
                         raise ValueError(f"Invalid variation: {variation}")
         elif isDM:
-            data = self.data[wp][wp_VSe]
+            data = self.data[wp]["VVLoose"]
             # if id_es == "es":
             #     breakpoint()
             for bin in data.keys():
@@ -688,9 +690,9 @@ class TauID(Correction):
                     if variation == "nom":
                         return _convert_tes_to_factor(data[bin]["r"], id_es=id_es)
                     elif variation == "up":
-                        return _convert_tes_to_factor(data[bin]["u"], id_es=id_es)
+                        return _convert_tes_to_factor(data[bin]["u"], id_es=id_es) * vsEle_correction_up
                     elif variation == "down":
-                        return _convert_tes_to_factor(data[bin]["d"], id_es=id_es)
+                        return _convert_tes_to_factor(data[bin]["d"], id_es=id_es) * vsEle_correction_down
                     else:
                         raise ValueError(f"Invalid variation: {variation}")
         else:
@@ -892,7 +894,7 @@ if "DM1011" in binnames:
 data_dict, data_dict_ES = load_fitresults_from_files(fitfiles, binnames)
 
 correctionset = CorrectionSet("Tau_ID_ES_SF")
-
+correctionset.description = f"Correction for tau embedding events; embedded tau identification efficiency and embedded tau energy scale factors ( DeepTau2017v2p1VSjet, tau_energy_scale, tau_energy_scale_dm_binned). For more info, please visit https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauEmbeddingSamplesUL#TauID_and_TauES_correction and https://tau-wiki.docs.cern.ch/ (This file was created on {datetime.datetime.now().strftime('%d.%m.%Y')})."
 ### ID corrections:
 # pt
 correction_dm_pt = TauID(
@@ -953,14 +955,17 @@ correctionset.add_correction(correction_dm_es)
 
 # Adds dm as second correction:
 # correctionset.add_correction(correction_dm)
+# correctionset.write_json(
+#     "Correctionlib_Tau_ID_ES_"
+#     + str(args.era)
+#     + "_UL_"
+#     + str(args.channel)
+#     + "_"
+#     + str(args.nTuple_tag)
+#     + ".json"
+# )
 correctionset.write_json(
-    "CHECK_Tau_ID_ES_"
-    + str(args.era)
-    + "_UL_"
-    + str(args.channel)
-    + "_"
-    + str(args.nTuple_tag)
-    + ".json"
+    f"tau_id_es_embedding{args.era}UL.json"
 )
 ###########################
 #### Plotting the fits ####
@@ -999,11 +1004,12 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
             else:
                 new_keys[key] = value
         data[wp][wp_VSe] = new_keys       
-        
     
-    x_labels = ['Incl.', 'PT20_40', 'PT40_200']
+    
+    x_labels = ['Incl.', 'PT20 to 40', 'PT40 to 200']
     x_list=[0.25, 0.5, 0.75]
-    fig, axes = plt.subplots(nrows=len(dm_bins), ncols=1, sharex=True, figsize=(8, 10))
+    fig, axes = plt.subplots(nrows=len(dm_bins), ncols=1, sharex=True,
+                             figsize=(9, 10))
     if len(dm_bins) == 1:
         axes = [axes]
 
@@ -1072,11 +1078,11 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
         ax.axhline(y=1 if id_es == "ID" else 0, color='black', linestyle='--',
                    label="Nominal")
         # ax.set_title(f"{dm} bins")
-        ax.set_ylabel(f"{dm}")
+        ax.set_ylabel(f"{dm}".replace("DM", "DM ").replace("1011", "10+11"), fontsize=18)
         
         ax.grid(True)
-    axes[0].legend(loc='upper right', fontsize='small')
-    axes[0].set_xticks(x_list, x_labels)
+    axes[0].legend(loc='upper right', fontsize=16)
+    axes[0].set_xticks(x_list, x_labels, fontsize=18)
     axes[0].tick_params(labelbottom=True, top=True, labeltop=True)  # Show ticks at the top
     axes[0].xaxis.set_label_position('top')
     axes[0].xaxis.tick_top()
@@ -1084,12 +1090,12 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
     for ax in axes[1:]:
         ax.tick_params(labelbottom=False)
     
-    fig.suptitle(f'Corrections {era} UL {wp} vsJets {wp_VSe} vsEle Tau{id_es}', fontsize=14)
+    fig.suptitle(f'Corrections {era}(UL) ({wp} vsJets) ({wp_VSe} vsEle) T{id_es}', fontsize=18)
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     # plt.title(f'Corrections {era} UL {wp}vsJets {wp_VSe}vsEle Tau{id_es} {channel}', loc='center', fontsize=14)
     # plt.tight_layout()
     plt.savefig(f"Tau{id_es}_{era}_UL_{channel}_{wp}vsJets_{wp_VSe}vsEle_{nTuple_tag}.pdf")
-    plt.savefig(f"Tau{id_es}_{era}_UL_{channel}_{wp}vsJets_{wp_VSe}vsEle_{nTuple_tag}.png")
+    # plt.savefig(f"Tau{id_es}_{era}_UL_{channel}_{wp}vsJets_{wp_VSe}vsEle_{nTuple_tag}.png")
     plt.close(fig)
 
 for wp in wps:

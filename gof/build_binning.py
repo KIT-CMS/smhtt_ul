@@ -468,8 +468,9 @@ def main(args):
             cut,
         )
         logger.info(f"Building chain {dm_bin}")
-        # percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
-        percentiles = [0.0, 20.0, 40.0, 60.0, 80.0, 100.0]
+        percentiles = [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
+        # percentiles = [0.0, 12.5, 25.0, 37.5, 50.0, 62.5, 75.0, 87.5, 100.0]
+        # percentiles = [0.0, 20.0, 40.0, 60.0, 80.0, 100.0]
         # chain = build_chain(data_selection)
         chain = build_chain_mp(dict_=data_selection, n_workers=32)
         logger.info(f"Calculating binning for {dm_bin}")

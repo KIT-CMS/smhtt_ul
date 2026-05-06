@@ -5,7 +5,7 @@ executable = submit/single_graph_job.sh
 Requirements = ( (Target.ProvidesCPU == True) && (Target.ProvidesIO == True) && (TARGET.ProvidesEKPResources == True ) )
 +RequestWalltime = 7200
 +ExperimentalJob = True
-RequestMemory = 4096
+RequestMemory = 2048
 request_disk = 204800
 RequestCpus = 1
 accounting_group = cms.higgs

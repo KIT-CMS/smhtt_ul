@@ -236,6 +236,62 @@ if __name__ == "__main__":
          "ES_DM10_PT40_200",
          "ES_DM11_PT40_200",
     ]
+    
+    AN_label_dict = {
+
+        "r_EMB_DM_0" : "Tau ID", 
+        "r_EMB_DM_1" : "Tau ID", 
+        "r_EMB_DM_10_11" : "Tau ID",
+        
+        "r_EMB_DM0" : "Tau ID",
+        "r_EMB_DM1" : "Tau ID", 
+        "r_EMB_DM1011" : "Tau ID",
+        "r_EMB_DM10" : "Tau ID",
+        "r_EMB_DM11" : "Tau ID",
+        "r_EMB_DM0_PT20_40" : "Tau ID",
+        "r_EMB_DM1_PT20_40" : "Tau ID",
+        "r_EMB_DM1011_PT20_40" : "Tau ID",
+        "r_EMB_DM10_PT20_40" : "Tau ID",
+        "r_EMB_DM11_PT20_40" : "Tau ID",
+        "r_EMB_DM0_PT40_200" : "Tau ID",
+        "r_EMB_DM1_PT40_200" : "Tau ID",
+        "r_EMB_DM1011_PT40_200" : "Tau ID",
+        "r_EMB_DM10_PT40_200" : "Tau ID",
+        "r_EMB_DM11_PT40_200" : "Tau ID",
+
+        "ES_DM0" : "TES",
+        "ES_DM1" : "TES",
+        "ES_DM1011" : "TES",
+        "ES_DM10" : "TES",
+        "ES_DM11" : "TES",
+        "ES_DM0_PT20_40" : "TES",
+        "ES_DM1_PT20_40" : "TES",
+        "ES_DM1011_PT20_40" : "TES",
+        "ES_DM10_PT20_40" : "TES",
+        "ES_DM11_PT20_40" : "TES",
+        "ES_DM0_PT40_200" : "TES",
+        "ES_DM1_PT40_200" : "TES",
+        "ES_DM1011_PT40_200" : "TES",
+        "ES_DM10_PT40_200" : "TES",
+        "ES_DM11_PT40_200" : "TES",
+        
+        "r_DY_incl_DM0":"DY xsec",
+        "r_DY_incl_DM1":"DY xsec",
+        "r_DY_incl_DM1011":"DY xsec",
+        "r_DY_incl_DM10":"DY xsec",
+        "r_DY_incl_DM11":"DY xsec",
+        "r_DY_incl_DM0_PT20_40":"DY xsec",
+        "r_DY_incl_DM1_PT20_40":"DY xsec",
+        "r_DY_incl_DM1011_PT20_40":"DY xsec",
+        "r_DY_incl_DM10_PT20_40":"DY xsec",
+        "r_DY_incl_DM11_PT20_40":"DY xsec",
+        "r_DY_incl_DM0_PT40_200":"DY xsec",
+        "r_DY_incl_DM1_PT40_200":"DY xsec",
+        "r_DY_incl_DM1011_PT40_200":"DY xsec",
+        "r_DY_incl_DM10_PT40_200":"DY xsec",
+        "r_DY_incl_DM11_PT40_200":"DY xsec",
+
+    }
 
     era = sys.argv[1]
     print("[INFO] Plot for era {}.".format(era))
@@ -248,7 +304,16 @@ if __name__ == "__main__":
     
     tag= sys.argv[4]
     print("[INFO] Plot POI for category {}.".format(tag))
-    
+   
+    if "PT" in category:
+        dm, pt_range = category.split("_PT")
+        pt_low, pt_high = pt_range.split("_")
+        dm_str = f"{dm.replace('DM', 'DM ')} (PT{pt_low} to {pt_high})"
+    else:
+        dm_str = category.replace("DM", "DM ")
+    if "1011" in dm_str:
+        dm_str = dm_str.replace("1011", "10+11")
+   
     f = ROOT.TFile(filename)
     if f == None:
         raise Exception("[ERROR] File {} not found.".format(filename))
@@ -277,14 +342,19 @@ if __name__ == "__main__":
     m.SetTitle("")
     for i in range(num_pois):
         m.GetXaxis().SetBinLabel(i+1, "")
-        m.GetYaxis().SetBinLabel(i+1, label_dict[pois[i]])
+        m.GetYaxis().SetBinLabel(i+1, AN_label_dict[pois[i]])
     m.GetXaxis().LabelsOption("v")
     m.SetMinimum(-1)
     m.SetMaximum(1)
 
     canv = ROOT.TCanvas("canv", "canv", 600, 600)
     canv.SetGrid(1)
+    # Reduce white space for shorter AN labels:
+    canv.SetLeftMargin(0.15)
+    canv.SetBottomMargin(0.15)
+    
     m.SetContour(10000)
+    m.SetMarkerSize(1.8)
     m.Draw("colz text")
 
     era_lumi = ""
@@ -305,17 +375,17 @@ if __name__ == "__main__":
     tex.SetTextFont(43)
     tex.SetTextSize(25)
     tex.SetTextFont(43)
-    tex.DrawLatex(0.30, 0.955, "CMS")
+    tex.DrawLatex(0.15, 0.955, dm_str)
     tex.DrawLatex(0.65, 0.955, era_lumi+" fb^{-1} (13 TeV)")
     tex.SetTextFont(53)
-    tex.DrawLatex(0.40, 0.955, "Internal")
+    # tex.DrawLatex(0.40, 0.955, "Internal")
     for i in range(num_pois):
         texlabel = ROOT.TLatex()
         texlabel.SetTextAngle(30)
         texlabel.SetTextFont(42)
         texlabel.SetTextAlign(32)
         texlabel.SetTextSize(0.02)
-        texlabel.DrawLatex(i+0.6,-0.19,label_dict[pois[i]])
+        texlabel.DrawLatex(i+0.6,-0.19,AN_label_dict[pois[i]])
 
 
     lineh = ROOT.TLine(0.0,7.0,13.0,7.0)
@@ -328,7 +398,7 @@ if __name__ == "__main__":
     canv.Update()
 
     canv.SaveAs(f"{era}_{category}_{tag}_POIS_correlations_ID_ES.pdf")
-    canv.SaveAs(f"{era}_{category}_{tag}_POIS_correlations_ID_ES.png")
+    # canv.SaveAs(f"{era}_{category}_{tag}_POIS_correlations_ID_ES.png")
     
     # Extract the upper off-diagonal elements.
     wp = tag.split("_")[0]

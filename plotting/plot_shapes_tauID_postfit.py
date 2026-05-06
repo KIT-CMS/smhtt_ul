@@ -181,12 +181,22 @@ def main(args):
         "100": "Control Region"
     }
     category_dict_for_plot = {
-        "7": "#tau_{h}#rightarrow#pi^{#pm}#nu_{#tau}",
-        "8": "#pi^{#pm}#pi^{0}#nu_{#tau}",
-        "9": "DM10_11",
-        "10": "DM10",
-        "11": "DM11",
-        "100": "CR"
+        "7": "DM 0",
+        "8": "DM 1",
+        "9": "DM 10+11",
+        "10": "DM 10",
+        "11": "DM 11",
+        "12": "DM 0 (PT20 to 40)",
+        "13": "DM 1 (PT20 to 40)",
+        "14": "DM 10+11 (PT20 to 40)",
+        "15": "DM 10 (PT20 to 40)",
+        "16": "DM 11 (PT20 to 40)",
+        "17": "DM 0 (PT40 to 200)",
+        "18": "DM 1 (PT40 to 200)",
+        "19": "DM 10+11 (PT40 to 200)",
+        "20": "DM 10 (PT40 to 200)",
+        "21": "DM 11 (PT40 to 200)",
+        "100": "Control Region"
     }
     inv_category_dict = {v: k for k, v in category_dict.items()}
     
@@ -200,6 +210,12 @@ def main(args):
 
     split_dict = {c: split_value for c in ["et", "mt", "tt", "em", "mm"]}
 
+    AN_dict ={
+    "jetFData": ["QCD"],
+    "jetFMC": ["VVJ", "TTJ", "ZJ", "W"],
+    "lepF": ["VVL", "TTL", "ZL"]
+    }
+    
     bkg_processes = ["VVL", "TTL", "ZL", "jetFakes", "EMB"]
     if not args.fake_factor and args.embedding:
         bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", "EMB"]
@@ -269,11 +285,11 @@ def main(args):
         legend_bkg_processes = copy.deepcopy(bkg_processes)
         legend_bkg_processes.reverse()
         # create plot
-        width = 700
+        width = 800
         if args.linear:
-            plot = dd.Plot([0.3, [0.3, 0.28]], "ModTDR", r=0.04, l=0.14, width=width)
+            plot = dd.Plot([0.3, [0.3, 0.28]], "ModTDR", r=0.04, l=0.18, width=width)
         else:
-            plot = dd.Plot([0.5, [0.3, 0.28]], "ModTDR", r=0.04, l=0.14, width=width)
+            plot = dd.Plot([0.5, [0.3, 0.28]], "ModTDR", r=0.04, l=0.18, width=width)
 
         # get background histograms
         for process in bkg_processes:
@@ -281,14 +297,30 @@ def main(args):
                 rootfile.get(era, channel, category, process), process, "bkg"
             )
             if "EMB_" not in process:
-                plot.setGraphStyle(
-                    process, "hist", fillcolor=styles.color_dict[process]
-                )
+                if process in AN_dict["jetFData"]:
+                    plot.setGraphStyle(
+                    process, "hist", fillcolor=styles.color_dict["QCD"])
+
+                elif process in AN_dict["jetFMC"]:
+                    plot.setGraphStyle(
+                    process, "hist", fillcolor=styles.color_dict["jetFakesQCD"])
+                elif process in AN_dict["lepF"]:
+                    plot.setGraphStyle(
+                    process, "hist", fillcolor=styles.color_dict["ZL"])
+                else:
+                    plot.setGraphStyle(
+                        process, "hist", fillcolor=styles.color_dict[process]
+                    )
             else:
                 if "EMB_" in process:
-                    plot.setGraphStyle(
-                        process, "hist", fillcolor=styles.color_dict["EMB"]
-                    )
+                    if channel == "mm":
+                        plot.setGraphStyle(
+                            process, "hist", fillcolor=styles.color_dict["MUEMB"]
+                        )
+                    else:
+                        plot.setGraphStyle(
+                            process, "hist", fillcolor=styles.color_dict["EMB"]
+                        )
                 
                 else:
                     print(f""" \n Something went wrong in creating hist and style for process: {process} \n""")
@@ -298,22 +330,30 @@ def main(args):
         
         data_obs = rootfile.get(era, channel, category, "data_obs")
         plot.add_hist(data_obs, "data_obs")
-
-        total_bkg = rootfile.get(era, channel, category, "total_background")
+        # Total bkg and sig have different naming in COMBINE!!! Other name is total_background or total_signal !!!
+        # Check that if Ratio plot is not working!
+        total_bkg = rootfile.get(era, channel, category, "TotalBkg")
         plot.add_hist(total_bkg, "total_bkg")
         if channel != "mm":
-            total_sig = rootfile.get(era, channel, category, "total_signal")
+            total_sig = rootfile.get(era, channel, category, "TotalSig") 
             plot.add_hist(total_sig, "total_sig")
-
+        # breakpoint()
         model_total = plot.subplot(2).get_hist("total_bkg")
         if channel != "mm":
             model_total.Add(plot.subplot(2).get_hist("total_sig"))
         plot.add_hist(model_total, "model_total")
         plot.subplot(0).setGraphStyle("data_obs", "e0")
+        
+        
+        # print("total_bkg bins:", [plot.subplot(2).get_hist("total_bkg").GetBinContent(i) for i in range(1, model_total.GetNbinsX()+1)])
+        # if channel != "mm":
+            # print("total_sig bins:", [plot.subplot(2).get_hist("total_sig").GetBinContent(i) for i in range(1, model_total.GetNbinsX()+1)])
+        
         try:
             n_bins = model_total.GetNbinsX()
             errors = [model_total.GetBinError(i) for i in range(1, n_bins + 1)]
             if any([math.isnan(i) for i in errors]):
+                print("\n NAN in uncertainties!!! \n")
                 raise ValueError("Postfit uncertainties contain NaN values.")
             plot.setGraphStyle(
             "model_total",
@@ -327,6 +367,9 @@ def main(args):
             logger.warning("Postfit uncertainties appear to be faulty; skipping error band plotting.")
             plot.setGraphStyle("model_total", "hist")
         
+        # print("model_total bins:", [model_total.GetBinContent(i) for i in range(1, model_total.GetNbinsX()+1)])
+        # print("data_obs bins:", [data_obs.GetBinContent(i) for i in range(1, data_obs.GetNbinsX()+1)])
+        
         plot.subplot(2).normalize(
             [
                 "model_total",
@@ -334,9 +377,12 @@ def main(args):
             ],
             "model_total",
         )
-
+        # plot.subplot(2).get_hist("data_obs").Integral()
         # stack background processes
         plot.create_stack(bkg_processes, "stack")
+        # ratio_hist = plot.subplot(2).get_hist("data_obs")
+        # print("ratio bins:", [ratio_hist.GetBinContent(i) for i in range(1, ratio_hist.GetNbinsX()+1)])
+        # print("ratio errors:", [ratio_hist.GetBinError(i) for i in range(1, ratio_hist.GetNbinsX()+1)])
 
         # normalize stacks by bin-width
         # breakpoint()
@@ -361,15 +407,19 @@ def main(args):
             plot.subplot(1).setYlabel(
                 ""
             )  # otherwise number labels are not drawn on axis
-        plot.subplot(0).setYlabel("N_{events}")
+        if args.normalize_by_bin_width:
+            plot.subplot(0).setYlabel("#frac{d N_{events}}{d m_{vis}} #left[GeV^{-1}#right]")
+        else:
+            plot.subplot(0).setYlabel("N_{events}")
+            # plot.subplot(0).setYlabel("#frac{d N_{events}}{d m_{vis}} #left[GeV^{-1}#right]")
         plot.subplot(2).setXlabel("m_{vis} [GeV]")
-        plot.subplot(2).setYlabel("Ratio")
+        plot.subplot(2).setYlabel("")
         plot.subplot(2).setGrid()
         # plot.scaleXLabelSize(0.8)
         # plot.scaleYTitleSize(0.8)
-        plot.scaleYLabelSize(0.8)
+        plot.scaleYLabelSize(0.7)
+        plot.scaleYTitleOffset(0.8)
         # plot.scaleXLabelOffset(2.0)
-        plot.scaleYTitleOffset(1.1)
         plot.subplot(2).setNYdivisions(3, 5) # what does it do ???
         plot.subplot(2).setNXdivisions(5, 3)
         # if not channel == "tt" and category in ["11", "12", "13", "14", "15", "16"]:
@@ -394,9 +444,13 @@ def main(args):
         plot.subplot(2).Draw(procs_to_draw_2)
         # create legends
         for i in range(2):
+            jetFData = False
+            jetFMC = False
+            lepF = False
+            emb = False
             plot.add_legend(width=0.6, height=0.15)
             for process in legend_bkg_processes:
-                try:
+                if channel == "mm":
                     plot.legend(i).add_entry(
                         0,
                         process,
@@ -405,10 +459,32 @@ def main(args):
                         ],
                         "f",
                     )
-                except BaseException:
-                    pass
-            if channel != "mm":
-                plot.legend(i).add_entry(0, legend_bkg_processes[0], f"#tau  {legend_bkg_processes[0]}" , "f")
+                elif "EMB_" in process:
+                    if not emb:
+                        plot.legend(i).add_entry(
+                            0, process, f"#tau embedded", 'f')
+                        emb = True
+                else:
+                    if process in AN_dict["jetFData"] and not jetFData:
+                        plot.legend(i).add_entry(
+                            0, process, styles.legend_label_dict["jetFakesData"], 'f')
+                        jetFData = True
+                    elif process in AN_dict["jetFMC"] and not jetFMC:
+                        plot.legend(i).add_entry(
+                            0, process, styles.legend_label_dict["jetFakesMC"], 'f')
+                        jetFMC = True
+                    elif process in AN_dict["lepF"] and not lepF:
+                        plot.legend(i).add_entry(
+                            0, process, styles.legend_label_dict["lepFakes"], 'f')
+                        lepF = True
+                    else:
+                        if process in AN_dict["lepF"] + AN_dict["jetFMC"] + AN_dict["jetFData"]:
+                            continue
+                        else:
+                            print(f"Legend entry for process:{process} had a problem.")
+                            breakpoint()
+            # if channel != "mm":
+            #     plot.legend(i).add_entry(0, legend_bkg_processes[0], f"#tau embedded" , "f")
             # plot.legend(i).add_entry(0, "total_bkg", "Bkg. unc.", "f")
             plot.legend(i).add_entry(0, "model_total", "Bkg. unc.", "f")
             plot.legend(i).add_entry(0, "data_obs", "Data", "PE")
@@ -448,7 +524,7 @@ def main(args):
         # plot.legend(3).Draw()
 
         # draw additional labels
-        plot.DrawCMS(position="outside")
+        # plot.DrawCMS(position="outside")
         if "2016postVFP" in args.era:
             plot.DrawLumi("16.8 fb^{-1} (2016UL postVFP, 13 TeV)")
         elif "2016preVFP" in args.era:
@@ -465,39 +541,48 @@ def main(args):
         else:
             logger.critical("Era {} is not implemented.".format(args.era))
             raise Exception
-
+        #### This drew inside the plot, bad for reading. Could be used for other stuff.
+        # plot.DrawChannelCategoryLabel(
+        #     "%s, %s" % (channel_dict[channel], category_dict[category]),
+        #     begin_left=None,
+        #     textsize=0.032,
+        #     print_inside=True,
+        #     legend_outside=False,
+        # )
+        posChannelCategoryLabelLeft = None
         plot.DrawChannelCategoryLabel(
-            "%s, %s" % (channel_dict[channel], category_dict[category]),
-            begin_left=None,
-            textsize=0.032,
-            print_inside=True,
-            legend_outside=False,
-        )
+            "%s, %s" % (channel_dict[channel], category_dict_for_plot[category]),
+            begin_left=posChannelCategoryLabelLeft)
 
         # save plot
         postfix = "prefit" if args.prefit else "postfit"
+        # plot.save(
+        #     "%s/%s_%s_%s_%s.%s"
+        #     % (
+        #         args.outputfolder,
+        #         args.era,
+        #         channel,
+        #         args.gof_variable if args.gof_variable is not None else category,
+        #         postfix,
+        #         "png",
+        #     )
+        # )
+        s_or_b = ""
+        if args.input.endswith("-b.root"):
+            s_or_b = "_b"
         plot.save(
-            "%s/%s_%s_%s_%s.%s"
+            "%s/%s_%s_%s_%s%s.%s"
             % (
                 args.outputfolder,
                 args.era,
                 channel,
                 args.gof_variable if args.gof_variable is not None else category,
                 postfix,
-                "png",
-            )
-        )
-        plot.save(
-            "%s/%s_%s_%s_%s.%s"
-            % (
-                args.outputfolder,
-                args.era,
-                channel,
-                args.gof_variable if args.gof_variable is not None else category,
-                postfix,
+                s_or_b,
                 "pdf",
             )
         )
+        # plot.save(f"output/{postfix}_{channel}_{category}.png")
         # work around to have clean up seg faults only at the end of the
         # script
         plots.append(plot)

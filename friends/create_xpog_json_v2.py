@@ -11,6 +11,7 @@ from typing import Union
 ROOT.PyConfig.IgnoreCommandLineOptions = True  # disable ROOT internal argument parser
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 class CorrectionSet(object):
     def __init__(self, name):
@@ -384,7 +385,7 @@ class TauID(Correction):
         self.correctionset = {
             "version": 0,
             "name": self.name,
-            "description": "dm-pt-dependent tau ID scale factor for tau embedded samples",
+            "description": "dm-pt-dependent tau ES scale factor for tau embedded samples",
             "inputs": [
                 { "name": "pt",
                 "type": "real",
@@ -521,7 +522,7 @@ class TauID(Correction):
         self.correctionset = {
             "version": 0,
             "name": self.name,
-            "description": "dm-dependent tau ID scale factor for tau embedded samples",
+            "description": "dm-dependent tau ES scale factor for tau embedded samples",
             "inputs": [
                 { "name": "pt",
                 "type": "real",
@@ -892,6 +893,7 @@ if "DM1011" in binnames:
 data_dict, data_dict_ES = load_fitresults_from_files(fitfiles, binnames)
 
 correctionset = CorrectionSet("Tau_ID_ES_SF")
+correctionset.description = f"Correction for tau embedding events; embedded tau identification efficiency and embedded tau energy scale factors ( DeepTau2017v2p1VSjet, tau_energy_scale, tau_energy_scale_dm_binned). For more info, please visit https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauEmbeddingSamplesUL#TauID_and_TauES_correction and https://tau-wiki.docs.cern.ch/ (This file was created on {datetime.datetime.now().strftime('%d.%m.%Y')})."
 
 ### ID corrections:
 # pt
@@ -953,15 +955,20 @@ correctionset.add_correction(correction_dm_es)
 
 # Adds dm as second correction:
 # correctionset.add_correction(correction_dm)
+# correctionset.write_json(
+#     "Tau_ID_ES_"
+#     + str(args.era)
+#     + "_UL_"
+#     + str(args.channel)
+#     + "_"
+#     + str(args.nTuple_tag)
+#     + ".json"
+# )
 correctionset.write_json(
-    "Tau_ID_ES_"
-    + str(args.era)
-    + "_UL_"
-    + str(args.channel)
-    + "_"
-    + str(args.nTuple_tag)
-    + ".json"
+    f"tau_id_es_embedding{args.era}UL.json"
 )
+
+
 ###########################
 #### Plotting the fits ####
 
@@ -1001,7 +1008,7 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
         data[wp][wp_VSe] = new_keys       
         
     
-    x_labels = ['Incl.', 'PT20_40', 'PT40_200']
+    x_labels = ['Incl.', 'PT20 to 40', 'PT40 to 200']
     x_list=[0.25, 0.5, 0.75]
     fig, axes = plt.subplots(nrows=len(dm_bins), ncols=1, sharex=True, figsize=(8, 10))
     if len(dm_bins) == 1:
@@ -1072,7 +1079,7 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
         ax.axhline(y=1 if id_es == "ID" else 0, color='black', linestyle='--',
                    label="Nominal")
         # ax.set_title(f"{dm} bins")
-        ax.set_ylabel(f"{dm}")
+        ax.set_ylabel(f"{dm}".replace("DM", "DM ").replace("1011", "10+11"))
         
         ax.grid(True)
     axes[0].legend(loc='upper right', fontsize='small')
@@ -1092,7 +1099,7 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
     plt.savefig(f"Tau{id_es}_{era}_UL_{channel}_{wp}vsJets_{wp_VSe}vsEle_{nTuple_tag}.png")
     plt.close(fig)
 
-for wp in wps:
-    for wp_VSe in wp_VSes:
-        summary_SFs(data_dict, wp, wp_VSe, id_es="ID")
-        summary_SFs(data_dict_ES, wp, wp_VSe, id_es="ES")
+# for wp in wps:
+#     for wp_VSe in wp_VSes:
+#         summary_SFs(data_dict, wp, wp_VSe, id_es="ID")
+#         summary_SFs(data_dict_ES, wp, wp_VSe, id_es="ES")

@@ -122,3 +122,12 @@ if [[ $MODE == "CONDOR" ]]; then
         echo "[INFO] Jobs submitted"
     done
 fi
+
+if [[ $MODE == "CONDOR_REMNANTS" ]]; then
+    CHANNEL=('mt')
+    source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
+    source utils/setup_ul_samples.sh ${NTUPLETAG} ${ERA}
+    source utils/setup_root.sh
+    echo ${CONDOR_OUTPUT}
+    python submit/single_graph_job.py --input ${CONDOR_OUTPUT}/analysis_unit_graphs-${ERA}-${CHANNEL}-${TAG}.pkl --graph-number 80 --num-threads 4
+fi

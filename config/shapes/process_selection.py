@@ -70,7 +70,7 @@ def prefiring_weight(era, **kwargs):
 def MC_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", vs_mu_wp="Tight", **kwargs):
     wps_dict = [
 
-        "VVTight",
+        "VVVTight",
         "VVTight",
         "Tight",
         "Medium",
@@ -127,12 +127,15 @@ def MC_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoos
         if era == "2016preVFP" or era == "2016postVFP":
             trgweight = ("trg_wgt_single_mu22", "trgweight")
         elif era == "2017":
-            trgweight = ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight")
-        else:
             trgweight = (
-                "((pt_1>=25 && pt_1<28)* trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
-                "trgweight",
-            )
+                        "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
+                        "trgweight",
+                    )
+        elif era == "2018":
+            trgweight = (
+                        "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
+                        "trgweight",
+                    )
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -156,9 +159,15 @@ def MC_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoos
         vsmu_weight = None
         vsele_weight = None
         if era == "2017":
-            trgweight = ("trg_wgt_single_mu27", "trgweight")
+            trgweight = (
+                        "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
+                        "trgweight",
+                    )
         elif era == "2018":
-            trgweight = ("1", "trgweight")
+            trgweight = (
+                        "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
+                        "trgweight",
+                    )
         elif era == "2016postVFP" or era == "2016preVFP":
             trgweight = ("trg_wgt_single_mu22", "trgweight")
     elif channel == "ee":
@@ -509,7 +518,10 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp="Tight", v
                     ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
                     ("iso_wgt_mu_1", "isoweight"),
                     ("id_wgt_mu_1", "idweight"),
-                    ("((pt_1>28)* trg_wgt_single_mu27)", "trgweight"),
+                    (
+                        "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
+                        "trgweight",
+                    ),
                 ]
             )
             if apply_wps:
@@ -530,7 +542,6 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp="Tight", v
                         "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
                         "trgweight",
                     ),
-                    ("(trg_wgt_single_mu24ormu27)", "trgweight"),
                 ]
             )
             if apply_wps:
@@ -548,10 +559,6 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp="Tight", v
                     ("iso_wgt_mu_1", "isoweight"),
                     ("id_wgt_mu_1", "idweight"),
                     ("trg_wgt_single_mu22", "trgweight"),
-                    (
-                        "((pt_1>=23) * trg_wgt_single_mu22)",
-                        "trgweight",
-                    ),
                 ]
             )
             if apply_wps:
@@ -652,7 +659,10 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp="Tight", v
                     ("(gen_match_1==2 && gen_match_2==2)", "emb_gen_match"),
                     ("iso_wgt_mu_1 * iso_wgt_mu_2", "isoweight"),
                     ("id_wgt_mu_1 * id_wgt_mu_2", "idweight"),
-                    ("trg_wgt_single_mu27", "trgweight"),
+                    (
+                        "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
+                        "trgweight",
+                    ),
                     # triggerweight_emb(channel, era, vs_jet_wp, vs_ele_wp),
                 ]
             )
