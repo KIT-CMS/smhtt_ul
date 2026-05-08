@@ -366,10 +366,16 @@ def build_class_scheme(raw_classes, scheme, channel="mt"):
         if kind in ("ggh_bin", "vbf_bin"):
             target = name  # keep individual bin
         elif kind in ("ggh_inclusive", "vbf_inclusive"):
-            # inclusive label overlaps with bins — skip as its own class;
-            # events with only the inclusive flag land in their production-mode bin
-            # via coarse; for fine, treat them the same as their production mode
-            target = name  # keep as separate fine class (events not in any bin)
+            # In the fine scheme the inclusive flag is set on EVERY ggH/VBF event,
+            # including those that also carry a specific STXS bin flag.
+            # Keeping it as a separate class causes remap_labels to set both the
+            # inclusive class and the bin class to 1.0, and after normalisation
+            # np.argmax always picks the inclusive class (lower index), leaving all
+            # individual STXS bins permanently unpopulated in training.
+            # Solution: skip the inclusive label here; individual bin labels fully
+            # define the fine classification.  ggH/VBF events not assigned to any
+            # bin become unlabeled (Y-row sums to 0) and are logged as a warning.
+            continue
         elif kind == "bkg_dyjets_tt":
             target = "is_dyjets"          # Z→ττ
         elif kind == "bkg_dyjets_ll":
@@ -743,69 +749,13 @@ def main():
     n_no_label = (row_sums < 0.5).sum()  # after normalisation, unlabelled rows sum to ~0
     n_multi_label = 0  # remapped labels are normalised, so check argmax consistency
     if n_no_label > 0:
-        logger.warning(f"{n_no_label} training events have NO label (all zeros) — they contribute to loss but teach nothing")
+        logger.warning(f"{n_no_label} training events have NO label (all zeros) — they are ignored by the loss but pollute balanced-batch class counts (typically inclusive ggH/VBF events not assigned to any STXS bin)")
 
     W_train = extract_weights(df_train)
     W_val = extract_weights(df_val)
 
-    # ── Identify data events and their selection region ──────────────────
-    # Anti-iso data (is_data=1, anti-iso region): jetFakes proxy — STAYS in training.
-    # Iso data   (is_data=1, nominal/iso region): signal-region data — excluded from
-    #   training and val-loss monitoring; scored by model.predict for data overlay in
-    #   background score plots (requires `is_data: nominal` in setup.yaml selections).
-    # Keys.CUT ("cut") is a tuple element distinct from Keys.ANTI_ISO_CUT ("anti_iso_cut")
-    # so `Keys.CUT in col_tuple` correctly identifies only iso-cut columns.
-    _data_col = _col(Keys.NOMINAL, Keys.VARIABLES, "is_data")
-    _is_data_tr = (
-        df_train[_data_col].values.astype(bool)
-        if _data_col in df_train.columns
-        else np.zeros(len(df_train), dtype=bool)
-    )
-    _is_data_va = (
-        df_val[_data_col].values.astype(bool)
-        if _data_col in df_val.columns
-        else np.zeros(len(df_val), dtype=bool)
-    )
-    _in_iso_tr = np.zeros(len(df_train), dtype=bool)
-    for c in [c for c in df_train.columns if Keys.CUT in c]:
-        _in_iso_tr |= df_train[c].values.astype(bool)
-    _in_iso_va = np.zeros(len(df_val), dtype=bool)
-    for c in [c for c in df_val.columns if Keys.CUT in c]:
-        _in_iso_va |= df_val[c].values.astype(bool)
-
-    is_iso_data_train = _is_data_tr & _in_iso_tr
-    is_iso_data_val   = _is_data_va & _in_iso_va
-    mc_val            = ~_is_data_va   # MC-only mask for val loss and diagnostic plots
-
-    logger.info(
-        f"Training fold: {int(is_iso_data_train.sum())} iso data excluded; "
-        f"{int(_is_data_tr.sum()) - int(is_iso_data_train.sum())} anti-iso data kept (jetFakes); "
-        f"{int((~_is_data_tr).sum())} MC events"
-    )
-    logger.info(
-        f"Validation fold: {int(is_iso_data_val.sum())} iso data (plot overlay); "
-        f"{int(_is_data_va.sum()) - int(is_iso_data_val.sum())} anti-iso data; "
-        f"{int((~_is_data_va).sum())} MC events"
-    )
-    del _is_data_tr, _in_iso_tr, _in_iso_va
-
     # Free DataFrames — all needed arrays have been extracted
     del df_train, df_val
-
-    # ── Exclude iso-region data from training ─────────────────────────────
-    # Anti-iso data (jetFakes proxy) remains in X_train.
-    # X_val / E_val kept intact so model.predict can score iso data for plots.
-    if is_iso_data_train.sum() > 0:
-        logger.info(f"Removing {int(is_iso_data_train.sum())} iso data events from training")
-        keep = ~is_iso_data_train
-        X_train = X_train[keep]
-        E_train = E_train[keep]
-        Y_train = Y_train[keep]
-        W_train = W_train[keep]
-        if hierarchical:
-            Y_train_coarse = Y_train_coarse[keep]
-        del keep
-    del is_iso_data_train
 
     # ── Weight diagnostics and fixes ─────────────────────────────────────
     n_neg_w = (W_train < 0).sum()
@@ -921,9 +871,6 @@ def main():
         else:
             logger.warning(f"  {era_name}: NO training events for this era!")
 
-    # mc_val (MC-only, no data) used for val loss and diagnostic plots.
-    # is_iso_data_val (iso/signal-region data) used as overlay in background score plots.
-
     # ── Preprocessing ────────────────────────────────────────────────────
     if args.preprocessing == "standard_scaler":
         scaler = preprocessing.StandardScaler().fit(X_train)
@@ -1022,22 +969,18 @@ def main():
     # TF validation dataset: MC-only (iso and anti-iso data both excluded from val loss
     # so early-stopping monitors a clean MC metric).  X_val / E_val left intact.
     val_batch_size = args.batch_size * 4
-    _X_mc = X_val[mc_val]
-    _E_mc = E_val[mc_val]
-    _Y_mc = Y_val[mc_val]
-    _W_mc = W_val[mc_val]
-    _val_mc_inputs = {"physics_input": _X_mc, "era_input": _E_mc}
+    _val_inputs = {"physics_input": X_val, "era_input": E_val}
     if hierarchical:
         val_dataset = tf.data.Dataset.from_tensor_slices((
-            _val_mc_inputs,
-            {"coarse": Y_val_coarse[mc_val], "fine": _Y_mc},
-            {"coarse": _W_mc, "fine": _W_mc},
+            _val_inputs,
+            {"coarse": Y_val_coarse, "fine": Y_val},
+            {"coarse": W_val, "fine": W_val},
         )).batch(val_batch_size)
     else:
         val_dataset = tf.data.Dataset.from_tensor_slices(
-            (_val_mc_inputs, _Y_mc, _W_mc)
+            (_val_inputs, Y_val, W_val)
         ).batch(val_batch_size)
-    del _X_mc, _E_mc, _Y_mc, _W_mc, _val_mc_inputs
+    del _val_inputs
 
     if args.balanced_batches:
         n_per_class = max(1, args.batch_size // n_classes)
@@ -1166,7 +1109,7 @@ def main():
         )
         # Desaturate by blending with white (alpha=0.6)
         colors = [tuple(c * 0.6 + 0.4 for c in rgba[:3]) + (1.0,) for rgba in raw_colors]
-        ncols = min(4, n_cls)
+        ncols = 3
         nrows = int(np.ceil(n_cls / ncols))
         fig, axes = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4 * nrows))
         axes = np.atleast_2d(axes)
@@ -1239,35 +1182,32 @@ def main():
                   f"({args.class_scheme})")
 
     # ── Confusion matrices on validation set ─────────────────────────────
-    # Predict on ALL validation events (MC + data) so data events get a score
-    # for the background plots.  Confusion matrix and score distributions
-    # use MC-only events (mc_val mask).
     preds = model.predict({"physics_input": X_val, "era_input": E_val}, batch_size=8192)
     if hierarchical:
         pred_coarse = preds["coarse"]
         pred_fine   = preds["fine"]
         _plot_confusion(
-            np.argmax(Y_val_coarse[mc_val], axis=1), np.argmax(pred_coarse[mc_val], axis=1),
+            np.argmax(Y_val_coarse, axis=1), np.argmax(pred_coarse, axis=1),
             coarse_names, len(coarse_names), "(coarse)", "_coarse",
         )
         _plot_confusion(
-            np.argmax(Y_val[mc_val], axis=1), np.argmax(pred_fine[mc_val], axis=1),
+            np.argmax(Y_val, axis=1), np.argmax(pred_fine, axis=1),
             class_names, n_classes, "(fine)", "_fine",
         )
     else:
         _plot_confusion(
-            np.argmax(Y_val[mc_val], axis=1), np.argmax(preds[mc_val], axis=1),
+            np.argmax(Y_val, axis=1), np.argmax(preds, axis=1),
             class_names, n_classes, f"({args.class_scheme})",
         )
 
-    # ── Score distributions on validation set (MC only) ──────────────────
+    # ── Score distributions on validation set ────────────────────────────
     if hierarchical:
-        _plot_scores(pred_coarse[mc_val], Y_val_coarse[mc_val], coarse_names, len(coarse_names),
+        _plot_scores(pred_coarse, Y_val_coarse, coarse_names, len(coarse_names),
                      "(coarse)", "_coarse")
-        _plot_scores(pred_fine[mc_val], Y_val[mc_val], class_names, n_classes,
+        _plot_scores(pred_fine, Y_val, class_names, n_classes,
                      "(fine)", "_fine")
     else:
-        _plot_scores(preds[mc_val], Y_val[mc_val], class_names, n_classes,
+        _plot_scores(preds, Y_val, class_names, n_classes,
                      f"({args.class_scheme})")
 
     # ── Save validation arrays for Dumbledraw background score plot ──────
@@ -1281,7 +1221,6 @@ def main():
         scores_val        = pred_fine.astype(np.float32),
         true_class_val    = np.argmax(Y_val, axis=1).astype(np.int32),
         weights_val       = W_val.astype(np.float32),
-        is_data_val       = is_iso_data_val.astype(np.float32),  # iso-region data for plot overlay
         class_names       = np.array(class_names, dtype=object),
         bkg_class_indices = np.array(bkg_cls_idx, dtype=np.int32),
         bkg_class_names   = np.array(bkg_cls_names, dtype=object),

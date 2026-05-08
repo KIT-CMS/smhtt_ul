@@ -415,7 +415,8 @@ def main(info):
                 plot.legend(i).add_entry(
                 0,
                 process,
-                styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("_NLO","")],
+                # styles.legend_label_dict[process.replace("TTL", "TT").replace("VVL", "VV").replace("_NLO","")],
+                styles.legend_label_dict[process],
                 'f'
                 )
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
@@ -485,6 +486,7 @@ def main(info):
         begin_left=posChannelCategoryLabelLeft)
 
     print("Trying to save the created plot")
+    # _path = os.path.join(f"/work/sgiappic/plots/{args.era}/{args.tag}", channel)
     _path = os.path.join(f"/web/sgiappic/public_html/CMS_HTT/{args.era}/{args.tag}", channel)
     if not os.path.exists(_path):
         os.makedirs(_path, exist_ok=True)

@@ -327,6 +327,45 @@ def DY_NLO_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     return Selection(name="DYNLO", weights=DY_process_weights)
 
 
+def ttbar_em_weight(channel, era, **kwargs):
+    """
+    Applies a data/MC correction for ttbar events based on the em channel measurement
+    in the m_vis > 100 region. The ratio is computed from the em channel and applied
+    uniformly to all ttbar events across all channels and regions.
+    
+    This weight should be used for ttbar process selection to account for
+    mismodeling of ttbar.
+    
+    Calculation:
+    - TT includes: TTT + TTL (excludes TTJ which is in fake factors)
+    - Background: DY + W + VV + QCD (excludes all Higgs processes)
+    - Weight = (data - background) / TT
+    """
+    # Get the data/MC ratio from em channel for m_vis > 100
+    # Calculated as: (data - all_backgrounds) / TT_MC in em channel
+    
+    if era == "2022preEE":
+        ratio_em = "0.850809"  # ± 0.006696
+    elif era == "2022postEE":
+        ratio_em = "0.927774"  # ± 0.003925
+    elif era == "2023preBPix":
+        ratio_em = "0.967221"  # ± 0.004604
+    elif era == "2023postBPix":
+        ratio_em = "0.898871"  # ± 0.006258
+    elif era == "2024":
+        ratio_em = "0.926025"  # ± 0.002382
+    elif era == "2025":
+        ratio_em = "0.928433"  # ± 0.002396
+    else:
+        ratio_em = "1.0"
+    
+    # Apply the correction uniformly to all ttbar events in all regions
+    # This works for all channels (et, mt, tt, em)
+    weight_expr = ratio_em
+    
+    return (weight_expr, "ttbar_em_weight")
+
+
 def TT_process_selection(channel, era, vs_jet_wp, vs_ele_wp, **kwargs):
     TT_process_weights = MC_base_process_selection(channel, era, vs_jet_wp, vs_ele_wp).weights
     TT_process_weights.extend(
@@ -812,7 +851,7 @@ def __get_ZJ_cut(channel, **kwargs):
         return ""
 
 
-def TTT_process_selection(channel, **kwargs):
+def TTT_process_selection(channel, era, **kwargs):
     tt_cut = ""
     if "mt" in channel:
         tt_cut = "(gen_match_1==4 && gen_match_2==5)"
@@ -826,10 +865,11 @@ def TTT_process_selection(channel, **kwargs):
         tt_cut = "gen_match_1==4 && gen_match_2==4"
     elif "ee" in channel:
         tt_cut = "gen_match_1==3 && gen_match_2==3"
-    return Selection(name="TTT", cuts=[(f"({tt_cut})", "ttt_cut")])
+    weights = [ttbar_em_weight(channel, era)]
+    return Selection(name="TTT", cuts=[(f"({tt_cut})", "ttt_cut")], weights=weights)
 
 
-def TTL_process_selection(channel, **kwargs):
+def TTL_process_selection(channel, era, **kwargs):
     emb_veto = ""
     ff_veto = ""
     if "mt" in channel:
@@ -850,9 +890,11 @@ def TTL_process_selection(channel, **kwargs):
     elif "ee" in channel:
         emb_veto = "!(gen_match_1==3 && gen_match_2==3)"
         ff_veto = "(1.0)"
+    weights = [ttbar_em_weight(channel, era)]
     return Selection(
         name="TTL",
         cuts=[(f"({emb_veto})", "tt_emb_veto"), (f"({ff_veto})", "ff_veto")],
+        weights=weights,
     )
 
 

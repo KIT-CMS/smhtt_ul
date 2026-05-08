@@ -7,6 +7,7 @@ PLOTVERSION="all"
 FF_TYPE="none"
 VARIABLES=""
 NANOAODVERSION="v12"
+SIGNAL_MODE="fine"
 DEFAULT_VARIABLES_LIST=(
   pt_1 eta_1 phi_1 tau_decaymode_1 mt_1 iso_1 mass_1
   pt_2 eta_2 phi_2 tau_decaymode_2 mt_2 iso_2 mass_2
@@ -20,7 +21,6 @@ DEFAULT_VARIABLES_LIST=(
   nbtag njets
   q_1 pzetamissvis jet_hemisphere
   deltaR_ditaupair 
-  met_uncorrected
   deltaR_jj
   deltaEta_jj
   deltaR_1j1
@@ -50,6 +50,7 @@ options=(
   "p:plotversion:"
   "v:variables:"
   "N:nanoaodversion:"
+  "M:signal_mode:"
 )
 
 short_opts=""
@@ -99,6 +100,8 @@ while true; do
     VARIABLES="${2}"; shift 2; ;;
   -N | --nanoaodversion)
     NANOAODVERSION="${2}"; shift 2; ;;
+  -M | --signal_mode)
+    SIGNAL_MODE="${2}"; shift 2; ;;
   --)
     shift
     break
@@ -109,9 +112,18 @@ while true; do
   esac
 done
 
-if [ -z "${CHANNEL}" ] || [ -z "${ERA}" ] || [ -z "${NTUPLETAG}" ] || [ -z "${TAG}" ] || [ -z "${MODE}" ]; then
-  echo "Missing required parameters. You must supply --channel, --era, --ntupletag, --tag, and --mode." >&2
-  exit 1
+# if [ -z "${CHANNEL}" ] || [ -z "${ERA}" ] || [ -z "${NTUPLETAG}" ] || [ -z "${TAG}" ] || [ -z "${MODE}" ]; then
+#   echo "Missing required parameters. You must supply --channel, --era, --ntupletag, --tag, and --mode." >&2
+#   exit 1
+# fi
+
+# Set tau discriminator working points based on channel
+if [ "${CHANNEL}" == "et" ]; then
+    VS_JET_WP="Medium"
+    VS_ELE_WP="Tight"
+else
+    VS_JET_WP="Medium"
+    VS_ELE_WP="VVLoose"
 fi
 
 USED_VARIABLES=""
@@ -185,41 +197,16 @@ if [[ $MODE == "SHAPES" ]]; then
     mkdir -p ${shapes_output}
   fi
 
-  if [ "${CHANNEL}" == "mt" ]; then
-    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
-      --directory ${NTUPLES} \
-      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
-      --era ${ERA} --num-processes 10 --num-threads 20 \
-      --optimization-level 1 --control-plots \
-      --control-plot-set ${USED_VARIABLES} \
-      --output-file ${shapes_output} \
-      --validation-tag ${TAG} \
-      --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" --apply-tauid \
-      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}  \
-      --skip-systematic-variations  #--xrootd
-  elif [ "${CHANNEL}" == "et" ]; then
-    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
-      --directory ${NTUPLES} \
-      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
-      --era ${ERA} --num-processes 10 --num-threads 20 \
-      --optimization-level 1 --control-plots \
-      --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
-      --output-file ${shapes_output} \
-      --validation-tag ${TAG} \
-      --vs-jet-wp "Medium" --vs-ele-wp "Tight" --apply-tauid \
-      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} #--xrootd
-  else # tt channel only, the rest do not use the tau discriminator anyway
-    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
-      --directory ${NTUPLES} \
-      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
-      --era ${ERA} --num-processes 10 --num-threads 20 \
-      --optimization-level 1 --control-plots \
-      --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
-      --output-file ${shapes_output} \
-      --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" \
-      --validation-tag ${TAG} --apply-tauid \
-      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} # --xrootd
-  fi
+  nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
+    --directory ${NTUPLES} \
+    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+    --era ${ERA} --num-processes 10 --num-threads 20 \
+    --optimization-level 1 --control-plots \
+    --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
+    --output-file ${shapes_output} \
+    --vs-jet-wp "${VS_JET_WP}" --vs-ele-wp "${VS_ELE_WP}" \
+    --validation-tag ${TAG} --apply-tauid \
+    --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} # --xrootd
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                                                #"
@@ -261,85 +248,81 @@ if [[ $MODE == "PLOT" ]]; then
   fi
 fi
 
-if [[ $MODE == "PRETRAIN" ]]; then
+if [[ $MODE == "TRAIN-SHAPES" ]]; then
     echo "##############################################################################################"
-    echo "#      Producing training set for ${CHANNEL}-${ERA}-${NTUPLETAG}                             #"
+    echo "#      Producing training shapes for ${CHANNEL}-${ERA}-${NTUPLETAG}                          #"
     echo "##############################################################################################"
 
   mkdir -p /ceph/sgiappic/Htt_training/${TAG}
 
-  if [ "${CHANNEL}" == "mt" ]; then
-    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
-      --directory ${NTUPLES} \
-      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
-      --era ${ERA} --num-processes 10 --num-threads 20 \
-      --optimization-level 1 --control-plots \
-      --control-plot-set ${USED_VARIABLES} \
-      --output-file ${shapes_output} \
-      --validation-tag ${TAG} \
-      --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" --apply-tauid \
-      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE}  \
-      --skip-systematic-variations --collect-config-only \
-      --config-output-file /ceph/sgiappic/Htt_training/${TAG}/config.yaml
-  elif [ "${CHANNEL}" == "et" ]; then
-    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
-      --directory ${NTUPLES} \
-      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
-      --era ${ERA} --num-processes 10 --num-threads 20 \
-      --optimization-level 1 --control-plots \
-      --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
-      --output-file ${shapes_output} \
-      --validation-tag ${TAG} \
-      --vs-jet-wp "Medium" --vs-ele-wp "Tight" --apply-tauid \
-      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} \
-      --skip-systematic-variations --collect-config-only \
-      --config-output-file /ceph/sgiappic/Htt_training/${TAG}/config.yaml
-  else # tt channel only, the rest do not use the tau discriminator anyway
-    nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
-      --directory ${NTUPLES} \
-      --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
-      --era ${ERA} --num-processes 10 --num-threads 20 \
-      --optimization-level 1 --control-plots \
-      --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
-      --output-file ${shapes_output} \
-      --vs-jet-wp "Medium" --vs-ele-wp "VVLoose" \
-      --validation-tag ${TAG} --apply-tauid \
-      --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} \
-      --skip-systematic-variations --collect-config-only \
-      --config-output-file /ceph/sgiappic/Htt_training/${TAG}/config.yaml
-  fi
+  nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
+    --directory ${NTUPLES} \
+    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+    --era ${ERA} --num-processes 10 --num-threads 20 \
+    --optimization-level 1 --control-plots \
+    --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
+    --output-file ${shapes_output} \
+    --validation-tag ${TAG} \
+    --vs-jet-wp "${VS_JET_WP}" --vs-ele-wp "${VS_ELE_WP}" --apply-tauid \
+    --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} \
+    --skip-systematic-variations --collect-config-only \
+    --config-output-file /ceph/sgiappic/Htt_training/${TAG}/config.yaml
 
-    nice -n 19 python trainings/adjust_config.py --config /ceph/sgiappic/Htt_training/${TAG}/${ERA}__${CHANNEL}__config.yaml \
-        --modified-config /ceph/sgiappic/Htt_training/${TAG}/${ERA}__${CHANNEL}__mod_config.yaml \
-        --common-setup-config trainings/setup.yaml
+fi
+
+CONFIGS=""
+ERA=(2022preEE 2022postEE 2023preBPix 2023postBPix 2024 2025)
+for era in "${ERA[@]}"; do
+  path="/ceph/sgiappic/Htt_training/${TAG}/${era}__${CHANNEL}__config.yaml"
+  CONFIGS+="${path} "
+done
+CONFIGS="${CONFIGS% }"
+
+if [[ $MODE == "CONFIGS" ]]; then
+    echo "##############################################################################################"
+    echo "#      Write configs and feathers set for ${CHANNEL}-${TAG}                                  #"
+    echo "##############################################################################################"
+
+    nice -n 19 python trainings/adjust_config.py --configs ${CONFIGS} \
+      --modified-config /ceph/sgiappic/Htt_training/${TAG}/${CHANNEL}__mod_config.yaml \
+      --common-setup-config trainings/setup.yaml
 
     nice -n 19  python trainings/create_training_dataset.py \
-      --config /ceph/sgiappic/Htt_training/${TAG}/${ERA}__${CHANNEL}__mod_config.yaml \
-      --base-dataset-directory /ceph/sgiappic/Htt_training/${TAG}/dataset/ \
-      --common-setup-config trainings/setup.yaml --recreate
+        --config /ceph/sgiappic/Htt_training/${TAG}/${CHANNEL}__mod_config.yaml \
+        --base-dataset-directory /ceph/sgiappic/Htt_training/${TAG}/dataset/ \
+        --common-setup-config trainings/setup.yaml --recreate
+
+    #using artur's framework
+
+    # nice -n 19 python trainings/combine_to_cennt_folds.py \
+    #     --folds-dir /ceph/sgiappic/Htt_training/${TAG}/dataset/_folds \
+    #     --output-dir /ceph/sgiappic/Htt_training/cennt_folds/${SIGNAL_MODE}/ \
+    #     --channel ${CHANNEL} \
+    #     --setup-config trainings/setup.yaml --signal-mode ${SIGNAL_MODE}
+
 fi
 
 if [[ $MODE == "TRAIN" ]]; then
     echo "##############################################################################################"
-    echo "#      Train set for ${CHANNEL}-${NTUPLETAG}                                                 #"
+    echo "#      Train set for ${CHANNEL}                                                              #"
     echo "##############################################################################################"
 
-    source /work/sgiappic/MiniForge/etc/profile.d/conda.sh
-    conda activate smhtt-training
+    # source /work/sgiappic/MiniForge/etc/profile.d/conda.sh
+    # conda activate smhtt-training
 
-    nice -n 19 python trainings/train_multiclass_nn.py \
-      --dataset-dir /ceph/sgiappic/Htt_training/${TAG}/dataset/_folds \
-      --setup-config trainings/setup.yaml --channel ${CHANNEL} \
-      --output-dir /ceph/sgiappic/Htt_training/${TAG}/models/ \
-      --fold 0 --epochs 400 --abs-weights \
-      --class-scheme coarse --equalise-class-weights --equalise-era-weights \
-      --layers 512,512,256,128 --learning-rate 1e-3 --dropout 0.4 \
-      --focal-loss --focal-gamma 1.0 \
-      --warmup-epochs 10 --label-smoothing 0.0 \
-      --early-stopping 100 --batch-size 4096 \
-      --gpu 0
+    # will need to also train fold 1 later on
 
-    python trainings/plot_bkg_scores.py \
-    --input /ceph/sgiappic/Htt_training/${TAG}/models/${CHANNEL}/fold0_bkg_scores.npz \
-    --era Run2022-23
+    # nice -n 19 python trainings/train_multiclass_nn.py \
+    #   --dataset-dir /ceph/sgiappic/Htt_training/${TAG}/dataset/_folds \
+    #   --setup-config trainings/setup.yaml --channel ${CHANNEL} \
+    #   --output-dir /ceph/sgiappic/Htt_training/${TAG}/fine/models/ \
+    #   --fold 0 --epochs 200 --abs-weights \
+    #   --class-scheme ${SIGNAL_MODE} --equalise-class-weights --equalise-era-weights \
+    #   --layers 512,512,256,128 --learning-rate 3e-4 --dropout 0.65 \
+    #   --focal-loss --focal-gamma 1.0 \
+    #   --warmup-epochs 10 --label-smoothing 0.1 \
+    #   --early-stopping 120 --batch-size 4096 \
+    #   --gpu 0
+
+    
   fi
