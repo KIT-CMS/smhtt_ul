@@ -377,17 +377,17 @@ def get_control_units(
         # also build all aviailable 2D variables from the 1D variables
         if do_2dGofs:
             variables_2d = []
-            for var1, var2 in product(variables, variables):  # order invariant
-                if var1 == var2:  # diagonals are solved by 1d
-                    continue
-                if f"{var1}_{var2}" in control_binning[channel]:
-                    variables_2d.append(f"{var1}_{var2}")
-                elif f"{var2}_{var1}" in control_binning[channel]:
-                    variables_2d.append(f"{var2}_{var1}")
-                else:
-                    raise ValueError(
-                        f"No binning found for 2D variable from {var1} and {var2}"
-                    )
+            # for var1, var2 in product(variables, variables):  # order invariant
+            #     if var1 == var2:  # diagonals are solved by 1d
+            #         continue
+            #     if f"{var1}_{var2}" in control_binning[channel]:
+            #         variables_2d.append(f"{var1}_{var2}")
+            #     elif f"{var2}_{var1}" in control_binning[channel]:
+            #         variables_2d.append(f"{var2}_{var1}")
+            #     else:
+            #         raise ValueError(
+            #             f"No binning found for 2D variable from {var1} and {var2}"
+            #         )
             variables.extend(variables_2d)
             logger.info(
                 f"Will run GoFs for {len(variables) - len(variables_2d)} variables, including {len(variables_2d)} 2D variables"
@@ -700,13 +700,13 @@ def main(args):
             # Book variations common to all channels.
             logger.info(f"Start booking systematic variations for channel {channel}")
 
-            _book({"ggh"} & procS, [variations.ggh_acceptance, variations.ggh_muRmuF_acceptance])
-            _book({"qqh"} & procS, [variations.qqh_acceptance, variations.qqh_muRmuF_acceptance])
+            _book({proc for proc in signalsS if "ggh" in proc} & procS, [variations.ggh_acceptance, variations.ggh_muRmuF_acceptance])
+            _book({proc for proc in signalsS if "qqh" in proc} & procS, [variations.qqh_acceptance, variations.qqh_muRmuF_acceptance])
 
             # General variations for simulated processes
             _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging])
             _book(signalsS, variations.LHE_scale.unrolled())
-            _book(signalsS - {"qqh"}, variations.PS_scale.unrolled())  # qqh not properly present in v9 samples
+            _book(signalsS - {proc for proc in signalsS if "qqh" in proc}, variations.PS_scale.unrolled())  # qqh-like samples are not properly present in v9 samples
 
             _book({"ztt", "zj", "zl", "w"} & procS | signalsS, variations.Recoil.unrolled())
             _book(simulatedProcsDS[channel], [variations.met_unclustered, variations.pileup_reweighting])
