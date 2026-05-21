@@ -145,8 +145,8 @@ FRIENDS=""
 if [ -n "${ADDITIONAL_FRIENDS}" ]; then
   echo "INFO: Constructing friend directory paths for: ${ADDITIONAL_FRIENDS}"
   for tag in ${ADDITIONAL_FRIENDS}; do
-    # path="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/${tag}/"
-    path="/ceph/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/${tag}/"
+    path="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/${tag}/"
+    # path="/ceph/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/${tag}/"
     FRIENDS+="${path} "
   done
   FRIENDS="${FRIENDS% }"
@@ -182,9 +182,10 @@ echo "##########################################################################
   echo "XSEC_FRIENDS: ${XSEC_FRIENDS}"
   nice -n 19 python3 friends/build_friend_tree.py \
     --basepath ${KINGMAKER_BASEDIR_XROOTD} \
-    --outputpath ${XSEC_FRIENDS} \
+    --outputpath root://cmsdcache-kit-disk.gridka.de/${XSEC_FRIENDS} \
     --dataset-config "datasets/nanoAOD_${NANOAODVERSION}/datasets.json" \
     --nthreads 20
+    
 fi
 # output path of xsec frinds also to local now , not root://cmsdcache-kit-disk.gridka.de/
 if [[ $MODE == "SHAPES" ]]; then
@@ -202,11 +203,11 @@ if [[ $MODE == "SHAPES" ]]; then
     --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
     --era ${ERA} --num-processes 10 --num-threads 20 \
     --optimization-level 1 --control-plots \
-    --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
+    --control-plot-set ${USED_VARIABLES} \
     --output-file ${shapes_output} \
     --vs-jet-wp "${VS_JET_WP}" --vs-ele-wp "${VS_ELE_WP}" \
     --validation-tag ${TAG} --apply-tauid \
-    --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} # --xrootd
+    --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} --xrootd #--skip-systematic-variations
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                                                #"
@@ -292,37 +293,4 @@ if [[ $MODE == "CONFIGS" ]]; then
         --base-dataset-directory /ceph/sgiappic/Htt_training/${TAG}/dataset/ \
         --common-setup-config trainings/setup.yaml --recreate
 
-    #using artur's framework
-
-    # nice -n 19 python trainings/combine_to_cennt_folds.py \
-    #     --folds-dir /ceph/sgiappic/Htt_training/${TAG}/dataset/_folds \
-    #     --output-dir /ceph/sgiappic/Htt_training/cennt_folds/${SIGNAL_MODE}/ \
-    #     --channel ${CHANNEL} \
-    #     --setup-config trainings/setup.yaml --signal-mode ${SIGNAL_MODE}
-
 fi
-
-if [[ $MODE == "TRAIN" ]]; then
-    echo "##############################################################################################"
-    echo "#      Train set for ${CHANNEL}                                                              #"
-    echo "##############################################################################################"
-
-    # source /work/sgiappic/MiniForge/etc/profile.d/conda.sh
-    # conda activate smhtt-training
-
-    # will need to also train fold 1 later on
-
-    # nice -n 19 python trainings/train_multiclass_nn.py \
-    #   --dataset-dir /ceph/sgiappic/Htt_training/${TAG}/dataset/_folds \
-    #   --setup-config trainings/setup.yaml --channel ${CHANNEL} \
-    #   --output-dir /ceph/sgiappic/Htt_training/${TAG}/fine/models/ \
-    #   --fold 0 --epochs 200 --abs-weights \
-    #   --class-scheme ${SIGNAL_MODE} --equalise-class-weights --equalise-era-weights \
-    #   --layers 512,512,256,128 --learning-rate 3e-4 --dropout 0.65 \
-    #   --focal-loss --focal-gamma 1.0 \
-    #   --warmup-epochs 10 --label-smoothing 0.1 \
-    #   --early-stopping 120 --batch-size 4096 \
-    #   --gpu 0
-
-    
-  fi
