@@ -329,8 +329,14 @@ def main() -> None:
         if arguments.plotcategory and arguments.plotcategory != "Nominal":
             category_flag = f"--category {arguments.plotcategory}"
 
+        nll_path = "/work/amonsch/Documents/_M_Code/nll-training"
+        current = os.environ.get("PYTHONPATH", "")
+        paths = current.split(":") if current else []
+        if nll_path not in paths:
+            os.environ["PYTHONPATH"] = f"{current}:{nll_path}" if current else nll_path
+
         base_plot_cmd = f"""
-            python3 plotting/plot_shapes_control.py -l
+            python3 plotting/plot_shapes_control_new.py -l
             --era Run{arguments.era}
             --input {shape_rootfile}
             --variables {used_variables}
