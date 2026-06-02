@@ -459,22 +459,22 @@ def main(info):
     elif "2018" in args.era:
         plot.DrawLumi("59.8 fb^{-1} (2018, 13 TeV)")
     elif "2022preEE" in args.era:
-        plot.DrawLumi("7.98 fb^{-1} (2022 preEE, 13.6 TeV)")
+        plot.DrawLumi("8.08 fb^{-1} (2022 preEE, 13.6 TeV)")
     elif "2022postEE" in args.era:
         plot.DrawLumi("26.67 fb^{-1} (2022 postEE, 13.6 TeV)")
     elif "2023preBPix" in args.era:
-        plot.DrawLumi("18.06 fb^{-1} (2023 preBPix, 13.6 TeV)")
+        plot.DrawLumi("17.96 fb^{-1} (2023 preBPix, 13.6 TeV)")
     elif "2023postBPix" in args.era:
-        plot.DrawLumi("9.69 fb^{-1} (2023 postBPix, 13.6 TeV)")
+        plot.DrawLumi("9.67 fb^{-1} (2023 postBPix, 13.6 TeV)")
     elif "2024" in args.era:
         if "CDE" in args.tag:
             plot.DrawLumi("26.52 fb^{-1} (2024 CDE, 13.6 TeV)")
         elif "FGHI" in args.tag:
             plot.DrawLumi("82.43 fb^{-1} (2024 FGHI, 13.6 TeV)")
         else:
-            plot.DrawLumi("109.85 fb^{-1} (2024, 13.6 TeV)")
+            plot.DrawLumi("109.81 fb^{-1} (2024, 13.6 TeV)")
     elif "2025" in args.era:
-        plot.DrawLumi("110.47 fb^{-1} (2025, 13.6 TeV)") 
+        plot.DrawLumi("109.89 fb^{-1} (2025, 13.6 TeV)") 
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception

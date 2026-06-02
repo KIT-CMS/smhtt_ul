@@ -71,26 +71,17 @@ def lumi_weight(era, **kwargs):
     elif era == "2018":
         lumi = "59.83"
     elif era == "2022preEE":
-        lumi = "7.98"
+        lumi = "8.086"
     elif era == "2022postEE":
         lumi = "26.67"
     elif era == "2023preBPix":
-        lumi = "18.06"
+        lumi = "17.96"
     elif era == "2023postBPix":
-        lumi = "9.69"
-    # elif era == "2024":
-    #      lumi = "3.625" #Muon 0 only
-    # elif era == "2024":
-    #      lumi = "26.52" #CDE
-    # elif era == "2024":
-    #     lumi = "82.43" #FGHI
+        lumi = "9.67"
     elif era == "2024":
-       lumi = "219.7" #lumi = "109.85"
+       lumi = "218.9" #lumi = "109.81"
     elif era == "2025":
-        lumi = "220.94" #lumi = "110.47" 
-    else:
-        raise ValueError("Given era {} not defined.".format(era))
-    return ("{} * 1000.0".format(lumi), "lumi")
+        lumi = "219.78" #lumi = "109.89" 
 
 
 def prefiring_weight(era, **kwargs):

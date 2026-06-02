@@ -207,7 +207,7 @@ if [[ $MODE == "SHAPES" ]]; then
     --output-file ${shapes_output} \
     --vs-jet-wp "${VS_JET_WP}" --vs-ele-wp "${VS_ELE_WP}" \
     --validation-tag ${TAG} --apply-tauid \
-    --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} --xrootd #--skip-systematic-variations
+    --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} --xrootd --skip-systematic-variations
 
     echo "##############################################################################################"
     echo "#      Additional estimations                                                                #"
