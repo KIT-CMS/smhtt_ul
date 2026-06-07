@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import gc
+import json
 from functools import partial
 from pathlib import Path
 
@@ -187,6 +188,7 @@ def create_process_folds(
             .pipe(add.additional_nominal_cuts)
             .pipe(add.weight_like_uncertainties)
             .pipe(add.shift_like_uncertainties)
+            .pipe(add.add_accumulated_data)
             .pipe(exemplary_remove_cut_regions, regions=("same_sign", "same_sign_anti_iso"))
         )
 
@@ -274,6 +276,41 @@ def combine_folds(
         logger.info(f"Final shape of fold {fold_name} is {fold.shape}")
         fold.to_feather(filepath("folds", f"{fold_name}"))
         logger.info(f"Saved combined fold {fold_name} at {filepath('folds', f'{fold_name}')}")
+
+        try:
+            folder_path = filepath("folds", f"{fold_name}").with_suffix("")
+            folder_path.mkdir(parents=True, exist_ok=True)
+
+            partitions = []
+
+            for level0 in [Keys.EVENT, Keys.NOMINAL, Keys.WEIGHT_LIKE, Keys.LABELS]:
+                if level0 in fold.columns.levels[0]:
+                    file_name = f"{level0}.feather"
+                    fold[level0].to_feather(folder_path.joinpath(file_name))
+                    partitions.append({"file": file_name, "prefix": [str(level0)]})
+                    logger.info(f"Saved {level0} part of fold {fold_name}")
+
+            if Keys.SHIFT_LIKE in fold.columns.levels[0]:
+                for uncertainty in tqdm(fold[Keys.SHIFT_LIKE].columns.unique(level=0)):
+                    file_name = f"{Keys.SHIFT_LIKE}_{uncertainty}.feather"
+                    fold[Keys.SHIFT_LIKE][uncertainty].to_feather(folder_path.joinpath(file_name))
+                    partitions.append({"file": file_name, "prefix": [str(Keys.SHIFT_LIKE), str(uncertainty)]})
+                    logger.info(f"Saved ShiftLike uncertainty {uncertainty} of fold {fold_name}")
+
+            with open(folder_path.joinpath("metadata.json"), "w") as f:
+                json.dump(
+                    {
+                        "num_rows": len(fold),
+                        "columns": [list(col) for col in fold.columns],
+                        "dtypes": [[list(col), str(dtype)] for col, dtype in fold.dtypes.items()],
+                        "partitions": partitions
+                    },
+                    f,
+                    indent=2,
+                )
+            logger.info(f"Saved metadata at {folder_path.joinpath('metadata.json')}")
+        except Exception as e:
+            logger.error(f"Error while saving parts of fold {fold_name}: {e}")
 
         del fold
         gc.collect()

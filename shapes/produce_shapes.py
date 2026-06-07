@@ -28,9 +28,9 @@ from ntuple_processor import GraphManager, RunManager, UnitManager
 from ntuple_processor.utils import Selection
 
 
-WITH_SPLIT_SIGNAL = False
-WITH_SPLIT_SIGNAL_PRUNED = True
-WITH_SPLIT_SIGNAL_STAGE0 = False
+WITH_SPLIT_SIGNAL = False  # for config and training setup
+WITH_SPLIT_SIGNAL_PRUNED = True  # for final fit
+WITH_SPLIT_SIGNAL_STAGE0 = False  # for control plot/gof
 
 
 def parse_arguments():
@@ -290,8 +290,7 @@ def add_processes(
                 add_fn(name=f"qqh_b{b}", dataset=datasets["qqH"], selections=select_fn(*getattr(selection.qqH125, f"bin{b}")))
 
         if WITH_SPLIT_SIGNAL_PRUNED:
-            add_fn(name="qqh_bin201to202", dataset=datasets["qqH"], selections=select_fn(*selection.qqH125.bin201to202))
-            add_fn(name="qqh_bin203to210", dataset=datasets["qqH"], selections=select_fn(*selection.qqH125.bin203to210))
+            add_fn(name="qqh_bin201to210", dataset=datasets["qqH"], selections=select_fn(*selection.qqH125.bin201to210))
 
             add_fn(name="ggh_bin101to104", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin101to104))
             add_fn(name="ggh_bin105to106", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin105to106))
@@ -602,7 +601,7 @@ def main(args):
             *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
             # ---
             *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
-            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 210),]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         }
     else:
         procS = args.process_selection
@@ -634,7 +633,7 @@ def main(args):
         *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
         # ---
         *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
-        *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+        *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 210),]} if WITH_SPLIT_SIGNAL_PRUNED else []),
     } & procS
     signalsS = sm_signalsS | set(  # this part is not necessary?
         [
@@ -642,7 +641,7 @@ def main(args):
             *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
             # ---
             *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
-            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 210),]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         ]
     )
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
@@ -654,7 +653,7 @@ def main(args):
             *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
             # ---
             *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
-            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 210),]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         }
 
     simulatedProcsDS = {

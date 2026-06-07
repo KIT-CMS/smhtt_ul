@@ -65,10 +65,15 @@ GOF_VARIABLES=$(IFS=, ; echo "${final_variables_list[*]}")
 MODE=$1
 
 FRIENDS="fastmtt_v1"
-ADDITIONAL_MULTIFRIENDS="fakefactors_ml__2026-05-21__v10"
+# ADDITIONAL_MULTIFRIENDS="fakefactors_ml__2026-06-02__njets__with_additional_normalization__v1"  # default to work with
+# BASETAG="ml_ff_sym_unct"  # default to work with
+
+# test...  turns out better!
+ADDITIONAL_MULTIFRIENDS="fakefactors_ml__2026-06-02__njets__with_additional_normalization__ti_squeeze__v1"
+BASETAG="ml_ff_sym_unct__ti_sq__v1"
 
 if [[ $MODE == "GOF" ]]; then
-  TAG="gof_ml_ff_fixed_ff_unct__adjusted_syst_test"
+  TAG="gof_${BASETAG}"
 
   KWARGS=(
     --channel "${CHANNEL}"
@@ -88,7 +93,7 @@ if [[ $MODE == "GOF" ]]; then
 fi
 
 if [[ $MODE == "CONTROL" ]]; then
-  TAG="control_ml_ff_fixed_ff_unct__adjusted_syst_test"
+  TAG="control_${BASETAG}"
 
   KWARGS=(
     --channel "${CHANNEL}"
@@ -108,54 +113,68 @@ if [[ $MODE == "CONTROL" ]]; then
 
 fi
 
-if [[ $MODE == "NN-OUTPUT" ]]; then
-  echo "TODO"
+if [[ $MODE == "CONFIG" ]]; then
+  TAG="config_${BASETAG}"
+  KWARGS=(
+    --channel "${CHANNEL}"
+    --era "${ERA}"
+    --tag "${TAG}"
+    --ntupletag "${NTUPLETAG}"
+    --additional-friends "${FRIENDS}"
+    --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
+    --enable-cut-ordering
+    --locally
+    --collect-config-only
+    --with-systematic-variations
+    --control-plots
+    --config-output-file unmodified_2018_mt_training_${TAG}__all_variables.yaml
+  )
+python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
 fi
 
+if [[ $MODE == "NN-OUTPUT-CENNT" ]]; then
+  # latest greatest kind of working fallback
+  # TAG="nn_output_CENNT__2026-05-25__${BASETAG}"
+  # ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_CENNT_groupedDNN_FF_adjusted__2026-05-25__fixed_inputs__v2"
 
+  TAG="nn_output_CENNT__2026-06-05__${BASETAG}"
+  ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_CENNT_groupedDNN_FF_adjusted__2026-06-05__v1"
 
+  KWARGS=(
+    --channel "${CHANNEL}"
+    --era "${ERA}"
+    --tag "${TAG}"
+    --ntupletag "${NTUPLETAG}"
+    --additional-friends "${FRIENDS}"
+    --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
+    --enable-cut-ordering
+    --locally
+    --with-systematic-variations
+    --analysis-units
+  )
+  python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
+  # python3 control_plots_ul.py "${KWARGS[@]}" --mode PLOT
+fi
 
+if [[ $MODE == "NN-OUTPUT-SANNT" ]]; then
+  # latest greatest kind of working fallback
+  # TAG="nn_output_SANNT__2026-05-29__${BASETAG}"
+  # ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_SANNT_groupedDNN_FF_adjusted__2026-05-29__fixed_inputs__v3"
 
-
-
-
-
-# TAG="nn_output_groupedDNN__FF_adjusted__2026-05-07__1sigmatest__v1_control"
-# FRIENDS="fastmtt_v1"
-# ADDITIONAL_MULTIFRIENDS="fakefactors_ml_1sigma_unct__2026-05-07__v1 nn_output_CENNT_groupedDNN_FF_adjusted__2026-04-30__v1"
-
-# KWARGS=(
-#   --channel "${CHANNEL}"
-#   --era "${ERA}"
-#   --tag "${TAG}"
-#   --ntupletag "${NTUPLETAG}"
-#   --additional-friends "${FRIENDS}"
-#   --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
-#   --enable-cut-ordering
-#   --control-plots
-#   --locally
-# )
-# python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
-# python3 control_plots_ul.py "${KWARGS[@]}" --mode PLOT
-
-
-# TAG="nn_output_groupedDNN__FF_adjusted__2026-04-30__v1__config"
-
-# FRIENDS="fastmtt_v1"
-# ADDITIONAL_MULTIFRIENDS="fakefactors_ml_2sigma_unct_v1"
-
-# KWARGS=(
-#   --channel "${CHANNEL}"
-#   --era "${ERA}"
-#   --tag "${TAG}"
-#   --ntupletag "${NTUPLETAG}"
-#   --additional-friends "${FRIENDS}"
-#   --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
-#   --enable-cut-ordering
-#   --locally
-#   --collect-config-only
-#   --with-systematic-variations
-#   --control-plots
-#   --config-output-file unmodified_2018_mt_training_config_with_ml_ff.yaml
-# )
-# python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
+  TAG="nn_output_SANNT__2026-06-05__${BASETAG}"
+  ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_SANNT_groupedDNN__2026-06-05__Nemo2_pareto_best_of_1600__v1"
+  KWARGS=(
+    --channel "${CHANNEL}"
+    --era "${ERA}"
+    --tag "${TAG}"
+    --ntupletag "${NTUPLETAG}"
+    --additional-friends "${FRIENDS}"
+    --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
+    --enable-cut-ordering
+    --locally
+    --with-systematic-variations
+    --analysis-units
+  )
+  python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
+  # python3 control_plots_ul.py "${KWARGS[@]}" --mode PLOT
+fi

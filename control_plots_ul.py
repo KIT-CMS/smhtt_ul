@@ -276,8 +276,8 @@ def main() -> None:
             --directory {os.environ['NTUPLES']}
             --{arguments.channel}-friend-directory {xsec_friend} {friends_string} {multifriends_string}
             --era {arguments.era}
-            --num-processes 8
-            --num-threads 20
+            --num-processes 12
+            --num-threads 60
             --optimization-level 2
             {control_plots_flag}
             {control_split_flag}

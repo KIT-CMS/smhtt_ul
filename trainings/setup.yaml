@@ -2,46 +2,46 @@ training_variables:
   - event_parity
   - pt_1
   - pt_2
-  - eta_1
-  - eta_2
+  - eta_1  #
+  - eta_2  #
   - jpt_1
   - jpt_2
   - jeta_1
   - jeta_2
   - m_fastmtt
-  - m_vis
-  - mjj
-  - pt_vis
-  - pt_dijet
-  - pt_tt
-  - pt_ttjj
-  - njets
-  - nbtag
-  - met
-  - deltaEta_ditaupair
-  - deltaR_ditaupair
-  - mt_1
-  - mt_2
   - pt_fastmtt
-  - mt_tot
+  - met
+  - nbtag
+  - m_vis
+  - pt_tt
+  - pt_vis
+  - mjj
+  - pt_dijet
   - pzetamissvis
-  - deltaR_jj
-  - deltaEta_jj
+  - pt_ttjj  #
+  - deltaEta_ditaupair  #
+  - deltaR_ditaupair
+  - mt_1  #
+  - mt_2  #
+  - mt_tot  #
+  - deltaR_jj  #
+  - deltaEta_jj  #
   - deltaR_1j1
-  - deltaR_2j2
-  - deltaR_2j1
   - deltaR_1j2
+  - deltaR_2j1
+  - deltaR_2j2
   - deltaR_12j1
-  - deltaR_12j2
+  - deltaR_12j2  #
   - deltaEta_1j1
-  - deltaEta_1j2
+  - deltaEta_1j2  #
   - deltaEta_2j1
-  - deltaEta_2j2
+  - deltaEta_2j2  #
   - deltaEta_12j1
-  - deltaEta_12j2
+  - njets
+  - deltaEta_12j2  #
   # --- potentially to remove since not important
-  - mass_2
-  - tau_decaymode_2
+  - mass_2  #
+  - tau_decaymode_2  #
   # -- label flags ---
   - is_data
   - is_dyjets

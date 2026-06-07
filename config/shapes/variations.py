@@ -371,6 +371,12 @@ class FFHelper:
             "ff_WjetsStat",
             "ff_ttbarStat",
             # ---
+            "ff_QCDNormalization",
+            "ff_WjetsNormalization",
+            "ff_ttbarNormalization",
+            "QCD_DR_SR_correctionNormalization",
+            "Wjets_DR_SR_correctionNormalization",
+            # ---
             "fractions_QCD",
             "fractions_Wjets",
             "fractions_ttbar",
@@ -405,6 +411,12 @@ class FFHelper:
             "ff_QCDStat",
             "ff_WjetsStat",
             "ff_ttbarStat",
+            # ---
+            "ff_QCDNormalization",
+            "ff_WjetsNormalization",
+            "ff_ttbarNormalization",
+            "QCD_DR_SR_correctionNormalization",
+            "Wjets_DR_SR_correctionNormalization",
             # ---
             "fractions_QCD",
             "fractions_Wjets",

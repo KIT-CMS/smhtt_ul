@@ -6,10 +6,13 @@ set -o pipefail
 CHANNEL="mt"
 ERA="2018"
 NTUPLETAG="ff_and_cr_2018UL_mt__2026-03-27__v2"
-TAG="gof_ml_ff"
+# TAG="gof_ml_ff"
+# TAG="gof_ml_ff_fixed_ff_unct"
+# TAG="gof_ml_ff_fixed_ff_unct__adjusted_syst_test"
+TAG="gof_ml_ff_sym_unct__ti_sq__v1"
 YAML_FILE="config/gof_binning/binning_${ERA}_${CHANNEL}_2D.yaml"
 
-FORCE_REPROCESSING=0
+FORCE_REPROCESSING=1
 
 MODE=$1
 
@@ -103,72 +106,6 @@ echo "FRIENDS: ${FRIENDS}"
 echo "###################################"
 echo "#           Mode ${MODE}          #"
 echo "###################################"
-
-if [[ $MODE == "XSEC" ]]; then
-    source utils/setup_root.sh
-    python3 friends/build_friend_tree.py --basepath $BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
-    # if the xsec friends directory does not exist, create it
-    if [ ! -d "$XSEC_FRIENDS" ]; then
-        mkdir -p $XSEC_FRIENDS
-    fi
-    # if th xsec friends dir is empty, run the xsec friends script
-    if [ "$(ls -A $XSEC_FRIENDS)" ]; then
-        echo "xsec friends dir already exists"
-    else
-        echo "xsec friends dir is empty"
-        echo "running xsec friends script"
-        python3 friends/build_friend_tree.py --basepath $BASEDIR --outputpath $XSEC_FRIENDS --nthreads 20
-    fi
-    exit 0
-fi
-
-if [[ $MODE == "GOF-BINNING" ]]; then
-    source utils/setup_root.sh
-    ./gof/create_gof_binning.sh $CHANNEL $ERA $NTUPLETAG $VARIABLES
-fi
-
-if [[ $MODE == "CONTROL" ]]; then
-    source utils/setup_root.sh
-    # python shapes/produce_shapes.py --channels $CHANNEL $NNSCORE_FRIENDS \
-    #     --directory $NTUPLES \
-    #     --${CHANNEL}-friend-directory $FRIENDS \
-    #     --era $ERA --num-processes 4 --num-threads 6 \
-    #     --optimization-level 1 --skip-systematic-variations \
-    #     --output-file $shapes_output
-
-    # python shapes/do_estimations.py -e $ERA -i ${shapes_output}.root --do-emb-tt --do-ff --do-qcd
-
-    # now plot the shapes by looping over the categories
-    for category in "ggh" "qqh" "ztt" "tt" "ff" "misc" "xxh"; do
-        python3 plotting/plot_ml_shapes_control.py -l --era Run${ERA} --input ${shapes_output}.root --channel ${CHANNEL} --embedding --fake-factor --category ${category} --output-dir output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/controlplots --normalize-by-bin-width
-    done
-fi
-
-if [[ $MODE == "LOCAL" ]]; then
-    source utils/setup_root.sh
-    python shapes/produce_shapes.py --channels $CHANNEL \
-        --directory $NTUPLES \
-        --${CHANNEL}-friend-directory $FRIENDS \
-        --era $ERA --num-processes 4 --num-threads 12 \
-        --optimization-level 1 --gof-inputs \
-        --control-plot-set ${VARIABLES} \
-        --output-file $shapes_output
-fi
-
-if [[ $MODE == "CONDOR" ]]; then
-    source utils/setup_root.sh
-    echo "[INFO] Running on Condor"
-    echo "[INFO] Condor output folder: ${CONDOR_OUTPUT}"
-    bash submit/submit_shape_production_ul.sh $ERA $CHANNEL \
-        "singlegraph" $TAG 1 $NTUPLETAG $CONDOR_OUTPUT ${VARIABLES} $NNSCORE_FRIENDS
-    echo "[INFO] Jobs submitted"
-fi
-
-if [[ $MODE == "MERGE" ]]; then
-    source utils/setup_root.sh
-    echo "[INFO] Merging outputs located in ${CONDOR_OUTPUT}"
-    hadd -j 5 -n 600 -f $shapes_rootfile ${CONDOR_OUTPUT}/../control_unit_graphs-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/*.root
-fi
 
 if [[ $MODE == "SYNC" ]]; then
     source utils/setup_root.sh
@@ -272,47 +209,6 @@ if [[ $MODE == "DATACARD" ]]; then
     exit 0
 fi
 
-if [[ $MODE == "DATACARD-MC" ]]; then
-    source utils/setup_cmssw.sh
-    # Datacard Setup
-    for VARIABLE in ${VARIABLES//,/ }; do
-        datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ERA}_${CHANNEL}_${VARIABLE}"
-        GOF_CATEGORY_NAME=${CHANNEL}_${VARIABLE}
-        ${CMSSW_BASE}/bin/slc7_amd64_gcc700/MorphingSMRun2Legacy \
-            --base_path=$PWD \
-            --input_folder_mt=$shapes_output_synced \
-            --input_folder_tt=$shapes_output_synced \
-            --input_folder_et=$shapes_output_synced \
-            --input_folder_em=$shapes_output_synced \
-            --real_data=true \
-            --classic_bbb=false \
-            --binomial_bbb=false \
-            --jetfakes=1 \
-            --embedding=0 \
-            --postfix="-ML" \
-            --channel=${CHANNEL} \
-            --auto_rebin=false \
-            --rebin_categories=false \
-            --stxs_signals="stxs_stage0" \
-            --categories="gof" \
-            --era=${ERA} \
-            --gof_category_name=$GOF_CATEGORY_NAME \
-            --output=$datacard_output \
-            --train_ff=1 \
-            --train_stage0=1 --train_emb=1
-        THIS_PWD=${PWD}
-        echo $THIS_PWD
-        cd $datacard_output/${CHANNEL}
-        for FILE in */*.txt; do
-            sed -i '$s/$/\n * autoMCStats 0.0/' $FILE
-        done
-        cd $THIS_PWD
-
-        echo "[INFO] Create Workspace for datacard"
-        combineTool.py -M T2W -o workspace.root -i $datacard_output/${CHANNEL}/125 --channel-masks
-    done
-    exit 0
-fi
 
 if [[ $MODE == "GOF" ]]; then
     source utils/setup_cmssw.sh
@@ -589,6 +485,87 @@ if [[ $MODE == "PLOT-POSTFIT" ]]; then
     exit 0
 fi
 
+if [[ $MODE == "PLOT-POSTFIT-NEW" ]]; then
+    source utils/setup_root.sh
+    source utils/common_args.sh
+    
+    export SUMMARYFOLDER="output/gof/${NTUPLETAG}-${TAG}/plots"
+    [ -d "$SUMMARYFOLDER" ] || mkdir -p "$SUMMARYFOLDER"
+
+    run_plot_postfit() {
+        VARIABLE=$1
+        
+        source utils/setup_root.sh
+        source utils/common_args.sh
+
+        ID=${ERA}_${CHANNEL}_${VARIABLE}
+        datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
+        PLOTDIR=${datacard_output}/plots
+
+        final_plot_pdf="${PLOTDIR}/${ID}_postfit.pdf"
+        final_plot_png="${PLOTDIR}/${ID}_postfit.png"
+
+        if [[ -z "${FORCE_REPROCESSING}" && (-f "$final_plot_pdf" || -f "$final_plot_png") ]]; then
+            echo "[INFO] Post-fit plots for ${VARIABLE} already exist. Skipping."
+            [ -f "${SUMMARYFOLDER}/${ID}_postfit.pdf" ] || cp "${PLOTDIR}"/*.p{df,ng} "$SUMMARYFOLDER" 2> /dev/null
+            return 0
+        fi
+
+        PREFITFILE=${datacard_output}/${ID}-datacard-shapes-prefit.root
+        POSTFITFILE=${datacard_output}/${ID}-datacard-shapes-postfit-b.root
+        
+        [ -d "$PLOTDIR" ] || mkdir -p "$PLOTDIR"
+        
+        echo "[INFO] Processing plots for variable: ${VARIABLE}"
+
+        AXIS_FLAG="-l"
+        if [[ " ${LOG_VARIABLES} " =~ " ${VARIABLE} " ]]; then
+            AXIS_FLAG=""
+        fi
+
+        python3 plotting/plot_shapes_gof_new.py \
+            --region "Nominal" \
+            --era $ERA \
+            --channel $CHANNEL \
+            --input-file $PREFITFILE \
+            --variable $VARIABLE \
+            --embedding \
+            --fake-factor \
+            --output-folder "${PLOTDIR}" \
+            --suffix "_prefit" \
+            --gof-binning-config "config/gof_binning/binning_${ERA}_${CHANNEL}_2D.yaml"
+        
+        python3 plotting/plot_shapes_gof_new.py \
+            --region "Nominal" \
+            --era $ERA \
+            --channel $CHANNEL \
+            --input-file $POSTFITFILE \
+            --variable $VARIABLE \
+            --embedding \
+            --fake-factor \
+            --output-folder "${PLOTDIR}" \
+            --suffix "_postfit" \
+            --gof-binning-config "config/gof_binning/binning_${ERA}_${CHANNEL}_2D.yaml"
+
+        # Copy results to summary folder
+        # Use simple wildcard copy; ignore errors if no files found (unlikely)
+        cp "${PLOTDIR}"/*.p{df,ng} "$SUMMARYFOLDER" 2>/dev/null
+        
+        echo "[DONE] Finished plotting ${VARIABLE}"
+    }
+
+    export -f run_plot_postfit
+    export ERA CHANNEL NTUPLETAG TAG FORCE_REPROCESSING SUMMARYFOLDER
+
+    echo "[INFO] Starting parallel Plotting..."
+    
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -P 50 -I {} bash -c 'run_plot_postfit "{}"'
+
+    echo "[INFO] All plotting jobs complete."
+    exit 0
+fi
+
+
 if [[ $MODE == "PLOT-POSTFIT-MC" ]]; then
     source utils/setup_root.sh
     SUMMARYFOLDER=output/gof/${NTUPLETAG}-${TAG}/plots
@@ -670,5 +647,189 @@ if [[ $MODE == "IMPACTS" ]]; then
         rm ${IMPACTSDIR}/higgsCombine*_${ID}.*.root
         exit 0
     done
+    exit 0
+fi
+
+
+if [[ $MODE == "IMPACTS_FIXED" ]]; then
+    source utils/setup_cmssw.sh
+
+    run_impacts_for_variable() {
+        local DRY_RUN=0 # Set to 1 to print intentions only, 0 to execute
+        local VARIABLE=$1
+        
+        local ID="${ERA}_${CHANNEL}_${VARIABLE}"
+        local rel_datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
+        
+        # Ensure directories exist before resolving real paths
+        mkdir -p "${rel_datacard_output}/impacts"
+        
+        # Resolve absolute paths (WORKSPACE is needed for combineTool while inside the impacts dir)
+        local WORKSPACE=$(realpath -m "${rel_datacard_output}/${CHANNEL}/125/workspace.root")
+        local IMPACTSDIR=$(realpath "${rel_datacard_output}/impacts")
+        
+        # --- DEFINE FINAL OUTPUT PATHS AND ADD SKIP LOGIC ---
+        local FINAL_JSON_PATH="${IMPACTSDIR}/impacts_${ID}.json"
+        local FINAL_PDF_PATH="${IMPACTSDIR}/impacts_${ID}.pdf"
+
+        if [[ "${FORCE_REPROCESSING}" != "1" && -f "$FINAL_JSON_PATH" && -f "$FINAL_PDF_PATH" ]]; then
+            echo "[INFO] Impact plots for ${VARIABLE} already exist in ${IMPACTSDIR}. Skipping."
+            return 0
+        fi
+
+        if [[ "$DRY_RUN" == "1" ]]; then
+            echo "[DRY_RUN] Will perform IMPACTS for variable: '${VARIABLE}' (Files missing or Forced)"
+            return 0
+        fi
+
+        echo "[INFO] Running impacts for variable: ${VARIABLE}"
+
+        # Combine tuning: optimized for nuisance parameter scanning stability
+        local ROBUST_OPTS=(
+            "--robustFit" "1"
+            "--robustHesse" "1"
+            "--setRobustFitAlgo" "Minuit2,Migrad"
+            "--cminDefaultMinimizerStrategy" "0"     # Strategy 0 for speed during nuisance scans
+            "--cminPreFit" "2"                       # But Strategy 2 for the pre-fit to ensure a perfect start
+            "--cminPreScan"                          # Scan NLL to prevent local minima traps
+            "--cminDefaultMinimizerTolerance" "0.01" # Tighter tolerance
+            "--stepSize=0.01"
+            "--cminFallbackAlgo" "Minuit2,Migrad,0:0.01,Minuit2,Migrad,0:0.01"
+            "--X-rtd" "FITTER_NEW_CROSSING_ALGO"
+            "--X-rtd" "FITTER_NEVER_GIVE_UP"
+            "--X-rtd" "MINIMIZER_analytic"
+            "--X-rtd" "FITTER_DYN_STEP"              # Adaptive step sizes during gradient descent
+        )
+
+        local ABS_BASE_PWD=$(pwd)
+        cd "$IMPACTSDIR" || return 1
+
+        # Use purely local filenames to avoid ROOT TPDF path concatenation bugs
+        local LOCAL_JSON="impacts_${ID}.json"
+        local LOCAL_PDF_BASE="impacts_${ID}"
+
+        echo "[INFO][${VARIABLE}] Step 1: Initial Fit"
+        combineTool.py -M Impacts -d "$WORKSPACE" -m 125 -n "_${ID}" --doInitialFit "${ROBUST_OPTS[@]}"
+        
+        echo "[INFO] [${VARIABLE}] Step 2: Fit Nuisances (Parallelized across nuisances)"
+        combineTool.py -M Impacts -d "$WORKSPACE" -m 125 -n "_${ID}" --doFits --parallel 16 "${ROBUST_OPTS[@]}"
+        
+        echo "[INFO] [${VARIABLE}] Step 3: Collect JSON"
+        combineTool.py -M Impacts -d "$WORKSPACE" -m 125 -n "_${ID}" -o "$LOCAL_JSON"
+        
+        echo "[INFO] [${VARIABLE}] Step 4: Plot Impacts"
+        plotImpacts.py -i "$LOCAL_JSON" -o "$LOCAL_PDF_BASE"
+        
+        # Cleanup intermediate combine files
+        rm -f higgsCombine*_${ID}.*.root
+
+        # Return to base execution path
+        cd "$ABS_BASE_PWD"
+    }
+    
+    export -f run_impacts_for_variable
+    export NTUPLETAG TAG ERA CHANNEL FORCE_REPROCESSING
+
+    # Parallelize over variables via xargs
+    # echo "${VARIABLES//,/ }" | tr ' ' '\n' | xargs -n 1 -P 2 -I {} bash -c 'run_impacts_for_variable "{}"'
+    run_impacts_for_variable m_vis
+
+    wait
+
+    echo "[INFO] All IMPACT jobs complete."
+    exit 0
+fi
+
+
+if [[ $MODE == "IMPACTS_FIXED2" ]]; then
+    source utils/setup_cmssw.sh
+
+    run_impacts_for_variable() {
+        local DRY_RUN=0
+        local VARIABLE=$1
+        
+        local ID="${ERA}_${CHANNEL}_${VARIABLE}"
+        local rel_datacard_output="output/gof/${NTUPLETAG}-${TAG}/${ID}"
+        
+        mkdir -p "${rel_datacard_output}/impacts"
+        
+        local WORKSPACE=$(realpath -m "${rel_datacard_output}/${CHANNEL}/125/workspace.root")
+        local IMPACTSDIR=$(realpath "${rel_datacard_output}/impacts")
+        
+        local FINAL_JSON_PATH="${IMPACTSDIR}/impacts_${ID}.json"
+        local FINAL_PDF_PATH="${IMPACTSDIR}/impacts_${ID}.pdf"
+
+        if [[ "${FORCE_REPROCESSING}" != "1" && -f "$FINAL_JSON_PATH" && -f "$FINAL_PDF_PATH" ]]; then
+            echo "[INFO] Impact plots for ${VARIABLE} already exist in ${IMPACTSDIR}. Skipping."
+            return 0
+        fi
+
+        if [[ "$DRY_RUN" == "1" ]]; then
+            echo "[DRY_RUN] Will perform IMPACTS for variable: '${VARIABLE}'"
+            return 0
+        fi
+
+        echo "[INFO] Running impacts for variable: ${VARIABLE} (Background Only)"
+
+        # --- BACKGROUND-ONLY CONSTRAINTS ---
+        # Note: If 'r' is included in freezeParameters, the impact bars (\Delta r) will be 0.
+        # Remove 'r,' from freezeParameters if you want to see the impact of background
+        # uncertainties on a floating zero-signal extraction.
+        local MODEL_OPTS=(
+            "--setParameters" "r=0"
+            "--freezeParameters" "r,${THEORY_NUISANCES_TO_FREEZE}"
+        )
+
+        local ROBUST_OPTS=(
+            "--robustFit" "1"
+            "--robustHesse" "1"
+            "--setRobustFitAlgo" "Minuit2,Migrad"
+            "--cminDefaultMinimizerStrategy" "0"
+            "--cminPreFit" "2"
+            "--cminPreScan"
+            "--cminDefaultMinimizerTolerance" "0.01"
+            "--stepSize=0.01"
+            "--cminFallbackAlgo" "Minuit2,Migrad,0:0.01,Minuit2,Migrad,0:0.01"
+            "--X-rtd" "FITTER_NEW_CROSSING_ALGO"
+            "--X-rtd" "FITTER_NEVER_GIVE_UP"
+            "--X-rtd" "MINIMIZER_analytic"
+            "--X-rtd" "FITTER_DYN_STEP"
+        )
+
+        local ABS_BASE_PWD=$(pwd)
+        cd "$IMPACTSDIR" || return 1
+
+        local LOCAL_JSON="impacts_${ID}.json"
+        local LOCAL_PDF_BASE="impacts_${ID}"
+
+        echo "[INFO][${VARIABLE}] Step 1: Initial Fit"
+        combineTool.py -M Impacts -d "$WORKSPACE" -m 125 -n "_${ID}" \
+            --doInitialFit "${ROBUST_OPTS[@]}" "${MODEL_OPTS[@]}"
+        
+        echo "[INFO] [${VARIABLE}] Step 2: Fit Nuisances"
+        combineTool.py -M Impacts -d "$WORKSPACE" -m 125 -n "_${ID}" \
+            --doFits --parallel 16 "${ROBUST_OPTS[@]}" "${MODEL_OPTS[@]}"
+        
+        echo "[INFO] [${VARIABLE}] Step 3: Collect JSON"
+        combineTool.py -M Impacts -d "$WORKSPACE" -m 125 -n "_${ID}" \
+            -o "$LOCAL_JSON" "${MODEL_OPTS[@]}"
+        
+        echo "[INFO] [${VARIABLE}] Step 4: Plot Impacts"
+        plotImpacts.py -i "$LOCAL_JSON" -o "$LOCAL_PDF_BASE"
+        
+        rm -f higgsCombine*_${ID}.*.root
+        cd "$ABS_BASE_PWD"
+    }
+    
+    export -f run_impacts_for_variable
+    # Expose the nuisance string to the subshells spawned by xargs
+    export NTUPLETAG TAG ERA CHANNEL FORCE_REPROCESSING THEORY_NUISANCES_TO_FREEZE
+
+    # echo "${VARIABLES//,/ }" | tr ' ' '\n' | xargs -n 1 -P 2 -I {} bash -c 'run_impacts_for_variable "{}"'
+    run_impacts_for_variable met
+
+    wait
+
+    echo "[INFO] All IMPACT jobs complete."
     exit 0
 fi

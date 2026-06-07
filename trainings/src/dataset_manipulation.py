@@ -111,7 +111,7 @@ def exemplary_remove_cut_regions(df: pd.DataFrame, regions: Iterable[str]) -> pd
             ]
             if columns_to_drop:
                 df.drop(columns=columns_to_drop, inplace=True)
-
+        logger.info(f"Removed cut region {region} and associated columns from the dataframe.")
     return df
 
 
@@ -151,7 +151,10 @@ def exemplary_custom_selection(df: pd.DataFrame, selections: Union[None, dict] =
 
         mask |= (process_mask & selection_mask)
 
-    return df[mask].copy()
+    logger.info(f"Selected processes and cut regions based on the provided selections: {selections}")
+    result = df[mask].copy()
+    logger.info(f"Selected dataframe shape: {df.shape} -> {result.shape}")
+    return result
 
 
 class ROOTToPlain(object):
@@ -680,6 +683,11 @@ class ProcessDataFrameManipulation:
         self.subprocess_df = subprocess_df
         self.process_name = process_name
         self.subprocess_name = subprocess_name
+        self._data = {}  # Store columns to build DataFrame once at the end
+
+    def add_accumulated_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        combined_data = {**{col: df[col].values for col in df.columns}, **self._data}
+        return pd.DataFrame(combined_data, index=df.index)
 
     def labels(self, df: pd.DataFrame, renaming_map: Union[dict, None] = None) -> pd.DataFrame:
         """
@@ -732,8 +740,9 @@ class ProcessDataFrameManipulation:
         renaming_map = renaming_map or {}
 
         for variable in self.from_config.variable_columns:
+            logger.debug(f"Adding nominal variable {variable} to the dataframe.")
             column = tuple_column(Keys.NOMINAL, Keys.VARIABLES, renaming_map.get(variable, variable))
-            df[column] = self.subprocess_df[variable].astype(np.float32, copy=False).values
+            self._data[column] = self.subprocess_df[variable].astype(np.float32, copy=False).values
 
         return df
 
@@ -748,18 +757,21 @@ class ProcessDataFrameManipulation:
             pd.DataFrame: DataFrame with added nominal weight and cut.
         """
         weight, cut = self.subprocess_dict[Keys.NOMINAL][Keys.WEIGHT], self.subprocess_dict[Keys.NOMINAL][Keys.CUT]
-        df[tuple_column(Keys.NOMINAL, Keys.WEIGHT)] = self.subprocess_df[weight].astype(np.float64, copy=False).values
-        df[tuple_column(Keys.NOMINAL, Keys.CUT)] = self.subprocess_df[cut].astype(np.float32, copy=False).values
+        self._data[tuple_column(Keys.NOMINAL, Keys.WEIGHT)] = self.subprocess_df[weight].astype(np.float64, copy=False).values
+        self._data[tuple_column(Keys.NOMINAL, Keys.CUT)] = self.subprocess_df[cut].astype(np.float32, copy=False).values
+
+        logger.info(f"Added nominal weight and cut to the dataframe: {weight}, {cut}")
 
         try:
             anti_iso_weight, anti_iso_cut = (
                 self.subprocess_dict[Keys.NOMINAL][Keys.ANTI_ISO_WEIGHT],
                 self.subprocess_dict[Keys.NOMINAL][Keys.ANTI_ISO_CUT],
             )
-            df[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_CUT)] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
-            df[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_WEIGHT)] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
+            self._data[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_CUT)] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
+            self._data[tuple_column(Keys.NOMINAL, Keys.ANTI_ISO_WEIGHT)] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
+            logger.info(f"Added anti-iso weight and cut to the dataframe: {anti_iso_weight}, {anti_iso_cut}")
         except KeyError:
-            pass
+            logger.info("ANTI_ISO weight or cut not found in subprocess_dict.")
 
         return df
 
@@ -773,14 +785,15 @@ class ProcessDataFrameManipulation:
         Returns:
             pd.DataFrame: DataFrame with added event quantities.
         """
-        df[tuple_column(Keys.EVENT, Keys.ID)] = range(len(self.subprocess_df))
+        self._data[tuple_column(Keys.EVENT, Keys.ID)] = range(len(self.subprocess_df))
 
         has_ntuple_identifier = False
         if columns is not None:
             for column in columns:
                 if column in self.subprocess_df.columns:
                     has_ntuple_identifier = True
-                    df[tuple_column(Keys.EVENT, column)] = self.subprocess_df[column].values
+                    logger.info(f"Adding event quantity column {column} to the dataframe.")
+                    self._data[tuple_column(Keys.EVENT, column)] = self.subprocess_df[column].values
                 else:
                     logger.warning(f"Column {column} not found in subprocess_df, skipping.")
 
@@ -807,8 +820,10 @@ class ProcessDataFrameManipulation:
                 continue
             cut = self.subprocess_dict[name][Keys.CUT]
             weight = self.subprocess_dict[name][Keys.WEIGHT]
-            df[tuple_column(Keys.NOMINAL, name, Keys.CUT)] = self.subprocess_df[cut].astype(np.float32, copy=False).values
-            df[tuple_column(Keys.NOMINAL, name, Keys.WEIGHT)] = self.subprocess_df[weight].astype(np.float64, copy=False).values
+            self._data[tuple_column(Keys.NOMINAL, name, Keys.CUT)] = self.subprocess_df[cut].astype(np.float32, copy=False).values
+            self._data[tuple_column(Keys.NOMINAL, name, Keys.WEIGHT)] = self.subprocess_df[weight].astype(np.float64, copy=False).values
+
+        logger.info(f"Added additional nominal cuts and weights to the dataframe: {names}")
 
         return df
 
@@ -828,7 +843,7 @@ class ProcessDataFrameManipulation:
             if uncertainty_dict[Keys.UNCERTAINTY_TYPE] != Keys.WEIGHT_LIKE:
                 continue
 
-            logger.debug(f"Processing weight-like uncertainties for {uncertainty_name}")
+            logger.info(f"Processing weight-like uncertainties for {uncertainty_name}")
 
             for direction in [Keys.UP, Keys.DOWN]:
                 (
@@ -845,13 +860,13 @@ class ProcessDataFrameManipulation:
 
                 try:
                     if (weight := uncertainty_dict[direction].get(Keys.WEIGHT)):
-                        df[weight_column] = self.subprocess_df[weight].astype(np.float64, copy=False).values
+                        self._data[weight_column] = self.subprocess_df[weight].astype(np.float64, copy=False).values
                     if (cut := uncertainty_dict[direction].get(Keys.CUT)):
-                        df[cut_column] = self.subprocess_df[cut].astype(np.float32, copy=False).values
+                        self._data[cut_column] = self.subprocess_df[cut].astype(np.float32, copy=False).values
                     if (anti_iso_weight := uncertainty_dict[direction].get(Keys.ANTI_ISO_WEIGHT)):
-                        df[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
+                        self._data[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
                     if (anti_iso_cut := uncertainty_dict[direction].get(Keys.ANTI_ISO_CUT)):
-                        df[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
+                        self._data[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
 
                     logger.debug(f"Adding {uncertainty_name}\n\t\t{weight=}\n\t\t{cut=}\n\t\t{anti_iso_weight=}\n\t\t{anti_iso_cut=}")
                 except KeyError:
@@ -875,7 +890,7 @@ class ProcessDataFrameManipulation:
             if uncertainty_dict[Keys.UNCERTAINTY_TYPE] != Keys.SHIFT_LIKE:
                 continue
 
-            logger.debug(f"Processing shift-like uncertainties for {uncertainty_name}")
+            logger.info(f"Processing shift-like uncertainties for {uncertainty_name}")
 
             for direction in [Keys.UP, Keys.DOWN]:
                 (
@@ -891,19 +906,19 @@ class ProcessDataFrameManipulation:
                 )
                 try:
                     if (weight := uncertainty_dict[direction].get(Keys.WEIGHT)):
-                        df[weight_column] = self.subprocess_df[weight].astype(np.float64, copy=False).values
+                        self._data[weight_column] = self.subprocess_df[weight].astype(np.float64, copy=False).values
                     if (cut := uncertainty_dict[direction].get(Keys.CUT)):
-                        df[cut_column] = self.subprocess_df[cut].astype(np.float32, copy=False).values
+                        self._data[cut_column] = self.subprocess_df[cut].astype(np.float32, copy=False).values
                     if (anti_iso_weight := uncertainty_dict[direction].get(Keys.ANTI_ISO_WEIGHT)):
-                        df[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
+                        self._data[anti_iso_weight_column] = self.subprocess_df[anti_iso_weight].astype(np.float64, copy=False).values
                     if (anti_iso_cut := uncertainty_dict[direction].get(Keys.ANTI_ISO_CUT)):
-                        df[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
+                        self._data[anti_iso_cut_column] = self.subprocess_df[anti_iso_cut].astype(np.float32, copy=False).values
 
                     shfted_variables_collection = []
                     for variable in self.from_config.all_shifted_variables:
                         variable_column = tuple_column(Keys.SHIFT_LIKE, uncertainty_name, direction, Keys.VARIABLES, variable)
                         shifted_variable = uncertainty_dict[direction][Keys.VARIABLES][variable]
-                        df[variable_column] = self.subprocess_df[shifted_variable].astype(np.float32, copy=False).values
+                        self._data[variable_column] = self.subprocess_df[shifted_variable].astype(np.float32, copy=False).values
                         shfted_variables_collection.append((variable, shifted_variable))
 
                     logger.debug(
@@ -938,6 +953,7 @@ class ProcessDataFrameManipulation:
             pd.DataFrame: Updated dataframe.
         """
         if by == "index":
+            logger.info("Updating subprocess_df based on the index of the provided dataframe.")
             self.subprocess_df = self.subprocess_df.loc[df.index, :]
         else:
             raise NotImplementedError(f"Unsupported method: {by}")
@@ -953,7 +969,7 @@ class ProcessDataFrameManipulation:
         Returns:
             pd.DataFrame: DataFrame with adjusted weights.
         """
-
+        logger.info("Adjusting jetFakes weights.")
         df[tuple_column(Keys.NOMINAL, f"_{Keys.CUT}")] = df[tuple_column(Keys.NOMINAL, Keys.CUT)].values  # copy
 
         mapping = {Keys.WEIGHT: Keys.ANTI_ISO_WEIGHT, Keys.CUT: Keys.ANTI_ISO_CUT}

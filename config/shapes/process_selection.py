@@ -1513,6 +1513,7 @@ for b in range(200, 211):
     exec(f"qqH125.bin{b} = qqH125.wrap_next(qqH125_{b})")
 qqH125.bin201to202 = qqH125.wrap_next(get_stxs_bin_selection('vbf_htautau', 201, 202))
 qqH125.bin203to210 = qqH125.wrap_next(get_stxs_bin_selection('vbf_htautau', 203, 210))
+qqH125.bin201to210 = qqH125.wrap_next(get_stxs_bin_selection('vbf_htautau', 201, 210))
 
 # ggH125
 ggH125 = make_chainable_process_selection(ggH125_process_selection)

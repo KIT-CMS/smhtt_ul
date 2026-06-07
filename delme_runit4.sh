@@ -1,10 +1,26 @@
 CMSSW_BASE=CMSSW_14_1_0_pre4
 CHANNEL=mt
 ERA=2018
-datacard_output="2026-05-05__datacard_nn_output"
-TAG="nn_output_groupedDNN__FF_adjusted__2026-04-30__v1"
+NTUPLETAG="ff_and_cr_2018UL_mt__2026-03-27__v2"
 
-MODE=$1
+TAG=$1
+MODE=$2
+
+datacard_output="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/datacards"
+mkdir -p "$datacard_output"
+
+BASE_MODE=${MODE%-TOYS}
+
+DIR_SUFF=""
+IS_TOYS=0
+SEED="19"
+SNAP_FILE="higgsCombine.snap.MultiDimFit.mH125.root"
+
+if [[ "$MODE" != "$BASE_MODE" ]]; then
+    IS_TOYS=1
+    DIR_SUFF="_toys"
+    SNAP_FILE="higgsCombine.snap.MultiDimFit.mH125.${SEED}.root"
+fi
 
 ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
 ABS_WS="$ABS_BASE/workspace.root"
@@ -30,7 +46,15 @@ make_collections() {
     (( ng == 0 )) || shopt -u nullglob
 }
 
-POIS=( "r_qqH_201to202" "r_qqH_203to210" "r_ggH_101to104" "r_ggH_105to106" "r_ggH_107to109" "r_ggH_110to116" )
+run_logged() {
+    local logfile=$1
+    shift
+
+    "$@" 2>&1 | tee "$logfile"
+    return ${PIPESTATUS[0]}
+}
+
+POIS=( "r_qqH_201to210" "r_ggH_101to104" "r_ggH_105to106" "r_ggH_107to109" "r_ggH_110to116" )
 POI_CSV=$(IFS=, ; echo "${POIS[*]}")
 
 SET_PARAMS=""
@@ -53,14 +77,15 @@ OPTS_FIT=(
 )
 
 if (( IS_TOYS )); then
-    OPTS_FIT+=("-t" "1" "-s" "19")
+    OPTS_FIT+=("-t" "1" "-s" "$SEED")
+    echo "[INFO] Toy mode enabled (Seed: $SEED)"
 fi
 
-if [[ "$MODE" == "DATACARD" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "DATACARD" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] Run make_datacards.py"
     python3 ${CMSSW_BASE}/src/CombineHarvester/SMRun2Legacy/scripts/make_datacards.py \
         --base-path=$PWD \
-        --input-folder-${CHANNEL}="output/2018-mt-ff_and_cr_2018UL_mt__2026-03-27__v2-${TAG}/synced" \
+        --input-folder-${CHANNEL}="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced" \
         --real-data=false \
         --bbb=true \
         --jetfakes=true \
@@ -80,12 +105,11 @@ if [[ "$MODE" == "DATACARD" || "$MODE" == "ALL" ]]; then
     echo "[INFO] Done datacard creation"
 fi
 
-if [[ "$MODE" == "WORKSPACE" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "WORKSPACE" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] Create Multi-POI workspace"
     combineTool.py -M T2W -o workspace.root -i $datacard_output/${CHANNEL}/125 --parallel 4 -m 125 \
         -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-        --PO '"map=.*bin201to202.*$:r_qqH_201to202[1,-5,5]"' \
-        --PO '"map=.*bin203to210.*$:r_qqH_203to210[1,-5,5]"' \
+        --PO '"map=.*bin201to210.*$:r_qqH_201to210[1,-5,5]"' \
         --PO '"map=.*bin101to104.*$:r_ggH_101to104[1,-5,5]"' \
         --PO '"map=.*bin105to106.*$:r_ggH_105to106[1,-5,5]"' \
         --PO '"map=.*bin107to109.*$:r_ggH_107to109[1,-5,5]"' \
@@ -94,111 +118,117 @@ if [[ "$MODE" == "WORKSPACE" || "$MODE" == "ALL" ]]; then
     make_collections "$ABS_BASE"
 fi
 
-if [[ "$MODE" == "WORKSPACE-INCLUSIVE" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "WORKSPACE-INCLUSIVE" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] Create 1-POI inclusive workspace (POI=r)"
     combineTool.py -M T2W -o workspace_inclusive.root -i $datacard_output/${CHANNEL}/125 --parallel 4 -m 125
 
     make_collections "$ABS_BASE"
 fi
 
-if [[ "$MODE" == "PREFIT" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "PREFIT" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] Extract pre-fit shapes"
-    mkdir -p "$ABS_BASE/shapes"
+    mkdir -p "$ABS_BASE/shapes${DIR_SUFF}"
     PostFitShapesFromWorkspace -w $ABS_WS \
         -m 125 -d $ABS_BASE/combined.txt.cmb \
-        --output $ABS_BASE/shapes/datacard-shapes-prefit.root
-        
-    make_collections "$ABS_BASE/shapes"
+        --output $ABS_BASE/shapes${DIR_SUFF}/datacard-shapes-prefit.root
+
+    make_collections "$ABS_BASE/shapes${DIR_SUFF}"
 fi
 
-if [[ "$MODE" == "FITDIAGNOSTICS" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "FITDIAGNOSTICS" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] FitDiagnostics & Pulls"
-    mkdir -p "$ABS_BASE/diagnostics"
-    pushd "$ABS_BASE/diagnostics" > /dev/null
+    mkdir -p "$ABS_BASE/diagnostics${DIR_SUFF}"
+    pushd "$ABS_BASE/diagnostics${DIR_SUFF}" > /dev/null
     
-    combine -M FitDiagnostics -d $ABS_WS -n .fitdiag \
+    run_logged fitDiagnostics.fitdiag.txt combine -M FitDiagnostics -d $ABS_WS -n .fitdiag \
         --redefineSignalPOIs $POI_CSV \
         --plots --saveShapes --saveWithUncertainties --saveOverallShapes --numToysForShapes 1000 \
         $(printf "%s " "${OPTS_FIT[@]}")
 
-    python $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py \
-        -a fitDiagnostics.fitdiag.root -g pulls.root | tee pulls.txt
+    run_logged pulls.txt python $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py \
+        -a fitDiagnostics.fitdiag.root -g pulls.root
         
     popd > /dev/null
 
-    make_collections "$ABS_BASE/diagnostics"
+    make_collections "$ABS_BASE/diagnostics${DIR_SUFF}"
 fi
 
-if [[ "$MODE" == "POSTFIT" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "POSTFIT" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] PostFit Shapes (Multi-POI)"
-    mkdir -p "$ABS_BASE/shapes"
+    mkdir -p "$ABS_BASE/shapes${DIR_SUFF}"
+    
+    if (( IS_TOYS )); then
+        echo "[WARNING] PostFitShapesFromWorkspace extracts expected PostFit shapes, but plotted data points will be Asimov!"
+        echo "[WARNING] To plot Toy data points, extract 'data' manually from fitDiagnostics.fitdiag.root."
+    fi
+
     PostFitShapesFromWorkspace -w $ABS_WS \
         -m 125 -d $ABS_BASE/combined.txt.cmb \
-        -f $ABS_BASE/diagnostics/fitDiagnostics.fitdiag.root:fit_s \
-        --output $ABS_BASE/shapes/datacard-shapes-postfit.root \
+        -f $ABS_BASE/diagnostics${DIR_SUFF}/fitDiagnostics.fitdiag.root:fit_s \
+        --output $ABS_BASE/shapes${DIR_SUFF}/datacard-shapes-postfit.root \
         --postfit --sampling
         
-    make_collections "$ABS_BASE/shapes"
+    make_collections "$ABS_BASE/shapes${DIR_SUFF}"
 fi
 
-if [[ "$MODE" == "FIT-SINGLES" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "FIT-SINGLES" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] MultiDimFit Singles (Stat+Syst / Stat-only)"
-    mkdir -p "$ABS_BASE/fits"
-    pushd "$ABS_BASE/fits" > /dev/null
+    mkdir -p "$ABS_BASE/fits${DIR_SUFF}"
+    pushd "$ABS_BASE/fits${DIR_SUFF}" > /dev/null
 
-    combineTool.py -M MultiDimFit -d $ABS_WS --algo singles -n .sys_singles $(printf "%s " "${OPTS_FIT[@]}")
-    combineTool.py -M MultiDimFit -d $ABS_WS --algo singles -n .snap --saveWorkspace $(printf "%s " "${OPTS_FIT[@]}")
-    combineTool.py -M MultiDimFit -d "higgsCombine.snap.MultiDimFit.mH125.root" \
+    run_logged sys_singles.txt combineTool.py -M MultiDimFit -d $ABS_WS --algo singles -n .sys_singles $(printf "%s " "${OPTS_FIT[@]}")
+    run_logged snap.txt combineTool.py -M MultiDimFit -d $ABS_WS --algo singles -n .snap --saveWorkspace $(printf "%s " "${OPTS_FIT[@]}")
+    
+    # Use variable $SNAP_FILE to prevent Toy seed mismatch
+    run_logged stat_singles.txt combineTool.py -M MultiDimFit -d "$SNAP_FILE" \
         --snapshotName MultiDimFit --algo singles -n .stat_singles \
         --freezeParameters allConstrainedNuisances $(printf "%s " "${OPTS_FIT[@]}")
         
     popd > /dev/null
-
-    make_collections "$ABS_BASE/fits"
+    make_collections "$ABS_BASE/fits${DIR_SUFF}"
 fi
 
-if [[ "$MODE" == "FIT-GRID" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "FIT-GRID" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] MultiDimFit Grid Scans"
-    mkdir -p "$ABS_BASE/fits"
-    pushd "$ABS_BASE/fits" > /dev/null
+    mkdir -p "$ABS_BASE/fits${DIR_SUFF}"
+    pushd "$ABS_BASE/fits${DIR_SUFF}" > /dev/null
 
     for POI in "${POIS[@]}"; do
-        combineTool.py -M MultiDimFit -d $ABS_WS \
+        run_logged "sys_grid_${POI}.txt" combineTool.py -M MultiDimFit -d $ABS_WS \
             --algo grid --points 301 -n .sys_grid_${POI} -P $POI --parallel 32 $(printf "%s " "${OPTS_FIT[@]}")
-        
-        combineTool.py -M MultiDimFit -d "higgsCombine.snap.MultiDimFit.mH125.root" --snapshotName MultiDimFit \
+
+        # Use variable $SNAP_FILE to prevent Toy seed mismatch
+        run_logged "stat_grid_${POI}.txt" combineTool.py -M MultiDimFit -d "$SNAP_FILE" --snapshotName MultiDimFit \
             --algo grid --points 301 -n .stat_grid_${POI} -P $POI \
             --freezeParameters allConstrainedNuisances --parallel 32 $(printf "%s " "${OPTS_FIT[@]}")
     done
     popd > /dev/null
-
-    make_collections "$ABS_BASE/fits"
+    make_collections "$ABS_BASE/fits${DIR_SUFF}"
 fi
 
-if [[ "$MODE" == "IMPACTS" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "IMPACTS" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] Impacts per POI"
-    mkdir -p "$ABS_BASE/impacts"
-    pushd "$ABS_BASE/impacts" > /dev/null
+    mkdir -p "$ABS_BASE/impacts${DIR_SUFF}"
+    pushd "$ABS_BASE/impacts${DIR_SUFF}" > /dev/null
     
     for POI in "${POIS[@]}"; do
         echo "[INFO] Computing impacts for $POI"
         
-        combineTool.py -M Impacts -d "$ABS_WS" -n .impacts_${POI} --redefineSignalPOIs $POI --doInitialFit $(printf "%s " "${OPTS_FIT[@]}")
-        combineTool.py -M Impacts -d "$ABS_WS" -n .impacts_${POI} --redefineSignalPOIs $POI --doFits --parallel 32 --cminPreFit 2 --cminPreScan --cminDefaultMinimizerTolerance 0.01 $(printf "%s " "${OPTS_FIT[@]}")
-        combineTool.py -M Impacts -d "$ABS_WS" -n .impacts_${POI} --redefineSignalPOIs $POI -o impacts_${POI}.json $(printf "%s " "${OPTS_FIT[@]}")
+        run_logged "impacts_${POI}_initial.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts_${POI} --redefineSignalPOIs $POI --doInitialFit $(printf "%s " "${OPTS_FIT[@]}")
+        run_logged "impacts_${POI}_fits.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts_${POI} --redefineSignalPOIs $POI --doFits --parallel 32 --cminPreFit 2 --cminPreScan --cminDefaultMinimizerTolerance 0.01 $(printf "%s " "${OPTS_FIT[@]}")
+        run_logged "impacts_${POI}_json.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts_${POI} --redefineSignalPOIs $POI -o impacts_${POI}.json $(printf "%s " "${OPTS_FIT[@]}")
         
         plotImpacts.py -i impacts_${POI}.json -o impacts_${POI}
     done
     
     popd > /dev/null
-
-    make_collections "$ABS_BASE/impacts"
+    make_collections "$ABS_BASE/impacts${DIR_SUFF}"
 fi
 
-if [[ "$MODE" == "IMPACTS-INCLUSIVE" || "$MODE" == "ALL" ]]; then
+if [[ "$BASE_MODE" == "IMPACTS-INCLUSIVE" || "$BASE_MODE" == "ALL" ]]; then
     echo "[INFO] Impacts Inclusive (POI=r)"
-    mkdir -p "$ABS_BASE/impacts_inclusive"
-    pushd "$ABS_BASE/impacts_inclusive" > /dev/null
+    mkdir -p "$ABS_BASE/impacts_inclusive${DIR_SUFF}"
+    pushd "$ABS_BASE/impacts_inclusive${DIR_SUFF}" > /dev/null
     
     OPTS_INCL=(
         "--robustFit 1"
@@ -208,14 +238,16 @@ if [[ "$MODE" == "IMPACTS-INCLUSIVE" || "$MODE" == "ALL" ]]; then
         "--setParameterRanges r=-5.0,5.0"
         "-m 125"
     )
+    if (( IS_TOYS )); then
+        OPTS_INCL+=("-t" "1" "-s" "$SEED")
+    fi
     
-    combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl --redefineSignalPOIs r --doInitialFit $(printf "%s " "${OPTS_INCL[@]}")
-    combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl --redefineSignalPOIs r --doFits --parallel 32 --cminPreFit 2 --cminPreScan --cminDefaultMinimizerTolerance 0.01 $(printf "%s " "${OPTS_INCL[@]}")
-    combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl --redefineSignalPOIs r -o impacts_incl.json $(printf "%s " "${OPTS_INCL[@]}")
+    run_logged impacts_incl_initial.txt combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl --redefineSignalPOIs r --doInitialFit $(printf "%s " "${OPTS_INCL[@]}")
+    run_logged impacts_incl_fits.txt combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl --redefineSignalPOIs r --doFits --parallel 32 --cminPreFit 2 --cminPreScan --cminDefaultMinimizerTolerance 0.01 $(printf "%s " "${OPTS_INCL[@]}")
+    run_logged impacts_incl_json.txt combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl --redefineSignalPOIs r -o impacts_incl.json $(printf "%s " "${OPTS_INCL[@]}")
     
     plotImpacts.py -i impacts_incl.json -o impacts_incl
     
     popd > /dev/null
-
-    make_collections "$ABS_BASE/impacts_inclusive"
+    make_collections "$ABS_BASE/impacts_inclusive${DIR_SUFF}"
 fi

@@ -152,3 +152,6 @@ dmypy.json
 # Log files
 *.out
 *.archive*
+*.txt
+*.collection
+*.cmb
