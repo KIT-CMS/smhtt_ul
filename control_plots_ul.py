@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="UL control plots workflow")
+    parser = argparse.ArgumentParser(description="UL control plots workflow", allow_abbrev=False)
     parser.add_argument("-c", "--channel", required=True)
     parser.add_argument("-e", "--era", required=True)
     parser.add_argument("-n", "--ntupletag", required=True)
@@ -52,6 +52,12 @@ def parse_arguments() -> argparse.Namespace:
         dest="control_plots_njet_split",
         action="store_true",
         help="Enable njets split categories for control-shape production.",
+    )
+    parser.add_argument(
+        "--control-plots-dnn-split",
+        dest="control_plots_dnn_split",
+        action="store_true",
+        help="Split control plots into DNN categories and bins.",
     )
     parser.add_argument(
         "--analysis-units",
@@ -114,6 +120,8 @@ def parse_arguments() -> argparse.Namespace:
         parser.error("--config-output-file requires --collect-config-only")
     if arguments.analysis_units and arguments.control_plots_njet_split:
         parser.error("--control-plots-njet-split is only valid for control-plot unit production")
+    if arguments.analysis_units and arguments.control_plots_dnn_split:
+        parser.error("--control-plots-dnn-split is only valid for control-plot unit production")
 
     return arguments
 
@@ -268,6 +276,7 @@ def main() -> None:
         if not arguments.analysis_units and not arguments.shape_meta_mode == "gof_inputs":
             control_plots_flag = "--control-plots"
         control_split_flag = "--control-plots-njet-split" if arguments.control_plots_njet_split else ""
+        control_dnn_split_flag = "--control-plots-dnn-split" if arguments.control_plots_dnn_split else ""
         control_plot_set_flag = f"--control-plot-set {used_variables}" if not arguments.analysis_units else ""
 
         shapes_command = f"""
@@ -281,6 +290,7 @@ def main() -> None:
             --optimization-level 2
             {control_plots_flag}
             {control_split_flag}
+            {control_dnn_split_flag}
             {control_plot_set_flag}
             --output-file {shapes_output_path}
             --xrootd {cache_flags}

@@ -367,6 +367,7 @@ def get_control_units(
     do_gofs: bool = False,
     do_2dGofs: bool = False,
     control_plots_njet_split: bool = False,
+    control_plots_dnn_split: bool = False,
 ):
     control_units = {}
     control_binning = default_control_binning
@@ -412,6 +413,47 @@ def get_control_units(
         logger.info(
             "Control-plot njet split enabled with categories: njets_inclusive, njets_0, njets_1, njets_2p"
         )
+    if control_plots_dnn_split:
+        if channel != "mt":
+            raise NotImplementedError("DNN split is currently only implemented for mt")
+        _dnn_categories_cennt = {
+            # 0 - 4 are signal categories
+            5: [0.0, 1.0],  # embedding
+            6: [0.0, 1.0],  # jetFakes
+            7: [0.0, 1.0],  # ttbar
+            8: [0.0, 1.0],  # dyjets
+            9: [0.0, 1.0],  # diboson
+        }
+        _dnn_categories_sannt = {
+            # 0 - 4 are signal categories
+            5: [0.0, 1.0],  # embedding
+            6: [0.0, 1.0],  # jetFakes
+            7: [0.0, 1.0],  # ttbar
+            8: [0.0, 1.0],  # dyjets
+            9: [0.0, 1.0],  # diboson
+        }
+        _dnn_categories_used = _dnn_categories_cennt
+
+        control_categories = [Selection(name="dnn_cat_inclusive", cuts=[("nn_predicted_class >= 5", "dnn_cat_inclusive")])]
+        for _idx, _category_bins in _dnn_categories_used.items():
+            control_categories.append(
+                Selection(
+                    name=f"dnn_cat_{int(_idx)}_inclusive",
+                    cuts=[
+                        (f"nn_predicted_class == {_idx}", f"dnn_cat_{int(_idx)}_inclusive")
+                    ],
+                )
+            )
+            for _idx_bin, (_bin_low, _bin_high) in enumerate(windowed(_category_bins, 2)):
+                control_categories.append(
+                    Selection(
+                        name=f"dnn_cat_{int(_idx)}_bin_{_idx_bin}",
+                        cuts=[
+                            (f"nn_predicted_class == {_idx}", f"dnn_cat_{int(_idx)}_inclusive"),
+                            (f"(nn_predicted_max_value >= {_bin_low}) & (nn_predicted_max_value <= {_bin_high})", f"dnn_cat_{int(_idx)}_bin_{_idx_bin}"),
+                        ],
+                    )
+                )
     else:
         control_categories = [None]
 
@@ -564,6 +606,7 @@ def main(args):
                 variables=args.control_plot_set,
                 do_gofs=False,
                 control_plots_njet_split=args.control_plots_njet_split,
+                control_plots_dnn_split=args.control_plots_dnn_split,
             )
         elif args.gof_inputs:
             nominals[args.era]["units"][channel] = get_control_units(
@@ -572,6 +615,7 @@ def main(args):
                 do_gofs=True,
                 do_2dGofs=args.do_2dGofs,
                 control_plots_njet_split=args.control_plots_njet_split,
+                control_plots_dnn_split=args.control_plots_dnn_split,
             )
         else:
             nominals[args.era]["units"][channel] = get_analysis_units(

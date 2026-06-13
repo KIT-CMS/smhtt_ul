@@ -104,13 +104,31 @@ if [[ $MODE == "CONTROL" ]]; then
     --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
     --enable-cut-ordering
     --locally
-    --control-plots
   )
   # using default variables defined in control_plots_ul.py
   # add `--with-systematic-variations` if finally needed with a distinct varaible selection (default too long)
   python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
   python3 control_plots_ul.py "${KWARGS[@]}" --mode PLOT
+fi
 
+if [[ $MODE == "CONTROL-NJET-SPLIT" ]]; then
+  TAG="control_njet_split_${BASETAG}"
+
+  KWARGS=(
+    --channel "${CHANNEL}"
+    --era "${ERA}"
+    --tag "${TAG}"
+    --ntupletag "${NTUPLETAG}"
+    --additional-friends "${FRIENDS}"
+    --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
+    --enable-cut-ordering
+    --locally
+    --control-plots-njet-split
+  )
+  # using default variables defined in control_plots_ul.py
+  # add `--with-systematic-variations` if finally needed with a distinct varaible selection (default too long)
+  python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
+  # python3 control_plots_ul.py "${KWARGS[@]}" --mode PLOT
 fi
 
 if [[ $MODE == "CONFIG" ]]; then
@@ -126,10 +144,9 @@ if [[ $MODE == "CONFIG" ]]; then
     --locally
     --collect-config-only
     --with-systematic-variations
-    --control-plots
     --config-output-file unmodified_2018_mt_training_${TAG}__all_variables.yaml
   )
-python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
+  python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
 fi
 
 if [[ $MODE == "NN-OUTPUT-CENNT" ]]; then
@@ -160,9 +177,10 @@ if [[ $MODE == "NN-OUTPUT-SANNT" ]]; then
   # latest greatest kind of working fallback
   # TAG="nn_output_SANNT__2026-05-29__${BASETAG}"
   # ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_SANNT_groupedDNN_FF_adjusted__2026-05-29__fixed_inputs__v3"
+  
+  TAG="nn_output_SANNT__2026-06-05__best_of_2200__${BASETAG}"
+  ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_SANNT_groupedDNN__2026-06-05__Nemo2_pareto_best_of_2200__v1" 
 
-  TAG="nn_output_SANNT__2026-06-05__${BASETAG}"
-  ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_SANNT_groupedDNN__2026-06-05__Nemo2_pareto_best_of_1600__v1"
   KWARGS=(
     --channel "${CHANNEL}"
     --era "${ERA}"
@@ -174,6 +192,44 @@ if [[ $MODE == "NN-OUTPUT-SANNT" ]]; then
     --locally
     --with-systematic-variations
     --analysis-units
+  )
+  python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
+  # python3 control_plots_ul.py "${KWARGS[@]}" --mode PLOT
+fi
+
+if [[ $MODE == "CONTROL-DNN-SPLIT-CENNT" ]]; then
+  TAG="control_CENNT_dnn_split_${BASETAG}"
+  ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_CENNT_groupedDNN_FF_adjusted__2026-06-05__v1"
+
+  KWARGS=(
+    --channel "${CHANNEL}"
+    --era "${ERA}"
+    --tag "${TAG}"
+    --ntupletag "${NTUPLETAG}"
+    --additional-friends "${FRIENDS}"
+    --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
+    --enable-cut-ordering
+    --locally
+    --control-plots-dnn-split
+  )
+  python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
+  # python3 control_plots_ul.py "${KWARGS[@]}" --mode PLOT
+fi
+
+if [[ $MODE == "CONTROL-DNN-SPLIT-SANNT" ]]; then
+  TAG="control_SANNT_dnn_split_${BASETAG}"
+  ADDITIONAL_MULTIFRIENDS="${ADDITIONAL_MULTIFRIENDS} nn_output_SANNT_groupedDNN__2026-06-05__Nemo2_pareto_best_of_2200__v1"
+
+  KWARGS=(
+    --channel "${CHANNEL}"
+    --era "${ERA}"
+    --tag "${TAG}"
+    --ntupletag "${NTUPLETAG}"
+    --additional-friends "${FRIENDS}"
+    --additional-multifriends "${ADDITIONAL_MULTIFRIENDS}"
+    --enable-cut-ordering
+    --locally
+    --control-plots-dnn-split
   )
   python3 control_plots_ul.py "${KWARGS[@]}" --mode SHAPES
   # python3 control_plots_ul.py "${KWARGS[@]}" --mode PLOT
