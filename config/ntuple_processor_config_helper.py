@@ -67,6 +67,7 @@ def get_config_formatter(
         name: str,
         cut_expression: str,
         weight_expression: str,
+        var: str,
         **kwargs,  # dont need more, see ntuple_processor/run/RunManager/__histo1d_from_hist for more details
     ) -> None:
         replacement_dict = {"Era": era}
@@ -81,9 +82,13 @@ def get_config_formatter(
 
         sample = "data" if process == "data" else sample
 
-        config[channel][era][process][sample][variation] = NestedDefaultDict(
-            cut=cut_expression or "(float)1.",
-            weight=weight_expression or "(float)1.",
-        )
+        if not config[channel][era][process][sample][variation]:
+            config[channel][era][process][sample][variation] = NestedDefaultDict(
+                cut=cut_expression or "(float)1.",
+                weight=weight_expression or "(float)1.",
+                var=[var],
+            )
+        else:
+            config[channel][era][process][sample][variation]["var"].append(var)
 
     return _config_formatter

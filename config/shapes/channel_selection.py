@@ -13,7 +13,10 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts["extramuon_veto"] = "(extramuon_veto < 0.5)"
     cuts["dilepton_veto"] = "(dilepton_veto < 0.5)"
     cuts["os"] = "((q_1 * q_2) < 0)"
-    cuts["jet_vetomap"] = "(Jet_vetomap < 0.5)"
+    cuts["jet_vetomap"] = "(jet_vetomap < 0.5)"
+    # cuts["met"] = "(puppimet < 30)"
+    # cuts["mvis"] = "(m_vis > 110 || m_vis < 50)"
+    # cuts["pt"] = "(pt_1 > 30 && pt_2 > 30)"
     # cuts["met_mask"] = "(met_mask > 0.5)"
     # event selection for mc in 2024 campaign to have statistically ortogonal events
     # now a filter so no need to add here
@@ -184,6 +187,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
             cuts["ele_iso"] = "(iso_1 < 0.15)"
             cuts["muon_iso"] = "(iso_2 < 0.15)"
             cuts["electron_eta"] = "(abs(eta_1) < 2.5)"
+            #cuts["nbtag"] = "(nbtag >=1)"
 
             if era == "2016preVFP" or era == "2016postVFP":
                 print(f" *** No triggers for {era} implemented yet ***")
@@ -204,14 +208,15 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                 )"""
             elif era in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix", "2024", "2025"]:
                 cuts["trg_selection"] = """(
-                    (pt_2 > 26) &&
+                    (pt_2 > 25) &&
                     (
-                        (pt_1 > 25) &&
+                        (pt_1 > 26) &&
                         (
                             (trg_single_mu24 > 0.5)
                         )
                     )
                 )"""
+            #muon is pt_2 and ele is pt_1
             else:
                 logger.error(f"Given era {era} does not exist")
                 raise ValueError(f"Given era {era} does not exist")
@@ -415,7 +420,7 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
         cuts["os"] = "((q_1 * q_2) < 0)"
         cuts["ele_iso"] = "((iso_1 < 0.1) && (iso_2 < 0.1))"
         cuts["electron_eta"] = "((abs(eta_1) < 2.1) && (abs(eta_2) < 2.1))"
-        # cuts["met"] = "(met < 100)"
+        # cuts["puppimet"] = "(puppimet < 100)"
 
         if era == "2016preVFP" or era == "2016postVFP":
             cuts["trg_selection"] = """(

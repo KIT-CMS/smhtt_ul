@@ -43,7 +43,7 @@ VARIABLES_LIST = [
     "bpt_2", "beta_2", "bphi_2", "btag_value_2",
     "pt_tt", "pt_tt", "pt_vis", "pt_dijet", "pt_ttjj",
     "mjj", "mt_tot", "m_vis",
-    "met", "metphi", "mTdileptonMET", "metSumEt",
+    "puppimet", "puppimetphi", "mTdileptonMET", "metSumEt",
     "nbtag", "njets",
     "q_1", "pzetamissvis", "jet_hemisphere",
     "deltaR_ditaupair",

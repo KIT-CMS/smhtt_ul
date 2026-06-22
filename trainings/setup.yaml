@@ -17,7 +17,7 @@ training_variables:
   - pt_ttjj
   - njets
   - nbtag
-  - met
+  - puppimet
   - deltaEta_ditaupair
   - deltaR_ditaupair
   - mt_1
@@ -158,6 +158,9 @@ dataset_modifications:
       # bakcgrounds
       is_dyjets_tt: is_DY__DY_ZTT
       is_dyjets_ll: is_DY__DY_ZL
+      is_dyjets: 
+       - is_DY__DY_ZTT
+       - is_DY__DY_ZL
       # is_embedding: is_EMB__Embedded
       is_ttbar: 
         - is_TT__TT_TTL
@@ -172,10 +175,11 @@ dataset_modifications:
         - is_TT__TT_TTT
         - is_VV__VV_VVL
         - is_VV__VV_VVT
+        - is_DY__DY_ZL
   selections:
     is_dyjets: anti_iso+nominal
     is_dyjets_tt: anti_iso+nominal
-    is_dy_ll: anti_iso+nominal
+    is_dyjets_ll: anti_iso+nominal
     is_embedding: anti_iso+nominal
     is_ttbar: anti_iso+nominal
     is_diboson: anti_iso+nominal

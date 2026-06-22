@@ -1320,7 +1320,7 @@ class JetFakeVariations(_VariationCollection):
 
 # TODO: TBD, needed or not, collection:
 
-# # fake met scaling in embedded samples
+# # fake puppimet scaling in embedded samples
 # emb_met_scale = [  # TODO: Check if needed or is replaced
 #         ReplaceVariable("scale_embed_metUp", "emb_scale_metUp"),
 #         ReplaceVariable("scale_embed_metDown", "emb_scale_metDown")

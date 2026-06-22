@@ -16,7 +16,7 @@ minimal_control_plot_set = [
     "jeta_2",
     "bpt_1",
     "bpt_2",
-    "met",
+    "puppimet",
     "pfmet",
     "DiTauDeltaR",
     "pzetamissvis",
@@ -908,9 +908,9 @@ control_binning = {
                 3.14,
             ],
         ),
-        "metphi": Histogram(
-            "metphi",
-            "metphi",
+        "puppimetphi": Histogram(
+            "puppimetphi",
+            "puppimetphi",
             [
                 -3.14,
                 -3.01,
@@ -2691,9 +2691,9 @@ control_binning = {
                 160,
             ],
         ),
-        "met": Histogram(
-            "met",
-            "met",
+        "puppimet": Histogram(
+            "puppimet",
+            "puppimet",
             [
                 0,
                 5,
@@ -8312,9 +8312,9 @@ control_binning = {
                 3.14,
             ],
         ),
-        "metphi": Histogram(
-            "metphi",
-            "metphi",
+        "puppimetphi": Histogram(
+            "puppimetphi",
+            "puppimetphi",
             [
                 -3.14,
                 -3.01,
@@ -10080,9 +10080,9 @@ control_binning = {
                 160,
             ],
         ),
-        "met": Histogram(
-            "met",
-            "met",
+        "puppimet": Histogram(
+            "puppimet",
+            "puppimet",
             [
                 0,
                 5,
@@ -14942,9 +14942,9 @@ control_binning = {
                 3.14,
             ],
         ),
-        "metphi": Histogram(
-            "metphi",
-            "metphi",
+        "puppimetphi": Histogram(
+            "puppimetphi",
+            "puppimetphi",
             [
                 -3.14,
                 -3.01,
@@ -16681,9 +16681,9 @@ control_binning = {
                 160,
             ],
         ),
-        "met": Histogram(
-            "met",
-            "met",
+        "puppimet": Histogram(
+            "puppimet",
+            "puppimet",
             [
                 0,
                 5,
@@ -21543,9 +21543,9 @@ control_binning = {
                 3.14,
             ],
         ),
-        "metphi": Histogram(
-            "metphi",
-            "metphi",
+        "puppimetphi": Histogram(
+            "puppimetphi",
+            "puppimetphi",
             [
                 -3.14,
                 -3.01,
@@ -23273,9 +23273,9 @@ control_binning = {
                 160,
             ],
         ),
-        "met": Histogram(
-            "met",
-            "met",
+        "puppimet": Histogram(
+            "puppimet",
+            "puppimet",
             [
                 0,
                 5,
@@ -27993,9 +27993,9 @@ control_binning = {
                 3.14,
             ],
         ),
-        "metphi": Histogram(
-            "metphi",
-            "metphi",
+        "puppimetphi": Histogram(
+            "puppimetphi",
+            "puppimetphi",
             [
                 -3.14,
                 -3.01,
@@ -29821,9 +29821,9 @@ control_binning = {
                 160,
             ],
         ),
-        "met": Histogram(
-            "met",
-            "met",
+        "puppimet": Histogram(
+            "puppimet",
+            "puppimet",
             [
                 0.0,
                 5.0,

@@ -82,6 +82,10 @@ def lumi_weight(era, **kwargs):
        lumi = "218.9" #lumi = "109.81"
     elif era == "2025":
         lumi = "219.78" #lumi = "109.89" 
+    else:
+        raise ValueError("Given era {} not defined.".format(era))
+    return ("{} * 1000.0".format(lumi), "lumi")
+
 
 
 def prefiring_weight(era, **kwargs):
@@ -335,18 +339,34 @@ def ttbar_em_weight(channel, era, **kwargs):
     # Get the data/MC ratio from em channel for m_vis > 100
     # Calculated as: (data - all_backgrounds) / TT_MC in em channel
     
+    # old weigths with shape for 22-23 and wrong weight for 24-25
+    # calculated on m_vis>100 to exclude dy
+    # if era == "2022preEE":
+    #     ratio_em = "0.850809"  # ± 0.006696
+    # elif era == "2022postEE":
+    #     ratio_em = "0.927774"  # ± 0.003925
+    # elif era == "2023preBPix":
+    #     ratio_em = "0.967221"  # ± 0.004604
+    # elif era == "2023postBPix":
+    #     ratio_em = "0.898871"  # ± 0.006258
+    # elif era == "2024":
+    #     ratio_em = "0.926025"  # ± 0.002382
+    # elif era == "2025":
+    #     ratio_em = "0.928433"  # ± 0.002396
+    
+    # new 260602 with nbtag>=0 to exclude dy and most others
     if era == "2022preEE":
-        ratio_em = "0.850809"  # ± 0.006696
+        ratio_em = "0.827018"  # ± 0.002797
     elif era == "2022postEE":
-        ratio_em = "0.927774"  # ± 0.003925
+        ratio_em = "0.955392"  # ± 0.001769
     elif era == "2023preBPix":
-        ratio_em = "0.967221"  # ± 0.004604
+        ratio_em = "1.016815"  # ± 0.002064
     elif era == "2023postBPix":
-        ratio_em = "0.898871"  # ± 0.006258
+        ratio_em = "0.977028"  # ± 0.002836
     elif era == "2024":
-        ratio_em = "0.926025"  # ± 0.002382
+        ratio_em = "0.945792"  # ± 0.000892
     elif era == "2025":
-        ratio_em = "0.928433"  # ± 0.002396
+        ratio_em = "0.918900"  # ± 0.000890
     else:
         ratio_em = "1.0"
     
@@ -1636,12 +1656,18 @@ qqH125 = make_chainable_process_selection(qqH125_process_selection)
 for b in range(200, 211):
     exec(f"qqH125_{b} = get_stxs_bin_selection('vbf_htautau', {b})")
     exec(f"qqH125.bin{b} = qqH125.wrap_next(qqH125_{b})")
+qqH125.bin201to202 = qqH125.wrap_next(get_stxs_bin_selection('vbf_htautau', 201, 202))
+qqH125.bin203to210 = qqH125.wrap_next(get_stxs_bin_selection('vbf_htautau', 203, 210))
 
 # ggH125
 ggH125 = make_chainable_process_selection(ggH125_process_selection)
 for b in range(100, 117):
     exec(f"ggH125_{b} = get_stxs_bin_selection('ggh_htautau', {b})")
     exec(f"ggH125.bin{b} = ggH125.wrap_next(ggH125_{b})")
+ggH125.bin101to104 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 101, 104))
+ggH125.bin105to106 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 105, 106))
+ggH125.bin107to109 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 107, 109))
+ggH125.bin110to116 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 110, 116))
 
 # Individual and miscellaneous
 ZTT_embedded = ZTT_embedded_process_selection

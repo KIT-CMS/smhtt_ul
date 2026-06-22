@@ -269,14 +269,14 @@ def write_hists_per_category(cat_hists: tuple):
                 hist.SetName(name_output.replace("_Era", ""))
                 hist.Write()
         if "scale_embed_met" in name_output:
-            hist.SetTitle(name_output.replace("met", "_".join(["met", args.era])))
-            hist.SetName(name_output.replace("met", "_".join(["met", args.era])))
+            hist.SetTitle(name_output.replace("puppimet", "_".join(["puppimet", args.era])))
+            hist.SetName(name_output.replace("puppimet", "_".join(["puppimet", args.era])))
             hist.Write()
             hist.SetTitle(
-                name_output.replace("met", "_".join(["met", channel, args.era]))
+                name_output.replace("puppimet", "_".join(["puppimet", channel, args.era]))
             )
             hist.SetName(
-                name_output.replace("met", "_".join(["met", channel, args.era]))
+                name_output.replace("puppimet", "_".join(["puppimet", channel, args.era]))
             )
             hist.Write()
         if "Era" in name_output:
@@ -399,7 +399,7 @@ def main(args):
                 else:
                     if not "emb" in process and not "jetFakes" in process:
                         process = _rev_process_map[process]
-        if category != "control_region":
+        if category != "control_region" and not args.gof:
             if "EMB" in process:
                 process  = "EMB_"+category+"_0.0"
             if "emb" in process:
@@ -414,6 +414,21 @@ def main(args):
             name_output = process.replace("125", "_htt125")
         if "Nominal" not in variation:
             name_output += "_" + variation
+        if process == "jetFakes":  # Check for the incorrect pattern
+            if "_Channel" in name_output and "scale_t_" in name_output:
+                name_output = name_output.replace("_Channel", "")  # TODO FIXME
+            if "Down_" in name_output:
+                parts = name_output.split("Down_")
+                if len(parts) == 2:
+                    corrected_name = f"{parts[0]}_{parts[1]}Down"
+                    logger.debug(f"Correcting jetFakes name: {name_output} -> {corrected_name}")
+                    name_output = corrected_name
+            elif "Up_" in name_output:
+                parts = name_output.split("Up_")
+                if len(parts) == 2:
+                    corrected_name = f"{parts[0]}_{parts[1]}Up"
+                    logger.debug(f"Correcting jetFakes name: {name_output} -> {corrected_name}")
+                    name_output = corrected_name
         logging.debug(
             "Adding histogram with name %s as %s to category %s.",
             key.GetName(),

@@ -4,7 +4,12 @@ import logging
 import os
 import pickle
 from functools import partial
-from itertools import combinations
+from itertools import product
+import multiprocessing as mp
+import pathlib
+import time
+from copy import deepcopy
+from tqdm import tqdm
 
 import yaml
 
@@ -12,7 +17,7 @@ import config.shapes.process_selection as selection
 import config.shapes.variations as variations
 import shapes.utils as shape_utils
 import config.ntuple_processor_config_helper as ntuple_processor_config_helper
-from config.helper_collection import PreserveROOTPathsAsStrings
+from config.helper_collection import PreserveROOTPathsAsStrings, incremental_hadd
 from config.logging_setup_configs import setup_logging
 from config.shapes.category_selection import categorization as default_categorization
 from config.shapes.channel_selection import channel_selection
@@ -21,7 +26,6 @@ from config.shapes.file_names import files
 from config.shapes.gof_binning import load_gof_binning
 from ntuple_processor import GraphManager, RunManager, UnitManager
 from ntuple_processor.utils import Selection
-
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -117,6 +121,11 @@ def parse_arguments():
         help="Produce shapes for control plots. Default is production of analysis shapes.",
     )
     parser.add_argument(
+        "--control-plots-njet-split",
+        action="store_true",
+        help="Split control plots into njets_inclusive, njets_0, njets_1 and njets_2p categories.",
+    )
+    parser.add_argument(
         "--gof-inputs",
         action="store_true",
         help="Produce shapes for control plots. Default is production of analysis shapes.",
@@ -155,6 +164,12 @@ def parse_arguments():
         help="Directory the graph file is written to.",
     )
     parser.add_argument(
+        "--graph-filename",
+        default=None,
+        type=str,
+        help="Filename for the graph file.",
+    )
+    parser.add_argument(
         "--collect-config-only",
         action="store_true",
         help="Only collect cuts/weights/datasets/variations into a YAML file, skip histogram production.",
@@ -176,6 +191,22 @@ def parse_arguments():
         help="Read input ntuples and friends via xrootd from gridka dCache",
     )
     parser.add_argument(
+        "--split-signal",
+        action="store_true",
+        help="Use per-bin ggh/qqh STXS signal processes instead of inclusive.",
+    )
+    parser.add_argument(
+        "--locally",
+        action="store_true",
+        help="Cache input ntuples/friends under /ceph/$USER and prefer local files.",
+    )
+    parser.add_argument(
+        "--local-cache-workers",
+        default=10,
+        type=int,
+        help="Maximum number of parallel workers used to fill the local cache.",
+    )
+    parser.add_argument(
         "--validation-tag",
         default="default",
         type=str,
@@ -189,11 +220,44 @@ def parse_arguments():
     )
     parser.add_argument(
         "--ff-type",
-        help=f"Set to the type of fake factor used. If set to none anti_iso (and associated) variation is (are) skipped. \n{variations.__FF_OPTION_info__}",
-        default="none"
+        help=f"Set to the type of fake factor used.",
+        default="fake_factor"
+    )
+    parser.add_argument(
+        "--run-splitted",
+        action="store_true",
+        help="If set, run the job in splitted mode.",
+    )
+    parser.add_argument(
+        "--incremental-hadd",
+        action="store_true",
+        help="If set, incrementally hadd the output files that are produced if --run-splitted is set.",
+    )
+    parser.add_argument(
+        "--remove-partial-files",
+        action="store_true",
+        help="If set, remove partial files after processing.",
+    )
+    parser.add_argument(
+        "--discover-cut-ordering",
+        action="store_true",
+        help="Discover per-dataset cut ordering from one run and write it to --cut-order-cache-file.",
+    )
+    parser.add_argument(
+        "--cut-order-cache-file",
+        default=None,
+        type=str,
+        help="Path to a per-dataset cut-order cache json file.",
+    )
+    parser.add_argument(
+        "--enable-cut-ordering",
+        action="store_true",
+        help="Enable applying cut ordering from cache. If not set, declared cut order is kept.",
     )
     return parser.parse_args()
 
+WITH_SPLIT_SIGNAL = False
+WITH_SPLIT_SIGNAL_PRUNED = False
 
 def add_processes(
     add_fn: callable,
@@ -220,6 +284,19 @@ def add_processes(
     add_fn(name="ggh", dataset=datasets["ggH"], selections=select_fn(selection.ggH125))
     add_fn(name="tth", dataset=datasets["ttH"], selections=select_fn(selection.ttH))
     add_fn(name="vh", dataset=datasets["VH"], selections=select_fn(selection.VH))
+    if WITH_SPLIT_SIGNAL:
+        for b in range(100, 117):
+            add_fn(name=f"ggh_b{b}", dataset=datasets["ggH"], selections=select_fn(*getattr(selection.ggH125, f"bin{b}")))
+        for b in range(200, 211):
+            add_fn(name=f"qqh_b{b}", dataset=datasets["qqH"], selections=select_fn(*getattr(selection.qqH125, f"bin{b}")))
+    if WITH_SPLIT_SIGNAL_PRUNED:
+        add_fn(name="qqh_bin201to202", dataset=datasets["qqH"], selections=select_fn(*selection.qqH125.bin201to202))
+        add_fn(name="qqh_bin203to210", dataset=datasets["qqH"], selections=select_fn(*selection.qqH125.bin203to210))
+
+        add_fn(name="ggh_bin101to104", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin101to104))
+        add_fn(name="ggh_bin105to106", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin105to106))
+        add_fn(name="ggh_bin107to109", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin107to109))
+        add_fn(name="ggh_bin110to116", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin110to116))
 
 
 def get_select_function(
@@ -290,6 +367,8 @@ def get_control_units(
     selection_option: str = "CR",
     do_gofs: bool = False,
     do_2dGofs: bool = False,
+    control_plots_njet_split: bool = False,
+    control_plots_dnn_split: bool = False,
 ):
     control_units = {}
     control_binning = default_control_binning
@@ -299,7 +378,9 @@ def get_control_units(
         # also build all aviailable 2D variables from the 1D variables
         if do_2dGofs:
             variables_2d = []
-            for var1, var2 in combinations(variables, 2):
+            for var1, var2 in product(variables, variables):  # order invariant
+                if var1 == var2:  # diagonals are solved by 1d
+                    continue
                 if f"{var1}_{var2}" in control_binning[channel]:
                     variables_2d.append(f"{var1}_{var2}")
                 elif f"{var2}_{var1}" in control_binning[channel]:
@@ -323,6 +404,77 @@ def get_control_units(
     # variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
     logger.info(f"[INFO] Running control plots for variables: {variable_set}")
 
+    if control_plots_njet_split:
+        control_categories = [
+            Selection(name="njets_inclusive", cuts=[("njets >= 0", "njets_inclusive")]),
+            Selection(name="njets_0", cuts=[("njets == 0", "njets_0")]),
+            Selection(name="njets_1", cuts=[("njets == 1", "njets_1")]),
+            Selection(name="njets_2p", cuts=[("njets >= 2", "njets_2p")]),
+        ]
+        logger.info(
+            "Control-plot njet split enabled with categories: njets_inclusive, njets_0, njets_1, njets_2p"
+        )
+    if control_plots_dnn_split:
+        if channel == "mt" or channel == "et":
+            if args.split_signal:
+                _dnn_categories = {
+                    # 0 - 1 are signal categories
+                    2: [0.0, 1.0],  # dy tt
+                    3: [0.0, 1.0],  # dy ll
+                    4: [0.0, 1.0],  # ff
+                    5: [0.0, 1.0],  # ttbar
+                    6: [0.0, 1.0],  # diboson
+                }
+            else:
+                _dnn_categories = {
+                    # 0 - 1 are signal categories #adjust the numbers later depending on the signals
+                    2: [0.0, 1.0],  # dy tt
+                    3: [0.0, 1.0],  # dy ll
+                    4: [0.0, 1.0],  # ff
+                    5: [0.0, 1.0],  # ttbar
+                    6: [0.0, 1.0],  # diboson
+                }
+        elif channel == "tt":
+            if args.split_signal:
+                _dnn_categories = {
+                    # 0 - 1 are signal categories
+                    2: [0.0, 1.0],  # dy tt
+                    3: [0.0, 1.0],  # ff
+                    4: [0.0, 1.0],  # rest
+                }
+            else:
+                _dnn_categories = {
+                    # 0 - 1 are signal categories #adjust the numbers later depending on the signals
+                    2: [0.0, 1.0],  # dy tt
+                    3: [0.0, 1.0],  # ff
+                    4: [0.0, 1.0],  # rest
+                }
+        else:
+            raise NotImplementedError("DNN split is currently not implemented")
+
+        control_categories = [Selection(name="dnn_cat_inclusive", cuts=[("nn_predicted_class >= 2", "dnn_cat_inclusive")])] # bkg classes inclusive
+        for _idx, _category_bins in _dnn_categories.items():
+            control_categories.append(
+                Selection(
+                    name=f"dnn_cat_{int(_idx)}_inclusive",
+                    cuts=[
+                        (f"nn_predicted_class == {_idx}", f"dnn_cat_{int(_idx)}_inclusive")
+                    ],
+                )
+            )
+            for _idx_bin, (_bin_low, _bin_high) in enumerate(windowed(_category_bins, 2)): # split by dnn bins
+                control_categories.append(
+                    Selection(
+                        name=f"dnn_cat_{int(_idx)}_bin_{_idx_bin}",
+                        cuts=[
+                            (f"nn_predicted_class == {_idx}", f"dnn_cat_{int(_idx)}_inclusive"),
+                            (f"(nn_predicted_max_value >= {_bin_low}) & (nn_predicted_max_value <= {_bin_high})", f"dnn_cat_{int(_idx)}_bin_{_idx_bin}"),
+                        ],
+                    )
+                )
+    else:
+        control_categories = [None]
+
     _selection_kwargs = dict(
         channel=channel,
         era=era,
@@ -343,6 +495,7 @@ def get_control_units(
             channel=channel,
             binning=control_binning,
             variables=variable_set,
+            categories=control_categories,
         ),
         datasets=datasets,
         select_fn=_select,
@@ -387,12 +540,37 @@ def collect_config(
             default_flow_style=False,
             Dumper=PreserveROOTPathsAsStrings,
         )
-    logger.info(f"Configuration written to {args.config_output_file}")
-    logger.info("Due to a bug in ROOT/xrd the script won't exit properly. Please kill it manually. (i.e. Ctrl+z && kill %1)")
+    logger.info(f"Configuration written to {_path}")
 
 
 def main(args):
+    global WITH_SPLIT_SIGNAL, WITH_SPLIT_SIGNAL_PRUNED
+    WITH_SPLIT_SIGNAL = args.split_signal
     # Parse given arguments.
+    if args.cut_order_cache_file is None and len(args.channels) == 1:
+        if os.path.exists(
+            (
+                _cut_order_cache_file := os.path.join(
+                    "ntuple_processor",
+                    ".cached_paths",
+                    f"cut_ordering_{args.era}_{args.channels[0]}.json",
+                )
+            )
+        ):
+            args.cut_order_cache_file = _cut_order_cache_file
+            logger.info(f"Auto set cut-order cache path to: {args.cut_order_cache_file}")
+    else:
+        logger.info(f"Cut-order cache path: {args.cut_order_cache_file}")
+
+    if args.discover_cut_ordering and args.run_splitted:
+        raise NotImplementedError("--discover-cut-ordering is not supported together with --run-splitted")
+
+    if args.discover_cut_ordering:
+        logger.info("Cut-order discovery is enabled for this run")
+
+    if args.enable_cut_ordering:
+        logger.info("Cut-order application is enabled for this run")
+
     friend_directories = {
         "et": args.et_friend_directory,
         "mt": args.mt_friend_directory,
@@ -408,6 +586,9 @@ def main(args):
     # setup categories depending on the selected anayses
     unit_manager = UnitManager()
     logger.info(f"Apply tau ID: {args.apply_tauid}")
+    if args.locally:
+        logger.info("Local input caching enabled: /store/user/$USER/... -> /ceph/$USER/...")
+        logger.info(f"Local cache workers: {args.local_cache_workers}")
 
     nominals = {}
     nominals[args.era] = {}
@@ -424,6 +605,8 @@ def main(args):
             directory=args.directory,
             xrootd=args.xrootd,
             validation_tag=args.validation_tag,
+            locally=args.locally,
+            local_cache_workers=args.local_cache_workers,
         )
 
         common_kwargs = dict(
@@ -441,6 +624,8 @@ def main(args):
                 **common_kwargs,
                 variables=args.control_plot_set,
                 do_gofs=False,
+                control_plots_njet_split=args.control_plots_njet_split,
+                control_plots_dnn_split=args.control_plots_dnn_split,
             )
         elif args.gof_inputs:
             nominals[args.era]["units"][channel] = get_control_units(
@@ -448,6 +633,8 @@ def main(args):
                 variables=args.control_plot_set,
                 do_gofs=True,
                 do_2dGofs=args.do_2dGofs,
+                control_plots_njet_split=args.control_plots_njet_split,
+                control_plots_dnn_split=args.control_plots_dnn_split,
             )
         else:
             nominals[args.era]["units"][channel] = get_analysis_units(
@@ -475,6 +662,10 @@ def main(args):
             "vh",
             #"zh",
             #"wh",
+            *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
+            *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         }
     else:
         procS = args.process_selection
@@ -502,17 +693,35 @@ def main(args):
         "ggh",
         "qqh",
         "tth",
-        "zh",
-        "wh",
+        # "zh",
+        # "wh",
         "vh",
-        "gghww",
-        "qqhww",
-        "zhww",
-        "whww",
+        # "gghww",
+        # "qqhww",
+        # "zhww",
+        # "whww",
+        *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
+        *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
+        # ---
+        *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+        *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
     } & procS
-    signalsS = sm_signalsS
+    signalsS = sm_signalsS | set(  # this part is not necessary?
+        [
+            *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
+            *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+        ]
+    )
     if args.control_plots or args.gof_inputs and not args.control_plots_full_samples:
-        signalsS = signalsS & {"ggh", "qqh", "vh", "tth",}
+        signalsS = signalsS & {
+            "ggh", "qqh", 
+            "vh", "tth",
+            *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
+            *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 202), (203, 210)]} if WITH_SPLIT_SIGNAL_PRUNED else []),}
 
     simulatedProcsDS = {
         chname_: jetFakesDS[chname_] | leptonFakesS | trueTauBkgS | signalsS
@@ -528,6 +737,7 @@ def main(args):
     logger.info(f"signals: {signalsS}")
 
     def _book(processes, variations):  # helper wrapper
+        logger.info(f"Booking processes on line {shape_utils.get_caller_line_number()}\n\nProcess {processes} booking variations\n\n{variations}\n")
         shape_utils.book_histograms(
             processes=processes,
             variations=variations,
@@ -554,8 +764,16 @@ def main(args):
         ############################
         if not args.skip_systematic_variations:
             # Book variations common to all channels.
-            _book({"ggh"} & procS, [variations.ggh_acceptance, variations.ggh_muRmuF_acceptance])
-            _book({"qqh"} & procS, [variations.qqh_acceptance, variations.qqh_muRmuF_acceptance])
+            logger.info(f"Start booking systematic variations for channel {channel}")
+
+            _book({proc for proc in signalsS if "ggh" in proc} & procS, [variations.ggh_acceptance, variations.ggh_muRmuF_acceptance])
+            _book({proc for proc in signalsS if "qqh" in proc} & procS, [variations.qqh_acceptance, variations.qqh_muRmuF_acceptance])
+
+            # General variations for simulated processes
+            _book(simulatedProcsDS[channel], [variations.jet_es, variations.btagging])
+            _book(signalsS, variations.LHE_scale.unrolled())
+            _book(signalsS - {proc for proc in signalsS if "qqh" in proc}, variations.PS_scale.unrolled())  # qqh-like samples are not properly present in v9 samples
+
             _book(signalsS, variations.LHE_scale.unrolled())
 
             _book({"ztt", "zj", "zl", "w"} & procS | signalsS, variations.Recoil.unrolled())
@@ -615,8 +833,7 @@ def main(args):
     g_manager = GraphManager(unit_manager.booked_units, True)
     g_manager.optimize(args.optimization_level)
     graphs = g_manager.graphs
-    for graph in graphs:
-        print(f"{graph}")
+    logger.info('\n'.join(str(graph) for graph in graphs))
 
     if args.collect_config_only:
         if len(args.channels) > 1:
@@ -627,26 +844,84 @@ def main(args):
             channel=args.channels[0],
             filename=args.config_output_file,
         )
+        logger.warning("Forcing process exit after config collection to avoid known ROOT/xrd shutdown hang.")
+        logging.shutdown()
+        os._exit(0)
         return
 
     if args.only_create_graphs:
-        _channels = ",".join(args.channels)
-        _processes = ",".join(sorted(procS))
-        if args.control_plots or args.gof_inputs:
-            graph_file_name = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
-        else:
-            graph_file_name = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
-        if args.graph_dir is not None:
-            graph_file = os.path.join(args.graph_dir, graph_file_name)
-        else:
-            graph_file = graph_file_name
+        if args.graph_filename is None:
+            _channels = ",".join(args.channels)
+            _processes = ",".join(sorted(procS))
+            if args.control_plots or args.gof_inputs:
+                args.graph_filename = f"control_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+            else:
+                args.graph_filename = f"analysis_unit_graphs-{args.era}-{_channels}-{_processes}.pkl"
+        if args.graph_dir is None:
+            args.graph_dir = "."
+
+        os.makedirs(args.graph_dir, exist_ok=True)
+        graph_file = os.path.join(args.graph_dir, args.graph_filename)
         logger.info(f"Writing created graphs to file {graph_file}")
         with open(graph_file, "wb") as file:
             pickle.dump(graphs, file)
     else:
-        r_manager = RunManager(graphs)
-        r_manager.run_locally(output_file, args.num_processes, args.num_threads)
+        if not args.run_splitted:
+            r_manager = RunManager(
+                graphs,
+                cut_order_cache_path=args.cut_order_cache_file,
+                discover_cut_ordering=args.discover_cut_ordering,
+                enable_cut_ordering=args.enable_cut_ordering,
+            )
+            r_manager.run_locally(output_file, args.num_processes, args.num_threads)
+        else:
+            _p = pathlib.Path(args.output_file).parent / "partial_graph_results"
+            _p.mkdir(exist_ok=True)
+            arguments = [
+                (deepcopy(_graph), _p / f"_out_{idx}.root", args)
+                for idx, _graph in tqdm(enumerate(graphs))
+                if not (_p / f"_out_{idx}.root").exists()
+            ]
+            with mp.Pool(args.num_processes) as pool:
+                print("\n".join(list(pool.imap_unordered(run_partial_graph, arguments))))
+            if args.incremental_hadd:
+                incremental_hadd(
+                    input_directory=str(_p),
+                    output_file=output_file,
+                    batch_size=250,
+                    remove_partial_files=args.remove_partial_files,
+                )
 
+
+def run_partial_graph(arguments):
+    graph, output_file, args = arguments
+
+    output_file = pathlib.Path(output_file)
+    reservation_path = pathlib.Path(str(output_file).replace(".root", ".lock"))
+
+    if output_file.exists() and not reservation_path.exists():
+        return f"skip {output_file.name}, already done"
+
+    if reservation_path.exists() and not output_file.exists():
+        return f"locked {output_file.name}"
+
+    try:
+        reservation_path.touch(exist_ok=False)
+    except FileExistsError:
+        return f"locked {output_file.name}"
+
+    try:
+        RunManager(
+            [graph],
+            cut_order_cache_path=args.cut_order_cache_file,
+            discover_cut_ordering=False,
+            enable_cut_ordering=args.enable_cut_ordering,
+        ).run_locally(str(output_file), 1, args.num_threads)
+        return f"done {output_file.name}"
+    except Exception as e:
+        return f"failed {output_file.name}: {e}"
+    finally:
+        reservation_path.unlink(missing_ok=True)
 
 if __name__ == "__main__":
     args = parse_arguments()

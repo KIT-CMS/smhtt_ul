@@ -5,7 +5,7 @@ NTUPLETAG=$3
 TAG=$4
 MODE=$5
 # full set
-VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,mt_1_pf,mt_2_pf,pt_tt,pfmet,met,pzetamissvis,metphi,m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt,pt_dijet,deltaR_ditaupair,decaymode_2,mt_tot,jet_hemisphere,pt_vis"
+VARIABLES="pt_1,pt_2,eta_1,eta_2,m_vis,jpt_1,jpt_2,jeta_1,jeta_2,mjj,njets,nbtag,bpt_1,bpt_2,mt_1,mt_2,mt_1_pf,mt_2_pf,pt_tt,pfmet,puppimet,pzetamissvis,puppimetphi,m_fastmtt,pt_fastmtt,eta_fastmtt,phi_fastmtt,pt_dijet,deltaR_ditaupair,decaymode_2,mt_tot,jet_hemisphere,pt_vis"
 # used in training
 VARIABLES="pt_1,pt_2,m_vis,njets,nbtag,jpt_1,jpt_2,jeta_1,jeta_2,m_fastmtt,mjj,pt_vis,deltaR_ditaupair,pt_dijet"
 # VARIABLES="pt_2,jpt_2"

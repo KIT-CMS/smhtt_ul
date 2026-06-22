@@ -57,8 +57,8 @@ def find_em_file(era):
     """Find em channel ROOT file for given era with tag 260417."""
     output_dir = Path("/work/sgiappic/smhtt_ul/output")
     
-    # Look for directories matching: {era}-em-htt*260417*
-    em_dirs = sorted(output_dir.glob(f"{era}-em-htt*260417*"))
+    # Look for directories matching
+    em_dirs = sorted(output_dir.glob(f"{era}-em-htt*260602_btag*"))
     
     if not em_dirs:
         return None
@@ -77,7 +77,7 @@ def find_em_file(era):
     
     return None
 
-def get_histograms_by_process(f, m_vis_variable="m_vis"):
+def get_histograms_by_process(f, m_vis_variable="met"):
     """
     Extract m_vis histograms by process from ROOT file.
     
@@ -290,7 +290,7 @@ def main():
         "2025",
     ]
     
-    m_vis_cut = 100
+    m_vis_cut = 0
     
     print("="*80)
     print("TTBar EM-Channel Weight Calculation")

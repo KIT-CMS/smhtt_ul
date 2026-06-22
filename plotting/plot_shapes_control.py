@@ -29,7 +29,9 @@ def parse_arguments():
     parser.add_argument(
         "-i",
         "--input",
+        nargs="+",
         type=str,
+        default=[],
         required=True,
         help="ROOT file with shapes of processes")
     parser.add_argument(
@@ -137,14 +139,20 @@ def main(info):
         era = "Run2022preEE"
     elif "2022postEE" in args.era:
         era = "Run2022postEE"
+    elif "2022" in args.era:
+        era = "Run2022"
     elif "2023preBPix" in args.era:
         era = "Run2023preBPix"
     elif "2023postBPix" in args.era:
         era = "Run2023postBPix"
+    elif "2023" in args.era:
+        era = "Run2023"
     elif "2024" in args.era:
         era = "Run2024"
     elif "2025" in args.era:
         era = "Run2025"
+    elif "3" in args.era:
+        era = "Run3 - 2022-2025"
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
@@ -158,7 +166,7 @@ def main(info):
     width = 600
     if args.linear:
         plot = dd.Plot(
-            [0.3, [0.3, 0.28]], "ModTDR", r=0.04, l=0.14, width=width)
+            [0.2, [0.3, 0.19]], "ModTDR", r=0.04, l=0.14, width=width)
     else:
         plot = dd.Plot(
             [0.5, [0.3, 0.28]], "ModTDR", r=0.04, l=0.14, width=width)
@@ -194,12 +202,12 @@ def main(info):
     plot.add_hist(rootfile.get(channel, "data", category=cat, shape_type=stype), "data_obs")
     data_norm = plot.subplot(0).get_hist("data_obs").Integral()
     plot.subplot(0).get_hist("data_obs").GetXaxis().SetMaxDigits(4)
-    plot.subplot(0).setGraphStyle("data_obs", "e0")
-    plot.subplot(0).setGraphStyle("data_obs", "e0")
+    plot.subplot(0).setGraphStyle("data_obs", "e0", markersize=0.6)
+    plot.subplot(2).setGraphStyle("data_obs", "e0", markersize=0.6)
     if args.linear:
         pass
     else:
-        plot.subplot(1).setGraphStyle("data_obs", "e0")
+        plot.subplot(1).setGraphStyle("data_obs", "e0", markersize=0.8)
 
     # get signal histograms
     plot_idx_to_add_signal = [0,2] if args.linear else [1,2]
@@ -314,7 +322,7 @@ def main(info):
     max_bin = max(bkg_max, data_max)
     plot.subplot(0).setYlims(
         split_dict[channel],
-        max(1.6 * max_bin, split_dict[channel] * 2))
+        max(1.8 * max_bin, split_dict[channel] * 2))
 
     log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
 
@@ -326,7 +334,7 @@ def main(info):
             1.0,
             1000 * plot.subplot(0).get_hist("data_obs").GetMaximum())
 
-    plot.subplot(2).setYlims(0.75, 1.45)
+    plot.subplot(2).setYlims(0.5, 1.5)
     # if channel == "mm":
     #     plot.subplot(0).setLogY()
     #     plot.subplot(0).setYlims(1, 10**10)
@@ -337,7 +345,7 @@ def main(info):
             "")  # otherwise number labels are not drawn on axis
         plot.subplot(1).setLogY()
     # Check if variables should be plotted with log x axis
-    log_x_variables = ["puppimet"]
+    log_x_variables = [] # "puppimet"
     if variable in log_x_variables:
         plot.subplot(0).setLogX()
         plot.subplot(1).setLogX()
@@ -358,6 +366,7 @@ def main(info):
 
     plot.subplot(2).setYlabel("")
     plot.subplot(2).setGrid()
+    plot.subplot(2).setNYdivisions(5, 2)
     plot.scaleYLabelSize(0.8)
     plot.scaleYTitleOffset(1.1)
 
@@ -402,7 +411,7 @@ def main(info):
     suffix = ["", "_top"]
     for i in range(2):
 
-        plot.add_legend(width=0.55, height=0.15)
+        plot.add_legend(width=0.55, height=0.25)
         for process in legend_bkg_processes:
             if "mm" in channel and process == "EMB":
                 plot.legend(i).add_entry(
@@ -421,31 +430,42 @@ def main(info):
                 )
         plot.legend(i).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
         if args.add_signals:
-            plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s#times gg#rightarrowH"%str(int(ggH_scale)), 'l')
-            plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s#times qq#rightarrowH"%str(int(qqH_scale)), 'l')
-            #plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s #times V(lep)H"%str(int(VH_scale)), 'l')
-            #plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s #times ttH"%str(int(ttH_scale)), 'l')
+            if ggH_scale > 0:
+                plot.legend(i).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "%s#times gg#rightarrowH"%str(int(ggH_scale)), 'l')
+            if qqH_scale > 0:
+                plot.legend(i).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "%s#times qq#rightarrowH"%str(int(qqH_scale)), 'l')
+            if VH_scale > 0:
+                plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s#times V(lep)H"%str(int(VH_scale)), 'l')
+            if ttH_scale > 0:
+                plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s#times ttH"%str(int(ttH_scale)), 'l')
             # # plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "%s #times H#rightarrowWW"%str(int(HWW_scale)), 'l')
         plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
-        plot.legend(i).setNColumns(3)
+        plot.legend(i).setNColumns(2)
         plot.legend(i).setAlpha(0.0)
     plot.legend(0).Draw()
     plot.legend(1).Draw()
 
-    for i in range(2):
-        plot.add_legend(
-            reference_subplot=2, pos=1, width=0.6, height=0.03)
-        plot.legend(i + 2).add_entry(0, "data_obs", "Observed", 'PE2L')
-        if "mm" not in channel and "ee" not in channel and args.draw_jet_fake_variation is None and args.add_signals:
-            plot.legend(i + 2).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i],
-                                         "ggH+bkg.", 'l')
-            plot.legend(i + 2).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i],
-                                         "qqH+bkg.", 'l')
-        plot.legend(i + 2).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
-        plot.legend(i + 2).setNColumns(4)
-    plot.legend(2).Draw()
-    plot.legend(3).setAlpha(0.0)
-    plot.legend(3).Draw()
+    # ratio legend, same as normal so not needed`
+    # for i in range(2):
+    #     plot.add_legend(
+    #         reference_subplot=2, pos=1, width=0.6, height=0.03)
+    #     plot.legend(i + 2).add_entry(0, "data_obs", "Observed", 'PE2L')
+    #     if "mm" not in channel and "ee" not in channel and args.draw_jet_fake_variation is None and args.add_signals:
+    #         if ggH_scale > 0:
+    #             plot.legend(i + 2).add_entry(0 if args.linear else 1, "ggH%s" % suffix[i], "ggH+bkg.", 'l')
+    #         if qqH_scale > 0:
+    #             plot.legend(i + 2).add_entry(0 if args.linear else 1, "qqH%s" % suffix[i], "qqH+bkg.", 'l')
+    #         if VH_scale > 0:
+    #             plot.legend(i).add_entry(0 if args.linear else 1, "VH%s" % suffix[i], "%s#times V(lep)H"%str(int(VH_scale)), 'l')
+    #         if ttH_scale > 0:
+    #             plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s#times ttH"%str(int(ttH_scale)), 'l')
+    
+                                             
+    #     plot.legend(i + 2).add_entry(0, "total_bkg", "Bkg. stat. unc.", 'f')
+    #     plot.legend(i + 2).setNColumns(4)
+    # plot.legend(2).Draw()
+    # plot.legend(3).setAlpha(0.0)
+    # plot.legend(3).Draw()
 
     # draw additional labels
     # guidelines https://cms-analysis.docs.cern.ch/guidelines/plotting/general/#labeling-guidelines
@@ -462,10 +482,14 @@ def main(info):
         plot.DrawLumi("8.08 fb^{-1} (2022 preEE, 13.6 TeV)")
     elif "2022postEE" in args.era:
         plot.DrawLumi("26.67 fb^{-1} (2022 postEE, 13.6 TeV)")
+    elif "2022" in args.era:
+        plot.DrawLumi("34.75 fb^{-1} (2022, 13.6 TeV)")
     elif "2023preBPix" in args.era:
         plot.DrawLumi("17.96 fb^{-1} (2023 preBPix, 13.6 TeV)")
     elif "2023postBPix" in args.era:
         plot.DrawLumi("9.67 fb^{-1} (2023 postBPix, 13.6 TeV)")
+    elif "2023" in args.era:
+        plot.DrawLumi("27.63 fb^{-1} (2023, 13.6 TeV)")
     elif "2024" in args.era:
         if "CDE" in args.tag:
             plot.DrawLumi("26.52 fb^{-1} (2024 CDE, 13.6 TeV)")
@@ -474,14 +498,17 @@ def main(info):
         else:
             plot.DrawLumi("109.81 fb^{-1} (2024, 13.6 TeV)")
     elif "2025" in args.era:
-        plot.DrawLumi("109.89 fb^{-1} (2025, 13.6 TeV)") 
+        plot.DrawLumi("109.89 fb^{-1} (2025, 13.6 TeV)")
+    elif "3" in args.era:
+        plot.DrawLumi("281.94 fb^{-1} (2022-2025, 13.6 TeV)")  
     else:
         logger.critical("Era {} is not implemented.".format(args.era))
         raise Exception
 
     posChannelCategoryLabelLeft = None
     plot.DrawChannelCategoryLabel(
-        "%s, %s" % (channel_dict[channel], "inclusive"),
+        # "%s, %s" % (channel_dict[channel], "inclusive"),
+        "%s" % (channel_dict[channel]),
         #"%s" % ("Private work (CMS data/simulation)"),
         begin_left=posChannelCategoryLabelLeft)
 

@@ -1,4 +1,5 @@
 import numpy as np
+import argparse
 from ntuple_processor import Histogram
 from ntuple_processor.utils import Selection
 
@@ -44,41 +45,37 @@ def build_xxh_cutstring(channel):
     return cutstring, bincounter
 
 
-fine_binning = np.linspace(0.0, 1.0, 51)
-category_mapping = {
-    "mt": {
-        "ggh": {
-            "index": 0,
-            "binning": fine_binning,
+fine_binning = np.linspace(0.0, 1.0, 11)
+if args.split_signal:
+    category_mapping = {
+        "mt": {
+            "ggh": {"index": 0, "binning": fine_binning},
+            "vbf": {"index": 1, "binning": fine_binning},
+            "dyjets_tt": {"index": 2, "binning": fine_binning},
+            "dyjets_ll": {"index": 3, "binning": fine_binning},
+            "jetfakes": {"index": 4, "binning": fine_binning},
+            "ttbar": {"index": 5, "binning": fine_binning},
+            "diboson": {"index": 6, "binning": fine_binning},
         },
-        "qqh": {
-            "index": 1,
-            "binning": fine_binning,
-        },
-        "ztt": {
-            "index": 2,
-            "binning": fine_binning,
-        },
-        "ff": {
-            "index": 3,
-            "binning": fine_binning,
-        },
-        "zll": {
-            "index": 4,
-            "binning": fine_binning,
+        "et": {
+            "ggh": {"index": 0, "binning": fine_binning},
+            "vbf": {"index": 1, "binning": fine_binning},
+            "dyjets_tt": {"index": 2, "binning": fine_binning},
+            "dyjets_ll": {"index": 3, "binning": fine_binning},
+            "jetfakes": {"index": 4, "binning": fine_binning},
+            "ttbar": {"index": 5, "binning": fine_binning},
+            "diboson": {"index": 6, "binning": fine_binning},
         },
         "tt": {
-            "index": 5,
-            "binning": fine_binning,
-        },
-        "misc": {
-            "index": 6,
-            "binning": fine_binning,
-        },
+            "ggh": {"index": 0, "binning": fine_binning},
+            "vbf": {"index": 1, "binning": fine_binning},
+            "dyjets_tt": {"index": 2, "binning": fine_binning},
+            "jetfakes": {"index": 3, "binning": fine_binning},
+            "bkg_rest": {"index": 4, "binning": fine_binning},
+        }
     }
-}
 categorization = {}
-for channel in ["mt"]:
+for channel in ["mt", "et", "tt"]:
     categorization[channel] = []
     for category in category_mapping[channel].keys():
         selection = (
@@ -86,7 +83,7 @@ for channel in ["mt"]:
                 name=category,
                 cuts=[
                     (
-                        f"{channel}_max_index == {category_mapping[channel][category]['index']}",
+                        f"nn_predicted_class == {category_mapping[channel][category]['index']}",
                         "category selection",
                     )
                 ],
@@ -94,30 +91,30 @@ for channel in ["mt"]:
             [
                 Histogram(
                     f"{channel}_score",
-                    f"{channel}_max_score",
+                    "nn_predicted_max_value",
                     category_mapping[channel][category]["binning"],
                 )
             ],
         )
         categorization[channel].append(selection)
     # add the xxh category
-    cutstring, nbins = build_xxh_cutstring(channel)
-    selection = (
-        Selection(
-            name="xxh",
-            cuts=[
-                (
-                    f"(({channel}_max_index == {category_mapping[channel]['qqh']['index']}) || ({channel}_max_index == {category_mapping[channel]['ggh']['index']}))",
-                    "category selection",
-                )
-            ],
-        ),
-        [
-            Histogram(
-                "mt_score",
-                cutstring,
-                np.arange(nbins + 1),
-            )
-        ],
-    )
-    categorization[channel].append(selection)
+    # cutstring, nbins = build_xxh_cutstring(channel)
+    # selection = (
+    #     Selection(
+    #         name="xxh",
+    #         cuts=[
+    #             (
+    #                 f"(({channel}_max_index == {category_mapping[channel]['qqh']['index']}) || ({channel}_max_index == {category_mapping[channel]['ggh']['index']}))",
+    #                 "category selection",
+    #             )
+    #         ],
+    #     ),
+    #     [
+    #         Histogram(
+    #             "mt_score",
+    #             cutstring,
+    #             np.arange(nbins + 1),
+    #         )
+    #     ],
+    # )
+    # categorization[channel].append(selection)

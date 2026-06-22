@@ -16,8 +16,7 @@ logger = logging.getLogger("")
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description=
-        "Plot categories using Dumbledraw from shapes produced by shape-producer module."
+        description="Plot categories using Dumbledraw from shapes produced by shape-producer module."
     )
     parser.add_argument(
         "-l", "--linear", action="store_true", help="Enable linear x-axis")
@@ -106,6 +105,72 @@ def check_for_zero_bins(hist):
             hist.SetBinContent(ibin, 0)
     return hist
 
+
+def _derive_2d_gof_label(variable, label_dict):
+    # If 1D variable, return single item list
+    if variable in label_dict:
+        return [label_dict[variable]]
+
+    # If 2D variable, try to split and return 3 items
+    parts = variable.split('_')
+    for i in range(1, len(parts)):
+        var1 = "_".join(parts[:i])
+        var2 = "_".join(parts[i:])
+
+        if var1 in label_dict and var2 in label_dict:
+            return [
+                "Bin number of unrolled",
+                label_dict[var1],
+                label_dict[var2]
+            ]
+
+    # Fallback
+    return [variable]
+
+
+def derive_2d_gof_label(variable, label_dict):
+    """
+    A robust label deriver that finds dictionary keys matching 
+    components of a merged variable name, even with underscore mismatches.
+    """
+    # 1. Direct match (for 1D variables)
+    if variable in label_dict:
+        return [label_dict[variable]]
+
+    # 2. Key-Combination Match (The "Smart" way)
+    # This checks if the variable is composed of any two keys in the dictionary
+    # by iterating through all keys and checking for a prefix/suffix match.
+    all_keys = sorted(label_dict.keys(), key=len, reverse=True) # Check longest keys first
+    
+    for key1 in all_keys:
+        if variable.startswith(key1):
+            # Try finding the second part, with or without a joining underscore
+            remainder = variable[len(key1):]
+            
+            # Check for: key1 + key2
+            if remainder in label_dict:
+                return ["Bin number of unrolled", label_dict[key1], label_dict[remainder]]
+            
+            # Check for: key1 + "_" + key2
+            if remainder.startswith("_"):
+                remainder_no_under = remainder[1:]
+                if remainder_no_under in label_dict:
+                    return ["Bin number of unrolled", label_dict[key1], label_dict[remainder_no_under]]
+
+    # 3. Traditional Split Logic (Backup)
+    parts = variable.split('_')
+    for i in range(1, len(parts)):
+        var1 = "_".join(parts[:i])
+        var2 = "_".join(parts[i:])
+        if var1 in label_dict and var2 in label_dict:
+            return ["Bin number of unrolled", label_dict[var1], label_dict[var2]]
+
+    # 4. Final Fail-safe: Diagnostic logging
+    logger.error(f"Label lookup failed for: '{variable}'")
+    logger.debug(f"Available keys in dict: {list(label_dict.keys())}")
+    
+    # Return the raw name so the script doesn't crash, but you'll see the error
+    return [variable]
 
 
 def main(args):
@@ -394,27 +459,30 @@ def main(args):
             if args.linear != True:
                 plot.subplot(1).setYlims(0.1, split_dict[channel])
                 plot.subplot(1).setLogY()
-                plot.subplot(1).setYlabel(
-                    "")  # otherwise number labels are not drawn on axis
-            if args.gof_variable != None and not args.linear:
-                gof_linear_vars = ["njets", "nbtag", "DiTauDeltaR", "jdeta"]
-                if args.gof_variable not in gof_linear_vars:
-                    plot.subplot(0).setLogX()
-                    plot.subplot(1).setLogX()
-                    plot.subplot(2).setLogX()
-                if args.gof_variable in styles.x_label_dict[args.channels[0]]:
-                    x_label = styles.x_label_dict[args.channels[0]][
-                        args.gof_variable]
+                plot.subplot(1).setYlabel("")  # otherwise number labels are not drawn on axis
+
+            custom_x_labels = []
+
+            if args.gof_variable is not None:
+                # Log X-axis logic
+                if not args.linear:
+                    gof_linear_vars = ["njets", "nbtag", "DiTauDeltaR", "jdeta"]
+                    if args.gof_variable not in gof_linear_vars:
+                        plot.subplot(0).setLogX()
+                        plot.subplot(1).setLogX()
+                        plot.subplot(2).setLogX()
+
+                # Derive Labels (Returns a list)
+                labels_list = derive_2d_gof_label(args.gof_variable, styles.x_label_dict[args.channels[0]])
+
+                if len(labels_list) > 1:
+                    # Multi-line: Suppress default label and make space
+                    plot.subplot(2).setXlabel("")
+                    plot.subplot(2)._pad.SetBottomMargin(0.20)  # Increase margin for 3 lines
+                    custom_x_labels = labels_list
                 else:
-                    x_label = args.gof_variable
-                plot.subplot(2).setXlabel(x_label)
-            elif args.gof_variable != None and args.linear:
-                if args.gof_variable in styles.x_label_dict[args.channels[0]]:
-                    x_label = styles.x_label_dict[args.channels[0]][
-                        args.gof_variable]
-                else:
-                    x_label = args.gof_variable
-                plot.subplot(2).setXlabel(x_label)
+                    # Single-line: Use standard behavior
+                    plot.subplot(2).setXlabel(labels_list[0])
             else:
                 plot.subplot(2).setXlabel("NN output")
             if args.normalize_by_bin_width:
@@ -457,6 +525,22 @@ def main(args):
             plot.subplot(2).Draw([
                 "total_bkg", "data_obs"
             ])
+            if custom_x_labels:
+                plot.subplot(2)._pad.cd()
+                latex = ROOT.TLatex()
+                latex.SetNDC()
+                latex.SetTextFont(42)
+                latex.SetTextSize(0.04)
+                # 33 = Right aligned, Top aligned (Coordinates are Top-Right of text block)
+                latex.SetTextAlign(33)
+
+                # Position: Right aligned to the right frame border
+                x_pos = 1.0 - plot.subplot(2)._pad.GetRightMargin() - 0.01
+                # Start drawing below the axis (Axis is at BottomMargin)
+                y_start = plot.subplot(2)._pad.GetBottomMargin() - 0.05
+                line_height = 0.05
+                for i, line in enumerate(custom_x_labels):
+                    latex.DrawLatex(x_pos, y_start - (i * line_height), line)
 
             # create legends
             suffix = ["", "_top"]

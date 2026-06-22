@@ -35,7 +35,7 @@ TRAINING_VARIABLES = [
     "pt_ttjj",
     "njets",
     "nbtag",
-    "met",
+    "puppimet",
     "deltaEta_ditaupair",
     "deltaR_ditaupair",
     "mt_2",

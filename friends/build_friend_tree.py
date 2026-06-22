@@ -84,35 +84,19 @@ def job_wrapper(args):
 
 
 def check_file_exists_remote(serverpath, file_path):
-    """
-    Check if a remote file exists. Works for both remote (XRootD) and local paths.
-    
-    Args:
-        serverpath: Base server/path (can be remote XRootD or local)
-        file_path: Full file path to check
-    
-    Returns:
-        bool: True if file exists, False otherwise
-    """
-    # Check if path is remote (XRootD) or local
-    if serverpath.startswith("root://"):
-        # Remote XRootD path
-        server_url = serverpath.split("store")[0][:-1] if "store" in serverpath else serverpath.rstrip("/")
-        remote_file_path = (
-            "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
-            if "store" in serverpath
-            else file_path
-        )
-        try:
-            myclient = client.FileSystem(server_url)
-            status, listing = myclient.stat(remote_file_path, DirListFlags.STAT)
-            return status.ok
-        except Exception as e:
-            print(f"Error checking remote file {remote_file_path}: {e}")
-            return False
+    server_url = serverpath.split("store")[0][:-1]
+    file_path = (
+        "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
+    )
+    # print(f"Checking if {file_path} exists in {server_url}")
+    myclient = client.FileSystem(server_url)
+    status, listing = myclient.stat(file_path, DirListFlags.STAT)
+    if status.ok:
+        # print(f"{file_path} exists")
+        return True
     else:
-        # Local path
-        return os.path.exists(file_path)
+        # print(f"{file_path} does not exist")
+        return False
 
 
 def friend_producer(
@@ -259,14 +243,24 @@ if __name__ == "__main__":
         ntuples = glob.glob(base_path)
     print("Found {} ntuples".format(len(ntuples)))
     # Remove data and embedded samples from ntuple list as friends are not needed for these
-    ntuples_wo_data = list(
-        filter(
-            lambda ntuple: dataset[parse_filepath(ntuple)["nick"]]["sample_type"]
-            != "data"
-            and dataset[parse_filepath(ntuple)["nick"]]["sample_type"] != "embedding",
-            ntuples,
-        )
-    )
+    ntuples_wo_data = []
+    for ntuple in ntuples:
+        parsed_filepath = parse_filepath(ntuple)
+        try:
+            if dataset[parsed_filepath["nick"]]["sample_type"] != "data" and dataset[parsed_filepath["nick"]]["sample_type"] != "embedding":
+                ntuples_wo_data.append(ntuple)
+        except KeyError:
+            print(f"Sample {parsed_filepath['nick']} not found in dataset configuration")
+            print("Skipping")
+
+    # ntuples_wo_data = list(
+    #     filter(
+    #         lambda ntuple: dataset[parse_filepath(ntuple)["nick"]]["sample_type"]
+    #         != "data"
+    #         and dataset[parse_filepath(ntuple)["nick"]]["sample_type"] != "embedding",
+    #         ntuples,
+    #     )
+    # )
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)

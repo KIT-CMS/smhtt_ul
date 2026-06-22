@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ADDITIONAL_FRIENDS=""
+ADDITIONAL_MULTIFRIENDS=""
 SELECTION_OPTION="CR"
 SELECTION_OPTION_ESTIMATION="CR"
 PLOTVERSION="all"
@@ -17,7 +18,7 @@ DEFAULT_VARIABLES_LIST=(
   bpt_2 beta_2 bphi_2 btag_value_2
   pt_tt pt_tt pt_vis pt_dijet pt_ttjj
   mjj mt_tot m_vis
-  met metphi mTdileptonMET metSumEt
+  puppimet puppimetphi mTdileptonMET metSumEt
   nbtag njets
   q_1 pzetamissvis jet_hemisphere
   deltaR_ditaupair 
@@ -44,6 +45,7 @@ options=(
   "t:tag:"
   "m:mode:"
   "f:additional_friends:"
+  "M:additional_multifriends:"
   "s:selection_option:"
   "S:selection_option_estimation:"
   "F:ff_type:"
@@ -51,6 +53,8 @@ options=(
   "v:variables:"
   "N:nanoaodversion:"
   "M:signal_mode:"
+  "L:locally"
+  "W:local_cache_workers:"
 )
 
 short_opts=""
@@ -87,7 +91,9 @@ while true; do
   -m | --mode)
     MODE="${2}"; shift 2; ;;
   -f | --additional_friends)
-    ADDITIONAL_FRIENDS="${2}"; shift 2; ;;
+    ADDITIONAL_FRIENDS+="${2}"; shift 2; ;;
+  -M | --additional_multifriends)
+    ADDITIONAL_MULTIFRIENDS+="${2}"; shift 2; ;;
   -s | --selection_option)
     SELECTION_OPTION="${2}"; shift 2; ;;
   -S | --selection_option_estimation)
@@ -102,6 +108,10 @@ while true; do
     NANOAODVERSION="${2}"; shift 2; ;;
   -M | --signal_mode)
     SIGNAL_MODE="${2}"; shift 2; ;;
+      -L | --locally)
+    LOCAL_CACHE="true"; shift; ;;
+  -W | --local_cache_workers)
+    LOCAL_CACHE_WORKERS="${2}"; shift 2; ;;
   --)
     shift
     break
@@ -152,6 +162,16 @@ if [ -n "${ADDITIONAL_FRIENDS}" ]; then
   FRIENDS="${FRIENDS% }"
 fi
 
+MULTIFRIENDS=""
+if [ -n "${ADDITIONAL_MULTIFRIENDS}" ]; then
+  echo "INFO: Constructing friend directory paths for: ${ADDITIONAL_MULTIFRIENDS}"
+  for tag in ${ADDITIONAL_MULTIFRIENDS}; do
+    path="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNMultiFriends/${tag}/"
+    MULTIFRIENDS+="${path} "
+  done
+  MULTIFRIENDS="${MULTIFRIENDS% }"
+fi
+
 # ---
 
 export PYTHONPATH=${PYTHONPATH}:${PWD}/Dumbledraw
@@ -163,7 +183,6 @@ source utils/setup_ul_samples.sh ${NTUPLETAG} ${ERA}
 output_shapes="control_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}"
 CONDOR_OUTPUT=output/condor_shapes/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}
 shapes_output=output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}
-shape_rootfile=${shapes_output}.root
 # print the paths to be used
 echo "KINGMAKER_BASEDIR: $KINGMAKER_BASEDIR"
 echo "KINGMAKER_BASEDIR_XROOTD: $KINGMAKER_BASEDIR_XROOTD"
@@ -200,7 +219,7 @@ if [[ $MODE == "SHAPES" ]]; then
 
   nice -n 19 python shapes/produce_shapes.py --channels ${CHANNEL} \
     --directory ${NTUPLES} \
-    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
+    --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} ${MULTIFRIENDS} \
     --era ${ERA} --num-processes 10 --num-threads 20 \
     --optimization-level 1 --control-plots \
     --control-plot-set ${USED_VARIABLES} \
@@ -228,15 +247,39 @@ if [[ $MODE == "PLOT" ]]; then
     echo "#     Plotting                                                                               #"
     echo "##############################################################################################"
 
-  BASE_COMMAND="python3 plotting/plot_shapes_control.py \
-                    -l \
-                    --era Run${ERA} \
-                    --input ${shapes_output}.root \
-                    --variables ${USED_VARIABLES} \
-                    --channels ${CHANNEL} \
-                    --tag ${TAG} \
-                    --selection-option ${SELECTION_OPTION} \
-                    --add-signals " #--category same_sign
+    input_shapes=()
+    if [[ "${ERA}" == "2022" ]]; then
+        input_shapes=(
+            "output/2022preEE-${CHANNEL}-${NTUPLETAG}-${TAG}/control_shapes-2022preEE-${CHANNEL}-${NTUPLETAG}-${TAG}.root"
+            "output/2022postEE-${CHANNEL}-${NTUPLETAG}-${TAG}/control_shapes-2022postEE-${CHANNEL}-${NTUPLETAG}-${TAG}.root"
+        )
+    elif [[ "${ERA}" == "2023" ]]; then
+        input_shapes=(
+            "output/2023preBPix-${CHANNEL}-${NTUPLETAG}-${TAG}/control_shapes-2023preBPix-${CHANNEL}-${NTUPLETAG}-${TAG}.root"
+            "output/2023postBPix-${CHANNEL}-${NTUPLETAG}-${TAG}/control_shapes-2023postBPix-${CHANNEL}-${NTUPLETAG}-${TAG}.root"
+        )
+    elif [[ "${ERA}" == "3" ]]; then
+        input_shapes=(
+            "output/2022preEE-${CHANNEL}-${NTUPLETAG}-${TAG}/control_shapes-2022preEE-${CHANNEL}-${NTUPLETAG}-${TAG}.root"
+            "output/2022postEE-${CHANNEL}-${NTUPLETAG}-${TAG}/control_shapes-2022postEE-${CHANNEL}-${NTUPLETAG}-${TAG}.root"
+            "output/2023preBPix-${CHANNEL}-${NTUPLETAG}-${TAG}/control_shapes-2023preBPix-${CHANNEL}-${NTUPLETAG}-${TAG}.root"
+            "output/2023postBPix-${CHANNEL}-${NTUPLETAG}-${TAG}/control_shapes-2023postBPix-${CHANNEL}-${NTUPLETAG}-${TAG}.root"
+            "output/2024-${CHANNEL}-htt_260602_2024-25_v5-${TAG}/control_shapes-2024-${CHANNEL}-htt_260602_2024-25_v5-${TAG}.root"
+            "output/2025-${CHANNEL}-htt_260602_2024-25_v5-${TAG}/control_shapes-2025-${CHANNEL}-htt_260602_2024-25_v5-${TAG}.root"
+        )
+    else
+        input_shapes=("output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/${output_shapes}.root")
+    fi
+
+    BASE_COMMAND="python3 plotting/plot_shapes_control.py \
+                      -l \
+                      --era Run${ERA} \
+                      --input ${input_shapes[@]} \
+                      --variables ${USED_VARIABLES} \
+                      --channels ${CHANNEL} \
+                      --tag ${TAG} \
+                      --selection-option ${SELECTION_OPTION} \
+                      --add-signals" #--category same_sign
 
   if [[ ${PLOTVERSION} == "all" || ${PLOTVERSION} == "emb+ff" ]]; then
     ${BASE_COMMAND} --embedding --fake-factor
@@ -260,13 +303,13 @@ if [[ $MODE == "TRAIN-SHAPES" ]]; then
     --directory ${NTUPLES} \
     --${CHANNEL}-friend-directory ${XSEC_FRIENDS} ${FRIENDS} \
     --era ${ERA} --num-processes 10 --num-threads 20 \
-    --optimization-level 1 --control-plots \
+    --optimization-level 1 --control-plots  --control_plots_dnn_split \
     --control-plot-set ${USED_VARIABLES} --skip-systematic-variations \
     --output-file ${shapes_output} \
-    --validation-tag ${TAG} \
+    --validation-tag ${TAG}  --xrootd \
     --vs-jet-wp "${VS_JET_WP}" --vs-ele-wp "${VS_ELE_WP}" --apply-tauid \
     --selection-option ${SELECTION_OPTION} --ff-type ${FF_TYPE} \
-    --skip-systematic-variations --collect-config-only \
+    --skip-systematic-variations --collect-config-only --split-signal \
     --config-output-file /ceph/sgiappic/Htt_training/${TAG}/config.yaml
 
 fi
@@ -284,13 +327,13 @@ if [[ $MODE == "CONFIGS" ]]; then
     echo "#      Write configs and feathers set for ${CHANNEL}-${TAG}                                  #"
     echo "##############################################################################################"
 
-    nice -n 19 python trainings/adjust_config.py --configs ${CONFIGS} \
-      --modified-config /ceph/sgiappic/Htt_training/${TAG}/${CHANNEL}__mod_config.yaml \
-      --common-setup-config trainings/setup.yaml
+    # nice -n 19 python trainings/adjust_config.py --configs ${CONFIGS} \
+    #   --modified-config /ceph/sgiappic/Htt_training/${TAG}/${CHANNEL}__mod_config.yaml \
+    #   --common-setup-config trainings/setup.yaml
 
     nice -n 19  python trainings/create_training_dataset.py \
         --config /ceph/sgiappic/Htt_training/${TAG}/${CHANNEL}__mod_config.yaml \
-        --base-dataset-directory /ceph/sgiappic/Htt_training/${TAG}/dataset/ \
+        --base-dataset-directory /ceph/sgiappic/Htt_training/${TAG}/dataset/${CHANNEL} \
         --common-setup-config trainings/setup.yaml --recreate
 
 fi
