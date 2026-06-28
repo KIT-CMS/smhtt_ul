@@ -121,7 +121,20 @@ def main(args: argparse.Namespace) -> None:
 
             _sig = {}
             if sig_processes:
-                _sig = shapes.get_histograms(variable=variable, processes=sig_processes, key_prefix="sig")
+                try:
+                    _sig = shapes.get_histograms(variable=variable, processes=sig_processes, key_prefix="sig")
+                except ValueError:
+                    _sig = shapes.get_histograms(
+                        variable=variable,
+                        processes=[
+                            "qqH125-vbf_htautau_bin201to210_selection",
+                            "ggH125-ggh_htautau_bin101to104_selection",
+                            "ggH125-ggh_htautau_bin105to106_selection",
+                            "ggH125-ggh_htautau_bin107to109_selection",
+                            "ggH125-ggh_htautau_bin110to116_selection",
+                        ],
+                        key_prefix="sig",
+                    )
 
             if args.linear:
                 yscale, ylim = "linear", (0.0, None)
@@ -136,7 +149,7 @@ def main(args: argparse.Namespace) -> None:
             plot_single_quantity(
                 variable=variable,
                 **{**_bkg, **_data, **_sig},
-                ratio_ylim=(0.8, 1.4),
+                ratio_ylim=(0.8, 1.2),
                 yscale=yscale,
                 ylim=ylim,
                 figsize=(10, 10),
@@ -145,7 +158,8 @@ def main(args: argparse.Namespace) -> None:
                     output_dir / f"{output_base}.pdf",
                     output_dir / f"{output_base}.png",
                 ],
-                ratio_legend=True,
+                # ratio_legend=True,
+                ratio_legend=False,
                 trim_edges=variable not in ["tau_decaymode_2", "q_1"],
                 add_fraction=False,
                 bkg_unct_label="Bkg. Unct. (stat.)"

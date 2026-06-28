@@ -11,6 +11,10 @@ import time
 from copy import deepcopy
 from tqdm import tqdm
 
+from typing import Literal
+from tap import Tap
+from more_itertools import windowed
+
 import yaml
 
 import config.shapes.process_selection as selection
@@ -35,7 +39,8 @@ WITH_SPLIT_SIGNAL_STAGE0 = False  # for control plot/gof
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="Produce shapes for the legacy MSSM analysis."
+        description="Produce shapes for the legacy MSSM analysis.",
+        allow_abbrev=False,
     )
     parser.add_argument("--era", required=True, type=str, help="Experiment era.")
     parser.add_argument(
@@ -130,6 +135,11 @@ def parse_arguments():
         "--control-plots-njet-split",
         action="store_true",
         help="Split control plots into njets_inclusive, njets_0, njets_1 and njets_2p categories.",
+    )
+    parser.add_argument(
+        "--control-plots-dnn-split",
+        action="store_true",
+        help="Split control plots into DNN categories and bins.",
     )
     parser.add_argument(
         "--gof-inputs",
@@ -296,6 +306,7 @@ def add_processes(
             add_fn(name="ggh_bin105to106", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin105to106))
             add_fn(name="ggh_bin107to109", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin107to109))
             add_fn(name="ggh_bin110to116", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin110to116))
+            add_fn(name="ggh_bin101to116", dataset=datasets["ggH"], selections=select_fn(*selection.ggH125.bin101to116))
 
 
 def get_select_function(
@@ -413,26 +424,18 @@ def get_control_units(
         logger.info(
             "Control-plot njet split enabled with categories: njets_inclusive, njets_0, njets_1, njets_2p"
         )
-    if control_plots_dnn_split:
+    elif control_plots_dnn_split:
         if channel != "mt":
             raise NotImplementedError("DNN split is currently only implemented for mt")
-        _dnn_categories_cennt = {
+        _dnn_categories_used = {
             # 0 - 4 are signal categories
+            # split according to binning if necessary
             5: [0.0, 1.0],  # embedding
             6: [0.0, 1.0],  # jetFakes
             7: [0.0, 1.0],  # ttbar
             8: [0.0, 1.0],  # dyjets
             9: [0.0, 1.0],  # diboson
         }
-        _dnn_categories_sannt = {
-            # 0 - 4 are signal categories
-            5: [0.0, 1.0],  # embedding
-            6: [0.0, 1.0],  # jetFakes
-            7: [0.0, 1.0],  # ttbar
-            8: [0.0, 1.0],  # dyjets
-            9: [0.0, 1.0],  # diboson
-        }
-        _dnn_categories_used = _dnn_categories_cennt
 
         control_categories = [Selection(name="dnn_cat_inclusive", cuts=[("nn_predicted_class >= 5", "dnn_cat_inclusive")])]
         for _idx, _category_bins in _dnn_categories_used.items():
@@ -644,7 +647,7 @@ def main(args):
             *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
             *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
             # ---
-            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116), (101, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
             *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 210),]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         }
     else:
@@ -676,7 +679,7 @@ def main(args):
         *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
         *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
         # ---
-        *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+        *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116), (101, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 210),]} if WITH_SPLIT_SIGNAL_PRUNED else []),
     } & procS
     signalsS = sm_signalsS | set(  # this part is not necessary?
@@ -684,7 +687,7 @@ def main(args):
             *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
             *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
             # ---
-            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116), (101, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
             *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 210),]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         ]
     )
@@ -696,7 +699,7 @@ def main(args):
             *([f"ggh_b{b}" for b in range(100, 117)] if WITH_SPLIT_SIGNAL else []),
             *([f"qqh_b{b}" for b in range(200, 211)] if WITH_SPLIT_SIGNAL else []),
             # ---
-            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
+            *({f"ggh_bin{b1}to{b2}" for b1, b2 in [(101, 104), (105, 106), (107, 109), (110, 116), (101, 116)]} if WITH_SPLIT_SIGNAL_PRUNED else []),
             *({f"qqh_bin{b1}to{b2}" for b1, b2 in [(201, 210),]} if WITH_SPLIT_SIGNAL_PRUNED else []),
         }
 

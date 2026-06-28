@@ -2,6 +2,7 @@ import uproot
 import argparse
 import mplhep as hep
 import yaml
+import numpy as np
 from copy import deepcopy
 import pathlib
 
@@ -27,6 +28,8 @@ argument_parser.add_argument("--gof-binning-config", type=str, default="gof_binn
 argument_parser.add_argument("--output-folder", type=str)
 argument_parser.add_argument("--suffix", type=str, default="")
 argument_parser.add_argument("--region", type=str, default="Nominal")
+argument_parser.add_argument("--replace-close-to-zero-with-zero", action="store_true")
+argument_parser.add_argument("--ratio-ylim", nargs=2, type=float, default=(0.5, 1.5))
 
 if __name__ == "__main__":
     args = argument_parser.parse_args()
@@ -48,19 +51,38 @@ if __name__ == "__main__":
     with open(args.gof_binning_config) as f:
         gof_binning = yaml.safe_load(f)
 
+    def replacement_function(obj, eps=1e-8):
+        if isinstance(obj, dict):
+            return {
+                k: (v if k == "edges" else replacement_function(v, eps))
+                for k, v in obj.items()
+            }
+
+        if isinstance(obj, np.ndarray):
+            out = obj.copy()
+            out[np.abs(out) < eps] = 0.0
+            return out
+
+        if isinstance(obj, tuple):
+            return tuple(replacement_function(v, eps) for v in obj)
+
+        return obj
+    
+    func = replacement_function if args.replace_close_to_zero_with_zero else lambda x: x
+
     plot_single_quantity(
         variable=args.variable,
         **{
-            **shapes.get_histograms(key_prefix="bkg", processes=bkg_processes, uncertainty_type="total"),
-            **shapes.get_histograms(key_prefix="data", processes="data_obs"),
-            **shapes.get_histograms(key_prefix="sig", processes=sig_processes),
+            **func(shapes.get_histograms(key_prefix="bkg", processes=bkg_processes, uncertainty_type="total")),
+            **func(shapes.get_histograms(key_prefix="data", processes="data_obs")),
+            **func(shapes.get_histograms(key_prefix="sig", processes=sig_processes)),
         },
-        ylim=(1e-2, 1e3, None),
+        ylim=(1e-2, 1e3 + 1, None),
         yscale="linear+log",
         figsize=(13, 10),
         legend_ncol=4,
         is_2d_gof=True,
-        ratio_ylim=(0.8, 1.2),
+        ratio_ylim=args.ratio_ylim,
         draw_2d_slice_guides=True,
         slice_binning_dict=gof_binning,
         slice_guide_options={

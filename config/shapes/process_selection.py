@@ -1524,6 +1524,7 @@ ggH125.bin101to104 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 101,
 ggH125.bin105to106 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 105, 106))
 ggH125.bin107to109 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 107, 109))
 ggH125.bin110to116 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 110, 116))
+ggH125.bin101to116 = ggH125.wrap_next(get_stxs_bin_selection('ggh_htautau', 101, 116))
 
 # Individual and miscellaneous
 ZTT_embedded = ZTT_embedded_process_selection

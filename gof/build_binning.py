@@ -294,10 +294,7 @@ class BinningStrategyTargetBinning:
         return is_integer_like and len(unique_vals) < unique_threshold
 
     @staticmethod
-    def get_quantized_slice_bins(data, num_slices, high_cutoff=50):
-        """
-        Finds more robustly equipopulated bin edges for a quantized variable.
-        """
+    def get_quantized_slice_bins(data, num_slices, high_cutoff=50, min_yield=None):
         if num_slices <= 1 or len(np.unique(data)) <= 1:
             return [np.min(data) - 0.5, high_cutoff + 0.5]
 
@@ -306,16 +303,22 @@ class BinningStrategyTargetBinning:
 
         total_events = len(data)
         target_per_slice = total_events / num_slices
+        
+        if min_yield is None:
+            min_yield = target_per_slice * 0.5
 
         edges = [sorted_unique_vals[0] - 0.5]
         cumulative_events = 0
 
         for i, val in enumerate(sorted_unique_vals):
-            # Look ahead to see if adding this value would be a good cut point
-            if cumulative_events >= target_per_slice:
-                edges.append(val - 0.5)
-                cumulative_events = 0
             cumulative_events += counts[val]
+
+            if cumulative_events >= target_per_slice:
+                remaining_events = total_events - sum(counts[v] for v in sorted_unique_vals[:i + 1])
+                # Tail protection: only cut if remaining events justify a new bin
+                if i < len(sorted_unique_vals) - 1 and remaining_events >= min_yield:
+                    edges.append(val + 0.5)
+                    cumulative_events = 0
 
         edges.append(high_cutoff + 0.5)
 
@@ -358,36 +361,32 @@ class BinningStrategyTargetBinning:
                 continue
 
             # Select slicing (v_slice) and adaptive (v_cont) variables
-            v1_is_quantized = "njets" in v1 or "nbtag" in v1
-            v2_is_quantized = "njets" in v2 or "nbtag" in v2
-            if v1_is_quantized and not v2_is_quantized:
-                v_slice_name, v_cont_name = v1, v2
-                slice_data, cont_data = val1_local, val2_local
-            elif v2_is_quantized and not v1_is_quantized:
-                v_slice_name, v_cont_name = v2, v1
-                slice_data, cont_data = val2_local, val1_local
-            else:  # Covers continuous-continuous and quantized-quantized
-                if len(val1_local) <= len(val2_local):
-                    v_slice_name, v_cont_name = v1, v2
-                    slice_data, cont_data = val1_local, val2_local
-                else:
-                    v_slice_name, v_cont_name = v2, v1
-                    slice_data, cont_data = val2_local, val1_local
+            v1_quant = "njets" in v1 or "nbtag" in v1 or "tau_decaymode" in v1 or BinningStrategyTargetBinning.is_quantized(val1_local)
+            v2_quant = "njets" in v2 or "nbtag" in v2 or "tau_decaymode" in v2 or BinningStrategyTargetBinning.is_quantized(val2_local)
+            
+            u1, u2 = len(np.unique(val1_local)), len(np.unique(val2_local))
+
+            if v1_quant and not v2_quant:
+                v_slice_name, v_cont_name, slice_data, cont_data = v1, v2, val1_local, val2_local
+            elif v2_quant and not v1_quant:
+                v_slice_name, v_cont_name, slice_data, cont_data = v2, v1, val2_local, val1_local
+            elif u1 <= u2:
+                v_slice_name, v_cont_name, slice_data, cont_data = v1, v2, val1_local, val2_local
+            else:
+                v_slice_name, v_cont_name, slice_data, cont_data = v2, v1, val2_local, val1_local
 
             # Define primary slices for v_slice
-            slice_is_quantized_check = BinningStrategyTargetBinning.is_quantized(slice_data)
-            if slice_is_quantized_check:
-                slice_edges = BinningStrategyTargetBinning.get_quantized_slice_bins(slice_data, num_primary_slices)
+            slice_info, total_valid_events = [], len(slice_data)
+            global_target_yield = max(1, total_valid_events / target_total_bins) if target_total_bins > 0 else 1
+
+            if BinningStrategyTargetBinning.is_quantized(slice_data):
+                slice_edges = BinningStrategyTargetBinning.get_quantized_slice_bins(slice_data, num_primary_slices, min_yield=global_target_yield)
             else:
-                noise = np.random.normal(0, 1e-9, slice_data.shape)
-                slice_edges = np.percentile(slice_data + noise, np.linspace(0, 100, num_primary_slices + 1))
-            slice_edges = sorted(list(set(slice_edges)))
+                slice_edges = sorted(list(set(np.percentile(slice_data, np.linspace(0, 100, num_primary_slices + 1)))))
+            
             if len(slice_edges) < 2:
                 continue
 
-            # Pre-calculate the adaptive number of sub-bins and their edges for each slice
-            slice_info, total_valid_events = [], len(slice_data)
-            global_target_yield = max(1, total_valid_events / target_total_bins) if target_total_bins > 0 else 1
             for i in range(len(slice_edges) - 1):
                 start, end = slice_edges[i], slice_edges[i + 1]
                 is_last = i == len(slice_edges) - 2
@@ -396,11 +395,26 @@ class BinningStrategyTargetBinning:
                 if len(cont_in_slice) < 2:
                     slice_info.append({"valid": False})
                     continue
-                num_sub_bins = int(round(len(cont_in_slice) / global_target_yield))
-                if num_sub_bins < 1:
-                    num_sub_bins = 1
-                noise = np.random.normal(0, 1e-9, cont_in_slice.shape)
-                secondary_edges = np.percentile(cont_in_slice + noise, np.linspace(0, 100, num_sub_bins + 1))
+
+                ratio = len(cont_in_slice) / global_target_yield
+                n_floor, n_ceil = max(1, int(np.floor(ratio))), max(1, int(np.ceil(ratio)))
+
+                if abs((len(cont_in_slice) / n_floor) - global_target_yield) <= abs((len(cont_in_slice) / n_ceil) - global_target_yield):
+                    num_sub_bins = n_floor
+                else:
+                    num_sub_bins = n_ceil
+
+                cont_is_quant = "njets" in v_cont_name or "nbtag" in v_cont_name or "tau_decaymode" in v_cont_name or BinningStrategyTargetBinning.is_quantized(cont_in_slice)
+
+                if cont_is_quant:
+                    secondary_edges = BinningStrategyTargetBinning.get_quantized_slice_bins(cont_in_slice, num_sub_bins, min_yield=global_target_yield)
+                else:
+                    secondary_edges = sorted(list(set(np.percentile(cont_in_slice, np.linspace(0, 100, num_sub_bins + 1)))))
+
+                if len(secondary_edges) < 2:
+                    secondary_edges = [np.min(cont_in_slice) - 1e-4, np.max(cont_in_slice) + 1e-4]
+
+                num_sub_bins = len(secondary_edges) - 1
                 slice_info.append({"valid": True, "num_sub_bins": num_sub_bins, "secondary_edges": secondary_edges})
 
             # Build the nested expression for bin index
@@ -453,17 +467,19 @@ class BinningStrategyYieldPerBin:
         is_integer_like = np.all(np.equal(np.mod(unique_vals, 1), 0))
         return is_integer_like and len(unique_vals) < unique_threshold
 
-    def get_yield_based_edges(self, data, target_yield, is_quantized=False, high_cutoff=50):
+    def get_yield_based_edges(self, data, target_yield, is_quantized=False, high_cutoff=50, min_yield=None):
         total_events = len(data)
         if total_events == 0:
             return [-0.5, 0.5] if is_quantized else [0.0, 1.0]
 
         if total_events < target_yield:
-            # Not enough data for even one full bin, return min/max
             return [np.min(data) - (0.5 if is_quantized else 0), np.max(data) + (0.5 if is_quantized else 0)]
 
+        if min_yield is None:
+            min_yield = target_yield * 0.5
+
         if is_quantized:
-            counts = Counter(data)  # Quantized: Accumulate integer values until yield is met
+            counts = Counter(data)
             sorted_vals = sorted(counts.keys())
 
             edges = [sorted_vals[0] - 0.5]
@@ -473,23 +489,18 @@ class BinningStrategyYieldPerBin:
                 current_bin_yield += counts[val]
 
                 if current_bin_yield >= target_yield:
-                    # Look ahead: Remaining data is too small for valid bin: merge it into the current one (loose constraint)
-                    # Try to keep strict and avoiding small tails.
                     remaining_events = total_events - np.sum([counts[v] for v in sorted_vals[: i + 1]])
+                    # Tail protection
+                    if i < len(sorted_vals) - 1 and remaining_events >= min_yield:
+                        edges.append(val + 0.5)
+                        current_bin_yield = 0
 
-                    if i < len(sorted_vals) - 1:
-                        if remaining_events > 0.5 * target_yield:  # If remaining events are very low
-                            edges.append(val + 0.5)
-                            current_bin_yield = 0
-
-            if edges[-1] < sorted_vals[-1] + 0.5:  # ensure max is covered
-                edges[-1] = sorted_vals[-1] + 0.5
-            elif edges[-1] > sorted_vals[-1] + 0.5:  # safety
-                edges[-1] = sorted_vals[-1] + 0.5
+            if edges[-1] < high_cutoff + 0.5:
+                edges[-1] = high_cutoff + 0.5
 
             return sorted(list(set(edges)))
 
-        else:  # Continuous: Use percentiles based on ratio
+        else:
             n_bins = int(total_events / target_yield)
             if n_bins < 1:
                 n_bins = 1
@@ -498,8 +509,6 @@ class BinningStrategyYieldPerBin:
             edges = np.percentile(data, p_values)
 
             edges = sorted(list(set(edges)))
-
-            # padding fix
             edges[0] -= abs(edges[0] * 1e-4) if edges[0] != 0 else 1e-4
             edges[-1] += abs(edges[-1] * 1e-4) if edges[-1] != 0 else 1e-4
 
@@ -560,27 +569,24 @@ class BinningStrategyYieldPerBin:
                 dynamic_slice_yield = self.target_yield
 
             # Priority: Quantized > Continuous. If both same, larger range or alphabetical
-            v1_quant = "njets" in v1 or "nbtag" in v1 or self.is_quantized(val1_local)
-            v2_quant = "njets" in v2 or "nbtag" in v2 or self.is_quantized(val2_local)
+            v1_quant = "njets" in v1 or "nbtag" in v1 or "tau_decaymode" in v1 or self.is_quantized(val1_local)
+            v2_quant = "njets" in v2 or "nbtag" in v2 or "tau_decaymode" in v2 or self.is_quantized(val2_local)
+
+            u1, u2 = len(np.unique(val1_local)), len(np.unique(val2_local))
 
             if v1_quant and not v2_quant:
-                v_slice_name, v_cont_name = v1, v2
-                slice_data, cont_data = val1_local, val2_local
+                v_slice_name, v_cont_name, slice_data, cont_data = v1, v2, val1_local, val2_local
             elif v2_quant and not v1_quant:
-                v_slice_name, v_cont_name = v2, v1
-                slice_data, cont_data = val2_local, val1_local
-            else:  # Both continuous or both quantized
-                if len(val1_local) <= len(val2_local):  # fallback
-                    v_slice_name, v_cont_name = v1, v2
-                    slice_data, cont_data = val1_local, val2_local
-                else:
-                    v_slice_name, v_cont_name = v2, v1
-                    slice_data, cont_data = val2_local, val1_local
+                v_slice_name, v_cont_name, slice_data, cont_data = v2, v1, val2_local, val1_local
+            elif u1 <= u2:
+                v_slice_name, v_cont_name, slice_data, cont_data = v1, v2, val1_local, val2_local
+            else:
+                v_slice_name, v_cont_name, slice_data, cont_data = v2, v1, val2_local, val1_local
 
             # 4. Determine Primary Slices (Slicing Variable)
             slice_is_quantized_check = self.is_quantized(slice_data)
 
-            slice_edges = self.get_yield_based_edges(slice_data, target_yield=dynamic_slice_yield, is_quantized=slice_is_quantized_check)
+            slice_edges = self.get_yield_based_edges(slice_data, target_yield=dynamic_slice_yield, is_quantized=slice_is_quantized_check, min_yield=self.target_yield)
 
             bin_offset = 0
             expression_parts = []
@@ -589,23 +595,29 @@ class BinningStrategyYieldPerBin:
                 start, end = slice_edges[i], slice_edges[i + 1]
                 is_last_slice = i == len(slice_edges) - 2
 
-                # Filter data in this slice
                 slice_mask = (slice_data >= start) & (slice_data <= end if is_last_slice else slice_data < end)
                 cont_in_slice = cont_data[slice_mask]
 
-                # Calculate sub-bins based on ACTUAL yield in this slice
                 n_events_slice = len(cont_in_slice)
+                ratio = n_events_slice / self.target_yield
+                n_floor, n_ceil = max(1, int(np.floor(ratio))), max(1, int(np.ceil(ratio)))
 
-                if n_events_slice < self.target_yield * 0.5:
-                    num_sub_bins = 1
+                if abs((n_events_slice / n_floor) - self.target_yield) <= abs((n_events_slice / n_ceil) - self.target_yield):
+                    num_sub_bins = n_floor
                 else:
-                    num_sub_bins = int(round(n_events_slice / self.target_yield))
-                    if num_sub_bins < 1:
-                        num_sub_bins = 1
+                    num_sub_bins = n_ceil
 
-                # Calculate edges for continuous variable in this slice
-                noise = np.random.normal(0, 1e-9, cont_in_slice.shape)  # Break ties in percentiles
-                secondary_edges = np.percentile(cont_in_slice + noise, np.linspace(0, 100, num_sub_bins + 1))
+                cont_is_quant = "njets" in v_cont_name or "nbtag" in v_cont_name or "tau_decaymode" in v_cont_name or self.is_quantized(cont_in_slice)
+
+                if cont_is_quant:
+                    secondary_edges = self.get_yield_based_edges(cont_in_slice, target_yield=self.target_yield, is_quantized=True, min_yield=self.target_yield)
+                else:
+                    secondary_edges = sorted(list(set(np.percentile(cont_in_slice, np.linspace(0, 100, num_sub_bins + 1)))))
+
+                if len(secondary_edges) < 2:
+                    secondary_edges = [np.min(cont_in_slice) - 1e-4, np.max(cont_in_slice) + 1e-4]
+
+                num_sub_bins = len(secondary_edges) - 1
 
                 # Build Expression Strings
                 sub_bin_expr_parts = []

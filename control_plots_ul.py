@@ -275,7 +275,7 @@ def main() -> None:
         control_plots_flag = ""
         if not arguments.analysis_units and not arguments.shape_meta_mode == "gof_inputs":
             control_plots_flag = "--control-plots"
-        control_split_flag = "--control-plots-njet-split" if arguments.control_plots_njet_split else ""
+        control_njet_split_flag = "--control-plots-njet-split" if arguments.control_plots_njet_split else ""
         control_dnn_split_flag = "--control-plots-dnn-split" if arguments.control_plots_dnn_split else ""
         control_plot_set_flag = f"--control-plot-set {used_variables}" if not arguments.analysis_units else ""
 
@@ -285,11 +285,11 @@ def main() -> None:
             --directory {os.environ['NTUPLES']}
             --{arguments.channel}-friend-directory {xsec_friend} {friends_string} {multifriends_string}
             --era {arguments.era}
-            --num-processes 12
+            --num-processes 14
             --num-threads 60
             --optimization-level 2
             {control_plots_flag}
-            {control_split_flag}
+            {control_njet_split_flag}
             {control_dnn_split_flag}
             {control_plot_set_flag}
             --output-file {shapes_output_path}
@@ -346,13 +346,14 @@ def main() -> None:
             os.environ["PYTHONPATH"] = f"{current}:{nll_path}" if current else nll_path
 
         base_plot_cmd = f"""
-            python3 plotting/plot_shapes_control_new.py -l
+            python3 plotting/plot_shapes_control_new.py
             --era Run{arguments.era}
             --input {shape_rootfile}
             --variables {used_variables}
             --channels {arguments.channel}
             --tag {arguments.tag}
             --selection-option {arguments.selection_option}
+            --add-signals
             {category_flag}
         """
 

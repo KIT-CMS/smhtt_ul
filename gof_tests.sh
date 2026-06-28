@@ -9,7 +9,13 @@ NTUPLETAG="ff_and_cr_2018UL_mt__2026-03-27__v2"
 # TAG="gof_ml_ff"
 # TAG="gof_ml_ff_fixed_ff_unct"
 # TAG="gof_ml_ff_fixed_ff_unct__adjusted_syst_test"
-TAG="gof_ml_ff_sym_unct__ti_sq__v1"
+
+
+# TAG="gof_ml_ff_sym_unct__ti_sq__v1"
+
+# Latest greatest so far
+TAG="gof_ml_ff_sym_unct__ti_sq__groupedScaler__v1"
+
 YAML_FILE="config/gof_binning/binning_${ERA}_${CHANNEL}_2D.yaml"
 
 FORCE_REPROCESSING=1
@@ -29,6 +35,9 @@ VARIABLES_LIST_1D=(
   deltaR_jj deltaR_1j1 deltaR_1j2 deltaR_2j1 deltaR_2j2 deltaR_12j1 deltaR_12j2
   deltaEta_jj deltaEta_1j1 deltaEta_1j2 deltaEta_2j1 deltaEta_2j2 deltaEta_12j1 deltaEta_12j2
   eta_fastmtt m_fastmtt pt_fastmtt
+  # known to be bad but kept for now out of consistency with older results
+  # eta_fastmtt eta_1 eta_2 mt_1 mt_2 (mt_tot) tau_decaymode_2
+  tau_decaymode_2
 )
 
 echo "[INFO] Parsing variables from ${YAML_FILE} based on master 1D list..."
@@ -58,8 +67,30 @@ for key in "${all_yaml_keys[@]}"; do
     done
 done
 
+filter_gof_variables_string() {
+    local all_vars="$1"
+    local target="$2"
+
+    IFS=',' read -r -a var_array <<< "$all_vars"
+
+    local matched=()
+    for var in "${var_array[@]}"; do
+        if [[ "$var" == "$target" ]] || \
+           [[ "$var" == "${target}_"* ]] || \
+           [[ "$var" == *"_${target}" ]]; then
+            matched+=("$var")
+        fi
+    done
+
+    (IFS=, ; echo "${matched[*]}")
+}
+
 VARIABLES_1D=$(IFS=, ; echo "${VARIABLES_LIST_1D[*]}")
 VARIABLES=$(IFS=, ; echo "${final_variables_list[*]}")
+
+# for tau_decaymode_2 only (temporary)
+# VARIABLES_1D=$(filter_gof_variables_string "$VARIABLES_1D" "tau_decaymode_2")
+# VARIABLES=$(filter_gof_variables_string "$VARIABLES" "tau_decaymode_2")
 
 echo "[INFO] Using ${#VARIABLES_LIST_1D[@]} master 1D variables."
 echo "[INFO] Found ${#final_variables_list[@]} total matching variables (1D & 2D) in YAML to process."
@@ -314,7 +345,7 @@ if [[ $MODE == "GOF" ]]; then
     export -f run_gof_for_variable
     export NTUPLETAG TAG ERA CHANNEL THEORY_NUISANCES_TO_FREEZE FORCE_REPROCESSING
 
-    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 6 -I {} bash -c 'run_gof_for_variable "{}"'
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -n 1 -P 10 -I {} bash -c 'run_gof_for_variable "{}"'
     # run_gof_for_variable eta_1_deltaR_ditaupair
 
     wait
@@ -533,6 +564,7 @@ if [[ $MODE == "PLOT-POSTFIT-NEW" ]]; then
             --fake-factor \
             --output-folder "${PLOTDIR}" \
             --suffix "_prefit" \
+            --ratio-ylim 0.8 1.2 \
             --gof-binning-config "config/gof_binning/binning_${ERA}_${CHANNEL}_2D.yaml"
         
         python3 plotting/plot_shapes_gof_new.py \
@@ -545,10 +577,9 @@ if [[ $MODE == "PLOT-POSTFIT-NEW" ]]; then
             --fake-factor \
             --output-folder "${PLOTDIR}" \
             --suffix "_postfit" \
+            --ratio-ylim 0.8 1.2 \
             --gof-binning-config "config/gof_binning/binning_${ERA}_${CHANNEL}_2D.yaml"
 
-        # Copy results to summary folder
-        # Use simple wildcard copy; ignore errors if no files found (unlikely)
         cp "${PLOTDIR}"/*.p{df,ng} "$SUMMARYFOLDER" 2>/dev/null
         
         echo "[DONE] Finished plotting ${VARIABLE}"
@@ -559,7 +590,8 @@ if [[ $MODE == "PLOT-POSTFIT-NEW" ]]; then
 
     echo "[INFO] Starting parallel Plotting..."
     
-    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -P 50 -I {} bash -c 'run_plot_postfit "{}"'
+    echo ${VARIABLES//,/ } | tr ' ' '\n' | xargs -P 100 -I {} bash -c 'run_plot_postfit "{}"'
+    # run_plot_postfit pt_1_m_vis
 
     echo "[INFO] All plotting jobs complete."
     exit 0

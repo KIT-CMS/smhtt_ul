@@ -8,24 +8,52 @@ N_CORES=64
 TAG=$1
 shift
 
-# If no modes specified, default to ALL
-if (( $# == 0 )); then
-    set -- "ALL"
-fi
-
 MODES=()
+EXCLUDES=()
 IS_TOYS=0
-for arg in "$@"; do
-    base_arg=${arg%-TOYS}
-    MODES+=( "$base_arg" )
-    if [[ "$arg" != "$base_arg" ]]; then
-        IS_TOYS=1
-    fi
+STAGE0=0
+USE_DATA=0
+
+while (( $# > 0 )); do
+    case "$1" in
+        --stage0)
+            STAGE0=1
+            ;;
+	--use-data)
+	    USE_DATA=1
+	    ;;
+        --exclude)
+            shift
+            IFS=',' read -ra ADDS <<< "$1"
+            EXCLUDES+=("${ADDS[@]}")
+            ;;
+        --exclude=*)
+            IFS=',' read -ra ADDS <<< "${1#*=}"
+            EXCLUDES+=("${ADDS[@]}")
+            ;;
+        *)
+            base_arg=${1%-TOYS}
+            MODES+=( "$base_arg" )
+            if [[ "$1" != "$base_arg" ]]; then
+                IS_TOYS=1
+            fi
+            ;;
+    esac
+    shift
 done
+
+if (( ${#MODES[@]} == 0 )); then
+    MODES=( "ALL" )
+fi
 
 has_mode() {
     local search=$1
     local mode
+    for mode in "${EXCLUDES[@]}"; do
+        if [[ "$mode" == "$search" ]]; then
+            return 1
+        fi
+    done
     for mode in "${MODES[@]}"; do
         if [[ "$mode" == "$search" || "$mode" == "ALL" ]]; then
             return 0
@@ -34,7 +62,8 @@ has_mode() {
     return 1
 }
 
-datacard_output="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/datacards"
+DATACARD_SUFFIX=${DATACARD_SUFFIX:-""}
+datacard_output="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/datacards${DATACARD_SUFFIX}"
 mkdir -p "$datacard_output"
 
 DIR_SUFF=""
@@ -49,6 +78,38 @@ fi
 ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
 ABS_WS="$ABS_BASE/workspace.root"
 ABS_WS_INCL="$ABS_BASE/workspace_inclusive.root"
+
+NEEDS_WS=0
+for target in "PREFIT" "FITDIAGNOSTICS" "POSTFIT" "FIT-SINGLES" "FIT-GRID" "IMPACTS"; do
+    if has_mode "$target"; then
+        NEEDS_WS=1
+        break
+    fi
+done
+
+if (( NEEDS_WS )) && [[ ! -f "$ABS_WS" ]]; then
+    echo "[INFO] Downstream mode active but Multi-POI workspace missing. Injecting WORKSPACE..."
+    MODES+=( "WORKSPACE" )
+fi
+
+if has_mode "IMPACTS-INCLUSIVE" && [[ ! -f "$ABS_WS_INCL" ]]; then
+    echo "[INFO] Inclusive mode active but workspace_inclusive.root missing. Injecting WORKSPACE-INCLUSIVE..."
+    MODES+=( "WORKSPACE-INCLUSIVE" )
+fi
+
+if has_mode "WORKSPACE" || has_mode "WORKSPACE-INCLUSIVE"; then
+    if [[ ! -f "$ABS_BASE/combined.txt.cmb" ]]; then
+        echo "[INFO] Workspace generation required but combined datacard missing. Injecting DATACARD..."
+        MODES+=( "DATACARD" )
+    fi
+fi
+
+if has_mode "FIT-GRID"; then
+    if [[ ! -f "$ABS_BASE/fits${DIR_SUFF}/higgsCombine.snap.MultiDimFit.mH125.root" ]]; then
+        echo "[INFO] Grid scan mode active but snapshot file missing. Injecting FIT-SINGLES..."
+        MODES+=( "FIT-SINGLES" )
+    fi
+fi
 
 # VSCode nesting anchor files
 make_collections() {
@@ -78,8 +139,20 @@ run_logged() {
     return ${PIPESTATUS[0]}
 }
 
-POIS=( "r_qqH_201to210" "r_ggH_101to104" "r_ggH_105to106" "r_ggH_107to109" "r_ggH_110to116" )
+if (( STAGE0 )); then
+    STXS_SIGNALS="stxs_stage0_syst"
+    POIS=( "r_qqH_201to210" "r_ggH_101to116" )
+else
+    STXS_SIGNALS="stxs_stage1p2_syst"
+    POIS=( "r_qqH_201to210" "r_ggH_101to104" "r_ggH_105to106" "r_ggH_107to109" "r_ggH_110to116" )
+fi
 POI_CSV=$(IFS=, ; echo "${POIS[*]}")
+
+PO_MAPS=()
+for POI in "${POIS[@]}"; do
+    range=${POI#r_*_}
+    PO_MAPS+=( "--PO" "\"map=.*bin${range}.*\$:${POI}[1,-5,5]\"" )
+done
 
 SET_PARAMS=""
 RANGES=""
@@ -91,20 +164,25 @@ SET_PARAMS=${SET_PARAMS%,}
 RANGES=${RANGES%:}
 
 OPTS_FIT=(
-    "--robustFit 1"
-    "--X-rtd MINIMIZER_analytic"
-    "--X-rtd FITTER_DYN_STEP"
-    "--cminDefaultMinimizerStrategy 1"
-    "--setParameterRanges $RANGES"
-    "--setParameters $SET_PARAMS"
+    "--robustFit" "1"
+    "--X-rtd" "MINIMIZER_analytic"
+    "--X-rtd" "FITTER_DYN_STEP"
+    "--X-rtd" "FAST_VERTICAL_MORPH" 
+    "--cminDefaultMinimizerStrategy" "1"
+    "--setParameterRanges" "$RANGES"
+    "--setParameters" "$SET_PARAMS"
 )
 
 OPTS_FALLBACK=(
-    "--cminFallbackAlgo Minuit2,0:0.1"           # 1. Try Strategy 0 with looser tolerance (0.1)
-    "--cminFallbackAlgo Minuit2,0:1.0"           # 2. Try Strategy 0 with very loose tolerance (1.0)
-    "--cminFallbackAlgo Minuit2,Simplex,0:1.0"   # 3. Try Simplex if Migrad fails entirely
-    "--X-rtd FITTER_NEVER_GIVE_UP"               # 4. Do not abort on intermediate failures
-    "--X-rtd FITTER_BOUND"                       # 5. Prevent out-of-boundary parameters from crashing
+     "--cminFallbackAlgo" "Minuit2,0:0.1"             # 1. Try Strategy 0 with looser tolerance (0.1)
+     "--cminFallbackAlgo" "Minuit2,2:0.1"             # 2. Try Strategy 2 (Hessian) with looser tolerance (0.1)
+     "--cminFallbackAlgo" "Minuit2,0:1.0"             # 3. Try Strategy 0 with very loose tolerance (1.0)
+     "--cminFallbackAlgo" "Minuit2,2:1.0"             # 4. Try Strategy 2 (Hessian) with very loose tolerance (1.0)
+     "--cminFallbackAlgo" "Minuit2,Simplex,0:1.0"     # 5. Try Simplex if Migrad fails entirely
+     "--X-rtd" "FITTER_NEVER_GIVE_UP"                 # 6. Do not abort on intermediate failures
+     "--X-rtd" "FITTER_BOUND"                         # 7. Prevent out-of-boundary parameters from crashing
+     "--cminSetZeroPoint" "1"                         # 8. Shift NLL reference to 0 for numerical precision
+     "--X-rtd" "MINIMIZER_MaxCalls=9999999"           # 9. Prevent premature exit before convergence
 )
 
 OPTS_FIT+=( "${OPTS_FALLBACK[@]}" )
@@ -114,26 +192,185 @@ if (( IS_TOYS )); then
     echo "[INFO] Toy mode enabled (Seed: $SEED)"
 fi
 
-if has_mode "DATACARD"; then
-    echo "[INFO] Run make_datacards.py"
-    python3 ${CMSSW_BASE}/src/CombineHarvester/SMRun2Legacy/scripts/make_datacards.py \
-        --base-path=$PWD \
+write_calculate_bias_pulls_py() {
+cat << 'EOF' > calculate_bias_pulls.py
+import ROOT, os, json, glob, numpy as np
+from tqdm import tqdm
+from collections import defaultdict
+
+ROOT.gROOT.SetBatch(True)
+
+pois = os.environ["POI_CSV"].split(",")
+# Use environment variable to dynamically swap input files
+files = glob.glob(os.environ.get("FILE_PATTERN", "higgsCombine.BiasTest.job*.MultiDimFit.mH125.*.root"))
+
+toy_entries = {}
+
+for file_path in tqdm(files, desc="Processing files"):
+    f = ROOT.TFile.Open(file_path, "READ")
+    tree = f.Get("limit")
+    for i in range(tree.GetEntries()):
+        tree.GetEntry(i)
+        if hasattr(tree, "iToy") and tree.iToy == 0:
+            continue
+        if (itoy := f"{file_path}_{tree.iToy}") not in toy_entries:
+            toy_entries[itoy] = []
+        entry_vals = {poi: getattr(tree, poi) for poi in pois}
+        entry_vals["quantileExpected"] = tree.quantileExpected
+        toy_entries[itoy].append(entry_vals)
+    f.Close()
+
+results = {}
+
+expected_values = defaultdict(lambda: 1.0,{})  # local overrides if necessary due to prior knowledge
+
+for poi in pois:
+    pulls, vals, errs, err_los, err_his = [], [], [], [], []
+    poi_idx = pois.index(poi)
+    erroneous_counter = 0
+    for itoy, entries in tqdm(toy_entries.items(), desc=f"Processing toys for {poi}"):
+        valid_entries = [e for e in entries if e["quantileExpected"] != -2]
+
+        if not (best_fit_entries := [e for e in valid_entries if e["quantileExpected"] == -1]):
+            continue
+
+        if len(valid_entries) != (expected_len := (2 * len(pois) + 1)):
+            raise RuntimeError(
+                f"Toy {itoy} has {len(entries)} entries, but expected {expected_len}. "
+                "This indicates a fit convergence/boundary failure in MultiDimFit. Check minimizer settings!"
+            )
+
+        best_fit = best_fit_entries[0]
+        val = best_fit[poi]
+
+        lower_entry, upper_entry = valid_entries[2 * poi_idx + 1], valid_entries[2 * poi_idx + 2]
+
+        err_lo, err_hi = val - lower_entry[poi], upper_entry[poi] - val
+        err = (err_lo + err_hi) / 2.
+
+        try:
+            pull = (expected_values[poi_idx] - val) / err
+        except ZeroDivisionError:
+            erroneous_counter += 1
+            continue
+
+        pulls.append(pull)
+        vals.append(val)
+        errs.append(err)
+        err_los.append(err_lo)
+        err_his.append(err_hi)
+
+    h_pull = ROOT.TH1F(f"h_pull_{poi}", "", 30, -10, 10)
+    for p in pulls:
+        h_pull.Fill(p)
+
+    fit_res = h_pull.Fit("gaus", "S Q")
+
+    results[poi] = {
+        "mean": fit_res.Parameter(1),
+        "mean_err": fit_res.ParError(1),
+        "sigma": fit_res.Parameter(2),
+        "sigma_err": fit_res.ParError(2),
+        "raw_val": vals,
+        "raw_err": errs,
+        "raw_err_lo": err_los,
+        "raw_err_hi": err_his,
+        "individual_pulls": pulls
+    }
+    print(f"Erroneous toy count due to zero error for {poi}: {erroneous_counter} out of {len(pulls)}, reduced statistics by {100*erroneous_counter/len(pulls):.1f}%")
+
+with open("bias_results.json", "w") as jf:
+    json.dump(results, jf, indent=2)
+EOF
+}
+
+get_failed_impact_params() {
+    local pattern=$1
+    local prefix=$2
+
+    python3 -c '
+import ROOT, glob, sys
+pattern = sys.argv[1]
+prefix = sys.argv[2]
+failed = []
+for f in glob.glob(pattern):
+    tf = ROOT.TFile.Open(f)
+    if not tf or tf.IsZombie():
+        name = f.split(prefix)[1].split(".MultiDimFit")[0]
+        failed.append(name)
+        continue
+    tree = tf.Get("limit")
+    if not tree or tree.GetEntries() < 3:
+        name = f.split(prefix)[1].split(".MultiDimFit")[0]
+        failed.append(name)
+    tf.Close()
+print(",".join(failed))
+' "$pattern" "$prefix"
+}
+
+_run_datacard() {
+    local out_folder=$1
+    local real_data=$2
+    shift 2
+    local extra_args=("$@")
+
+    python3 "${CMSSW_BASE}/src/CombineHarvester/SMRun2Legacy/scripts/make_datacards.py" \
+        --base-path="$PWD" \
         --input-folder-${CHANNEL}="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced" \
-        --real-data=false \
+        --real-data="${real_data}" \
         --bbb=true \
         --jetfakes=true \
         --embedding=true \
         --postfix="-ML" \
-        --channels=${CHANNEL} \
+        --channels="${CHANNEL}" \
         --rebinning-strategy="combine" \
         --rebinning-using-combine-uncert-fraction 0.1 \
         --convert-shapes-to-lnN=true \
-        --stxs-signals="stxs_stage1p2_syst" \
-        --categories="stxs_stage1p2_syst" \
-        --era=${ERA} \
-        --output-folder=$datacard_output \
+        --stxs-signals="$STXS_SIGNALS" \
+        --era="${ERA}" \
+        --output-folder="${out_folder}" \
         --ggh-wg1=true \
-        --qqh-wg1=true
+        --qqh-wg1=true \
+        "${extra_args[@]}"
+}
+
+if has_mode "PLOT-NN-OUTPUT"; then
+    echo "[INFO] Running PLOT-NN-OUTPUT sequence..."
+
+    STAGE0_FLAG=()
+    (( STAGE0 )) && STAGE0_FLAG=( --stage0 )
+
+    echo "[INFO] Preparing .for_plotting inputs using recursive script execution..."
+    env DATACARD_SUFFIX=".for_plotting" FORCE_REAL_DATA="true" bash "$0" "$TAG" DATACARD WORKSPACE PREFIT "${STAGE0_FLAG[@]}"
+    (
+        # Attempt to load conda activation functions if not inherited by subshell
+        # env setup commands for the SANNT.dev environment (scripts not migrated)
+        if declare -f get_conda > /dev/null; then
+            get_conda
+        elif [ -f ~/.bashrc ]; then
+            source ~/.bashrc
+            if declare -f get_conda > /dev/null; then get_conda; fi
+        fi
+        
+        conda activate SANNT.dev
+        export PYTHONPATH="/work/amonsch/Documents/_M_Code/nll-training:$PYTHONPATH"
+
+        python3 plotting/plot_ml_shapes_control_new.py \
+            --base-path "$PWD/output" \
+            --era "$ERA" \
+            --channel "$CHANNEL" \
+            --ntupletag "$NTUPLETAG" \
+            --tag "$TAG" \
+            "${STAGE0_FLAG[@]}"
+    )
+    echo "[INFO] PLOT-NN-OUTPUT sequence completed."
+fi
+
+if has_mode "DATACARD"; then
+    echo "[INFO] Run make_datacards.py"
+    real_data="${FORCE_REAL_DATA:-false}"
+    (( USE_DATA )) && real_data="true"
+    _run_datacard "$datacard_output" "$real_data" --categories="${STXS_SIGNALS}"
     
     make_collections "$ABS_BASE"
     echo "[INFO] Done datacard creation"
@@ -144,11 +381,7 @@ if has_mode "WORKSPACE"; then
     combineTool.py -M T2W -o workspace.root -i $datacard_output/${CHANNEL}/125 -m 125 \
         --parallel ${N_CORES} \
         -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-        --PO '"map=.*bin201to210.*$:r_qqH_201to210[1,-5,5]"' \
-        --PO '"map=.*bin101to104.*$:r_ggH_101to104[1,-5,5]"' \
-        --PO '"map=.*bin105to106.*$:r_ggH_105to106[1,-5,5]"' \
-        --PO '"map=.*bin107to109.*$:r_ggH_107to109[1,-5,5]"' \
-        --PO '"map=.*bin110to116.*$:r_ggH_110to116[1,-5,5]"'
+        "${PO_MAPS[@]}"
     
     make_collections "$ABS_BASE"
 fi
@@ -174,11 +407,11 @@ if has_mode "FITDIAGNOSTICS"; then
     echo "[INFO] FitDiagnostics & Pulls"
     mkdir -p "$ABS_BASE/diagnostics${DIR_SUFF}"
     pushd "$ABS_BASE/diagnostics${DIR_SUFF}" > /dev/null
-    
+
     run_logged fitDiagnostics.fitdiag.txt combine -M FitDiagnostics -d $ABS_WS -n .fitdiag -m 125 \
         --redefineSignalPOIs $POI_CSV \
         --plots --saveWithUncertainties \
-        $(printf "%s " "${OPTS_FIT[@]}")
+        "${OPTS_FIT_DIAG[@]}"
 
     run_logged pulls.txt python $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py \
         -a fitDiagnostics.fitdiag.root -g pulls.root
@@ -212,22 +445,22 @@ if has_mode "FIT-SINGLES"; then
 
     run_logged sys_singles.txt combineTool.py -M MultiDimFit -d $ABS_WS -m 125 \
         --algo singles -n .sys_singles --floatOtherPOIs 1 \
-        --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+        --parallel ${N_CORES} "${OPTS_FIT[@]}"
     run_logged snap.txt combineTool.py -M MultiDimFit -d $ABS_WS -m 125 \
         --algo singles -n .snap --saveWorkspace --floatOtherPOIs 1 \
-        --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+        --parallel ${N_CORES} "${OPTS_FIT[@]}"
     run_logged sys_nobbb_singles.txt combineTool.py -M MultiDimFit -d "$SNAP_FILE" -m 125 \
         --algo singles -n .sys_nobbb_singles --floatOtherPOIs 1 \
         --snapshotName MultiDimFit --freezeNuisanceGroups autoMCStats --freezeParameters 'rgx{.*_bin_.*}' \
-        --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+        --parallel ${N_CORES} "${OPTS_FIT[@]}"
     run_logged stat_singles.txt combineTool.py -M MultiDimFit -d "$SNAP_FILE" -m 125 \
         --algo singles -n .stat_singles --floatOtherPOIs 1 \
         --snapshotName MultiDimFit --freezeParameters allConstrainedNuisances \
-        --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+        --parallel ${N_CORES} "${OPTS_FIT[@]}"
     run_logged sys_stat_bbb_singles.txt combineTool.py -M MultiDimFit -d "$SNAP_FILE" -m 125 \
         --algo singles -n .sys_stat_bbb_singles --floatOtherPOIs 1 \
         --snapshotName MultiDimFit --freezeNuisanceGroups ^autoMCStats \
-        --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+        --parallel ${N_CORES} "${OPTS_FIT[@]}"
         
     popd > /dev/null
     make_collections "$ABS_BASE/fits${DIR_SUFF}"
@@ -242,25 +475,25 @@ if has_mode "FIT-GRID"; then
         run_logged "sys_grid_${POI}.txt" combineTool.py -M MultiDimFit -d $ABS_WS -m 125 \
             --algo grid --points 101 -n .sys_grid_${POI} --floatOtherPOIs 1 \
             -P $POI \
-            --job-mode interactive --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+            --job-mode interactive --parallel ${N_CORES} "${OPTS_FIT[@]}"
         run_logged "sys_nobbb_grid_${POI}.txt" combineTool.py -M MultiDimFit -d "$SNAP_FILE" -m 125 \
             --algo grid --points 101 -n .sys_nobbb_grid_${POI} --floatOtherPOIs 1 \
             -P $POI \
             --snapshotName MultiDimFit --freezeNuisanceGroups autoMCStats --freezeParameters 'rgx{.*_bin_.*}' \
-            --job-mode interactive --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+            --job-mode interactive --parallel ${N_CORES} "${OPTS_FIT[@]}"
 
         run_logged "sys_stat_bbb_grid_${POI}.txt" combineTool.py -M MultiDimFit -d "$SNAP_FILE" -m 125 \
             --algo grid --points 101 -n .sys_stat_bbb_grid_${POI} --floatOtherPOIs 1 \
             -P $POI \
             --snapshotName MultiDimFit --freezeNuisanceGroups ^autoMCStats \
-            --job-mode interactive --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+            --job-mode interactive --parallel ${N_CORES} "${OPTS_FIT[@]}"
 
         # Use variable $SNAP_FILE to prevent Toy seed mismatch
         run_logged "stat_grid_${POI}.txt" combineTool.py -M MultiDimFit -d "$SNAP_FILE" -m 125 \
             --algo grid --points 101 -n .stat_grid_${POI} --floatOtherPOIs 1 \
             -P $POI \
             --snapshotName MultiDimFit --freezeParameters allConstrainedNuisances \
-            --job-mode interactive --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
+            --job-mode interactive --parallel ${N_CORES} "${OPTS_FIT[@]}"
     done
     popd > /dev/null
     make_collections "$ABS_BASE/fits${DIR_SUFF}"
@@ -271,19 +504,59 @@ if has_mode "IMPACTS"; then
     echo "[INFO] Running Impacts (Single Pass for All POIs)"
     mkdir -p "$ABS_BASE/impacts${DIR_SUFF}"
     pushd "$ABS_BASE/impacts${DIR_SUFF}" > /dev/null
-    
+
+    if (( IS_TOYS )); then
+        OPTS_FALLBACK+=("-t" "1" "-s" "$SEED")
+    fi
+
+    OPTS_IMPACTS_FIT=(
+        "--setCrossingTolerance 0.001"
+        "--stepSize 0.05"
+        "--setRobustFitStrategy 0"
+        "--setRobustFitTolerance 0.1"
+    )
+
+    # intial fit
     run_logged "impacts_initial.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -m 125 \
         --redefineSignalPOIs $POI_CSV --doInitialFit  \
-        --parallel ${N_CORES} $(printf "%s " "${OPTS_FIT[@]}")
-        
+        --parallel ${N_CORES} "${OPTS_FIT[@]}" "${OPTS_IMPACTS_FIT[@]}"
+ 
+    # standard fit approach. best case: all parameters converge here
     run_logged "impacts_fits.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -m 125 \
         --redefineSignalPOIs $POI_CSV --doFits \
-        --cminPreFit 2 --cminPreScan --cminDefaultMinimizerTolerance 0.01 \
-        --job-mode interactive --parallel ${N_CORES}  $(printf "%s " "${OPTS_FIT[@]}")
-        
+        --cminPreFit 2 --cminPreScan --cminDefaultMinimizerTolerance 0.1 \
+        --job-mode interactive --parallel ${N_CORES} "${OPTS_FIT[@]}" "${OPTS_IMPACTS_FIT[@]}"
+
+    # For everything that did not worked: searching for fewer than 3 entries in their ROOT files
+    FAILED_PARAMS=$(get_failed_impact_params "higgsCombine_paramFit_.impacts_*.MultiDimFit.mH125.root" "_paramFit_.impacts_")
+
+    # everything enters here should be resolved within first retry
+    if [[ -n "$FAILED_PARAMS" ]]; then
+        echo "[INFO] initial strategy failed for: $FAILED_PARAMS. Retrying with different strategy..."
+        OPTS_FIT_RETRY=("${OPTS_FIT[@]/--cminDefaultMinimizerStrategy 1/--cminDefaultMinimizerStrategy 0}")
+        run_logged "impacts_fits_retry.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -m 125 \
+            --redefineSignalPOIs $POI_CSV --doFits \
+            --named "$FAILED_PARAMS" \
+            --cminDefaultMinimizerTolerance 0.1 \
+            --job-mode interactive --parallel ${N_CORES} "${OPTS_FIT_RETRY[@]}" "${OPTS_IMPACTS_FIT[@]}"
+
+        # If not: last resort: perhaps Simplex, loose tolerance 1.0. If its still failing: perhaps not fixable here?
+        FAILED_PARAMS_L2=$(get_failed_impact_params "higgsCombine_paramFit_.impacts_*.MultiDimFit.mH125.root" "_paramFit_.impacts_")
+        if [[ -n "$FAILED_PARAMS_L2" ]]; then
+            echo "[WARNING] adjusted strategy failed for: $FAILED_PARAMS_L2. Retrying with different strategy..."
+            OPTS_FIT_RETRY_L2=("${OPTS_FIT[@]/--cminDefaultMinimizerStrategy 1/--cminDefaultMinimizerStrategy 0}")
+            
+            run_logged "impacts_fits_retry_l2.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -m 125 \
+                --redefineSignalPOIs $POI_CSV --doFits \
+                --named "$FAILED_PARAMS_L2" \
+                --cminDefaultMinimizerTolerance 1.0 \
+                --cminFallbackAlgo Minuit2,Simplex,0:1.0 \
+                --job-mode interactive --parallel ${N_CORES} "${OPTS_FIT_RETRY_L2[@]}" "${OPTS_IMPACTS_FIT[@]}"
+        fi
+    fi
+
     run_logged "impacts_json.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -o impacts.json -m 125 \
-        --redefineSignalPOIs $POI_CSV \
-        --parallel ${N_CORES}
+        --parallel ${N_CORES} --redefineSignalPOIs $POI_CSV
     
     for POI in "${POIS[@]}"; do
         echo "[INFO] Generating impact plot for $POI"
@@ -300,28 +573,63 @@ if has_mode "IMPACTS-INCLUSIVE"; then
     pushd "$ABS_BASE/impacts_inclusive${DIR_SUFF}" > /dev/null
     
     OPTS_INCL=(
+        "--setCrossingTolerance 0.001"
+        "--stepSize 0.05"
         "--robustFit 1"
+        "--X-rtd FITTER_NEW_CROSSING_ALGO"
         "--X-rtd MINIMIZER_analytic"
         "--X-rtd FITTER_DYN_STEP"
+        "--X-rtd FAST_VERTICAL_MORPH"
         "--cminDefaultMinimizerStrategy 1"
         "--setParameterRanges r=-5.0,5.0"
-        "-m 125"
+        "--setParameters r=1.0"
     )
+
     if (( IS_TOYS )); then
         OPTS_INCL+=("-t" "1" "-s" "$SEED")
     fi
 
     OPTS_INCL+=( "${OPTS_FALLBACK[@]}" )
-    
+
+    # similar to IMPACTS
+
     run_logged impacts_incl_initial.txt combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl -m 125 \
-         --redefineSignalPOIs r --doInitialFit \
-         --parallel ${N_CORES} $(printf "%s " "${OPTS_INCL[@]}")
+        --redefineSignalPOIs r --doInitialFit \
+        --parallel ${N_CORES} "${OPTS_INCL[@]}"
+        
     run_logged impacts_incl_fits.txt combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl -m 125 \
-        --redefineSignalPOIs r --doFits --cminPreFit 2 --cminPreScan --cminDefaultMinimizerTolerance 0.01  \
-        --job-mode interactive --parallel ${N_CORES} $(printf "%s " "${OPTS_INCL[@]}")
+        --redefineSignalPOIs r --doFits \
+        --cminPreFit 2 --cminPreScan --cminDefaultMinimizerTolerance 0.1  \
+        --job-mode interactive --parallel ${N_CORES} "${OPTS_INCL[@]}"
+
+    FAILED_PARAMS=$(get_failed_impact_params "higgsCombine_paramFit_.impacts_incl_*.MultiDimFit.mH125.root" "_paramFit_.impacts_incl_")
+    if [[ -n "$FAILED_PARAMS" ]]; then
+        echo "[INFO] initial strategy failed for: $FAILED_PARAMS. Retrying with different strategy..."
+        OPTS_INCL_RETRY=("${OPTS_INCL[@]/--cminDefaultMinimizerStrategy 1/--cminDefaultMinimizerStrategy 0}")
+        
+        run_logged "impacts_incl_fits_retry.txt" combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl -m 125 \
+            --redefineSignalPOIs r --doFits \
+            --named "$FAILED_PARAMS" \
+            --cminDefaultMinimizerTolerance 0.1 \
+            --job-mode interactive --parallel ${N_CORES} "${OPTS_INCL_RETRY[@]}"
+
+        FAILED_PARAMS_L2=$(get_failed_impact_params "higgsCombine_paramFit_.impacts_incl_*.MultiDimFit.mH125.root" "_paramFit_.impacts_incl_")
+        if [[ -n "$FAILED_PARAMS_L2" ]]; then
+            echo "[WARNING] adjusted strategy failed for: $FAILED_PARAMS_L2. Retrying with different strategy..."
+            OPTS_INCL_RETRY_L2=("${OPTS_INCL[@]/--cminDefaultMinimizerStrategy 1/--cminDefaultMinimizerStrategy 0}")
+            
+            run_logged "impacts_incl_fits_retry_l2.txt" combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl -m 125 \
+                --redefineSignalPOIs r --doFits \
+                --named "$FAILED_PARAMS_L2" \
+                --cminDefaultMinimizerTolerance 1.0 \
+                --cminFallbackAlgo Minuit2,Simplex,0:1.0 \
+                --job-mode interactive --parallel ${N_CORES} "${OPTS_INCL_RETRY_L2[@]}"
+        fi
+    fi
+
     run_logged impacts_incl_json.txt combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl -o impacts_incl.json -m 125 \
         --redefineSignalPOIs r \
-        --parallel ${N_CORES} $(printf "%s " "${OPTS_INCL[@]}")
+        --parallel ${N_CORES} "${OPTS_INCL[@]}"
     
     plotImpacts.py -i impacts_incl.json -o impacts_incl
     
@@ -340,24 +648,8 @@ if has_mode "GOF-BKG"; then
     ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
     ABS_WS="$ABS_BASE/workspace.root"
 
-    python3 ${CMSSW_BASE}/src/CombineHarvester/SMRun2Legacy/scripts/make_datacards.py \
-        --base-path=$PWD \
-        --input-folder-${CHANNEL}="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced" \
-        --real-data=true \
-        --bbb=true \
-        --jetfakes=true \
-        --embedding=true \
-        --postfix="-ML" \
-        --channels=${CHANNEL} \
-        --rebinning-strategy="combine" \
-        --rebinning-using-combine-uncert-fraction 0.1 \
-        --convert-shapes-to-lnN=true \
-        --era=${ERA} \
-        --stxs-signals="stxs_stage1p2_syst" \
-        --output-folder="${datacard_output}" \
+    _run_datacard "${datacard_output}" "true" \
         --categories="stxs_stage1p2_syst_bkg_only" \
-        --ggh-wg1=true \
-        --qqh-wg1=true \
         --nn-output-gof-bkg-only=true
 
     make_collections "$ABS_BASE"
@@ -416,6 +708,110 @@ if has_mode "GOF-BKG"; then
     echo "[INFO] Done GoF background-only workflow"
 fi
 
+if has_mode "GOF-BKG-INDIVIDUAL"; then
+    echo "[INFO] Running Goodness-of-Fit Background-Only per Category..."
+
+    orig_datacard_output=$datacard_output
+    orig_ABS_BASE=$ABS_BASE
+    orig_ABS_WS=$ABS_WS
+
+    datacard_output="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/bkg_only_gof/datacards"
+    ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
+
+    if [ ! -d "$ABS_BASE" ] || [ -z "$(ls -A "$ABS_BASE"/htt_${CHANNEL}_*_${ERA}.txt 2>/dev/null)" ]; then
+        echo "[INFO] Background-only datacards not found. Creating on-the-fly..."
+        _run_datacard "${datacard_output}" "true" \
+            --categories="stxs_stage1p2_syst_bkg_only" \
+            --nn-output-gof-bkg-only=true
+
+        make_collections "$ABS_BASE"
+    else
+        echo "[INFO] Reusing existing background-only datacards from $ABS_BASE"
+    fi
+
+    get_bg_name() {
+        local cat_id=$1
+        case "$cat_id" in
+            10) echo "embedding" ;;
+            11) echo "jetFakes" ;;
+            12) echo "ttbar" ;;
+            13) echo "dyjets" ;;
+            14) echo "diboson" ;;
+            *) echo "cat_${cat_id}" ;;
+        esac
+    }
+
+    THEORY_NUISANCES_TO_FREEZE="rgx{BR_Htt.*},rgx{LHE_.*},rgx{PS_scale.*},rgx{THU_.*},rgx{ggH_scale.*},rgx{vbf_scale.*}"
+    GOF_FIT_OPTS=(
+        "--setParameters" "r=0"
+        "--fixedSignalStrength=0"
+        "--cminDefaultMinimizerStrategy" "2"
+        "--cminDefaultMinimizerTolerance" "0.1"
+        "--cminPreScan"
+        "--cminFallbackAlgo" "Minuit2,Migrad,0:0.01,Minuit2,Migrad,0:0.01"
+        "--X-rtd" "FITTER_NEW_CROSSING_ALGO"
+        "--X-rtd" "FITTER_NEVER_GIVE_UP"
+        "--X-rtd" "MINIMIZER_analytic"
+        "--X-rtd" "SIMPLE_RUNTIME_CHANGES"
+        "--freezeParameters" "r,${THEORY_NUISANCES_TO_FREEZE}"
+    )
+
+    # Resolve relative path for text2workspace globally
+    mkdir -p "$ABS_BASE/individual_gof"
+    ln -sfn "../../common" "$ABS_BASE/individual_gof/common"
+
+    for card_path in "$ABS_BASE"/htt_${CHANNEL}_*_${ERA}.txt; do
+        [ -e "$card_path" ] || continue
+        
+        card_file=$(basename "$card_path")
+        cat_id=$(echo "$card_file" | cut -d'_' -f3)
+        bg_name=$(get_bg_name "$cat_id")
+
+        echo "[INFO] === Starting GoF for Background: ${bg_name} (ID: ${cat_id}) ==="
+
+        bg_dir="$ABS_BASE/individual_gof/$bg_name"
+        mkdir -p "$bg_dir"
+
+        cp "$card_path" "$bg_dir/"
+        pushd "$bg_dir" > /dev/null
+
+        combineTool.py -M T2W -o workspace.root -i "$card_file" -m 125
+        run_logged gof_observed.txt combine -M GoodnessOfFit workspace.root -m 125 --algo=saturated -n .Observed "${GOF_FIT_OPTS[@]}"
+
+        for SEED_VAL in {1930..1939}; do
+            combine -M GoodnessOfFit workspace.root -m 125 --algo=saturated \
+                -t 100 -s "$SEED_VAL" --toysFrequentist -n .Toys \
+                "${GOF_FIT_OPTS[@]}" \
+                >/dev/null 2>&1 &
+        done
+        wait
+
+        TOY_FILES=()
+        for SEED_VAL in {1930..1939}; do
+            TOY_FILES+=("higgsCombine.Toys.GoodnessOfFit.mH125.${SEED_VAL}.root")
+        done
+
+        run_logged gof_collect.txt combineTool.py -M CollectGoodnessOfFit \
+            --input higgsCombine.Observed.GoodnessOfFit.mH125.root "${TOY_FILES[@]}" \
+            --output gof.json
+
+        plotGof.py --statistic saturated --mass 125.0 --output gof gof.json
+
+        popd > /dev/null
+        make_collections "$bg_dir"
+    done
+
+    datacard_output=$orig_datacard_output
+    ABS_BASE=$orig_ABS_BASE
+    ABS_WS=$orig_ABS_WS
+
+    echo "[INFO] Done GoF background-only individual workflow"
+fi
+
+
+exit 0
+# everything below is WIP
+
 if has_mode "BIAS"; then
     echo "[INFO] Run make_datacards.py for Multi-Signal Bias Test (Asimov templates)"
     
@@ -427,24 +823,8 @@ if has_mode "BIAS"; then
     ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
     ABS_WS="$ABS_BASE/workspace.root"
 
-    python3 ${CMSSW_BASE}/src/CombineHarvester/SMRun2Legacy/scripts/make_datacards.py \
-        --base-path=$PWD \
-        --input-folder-${CHANNEL}="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced" \
-        --real-data=false \
-        --bbb=true \
-        --jetfakes=true \
-        --embedding=true \
-        --postfix="-ML" \
-        --channels=${CHANNEL} \
-        --rebinning-strategy="combine" \
-        --rebinning-using-combine-uncert-fraction 0.1 \
-        --convert-shapes-to-lnN=true \
-        --stxs-signals="stxs_stage1p2_syst" \
+    _run_datacard "${datacard_output}" "false" \
         --categories="stxs_stage1p2_syst" \
-        --era=${ERA} \
-        --output-folder="${datacard_output}" \
-        --ggh-wg1=true \
-        --qqh-wg1=true \
         --bias-test=true
     
     make_collections "$ABS_BASE"
@@ -471,6 +851,7 @@ if has_mode "BIAS"; then
         combine -M MultiDimFit workspace_bias_test.root -m 125 \
             -t "$TOYS_PER_JOB" \
             -s "$SEED_VAL" \
+            --redefineSignalPOIs $POI_CSV \
             --algo singles \
             --cl=0.68 \
             --saveToys \
@@ -486,9 +867,110 @@ if has_mode "BIAS"; then
     export POI_CSV
     export SEED
 
+    write_calculate_bias_pulls_py
+    python3 calculate_bias_pulls.py
+
+    popd > /dev/null
+    make_collections "$ABS_BASE"
+
+    datacard_output=$orig_datacard_output
+    ABS_BASE=$orig_ABS_BASE
+    ABS_WS=$orig_ABS_WS
+    echo "[INFO] Done Bias Test workflow"
+fi
+
+if has_mode "BIAS-METHOD-A"; then
+    echo "[INFO] Run make_datacards.py for Multi-Signal Method A Bias Test (Real Data constraints)"
+    
+    orig_datacard_output=$datacard_output
+    orig_ABS_BASE=$ABS_BASE
+    orig_ABS_WS=$ABS_WS
+
+    datacard_output="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/bias_test_method_a/datacards"
+    ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
+    ABS_WS="$ABS_BASE/workspace_method_a.root"
+
+    python3 ${CMSSW_BASE}/src/CombineHarvester/SMRun2Legacy/scripts/make_datacards.py \
+        --base-path=$PWD \
+        --input-folder-${CHANNEL}="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced" \
+        --real-data=true \
+        --bbb=true \
+        --jetfakes=true \
+        --embedding=true \
+        --postfix="-ML" \
+        --channels=${CHANNEL} \
+        --rebinning-strategy="combine" \
+        --rebinning-using-combine-uncert-fraction 0.1 \
+        --convert-shapes-to-lnN=true \
+        --stxs-signals="stxs_stage1p2_syst" \
+        --categories="stxs_stage1p2_syst" \
+        --era=${ERA} \
+        --output-folder="${datacard_output}" \
+        --ggh-wg1=true \
+        --qqh-wg1=true
+    
+    make_collections "$ABS_BASE"
+
+    echo "[INFO] Create Multi-POI Method A workspace with channel masks"
+    combineTool.py -M T2W -o workspace_method_a.root -i "$datacard_output/${CHANNEL}/125" -m 125 \
+        --parallel ${N_CORES} \
+        --channel-masks \
+        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+        --PO '"map=.*bin201to210.*$:r_qqH_201to210[1,-5,5]"' \
+        --PO '"map=.*bin101to104.*$:r_ggH_101to104[1,-5,5]"' \
+        --PO '"map=.*bin105to106.*$:r_ggH_105to106[1,-5,5]"' \
+        --PO '"map=.*bin107to109.*$:r_ggH_107to109[1,-5,5]"' \
+        --PO '"map=.*bin110to116.*$:r_ggH_110to116[1,-5,5]"'
+
+    N_BIAS_JOBS=${N_BIAS_JOBS:-20}
+    N_BIAS_TOYS=${N_BIAS_TOYS:-1000}
+    TOYS_PER_JOB=$(( N_BIAS_TOYS / N_BIAS_JOBS ))
+
+    SIGNAL_BIN_IDS=(100 101 102 103 104)
+    FIT_MASKS=""
+    EVAL_MASKS=""
+
+    for BINID in "${SIGNAL_BIN_IDS[@]}"; do
+        FIT_MASKS+="mask_htt_${CHANNEL}_${BINID}_${ERA}=1,"
+        EVAL_MASKS+="mask_htt_${CHANNEL}_${BINID}_${ERA}=0,"
+    done
+
+    FIT_MASKS=${FIT_MASKS%,}
+    EVAL_MASKS=${EVAL_MASKS%,}
+
+    echo "[INFO] Running parallelized Method A Bias Fits with CR-only background fit..."
+    pushd "$ABS_BASE" > /dev/null
+
+    for (( JOB_IDX=0; JOB_IDX<N_BIAS_JOBS; JOB_IDX++ )); do
+        SEED_VAL=$(( SEED + JOB_IDX ))
+        
+        # --setParametersForFit: masks signal channels strictly during background profiling
+        # --setParametersForEval: unmasks signal channels to allow toy generation and fitting
+        combine -M MultiDimFit workspace_method_a.root -m 125 \
+            -t "$TOYS_PER_JOB" \
+            --toysFrequentist \
+            --setParametersForFit "$FIT_MASKS" \
+            --setParametersForEval "$EVAL_MASKS" \
+            -s "$SEED_VAL" \
+            --algo singles \
+            --cl=0.68 \
+            --saveToys \
+            --floatOtherPOIs 1 \
+            $(printf "%s " "${OPTS_FIT[@]}") \
+            -n ".BiasTest_MethodA.job${JOB_IDX}" \
+            >/dev/null 2>&1 &
+    done
+    wait
+
+    echo "[INFO] Extracting pulls and computing bias from parallel jobs..."
+
+    export POI_CSV
+    export SEED
+
     cat << 'EOF' > calculate_bias_pulls.py
 import ROOT, os, json, glob, numpy as np
 from tqdm import tqdm
+from collections import defaultdict
 
 ROOT.gROOT.SetBatch(True)
 
@@ -513,24 +995,43 @@ for file_path in tqdm(files, desc="Processing files"):
 
 results = {}
 
+expected_values = defaultdict(lambda: 1.0,{})  # local overrides if necessary due to prior knowledge
+
 for poi in pois:
-    pulls, vals, errs = [], [], []
+    pulls, vals, errs, err_los, err_his = [], [], [], [], []
+    poi_idx = pois.index(poi)
+    erroneous_counter = 0
     for itoy, entries in tqdm(toy_entries.items(), desc=f"Processing toys for {poi}"):
-        if not (best_fit_entries := [e for e in entries if e["quantileExpected"] == -1]):
+        valid_entries = [e for e in entries if e["quantileExpected"] != -2]
+
+        if not (best_fit_entries := [e for e in valid_entries if e["quantileExpected"] == -1]):
             continue
 
+        if len(valid_entries) != (expected_len := (2 * len(pois) + 1)):
+            raise RuntimeError(
+                f"Toy {itoy} has {len(entries)} entries, but expected {expected_len}. "
+                "This indicates a fit convergence/boundary failure in MultiDimFit. Check minimizer settings!"
+            )
+
         best_fit = best_fit_entries[0]
-        val, all_vals = best_fit[poi], [e[poi] for e in entries]
-        
-        err_lo, err_hi = val - min(all_vals), max(all_vals) - val
+        val = best_fit[poi]
+
+        lower_entry, upper_entry = valid_entries[2 * poi_idx + 1], valid_entries[2 * poi_idx + 2]
+
+        err_lo, err_hi = val - lower_entry[poi], upper_entry[poi] - val
         err = 0.5 * (err_lo + err_hi)
 
-        pull = (val - 1.0) / err
-        # pull = (1.0 - val) / err  # the cobine docu definition
+        try:
+            pull = (expected_values[poi_idx] - val) / err
+        except ZeroDivisionError:
+            erroneous_counter += 1
+            continue
 
         pulls.append(pull)
         vals.append(val)
         errs.append(err)
+        err_los.append(err_lo)
+        err_his.append(err_hi)
 
     h_pull = ROOT.TH1F(f"h_pull_{poi}", "", 30, -4, 4)
     for p in pulls:
@@ -543,10 +1044,13 @@ for poi in pois:
         "mean_err": fit_res.ParError(1),
         "sigma": fit_res.Parameter(2),
         "sigma_err": fit_res.ParError(2),
-        "raw_mean_bias": np.mean(vals) - 1.0,
-        "raw_mean_err": np.mean(errs),
+        "raw_val": vals,
+        "raw_err": errs,
+        "raw_err_lo": err_los,
+        "raw_err_hi": err_his,
         "individual_pulls": pulls
     }
+    print(f"Erroneous toy count due to zero error for {poi}: {erroneous_counter} out of {len(pulls)}, reduced statistics by {100*erroneous_counter/len(pulls):.1f}%")
 
 with open("bias_results.json", "w") as jf:
     json.dump(results, jf, indent=2)
