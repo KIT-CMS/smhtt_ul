@@ -1,4 +1,5 @@
-CMSSW_BASE=CMSSW_14_1_0_pre4
+PRE="/work/amonsch/HiggsToTauTau/2018Redone/smhtt_ul.2026-04-01_ml_parallel_tmp"
+CMSSW_BASE=${PRE}/CMSSW_14_1_0_pre4
 CHANNEL=mt
 ERA=2018
 NTUPLETAG="ff_and_cr_2018UL_mt__2026-03-27__v2"
@@ -19,9 +20,9 @@ while (( $# > 0 )); do
         --stage0)
             STAGE0=1
             ;;
-	--use-data)
-	    USE_DATA=1
-	    ;;
+        --use-data)
+            USE_DATA=1
+            ;;
         --exclude)
             shift
             IFS=',' read -ra ADDS <<< "$1"
@@ -44,6 +45,18 @@ done
 
 if (( ${#MODES[@]} == 0 )); then
     MODES=( "ALL" )
+fi
+
+BLIND_ONLY_MODES=( "BIAS" "BIAS-METHOD-A" "GOF-BKG" "GOF-BKG-INDIVIDUAL" )
+
+if (( USE_DATA )); then
+    for bmode in "${BLIND_ONLY_MODES[@]}"; do
+        named=0
+        for m in "${MODES[@]}"; do
+            [[ "$m" == "$bmode" ]] && { named=1; break; }
+        done
+        (( named )) || EXCLUDES+=( "$bmode" )
+    done
 fi
 
 has_mode() {
@@ -187,97 +200,131 @@ OPTS_FALLBACK=(
 
 OPTS_FIT+=( "${OPTS_FALLBACK[@]}" )
 
+OPTS_BIAS=(
+    "--robustFit" "1"
+    "--X-rtd" "MINIMIZER_analytic"
+    "--X-rtd" "FITTER_DYN_STEP"
+    "--cminDefaultMinimizerStrategy" "1"
+    "--setParameterRanges" "$RANGES"
+    "${OPTS_FALLBACK[@]}"
+)
+
 if (( IS_TOYS )); then
     OPTS_FIT+=("-t" "1" "-s" "$SEED")
     echo "[INFO] Toy mode enabled (Seed: $SEED)"
 fi
 
-write_calculate_bias_pulls_py() {
-cat << 'EOF' > calculate_bias_pulls.py
-import ROOT, os, json, glob, numpy as np
-from tqdm import tqdm
-from collections import defaultdict
+POI_TRANSLATIONS='{
+    "r_qqH_201to210": "VBF incl.",
+    "r_ggH_101to116": "ggH incl.",
+    "r_qqH_201to202": "VBF: N_{jets} #leq 1",
+    "r_qqH_203to210": "VBF: N_{jets} #geq 2",
+    "r_ggH_101to104": "ggH: p_{T}^{H} #geq 200 GeV",
+    "r_ggH_105to106": "ggH: N_{jets} = 0",
+    "r_ggH_107to109": "ggH: N_{jets} = 1",
+    "r_ggH_110to116": "ggH: N_{jets} #geq 2"
+}'
+
+write_fitdiag_to_json_py() {
+# for PULLS-BKG
+cat << 'EOF' > fitdiag_to_impacts_json.py
+import ROOT, json, sys
 
 ROOT.gROOT.SetBatch(True)
 
+infile, outfile = sys.argv[1], sys.argv[2]
+f = ROOT.TFile.Open(infile)
+fr = f.Get("fit_b") if f and not f.IsZombie() else None
+if not fr:
+    raise RuntimeError(f"fit_b not found in {infile}")
+
+pars = fr.floatParsFinal()
+params = []
+for i in range(pars.getSize()):
+    p = pars.at(i)
+    val, err = p.getVal(), p.getError()
+    if p.hasAsymError():
+        lo, hi = val + p.getAsymErrorLo(), val + p.getAsymErrorHi()
+    else:
+        lo, hi = val - err, val + err
+    params.append({
+        "name": p.GetName(),
+        "type": "Gaussian",
+        "groups": [],
+        "prefit": [-1.0, 0.0, 1.0],
+        "fit": [lo, val, hi],
+    })
+f.Close()
+
+with open(outfile, "w") as jf:
+    json.dump({"POIs": [], "method": "fitdiag_bonly", "params": params}, jf, indent=2)
+
+print(f"wrote {len(params)} nuisances -> {outfile}")
+EOF
+}
+
+write_calculate_bias_pulls_py() {
+cat << 'EOF' > calculate_bias_pulls.py
+import ROOT, os, json, glob, math
+ROOT.gROOT.SetBatch(True)
+
 pois = os.environ["POI_CSV"].split(",")
-# Use environment variable to dynamically swap input files
-files = glob.glob(os.environ.get("FILE_PATTERN", "higgsCombine.BiasTest.job*.MultiDimFit.mH125.*.root"))
+gen = float(os.environ.get("GEN_VALUE", "1.0"))  # injected truth (per-POI scalar)
+pattern = os.environ["FILE_PATTERN"]  # one multidimfit.<name>.root per toy
 
-toy_entries = {}
+files = glob.glob(pattern)
+if not files:
+    raise RuntimeError(f"No fit-result files matched: {pattern}")
 
-for file_path in tqdm(files, desc="Processing files"):
-    f = ROOT.TFile.Open(file_path, "READ")
-    tree = f.Get("limit")
-    for i in range(tree.GetEntries()):
-        tree.GetEntry(i)
-        if hasattr(tree, "iToy") and tree.iToy == 0:
-            continue
-        if (itoy := f"{file_path}_{tree.iToy}") not in toy_entries:
-            toy_entries[itoy] = []
-        entry_vals = {poi: getattr(tree, poi) for poi in pois}
-        entry_vals["quantileExpected"] = tree.quantileExpected
-        toy_entries[itoy].append(entry_vals)
-    f.Close()
-
+# Each file = one toy. fit_mdf holds best-fit value AND Hesse error per POI,
+# both read from floatParsFinal() -> no covariance indexing, no interval rows.
 results = {}
-
-expected_values = defaultdict(lambda: 1.0,{})  # local overrides if necessary due to prior knowledge
-
 for poi in pois:
-    pulls, vals, errs, err_los, err_his = [], [], [], [], []
-    poi_idx = pois.index(poi)
-    erroneous_counter = 0
-    for itoy, entries in tqdm(toy_entries.items(), desc=f"Processing toys for {poi}"):
-        valid_entries = [e for e in entries if e["quantileExpected"] != -2]
-
-        if not (best_fit_entries := [e for e in valid_entries if e["quantileExpected"] == -1]):
+    pulls, vals, errs = [], [], []
+    skipped = 0
+    for fpath in files:
+        f = ROOT.TFile.Open(fpath)
+        fr = f.Get("fit_mdf") if f and not f.IsZombie() else None
+        if not fr:
+            skipped += 1
+            if f:
+                f.Close()
             continue
+        p = fr.floatParsFinal().find(poi)
+        if not p:
+            skipped += 1; f.Close(); continue
+        val, err = p.getVal(), p.getError()
+        if err <= 0 or not math.isfinite(err) or not math.isfinite(val):
+            skipped += 1; f.Close(); continue
+        pulls.append((val - gen) / err)
+        vals.append(val); errs.append(err)
+        f.Close()
 
-        if len(valid_entries) != (expected_len := (2 * len(pois) + 1)):
-            raise RuntimeError(
-                f"Toy {itoy} has {len(entries)} entries, but expected {expected_len}. "
-                "This indicates a fit convergence/boundary failure in MultiDimFit. Check minimizer settings!"
-            )
+    print(f"{poi:>20s}: kept {len(pulls)} / {len(files)} toys (skipped {skipped})")
+    if len(pulls) < 5:
+        raise RuntimeError(f"Too few valid toys for {poi} ({len(pulls)}).")
 
-        best_fit = best_fit_entries[0]
-        val = best_fit[poi]
-
-        lower_entry, upper_entry = valid_entries[2 * poi_idx + 1], valid_entries[2 * poi_idx + 2]
-
-        err_lo, err_hi = val - lower_entry[poi], upper_entry[poi] - val
-        err = (err_lo + err_hi) / 2.
-
-        try:
-            pull = (expected_values[poi_idx] - val) / err
-        except ZeroDivisionError:
-            erroneous_counter += 1
-            continue
-
-        pulls.append(pull)
-        vals.append(val)
-        errs.append(err)
-        err_los.append(err_lo)
-        err_his.append(err_hi)
-
-    h_pull = ROOT.TH1F(f"h_pull_{poi}", "", 30, -10, 10)
-    for p in pulls:
-        h_pull.Fill(p)
-
-    fit_res = h_pull.Fit("gaus", "S Q")
-
+    n_bins = 40
+    h = ROOT.TH1F(f"h_pull_{poi}", ";pull;toys", n_bins, -5, 5)
+    for x in pulls:
+        h.Fill(x)
+    r = h.Fit("gaus", "S Q")
     results[poi] = {
-        "mean": fit_res.Parameter(1),
-        "mean_err": fit_res.ParError(1),
-        "sigma": fit_res.Parameter(2),
-        "sigma_err": fit_res.ParError(2),
-        "raw_val": vals,
-        "raw_err": errs,
-        "raw_err_lo": err_los,
-        "raw_err_hi": err_his,
-        "individual_pulls": pulls
+        "mean": r.Parameter(1),
+        "mean_err": r.ParError(1),
+        "sigma": r.Parameter(2),
+        "sigma_err": r.ParError(2),
+        "n_toys": len(pulls),
+        "gen": gen,
+        "pulls": pulls,
+        "vals": vals,
+        "errs": errs,
+        "n_bins": n_bins,
+        "chi2": r.Chi2(),
+        "ndf": r.Ndf(),
     }
-    print(f"Erroneous toy count due to zero error for {poi}: {erroneous_counter} out of {len(pulls)}, reduced statistics by {100*erroneous_counter/len(pulls):.1f}%")
+    print(f"{poi:>20s}: mean={r.Parameter(1):+.3f}+-{r.ParError(1):.3f}  "
+          f"sigma={r.Parameter(2):.3f}+-{r.ParError(2):.3f}")
 
 with open("bias_results.json", "w") as jf:
     json.dump(results, jf, indent=2)
@@ -334,8 +381,31 @@ _run_datacard() {
         "${extra_args[@]}"
 }
 
-if has_mode "PLOT-NN-OUTPUT"; then
-    echo "[INFO] Running PLOT-NN-OUTPUT sequence..."
+make_shapes() {
+    # $1 = postfit output suffix (e.g. "" for nominal, ".stat_singles" for a component)
+    # $2 = "file.root:fit_mdf" => also produce postfit; omit => prefit only
+    local suffix=$1
+    local fitres=$2
+    local outdir="$ABS_BASE/shapes${DIR_SUFF}"
+    mkdir -p "$outdir"
+
+    # prefit = nominal eval of bare workspace => fit-independent => generate once
+    if [[ ! -f "$outdir/datacard-shapes-prefit.root" ]]; then
+        PostFitShapesFromWorkspace -w "$ABS_WS" -m 125 -d "$ABS_BASE/combined.txt.cmb" \
+            --output "$outdir/datacard-shapes-prefit.root"
+    fi
+
+    if [[ -n "$fitres" ]]; then
+        PostFitShapesFromWorkspace -w "$ABS_WS" -m 125 -d "$ABS_BASE/combined.txt.cmb" \
+            -f "$fitres" --postfit --samples 2000 \
+            --output "$outdir/datacard-shapes-postfit${suffix}.root"
+    fi
+
+    make_collections "$outdir"
+}
+
+if has_mode "PLOT-NN-OUTPUT-PREFIT"; then
+    echo "[INFO] Running PLOT-NN-OUTPUT-PREFIT sequence..."
 
     STAGE0_FLAG=()
     (( STAGE0 )) && STAGE0_FLAG=( --stage0 )
@@ -355,15 +425,16 @@ if has_mode "PLOT-NN-OUTPUT"; then
         conda activate SANNT.dev
         export PYTHONPATH="/work/amonsch/Documents/_M_Code/nll-training:$PYTHONPATH"
 
-        python3 plotting/plot_ml_shapes_control_new.py \
+        python3 ${PRE}/plotting/plot_ml_shapes_control_new.py \
             --base-path "$PWD/output" \
             --era "$ERA" \
             --channel "$CHANNEL" \
             --ntupletag "$NTUPLETAG" \
             --tag "$TAG" \
-            "${STAGE0_FLAG[@]}"
+            "${STAGE0_FLAG[@]}" \
+            --mask-signal-region
     )
-    echo "[INFO] PLOT-NN-OUTPUT sequence completed."
+    echo "[INFO] PLOT-NN-OUTPUT-PREFIT sequence completed."
 fi
 
 if has_mode "DATACARD"; then
@@ -421,23 +492,6 @@ if has_mode "FITDIAGNOSTICS"; then
     make_collections "$ABS_BASE/diagnostics${DIR_SUFF}"
 fi
 
-if has_mode "POSTFIT"; then
-    echo "[INFO] PostFit Shapes (Multi-POI)"
-    mkdir -p "$ABS_BASE/shapes${DIR_SUFF}"
-    
-    if (( IS_TOYS )); then
-        echo "[WARNING] PostFitShapesFromWorkspace extracts expected PostFit shapes, but plotted data points will be Asimov!"
-        echo "[WARNING] To plot Toy data points, extract 'data' manually from fitDiagnostics.fitdiag.root."
-    fi
-
-    PostFitShapesFromWorkspace -w $ABS_WS -m 125 -d $ABS_BASE/combined.txt.cmb \
-        -f $ABS_BASE/diagnostics${DIR_SUFF}/fitDiagnostics.fitdiag.root:fit_s \
-        --output $ABS_BASE/shapes${DIR_SUFF}/datacard-shapes-postfit.root \
-        --postfit
-        
-    make_collections "$ABS_BASE/shapes${DIR_SUFF}"
-fi
-
 if has_mode "FIT-SINGLES"; then
     echo "[INFO] MultiDimFit Singles (Stat+Syst / Stat-only / Stat+Sys no BBB)"
     mkdir -p "$ABS_BASE/fits${DIR_SUFF}"
@@ -446,9 +500,17 @@ if has_mode "FIT-SINGLES"; then
     run_logged sys_singles.txt combineTool.py -M MultiDimFit -d $ABS_WS -m 125 \
         --algo singles -n .sys_singles --floatOtherPOIs 1 \
         --parallel ${N_CORES} "${OPTS_FIT[@]}"
+
+    run_logged snap.txt combineTool.py -M MultiDimFit -d $ABS_WS -m 125 \
+        --algo singles -n .snap --saveWorkspace --saveFitResult --robustHesse 1 --floatOtherPOIs 1 \
+        --parallel ${N_CORES} "${OPTS_FIT[@]}"
+    FITDIR="$ABS_BASE/fits${DIR_SUFF}"
+    make_shapes "" "$FITDIR/multidimfit.snap.root:fit_mdf"
+
     run_logged snap.txt combineTool.py -M MultiDimFit -d $ABS_WS -m 125 \
         --algo singles -n .snap --saveWorkspace --floatOtherPOIs 1 \
         --parallel ${N_CORES} "${OPTS_FIT[@]}"
+
     run_logged sys_nobbb_singles.txt combineTool.py -M MultiDimFit -d "$SNAP_FILE" -m 125 \
         --algo singles -n .sys_nobbb_singles --floatOtherPOIs 1 \
         --snapshotName MultiDimFit --freezeNuisanceGroups autoMCStats --freezeParameters 'rgx{.*_bin_.*}' \
@@ -464,6 +526,44 @@ if has_mode "FIT-SINGLES"; then
         
     popd > /dev/null
     make_collections "$ABS_BASE/fits${DIR_SUFF}"
+fi
+
+if has_mode "PLOT-NN-OUTPUT-POSTFIT"; then
+    echo "[INFO] Running PLOT-NN-OUTPUT-POSTFIT sequence..."
+
+    STAGE0_FLAG=()
+    (( STAGE0 )) && STAGE0_FLAG=( --stage0 )
+
+    (
+        # Attempt to load conda activation functions if not inherited by subshell
+        # env setup commands for the SANNT.dev environment (scripts not migrated)
+        if declare -f get_conda > /dev/null; then
+            get_conda
+        elif [ -f ~/.bashrc ]; then
+            source ~/.bashrc
+            if declare -f get_conda > /dev/null; then get_conda; fi
+        fi
+        
+        conda activate SANNT.dev
+        export PYTHONPATH="/work/amonsch/Documents/_M_Code/nll-training:$PYTHONPATH"
+
+        python3 ${PRE}/plotting/plot_ml_shapes_control_new.py \
+            --base-path "$PWD/output" \
+            --era "$ERA" \
+            --channel "$CHANNEL" \
+            --ntupletag "$NTUPLETAG" \
+            --tag "$TAG" \
+            "${STAGE0_FLAG[@]}" \
+            --is-postfit
+
+        python3 ${PRE}/plotting/plot_ml_shapes_control_new.py \
+            --base-path "$PWD/output" \
+            --era "$ERA" \
+            --channel "$CHANNEL" \
+            --ntupletag "$NTUPLETAG" \
+            --tag "$TAG" \
+            "${STAGE0_FLAG[@]}"
+    )
 fi
 
 if has_mode "FIT-GRID"; then
@@ -510,17 +610,17 @@ if has_mode "IMPACTS"; then
     fi
 
     OPTS_IMPACTS_FIT=(
-        "--setCrossingTolerance 0.001"
-        "--stepSize 0.05"
-        "--setRobustFitStrategy 0"
-        "--setRobustFitTolerance 0.1"
+        "--setCrossingTolerance" "0.001"
+        "--stepSize" "0.05"
+        "--setRobustFitStrategy" "0"
+        "--setRobustFitTolerance" "0.1"
     )
 
     # intial fit
     run_logged "impacts_initial.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -m 125 \
         --redefineSignalPOIs $POI_CSV --doInitialFit  \
         --parallel ${N_CORES} "${OPTS_FIT[@]}" "${OPTS_IMPACTS_FIT[@]}"
- 
+
     # standard fit approach. best case: all parameters converge here
     run_logged "impacts_fits.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -m 125 \
         --redefineSignalPOIs $POI_CSV --doFits \
@@ -545,7 +645,7 @@ if has_mode "IMPACTS"; then
         if [[ -n "$FAILED_PARAMS_L2" ]]; then
             echo "[WARNING] adjusted strategy failed for: $FAILED_PARAMS_L2. Retrying with different strategy..."
             OPTS_FIT_RETRY_L2=("${OPTS_FIT[@]/--cminDefaultMinimizerStrategy 1/--cminDefaultMinimizerStrategy 0}")
-            
+
             run_logged "impacts_fits_retry_l2.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -m 125 \
                 --redefineSignalPOIs $POI_CSV --doFits \
                 --named "$FAILED_PARAMS_L2" \
@@ -557,12 +657,14 @@ if has_mode "IMPACTS"; then
 
     run_logged "impacts_json.txt" combineTool.py -M Impacts -d "$ABS_WS" -n .impacts -o impacts.json -m 125 \
         --parallel ${N_CORES} --redefineSignalPOIs $POI_CSV
-    
+
+    echo "$POI_TRANSLATIONS" > "$ABS_BASE/impacts${DIR_SUFF}/poi_translations.json"
+    pushd "$ABS_BASE/impacts${DIR_SUFF}" > /dev/null
     for POI in "${POIS[@]}"; do
         echo "[INFO] Generating impact plot for $POI"
-        plotImpacts.py -i impacts.json -o impacts_${POI} --POI $POI
+        plotImpacts.py -i impacts.json -o impacts_${POI} --POI $POI --translate poi_translations.json
     done
-    
+
     popd > /dev/null
     make_collections "$ABS_BASE/impacts${DIR_SUFF}"
 fi
@@ -573,16 +675,16 @@ if has_mode "IMPACTS-INCLUSIVE"; then
     pushd "$ABS_BASE/impacts_inclusive${DIR_SUFF}" > /dev/null
     
     OPTS_INCL=(
-        "--setCrossingTolerance 0.001"
-        "--stepSize 0.05"
-        "--robustFit 1"
-        "--X-rtd FITTER_NEW_CROSSING_ALGO"
-        "--X-rtd MINIMIZER_analytic"
-        "--X-rtd FITTER_DYN_STEP"
-        "--X-rtd FAST_VERTICAL_MORPH"
-        "--cminDefaultMinimizerStrategy 1"
-        "--setParameterRanges r=-5.0,5.0"
-        "--setParameters r=1.0"
+        "--setCrossingTolerance" "0.001"
+        "--stepSize" "0.05"
+        "--robustFit" "1"
+        "--X-rtd" "FITTER_NEW_CROSSING_ALGO"
+        "--X-rtd" "MINIMIZER_analytic"
+        "--X-rtd" "FITTER_DYN_STEP"
+        "--X-rtd" "FAST_VERTICAL_MORPH"
+        "--cminDefaultMinimizerStrategy" "1"
+        "--setParameterRanges" "r=-5.0,5.0"
+        "--setParameters" "r=1.0"
     )
 
     if (( IS_TOYS )); then
@@ -630,11 +732,105 @@ if has_mode "IMPACTS-INCLUSIVE"; then
     run_logged impacts_incl_json.txt combineTool.py -M Impacts -d "$ABS_WS_INCL" -n .impacts_incl -o impacts_incl.json -m 125 \
         --redefineSignalPOIs r \
         --parallel ${N_CORES} "${OPTS_INCL[@]}"
-    
-    plotImpacts.py -i impacts_incl.json -o impacts_incl
-    
+
+    echo "$POI_TRANSLATIONS" > "$ABS_BASE/impacts_inclusive${DIR_SUFF}/poi_translations.json"
+    pushd "$ABS_BASE/impacts_inclusive${DIR_SUFF}" > /dev/null    
+    plotImpacts.py -i impacts_incl.json -o impacts_incl --translate poi_translations.json
+
     popd > /dev/null
     make_collections "$ABS_BASE/impacts_inclusive${DIR_SUFF}"
+fi
+
+if has_mode "PULLS-BKG"; then
+    echo "[INFO] Pulls/constraints (bkg-only, r=0) via FitDiagnostics"
+
+    orig_datacard_output=$datacard_output
+    orig_ABS_BASE=$ABS_BASE
+    orig_ABS_WS=$ABS_WS
+
+    datacard_output="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/pulls_bkg/datacards"
+    ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
+
+    _run_datacard "${datacard_output}" "true" \
+        --categories="stxs_stage1p2_syst_bkg_only" \
+        --nn-output-gof-bkg-only=true
+
+    make_collections "$ABS_BASE"
+
+    PULL_FIT_OPTS=(
+        "--setParameters" "r=0"
+        "--freezeParameters" "r"
+        "--saveWithUncertainties"
+        "--robustHesse" "1"
+        "--cminDefaultMinimizerStrategy" "1"
+        "${OPTS_FALLBACK[@]}"
+    )
+
+    get_bg_name() {
+        case "$1" in
+            10) echo "embedding" ;; 
+            11) echo "jetFakes" ;; 
+            12) echo "ttbar" ;; 
+            13) echo "dyjets" ;; 
+            14) echo "diboson" ;; 
+            *) echo "cat_$1" ;; 
+        esac
+    }
+
+    write_fitdiag_to_json_py
+    PULL_PY="$PWD/fitdiag_to_impacts_json.py"
+
+    # --- inclusive ---
+    echo "[INFO] Inclusive bkg-only FitDiagnostics"
+
+    combineTool.py -M T2W -o workspace.root -i "$datacard_output/${CHANNEL}/125" -m 125 \
+        --parallel ${N_CORES}
+
+    pushd "$ABS_BASE" > /dev/null
+
+    run_logged fitdiag.pulls_incl.txt combine -M FitDiagnostics -d workspace.root -m 125 \
+        -n .pulls_incl "${PULL_FIT_OPTS[@]}"
+    python3 "$PULL_PY" fitDiagnostics.pulls_incl.root pulls_incl.json
+
+    make_collections "$ABS_BASE"
+
+    popd > /dev/null
+
+    # --- per category ---
+
+    mkdir -p "$ABS_BASE/individual_pulls"
+    ln -sfn "../../common" "$ABS_BASE/individual_pulls/common"
+
+    for card_path in "$ABS_BASE"/htt_${CHANNEL}_*_${ERA}.txt; do
+        [ -e "$card_path" ] || continue
+
+        card_file=$(basename "$card_path")
+        cat_id=$(echo "$card_file" | cut -d'_' -f3)
+        bg_name=$(get_bg_name "$cat_id")
+
+        echo "[INFO] === Pulls for ${bg_name} (ID ${cat_id}) ==="
+
+        bg_dir="$ABS_BASE/individual_pulls/$bg_name"
+
+        mkdir -p "$bg_dir"
+        cp "$card_path" "$bg_dir/"
+
+        pushd "$bg_dir" > /dev/null
+
+        combineTool.py -M T2W -o workspace.root -i "$card_file" -m 125
+
+        run_logged fitdiag.pulls.txt combine -M FitDiagnostics -d workspace.root -m 125 \
+            -n .pulls "${PULL_FIT_OPTS[@]}"
+
+        python3 "$PULL_PY" fitDiagnostics.pulls.root "pulls_${bg_name}.json"
+
+        make_collections "$bg_dir"
+
+        popd > /dev/null
+    done
+
+    datacard_output=$orig_datacard_output; ABS_BASE=$orig_ABS_BASE; ABS_WS=$orig_ABS_WS
+    echo "[INFO] Done bkg-only pulls/constraints"
 fi
 
 if has_mode "GOF-BKG"; then
@@ -808,80 +1004,72 @@ if has_mode "GOF-BKG-INDIVIDUAL"; then
     echo "[INFO] Done GoF background-only individual workflow"
 fi
 
-
-exit 0
-# everything below is WIP
-
 if has_mode "BIAS"; then
-    echo "[INFO] Run make_datacards.py for Multi-Signal Bias Test (Asimov templates)"
-    
+    echo "[INFO] Classic Bias Test: Asimov data only"
+
     orig_datacard_output=$datacard_output
     orig_ABS_BASE=$ABS_BASE
-    orig_ABS_WS=$orig_ABS_WS
+    orig_ABS_WS=$ABS_WS
 
     datacard_output="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/bias_test/datacards"
     ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
-    ABS_WS="$ABS_BASE/workspace.root"
+    ABS_WS="$ABS_BASE/workspace_bias.root"
 
     _run_datacard "${datacard_output}" "false" \
-        --categories="stxs_stage1p2_syst" \
+        --categories="${STXS_SIGNALS}" \
         --bias-test=true
-    
+
     make_collections "$ABS_BASE"
 
-    echo "[INFO] Create Multi-POI bias workspace"
-    combineTool.py -M T2W -o workspace_bias_test.root -i "$datacard_output/${CHANNEL}/125" -m 125 \
+    combineTool.py -M T2W -o workspace_bias.root -i "$datacard_output/${CHANNEL}/125" -m 125 \
         --parallel ${N_CORES} \
         -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-        --PO '"map=.*bin201to210.*$:r_qqH_201to210[1,-5,5]"' \
-        --PO '"map=.*bin101to104.*$:r_ggH_101to104[1,-5,5]"' \
-        --PO '"map=.*bin105to106.*$:r_ggH_105to106[1,-5,5]"' \
-        --PO '"map=.*bin107to109.*$:r_ggH_107to109[1,-5,5]"' \
-        --PO '"map=.*bin110to116.*$:r_ggH_110to116[1,-5,5]"'
+        "${PO_MAPS[@]}"
 
-    N_BIAS_JOBS=${N_BIAS_JOBS:-20}
-    N_BIAS_TOYS=${N_BIAS_TOYS:-1000}
+    N_BIAS_JOBS=${N_BIAS_JOBS:-60}
+    N_BIAS_TOYS=${N_BIAS_TOYS:-1200}
     TOYS_PER_JOB=$(( N_BIAS_TOYS / N_BIAS_JOBS ))
 
-    echo "[INFO] Running parallelized Multi-POI Bias Fits (${N_BIAS_JOBS} jobs x ${TOYS_PER_JOB} toys each)..."
     pushd "$ABS_BASE" > /dev/null
 
-    for (( JOB_IDX=0; JOB_IDX<N_BIAS_JOBS; JOB_IDX++ )); do
-        SEED_VAL=$(( SEED + JOB_IDX ))
-        combine -M MultiDimFit workspace_bias_test.root -m 125 \
-            -t "$TOYS_PER_JOB" \
-            -s "$SEED_VAL" \
-            --redefineSignalPOIs $POI_CSV \
-            --algo singles \
-            --cl=0.68 \
-            --saveToys \
-            --floatOtherPOIs 1 \
-            $(printf "%s " "${OPTS_FIT[@]}") \
-            -n ".BiasTest.job${JOB_IDX}" \
-            >/dev/null 2>&1 &
-    done
-    wait
+    mkdir -p toys
+    ( cd toys
+      for (( JOB_IDX=0; JOB_IDX<N_BIAS_JOBS; JOB_IDX++ )); do
+        (
+          for (( K=0; K<TOYS_PER_JOB; K++ )); do
+            TOY_SEED=$(( SEED + JOB_IDX*TOYS_PER_JOB + K ))
+            combine -M MultiDimFit "$ABS_WS" -m 125 \
+                -t 1 \
+                -s "$TOY_SEED" \
+                --redefineSignalPOIs $POI_CSV \
+                --algo none \
+                --toysFrequentist \
+                --saveToys \
+                --robustHesse 1 \
+                --saveFitResult \
+                --setParameters "$SET_PARAMS" \
+                "${OPTS_BIAS[@]}" \
+                -n ".BiasTest.j${JOB_IDX}.t${K}" >/dev/null 2>&1
+          done
+        ) &
+      done
+      wait
+    )
 
-    echo "[INFO] Extracting pulls and computing bias from parallel jobs..."
-
-    export POI_CSV
-    export SEED
-
+    export POI_CSV; export GEN_VALUE=1.0
+    export FILE_PATTERN="toys/multidimfit.BiasTest.*.root"
     write_calculate_bias_pulls_py
-    python3 calculate_bias_pulls.py
-
+    run_logged bias_pulls.txt python3 calculate_bias_pulls.py
     popd > /dev/null
     make_collections "$ABS_BASE"
 
-    datacard_output=$orig_datacard_output
-    ABS_BASE=$orig_ABS_BASE
-    ABS_WS=$orig_ABS_WS
-    echo "[INFO] Done Bias Test workflow"
+    datacard_output=$orig_datacard_output; ABS_BASE=$orig_ABS_BASE; ABS_WS=$orig_ABS_WS
+    echo "[INFO] Done classic Bias Test"
 fi
 
 if has_mode "BIAS-METHOD-A"; then
-    echo "[INFO] Run make_datacards.py for Multi-Signal Method A Bias Test (Real Data constraints)"
-    
+    echo "[INFO] Bias Test: toys around data-postfit nuisance state"
+
     orig_datacard_output=$datacard_output
     orig_ABS_BASE=$ABS_BASE
     orig_ABS_WS=$ABS_WS
@@ -890,43 +1078,18 @@ if has_mode "BIAS-METHOD-A"; then
     ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
     ABS_WS="$ABS_BASE/workspace_method_a.root"
 
-    python3 ${CMSSW_BASE}/src/CombineHarvester/SMRun2Legacy/scripts/make_datacards.py \
-        --base-path=$PWD \
-        --input-folder-${CHANNEL}="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/synced" \
-        --real-data=true \
-        --bbb=true \
-        --jetfakes=true \
-        --embedding=true \
-        --postfix="-ML" \
-        --channels=${CHANNEL} \
-        --rebinning-strategy="combine" \
-        --rebinning-using-combine-uncert-fraction 0.1 \
-        --convert-shapes-to-lnN=true \
-        --stxs-signals="stxs_stage1p2_syst" \
-        --categories="stxs_stage1p2_syst" \
-        --era=${ERA} \
-        --output-folder="${datacard_output}" \
-        --ggh-wg1=true \
-        --qqh-wg1=true
-    
+    _run_datacard "${datacard_output}" "true" --categories="${STXS_SIGNALS}"
+
     make_collections "$ABS_BASE"
 
-    echo "[INFO] Create Multi-POI Method A workspace with channel masks"
     combineTool.py -M T2W -o workspace_method_a.root -i "$datacard_output/${CHANNEL}/125" -m 125 \
-        --parallel ${N_CORES} \
-        --channel-masks \
+        --parallel ${N_CORES} --channel-masks \
         -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-        --PO '"map=.*bin201to210.*$:r_qqH_201to210[1,-5,5]"' \
-        --PO '"map=.*bin101to104.*$:r_ggH_101to104[1,-5,5]"' \
-        --PO '"map=.*bin105to106.*$:r_ggH_105to106[1,-5,5]"' \
-        --PO '"map=.*bin107to109.*$:r_ggH_107to109[1,-5,5]"' \
-        --PO '"map=.*bin110to116.*$:r_ggH_110to116[1,-5,5]"'
-
-    N_BIAS_JOBS=${N_BIAS_JOBS:-20}
-    N_BIAS_TOYS=${N_BIAS_TOYS:-1000}
-    TOYS_PER_JOB=$(( N_BIAS_TOYS / N_BIAS_JOBS ))
+        "${PO_MAPS[@]}"
 
     SIGNAL_BIN_IDS=(100 101 102 103 104)
+    (( STAGE0 )) && SIGNAL_BIN_IDS=(100 101)
+
     FIT_MASKS=""
     EVAL_MASKS=""
 
@@ -938,131 +1101,54 @@ if has_mode "BIAS-METHOD-A"; then
     FIT_MASKS=${FIT_MASKS%,}
     EVAL_MASKS=${EVAL_MASKS%,}
 
-    echo "[INFO] Running parallelized Method A Bias Fits with CR-only background fit..."
     pushd "$ABS_BASE" > /dev/null
 
-    for (( JOB_IDX=0; JOB_IDX<N_BIAS_JOBS; JOB_IDX++ )); do
-        SEED_VAL=$(( SEED + JOB_IDX ))
-        
-        # --setParametersForFit: masks signal channels strictly during background profiling
-        # --setParametersForEval: unmasks signal channels to allow toy generation and fitting
-        combine -M MultiDimFit workspace_method_a.root -m 125 \
-            -t "$TOYS_PER_JOB" \
-            --toysFrequentist \
-            --setParametersForFit "$FIT_MASKS" \
-            --setParametersForEval "$EVAL_MASKS" \
-            -s "$SEED_VAL" \
-            --algo singles \
-            --cl=0.68 \
-            --saveToys \
-            --floatOtherPOIs 1 \
-            $(printf "%s " "${OPTS_FIT[@]}") \
-            -n ".BiasTest_MethodA.job${JOB_IDX}" \
-            >/dev/null 2>&1 &
-    done
-    wait
+    # Profile NPs on real data, signal masked, POIs frozen 0 -> snapshot
+    run_logged methodA_data_profile.txt combine -M MultiDimFit workspace_method_a.root -m 125 \
+        --redefineSignalPOIs $POI_CSV \
+        --setParameters "${FIT_MASKS},${SET_PARAMS//=1.0/=0.0}" \
+        --freezeParameters $POI_CSV \
+        --saveWorkspace -n .methodA_dataprofile \
+        "${OPTS_BIAS[@]}"
 
-    echo "[INFO] Extracting pulls and computing bias from parallel jobs..."
+    SNAP_DATA="$ABS_BASE/higgsCombine.methodA_dataprofile.MultiDimFit.mH125.root"
 
-    export POI_CSV
-    export SEED
+    N_BIAS_JOBS=${N_BIAS_JOBS:-60}
+    N_BIAS_TOYS=${N_BIAS_TOYS:-1200}
+    TOYS_PER_JOB=$(( N_BIAS_TOYS / N_BIAS_JOBS ))
 
-    cat << 'EOF' > calculate_bias_pulls.py
-import ROOT, os, json, glob, numpy as np
-from tqdm import tqdm
-from collections import defaultdict
+    # Toys from data-postfit snapshot, signal unmasked, SM injected (POIs=1)
+    mkdir -p toys
+    ( cd toys
+      for (( JOB_IDX=0; JOB_IDX<N_BIAS_JOBS; JOB_IDX++ )); do
+        (
+          for (( K=0; K<TOYS_PER_JOB; K++ )); do
+            TOY_SEED=$(( SEED + JOB_IDX*TOYS_PER_JOB + K ))
+            combine -M MultiDimFit "$SNAP_DATA" -m 125 --snapshotName MultiDimFit \
+                -t 1 \
+                -s "$TOY_SEED" \
+                --redefineSignalPOIs $POI_CSV \
+                --algo none \
+                --toysFrequentist \
+                --saveToys \
+                --robustHesse 1 \
+                --saveFitResult \
+                --setParameters "${EVAL_MASKS},${SET_PARAMS}" \
+                "${OPTS_BIAS[@]}" \
+                -n ".BiasTest_methodA.j${JOB_IDX}.t${K}" >/dev/null 2>&1
+          done
+        ) &
+      done
+      wait
+    )
 
-ROOT.gROOT.SetBatch(True)
-
-pois = os.environ["POI_CSV"].split(",")
-files = glob.glob("higgsCombine.BiasTest.job*.MultiDimFit.mH125.*.root")
-
-toy_entries = {}
-
-for file_path in tqdm(files, desc="Processing files"):
-    f = ROOT.TFile.Open(file_path, "READ")
-    tree = f.Get("limit")
-    for i in range(tree.GetEntries()):
-        tree.GetEntry(i)
-        if hasattr(tree, "iToy") and tree.iToy == 0:
-            continue
-        if (itoy := f"{file_path}_{tree.iToy}") not in toy_entries:
-            toy_entries[itoy] = []
-        entry_vals = {poi: getattr(tree, poi) for poi in pois}
-        entry_vals["quantileExpected"] = tree.quantileExpected
-        toy_entries[itoy].append(entry_vals)
-    f.Close()
-
-results = {}
-
-expected_values = defaultdict(lambda: 1.0,{})  # local overrides if necessary due to prior knowledge
-
-for poi in pois:
-    pulls, vals, errs, err_los, err_his = [], [], [], [], []
-    poi_idx = pois.index(poi)
-    erroneous_counter = 0
-    for itoy, entries in tqdm(toy_entries.items(), desc=f"Processing toys for {poi}"):
-        valid_entries = [e for e in entries if e["quantileExpected"] != -2]
-
-        if not (best_fit_entries := [e for e in valid_entries if e["quantileExpected"] == -1]):
-            continue
-
-        if len(valid_entries) != (expected_len := (2 * len(pois) + 1)):
-            raise RuntimeError(
-                f"Toy {itoy} has {len(entries)} entries, but expected {expected_len}. "
-                "This indicates a fit convergence/boundary failure in MultiDimFit. Check minimizer settings!"
-            )
-
-        best_fit = best_fit_entries[0]
-        val = best_fit[poi]
-
-        lower_entry, upper_entry = valid_entries[2 * poi_idx + 1], valid_entries[2 * poi_idx + 2]
-
-        err_lo, err_hi = val - lower_entry[poi], upper_entry[poi] - val
-        err = 0.5 * (err_lo + err_hi)
-
-        try:
-            pull = (expected_values[poi_idx] - val) / err
-        except ZeroDivisionError:
-            erroneous_counter += 1
-            continue
-
-        pulls.append(pull)
-        vals.append(val)
-        errs.append(err)
-        err_los.append(err_lo)
-        err_his.append(err_hi)
-
-    h_pull = ROOT.TH1F(f"h_pull_{poi}", "", 30, -4, 4)
-    for p in pulls:
-        h_pull.Fill(p)
-
-    fit_res = h_pull.Fit("gaus", "S Q")
-
-    results[poi] = {
-        "mean": fit_res.Parameter(1),
-        "mean_err": fit_res.ParError(1),
-        "sigma": fit_res.Parameter(2),
-        "sigma_err": fit_res.ParError(2),
-        "raw_val": vals,
-        "raw_err": errs,
-        "raw_err_lo": err_los,
-        "raw_err_hi": err_his,
-        "individual_pulls": pulls
-    }
-    print(f"Erroneous toy count due to zero error for {poi}: {erroneous_counter} out of {len(pulls)}, reduced statistics by {100*erroneous_counter/len(pulls):.1f}%")
-
-with open("bias_results.json", "w") as jf:
-    json.dump(results, jf, indent=2)
-EOF
-
-    python3 calculate_bias_pulls.py
-
+    export POI_CSV; export GEN_VALUE=1.0
+    export FILE_PATTERN="toys/multidimfit.BiasTest_methodA.*.root"
+    write_calculate_bias_pulls_py
+    run_logged methodA_pulls.txt python3 calculate_bias_pulls.py
     popd > /dev/null
     make_collections "$ABS_BASE"
 
-    datacard_output=$orig_datacard_output
-    ABS_BASE=$orig_ABS_BASE
-    ABS_WS=$orig_ABS_WS
-    echo "[INFO] Done Bias Test workflow"
+    datacard_output=$orig_datacard_output; ABS_BASE=$orig_ABS_BASE; ABS_WS=$orig_ABS_WS
+    echo "[INFO] Done Method-A Bias Test"
 fi
