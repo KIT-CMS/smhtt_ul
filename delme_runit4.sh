@@ -47,7 +47,7 @@ if (( ${#MODES[@]} == 0 )); then
     MODES=( "ALL" )
 fi
 
-BLIND_ONLY_MODES=( "BIAS" "BIAS-METHOD-A" "GOF-BKG" "GOF-BKG-INDIVIDUAL" )
+BLIND_ONLY_MODES=( "BIAS" "BIAS-METHOD-A" "GOF-BKG" "GOF-BKG-INDIVIDUAL" "PULLS-BKG" )
 
 if (( USE_DATA )); then
     for bmode in "${BLIND_ONLY_MODES[@]}"; do
@@ -872,6 +872,13 @@ if has_mode "GOF-BKG"; then
         "--freezeParameters" "r,${THEORY_NUISANCES_TO_FREEZE}"
     )
 
+    make_shapes "" ""
+    combine -M MultiDimFit "$ABS_WS" -m 125 \
+        --algo none --saveFitResult --robustHesse 1 -n .gof_postfit \
+        --setParameters r=0 --freezeParameters "r,${THEORY_NUISANCES_TO_FREEZE}" \
+        --cminDefaultMinimizerStrategy 1 "${OPTS_FALLBACK[@]}"
+    make_shapes "" "$ABS_BASE/multidimfit.gof_postfit.root:fit_mdf"
+
     run_logged gof_observed.txt combine -M GoodnessOfFit workspace.root -m 125 --algo=saturated -n .Observed "${GOF_FIT_OPTS[@]}"
 
     for SEED_VAL in {1930..1939}; do
@@ -1002,6 +1009,80 @@ if has_mode "GOF-BKG-INDIVIDUAL"; then
     ABS_WS=$orig_ABS_WS
 
     echo "[INFO] Done GoF background-only individual workflow"
+fi
+
+if has_mode "GOF-SB" && (( USE_DATA )); then
+
+    # TODO: read through it and verify!
+
+    echo "[INFO] Run make_datacards.py for GoF S+B (signal + background, unblinded)"
+
+    orig_datacard_output=$datacard_output
+    orig_ABS_BASE=$ABS_BASE
+    orig_ABS_WS=$ABS_WS
+
+    datacard_output="output/${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG}/sb_gof/datacards"
+    ABS_BASE="$PWD/$datacard_output/${CHANNEL}/125"
+    ABS_WS="$ABS_BASE/workspace.root"
+
+    _run_datacard "${datacard_output}" "true" --categories="${STXS_SIGNALS}"
+
+    make_collections "$ABS_BASE"
+
+    echo "[INFO] Create GoF S+B multiSignalModel workspace"
+    combineTool.py -M T2W -o workspace.root -i "$datacard_output/${CHANNEL}/125" -m 125 \
+        --parallel ${N_CORES} \
+        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+        "${PO_MAPS[@]}"
+
+    echo "[INFO] Running GoF (S+B, POIs + all NPs floating)..."
+    pushd "$ABS_BASE" > /dev/null
+
+    # S+B GoF: POIs float (redefined), all NPs float, nothing frozen.
+    # Differs from GOF-BKG: no r=0, no --fixedSignalStrength, no theory freeze.
+    GOF_FIT_OPTS=(
+        "--redefineSignalPOIs" "$POI_CSV"
+        "--setParameterRanges" "$RANGES"
+        "--cminDefaultMinimizerStrategy" "2"
+        "--cminDefaultMinimizerTolerance" "0.1"
+        "--cminPreScan"
+        "--cminFallbackAlgo" "Minuit2,Migrad,0:0.01,Minuit2,Migrad,0:0.01"
+        "--X-rtd" "FITTER_NEW_CROSSING_ALGO"
+        "--X-rtd" "FITTER_NEVER_GIVE_UP"
+        "--X-rtd" "MINIMIZER_analytic"
+        "--X-rtd" "SIMPLE_RUNTIME_CHANGES"
+    )
+
+    run_logged gof_observed.txt combine -M GoodnessOfFit workspace.root -m 125 --algo=saturated -n .Observed "${GOF_FIT_OPTS[@]}"
+
+    for SEED_VAL in {1930..1939}; do
+        combine -M GoodnessOfFit workspace.root -m 125 --algo=saturated \
+            -t 100 -s "$SEED_VAL" --toysFrequentist -n .Toys \
+            "${GOF_FIT_OPTS[@]}" \
+            >/dev/null 2>&1 &
+    done
+    wait
+
+    TOY_FILES=()
+    for SEED_VAL in {1930..1939}; do
+        TOY_FILES+=("higgsCombine.Toys.GoodnessOfFit.mH125.${SEED_VAL}.root")
+    done
+
+    run_logged gof_collect.txt combineTool.py -M CollectGoodnessOfFit \
+        --input higgsCombine.Observed.GoodnessOfFit.mH125.root "${TOY_FILES[@]}" \
+        --output gof.json
+
+    plotGof.py --statistic saturated --mass 125.0 --output gof gof.json
+
+    popd > /dev/null
+
+    make_collections "$ABS_BASE"
+
+    datacard_output=$orig_datacard_output
+    ABS_BASE=$orig_ABS_BASE
+    ABS_WS=$orig_ABS_WS
+
+    echo "[INFO] Done GoF S+B workflow"
 fi
 
 if has_mode "BIAS"; then

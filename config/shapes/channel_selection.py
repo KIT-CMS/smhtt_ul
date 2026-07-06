@@ -9,6 +9,7 @@ logger = setup_logging(logger=logging.getLogger(__name__))
 def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="VVLoose", selection_option="CR", **kwargs):
 
     cuts = WarnDict()
+    cuts["number_of_jets"] = "(njets >= 0)"
     cuts["extraelec_veto"] = "(extraelec_veto < 0.5)"
     cuts["extramuon_veto"] = "(extramuon_veto < 0.5)"
     cuts["dilepton_veto"] = "(dimuon_veto < 0.5)"

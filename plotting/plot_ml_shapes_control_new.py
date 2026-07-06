@@ -15,6 +15,7 @@ parser.add_argument("--save-path", type=pathlib.Path, default=None, help="Explic
 parser.add_argument("--stage0", action="store_true", help="Use STXS stage 0 signals and categories instead of stage 1.2")
 parser.add_argument("--is-postfit", action="store_true", help="Use post-fit shapes instead of pre-fit shapes")
 parser.add_argument("--mask-signal-region", action="store_true", help="Unmask signal region in plots")
+parser.add_argument("--is-HIG-19-010", action="store_true", help="Use HIG signal process categories and definitions (stage0)")
 
 BKG_CATEGORIES = (
     (10, r"$\tau$ embedded"),

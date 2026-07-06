@@ -106,6 +106,12 @@ def parse_arguments():
         default=30,
         help="Number of processes to use for multiprocessing",
     )
+    parser.add_argument(
+        "--njets-cut",
+        type=str,
+        default="(njets >= 0)",
+        help="Global cut expression applied on the input data before calculations (e.g. 'njets == 0', 'njets >= 2')",
+    )
     return parser.parse_args()
 
 
@@ -676,6 +682,12 @@ def main(args):
 
     chain = build_binning_helper.build_chain({"tree_path": "ntuple"}, cache_path=skim_file_path)
     var_data_np = build_binning_helper.extract_data_from_chain(chain, variables, cache_path=skim_file_path.replace(".root", "_variables.pkl"))
+
+    if args.njets_cut:
+        expr = args.njets_cut.replace("&&", "&").replace("||", "|")
+        mask = eval(expr, {}, var_data_np)
+        var_data_np = {k: v[mask] for k, v in var_data_np.items()}
+        logger.info(f"Applied filter '{args.njets_cut}'. Events: {len(mask)} -> {np.sum(mask)}")
 
     strategy = BinningStrategyTargetBinning()
     # strategy = BinningStrategyYieldPerBin(3000)

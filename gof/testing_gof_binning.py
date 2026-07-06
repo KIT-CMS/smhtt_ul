@@ -63,6 +63,8 @@ def produce_histograms(yaml_path, pickle_path):
         expression_str = config["expression"]
         cut_str = config["cut"]
 
+        cut_str = f"({cut_str}) & (njets >= 0)"  # TODO FIXME
+
         # 1. Apply Cut
         try:
             mask = evaluate_expression(cut_str, data)
