@@ -1,0 +1,29 @@
+imax    1 number of bins
+jmax    8 number of processes minus 1
+kmax    * number of nuisance parameters
+--------------------------------------------------------------------------------
+shapes * htt_mt_vbf_2022preEE common/htt_input_2022preEE.root htt_mt_vbf_2022preEE/$PROCESS htt_mt_vbf_2022preEE/$PROCESS_$SYSTEMATIC
+shapes ggH_htt htt_mt_vbf_2022preEE common/htt_input_2022preEE.root htt_mt_vbf_2022preEE/ggH_htt$MASS htt_mt_vbf_2022preEE/ggH_htt$MASS_$SYSTEMATIC
+shapes qqH_htt htt_mt_vbf_2022preEE common/htt_input_2022preEE.root htt_mt_vbf_2022preEE/qqH_htt$MASS htt_mt_vbf_2022preEE/qqH_htt$MASS_$SYSTEMATIC
+--------------------------------------------------------------------------------
+bin          htt_mt_vbf_2022preEE 
+observation  4772.0          
+--------------------------------------------------------------------------------
+bin                               htt_mt_vbf_2022preEE htt_mt_vbf_2022preEE htt_mt_vbf_2022preEE htt_mt_vbf_2022preEE htt_mt_vbf_2022preEE htt_mt_vbf_2022preEE htt_mt_vbf_2022preEE htt_mt_vbf_2022preEE htt_mt_vbf_2022preEE 
+process                           ZTT             ZL              TTT             TTL             VVT             VVL             jetFakes        ggH_htt         qqH_htt         
+process                           1               2               3               4               5               6               7               -1              0               
+rate                              3697.98         119.851         18.5257         166.127         39.8765         73.5835         1321.37         217.618         64.9752         
+--------------------------------------------------------------------------------
+BR_htt_PU_alphas          lnN     -               -               -               -               -               -               -               1.0061          1.0061          
+BR_htt_PU_mq              lnN     -               -               -               -               -               -               -               1.0099          1.0099          
+BR_htt_THU                lnN     -               -               -               -               -               -               -               1.0117          1.0117          
+CMS_eff_m                 lnN     1.02            1.02            1.02            1.02            1.02            1.02            -               1.02            1.02            
+CMS_eff_t_wp_Run2022preEE lnN     1.03            -               1.03            1.03            1.03            1.03            -               1.03            1.03            
+CMS_htt_tjXsec            lnN     -               -               1.06            1.06            -               -               -               -               -               
+CMS_htt_vvXsec            lnN     -               -               -               -               1.05            1.05            -               -               -               
+CMS_htt_zjXsec            lnN     1.02            1.02            -               -               -               -               -               -               -               
+QCDScale_ggH              lnN     -               -               -               -               -               -               -               1.039           -               
+QCDScale_qqH              lnN     -               -               -               -               -               -               -               -               1.005           
+lumi_13.6TeV_Run2022preEE lnN     1.0084          1.0084          1.0084          1.0084          1.0084          1.0084          -               1.0084          1.0084          
+lumi_13.6TeV_correlated   lnN     1.02            1.02            1.02            1.02            1.02            1.02            -               1.02            1.02            
+ * autoMCStats 0.0

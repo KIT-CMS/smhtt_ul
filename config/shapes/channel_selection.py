@@ -14,9 +14,11 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
     cuts["dilepton_veto"] = "(dilepton_veto < 0.5)"
     cuts["os"] = "((q_1 * q_2) < 0)"
     cuts["jet_vetomap"] = "(jet_vetomap < 0.5)"
+    # cuts["btag"] = "nbtag == 0"
     # cuts["met"] = "(puppimet < 30)"
     # cuts["mvis"] = "(m_vis > 110 || m_vis < 50)"
-    # cuts["pt"] = "(pt_1 > 30 && pt_2 > 30)"
+    cuts["pt"] = "(pt_2 > 25)"
+    cuts["mt"] = "mt_1 < 60"
     # cuts["met_mask"] = "(met_mask > 0.5)"
     # event selection for mc in 2024 campaign to have statistically ortogonal events
     # now a filter so no need to add here

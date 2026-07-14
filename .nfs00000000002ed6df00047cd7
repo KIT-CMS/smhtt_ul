@@ -395,7 +395,7 @@ if [[ $MODE == "SYNC-SHAPES" ]]; then
     nice -n 19 python shapes/convert_to_synced_shapes.py \
             -e ${ERA} -i ${shapes_output}.root \
             -o output/synced_shapes-${ERA}-${CHANNEL}-${NTUPLETAG}-${TAG} \
-            --variable-selection ${USED_VARIABLES} -n 12 --mc
+            --variable-selection ${USED_VARIABLES} -n 12
 
     #hadd -f ${sync_file} ${sync_dir}/*.root
 
@@ -407,39 +407,18 @@ if [[ $MODE == "DATACARDS" ]]; then
     echo "##############################################################################################"
 
     source /cvmfs/cms.cern.ch/cmsset_default.sh
-    export PYTHONNOUSERSITE=1
     cd /ceph/sgiappic/CMSSW_15_0_2/
     cmsenv
     cd /work/sgiappic/smhtt_ul
 
     nice -n 19  python3 ${CMSSW_BASE}/src/CombineHarvester/SMRun2Legacy/scripts/make_datacards.py \
-        --input-folder /work/sgiappic/smhtt_ul/output/ --ntuple-tag ${NTUPLETAG} --tag ${TAG} \
+        --input-folder /work/sgiappic/smhtt_ul/output/ --ntuple-tag ${NTUPLETAG} --tag ${TAG}/ \
         --real-data True --bbb True --jetfakes True --embedding False \
-        --era ${ERA} --channels ${CHANNEL} --stxs-signal stxs_stage0 \
+        --era 2022preEE,2022postEE,2023preBPix,2023postBPix --channels et,mt,tt --stxs-signal stxs_stage0 \
         --rebinning-strategy none \
         --convert-shapes-to-lnN False --smhtt-path /work/sgiappic/smhtt_ul/ \
         --output-folder /work/sgiappic/smhtt_ul/datacards/ \
         --ggh-wg1 False --qqh-wg1 False \
         --categories stxs_stage0_run3 --systematics False #--rebinning-using-combine-uncert-fraction 0.1
 
-fi
-
-if [[ $MODE == "COMBINE" ]]; then
-    echo "##############################################################################################"
-    echo "#      Write datacards for ${ERA}-${CHANNEL}-${TAG}                                          #"
-    echo "##############################################################################################"
-
-    source /cvmfs/cms.cern.ch/cmsset_default.sh
-    export PYTHONNOUSERSITE=1
-    cd /ceph/sgiappic/CMSSW_15_0_2/
-    cmsenv
-    cd /work/sgiappic/smhtt_ul/datacards/${CHANNEL}/
-
-    combineTool.py -M T2W -o /work/sgiappic/smhtt_ul/datacards/${CHANNEL}/ws.root -i /work/sgiappic/smhtt_ul/datacards/${CHANNEL}/ -m 125 \
-        --parallel 12  \
-        -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
-        "${PO_MAPS[@]}" --PO verbose --PO 'map=.*/ggH_htt:r_ggH[1,-5,5]' --PO 'map=.*/qqH_htt:r_qqH[1,-5,5]'
-
-    combine -M MultiDimFit /work/sgiappic/smhtt_ul/datacards/${CHANNEL}/ws.root -t -1 --expectSignal=1 --algo singles --floatOtherPOIs 1 --saveFitResult
-    # needs -v 10 otherwise doesn't actually print the uncertainties
 fi

@@ -2,6 +2,7 @@ from ntuple_processor import Histogram
 import numpy as np
 from typing import Any, Dict, Union
 from config.helper_collection import ObjBuildingDict
+from config.shapes.category_selection import get_dnn_class_mapping
 
 
 class HistogramBuildingDict(ObjBuildingDict):
@@ -37,6 +38,16 @@ class HistogramBuildingDict(ObjBuildingDict):
         else:
             raise ValueError(f"Value for key {key} is not a list or numpy array")
 
+def get_nn_score_binning(channel, n_bins_above_floor=8):
+    """
+    Binning for nn_predicted_max_value that respects the softmax floor:
+    with `n_classes` classes, the predicted (max) class probability can
+    never be below 1/n_classes, so bins below that are structurally empty.
+    """
+    n_classes = len(get_dnn_class_mapping(channel))
+    floor = 1.0 / n_classes
+    floor = np.ceil(floor * 20) / 20.0  # round up to nearest 0.05 for clean bin edges
+    return np.linspace(floor, 1.0, n_bins_above_floor + 1)
 
 common_binning = HistogramBuildingDict(
     {
@@ -162,6 +173,8 @@ common_binning = HistogramBuildingDict(
         "HTXS_stage1_2_cat_pTjet30GeV": np.linspace(100,118,19),
         "HTXS_stage1_2_fine_cat_pTjet25GeV": np.linspace(100,128,29),
         "HTXS_stage1_2_fine_cat_pTjet30GeV": np.linspace(100,128,29),
+        # nn output
+        "nn_predicted_max_value": np.linspace(0.0, 1.0, 11),
     }
 )
 

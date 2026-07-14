@@ -19,9 +19,10 @@ import shapes.utils as shape_utils
 import config.ntuple_processor_config_helper as ntuple_processor_config_helper
 from config.helper_collection import PreserveROOTPathsAsStrings, incremental_hadd
 from config.logging_setup_configs import setup_logging
-from config.shapes.category_selection import categorization as default_categorization
+from config.shapes.category_selection import build_categorization, get_dnn_class_mapping
 from config.shapes.channel_selection import channel_selection
 from config.shapes.control_binning import control_binning as default_control_binning
+from config.shapes.control_binning import get_nn_score_binning
 from config.shapes.file_names import files
 from config.shapes.gof_binning import load_gof_binning
 from ntuple_processor import GraphManager, RunManager, UnitManager
@@ -42,7 +43,7 @@ def parse_arguments():
         "--vs-jet-wp", required=True, type=str, help="Tau ID WP."
     )
     parser.add_argument(
-        "--vs-ele-wp", required=True, type=str, help="Vs Mu Fake rate WP."
+        "--vs-ele-wp", required=True, type=str, help="Vs Ele Fake rate WP."
     )
     parser.add_argument(
         "--apply-tauid", action="store_true", help="Flag that specifies if we apply tau id scale factors or not"
@@ -194,6 +195,11 @@ def parse_arguments():
         "--split-signal",
         action="store_true",
         help="Use per-bin ggh/qqh STXS signal processes instead of inclusive.",
+    )
+    parser.add_argument(
+        "--control-plots-dnn-split",
+        action="store_true",
+        help="Split control plots into per-DNN-class categories, further binned by nn_predicted_max_value.",
     )
     parser.add_argument(
         "--locally",
@@ -414,64 +420,31 @@ def get_control_units(
         logger.info(
             "Control-plot njet split enabled with categories: njets_inclusive, njets_0, njets_1, njets_2p"
         )
-    if control_plots_dnn_split:
-        if channel == "mt" or channel == "et":
-            if args.split_signal:
-                _dnn_categories = {
-                    # 0 - 1 are signal categories
-                    2: [0.0, 1.0],  # dy tt
-                    3: [0.0, 1.0],  # dy ll
-                    4: [0.0, 1.0],  # ff
-                    5: [0.0, 1.0],  # ttbar
-                    6: [0.0, 1.0],  # diboson
-                }
-            else:
-                _dnn_categories = {
-                    # 0 - 1 are signal categories #adjust the numbers later depending on the signals
-                    2: [0.0, 1.0],  # dy tt
-                    3: [0.0, 1.0],  # dy ll
-                    4: [0.0, 1.0],  # ff
-                    5: [0.0, 1.0],  # ttbar
-                    6: [0.0, 1.0],  # diboson
-                }
-        elif channel == "tt":
-            if args.split_signal:
-                _dnn_categories = {
-                    # 0 - 1 are signal categories
-                    2: [0.0, 1.0],  # dy tt
-                    3: [0.0, 1.0],  # ff
-                    4: [0.0, 1.0],  # rest
-                }
-            else:
-                _dnn_categories = {
-                    # 0 - 1 are signal categories #adjust the numbers later depending on the signals
-                    2: [0.0, 1.0],  # dy tt
-                    3: [0.0, 1.0],  # ff
-                    4: [0.0, 1.0],  # rest
-                }
-        else:
-            raise NotImplementedError("DNN split is currently not implemented")
 
-        control_categories = [Selection(name="dnn_cat_inclusive", cuts=[("nn_predicted_class >= 2", "dnn_cat_inclusive")])] # bkg classes inclusive
-        for _idx, _category_bins in _dnn_categories.items():
+    if control_plots_dnn_split:
+
+        for ch in ["mt", "et", "tt"]:
+            control_binning[ch]["nn_predicted_max_value"] = get_nn_score_binning(ch)
+
+        class_mapping = get_dnn_class_mapping(channel)
+
+        bkg_indices = sorted(
+            info["index"] for info in class_mapping.values() if not info["is_signal"]
+        )
+        bkg_cutstring = " || ".join(f"nn_predicted_class == {idx}" for idx in bkg_indices)
+
+        control_categories = [
+            Selection(name="dnn_cat_inclusive", cuts=[(f"({bkg_cutstring})", "dnn_cat_inclusive")])
+        ]  # all background classes, inclusive catch-all
+
+        for name, info in class_mapping.items():
+            idx = info["index"]
             control_categories.append(
                 Selection(
-                    name=f"dnn_cat_{int(_idx)}_inclusive",
-                    cuts=[
-                        (f"nn_predicted_class == {_idx}", f"dnn_cat_{int(_idx)}_inclusive")
-                    ],
+                    name=f"dnn_cat_{idx}_inclusive",
+                    cuts=[(f"nn_predicted_class == {idx}", f"dnn_cat_{idx}_inclusive")],
                 )
             )
-            for _idx_bin, (_bin_low, _bin_high) in enumerate(windowed(_category_bins, 2)): # split by dnn bins
-                control_categories.append(
-                    Selection(
-                        name=f"dnn_cat_{int(_idx)}_bin_{_idx_bin}",
-                        cuts=[
-                            (f"nn_predicted_class == {_idx}", f"dnn_cat_{int(_idx)}_inclusive"),
-                            (f"(nn_predicted_max_value >= {_bin_low}) & (nn_predicted_max_value <= {_bin_high})", f"dnn_cat_{int(_idx)}_bin_{_idx_bin}"),
-                        ],
-                    )
-                )
     else:
         control_categories = [None]
 
@@ -546,6 +519,7 @@ def collect_config(
 def main(args):
     global WITH_SPLIT_SIGNAL, WITH_SPLIT_SIGNAL_PRUNED
     WITH_SPLIT_SIGNAL = args.split_signal
+    default_categorization = build_categorization(split_signal=args.split_signal)
     # Parse given arguments.
     if args.cut_order_cache_file is None and len(args.channels) == 1:
         if os.path.exists(

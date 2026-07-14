@@ -1,120 +1,75 @@
 import numpy as np
-import argparse
-from ntuple_processor import Histogram
-from ntuple_processor.utils import Selection
+
+try:
+    from ntuple_processor import Histogram
+    from ntuple_processor.utils import Selection
+    _ntuple_processor_available = True
+except ImportError:
+    _ntuple_processor_available = False
 
 
-def build_xxh_cutstring(channel):
-    # this function is used to build up the 2D signal category
-    # from the ggh and the qqh category. This way,
-    # we can rover signal events, that have a large ggh+qqh score
-    ggh_binning = [0.0, 0.2, 0.3, 0.4, 0.5, 0.65, 0.8, 1.0]
-    qqh_binning = [
-        0.0,
-        0.35,
-        0.5,
-        0.6,
-        0.7,
-        0.8,
-        0.85,
-        0.9,
-        0.92,
-        0.94,
-        0.96,
-        0.98,
-        1.0,
-    ]
-    cutstring = "("
-    bincounter = 0.0
-    for i, qqh_bin in enumerate(qqh_binning[:-1]):
-        # outer binning is the qqh score
-        cutstring += (
-            f"({channel}_qqh >= {qqh_bin} && {channel}_qqh < {qqh_binning[i+1]}) * ("
-        )
-        for j, ggh_bin in enumerate(ggh_binning[:-1]):
-            # inner binning is the ggh score, only if the sum of the two scores is below 1
-            if qqh_bin + ggh_bin < 1.0:
-                cutstring += f"{bincounter} * ({channel}_ggh >= {ggh_bin} && {channel}_ggh < {ggh_binning[j+1]}) + "
-                bincounter += 1.0
-        # remove the last " + "
-        cutstring = cutstring[:-3] + ") + "
-    # remove the last " + " and close the parenthesis
-    cutstring = cutstring[:-3] + ")"
-    # print(cutstring)
-    # print("Number of bins: {}".format(bincounter))
-    return cutstring, bincounter
+# Canonical per-channel DNN class definitions: name -> {index, is_signal}.
+# This is the single source of truth used by produce_shapes.py (to build
+# per-class control categories) and plot_shapes_control.py (to know which
+# categories/indices exist and which ones should not have data drawn).
+# need to add the split signal later on
+DNN_CLASS_MAPPING = {
+    "mt": {
+        "ggh":       {"index": 0, "is_signal": True, "label": "ggH"},
+        "vbf":       {"index": 1, "is_signal": True, "label": "VBF"},
+        "dyjets_tt": {"index": 2, "is_signal": False, "label": "DY+Jets (#tau#tau)"},
+        "dyjets_ll": {"index": 3, "is_signal": False, "label": "DY+Jets (ll)"},
+        "jetFakes":  {"index": 4, "is_signal": False, "label": "Jet Fakes"},
+        "ttbar":     {"index": 5, "is_signal": False, "label": "t#bar{t}"},
+        "diboson":   {"index": 6, "is_signal": False, "label": "Diboson"},
+    },
+    "et": {
+        "ggh":       {"index": 0, "is_signal": True, "label": "ggH"},
+        "vbf":       {"index": 1, "is_signal": True, "label": "VBF"},
+        "dyjets_tt": {"index": 2, "is_signal": False, "label": "DY+Jets (#tau#tau)"},
+        "dyjets_ll": {"index": 3, "is_signal": False, "label": "DY+Jets (ll)"},
+        "jetFakes":  {"index": 4, "is_signal": False, "label": "Jet Fakes"},
+        "ttbar":     {"index": 5, "is_signal": False, "label": "t#bar{t}"},
+        "diboson":   {"index": 6, "is_signal": False, "label": "Diboson"},
+    },
+    "tt": {
+        "ggh":       {"index": 0, "is_signal": True, "label": "ggH"},
+        "vbf":       {"index": 1, "is_signal": True, "label": "VBF"},
+        "dyjets_tt": {"index": 2, "is_signal": False, "label": "DY+Jets (#tau#tau)"},
+        "jetFakes":  {"index": 3, "is_signal": False, "label": "Jet Fakes"},
+        "bkg_rest":  {"index": 4, "is_signal": False, "label": "Remaining backgrounds"},
+    },
+}
 
 
-fine_binning = np.linspace(0.0, 1.0, 11)
-if args.split_signal:
-    category_mapping = {
-        "mt": {
-            "ggh": {"index": 0, "binning": fine_binning},
-            "vbf": {"index": 1, "binning": fine_binning},
-            "dyjets_tt": {"index": 2, "binning": fine_binning},
-            "dyjets_ll": {"index": 3, "binning": fine_binning},
-            "jetfakes": {"index": 4, "binning": fine_binning},
-            "ttbar": {"index": 5, "binning": fine_binning},
-            "diboson": {"index": 6, "binning": fine_binning},
-        },
-        "et": {
-            "ggh": {"index": 0, "binning": fine_binning},
-            "vbf": {"index": 1, "binning": fine_binning},
-            "dyjets_tt": {"index": 2, "binning": fine_binning},
-            "dyjets_ll": {"index": 3, "binning": fine_binning},
-            "jetfakes": {"index": 4, "binning": fine_binning},
-            "ttbar": {"index": 5, "binning": fine_binning},
-            "diboson": {"index": 6, "binning": fine_binning},
-        },
-        "tt": {
-            "ggh": {"index": 0, "binning": fine_binning},
-            "vbf": {"index": 1, "binning": fine_binning},
-            "dyjets_tt": {"index": 2, "binning": fine_binning},
-            "jetfakes": {"index": 3, "binning": fine_binning},
-            "bkg_rest": {"index": 4, "binning": fine_binning},
-        }
-    }
-categorization = {}
-for channel in ["mt", "et", "tt"]:
-    categorization[channel] = []
-    for category in category_mapping[channel].keys():
-        selection = (
-            Selection(
-                name=category,
-                cuts=[
-                    (
-                        f"nn_predicted_class == {category_mapping[channel][category]['index']}",
-                        "category selection",
-                    )
-                ],
-            ),
-            [
-                Histogram(
-                    f"{channel}_score",
-                    "nn_predicted_max_value",
-                    category_mapping[channel][category]["binning"],
-                )
-            ],
-        )
-        categorization[channel].append(selection)
-    # add the xxh category
-    # cutstring, nbins = build_xxh_cutstring(channel)
-    # selection = (
-    #     Selection(
-    #         name="xxh",
-    #         cuts=[
-    #             (
-    #                 f"(({channel}_max_index == {category_mapping[channel]['qqh']['index']}) || ({channel}_max_index == {category_mapping[channel]['ggh']['index']}))",
-    #                 "category selection",
-    #             )
-    #         ],
-    #     ),
-    #     [
-    #         Histogram(
-    #             "mt_score",
-    #             cutstring,
-    #             np.arange(nbins + 1),
-    #         )
-    #     ],
-    # )
-    # categorization[channel].append(selection)
+def get_dnn_class_mapping(channel: str) -> dict:
+    """name -> {"index": int, "is_signal": bool} for the given channel."""
+    if channel not in DNN_CLASS_MAPPING:
+        raise NotImplementedError(f"DNN class mapping not defined for channel '{channel}'")
+    return DNN_CLASS_MAPPING[channel]
+
+
+def build_categorization(split_signal: bool = False) -> dict:
+    if not _ntuple_processor_available:
+        raise ImportError("ntuple_processor is required for build_categorization()")
+    fine_binning = np.linspace(0.0, 1.0, 11)
+    if split_signal:
+        raise NotImplementedError("STXS fine splitting not implemented yet")
+
+    categorization = {}
+    for channel, mapping in DNN_CLASS_MAPPING.items():
+        categorization[channel] = []
+        for category, info in mapping.items():
+            selection = (
+                Selection(
+                    name=category,
+                    cuts=[(f"nn_predicted_class == {info['index']}", "category selection")],
+                ),
+                [Histogram(f"{channel}_score", "nn_predicted_max_value", fine_binning)],
+            )
+            categorization[channel].append(selection)
+    return categorization
+
+
+# Module-level dict for direct import (mirrors upstream style)
+categorization = build_categorization() if _ntuple_processor_available else {}

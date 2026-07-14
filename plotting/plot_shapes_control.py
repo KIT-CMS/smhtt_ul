@@ -16,7 +16,7 @@ import Dumbledraw.dumbledraw as dd
 import Dumbledraw.rootfile_parser_ntuple_processor_inputshapes as rootfile_parser
 import Dumbledraw.styles as styles
 from config.logging_setup_configs import setup_logging
-
+from config.shapes.category_selection import get_dnn_class_mapping
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -108,6 +108,9 @@ def main(info):
         "mt": "#mu#tau_{#font[42]{h}}",
         "tt": "#tau_{#font[42]{h}}#tau_{#font[42]{h}}"
     }
+    dnn_category = info.get("dnn_category")          # None for normal variables
+    is_signal_class = info.get("is_signal_class", False)
+
     if args.linear:
         split_value = 0.1
     else:
@@ -175,10 +178,19 @@ def main(info):
     total_bkg = None
     if args.category is None:
         stype = "Nominal"
-        cat = None
     else:
-        stype = args.category  # or args.category if you want to plot a special category
-        cat = None  # in that case this should be set to None
+        stype = args.category
+    cat = dnn_category   # was: cat = None
+
+    # rmove data from dnn signal classes plot
+    if not is_signal_class:
+        plot.add_hist(rootfile.get(channel, "data", category=cat, shape_type=stype), "data_obs")
+        data_norm = plot.subplot(0).get_hist("data_obs").Integral()
+        plot.subplot(0).get_hist("data_obs").GetXaxis().SetMaxDigits(4)
+        plot.subplot(0).setGraphStyle("data_obs", "e0", markersize=0.6)
+        plot.subplot(2).setGraphStyle("data_obs", "e0", markersize=0.6)
+        if not args.linear:
+            plot.subplot(1).setGraphStyle("data_obs", "e0", markersize=0.8)
 
     for index, process in enumerate(bkg_processes):
         _hist = rootfile.get(channel, process, category=cat, shape_type=stype).Clone()
@@ -199,11 +211,6 @@ def main(info):
         fillcolor=styles.color_dict["unc"],
         linecolor=0)
 
-    plot.add_hist(rootfile.get(channel, "data", category=cat, shape_type=stype), "data_obs")
-    data_norm = plot.subplot(0).get_hist("data_obs").Integral()
-    plot.subplot(0).get_hist("data_obs").GetXaxis().SetMaxDigits(4)
-    plot.subplot(0).setGraphStyle("data_obs", "e0", markersize=0.6)
-    plot.subplot(2).setGraphStyle("data_obs", "e0", markersize=0.6)
     if args.linear:
         pass
     else:
@@ -218,22 +225,22 @@ def main(info):
             VH = rootfile.get(channel, "VH125",category=cat).Clone()
             ttH = rootfile.get(channel, "ttH125",category=cat).Clone()
             # HWW = rootfile.get(channel, "HWW").Clone()
-            if ggH.Integral() > 0:
+            if ggH.Integral() > 0 and dnn_category is None:
                 ggH_scale = 10
             else:
-                ggH_scale = 0.0
-            if qqH.Integral() > 0:
+                ggH_scale = 1.0
+            if qqH.Integral() > 0 and dnn_category is None:
                 qqH_scale = 100
             else:
-                qqH_scale = 0.0
-            if VH.Integral() > 0:
+                qqH_scale = 1.0
+            if VH.Integral() > 0 and dnn_category is None:
                  VH_scale = 10000
             else:
-                VH_scale = 0.0
-            if ttH.Integral() > 0:
+                VH_scale = 1.0
+            if ttH.Integral() > 0 and dnn_category is None:
                 ttH_scale = 1000
             else:
-                ttH_scale = 0.0
+                ttH_scale = 1.0
             # if HWW.Integral() > 0:
             #     HWW_scale = 10
             # else:
@@ -296,15 +303,11 @@ def main(info):
             linewidth=2, fillstyle=0)
         plot.subplot(2).setGraphStyle("bkg_qqH_top", "hist", linecolor=0, linewidth=0, fillstyle=0)
 
+    to_draw = ["total_bkg"]
     if args.add_signals:
-        to_draw = [
-            "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH",
-            "bkg_qqH_top", "data_obs"
-        ]
-    else:
-        to_draw = [
-            "total_bkg", "data_obs"
-        ]
+        to_draw += ["bkg_ggH", "bkg_ggH_top", "bkg_qqH", "bkg_qqH_top"]
+    if not is_signal_class:
+        to_draw.append("data_obs")
     plot.subplot(2).normalize(to_draw, "total_bkg")
 
     # stack background processes
@@ -318,21 +321,23 @@ def main(info):
     # set axes limits and labels
     # Set y-axis maximum to 1.6 times the highest bin in either background or data
     bkg_max = plot.subplot(0).get_hist("total_bkg").GetMaximum()
-    data_max = plot.subplot(0).get_hist("data_obs").GetMaximum()
-    max_bin = max(bkg_max, data_max)
+    if not is_signal_class:
+        data_max = plot.subplot(0).get_hist("data_obs").GetMaximum()
+        max_bin = max(bkg_max, data_max)
+    else:
+        max_bin = bkg_max
     plot.subplot(0).setYlims(
         split_dict[channel],
         max(1.8 * max_bin, split_dict[channel] * 2))
 
-    log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z"]
+    log_quantities = ["ME_ggh", "ME_vbf", "ME_z2j_1", "ME_z2j_2", "ME_q2v1", "ME_q2v2", "ME_vbf_vs_ggh", "ME_ggh_vs_Z", "nn_predicted_max_value"]
 
     #log_quantities += variables
 
     if variable in log_quantities:
         plot.subplot(0).setLogY()
-        plot.subplot(0).setYlims(
-            1.0,
-            1000 * plot.subplot(0).get_hist("data_obs").GetMaximum())
+        ref_max = bkg_max if is_signal_class else plot.subplot(0).get_hist("data_obs").GetMaximum()
+        plot.subplot(0).setYlims(1.0, 1000 * ref_max)
 
     plot.subplot(2).setYlims(0.5, 1.5)
     # if channel == "mm":
@@ -351,14 +356,19 @@ def main(info):
         plot.subplot(1).setLogX()
         plot.subplot(2).setLogX()
     if variable != None:
-        if variable in styles.x_label_dict[channel]:
-            x_label = styles.x_label_dict[channel][
-                variable]
+        if dnn_category is not None:
+            if info["class_name"] is None:
+                x_label = "Background inclusive DNN score"
+            else:
+                x_label = class_mapping[info["class_name"]].get("label", info["class_name"])+" DNN score"
+        elif variable in styles.x_label_dict[channel]:
+            x_label = styles.x_label_dict[channel][variable]
         else:
             x_label = variable
         plot.subplot(2).setXlabel(x_label)
     else:
         plot.subplot(2).setXlabel("NN output")
+
     if args.normalize_by_bin_width:
         plot.subplot(0).setYlabel("dN/d(NN output)")
     else:
@@ -375,37 +385,30 @@ def main(info):
         plot.subplot(2).changeXLabels(["0.2", "0.4", "0.6", "0.8", "1.0"])
 
     # draw subplots. Argument contains names of objects to be drawn in corresponding order.
-    # procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "VH", "VH_top", "ttH", "ttH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
     if args.add_signals:
         procs_to_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
     else:
-        procs_to_draw = ["stack", "total_bkg", "data_obs"] if args.linear else ["stack", "total_bkg", "data_obs"]
+        procs_to_draw = ["stack", "total_bkg", "data_obs"]
     if args.draw_jet_fake_variation is not None:
         procs_to_draw = ["stack", "total_bkg", "data_obs"]
+    if is_signal_class:
+        procs_to_draw = [p for p in procs_to_draw if p != "data_obs"]
     plot.subplot(0).Draw(procs_to_draw)
+
     if args.linear != True:
-        # plot.subplot(1).Draw([
-        #     "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
-        #     "VH", "VH_top", "ttH", "ttH_top", "HWW", "HWW_top", "data_obs"
-        # ])
-        if args.add_signals:
-            plot.subplot(1).Draw([
-                "stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top",
-                "data_obs"
-            ])
-        else:
-            plot.subplot(1).Draw([
-                "stack", "total_bkg", "data_obs"
-            ])
+        subplot1_draw = ["stack", "total_bkg", "ggH", "ggH_top", "qqH", "qqH_top", "data_obs"] if args.add_signals else ["stack", "total_bkg", "data_obs"]
+        if is_signal_class:
+            subplot1_draw = [p for p in subplot1_draw if p != "data_obs"]
+        plot.subplot(1).Draw(subplot1_draw)
+
     if args.draw_jet_fake_variation is None:
-        plot.subplot(2).Draw([
-            "total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH",
-            "bkg_qqH_top", "data_obs"
-        ])
+        subplot2_draw = ["total_bkg", "bkg_ggH", "bkg_ggH_top", "bkg_qqH", "bkg_qqH_top", "data_obs"]
     else:
-        plot.subplot(2).Draw([
-            "total_bkg", "data_obs"
-        ])
+        subplot2_draw = ["total_bkg", "data_obs"]
+    if is_signal_class:
+        subplot2_draw = [p for p in subplot2_draw if p != "data_obs"]
+    plot.subplot(2).Draw(subplot2_draw)
+
 
     # create legends
     suffix = ["", "_top"]
@@ -439,7 +442,8 @@ def main(info):
             if ttH_scale > 0:
                 plot.legend(i).add_entry(0 if args.linear else 1, "ttH%s" % suffix[i], "%s#times ttH"%str(int(ttH_scale)), 'l')
             # # plot.legend(i).add_entry(0 if args.linear else 1, "HWW%s" % suffix[i], "%s #times H#rightarrowWW"%str(int(HWW_scale)), 'l')
-        plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
+        if not is_signal_class:
+            plot.legend(i).add_entry(0, "data_obs", "Observed", 'PE2L')
         plot.legend(i).setNColumns(2)
         plot.legend(i).setAlpha(0.0)
     plot.legend(0).Draw()
@@ -518,13 +522,14 @@ def main(info):
     if not os.path.exists(_path):
         os.makedirs(_path, exist_ok=True)
     for _ext in ["pdf", "png"]:
-        plot.save(os.path.join(_path, f"{args.era}_{channel}_{args.category or ''}_{variable}.{_ext}"))
-
+        dnn_suffix = f"_{dnn_category}" if dnn_category is not None else ""
+        plot.save(os.path.join(_path, f"{args.era}_{channel}_{args.category or ''}{dnn_suffix}_{variable}.{_ext}")) 
 
 if __name__ == "__main__":
     args = parse_arguments()
     logger = setup_logging(logger=logging.getLogger(__name__))
-    variables, channels = args.variables.split(","), args.channels.split(",")
+    channels = args.channels.split(",")
+    variables = args.variables.split(",") if args.variables else []
 
     if not args.embedding and not args.fake_factor:
         postfix = "fully_classic"
@@ -536,9 +541,31 @@ if __name__ == "__main__":
         postfix = f"{postfix}_nlo"
     if args.draw_jet_fake_variation is not None:
         postfix = f"{postfix}_{args.draw_jet_fake_variation}"
+    if "nn_predicted_max_value" in variables:
+        infolist = []
+        for ch in channels:
+            class_mapping = get_dnn_class_mapping(ch)
+            for name, info in class_mapping.items():
+                infolist.append({
+                    "args": args,
+                    "channel": ch,
+                    "variable": "nn_predicted_max_value",
+                    "dnn_category": f"dnn_cat_{info['index']}_inclusive",
+                    "is_signal_class": info["is_signal"],
+                    "class_name": name,
+                })
+            # inclusive background category (all bkg classes combined)
+            infolist.append({
+                "args": args,
+                "channel": ch,
+                "variable": "nn_predicted_max_value",
+                "dnn_category": "dnn_cat_inclusive",
+                "is_signal_class": False,
+                "class_name": None,
+            })
+    else:
+        infolist = [{"args": args, "channel": ch, "variable": v} for ch, v in itt.product(channels, variables)]
 
     args.postfix = postfix
-
-    infolist = [{"args": args, "channel": ch, "variable": v} for ch, v in itt.product(channels, variables)]
     for info in infolist:
         main(info)

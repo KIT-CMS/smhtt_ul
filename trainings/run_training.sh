@@ -6,10 +6,10 @@ conda activate uncertainty-training
 export PYTHONPATH=$PWD:$PYTHONPATH
 law index -v
 
-worker="2"
-cuda_device="0,1" #"-2" 
+worker="1"
+cuda_device="0" #"-2"  1
 
-channels=(mt tt et) #et
+channels=(mt) #et tt
 
 train_tag="260608"
 
@@ -26,7 +26,7 @@ for channel in "${channels[@]}"; do
     
     for task in "${tasks[@]}"; do
         law run "${task}" --workers ${worker} --local-scheduler --version "${tag}" --log-level INFO \
-            --no-lock --use-grouped-DNN --batch-size 100000 --cuda-device "${cuda_device}" \
+            --no-lock --cuda-device "${cuda_device}" --batch-size 100000 --use-grouped-DNN \
             --dataset-directory="/ceph/sgiappic/Htt_training/${train_tag}_train/dataset/${channel}/folds/" \
             --dataset-config-file="/ceph/sgiappic/Htt_training/${train_tag}_train/dataset/${channel}/folds/config.yaml" \
             --base-config-file="/work/sgiappic/smhtt_ul/trainings/uncertainty-aware-training/datasets/smhtt/run3-coarse/smhtt_${channel}.yaml"
