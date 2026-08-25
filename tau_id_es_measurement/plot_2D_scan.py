@@ -184,7 +184,7 @@ if interpolate:
     ax.legend()
     plt.tight_layout()
     plt.savefig(f"2D_{scan_tag}_{args.outname}_{args.tag}_interpolated.pdf")
-    # plt.savefig(f"2D_{scan_tag}_{args.outname}_{args.tag}_interpolated.png")
+    plt.savefig(f"2D_{scan_tag}_{args.outname}_{args.tag}_interpolated.png")
     plt.close()
 
 # Binned data without interpolation
@@ -239,7 +239,7 @@ ax.set_title(f"2D Scan (Binned) {title_name}",fontsize=20)
 ax.legend()
 plt.tight_layout()
 plt.savefig(f"2D_{scan_tag}_{args.outname}_{args.tag}_binned.pdf")
-# plt.savefig(f"2D_{scan_tag}_{args.outname}_{args.tag}_binned.png")
+plt.savefig(f"2D_{scan_tag}_{args.outname}_{args.tag}_binned.png")
 plt.close()
 
 
@@ -485,9 +485,13 @@ def scale_contour_range(lower_edge_id: float, upper_edge_id: float, lower_edge_e
     return low_id, up_id, low_es, up_es
 
 
-def y_axis_hitter(y_val:float, y_axis):
+def y_axis_hitter(y_val:float, y_axis, do_log):
     '''y_axis has to be matplotlib object'''
     ymin, ymax = y_axis.ylim()
+    if do_log:
+        y_val = np.log10(y_val)
+        ymin = np.log10(ymin)
+        ymax = np.log10(ymax)
     y_axiscoord = (y_val - ymin) / (ymax - ymin)
     # print(f"\n\n[INFO] y axis coord for {y_val} is {y_axiscoord} \n\n")
     # breakpoint()
@@ -498,30 +502,33 @@ poi_id, dnll_id, fit_id, nrm_str_id = extract_1d_scan(f_1D_ID, f"r_EMB_{title}")
 lower_edge_id, upper_edge_id = extract_confidence_interval(poi_id, dnll_id, threshold=2.2957)
 lower_edge_id_2, upper_edge_id_2 = extract_confidence_interval(poi_id, dnll_id, threshold=6.1800)
 plt.figure()
-# if initial_fit_index is not None:
-#     plt.axvline(initial_fit[0], color='b', linestyle='--', label='2D Initial fit', lw=4)
-# else:
-#     plt.plot([], [], ' ', label="2D Initial fit: None")
-# plt.axvline(grid_best[0], color='k', linestyle='-.', label='2D Best grid', lw=2)
-
+if np.max(dnll_id) > 100:
+    do_log = True
+else:
+    do_log = False
 if fit_id is not None:
     plt.axvline(fit_id[0], color='g', linestyle='--', label=f'1D Initial fit{nrm_str_id}', lw=2)
 else:
     plt.plot([], [], ' ', label=f"1D Initial fit: None{nrm_str_id}")
 plt.axvline(poi_id[np.argmin(dnll_id)], color='k', linestyle=':', label='1D Best grid',lw=5)
 plt.plot(poi_id, dnll_id, marker='o', color='b', label='1D Scan (profiled ES)')
+plt.ylim(bottom=0)
 if lower_edge_id is not None:
-    plt.axvline(lower_edge_id,ymax=y_axis_hitter(2.2957, plt), color='r', linestyle='--', label=r'$+/-1\sigma$', lw=1)
+    # plt.axvline(lower_edge_id,ymax=y_axis_hitter(2.2957, plt, do_log), color='r', linestyle='--', label=r'$+/-1\sigma$', lw=1)
+    plt.vlines(x=lower_edge_id, ymin=0, ymax=2.2957, colors='r', linestyle='--', label=r'$+/-1\sigma$', lw=1)
 else:
     print("[WARNING] No lower edge found for ID scan.")
 if upper_edge_id is not None:
-    plt.axvline(upper_edge_id,ymax=y_axis_hitter(2.2957, plt), color='r', linestyle='--', lw=1)
+    # plt.axvline(upper_edge_id,ymax=y_axis_hitter(2.2957, plt, do_log), color='r', linestyle='--', lw=1)
+    plt.vlines(x=upper_edge_id, ymin=0, ymax=2.2957, colors='r', linestyle='--', lw=1)
 else:
     print("[WARNING] No upper edge found for ID scan.")
 if lower_edge_id_2 is not None:
-    plt.axvline(lower_edge_id_2,ymax=y_axis_hitter(6.1800, plt), color='tab:red', linestyle='--', label=r'$+/-2\sigma$', lw=1)
+    # plt.axvline(lower_edge_id_2,ymax=y_axis_hitter(6.1800, plt, do_log), color='tab:red', linestyle='--', label=r'$+/-2\sigma$', lw=1)
+    plt.vlines(x=lower_edge_id_2, ymin=0, ymax=6.1800, colors='tab:red', linestyle='--', label=r'$+/-2\sigma$', lw=1)
 if upper_edge_id_2 is not None:
-    plt.axvline(upper_edge_id_2,ymax=y_axis_hitter(6.1800, plt), color='tab:red', linestyle='--', lw=1)
+    # plt.axvline(upper_edge_id_2,ymax=y_axis_hitter(6.1800, plt, do_log), color='tab:red', linestyle='--', lw=1)
+    plt.vlines(x=upper_edge_id_2, ymin=0, ymax=6.1800, colors='tab:red', linestyle='--', lw=1)
 plt.axhline(2.2957, color='r', linestyle='-', label=r'$-2\Delta\ln\mathcal{L}\approx$2.3', lw=1)
 plt.axhline(6.1800, color='tab:red', linestyle='-', label=r'$-2\Delta\ln\mathcal{L}\approx$6.2', lw=1)
 plt.axhline(0, color='k', linestyle='-')
@@ -530,11 +537,11 @@ plt.ylabel(r'$-2\Delta\ln\mathcal{L}$')
 # plt.title(f'1D Scan tau ID SF ({title_name})')
 plt.title(f'{title_name}')
 plt.legend(loc="upper right", fontsize=20)
-# if np.max(dnll_id) > 3*1e2 or np.min(dnll_id) < -1:
-#     plt.yscale('symlog', linthresh=1e-3)
+if do_log:
+    plt.yscale('symlog', linthresh=100)
 plt.tight_layout()
 plt.savefig(f"1D_{scan_tag}_tauID_{args.outname}_{args.tag}.pdf")
-# plt.savefig(f"1D_{scan_tag}_tauID_{args.outname}_{args.tag}.png")
+plt.savefig(f"1D_{scan_tag}_tauID_{args.outname}_{args.tag}.png")
 plt.close()
 
 # 1D scan for tau ES shift (profiling ID)
@@ -542,29 +549,33 @@ poi_es, dnll_es, fit_es, norm_str_es = extract_1d_scan(f_1D_ES, f"ES_{title}")
 lower_edge_es, upper_edge_es = extract_confidence_interval(poi_es, dnll_es, threshold=2.2957)
 lower_edge_es_2, upper_edge_es_2 = extract_confidence_interval(poi_es, dnll_es, threshold=6.1800)
 plt.figure()
-# if initial_fit_index is not None:
-#     plt.axvline(initial_fit[1], color='b', linestyle='--', label='2D Initial fit',lw=4)
-# else:
-#     plt.plot([], [], ' ', label="2D Initial fit: None")
-# plt.axvline(grid_best[1], color='k', linestyle='-.', label='2D Best grid', lw=2)
+if np.max(dnll_es) > 100:
+    do_log = True
+else:
+    do_log = False
 if fit_es is not None:
     plt.axvline(fit_es[0], color='g', linestyle='--', label=f'1D Initial fit{norm_str_es}', lw=2)
 else:
     plt.plot([], [], ' ', label=f"1D Initial fit: None {norm_str_es}")
 plt.axvline(poi_es[np.argmin(dnll_es)], color='k', linestyle=':', label='1D Best grid',lw=5)
 plt.plot(poi_es, dnll_es, marker='o', color='b',label='1D Scan (profiled ID)')
+plt.ylim(bottom=0)
 if lower_edge_es is not None:
-    plt.axvline(lower_edge_es,ymax=y_axis_hitter(2.2957, plt), color='r', linestyle='--', label=r'$+/-1\sigma$', lw=1)
+    # plt.axvline(lower_edge_es,ymax=y_axis_hitter(2.2957, plt, do_log), color='r', linestyle='--', label=r'$+/-1\sigma$', lw=1)
+    plt.vlines(x=lower_edge_es, ymin=0, ymax=2.2957, colors='r', linestyle='--', label=r'$+/-1\sigma$', lw=1)
 else:
     print("[WARNING] No lower edge found for ES scan.")
 if upper_edge_es is not None:
-    plt.axvline(upper_edge_es,ymax=y_axis_hitter(2.2957, plt), color='r', linestyle='--', lw=1)
+    # plt.axvline(upper_edge_es,ymax=y_axis_hitter(2.2957, plt, do_log), color='r', linestyle='--', lw=1)
+    plt.vlines(x=upper_edge_es, ymin=0, ymax=2.2957, colors='r', linestyle='--', lw=1)
 else:
     print("[WARNING] No upper edge found for ES scan.")
 if lower_edge_es_2 is not None:
-    plt.axvline(lower_edge_es_2,ymax=y_axis_hitter(6.1800, plt), color='tab:red', linestyle='--', label=r'$+/-2\sigma$', lw=1)
+    # plt.axvline(lower_edge_es_2,ymax=y_axis_hitter(6.1800, plt, do_log), color='tab:red', linestyle='--', label=r'$+/-2\sigma$', lw=1)
+    plt.vlines(x=lower_edge_es_2, ymin=0, ymax=6.1800, colors='tab:red', linestyle='--', label=r'$+/-2\sigma$', lw=1)
 if upper_edge_es_2 is not None:
-    plt.axvline(upper_edge_es_2,ymax=y_axis_hitter(6.1800, plt), color='tab:red', linestyle='--', lw=1)
+    # plt.axvline(upper_edge_es_2,ymax=y_axis_hitter(6.1800, plt, do_log), color='tab:red', linestyle='--', lw=1)
+    plt.vlines(x=upper_edge_es_2, ymin=0, ymax=6.1800, colors='tab:red', linestyle='--', lw=1)
 plt.axhline(2.2957, color='r', linestyle='-', label=r'$-2\Delta\ln\mathcal{L}\approx$2.3', lw=1)
 plt.axhline(6.1800, color='tab:red', linestyle='-', label=r'$-2\Delta\ln\mathcal{L}\approx$6.2', lw=1)
 plt.axhline(0, color='k', linestyle='-')
@@ -573,11 +584,11 @@ plt.ylabel(r'$-2\Delta\ln\mathcal{L}$')
 # plt.title(f'1D Scan tau ES shift ({title_name})')
 plt.title(f'{title_name}')
 plt.legend(loc="upper right", fontsize=20)
-# if np.max(dnll_es) > 3*1e2 or np.min(dnll_es) < -1:
-#     plt.yscale('symlog', linthresh=1e-3)
+if do_log:
+    plt.yscale('symlog', linthresh=100)
 plt.tight_layout()
 plt.savefig(f"1D_{scan_tag}_tauES_{args.outname}_{args.tag}.pdf")
-# plt.savefig(f"1D_{scan_tag}_tauES_{args.outname}_{args.tag}.png")
+plt.savefig(f"1D_{scan_tag}_tauES_{args.outname}_{args.tag}.png")
 plt.close()
 
 #### If the scan is completely above the 1 or even 2 sigma thresholds, set the edges close to the border values to get useable ranges ####

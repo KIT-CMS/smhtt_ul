@@ -444,8 +444,12 @@ def main(args):
         else:
             variables = args.variables
         logger.info("Variables: {}".format(variables))
+        if "store" not in args.directory and "/ceph" in args.directory:
+            remote = False
+        else:
+            remote = True
         nominals[era]["datasets"][channel] = get_nominal_datasets(
-            era, channel, friend_directories, files, args.directory, args.tag, xrootd=True,
+            era, channel, friend_directories, files, args.directory, args.tag, xrootd=remote,
         )
         logger.info("Found {} datasets".format(len(nominals[era]["datasets"][channel])))
         logger.info("Creating analysis units")
@@ -453,7 +457,7 @@ def main(args):
             channel,
             era,
             nominals[era]["datasets"][channel],
-            set_dummy_categorization(),
+            [set_dummy_categorization()],
             "TauID_ES",
             False,
             args.wp_vsjet,

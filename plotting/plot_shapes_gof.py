@@ -9,7 +9,7 @@ import ROOT
 import argparse
 import copy
 import yaml
-import distutils.util
+from setuptools._distutils.util import strtobool
 import logging
 logger = logging.getLogger("")
 
@@ -62,17 +62,17 @@ def parse_arguments():
         help="Fake factor estimation method used")
     parser.add_argument(
         "--train-emb",
-        type=lambda x:bool(distutils.util.strtobool(x)),
+        type=lambda x:bool(strtobool(x)),
         default=True,
         help="Use fake factor training category")
     parser.add_argument(
         "--background-only",
-        type=lambda x:bool(distutils.util.strtobool(x)),
+        type=lambda x:bool(strtobool(x)),
         default=False,
         help="Plot only the background categories")
     parser.add_argument(
         "--train-ff",
-        type=lambda x:bool(distutils.util.strtobool(x)),
+        type=lambda x:bool(strtobool(x)),
         default=True,
         help="Use fake factor training category")
     parser.add_argument(
@@ -238,7 +238,7 @@ def main(args):
     plots = []
     for channel in args.channels:
         for category in channel_categories[channel]:
-            print "Plot for category: ",category
+            print("Plot for category: ", category)
             rootfile = rootfile_parser.Rootfile_parser(args.input)
             if channel == "em" and args.embedding:
                 bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]

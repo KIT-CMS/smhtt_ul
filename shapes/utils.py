@@ -55,7 +55,10 @@ def add_process(
             full_selection = selections + [category_selection]
             unitlist.append(Unit(dataset, full_selection, actions))
 
-    analysis_unit[name] = unitlist
+    if name in analysis_unit:
+        analysis_unit[name].extend(unitlist)
+    else:
+        analysis_unit[name] = unitlist
 
 
 def add_control_process(
@@ -196,6 +199,7 @@ def add_tauES_datasets(
             validate_samples=False,
             validation_tag=validation_tag,
             xrootd=xrootd,
+            validation_dataset_name="EMB",
         )
         nominals[era]["datasets"][channel][processname] = dataset
         updated_unit = []
@@ -301,7 +305,7 @@ def book_tauES_histograms(
                     subvariation.add_weight.weight.expression = replace_expression(
                         subvariation.add_weight.weight.expression, quants
                     )
-                # elif isinstance(subvariation, ReplaceVariable): was regarding trigger_eff_mt_emb, is now done via logN.
+                # elif isinstance(subvariation, ReplaceVariable): # When using EMB: is regarding trigger_eff_mt_emb, is done via logN atm
                 #     # breakpoint()
                 #     subvariation.variation = replace_expression(
                 #         subvariation.variation, quants

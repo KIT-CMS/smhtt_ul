@@ -50,17 +50,17 @@ def main():
 
     # sort and print
     print(f"Found values: {sorted(values)}, Count: {len(values)}")
-    aranged_down = np.arange(-8.1, -20 - 0.1, -0.1).round(2).tolist()[:-1]
-    aranged_up = np.arange(20, 8.1 - 0.1, -0.1).round(2).tolist()
-    aranged_nom = np.arange(8, -8 - 0.1, -0.1).round(2).tolist()
-    tauESvariations_down = sorted([x for x in aranged_down if x != 0.0])
-    tauESvariations_up = sorted([x for x in aranged_up if x != 0.0])
+    # aranged_down = np.arange(-8.1, -20 - 0.1, -0.1).round(2).tolist()[:-1]
+    # aranged_up = np.arange(20, 8.1 - 0.1, -0.1).round(2).tolist()
+    aranged_nom = np.arange(8, -12 - 0.2, -0.2).round(2).tolist()
+    # tauESvariations_down = sorted([x for x in aranged_down if x != 0.0])
+    # tauESvariations_up = sorted([x for x in aranged_up if x != 0.0])
     tauESvariations_nom = sorted([x for x in aranged_nom if x != 0.0])
-    compare_down = [x for x in tauESvariations_down if x not in values]
-    compare_up = [x for x in tauESvariations_up if x not in values]
+    # compare_down = [x for x in tauESvariations_down if x not in values]
+    # compare_up = [x for x in tauESvariations_up if x not in values]
     compare_nom = [x for x in tauESvariations_nom if x not in values]
-    print("Missing down variations:", compare_down)
-    print("Missing up variations:", compare_up)
+    # print("Missing down variations:", compare_down)
+    # print("Missing up variations:", compare_up)
     print("Missing nominal variations:", compare_nom)
 
 if __name__ == '__main__':

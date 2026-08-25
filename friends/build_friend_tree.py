@@ -84,6 +84,10 @@ def job_wrapper(args):
 
 
 def check_file_exists_remote(serverpath, file_path):
+    if "store" not in serverpath and "/ceph" in serverpath:
+        # Not a valid remote XRootD path, but on ceph
+        return False
+    
     server_url = serverpath.split("store")[0][:-1]
     file_path = (
         "/store" + serverpath.split("store")[1] + file_path.replace(serverpath, "")
@@ -190,13 +194,13 @@ def upload_file(redirector, input_file, output_file, max_retries=5):
                 n += 1
         else:
             if not os.path.exists(os.path.dirname(output_file)):
-                os.makedirs(os.path.dirname(output_file))
+                os.makedirs(os.path.dirname(output_file), exist_ok=True)
             os.system(f"mv {input_file} {output_file}")
             success = True
 
 
 def generate_empty_friend_tree(output_file):
-    friend_tree = ROOT.TFile(output_file, "CREATE")
+    friend_tree = ROOT.TFile(output_file, "RECREATE")
     tree = ROOT.TTree("ntuple", "")
     tree.Write()
     friend_tree.Close()
@@ -243,7 +247,8 @@ if __name__ == "__main__":
         ntuples = glob.glob(base_path)
     print("Found {} ntuples".format(len(ntuples)))
     # Remove data and embedded samples from ntuple list as friends are not needed for these
-    ntuples_wo_data = list(
+    try:
+        ntuples_wo_data = list(
         filter(
             lambda ntuple: dataset[parse_filepath(ntuple)["nick"]]["sample_type"]
             != "data"
@@ -251,6 +256,8 @@ if __name__ == "__main__":
             ntuples,
         )
     )
+    except:
+        breakpoint()
     nthreads = args.nthreads
     if nthreads > len(ntuples_wo_data):
         nthreads = len(ntuples_wo_data)

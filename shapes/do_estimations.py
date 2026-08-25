@@ -57,6 +57,12 @@ def parse_args():
         type=float,
         help="ES variation lower bound.",
     )
+    parser.add_argument(
+        "--tes_precision",
+        default=0.1,
+        type=float,
+        help="Precision of TES variations.",
+    )
     parser.add_argument("-s", "--special", help="Special selection.", default="")
     return parser.parse_args()
 
@@ -233,7 +239,7 @@ def main(args):
     eleES_names = []
     if args.special == "TauES":
         # we have to extend the _dataset_map and the _process_map to include the TauES variations
-        aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
+        aranged = np.arange(args.es_up, args.es_down - args.tes_precision, -args.tes_precision).round(2).tolist()
         tauESvariations = [x for x in aranged if x != 0.0]
         for variation in tauESvariations:
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
@@ -241,8 +247,9 @@ def main(args):
             tauES_names.append(processname)
     if args.special == "TauID_ES":
         # we have to extend the _dataset_map and the _process_map to include the TauES variations
-        aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
-        tauESvariations = [x for x in aranged if x != 0.0]
+        aranged = np.arange(args.es_up, args.es_down - args.tes_precision, -args.tes_precision).round(2).tolist()
+        tauESvariations = [x for x in aranged if x != 0.0 and x >= args.es_down]
+        # tauESvariations = [x for x in np.arange(19.9, -20.0, -0.2).round(2).tolist()]
         for variation in tauESvariations:
             name = str(round(variation, 2)).replace("-", "minus").replace(".", "p")
             processname = f"emb{name}"
@@ -428,7 +435,7 @@ def main(args):
                             embname=embsignal,
                         )
                         estimated_hist.Write()
-                if args.special == "TauID_ES" and channel != "mm":
+                if args.special == "TauID_ES" and channel == "mt":
                     for embsignal in tauES_names:
                         print(embsignal)
                         var = emb_categories[channel][category][0]

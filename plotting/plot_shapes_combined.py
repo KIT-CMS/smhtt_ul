@@ -8,7 +8,7 @@ import ROOT
 import numpy as np
 
 import argparse
-import distutils.util
+from setuptools._distutils.util import strtobool
 import logging
 import json
 import collections
@@ -78,13 +78,13 @@ def parse_arguments():
     )
     parser.add_argument(
         "--train-emb",
-        type=lambda x: bool(distutils.util.strtobool(x)),
+        type=lambda x: bool(strtobool(x)),
         default=True,
         help="Use fake factor training category",
     )
     parser.add_argument(
         "--train-ff",
-        type=lambda x: bool(distutils.util.strtobool(x)),
+        type=lambda x: bool(strtobool(x)),
         default=True,
         help="Use fake factor training category",
     )

@@ -318,10 +318,13 @@ if __name__ == "__main__":
     if f == None:
         raise Exception("[ERROR] File {} not found.".format(filename))
 
-    result = f.Get("fit_s")
+    result = f.Get("fit_mdf")
     if result == None:
-        print(f"[ERROR] Failed to load fit_s from file {filename}. There won't be a plot for {category}!")
-        sys.exit(1)
+        print(f"[ERROR] Failed to load fit_mdf from file {filename}. Checking fit_s... ")
+        result = f.Get("fit_s")
+        if result == None:
+            print(f"[ERROR] Failed to load fit_s from file {filename}. There won't be a plot for {category}!")
+            sys.exit(1)
 
     params = result.floatParsInit()
     pois = []
@@ -397,8 +400,8 @@ if __name__ == "__main__":
 
     canv.Update()
 
-    canv.SaveAs(f"{era}_{category}_{tag}_POIS_correlations_ID_ES.pdf")
-    # canv.SaveAs(f"{era}_{category}_{tag}_POIS_correlations_ID_ES.png")
+    canv.SaveAs(f"POIS_correlations_ID_ES_{category}.pdf")
+    canv.SaveAs(f"POIS_correlations_ID_ES_{category}.png")
     
     # Extract the upper off-diagonal elements.
     wp = tag.split("_")[0]
@@ -413,7 +416,7 @@ if __name__ == "__main__":
             upper_corr[key] = val
 
     # Check if the YAML file already exists; if yes, load existing content.
-    yaml_filename = "poi_corr_all.yaml"
+    yaml_filename = f"poi_corr_all_{tag}.yaml"
     if os.path.exists(yaml_filename):
         with open(yaml_filename, "r") as file:
             data = yaml.safe_load(file) or {}

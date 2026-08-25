@@ -22,6 +22,8 @@ from config.logging_setup_configs import setup_logging
 
 logger = setup_logging(logger=logging.getLogger(__name__))
 
+SHIFT_DIRECTIONS = ("Up", "Down")
+
 
 FF_OPTIONS = {
     "fake_factor": {
@@ -433,43 +435,43 @@ pileup_reweighting = [
 # Energy scales.
 # Previously defined with 2017 in name.
 tau_es_3prong = [
-    ReplaceVariable("CMS_scale_t_3prong_EraUp", "tauEs3prong0pizeroUp"),
-    ReplaceVariable("CMS_scale_t_3prong_EraDown", "tauEs3prong0pizeroDown"),
+    ReplaceVariable("CMS_scale_t_dm10_EraUp", "tauEsDM10Up"),
+    ReplaceVariable("CMS_scale_t_dm10_EraDown", "tauEsDM10Down"),
 ]
 
 tau_es_3prong1pizero = [
-    ReplaceVariable("CMS_scale_t_3prong1pizero_EraUp", "tauEs3prong1pizeroUp"),
-    ReplaceVariable("CMS_scale_t_3prong1pizero_EraDown", "tauEs3prong1pizeroDown"),
+    ReplaceVariable("CMS_scale_t_dm11_EraUp", "tauEsDM11Up"),
+    ReplaceVariable("CMS_scale_t_dm11_EraDown", "tauEsDM11Down"),
 ]
 
 tau_es_1prong = [
-    ReplaceVariable("CMS_scale_t_1prong_EraUp", "tauEs1prong0pizeroUp"),
-    ReplaceVariable("CMS_scale_t_1prong_EraDown", "tauEs1prong0pizeroDown"),
+    ReplaceVariable("CMS_scale_t_dm0_EraUp", "tauEsDM0Up"),
+    ReplaceVariable("CMS_scale_t_dm0_EraDown", "tauEsDM0Down"),
 ]
 
 tau_es_1prong1pizero = [
-    ReplaceVariable("CMS_scale_t_1prong1pizero_EraUp", "tauEs1prong1pizeroUp"),
-    ReplaceVariable("CMS_scale_t_1prong1pizero_EraDown", "tauEs1prong1pizeroDown"),
+    ReplaceVariable("CMS_scale_t_dm1_EraUp", "tauEsDM0Up"),
+    ReplaceVariable("CMS_scale_t_dm1_EraDown", "tauEsDM0Down"),
 ]
 
 emb_tau_es_3prong = [
-    ReplaceVariable("CMS_scale_t_emb_3prong_EraUp", "tauEs3prong0pizeroUp"),
-    ReplaceVariable("CMS_scale_t_emb_3prong_EraDown", "tauEs3prong0pizeroDown"),
+    ReplaceVariable("CMS_scale_t_emb_dm10_EraUp", "tauEsDM10Up"),
+    ReplaceVariable("CMS_scale_t_emb_dm10_EraDown", "tauEsDM10Down"),
 ]
 
 emb_tau_es_3prong1pizero = [
-    ReplaceVariable("CMS_scale_t_emb_3prong1pizero_EraUp", "tauEs3prong1pizeroUp"),
-    ReplaceVariable("CMS_scale_t_emb_3prong1pizero_EraDown", "tauEs3prong1pizeroDown"),
+    ReplaceVariable("CMS_scale_t_emb_dm11_EraUp", "tauEsDM11Up"),
+    ReplaceVariable("CMS_scale_t_emb_dm11_EraDown", "tauEsDM11Down"),
 ]
 
 emb_tau_es_1prong = [
-    ReplaceVariable("CMS_scale_t_emb_1prong_EraUp", "tauEs1prong0pizeroUp"),
-    ReplaceVariable("CMS_scale_t_emb_1prong_EraDown", "tauEs1prong0pizeroDown"),
+    ReplaceVariable("CMS_scale_t_emb_dm0_EraUp", "tauEsDM0Up"),
+    ReplaceVariable("CMS_scale_t_emb_dm0_EraDown", "tauEsDM0Down"),
 ]
 
 emb_tau_es_1prong1pizero = [
-    ReplaceVariable("CMS_scale_t_emb_1prong1pizero_EraUp", "tauEs1prong1pizeroUp"),
-    ReplaceVariable("CMS_scale_t_emb_1prong1pizero_EraDown", "tauEs1prong1pizeroDown"),
+    ReplaceVariable("CMS_scale_t_emb_dm1_EraUp", "tauEsDM0Up"),
+    ReplaceVariable("CMS_scale_t_emb_dm1_EraDown", "tauEsDM0Down"),
 ]
 
 
@@ -487,30 +489,51 @@ emb_tau_es_1prong1pizero = [
 
 # Jet energy scale split by sources.
 jet_es = [
-    ReplaceVariable("CMS_scale_j_AbsoluteUp", "jesUncAbsoluteUp"),
-    ReplaceVariable("CMS_scale_j_AbsoluteDown", "jesUncAbsoluteDown"),
-    ReplaceVariable("CMS_scale_j_Absolute_EraUp", "jesUncAbsoluteYearUp"),
-    ReplaceVariable("CMS_scale_j_Absolute_EraDown", "jesUncAbsoluteYearDown"),
-    ReplaceVariable("CMS_scale_j_BBEC1Up", "jesUncBBEC1Up"),
-    ReplaceVariable("CMS_scale_j_BBEC1Down", "jesUncBBEC1Down"),
-    ReplaceVariable("CMS_scale_j_BBEC1_EraUp", "jesUncBBEC1YearUp"),
-    ReplaceVariable("CMS_scale_j_BBEC1_EraDown", "jesUncBBEC1YearDown"),
-    ReplaceVariable("CMS_scale_j_EC2Up", "jesUncEC2Up"),
-    ReplaceVariable("CMS_scale_j_EC2Down", "jesUncEC2Down"),
-    ReplaceVariable("CMS_scale_j_EC2_EraUp", "jesUncEC2YearUp"),
-    ReplaceVariable("CMS_scale_j_EC2_EraDown", "jesUncEC2YearDown"),
-    ReplaceVariable("CMS_scale_j_HFUp", "jesUncHFUp"),
-    ReplaceVariable("CMS_scale_j_HFDown", "jesUncHFDown"),
-    ReplaceVariable("CMS_scale_j_HF_EraUp", "jesUncHFYearUp"),
-    ReplaceVariable("CMS_scale_j_HF_EraDown", "jesUncHFYearDown"),
-    ReplaceVariable("CMS_scale_j_FlavorQCDUp", "jesUncFlavorQCDUp"),
-    ReplaceVariable("CMS_scale_j_FlavorQCDDown", "jesUncFlavorQCDDown"),
-    ReplaceVariable("CMS_scale_j_RelativeBalUp", "jesUncRelativeBalUp"),
-    ReplaceVariable("CMS_scale_j_RelativeBalDown", "jesUncRelativeBalDown"),
-    ReplaceVariable("CMS_scale_j_RelativeSample_EraUp", "jesUncRelativeSampleYearUp"),
-    ReplaceVariable("CMS_scale_j_RelativeSample_EraDown", "jesUncRelativeSampleYearDown"),
-    ReplaceVariable("CMS_res_j_EraUp", "jerUncUp"),
-    ReplaceVariable("CMS_res_j_EraDown", "jerUncDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_scale_j_Total{shift}", f"jesUncTotal{shift}"),
+        (f"CMS_scale_j_SinglePionECAL{shift}", f"jesUncSinglePionECAL{shift}"),
+        (f"CMS_scale_j_SinglePionHCAL{shift}", f"jesUncSinglePionHCAL{shift}"),
+        (f"CMS_scale_j_AbsoluteMPFBias{shift}", f"jesUncAbsoluteMPFBias{shift}"),
+        (f"CMS_scale_j_AbsoluteScale{shift}", f"jesUncAbsoluteScale{shift}"),
+        (f"CMS_scale_j_Fragmentation{shift}", f"jesUncFragmentation{shift}"),
+        (f"CMS_scale_j_PileUpDataMC{shift}", f"jesUncPileUpDataMC{shift}"),
+        (f"CMS_scale_j_RelativeFSR{shift}", f"jesUncRelativeFSR{shift}"),
+        (f"CMS_scale_j_PileupPtRef{shift}", f"jesUncPileUpPtRef{shift}"),
+        (f"CMS_scale_j_AbsoluteStat{shift}", f"jesUncAbsoluteStat{shift}"),
+        (f"CMS_scale_j_TimePtEta{shift}", f"jesUncTimePtEta{shift}"),
+        (f"CMS_scale_j_RelativeStatFSR{shift}", f"jesUncRelativeStatFSR{shift}"),
+        (f"CMS_scale_j_FlavorQCD{shift}", f"jesUncFlavorQCD{shift}"),
+        (f"CMS_scale_j_PileupPtEC1{shift}", f"jesUncPileUpPtEC1{shift}"),
+        (f"CMS_scale_j_PileUpPtBB{shift}", f"jesUncPileUpPtBB{shift}"),
+        (f"CMS_scale_j_RelativePtBB{shift}", f"jesUncRelativePtBB{shift}"),
+        (f"CMS_scale_j_RelativeJEREC1{shift}", f"jesUncRelativeJEREC1{shift}"),
+        (f"CMS_scale_j_RelativePtEC1{shift}", f"jesUncRelativePtEC1{shift}"),
+        (f"CMS_scale_j_RelativeStatEC{shift}", f"jesUncRelativeStatEC{shift}"),
+        (f"CMS_scale_j_RelativePtHF{shift}", f"jesUncRelativePtHF{shift}"),
+        (f"CMS_scale_j_PileUpPtHF{shift}", f"jesUncPileUpPtHF{shift}"),
+        (f"CMS_scale_j_RelativeJERHF{shift}", f"jesUncRelativeJERHF{shift}"),
+        (f"CMS_scale_j_RelativeStatHF{shift}", f"jesUncRelativeStatHF{shift}"),
+        (f"CMS_scale_j_PileUpPtEC2{shift}", f"jesUncPileUpPtEC2{shift}"),
+        (f"CMS_scale_j_RelativeJEREC2{shift}", f"jesUncRelativeJEREC2{shift}"),
+        (f"CMS_scale_j_RelativePtEC2{shift}", f"jesUncRelativePtEC2{shift}"),
+        (f"CMS_scale_j_RelativeBal{shift}", f"jesUncRelativeBal{shift}"),
+        (f"CMS_scale_j_RelativeSample{shift}", f"jesUncRelativeSample{shift}"),
+        # Old systematics (pre v15):
+        #(f"CMS_scale_j_Absolute{shift}", f"jesUncAbsolute{shift}"),
+        #(f"CMS_scale_j_Absolute_Era{shift}", f"jesUncAbsoluteYear{shift}"),
+        #(f"CMS_scale_j_FlavorQCD{shift}", f"jesUncFlavorQCD{shift}"),
+        #(f"CMS_scale_j_BBEC1{shift}", f"jesUncBBEC1{shift}"),
+        #(f"CMS_scale_j_BBEC1_Era{shift}", f"jesUncBBEC1Year{shift}"),
+        #(f"CMS_scale_j_HF{shift}", f"jesUncHF{shift}"),
+        #(f"CMS_scale_j_HF_Era{shift}", f"jesUncHFYear{shift}"),
+        #(f"CMS_scale_j_EC2{shift}", f"jesUncEC2{shift}"),
+        #(f"CMS_scale_j_EC2_Era{shift}", f"jesUncEC2Year{shift}"),
+        #(f"CMS_scale_j_RelativeBal{shift}", f"jesUncRelativeBal{shift}"),
+        #(f"CMS_scale_j_RelativeSample_Era{shift}", f"jesUncRelativeSampleYear{shift}"),
+        #(f"CMS_res_j_Era{shift}", f"jerUnc{shift}"),
+    ]
 ]
 
 jet_es_hem = [
@@ -564,17 +587,17 @@ recoil_response = [
 
 # Eta binned uncertainty
 ele_fake_es_1prong = [
-    ReplaceVariable("CMS_ZLShape_et_1prong_barrel_EraUp", "tauEleFakeEs1prongBarrelUp"),
-    ReplaceVariable("CMS_ZLShape_et_1prong_barrel_EraDown", "tauEleFakeEs1prongBarrelDown"),
-    ReplaceVariable("CMS_ZLShape_et_1prong_endcap_EraUp", "tauEleFakeEs1prongEndcapUp"),
-    ReplaceVariable("CMS_ZLShape_et_1prong_endcap_EraDown", "tauEleFakeEs1prongEndcapDown"),
+    ReplaceVariable("CMS_ZLShape_et_dm0_barrel_EraUp", "tauEleFakeEsDM0BarrelUp"),
+    ReplaceVariable("CMS_ZLShape_et_dm0_barrel_EraDown", "tauEleFakeEsDM0BarrelDown"),
+    ReplaceVariable("CMS_ZLShape_et_dm0_endcap_EraUp", "tauEleFakeEsDM0EndcapUp"),
+    ReplaceVariable("CMS_ZLShape_et_dm0_endcap_EraDown", "tauEleFakeEsDM0EndcapDown"),
 ]
 
 ele_fake_es_1prong1pizero = [
-    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_barrel_EraUp", "tauEleFakeEs1prong1pizeroBarrelUp"),
-    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_barrel_EraDown","tauEleFakeEs1prong1pizeroBarrelDown"),
-    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_endcap_EraUp", "tauEleFakeEs1prong1pizeroEndcapUp"),
-    ReplaceVariable("CMS_ZLShape_et_1prong1pizero_endcap_EraDown","tauEleFakeEs1prong1pizeroEndcapDown"),
+    ReplaceVariable("CMS_ZLShape_et_dm1_barrel_EraUp", "tauEleFakeEsDM1BarrelUp"),
+    ReplaceVariable("CMS_ZLShape_et_dm1_barrel_EraDown","tauEleFakeEsDM1BarrelDown"),
+    ReplaceVariable("CMS_ZLShape_et_dm1_endcap_EraUp", "tauEleFakeEsDM1EndcapUp"),
+    ReplaceVariable("CMS_ZLShape_et_dm1_endcap_EraDown","tauEleFakeEsDM1EndcapDown"),
 ]
 
 ele_fake_es = ele_fake_es_1prong + ele_fake_es_1prong1pizero
@@ -611,56 +634,90 @@ mu_fake_es_inc = [    # scale_fake_m -> ZLShape_mt_Era...
 # Tau ID efficiency.
 
 # TODO add high pt tau ID efficiency
+# Old and not used atm:
+# tau_id_eff_lt = [
+#     ReplaceVariable(name, variation)
+#     for shift in SHIFT_DIRECTIONS
+#     for name, variation in [
+#         (f"CMS_eff_t_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
+#         (f"CMS_eff_t_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
+#         (f"CMS_eff_t_40-500_Era{shift}", f"vsJetTau40to500{shift}"),
+#         (f"CMS_eff_t_500-1000_Era{shift}", f"vsJetTau500to1000{shift}"),
+#         (f"CMS_eff_t_1000-Inf_Era{shift}", f"vsJetTau1000toInf{shift}"),
+#     ]
+# ]
+# emb_tau_id_eff_lt = [
+#     ReplaceVariable(name, variation)
+#     for shift in SHIFT_DIRECTIONS
+#     for name, variation in [
+#         (f"CMS_eff_t_emb_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
+#         (f"CMS_eff_t_emb_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
+#         (f"CMS_eff_t_emb_40-Inf_Era{shift}", f"vsJetTau40toInf{shift}"),
+#     ]
+# ]
+
+# # tauid variations used for correlation with mc ones
+# emb_tau_id_eff_lt_corr = [
+#     ReplaceVariable(name, variation)
+#     for shift in SHIFT_DIRECTIONS
+#     for name, variation in [
+#         (f"CMS_eff_t_30-35_Era{shift}", f"vsJetTau30to35{shift}"),
+#         (f"CMS_eff_t_35-40_Era{shift}", f"vsJetTau35to40{shift}"),
+#         (f"CMS_eff_t_40-500_Era{shift}", f"vsJetTau40toInf{shift}"),
+#     ]
+# ]
 tau_id_eff_lt = [
-    ReplaceVariable("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
-    ReplaceVariable("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
-    ReplaceVariable("CMS_eff_t_35-40_EraUp", "vsJetTau35to40Up"),
-    ReplaceVariable("CMS_eff_t_35-40_EraDown", "vsJetTau35to40Down"),
-    ReplaceVariable("CMS_eff_t_40-500_EraUp", "vsJetTau40to500Up"),
-    ReplaceVariable("CMS_eff_t_40-500_EraDown", "vsJetTau40to500Down"),
-    ReplaceVariable("CMS_eff_t_500-1000_EraUp", "vsJetTau500to1000Up"),
-    ReplaceVariable("CMS_eff_t_500-1000_EraDown", "vsJetTau500to1000Down"),
-    ReplaceVariable("CMS_eff_t_1000-Inf_EraUp", "vsJetTau1000toInfUp"),
-    ReplaceVariable("CMS_eff_t_1000-Inf_EraDown", "vsJetTau1000toInfDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_dm0_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_dm1_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_dm10_Era{shift}", f"vsJetTauDM10{shift}"),
+        (f"CMS_eff_t_dm11_Era{shift}", f"vsJetTauDM11{shift}"),
+    ]
 ]
 emb_tau_id_eff_lt = [
-    ReplaceVariable("CMS_eff_t_emb_30-35_EraUp", "vsJetTau30to35Up"),
-    ReplaceVariable("CMS_eff_t_emb_30-35_EraDown", "vsJetTau30to35Down"),
-    ReplaceVariable("CMS_eff_t_emb_35-40_EraUp", "vsJetTau35to40Up"),
-    ReplaceVariable("CMS_eff_t_emb_35-40_EraDown", "vsJetTau35to40Down"),
-    ReplaceVariable("CMS_eff_t_emb_40-500_EraUp", "vsJetTau40toInfUp"),
-    ReplaceVariable("CMS_eff_t_emb_40-500_EraDown", "vsJetTau40toInfDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_emb_dm0_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_emb_dm1_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_emb_dm10_Era{shift}", f"vsJetTauDM10{shift}"),
+        (f"CMS_eff_t_emb_dm11_Era{shift}", f"vsJetTauDM11{shift}"),
+    ]
 ]
+
 # tauid variations used for correlation with mc ones
+# ToDo: change away from prong naming !!! 
 emb_tau_id_eff_lt_corr = [
-    ReplaceVariable("CMS_eff_t_30-35_EraUp", "vsJetTau30to35Up"),
-    ReplaceVariable("CMS_eff_t_30-35_EraDown", "vsJetTau30to35Down"),
-    ReplaceVariable("CMS_eff_t_35-40_EraUp", "vsJetTau35to40Up"),
-    ReplaceVariable("CMS_eff_t_35-40_EraDown", "vsJetTau35to40Down"),
-    ReplaceVariable("CMS_eff_t_40-500_EraUp", "vsJetTau40toInfUp"),
-    ReplaceVariable("CMS_eff_t_40-500_EraDown", "vsJetTau40toInfDown"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_dm0_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_dm1_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_dm10_Era{shift}", f"vsJetTauDM10{shift}"),
+        (f"CMS_eff_t_dm11_Era{shift}", f"vsJetTauDM11{shift}"),
+    ]
 ]
-
 tau_id_eff_tt = [
-    ReplaceVariable("CMS_eff_t_dm0_EraUp", "vsJetTauDM0Up"),
-    ReplaceVariable("CMS_eff_t_dm0_EraDown", "vsJetTauDM0Down"),
-    ReplaceVariable("CMS_eff_t_dm1_EraUp", "vsJetTauDM1Up"),
-    ReplaceVariable("CMS_eff_t_dm1_EraDown", "vsJetTauDM1Down"),
-    ReplaceVariable("CMS_eff_t_dm10_EraUp", "vsJetTauDM10Up"),
-    ReplaceVariable("CMS_eff_t_dm10_EraDown", "vsJetTauDM10Down"),
-    ReplaceVariable("CMS_eff_t_dm11_EraUp", "vsJetTauDM11Up"),
-    ReplaceVariable("CMS_eff_t_dm11_EraDown", "vsJetTauDM11Down"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_dm0_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_dm1_Era{shift}", f"vsJetTauDM1{shift}"),
+        (f"CMS_eff_t_dm10_Era{shift}", f"vsJetTauDM10{shift}"),
+        (f"CMS_eff_t_dm11_Era{shift}", f"vsJetTauDM11{shift}"),
+    ]
 ]
-
 emb_tau_id_eff_tt = [
-    ReplaceVariable("CMS_eff_t_dm0_EraUp", "vsJetTauDM0Up"),
-    ReplaceVariable("CMS_eff_t_dm0_EraDown", "vsJetTauDM0Down"),
-    ReplaceVariable("CMS_eff_t_dm1_EraUp", "vsJetTauDM1Up"),
-    ReplaceVariable("CMS_eff_t_dm1_EraDown", "vsJetTauDM1Down"),
-    ReplaceVariable("CMS_eff_t_dm10_EraUp", "vsJetTauDM10Up"),
-    ReplaceVariable("CMS_eff_t_dm10_EraDown", "vsJetTauDM10Down"),
-    ReplaceVariable("CMS_eff_t_dm11_EraUp", "vsJetTauDM11Up"),
-    ReplaceVariable("CMS_eff_t_dm11_EraDown", "vsJetTauDM11Down"),
+    ReplaceVariable(name, variation)
+    for shift in SHIFT_DIRECTIONS
+    for name, variation in [
+        (f"CMS_eff_t_emb_dm0_Era{shift}", f"vsJetTauDM0{shift}"),
+        (f"CMS_eff_t_emb_dm1_Era{shift}", f"vsJetTauDM1{shift}"),
+        (f"CMS_eff_t_emb_dm10_Era{shift}", f"vsJetTauDM10{shift}"),
+        (f"CMS_eff_t_emb_dm11_Era{shift}", f"vsJetTauDM11{shift}"),
+    ]
 ]
 
 
@@ -1170,56 +1227,56 @@ ff_variations_lt = [
 ff_variations_tau_es_lt = [
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong_EraDown",
-        "tauEs1prong0pizeroDown",
+        "tauEsDM0Down",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong_EraUp",
-        "tauEs1prong0pizeroUp",
+        "tauEsDM0Up",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong1pizero_EraDown",
-        "tauEs1prong1pizeroDown",
+        "tauEsDM0Down",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_1prong1pizero_EraUp",
-        "tauEs1prong1pizeroUp",
+        "tauEsDM0Up",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong_EraDown",
-        "tauEs3prong0pizeroDown",
+        "tauEsDM10Down",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong_EraUp",
-        "tauEs3prong0pizeroUp",
+        "tauEsDM10Up",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong1pizero_EraDown",
-        "tauEs3prong1pizeroDown",
+        "tauEsDM11Down",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_3prong1pizero_EraUp",
-        "tauEs3prong1pizeroUp",
+        "tauEsDM11Up",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
@@ -1230,56 +1287,56 @@ ff_variations_tau_es_lt = [
 ff_variations_tau_es_emb_lt = [
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong_EraDown",
-        "tauEs1prong0pizeroDown",
+        "tauEsDM0Down",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong_EraUp",
-        "tauEs1prong0pizeroUp",
+        "tauEsDM0Up",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong1pizero_EraDown",
-        "tauEs1prong1pizeroDown",
+        "tauEsDM0Down",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_1prong1pizero_EraUp",
-        "tauEs1prong1pizeroUp",
+        "tauEsDM0Up",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong_EraDown",
-        "tauEs3prong0pizeroDown",
+        "tauEsDM10Down",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong_EraUp",
-        "tauEs3prong0pizeroUp",
+        "tauEsDM10Up",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong1pizero_EraDown",
-        "tauEs3prong1pizeroDown",
+        "tauEsDM11Down",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),
     ),
     ReplaceVariableReplaceCutAndAddWeight(
         "anti_iso_CMS_scale_t_emb_3prong1pizero_EraUp",
-        "tauEs3prong1pizeroUp",
+        "tauEsDM11Up",
         "tau_iso",
         Cut("id_tau_vsJet_Tight_2<0.5&&id_tau_vsJet_VLoose_2>0.5", "tau_anti_iso"),
         Weight(RuntimeVariables.FF_name_lt, "fake_factor"),

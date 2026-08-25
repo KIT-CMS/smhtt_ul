@@ -3,13 +3,18 @@ set -e
 NTUPLETAG=$1
 ERA=$2
 
-# KINGMAKER_BASEDIR="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
-# KINGMAKER_BASEDIR_XROOTD="root://cmsdcache-kit-disk.gridka.de/${KINGMAKER_BASEDIR}"
-# XSEC_FRIENDS="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
+KINGMAKER_BASEDIR_PATH="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+KINGMAKER_BASEDIR_XROOTD="root://cmsdcache-kit-disk.gridka.de/"
+XSEC_FRIENDS_PATH="/store/user/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
 
-KINGMAKER_BASEDIR="/store/user/jvoss/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
-KINGMAKER_BASEDIR_XROOTD="root://cmsdcache-kit-disk.gridka.de/${KINGMAKER_BASEDIR}"
-XSEC_FRIENDS="/store/user/jvoss/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
+# KINGMAKER_BASEDIR="/ceph/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNRun/"
+# KINGMAKER_BASEDIR_XROOTD="${KINGMAKER_BASEDIR}"
+# XSEC_FRIENDS="/ceph/${USER}/CROWN/ntuples/${NTUPLETAG}/CROWNFriends/xsec/"
+
+KINGMAKER_BASEDIR="${KINGMAKER_BASEDIR_XROOTD}${KINGMAKER_BASEDIR_PATH}"
+XSEC_FRIENDS="${KINGMAKER_BASEDIR_XROOTD}${XSEC_FRIENDS_PATH}"
+
+
 
 if [[ $ERA == *"2016"* ]]; then
     NTUPLES=$KINGMAKER_BASEDIR

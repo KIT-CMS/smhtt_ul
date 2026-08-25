@@ -1,0 +1,2380 @@
+{
+  "schema_version": 2,
+  "corrections": [
+    { "name": "DeepTau2018v2p5VSjet",
+      "description": "dm-pt-dependent tau ID scale factor for tau embedded samples",
+      "version": 0,
+      "inputs": [
+        { "name": "pt",
+          "type": "real",
+          "description": "Reconstructed tau pT"
+        },
+        { "name": "dm",
+          "type": "int",
+          "description": "Reconstructed tau decay mode: 0, 1, 10, 11"
+        },
+        { "name": "genmatch",
+          "type": "int",
+          "description": "genmatch: 0 or 6 = unmatched or jet, 1 or 3 = electron, 2 or 4 = muon, 5 = real tau"
+        },
+        { "name": "wp",
+          "type": "string",
+          "description": "DeepTau2018v2p5VSjet working point: Medium,Tight"
+        },
+        { "name": "wp_VSe",
+          "type": "string",
+          "description": "DeepTau2018v2p5VSe working point: VVLoose,Tight"
+        },
+        { "name": "syst",
+          "type": "string",
+          "description": "Systematic variations: 'nom', 'up', 'down'"
+        },
+        { "name": "flag",
+          "type": "string",
+          "description": "Flag: 'pt' = DM-pT-dependent SFs(20,40,200), 'dm' = DM-dependent SFs with pt>=20"
+        }
+      ],
+      "output": {
+        "name": "sf",
+        "type": "real",
+        "description": "DM-pT-dependent or DM-dependent scale factor"
+      },
+      "data": {
+        "nodetype": "category",
+        "input": "flag",
+        "content": [
+          { "key": "pt",
+            "value": {
+              "nodetype": "category",
+              "input": "genmatch",
+              "content": [
+                { "key": 0, "value": 1.0 },
+                { "key": 1, "value": 1.0 },
+                { "key": 2, "value": 1.0 },
+                { "key": 3, "value": 1.0 },
+                { "key": 4, "value": 1.0 },
+                { "key": 6, "value": 1.0 },
+                { "key": 5,
+                  "value": {
+                    "nodetype": "category",
+                    "input": "wp",
+                    "content": [
+                      { "key": "Medium",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0149122476577759 },
+                                            { "key": "up", "value": 1.2345000505447388 },
+                                            { "key": "down", "value": 0.8062999844551086 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.8190204501152039 },
+                                            { "key": "up", "value": 1.0161093473434448 },
+                                            { "key": "down", "value": 0.621381402015686 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.118565320968628 },
+                                            { "key": "up", "value": 1.2964999675750732 },
+                                            { "key": "down", "value": 0.9160000085830688 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.1930255889892578 },
+                                            { "key": "up", "value": 1.6274000406265259 },
+                                            { "key": "down", "value": 0.9460999965667725 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0912885665893555 },
+                                            { "key": "up", "value": 1.3259999752044678 },
+                                            { "key": "down", "value": 0.8824999928474426 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9750292897224426 },
+                                            { "key": "up", "value": 1.3767000436782837 },
+                                            { "key": "down", "value": 0.59170001745224 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0912885665893555 },
+                                            { "key": "up", "value": 1.3259999752044678 },
+                                            { "key": "down", "value": 0.8824999928474426 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9750292897224426 },
+                                            { "key": "up", "value": 1.3767000436782837 },
+                                            { "key": "down", "value": 0.59170001745224 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9100532531738281 },
+                                            { "key": "up", "value": 0.9557328820228577 },
+                                            { "key": "down", "value": 0.8625269532203674 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9649866819381714 },
+                                            { "key": "up", "value": 1.2433143854141235 },
+                                            { "key": "down", "value": 0.7288005948066711 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0604419708251953 },
+                                            { "key": "up", "value": 1.1089898347854614 },
+                                            { "key": "down", "value": 1.0185273885726929 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.086256980895996 },
+                                            { "key": "up", "value": 1.1575238704681396 },
+                                            { "key": "down", "value": 1.0220677852630615 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0760242938995361 },
+                                            { "key": "up", "value": 1.1358726024627686 },
+                                            { "key": "down", "value": 1.0306249856948853 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9592559337615967 },
+                                            { "key": "up", "value": 1.088518738746643 },
+                                            { "key": "down", "value": 0.8190764784812927 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0760242938995361 },
+                                            { "key": "up", "value": 1.1358726024627686 },
+                                            { "key": "down", "value": 1.0306249856948853 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9592559337615967 },
+                                            { "key": "up", "value": 1.088518738746643 },
+                                            { "key": "down", "value": 0.8190764784812927 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Tight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9572256803512573 },
+                                            { "key": "up", "value": 1.0055675506591797 },
+                                            { "key": "down", "value": 0.9097274541854858 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.912502110004425 },
+                                            { "key": "up", "value": 1.063896656036377 },
+                                            { "key": "down", "value": 0.797336757183075 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.1737650632858276 },
+                                            { "key": "up", "value": 1.2205156087875366 },
+                                            { "key": "down", "value": 1.1314940452575684 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.1867047548294067 },
+                                            { "key": "up", "value": 1.2710278034210205 },
+                                            { "key": "down", "value": 1.0470445156097412 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.101008415222168 },
+                                            { "key": "up", "value": 1.1434297561645508 },
+                                            { "key": "down", "value": 1.031698226928711 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.8574312329292297 },
+                                            { "key": "up", "value": 0.9979346990585327 },
+                                            { "key": "down", "value": 0.8012980222702026 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.101008415222168 },
+                                            { "key": "up", "value": 1.1434297561645508 },
+                                            { "key": "down", "value": 1.031698226928711 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.8574312329292297 },
+                                            { "key": "up", "value": 0.9979346990585327 },
+                                            { "key": "down", "value": 0.8012980222702026 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.875250518321991 },
+                                            { "key": "up", "value": 0.9060559272766113 },
+                                            { "key": "down", "value": 0.8394618034362793 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9598655104637146 },
+                                            { "key": "up", "value": 1.0562753677368164 },
+                                            { "key": "down", "value": 0.8479541540145874 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0859451293945312 },
+                                            { "key": "up", "value": 1.118877649307251 },
+                                            { "key": "down", "value": 1.039404273033142 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0060280561447144 },
+                                            { "key": "up", "value": 1.1346431970596313 },
+                                            { "key": "down", "value": 0.9070598483085632 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0869992971420288 },
+                                            { "key": "up", "value": 1.134467601776123 },
+                                            { "key": "down", "value": 1.0328702926635742 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.855739951133728 },
+                                            { "key": "up", "value": 0.9796152114868164 },
+                                            { "key": "down", "value": 0.7522473335266113 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 40.0, 200.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0869992971420288 },
+                                            { "key": "up", "value": 1.134467601776123 },
+                                            { "key": "down", "value": 1.0328702926635742 }
+                                          ]
+                                        },
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.855739951133728 },
+                                            { "key": "up", "value": 0.9796152114868164 },
+                                            { "key": "down", "value": 0.7522473335266113 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          { "key": "dm",
+            "value": {
+              "nodetype": "category",
+              "input": "genmatch",
+              "content": [
+                { "key": 0, "value": 1.0 },
+                { "key": 1, "value": 1.0 },
+                { "key": 2, "value": 1.0 },
+                { "key": 3, "value": 1.0 },
+                { "key": 4, "value": 1.0 },
+                { "key": 6, "value": 1.0 },
+                { "key": 5,
+                  "value": {
+                    "nodetype": "category",
+                    "input": "wp",
+                    "content": [
+                      { "key": "Medium",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.010552167892456 },
+                                            { "key": "up", "value": 1.2057000398635864 },
+                                            { "key": "down", "value": 0.809499979019165 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.13117253780365 },
+                                            { "key": "up", "value": 1.2970000505447388 },
+                                            { "key": "down", "value": 0.949400007724762 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0562494993209839 },
+                                            { "key": "up", "value": 1.2315000295639038 },
+                                            { "key": "down", "value": 0.8680999875068665 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0562494993209839 },
+                                            { "key": "up", "value": 1.2315000295639038 },
+                                            { "key": "down", "value": 0.8680999875068665 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.924981415271759 },
+                                            { "key": "up", "value": 0.9726905226707458 },
+                                            { "key": "down", "value": 0.8812819719314575 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0509511232376099 },
+                                            { "key": "up", "value": 1.091528058052063 },
+                                            { "key": "down", "value": 1.011414885520935 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0587937831878662 },
+                                            { "key": "up", "value": 1.1031492948532104 },
+                                            { "key": "down", "value": 1.0132330656051636 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0587937831878662 },
+                                            { "key": "up", "value": 1.1031492948532104 },
+                                            { "key": "down", "value": 1.0132330656051636 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Tight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.938627302646637 },
+                                            { "key": "up", "value": 0.9942142963409424 },
+                                            { "key": "down", "value": 0.8865447044372559 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.1670194864273071 },
+                                            { "key": "up", "value": 1.2128719091415405 },
+                                            { "key": "down", "value": 1.1284120082855225 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0658347606658936 },
+                                            { "key": "up", "value": 1.1041239500045776 },
+                                            { "key": "down", "value": 1.020594835281372 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0658347606658936 },
+                                            { "key": "up", "value": 1.1041239500045776 },
+                                            { "key": "down", "value": 1.020594835281372 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 0.9117264151573181 },
+                                            { "key": "up", "value": 0.9444267749786377 },
+                                            { "key": "down", "value": 0.8772943019866943 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.084445834159851 },
+                                            { "key": "up", "value": 1.1278609037399292 },
+                                            { "key": "down", "value": 1.0478464365005493 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0740290880203247 },
+                                            { "key": "up", "value": 1.1157729625701904 },
+                                            { "key": "down", "value": 1.0290565490722656 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "binning",
+                                      "input": "pt",
+                                      "edges": [ 20.0, 100000.0 ],
+                                      "content": [
+                                        { "nodetype": "category",
+                                          "input": "syst",
+                                          "content": [
+                                            { "key": "nom", "value": 1.0740290880203247 },
+                                            { "key": "up", "value": 1.1157729625701904 },
+                                            { "key": "down", "value": 1.0290565490722656 }
+                                          ]
+                                        }
+                                      ],
+                                      "flow": "clamp"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    { "name": "tau_energy_scale",
+      "description": "dm-pt-dependent tau ES scale factor for tau embedded samples",
+      "version": 0,
+      "inputs": [
+        { "name": "pt",
+          "type": "real",
+          "description": "Reconstructed tau pT"
+        },
+        { "name": "eta",
+          "type": "real",
+          "description": "Reconstructed tau eta"
+        },
+        { "name": "dm",
+          "type": "int",
+          "description": "Reconstructed tau decay mode: 0, 1, 10, 11"
+        },
+        { "name": "genmatch",
+          "type": "int",
+          "description": "genmatch: 0 or 6 = unmatched or jet, 1 or 3 = electron, 2 or 4 = muon, 5 = real tau"
+        },
+        { "name": "id",
+          "type": "string",
+          "description": "DeepTau2018v2p5:DeepTau2018v2p5"
+        },
+        { "name": "wp",
+          "type": "string",
+          "description": "DeepTau2018v2p5VSjet working point: Medium,Tight"
+        },
+        { "name": "wp_VSe",
+          "type": "string",
+          "description": "DeepTau2018v2p5VSe working point: VVLoose,Tight"
+        },
+        { "name": "syst",
+          "type": "string",
+          "description": "Systematic variations: 'nom', 'up', 'down'"
+        }
+      ],
+      "output": {
+        "name": "tes",
+        "type": "real",
+        "description": "DM-pT-dependent tau energy scale"
+      },
+      "data": {
+        "nodetype": "category",
+        "input": "id",
+        "content": [
+          { "key": "DeepTau2018v2p5",
+            "value": {
+              "nodetype": "category",
+              "input": "genmatch",
+              "content": [
+                { "key": 0, "value": 1.0 },
+                { "key": 1, "value": 1.0 },
+                { "key": 2, "value": 1.0 },
+                { "key": 3, "value": 1.0 },
+                { "key": 4, "value": 1.0 },
+                { "key": 6, "value": 1.0 },
+                { "key": 5,
+                  "value": {
+                    "nodetype": "category",
+                    "input": "wp",
+                    "content": [
+                      { "key": "Medium",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.891254005432129 },
+                                                  { "key": "up", "value": 0.9787479996681213 },
+                                                  { "key": "down", "value": 0.8014100074768067 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0184656012058257 },
+                                                  { "key": "up", "value": 1.070194926261902 },
+                                                  { "key": "down", "value": 0.9807454657554626 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0120033395290375 },
+                                                  { "key": "up", "value": 1.0947169971466064 },
+                                                  { "key": "down", "value": 0.9429820013046265 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9780006909370422 },
+                                                  { "key": "up", "value": 1.0284470009803772 },
+                                                  { "key": "down", "value": 0.9265700006484985 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0058311551809311 },
+                                                  { "key": "up", "value": 1.097672004699707 },
+                                                  { "key": "down", "value": 0.928206000328064 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9974426963925361 },
+                                                  { "key": "up", "value": 1.0814330005645751 },
+                                                  { "key": "down", "value": 0.9350759983062744 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0058311551809311 },
+                                                  { "key": "up", "value": 1.097672004699707 },
+                                                  { "key": "down", "value": 0.928206000328064 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9974426963925361 },
+                                                  { "key": "up", "value": 1.0814330005645751 },
+                                                  { "key": "down", "value": 0.9350759983062744 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.8973764228820801 },
+                                                  { "key": "up", "value": 0.9290720987319946 },
+                                                  { "key": "down", "value": 0.8570438480377197 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9580002737045288 },
+                                                  { "key": "up", "value": 1.003797471523285 },
+                                                  { "key": "down", "value": 0.9150769901275635 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.02205815076828 },
+                                                  { "key": "up", "value": 1.0496081352233886 },
+                                                  { "key": "down", "value": 0.9837649941444397 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9840000605583191 },
+                                                  { "key": "up", "value": 1.0007936408370732 },
+                                                  { "key": "down", "value": 0.9676233363151551 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9919956427812576 },
+                                                  { "key": "up", "value": 1.0328423404693603 },
+                                                  { "key": "down", "value": 0.9718943881988525 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0033400893211364 },
+                                                  { "key": "up", "value": 1.028657624721527 },
+                                                  { "key": "down", "value": 0.9778873872756958 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9919956427812576 },
+                                                  { "key": "up", "value": 1.0328423404693603 },
+                                                  { "key": "down", "value": 0.9718943881988525 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0033400893211364 },
+                                                  { "key": "up", "value": 1.028657624721527 },
+                                                  { "key": "down", "value": 0.9778873872756958 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Tight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.8994896125793457 },
+                                                  { "key": "up", "value": 0.9227223682403565 },
+                                                  { "key": "down", "value": 0.865694408416748 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9931473028659821 },
+                                                  { "key": "up", "value": 1.032340292930603 },
+                                                  { "key": "down", "value": 0.9627093315124512 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9940012001991272 },
+                                                  { "key": "up", "value": 1.0229355669021607 },
+                                                  { "key": "down", "value": 0.9785281276702881 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9820012629032135 },
+                                                  { "key": "up", "value": 1.003847865462303 },
+                                                  { "key": "down", "value": 0.9382359981536865 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0014234159886837 },
+                                                  { "key": "up", "value": 1.0254550909996032 },
+                                                  { "key": "down", "value": 0.968987786769867 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0213367438316345 },
+                                                  { "key": "up", "value": 1.0438471412658692 },
+                                                  { "key": "down", "value": 0.9947180914878845 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0014234159886837 },
+                                                  { "key": "up", "value": 1.0254550909996032 },
+                                                  { "key": "down", "value": 0.968987786769867 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0213367438316345 },
+                                                  { "key": "up", "value": 1.0438471412658692 },
+                                                  { "key": "down", "value": 0.9947180914878845 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.8997914505004883 },
+                                                  { "key": "up", "value": 0.9186699295043945 },
+                                                  { "key": "down", "value": 0.8807860946655274 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.975099790096283 },
+                                                  { "key": "up", "value": 0.996524973809719 },
+                                                  { "key": "down", "value": 0.9555084371566772 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0080013924837112 },
+                                                  { "key": "up", "value": 1.0348085761070251 },
+                                                  { "key": "down", "value": 0.9765446162223816 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.998000158816576 },
+                                                  { "key": "up", "value": 1.0149320983886718 },
+                                                  { "key": "down", "value": 0.9761666798591614 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9918725097179413 },
+                                                  { "key": "up", "value": 1.024117968082428 },
+                                                  { "key": "down", "value": 0.9657344961166382 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0252799892425537 },
+                                                  { "key": "up", "value": 1.0486421394348144 },
+                                                  { "key": "down", "value": 1.0006175643578172 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 40.0, 200.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9918725097179413 },
+                                                  { "key": "up", "value": 1.024117968082428 },
+                                                  { "key": "down", "value": 0.9657344961166382 }
+                                                ]
+                                              },
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0252799892425537 },
+                                                  { "key": "up", "value": 1.0486421394348144 },
+                                                  { "key": "down", "value": 1.0006175643578172 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    { "name": "tau_energy_scale_dm_binned",
+      "description": "dm-dependent tau ES scale factor for tau embedded samples",
+      "version": 0,
+      "inputs": [
+        { "name": "pt",
+          "type": "real",
+          "description": "Reconstructed tau pT"
+        },
+        { "name": "eta",
+          "type": "real",
+          "description": "Reconstructed tau eta"
+        },
+        { "name": "dm",
+          "type": "int",
+          "description": "Reconstructed tau decay mode: 0, 1, 10, 11"
+        },
+        { "name": "genmatch",
+          "type": "int",
+          "description": "genmatch: 0 or 6 = unmatched or jet, 1 or 3 = electron, 2 or 4 = muon, 5 = real tau"
+        },
+        { "name": "id",
+          "type": "string",
+          "description": "DeepTau2018v2p5:DeepTau2018v2p5"
+        },
+        { "name": "wp",
+          "type": "string",
+          "description": "DeepTau2018v2p5VSjet working point: Medium,Tight"
+        },
+        { "name": "wp_VSe",
+          "type": "string",
+          "description": "DeepTau2018v2p5VSe working point: VVLoose,Tight"
+        },
+        { "name": "syst",
+          "type": "string",
+          "description": "Systematic variations: 'nom', 'up', 'down'"
+        }
+      ],
+      "output": {
+        "name": "tes",
+        "type": "real",
+        "description": "DM-dependent tau energy scale"
+      },
+      "data": {
+        "nodetype": "category",
+        "input": "id",
+        "content": [
+          { "key": "DeepTau2018v2p5",
+            "value": {
+              "nodetype": "category",
+              "input": "genmatch",
+              "content": [
+                { "key": 0, "value": 1.0 },
+                { "key": 1, "value": 1.0 },
+                { "key": 2, "value": 1.0 },
+                { "key": 3, "value": 1.0 },
+                { "key": 4, "value": 1.0 },
+                { "key": 6, "value": 1.0 },
+                { "key": 5,
+                  "value": {
+                    "nodetype": "category",
+                    "input": "wp",
+                    "content": [
+                      { "key": "Medium",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9231227540969849 },
+                                                  { "key": "up", "value": 0.9833870005607604 },
+                                                  { "key": "down", "value": 0.8430900001525878 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0022719505429267 },
+                                                  { "key": "up", "value": 1.0420020008087159 },
+                                                  { "key": "down", "value": 0.9622070002555847 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9979999938607216 },
+                                                  { "key": "up", "value": 1.043632001876831 },
+                                                  { "key": "down", "value": 0.9495900011062622 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9979999938607216 },
+                                                  { "key": "up", "value": 1.043632001876831 },
+                                                  { "key": "down", "value": 0.9495900011062622 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9096632957458496 },
+                                                  { "key": "up", "value": 0.9375640106201172 },
+                                                  { "key": "down", "value": 0.8757232093811035 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0182484889030456 },
+                                                  { "key": "up", "value": 1.0312448310852051 },
+                                                  { "key": "down", "value": 1.0011290618032218 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0019999425113202 },
+                                                  { "key": "up", "value": 1.0105037152767182 },
+                                                  { "key": "down", "value": 0.9725245523452759 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0019999425113202 },
+                                                  { "key": "up", "value": 1.0105037152767182 },
+                                                  { "key": "down", "value": 0.9725245523452759 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Tight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9194108867645263 },
+                                                  { "key": "up", "value": 0.9486925888061524 },
+                                                  { "key": "down", "value": 0.9003061294555664 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0099998766183853 },
+                                                  { "key": "up", "value": 1.0190222787857055 },
+                                                  { "key": "down", "value": 0.9946048909425735 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9840000069141388 },
+                                                  { "key": "up", "value": 1.0058188915252686 },
+                                                  { "key": "down", "value": 0.9749133706092834 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9840000069141388 },
+                                                  { "key": "up", "value": 1.0058188915252686 },
+                                                  { "key": "down", "value": 0.9749133706092834 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9156925868988037 },
+                                                  { "key": "up", "value": 0.9358398151397705 },
+                                                  { "key": "down", "value": 0.8972787094116211 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 1.0159999525547028 },
+                                                  { "key": "up", "value": 1.0266006946563722 },
+                                                  { "key": "down", "value": 1.0011391094326973 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9939999997615814 },
+                                                  { "key": "up", "value": 1.0042509081959725 },
+                                                  { "key": "down", "value": 0.9744072818756103 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "transform",
+                                      "input": "eta",
+                                      "rule": {
+                                        "nodetype": "formula",
+                                        "expression": "abs(x)",
+                                        "parser": "TFormula",
+                                        "variables": [ "eta" ]
+                                      },
+                                      "content": {
+                                        "nodetype": "binning",
+                                        "input": "eta",
+                                        "edges": [ 0.0, 2.5 ],
+                                        "content": [
+                                          { "nodetype": "binning",
+                                            "input": "pt",
+                                            "edges": [ 20.0, 100000.0 ],
+                                            "content": [
+                                              { "nodetype": "category",
+                                                "input": "syst",
+                                                "content": [
+                                                  { "key": "nom", "value": 0.9939999997615814 },
+                                                  { "key": "up", "value": 1.0042509081959725 },
+                                                  { "key": "down", "value": 0.9744072818756103 }
+                                                ]
+                                              }
+                                            ],
+                                            "flow": "clamp"
+                                          }
+                                        ],
+                                        "flow": "clamp"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

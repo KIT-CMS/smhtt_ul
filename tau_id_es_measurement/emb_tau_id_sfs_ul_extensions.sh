@@ -13,7 +13,7 @@ ES_down=${10}
 EXTENDED_TAG_UP=${11:-"M_pre_20to20_ext_up"}
 EXTENDED_TAG_DOWN=${12:-"M_pre_20to20_ext_down"}
 BIN_TAG=${13}
-
+TES_precision=${14}
 
 echo ${NTUPLETAG}
 echo ${WP}
@@ -113,12 +113,12 @@ if [[ $MODE == "CONDOR" ]]; then
     CHANNELS=('mt')
     for CHANNEL in "${CHANNELS[@]}"
     do
-        source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP}
+        source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP} ${WP_VSe}
         
         echo "[INFO] Running on Condor"
         echo "[INFO] Condor output folder: ${CONDOR_OUTPUT}"
         bash submit/submit_shape_production_tauid_es_extensions.sh ${ERA} ${CHANNEL} \
-        "singlegraph" ${TAG} 0 ${NTUPLETAG} ${CONDOR_OUTPUT} "TauID_ES" ${WP} ${WP_VSe} ${WP_VSmu} ${ES_up} ${ES_down} ${BIN_TAG}
+        "singlegraph" ${TAG} 0 ${NTUPLETAG} ${CONDOR_OUTPUT} "TauID_ES" ${WP} ${WP_VSe} ${WP_VSmu} ${ES_up} ${ES_down} ${BIN_TAG} ${TES_precision}
         echo "[INFO] Jobs submitted"
     done
 fi

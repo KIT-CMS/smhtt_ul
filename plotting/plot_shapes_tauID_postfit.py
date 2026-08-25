@@ -9,7 +9,7 @@ import ROOT
 import argparse
 import copy
 import yaml
-import distutils.util
+from setuptools._distutils.util import strtobool
 import logging
 import math
 
@@ -74,13 +74,13 @@ def parse_arguments():
     )
     parser.add_argument(
         "--train-emb",
-        type=lambda x: bool(distutils.util.strtobool(x)),
+        type=lambda x: bool(strtobool(x)),
         default=True,
         help="Use fake factor training category",
     )
     parser.add_argument(
         "--train-ff",
-        type=lambda x: bool(distutils.util.strtobool(x)),
+        type=lambda x: bool(strtobool(x)),
         default=True,
         help="Use fake factor training category",
     )
@@ -272,7 +272,7 @@ def main(args):
         if channel != "mm":
             rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit, tag=binning_tag)
         else:
-            rootfile = rootfile_parser.Rootfile_parser(args.input, mode="CombineHarvester", prefit=args.prefit, tag="mm")
+            rootfile = rootfile_parser.Rootfile_parser(args.input, prefit=args.prefit, tag="mm")
         if channel == "em":
             if args.embedding:
                 bkg_processes = ["VVL", "W", "TTL", "ZL", "QCD", "EMB"]
@@ -281,7 +281,8 @@ def main(args):
         elif channel == "mm":
             bkg_processes = ["W", "QCD", "MUEMB"]
         else:
-            bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", f"EMB_{category_dict[category]}"]
+            # bkg_processes = ["QCD", "VVJ", "VVL", "W", "TTJ", "TTL", "ZJ", "ZL", f"EMB_{category_dict[category]}"]
+            bkg_processes = ["QCD", "VVJ", "TTJ", "ZJ", "W", "VVL", "TTL", "ZL", f"EMB_{category_dict[category]}"]
         legend_bkg_processes = copy.deepcopy(bkg_processes)
         legend_bkg_processes.reverse()
         # create plot
@@ -556,32 +557,17 @@ def main(args):
 
         # save plot
         postfix = "prefit" if args.prefit else "postfit"
-        # plot.save(
-        #     "%s/%s_%s_%s_%s.%s"
-        #     % (
-        #         args.outputfolder,
-        #         args.era,
-        #         channel,
-        #         args.gof_variable if args.gof_variable is not None else category,
-        #         postfix,
-        #         "png",
-        #     )
-        # )
         s_or_b = ""
         if args.input.endswith("-b.root"):
             s_or_b = "_b"
-        plot.save(
-            "%s/%s_%s_%s_%s%s.%s"
-            % (
-                args.outputfolder,
-                args.era,
-                channel,
-                args.gof_variable if args.gof_variable is not None else category,
-                postfix,
-                s_or_b,
-                "pdf",
-            )
-        )
+        CR_cat = ""
+        if channel == "mm":
+            path = args.input.split("/")
+            for dc in path:
+                if "htt_mt" in dc:
+                    CR_cat = dc.split('htt_mt')[1]
+        plot.save(f"{args.outputfolder}/{args.gof_variable if args.gof_variable is not None else category_dict[category]}{CR_cat}_{postfix}{s_or_b}.png")
+        plot.save(f"{args.outputfolder}/{args.gof_variable if args.gof_variable is not None else category_dict[category]}{CR_cat}_{postfix}{s_or_b}.pdf")
         # plot.save(f"output/{postfix}_{channel}_{category}.png")
         # work around to have clean up seg faults only at the end of the
         # script

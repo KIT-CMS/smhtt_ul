@@ -7,7 +7,7 @@ import json
 import argparse
 import glob
 import os
-from typing import Union
+from typing import Union, Tuple
 ROOT.PyConfig.IgnoreCommandLineOptions = True  # disable ROOT internal argument parser
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,7 +21,7 @@ class CorrectionSet(object):
     def add_correction_file(self, correction_file):
         with open(correction_file) as file:
             data = json.load(file)
-            corr = schema.Correction.parse_obj(data)
+            corr = schema.Correction.model_validate(data)
             self.add_correction(corr)
 
     def add_correction(self, correction):
@@ -191,11 +191,11 @@ class TauID(Correction):
                 },
                 { "name": "wp",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSjet working point: Medium,Tight"
+                "description": "DeepTau2018v2p5VSjet working point: Medium,Tight"
                 },
                 { "name": "wp_VSe",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSe working point: VVLoose,Tight"
+                "description": "DeepTau2018v2p5VSe working point: VVLoose,Tight"
                 },
                 { "name": "syst",
                 "type": "string",
@@ -246,24 +246,24 @@ class TauID(Correction):
                                     "value": {
                                         "nodetype": "binning",
                                         "input": "pt",
-                                        "edges":  self.dm_pt_bin_lists[wp]["VVLoose"][dm],
+                                        "edges":  self.dm_pt_bin_lists[wp][wp_VSe][dm],
                                         "flow": "clamp",
                                         "content": [
                                             {
                                                 "nodetype": "category",
                                                 "input": "syst",
                                                 "content": [
-                                                    {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="id")},
+                                                    {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="id")},
                                                     {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="id")},
                                                     {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="id")},
                                                                     ],
-                                                                } for pt in self.dm_pt_bin_lists[wp]["VVLoose"][dm][:-1]
+                                                                } for pt in self.dm_pt_bin_lists[wp][wp_VSe][dm][:-1]
                                                             ],
                                                         }
-                                                    } for dm in self.dm_pt_bin_lists[wp]["VVLoose"].keys()
+                                                    } for dm in self.dm_pt_bin_lists[wp][wp_VSe].keys()
                                                 ],
                                             },
-                                        } for wp_VSe in ["VVLoose", "Tight"]#self.data[wp].keys()
+                                        } for wp_VSe in self.data[wp].keys()
                                     ],
                                 },
                             } for wp in self.data.keys()
@@ -273,7 +273,7 @@ class TauID(Correction):
             ],
         }
         data["content"].append({"key": "pt", "value": sfs})
-        return schema.Category.parse_obj(data)
+        return schema.Category.model_validate(data)
 
     def setup_dm_scheme(self):
         self.correctionset = {
@@ -295,11 +295,11 @@ class TauID(Correction):
                 },
                 { "name": "wp",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSjet working point: Medium,Tight"
+                "description": "DeepTau2018v2p5VSjet working point: Medium,Tight"
                 },
                 { "name": "wp_VSe",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSe working point: VVLoose,Tight"
+                "description": "DeepTau2018v2p5VSe working point: VVLoose,Tight"
                 },
                 { "name": "syst",
                 "type": "string",
@@ -356,17 +356,17 @@ class TauID(Correction):
                                                 "nodetype": "category",
                                                 "input": "syst",
                                                 "content": [
-                                                    {"key": "nom","value": self.get_tau_sf(dm,"nom", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="id")},
+                                                    {"key": "nom","value": self.get_tau_sf(dm,"nom", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="id")},
                                                     {"key": "up","value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="id")},
                                                     {"key": "down","value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="id")},
                                                                     ],
                                                                 }
                                                             ],
                                                         }
-                                                    } for dm in self.data[wp]["VVLoose"].keys() if dm in self.dm_binning.keys()
+                                                    } for dm in self.data[wp][wp_VSe].keys() if dm in self.dm_binning.keys()
                                                 ],
                                             },
-                                        } for wp_VSe in ["VVLoose", "Tight"]#self.data[wp].keys()
+                                        } for wp_VSe in self.data[wp].keys()
                                     ],
                                 },
                             } for wp in self.data.keys() 
@@ -377,7 +377,7 @@ class TauID(Correction):
         }
         data["content"].append({"key": "dm", "value": sfs})
         
-        return schema.Category.parse_obj(data)
+        return schema.Category.model_validate(data)
 
 
 
@@ -405,15 +405,15 @@ class TauID(Correction):
                 },
                 { "name": "id",
                 "type": "string",
-                "description": "DeepTau2017v2p1:DeepTau2017v2p1"
+                "description": "DeepTau2018v2p5:DeepTau2018v2p5"
                 },
                 { "name": "wp",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSjet working point: Medium,Tight"
+                "description": "DeepTau2018v2p5VSjet working point: Medium,Tight"
                 },
                 { "name": "wp_VSe",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSe working point: VVLoose,Tight"
+                "description": "DeepTau2018v2p5VSe working point: VVLoose,Tight"
                 },
                 { "name": "syst",
                 "type": "string",
@@ -438,7 +438,7 @@ class TauID(Correction):
             "nodetype": "category",
             "input": "id",
             "content": [
-                { "key": "DeepTau2017v2p1",
+                { "key": "DeepTau2018v2p5",
                 "value": {
                     "nodetype": "category",
                     "input": "genmatch",
@@ -483,27 +483,27 @@ class TauID(Correction):
                                                     "content": [
                                                         {"nodetype": "binning",
                                                         "input": "pt",
-                                                        "edges":  self.dm_pt_bin_lists[wp]["VVLoose"][dm],
+                                                        "edges":  self.dm_pt_bin_lists[wp][wp_VSe][dm],
                                                         "flow": "clamp",
                                                         "content": [
                                                             {
                                                                 "nodetype": "category",
                                                                 "input": "syst",
                                                                 "content": [
-                                                                    {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe="VVLoose", dm=dm, id_es="es")},
+                                                                    {"key": "nom", "value": self.get_tau_sf(pt, "nom", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="es")},
                                                                     {"key": "up", "value": self.get_tau_sf(pt, "up", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="es")},
                                                                     {"key": "down", "value": self.get_tau_sf(pt, "down", isPt=True, wp=wp, wp_VSe=wp_VSe, dm=dm, id_es="es")},
                                                                                             ],
-                                                                                        } for pt in self.dm_pt_bin_lists[wp]["VVLoose"][dm][:-1]
+                                                                                        } for pt in self.dm_pt_bin_lists[wp][wp_VSe][dm][:-1]
                                                                                     ],
                                                                                 }
                                                                             ],
                                                                         }
                                                                     }
-                                                                } for dm in self.dm_pt_bin_lists[wp]["VVLoose"].keys()
+                                                                } for dm in self.dm_pt_bin_lists[wp][wp_VSe].keys()
                                                             ],
                                                         },
-                                                    } for wp_VSe in ["VVLoose", "Tight"]#self.data[wp].keys()
+                                                    } for wp_VSe in self.data[wp].keys()
                                                 ],
                                             },
                                         } for wp in self.data.keys()
@@ -516,7 +516,7 @@ class TauID(Correction):
             ],
         }
         # data["content"].append({"key": "pt", "value": sfs})
-        return schema.Category.parse_obj(sfs)
+        return schema.Category.model_validate(sfs)
 
     def setup_dm_scheme_es(self):
         self.correctionset = {
@@ -542,15 +542,15 @@ class TauID(Correction):
                 },
                 { "name": "id",
                 "type": "string",
-                "description": "DeepTau2017v2p1:DeepTau2017v2p1"
+                "description": "DeepTau2018v2p5:DeepTau2018v2p5"
                 },
                 { "name": "wp",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSjet working point: Medium,Tight"
+                "description": "DeepTau2018v2p5VSjet working point: Medium,Tight"
                 },
                 { "name": "wp_VSe",
                 "type": "string",
-                "description": "DeepTau2017v2p1VSe working point: VVLoose,Tight"
+                "description": "DeepTau2018v2p5VSe working point: VVLoose,Tight"
                 },
                 { "name": "syst",
                 "type": "string",
@@ -575,7 +575,7 @@ class TauID(Correction):
             "nodetype": "category",
             "input": "id",
             "content": [
-                { "key": "DeepTau2017v2p1",
+                { "key": "DeepTau2018v2p5",
                 "value": {
                     "nodetype": "category",
                     "input": "genmatch",
@@ -627,7 +627,7 @@ class TauID(Correction):
                                                                 "nodetype": "category",
                                                                 "input": "syst",
                                                                 "content": [
-                                                                    {"key": "nom", "value": self.get_tau_sf(dm, "nom", isDM=True, wp=wp, wp_VSe="VVLoose", id_es="es")},
+                                                                    {"key": "nom", "value": self.get_tau_sf(dm, "nom", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="es")},
                                                                     {"key": "up", "value": self.get_tau_sf(dm, "up", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="es")},
                                                                     {"key": "down", "value": self.get_tau_sf(dm, "down", isDM=True, wp=wp, wp_VSe=wp_VSe, id_es="es")},
                                                                                             ],
@@ -637,10 +637,10 @@ class TauID(Correction):
                                                                             ],
                                                                         }
                                                                     }
-                                                                } for dm in self.data[wp]["VVLoose"].keys() if dm in self.dm_binning.keys()
+                                                                } for dm in self.data[wp][wp_VSe].keys() if dm in self.dm_binning.keys()
                                                             ],
                                                         },
-                                                    } for wp_VSe in ["VVLoose", "Tight"]#self.data[wp].keys()
+                                                    } for wp_VSe in self.data[wp].keys()
                                                 ],
                                             },
                                         } for wp in self.data.keys()
@@ -653,7 +653,7 @@ class TauID(Correction):
             ],
         }
         # data["content"].append({"key": "dm", "value": sfs})
-        return schema.Category.parse_obj(sfs)
+        return schema.Category.model_validate(sfs)
 
     def get_tau_sf(self, variable: Union[str,int], variation: str, isPt=False, isDM=False, dm=9000, wp="Medium", wp_VSe="VVLoose", id_es="id"):
         def _convert_tes_to_factor(val:float, id_es="id"):
@@ -663,26 +663,26 @@ class TauID(Correction):
                 return (100 + val)/100
             else:
                 raise ValueError(f"Invalid id_es: {id_es}")
-        vsEle_correction_up = 1.0 if wp_VSe == "VVLoose" else 1.1
-        vsEle_correction_down = 1.0 if wp_VSe == "VVLoose" else 0.9
+        # vsEle_correction_up = 1.0 if wp_VSe == "VVLoose" else 1.1
+        # vsEle_correction_down = 1.0 if wp_VSe == "VVLoose" else 0.9
         if isPt:
             if variable == 20:
                 dm_pt = f"DM{dm}_PT{variable}_40"
             elif variable == 40:
                 dm_pt = f"DM{dm}_PT{variable}_200"
-            data = self.data[wp]["VVLoose"]
+            data = self.data[wp][wp_VSe]
             for bin in data[dm_pt].keys():
                 if variable == bin:
                     if variation == "nom":
                         return _convert_tes_to_factor(data[dm_pt][bin]["r"], id_es=id_es)
                     elif variation == "up":
-                        return _convert_tes_to_factor(data[dm_pt][bin]["u"], id_es=id_es) * vsEle_correction_up
+                        return _convert_tes_to_factor(data[dm_pt][bin]["u"], id_es=id_es) #* vsEle_correction_up
                     elif variation == "down":
-                        return _convert_tes_to_factor(data[dm_pt][bin]["d"], id_es=id_es) * vsEle_correction_down
+                        return _convert_tes_to_factor(data[dm_pt][bin]["d"], id_es=id_es) #* vsEle_correction_down
                     else:
                         raise ValueError(f"Invalid variation: {variation}")
         elif isDM:
-            data = self.data[wp]["VVLoose"]
+            data = self.data[wp][wp_VSe]
             # if id_es == "es":
             #     breakpoint()
             for bin in data.keys():
@@ -690,9 +690,9 @@ class TauID(Correction):
                     if variation == "nom":
                         return _convert_tes_to_factor(data[bin]["r"], id_es=id_es)
                     elif variation == "up":
-                        return _convert_tes_to_factor(data[bin]["u"], id_es=id_es) * vsEle_correction_up
+                        return _convert_tes_to_factor(data[bin]["u"], id_es=id_es) #* vsEle_correction_up
                     elif variation == "down":
-                        return _convert_tes_to_factor(data[bin]["d"], id_es=id_es) * vsEle_correction_down
+                        return _convert_tes_to_factor(data[bin]["d"], id_es=id_es) #* vsEle_correction_down
                     else:
                         raise ValueError(f"Invalid variation: {variation}")
         else:
@@ -702,7 +702,7 @@ class TauID(Correction):
         self.parse_config()
         self.setup_dm_pt_scheme()
         self.correctionset["data"] = self.generate_dm_pt_sfs()
-        output_corr = schema.Correction.parse_obj(self.correctionset)
+        output_corr = schema.Correction.model_validate(self.correctionset)
         self.correction = output_corr
         # print(JSONEncoder.dumps(self.correction))
 
@@ -710,7 +710,7 @@ class TauID(Correction):
         self.parse_config()
         self.setup_dm_scheme()
         self.correctionset["data"] = self.generate_dm_sfs()
-        output_corr = schema.Correction.parse_obj(self.correctionset)
+        output_corr = schema.Correction.model_validate(self.correctionset)
         self.correction = output_corr
         # print(JSONEncoder.dumps(self.correction))
         
@@ -718,7 +718,7 @@ class TauID(Correction):
         self.parse_config()
         self.setup_dm_pt_scheme_es()
         self.correctionset["data"] = self.generate_dm_pt_sfs_es()
-        output_corr = schema.Correction.parse_obj(self.correctionset)
+        output_corr = schema.Correction.model_validate(self.correctionset)
         self.correction = output_corr
         # print(JSONEncoder.dumps(self.correction))
 
@@ -726,7 +726,7 @@ class TauID(Correction):
         self.parse_config()
         self.setup_dm_scheme_es()
         self.correctionset["data"] = self.generate_dm_sfs_es()
-        output_corr = schema.Correction.parse_obj(self.correctionset)
+        output_corr = schema.Correction.model_validate(self.correctionset)
         self.correction = output_corr
         # print(JSONEncoder.dumps(self.correction))
 
@@ -873,7 +873,7 @@ def load_fitresults_from_files(filenames, sig_bins):
 parser = argparse.ArgumentParser(description="Plot the tau ID SF")
 # parser.add_argument("--wp", type=str, default="Tight", help="TauID WP")
 # parser.add_argument("--wp_vsele", type=str, default="Tight", help="TauID WP_VsEle")
-parser.add_argument("--nTuple_tag", type=str, default="", help="Tag")
+parser.add_argument("--nTuple_tags", type=str, default="", help="List of NTUPLE Tags")
 parser.add_argument("--era", type=str, default="2018", help="2016, 2017 or 2018")
 parser.add_argument("--channel", type=str, default="mt", help="mt, et, em, tt")
 parser.add_argument("--dm_pt_input_files", type=str, default="", help="DM-Pt input_files")
@@ -894,12 +894,12 @@ if "DM1011" in binnames:
 data_dict, data_dict_ES = load_fitresults_from_files(fitfiles, binnames)
 
 correctionset = CorrectionSet("Tau_ID_ES_SF")
-correctionset.description = f"Correction for tau embedding events; embedded tau identification efficiency and embedded tau energy scale factors ( DeepTau2017v2p1VSjet, tau_energy_scale, tau_energy_scale_dm_binned). For more info, please visit https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauEmbeddingSamplesUL#TauID_and_TauES_correction and https://tau-wiki.docs.cern.ch/ (This file was created on {datetime.datetime.now().strftime('%d.%m.%Y')})."
+correctionset.description = f"Correction for tau embedding events; embedded tau identification efficiency and embedded tau energy scale factors ( DeepTau2018v2p5VSjet, tau_energy_scale, tau_energy_scale_dm_binned). For more info, please visit https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauEmbeddingSamplesUL#TauID_and_TauES_correction and https://tau-wiki.docs.cern.ch/ (This file was created on {datetime.datetime.now().strftime('%d.%m.%Y')})."
 ### ID corrections:
 # pt
 correction_dm_pt = TauID(
     tag="tag",
-    name="DeepTau2017v2p1VSjet",
+    name="DeepTau2018v2p5VSjet",
     data=data_dict,
     era=args.era,outdir="/"
 )
@@ -907,7 +907,7 @@ correction_dm_pt.generate_dm_pt_scheme()
 # dm
 correction_dm = TauID(
     tag="tag",
-    name="DeepTau2017v2p1VSjet",
+    name="DeepTau2018v2p5VSjet",
     data=data_dict,
     era=args.era,
     outdir="/"
@@ -965,7 +965,7 @@ correctionset.add_correction(correction_dm_es)
 #     + ".json"
 # )
 correctionset.write_json(
-    f"tau_id_es_embedding{args.era}UL.json"
+    f"DeepTau2018v2p5_id_es_embedding{args.era}UL.json"
 )
 ###########################
 #### Plotting the fits ####
@@ -973,14 +973,13 @@ correctionset.write_json(
 # Example: one working point and wp_VSe combination.
 # Adjust these keys if needed.
 wps = list(data_dict.keys())
-wp_VSes = [keys for vals in data_dict.values() for keys in vals]
-
+wp_VSes = list(dict.fromkeys([keys for vals in data_dict.values() for keys in vals]))
 
 # Create subplots, one for each DM category
-def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.channel, nTuple_tag=args.nTuple_tag,
+def summary_SFs(data: dict, wpTuple: Tuple, tag, ntuple, era=args.era, channel=args.channel,
                 id_es="ID") -> None:
     # List of DM categories in data_dict, e.g. ['DM0', 'DM1', 'DM1011']
-    wp_list = list(data[wp][wp_VSe].keys())
+    wp_list = list(data[wpTuple[0]][wpTuple[1]].keys())
     desired_order = ['DM0', 'DM1', 'DM1011']
     dm_bins = sorted({_dm.split('_')[0] for _dm in wp_list},
                      key=lambda dm: desired_order.index(dm) if dm in desired_order else 999)
@@ -997,13 +996,13 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
     
     if flag_1011:
         new_keys = {}
-        for key, value in data[wp][wp_VSe].items():
+        for key, value in data[wpTuple[0]][wpTuple[1]].items():
             if "DM10" in key or "DM11" in key:
                 new_key = key.replace("DM10", "DM1011").replace("DM11", "DM1011")
                 new_keys[new_key] = value
             else:
                 new_keys[key] = value
-        data[wp][wp_VSe] = new_keys       
+        data[wpTuple[0]][wpTuple[1]] = new_keys       
     
     
     x_labels = ['Incl.', 'PT20 to 40', 'PT40 to 200']
@@ -1018,8 +1017,8 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
         up_errs = [None, None, None]
         fit_vals = [None, None, None]
         down_errs = [None, None, None]
-        for key, _data in data[wp][wp_VSe].items():
-            if dm in key:
+        for key, _data in data[wpTuple[0]][wpTuple[1]].items():
+            if key == dm or key.startswith(dm + "_"):
                 if "PT20_40" in key:
                     if len(_data[20])==3:
                         fit_vals[1] = _data[20]["r"]
@@ -1090,15 +1089,25 @@ def summary_SFs(data: dict, wp: str, wp_VSe: str, era=args.era, channel=args.cha
     for ax in axes[1:]:
         ax.tick_params(labelbottom=False)
     
-    fig.suptitle(f'Corrections {era}(UL) ({wp} vsJets) ({wp_VSe} vsEle) T{id_es}', fontsize=18)
+    fig.suptitle(f'Corrections {era}(UL) ({wpTuple[0]} vsJets) ({wpTuple[1]} vsEle) T{id_es}', fontsize=18)
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    # plt.title(f'Corrections {era} UL {wp}vsJets {wp_VSe}vsEle Tau{id_es} {channel}', loc='center', fontsize=14)
+    # plt.title(f'Corrections {era} UL {wpTuple[0]}vsJets {wpTuple[1]}vsEle Tau{id_es} {channel}', loc='center', fontsize=14)
     # plt.tight_layout()
-    plt.savefig(f"Tau{id_es}_{era}_UL_{channel}_{wp}vsJets_{wp_VSe}vsEle_{nTuple_tag}.pdf")
-    # plt.savefig(f"Tau{id_es}_{era}_UL_{channel}_{wp}vsJets_{wp_VSe}vsEle_{nTuple_tag}.png")
+    plt.savefig(f"Tau{id_es}_{channel}_{wpTuple[0]}_{wpTuple[1]}_{tag}_{ntuple}.pdf")
+    plt.savefig(f"Tau{id_es}_{channel}_{wpTuple[0]}_{wpTuple[1]}_{tag}_{ntuple}.png")
     plt.close(fig)
 
-for wp in wps:
-    for wp_VSe in wp_VSes:
-        summary_SFs(data_dict, wp, wp_VSe, id_es="ID")
-        summary_SFs(data_dict_ES, wp, wp_VSe, id_es="ES")
+
+ntuple_tag_list=args.nTuple_tags.split(" ")
+iter_tags = [(ntuple_tag_list[::2][i],ntuple_tag_list[1::2][i]) for i in range(len(ntuple_tag_list[::2]))]
+cross_wps = [(x, y) for x in wps for y in wp_VSes]
+
+for i in range(len(iter_tags)):
+    iter_tags[i] += (cross_wps[i],)
+
+print(f"\nGenerating summary plots for {wps} vsJets, \n{wp_VSes} vsEle, \nnTuple_tags: {ntuple_tag_list}:\n")
+# breakpoint()
+for tag,ntuple,wp_tuple in iter_tags:
+    print(f"\nGenerating summary plots for {wp_tuple} (vsJets,vsEle), tag: {tag}, ntuple: {ntuple}")
+    summary_SFs(data_dict, wp_tuple, tag, ntuple, id_es="ID")
+    summary_SFs(data_dict_ES, wp_tuple, tag, ntuple, id_es="ES")

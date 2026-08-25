@@ -238,6 +238,12 @@ def parse_arguments():
         type=float,
         help="ES variation lower bound.",
     )
+    parser.add_argument(
+        "--tes_precision",
+        default=0.1,
+        type=float,
+        help="Precision of TES variations.",
+    )
     return parser.parse_args()
 
 def add_processes(
@@ -269,7 +275,7 @@ def get_analysis_units(
     channel: str,
     era: str,
     datasets: dict,
-    categorization: dict,
+    categorizations: list[dict],
     special_analysis: Union[str, None],
     apply_tauid: bool,
     vs_jet_wp: str,
@@ -302,18 +308,18 @@ def get_analysis_units(
         return _selection
 
     analysis_units = {}
-
-    add_processes(
-        add_fn=partial(
-            shape_utils.add_process,
-            analysis_unit=analysis_units,
-            categorization=categorization,
+    for categorization in categorizations:
+        add_processes(
+            add_fn=partial(
+                shape_utils.add_process,
+                analysis_unit=analysis_units,
+                categorization=categorization,
+                channel=channel,
+            ),
+            datasets=datasets,
+            select_fn=select,
             channel=channel,
-        ),
-        datasets=datasets,
-        select_fn=select,
-        channel=channel,
-    )
+        )
 
     return analysis_units
 
@@ -364,7 +370,7 @@ def get_control_units(
         else:
             variable_set.add(variable)
     # variable_set = set(control_binning[channel].keys()) & set(args.control_plot_set)
-    logger.info("[INFO] Running control plots for variables: {}".format(variable_set))
+    logger.info(f"[INFO] Running control plots for variables: {variable_set}")
 
     _selection_kwargs = dict(
         channel=channel,
@@ -404,15 +410,15 @@ def get_control_units(
     return control_units
 
 
-def prepare_special_analysis(special: str) -> dict:
+def prepare_special_analysis(special: str, variable="m_vis") -> dict:
     if special is None:
-        return default_categorization
+        return tauid_categorization.load_tauid_categorization(args.era, 'mt', args.binning_tag, variable=variable)
     elif special == "TauID":
         return tauid_categorization
     elif special == "TauES":
         return taues_categorization
     elif special == "TauID_ES":
-        return tauid_categorization.load_tauid_categorization(args.era, 'mt', args.binning_tag)
+        return tauid_categorization.load_tauid_categorization(args.era, 'mt', args.binning_tag, variable=variable)
     else:
         raise ValueError("Unknown special analysis: {}".format(special))
 
@@ -448,7 +454,7 @@ def TauES_TauID_histogram_booking(
             manager=unit_manager,
             additional_emb_procS=processes,
             datasets=datasets,
-            variations=[variations.same_sign, variations.anti_iso_lt_no_ff], # variations.trigger_eff_mt_emb],
+            variations=[variations.same_sign, variations.anti_iso_lt_no_ff], #, variations.trigger_eff_mt_emb], via logN atm
             enable_check=args.enable_booking_check,
         )
     else:
@@ -469,7 +475,12 @@ def main(args):
     else:
         output_file = "{}.root".format(args.output_file)
     # setup categories depending on the selected anayses
-    categorization = prepare_special_analysis(args.special_analysis)
+    variables = args.control_plot_set
+    if variables:
+        vars = variables
+    else:
+        vars = ["m_vis"]
+    categorizations = [prepare_special_analysis(args.special_analysis, variable=var) for var in vars]
     unit_manager = UnitManager()
     do_check = args.enable_booking_check
     era = args.era
@@ -529,11 +540,11 @@ def main(args):
         else:
             nominals[args.era]["units"][channel] = get_analysis_units(
                 **common_kwargs,
-                categorization=categorization,
+                categorizations=categorizations,
             )
         if args.special_analysis == "TauES":
             additional_emb_procS = set()
-            aranged_es = np.arange(2.5, -2.5 - 0.1, -0.1).round(2).tolist()
+            aranged_es = np.arange(2.5, -2.5 - args.tes_precision, -args.tes_precision).round(2).tolist()
             tauESvariations = [x for x in aranged_es if x != 0.0]    # Nominal is produced extra
             shape_utils.add_tauES_datasets(
                 args.era,
@@ -554,8 +565,12 @@ def main(args):
             )
         elif channel == "mt" and args.special_analysis in ["TauID", "TauID_ES"]:
             additional_emb_procS = set()
-            aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
-            tauESvariations = [x for x in aranged if x != 0.0]    # Nominal is produced extra
+            try:
+                aranged = np.arange(args.es_up, args.es_down - args.tes_precision, -args.tes_precision).round(2).tolist()
+            except:
+                breakpoint()
+            tauESvariations = [x for x in aranged if x != 0.0 and x >= args.es_down] # Nominal is produced extra
+            print(f"\nTau ES variations to be produced:\n {tauESvariations}\n")
             shape_utils.add_tauES_datasets(
                 args.era,
                 channel,
@@ -689,7 +704,7 @@ def main(args):
             
         elif channel == "mm":
             _book_histogram(processes=procS, variations=[variations.same_sign])
-            # _book_histogram(processes=embS, variations=[trigger_eff_mt_emb])
+            # _book_histogram(processes=embS, variations=[variations.trigger_eff_mt_emb]) via logN atm
             
         elif channel == "ee":
             _book_histogram(processes=procS, variations=[variations.same_sign])
@@ -716,6 +731,11 @@ def main(args):
                 processes=simulatedProcsDS[channel],
                 variations=[variations.jet_es],
             )
+            if args.era == "2018":
+                _book_histogram(
+                    processes=simulatedProcsDS[channel],
+                    variations=[variations.jet_es_hem],
+                )
             
             # TODO add btag stuff
             # _book_histogram(
@@ -841,7 +861,7 @@ def main(args):
                     processes=simulatedProcsDS[channel],
                     variations=[variations.trigger_eff_mt],
                 )
-                # _book_histogram(
+                # _book_histogram( via logN atm
                 #     processes=embS,
                 #     variations=[variations.trigger_eff_mt_emb],
                 # )
@@ -911,6 +931,8 @@ def main(args):
 
     # Step 2: convert units to graphs and merge them
     g_manager = GraphManager(unit_manager.booked_units, True)
+    # print(unit_manager.booked_units)
+    # breakpoint()
     g_manager.optimize(args.optimization_level)
     graphs = g_manager.graphs
     for graph in graphs:

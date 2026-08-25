@@ -52,9 +52,9 @@ def lumi_weight(era, **kwargs):
     elif era == "2016postVFP":
         lumi = "16.8"
     elif era == "2017":
-        lumi = "41.529"
+        lumi = "42.07"
     elif era == "2018":
-        lumi = "59.83"
+        lumi = "59.56"
     else:
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
@@ -105,7 +105,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoos
             f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        vsmu_weight = (f"id_wgt_tau_vsMu_{vs_mu_wp}_2", "vsmuweight")
+        vsmu_weight = (f"id_wgt_tau_vsMu_{vs_mu_wp}_{vs_ele_wp}_2", "vsmuweight")
         vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_wp}_2", "vseleweight")
         if era == "2017":
             trgweight = (
@@ -121,7 +121,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoos
             f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))",
             "taubyIsoIdWeight",
         )
-        vsmu_weight = (f"id_wgt_tau_vsMu_{vs_mu_wp}_2", "vsmuweight")
+        vsmu_weight = (f"id_wgt_tau_vsMu_{vs_mu_wp}_{vs_ele_wp}_2", "vsmuweight")
         vsele_weight = (f"id_wgt_tau_vsEle_{vs_ele_wp}_2", "vseleweight")
         trgweight = None
         if era == "2016preVFP" or era == "2016postVFP":
@@ -144,7 +144,7 @@ def MC_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoos
             "taubyIsoIdWeight",
         )
         vsmu_weight = (
-            f"((gen_match_1==5)*id_wgt_tau_vsMu_{vs_mu_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsMu_{vs_mu_wp}_1 + (gen_match_2!=5))",
+            f"((gen_match_1==5)*id_wgt_tau_vsMu_{vs_mu_wp}_{vs_ele_wp}_1 + (gen_match_1!=5)) * ((gen_match_2==5)*id_wgt_tau_vsMu_{vs_mu_wp}_{vs_ele_wp}_2 + (gen_match_2!=5))",
             "vsmuweight",
         )
         vsele_weight = (
@@ -272,7 +272,7 @@ def DY_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", v
                     "crossSectionPerEventWeight",
                 ) if not use_stitching else dy_stitching_weight(era)
             ),
-            ("ZPtMassReweightWeight", "zPtReweightWeight"), #DY uses DYNLO files sometimes instead of using the NLO functions, then this is not needed!
+            # ("ZPtMassReweightWeight", "zPtReweightWeight"), #DY uses DYNLO files sometimes instead of using the NLO functions, then this is not needed!
         ]
     )
     return Selection(name="DY", weights=DY_process_weights)
@@ -744,11 +744,11 @@ def __get_ZL_cut(channel, **kwargs):
         emb_veto = "!(gen_match_1==3 && gen_match_2==4)"
         ff_veto = "(1.0)"
     elif "mm" in channel:
-        emb_veto = "!(gen_match_1==2 && gen_match_2==2) && !(gen_match_1==4 && gen_match_2==4) "
+        emb_veto = "!(gen_match_1==4 && gen_match_2==4)"
         ff_veto = "(1.0)"
     elif "ee" in channel:
         emb_veto = (
-            "!(gen_match_1==1 && gen_match_2==1) && !(gen_match_1==3 && gen_match_2==3)"
+            "!(gen_match_1==3 && gen_match_2==3)"
         )
         ff_veto = "(1.0)"
     return (emb_veto, ff_veto)

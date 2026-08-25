@@ -69,6 +69,16 @@ def parse_arguments():
         default=None,
         help="Draw variation of jetFakes or QCD in derivation region.")
     parser.add_argument(
+        "--vs-jet-wp",
+        type=str,
+        default=None,
+        help="Working point for tau ID vs Jets.")
+    parser.add_argument(
+        "--vs-ele-wp",
+        type=str,
+        default=None,
+        help="Working point for tau ID.")
+    parser.add_argument(
         "--energy_scale",
         action="store_true",
         help="Include energy scale variation in the plot.")
@@ -96,6 +106,11 @@ def parse_arguments():
         type=str,
         default=None,
         help="SFs user tag.")
+    parser.add_argument(
+        "--tes_precision",
+        type=float,
+        default=0.1,
+        help="Precision of the TES variation.")
 
     return parser.parse_args()
 
@@ -146,7 +161,8 @@ def add_es_family_plots(args, channel, cat, rootfile, plot, other_bkg):
                     sign = "+"
                 val = label_str.replace("p", ".")
                 short_val = val.split(".")[0] if "." in val else val
-                label = f"TES {sign}{short_val}%"
+                # label = f"TES {sign}{short_val}%"
+                label = f"TES {sign}{val}%"
                 
                 added_plots_info.append((plot_name, label))
     return added_plots_info
@@ -181,6 +197,7 @@ def main(info):
         "DM11_PT40_200": "DM 11 (PT40 to 200)",
         "DM1011_PT40_200": "DM 10+11 (PT40 to 200)",
         "control_region": "Control Region",
+        "Inclusive": "Inclusive",
     }
     if args.linear == True:
         split_value = 0.1
@@ -196,8 +213,11 @@ def main(info):
         "VVL", "TTL", "ZL", "jetFakesEMB", "EMB"
     ]
     if not args.fake_factor and args.embedding and not args.energy_scale:
-        bkg_processes = [
-            "QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
+        # bkg_processes = [
+        #     "QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
+        # ]
+        bkg_processes = [ # Ordered for AN_dict:
+            "QCDEMB", "VVJ", "TTJ", "ZJ", "W", "VVL", "TTL", "ZL", "EMB"
         ]
     if not args.fake_factor and args.embedding and args.energy_scale:
         bkg_processes = [
@@ -231,12 +251,15 @@ def main(info):
             bkg_processes = [
                 "VVT", "VVL", "VVJ", "W", "TTT", "TTL", "TTJ", "ZJ", "ZL", "ZTT"
             ]
-    all_bkg_processes = [b for b in bkg_processes]
+
     legend_bkg_processes = copy.deepcopy(bkg_processes)
     legend_bkg_processes.reverse()
     # breakpoint()
-    rootfile = rootfile_parser.Rootfile_parser(args.input, variable, [args.es_down, args.es_up],)
-    bkg_processes = [b for b in all_bkg_processes]
+    if args.energy_scale:
+        rootfile = rootfile_parser.Rootfile_parser(args.input, variable, [args.es_down, args.es_up], args.tes_precision, channel=channel)
+    else:
+        rootfile = rootfile_parser.Rootfile_parser(args.input, variable, [None, None],  channel=channel)
+
     if "em" in channel:
         if not args.embedding:
             bkg_processes = [
@@ -268,7 +291,7 @@ def main(info):
     legend_bkg_processes.reverse()
 
     AN_dict ={
-    "jetFData": ["QCD"],
+    "jetFData": ["QCD", "QCDEMB"],
     "jetFMC": ["VVJ", "TTJ", "ZJ", "W"],
     "lepF": ["VVL", "TTL", "ZL"],
     "true_tautau": ["ZTT", "TTT", "VVT"]
@@ -286,7 +309,8 @@ def main(info):
     # get category histograms
     cat = args.category
     scale_max = 1.0
-    if "40_200" in cat:
+    # # If ratio plot range is not large enough:
+    if cat is not None and "40_200" in cat:
         scale_max = 1.75
     # get background histograms
     total_bkg = None
@@ -295,7 +319,7 @@ def main(info):
         stype = "Nominal"
     else:
         stype = args.draw_jet_fake_variation
-        
+    # print(bkg_processes, variable)
     # breakpoint()
     for index,process in enumerate(bkg_processes):
         if index == 0:
@@ -326,7 +350,7 @@ def main(info):
         else:
             plot.add_hist(
                 rootfile.get(channel, process, cat, shape_type=stype), process, "bkg")
-        if "emb"in process or "EMB" in process:
+        if process == "EMB" or process.startswith("emb"):
             if channel != "mm":
                 plot.setGraphStyle(
                     process, "hist", fillcolor=styles.color_dict["EMB"])
@@ -600,8 +624,12 @@ def main(info):
         raise Exception
 
     posChannelCategoryLabelLeft = None
+    if cat is None:
+        cat_str = "Inclusive"
+    else:
+        cat_str = cat
     plot.DrawChannelCategoryLabel(
-        "%s, %s" % (channel_dict[channel], category_dict_plot[cat]),
+        "%s, %s" % (channel_dict[channel], category_dict_plot[cat_str]),
         begin_left=posChannelCategoryLabelLeft)
 
     # save plot
@@ -615,23 +643,21 @@ def main(info):
         postfix = "emb_ff"
     if args.draw_jet_fake_variation is not None:
         postfix = postfix + "_" + args.draw_jet_fake_variation
-
-    os.makedirs(f"output/{args.era}_plots_{postfix}_{args.tag}", exist_ok=True)
-    os.makedirs(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}",exist_ok=True)
-    shiftanme = ""
+    if "ctrl" in args.input:
+        shape_type = "_ctrl"
+    else:
+        shape_type = ""
+    os.makedirs(f"output/plots/{args.tag}/shapes{shape_type}", exist_ok=True)
+    os.makedirs(f"output/plots/{args.tag}/shapes{shape_type}/{args.vs_jet_wp}/{args.vs_ele_wp}",exist_ok=True)
+    savepath=f"output/plots/{args.tag}/shapes{shape_type}/{args.vs_jet_wp}/{args.vs_ele_wp}"
     for i in range(len(bkg_processes)):
         if "emb" in bkg_processes[i]:
             shiftanme = bkg_processes[i]
         else:
             shiftanme = ""
     print("Trying to save the created plot")
-    # plot.save(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.pdf")
-    # plot.save(f"output/{args.era}_plots_{postfix}_{args.tag}/{channel}/{cat}/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png")
-    # print(f"\noutput_AN/check_2017/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.pdf\n")
-    # name_str = f"output_AN/check_17_L/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png".replace("LO","").replace("NLO","")
-    plot.save(f"output_AN/ctrl/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.pdf")
-    # plot.save(f"output_AN/check_2017/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png")
-    # print(f"\n\noutput/{args.era}_{channel}_{variable}_{cat}_{shiftanme}_{args.tag}.png\n")
+    plot.save(f"{savepath}/{postfix}_{cat_str}_{variable}{shiftanme}.pdf")
+    plot.save(f"{savepath}/{postfix}_{cat_str}_{variable}{shiftanme}.png")
 
 
 if __name__ == "__main__":
@@ -640,7 +666,8 @@ if __name__ == "__main__":
     variables = args.variables.split(",")
     channels = args.channels.split(",")
     infolist = []
-
+    print(f"Variables: {variables}")
+    
     if not args.embedding and not args.fake_factor:
         postfix = "fully_classic"
     if args.embedding and not args.fake_factor:
@@ -650,14 +677,14 @@ if __name__ == "__main__":
     if args.embedding and args.fake_factor:
         postfix = "emb_ff"
 
-    if not os.path.exists(f"{args.era}_plots_{postfix}_{args.tag}"):
-        os.mkdir(f"{args.era}_plots_{postfix}_{args.tag}")
+    # if not os.path.exists(f"{args.era}_plots_{postfix}_{args.tag}"):
+    #     os.mkdir(f"{args.era}_plots_{postfix}_{args.tag}")
     for ch in channels:
-        if not os.path.exists(f"{args.era}_plots_{postfix}_{args.tag}/{ch}"):
-            os.mkdir(f"{args.era}_plots_{postfix}_{args.tag}/{ch}")
+        # if not os.path.exists(f"{args.era}_plots_{postfix}_{args.tag}/{ch}"):
+        #     os.mkdir(f"{args.era}_plots_{postfix}_{args.tag}/{ch}")
         for v in variables:
             infolist.append({"args" : args, "channel" : ch, "variable" : v})
-    
-    # with Pool(8) as pool:
+    # with Pool(3) as pool:
     #     pool.map(main, infolist)
-    main(infolist[0])
+    for i in range(len(infolist)):
+        main(infolist[i])

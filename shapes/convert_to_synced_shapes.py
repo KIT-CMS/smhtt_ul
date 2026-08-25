@@ -67,6 +67,12 @@ def parse_args():
         type=float,
         help="ES variation lower bound.",
     )
+    parser.add_argument(
+        "--tes_precision",
+        default=0.1,
+        type=float,
+        help="Precision of TES variations.",
+    )
     return parser.parse_args()
 
 
@@ -332,7 +338,12 @@ def main(args):
             if "EMB" in process:
                 process  = "EMB_"+category+"_0.0"
             if "emb" in process:
-                process = "EMB_"+category+"_"+tau_es_map[process]
+                try:
+                    process  = "EMB_"+category+"_"+tau_es_map[process]
+                except:
+                    print(f"""Could not find {process} in tau_es_map.
+                          Special case atm: ignore it and continue.""")
+                    continue
         elif category == "control_region":
             if "EMB" in process:
                 process  = "EMB"
@@ -354,10 +365,11 @@ def main(args):
     input_file.Close()
 
     # Loop over map and create the output file.
+    # ERA and CHANNEL are atm already in the path name (see utils/setup_shapes.sh), thus no need for more naming:
     for channel in hist_map:
         ofname = os.path.join(
             args.output,
-            "{ERA}-{CHANNELS}-synced.root".format(CHANNELS=channel, ERA=args.era),
+            "synced_shapes.root",
         )
         # if args.gof:
         #     ofname = os.path.join(
@@ -388,11 +400,10 @@ if __name__ == "__main__":
     args = parse_args()
     setup_logging("convert_to_synced_shapes.log", level=logging.INFO)
     
-    aranged = np.arange(args.es_up, args.es_down - 0.1, -0.1).round(2).tolist()
+    aranged = np.arange(args.es_up, args.es_down - args.tes_precision, -args.tes_precision).round(2).tolist()
     cleaned_aranged = [x for x in aranged if x != 0.0]
     tau_es_map = {
         f"emb{'minus' if val < 0 else ''}{str(abs(val)).replace('.', 'p')}":
         f"{val:.1f}" for val in cleaned_aranged
     }
-    
     main(args)

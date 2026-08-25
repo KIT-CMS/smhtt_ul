@@ -3,12 +3,13 @@ import numpy as np
 from ntuple_processor.utils import Selection
 from ntuple_processor import Histogram
 from config.logging_setup_configs import setup_logging
+from config.shapes.control_binning import control_binning_simple
 import yaml
 
 logger = setup_logging(logger=logging.getLogger(__name__))
 
 
-def load_tauid_categorization(era: str, channel: str, TAG: str) -> dict:
+def load_tauid_categorization(era: str, channel: str, TAG: str, variable: str = "m_vis") -> dict:
     """
     Load tau ID categorization based on the era and channel.
     """
@@ -26,75 +27,75 @@ def load_tauid_categorization(era: str, channel: str, TAG: str) -> dict:
         logger.error(f"Could not load special binning for era {era}, channel {channel}, tag {TAG}. Using default binning.")
         special_flag = False
    
-    discriminator_variable = "m_vis"
+    discriminator_variable = variable
     # discriminator_binning = np.arange(30, 130, 12) # -> [ 30  42  54  66  78  90 102 114 126]
-    discriminator_binning = np.array([30, 50, 80, 100, 130])
+    discriminator_binning = control_binning_simple[channel][discriminator_variable]
     # discriminator_binning = special_binning["m_vis"]["bins"]
     discriminator_binning_enlarged = np.arange(30, 160, 5)
-    logger.info(f"Using discriminator variable {discriminator_variable} with binning {discriminator_binning} as default. Special binning is used for specific categories:{special_flag}")
+    logger.info(f"Using discriminator variable {discriminator_variable}. Special binning is used for specific categories if True:{special_flag}")
     
-    categories = {
-        "mt": {
-            "Pt20to25": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(pt_2 >= 20) && (pt_2 < 25)",
-            },
-            "Pt25to30": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(pt_2 >= 25) && (pt_2 < 30)",
-            },
-            "Pt30to35": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(pt_2 >= 30) && (pt_2 < 35)",
-            },
-            "Pt35to40": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(pt_2 >= 35) && (pt_2 < 40)",
-            },
-            "PtGt40": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning_enlarged,
-                "expression": discriminator_variable,
-                "cut": "(pt_2 >= 40)",
-            },
-            "DM0": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 20)",
-            },
-            "DM1": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 20)",
-            },
-            "DM10": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(tau_decaymode_2 == 10) && (pt_2 >= 20)",
-            },
-            "DM11": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(tau_decaymode_2 == 11) && (pt_2 >= 20)",
-            },
-            "DM1011": {
-                "var": discriminator_variable,
-                "bins": discriminator_binning,
-                "expression": discriminator_variable,
-                "cut": "(tau_decaymode_2 == 10 || tau_decaymode_2 == 11) && (pt_2 >= 20)",
-            },
+    categories = {}
+    categories[channel] = {
+        #     "Pt20to25": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning,
+        #         "expression": discriminator_variable,
+        #         "cut": "(pt_2 >= 20) && (pt_2 < 25)",
+        #     },
+        #     "Pt25to30": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning,
+        #         "expression": discriminator_variable,
+        #         "cut": "(pt_2 >= 25) && (pt_2 < 30)",
+        #     },
+        #     "Pt30to35": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning,
+        #         "expression": discriminator_variable,
+        #         "cut": "(pt_2 >= 30) && (pt_2 < 35)",
+        #     },
+        #     "Pt35to40": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning,
+        #         "expression": discriminator_variable,
+        #         "cut": "(pt_2 >= 35) && (pt_2 < 40)",
+        #     },
+        #     "PtGt40": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning_enlarged,
+        #         "expression": discriminator_variable,
+        #         "cut": "(pt_2 >= 40)",
+        #     },
+            # "DM0": {
+            #     "var": discriminator_variable,
+            #     "bins": discriminator_binning,
+            #     "expression": discriminator_variable,
+            #     "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 20)",
+            # },
+        #     "DM1": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning,
+        #         "expression": discriminator_variable,
+        #         "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 20)",
+        #     },
+        #     "DM10": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning,
+        #         "expression": discriminator_variable,
+        #         "cut": "(tau_decaymode_2 == 10) && (pt_2 >= 20)",
+        #     },
+        #     "DM11": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning,
+        #         "expression": discriminator_variable,
+        #         "cut": "(tau_decaymode_2 == 11) && (pt_2 >= 20)",
+        #     },
+        #     "DM1011": {
+        #         "var": discriminator_variable,
+        #         "bins": discriminator_binning,
+        #         "expression": discriminator_variable,
+        #         "cut": "(tau_decaymode_2 == 10 || tau_decaymode_2 == 11) && (pt_2 >= 20)",
+        #     },
             "DM0_PT20_40": {
                 "var": discriminator_variable,
                 "bins": discriminator_binning,
@@ -162,13 +163,12 @@ def load_tauid_categorization(era: str, channel: str, TAG: str) -> dict:
                 "cut": "(pt_2 >= 20)",
             },
         }
-    }
 
     if special_flag:
         for key, cat_dict in categories["mt"].items():
             if key in special_binning.keys():
                 cat_dict["bins"] = special_binning[key]["m_vis"]["bins"]
-
+    
     categorization = {
         "mt": [
             (
