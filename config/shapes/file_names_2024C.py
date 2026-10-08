@@ -14,15 +14,21 @@ This separate configuration is not yet imported by the production scripts.
 
 # Common MC for 2024; normalize to the luminosity of the selected 2024C data.
 common_files_2024 = {
-    # nicht alle genommen aus der Kingmaker datenbank, da sich  smaples überschneiden können  https://github.com/KIT-CMS/KingMaker_sample_database/tree/main/nanoAOD_v15/2024/dyjets_amcatnlo
+    # aMC@NLO: pro Leptonflavour 0J/1J/2J fuer MLL > 50 GeV sowie MLL 10-50 GeV.
+    # Keine zusaetzlichen inklusiven MLL-50-Samples oder JMENano-Varianten.
+    # Kombination und Normierung der FXFX-Jet-Bins vor der Produktion pruefen.
     "DY": [
-        #Für Elektronen das 10-50 GeV sample genommen für über 50 nur das inklusive sample und nicht 0,1,2, J Sample
+        # Elektronen
+        "DYto2E-2Jets_Bin-0J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2",
+        "DYto2E-2Jets_Bin-1J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v3",
+        "DYto2E-2Jets_Bin-2J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2",
         "DYto2E-2Jets_Bin-MLL-10to50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2",
-        "DYto2E-2Jets_Bin-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v4",
-        # Für mu das 10-50 sample genommen, für über 50 das inklusive und nicht 0,1,2, J Samples
+        # Myonen (Standard-NanoAOD v15)
+        "DYto2Mu-2Jets_Bin-0J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v3",
+        "DYto2Mu-2Jets_Bin-1J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v1",
+        "DYto2Mu-2Jets_Bin-2J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v3",
         "DYto2Mu-2Jets_Bin-MLL-10to50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2",
-        "DYto2Mu-2Jets_Bin-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v6",
-        #Für tau alle aus Datenbank genommen, da es keine Überschneidungen gibt
+        # Taus
         "DYto2Tau-2Jets_Bin-0J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v4",
         "DYto2Tau-2Jets_Bin-1J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2",
         "DYto2Tau-2Jets_Bin-2J-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8_RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2",
