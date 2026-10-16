@@ -66,18 +66,18 @@ def load_tauid_categorization(era: str, channel: str, TAG: str, variable: str = 
         #         "expression": discriminator_variable,
         #         "cut": "(pt_2 >= 40)",
         #     },
-            # "DM0": {
-            #     "var": discriminator_variable,
-            #     "bins": discriminator_binning,
-            #     "expression": discriminator_variable,
-            #     "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 20)",
-            # },
-        #     "DM1": {
-        #         "var": discriminator_variable,
-        #         "bins": discriminator_binning,
-        #         "expression": discriminator_variable,
-        #         "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 20)",
-        #     },
+            "DM0": {
+                "var": discriminator_variable,
+                "bins": discriminator_binning,
+                "expression": discriminator_variable,
+                "cut": "(tau_decaymode_2 == 0) && (pt_2 >= 20)",
+            },
+            "DM1": {
+                "var": discriminator_variable,
+                "bins": discriminator_binning,
+                "expression": discriminator_variable,
+                "cut": "(tau_decaymode_2 == 1) && (pt_2 >= 20)",
+            },
         #     "DM10": {
         #         "var": discriminator_variable,
         #         "bins": discriminator_binning,
@@ -90,12 +90,12 @@ def load_tauid_categorization(era: str, channel: str, TAG: str, variable: str = 
         #         "expression": discriminator_variable,
         #         "cut": "(tau_decaymode_2 == 11) && (pt_2 >= 20)",
         #     },
-        #     "DM1011": {
-        #         "var": discriminator_variable,
-        #         "bins": discriminator_binning,
-        #         "expression": discriminator_variable,
-        #         "cut": "(tau_decaymode_2 == 10 || tau_decaymode_2 == 11) && (pt_2 >= 20)",
-        #     },
+            "DM1011": {
+                "var": discriminator_variable,
+                "bins": discriminator_binning,
+                "expression": discriminator_variable,
+                "cut": "(tau_decaymode_2 == 10 || tau_decaymode_2 == 11) && (pt_2 >= 20)",
+            },
             "DM0_PT20_40": {
                 "var": discriminator_variable,
                 "bins": discriminator_binning,

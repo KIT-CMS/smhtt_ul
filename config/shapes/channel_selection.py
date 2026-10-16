@@ -71,6 +71,12 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                             (trg_single_mu24 > 0.5)
                         )
                 )"""
+            elif era == "2024":
+                cuts["trg_selection"] = """(
+                    (pt_2 > 20) &&
+                    (pt_1 > 26) &&
+                    (trg_single_mu24 > 0.5)
+                )"""
             else:
                 logger.error(f"Given era {era} does not exist")
                 raise ValueError(f"Given era {era} does not exist")
@@ -317,7 +323,13 @@ def channel_selection(channel, era, special=None, vs_jet_wp="Tight", vs_ele_wp="
                         (trg_single_mu24 > 0.5)
                     )
                 )"""
-                
+            elif era == "2024":
+                cuts["trg_selection"] = """(
+                    (pt_2 > 20) &&
+                    (pt_1 > 26) &&
+                    (trg_single_mu24 > 0.5)
+                )"""
+
             else:
                 logger.error(f"Given era {era} does not exist")
                 raise ValueError(f"Given era {era} does not exist")

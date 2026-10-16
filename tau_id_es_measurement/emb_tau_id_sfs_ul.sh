@@ -93,58 +93,28 @@ print(min_id_sep, max_id_sep, cent_id_sep, min_es_sep, max_es_sep, cent_es_sep)"
 }
 
 
-if [[ $MODE == "COPY" ]]; then
-    source utils/setup_root.sh
-    echo "##############################################################################################"
-    echo "#      Copy sample to ceph, it not there yet                                                     #"
-    echo "##############################################################################################"
-    # if the xsec friends directory does not exist, create it
-    if [ ! -d "$BASEDIR/$ERA" ]; then
-        mkdir -p $BASEDIR/$ERA
-    fi
-    if [ "$(ls -A $BASEDIR/$ERA)" ]; then
-        echo "Ntuples already copied to ceph"
-    else
-        echo "Copying ntuples to ceph"
-        rsync -avhPl $KINGMAKER_BASEDIR$ERA/ $BASEDIR$ERA/
-    fi
-
-elif [[ $MODE == "COPY_XROOTD" ]]; then
-    source utils/setup_root.sh
-    echo "##############################################################################################"
-    echo "#      Copy sample to ceph, it not there yet                                                     #"
-    echo "##############################################################################################"
-    echo "[INFO] Copying ntuples to ceph via xrootd"
-    echo "xrdcp -r $KINGMAKER_BASEDIR_XROOTD$ERA/ $BASEDIR$ERA/"
-    if [ ! -d "$BASEDIR/$ERA" ]; then
-        mkdir -p $BASEDIR/$ERA
-    fi
-    xrdcp -r $KINGMAKER_BASEDIR_XROOTD$ERA $BASEDIR
-fi
-
-
+#als erstes für cross sections
 if [[ $MODE == "XSEC" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
     echo "#      Checking xsec friends directory                                                       #"
     echo "##############################################################################################"
-    python3 friends/build_friend_tree.py --basepath ${NTUPLES} --outputpath ${XSEC_FRIENDS} --nthreads 20 --dataset-config /work/jvoss/KingMaker_v15_Run2/sample_database/nanoAOD_v15/datasets.json
+    python3 friends/build_friend_tree.py --basepath ${NTUPLES} --outputpath ${XSEC_FRIENDS} --nthreads 20 --dataset-config /work/skaiser/Embedding/Kingmaker_tauID/KingMaker/sample_database/nanoAOD_v15/datasets.json
 fi
 
-
+#brauch ich auch 
 if [[ $MODE == "BINNING" ]]; then
     source utils/setup_root.sh
     echo "##############################################################################################"
     echo "#      Producing special binning for ${CHANNELS_str} -${ERA}-${NTUPLETAG}-${TAG}             #"
     echo "##############################################################################################"
-    all_categories=("Inclusive" "DM0_PT20_40")
     CHANNELS=('mt')
     for CHANNEL in "${CHANNELS[@]}"
     do
         python3 gof/build_binning.py --channel ${CHANNEL} \
-            --directory ${NTUPLES} --tag ${BIN_TAG} \
+            --directory "${KINGMAKER_BASEDIR_PATH}" --tag ${BIN_TAG} \
             --wp-vsjet ${WP} --wp-vse ${WP_VSe} --wp-vsmu ${WP_VSmu} \
-            --era ${ERA} --variables ${VARIABLES} --${CHANNEL}-friend-directory ${XSEC_FRIENDS} \
+            --era ${ERA} --variables ${VARIABLES} --${CHANNEL}-friend-directory "${XSEC_FRIENDS_PATH}" \
             --output-folder "config/gof_binning" --DM-categories "${all_categories[@]}"
     done
 fi
@@ -154,7 +124,7 @@ fi
 echo "##############################################################################################"
 echo "#      Producing shapes for ${CHANNELS_str} -${ERA}-${NTUPLETAG}                             #"
 echo "##############################################################################################"
-
+#macht mir die histos + bkg abschätzung 
 
 if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
@@ -209,6 +179,15 @@ if [[ $MODE == "CONTROL" ]]; then
         # fi
     done
 fi
+
+
+
+####################bis hierhin mal machen 
+
+
+
+
+
 
 ### No xrootD atm! Change in submit file when using dCache again !!!
 if [[ $MODE == "CONDOR" ]]; then
@@ -436,6 +415,47 @@ if [[ $MODE == "PLOT_CONTROL_ES" ]]; then
         fi
     done
 fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # For the next steps combine need to be installed (if not already done)
 # via e.g. source utils/install_combine_tauid.sh

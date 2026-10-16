@@ -1,7 +1,7 @@
 from shapes.utils import get_nominal_datasets
 from ntuple_processor import Histogram
 from ntuple_processor.utils import Selection
-from config.shapes.file_names import files
+from config.shapes.file_names_2024C_revised import files
 import yaml
 
 # from shapes.produce_shapes import setup_logging, get_analysis_units
