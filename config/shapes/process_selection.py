@@ -55,6 +55,8 @@ def lumi_weight(era, **kwargs):
         lumi = "42.07"
     elif era == "2018":
         lumi = "59.56"
+    elif era == "2024":
+        lumi = "7.25"  # fb^-1 für unsere 2024C-Auswahl also nicht ganz 2024
     else:
         raise ValueError("Given era {} not defined.".format(era))
     return ("{} * 1000.0".format(lumi), "lumi")
@@ -136,6 +138,8 @@ def MC_base_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoos
                         "((pt_1>=25 && pt_1<28) * trg_wgt_single_mu24) + ((pt_1>28)* trg_wgt_single_mu27)",
                         "trgweight",
                     )
+        elif era == "2024":
+            trgweight = ("(pt_1 > 26) * trg_wgt_single_mu24", "trgweight") # die p_T Abfrage vermutlich unnötig
     elif channel == "tt":
         isoweight = None
         idweight = None
@@ -251,6 +255,11 @@ def DY_process_selection(channel, era, vs_jet_wp="Tight", vs_ele_wp="VVLoose", v
             "numberGeneratedEventsWeight",
         )
     elif era == "2018":
+        gen_events_weight = (
+            "numberGeneratedEventsWeight",
+            "numberGeneratedEventsWeight",
+        )
+    elif era == "2024":
         gen_events_weight = (
             "numberGeneratedEventsWeight",
             "numberGeneratedEventsWeight",
@@ -552,6 +561,7 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp="Tight", v
                 )
             if not apply_wps:
                 pass
+        
         elif era == "2016preVFP" or era == "2016postVFP":
             ztt_embedded_weights.extend(
                 [
@@ -566,6 +576,28 @@ def ZTT_embedded_process_selection(channel, era, apply_wps, vs_jet_wp="Tight", v
                 [
                     (f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2 + (gen_match_2!=5))", "taubyIsoIdWeight")
                 ]
+                )
+            if not apply_wps:
+                pass
+        elif era == "2024":
+            ztt_embedded_weights.extend(
+                [
+                    ("gen_match_1==4 && gen_match_2==5", "emb_veto"),
+                    ("iso_wgt_mu_1", "isoweight"),
+                    ("id_wgt_mu_1", "idweight"),
+                    ("trg_wgt_single_mu24", "trgweight"),
+                ]
+            )
+
+            if apply_wps:
+                ztt_embedded_weights.extend(
+                    [
+                        (
+                            f"((gen_match_2==5)*id_wgt_tau_vsJet_{vs_jet_wp}_2"
+                            " + (gen_match_2!=5))",
+                            "taubyIsoIdWeight",
+                        )
+                    ]
                 )
             if not apply_wps:
                 pass
