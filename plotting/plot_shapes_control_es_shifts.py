@@ -216,9 +216,9 @@ def main(info):
         # bkg_processes = [
         #     "QCDEMB", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", "EMB"
         # ]
-        bkg_processes = [ # Ordered for AN_dict:
-            "QCDEMB", "VVJ", "TTJ", "ZJ", "W", "VVL", "TTL", "ZL", "EMB"
-        ]
+        bkg_processes = [
+            "QCDEMB", "VVJ", "TTJ", "STJ", "ZJ", "W",
+            "VVL", "TTL", "STL", "ZL", "EMB",]
     if not args.fake_factor and args.embedding and args.energy_scale:
         bkg_processes = [
             "QCD", "VVL", "VVJ", "W", "TTL", "TTJ", "ZJ", "ZL", args.es_shift
@@ -292,8 +292,8 @@ def main(info):
 
     AN_dict ={
     "jetFData": ["QCD", "QCDEMB"],
-    "jetFMC": ["VVJ", "TTJ", "ZJ", "W"],
-    "lepF": ["VVL", "TTL", "ZL"],
+    "jetFMC": ["VVJ", "TTJ", "STJ", "ZJ", "W"],
+    "lepF": ["VVL", "TTL", "STL", "ZL"],
     "true_tautau": ["ZTT", "TTT", "VVT"]
     }
     
@@ -619,6 +619,8 @@ def main(info):
         plot.DrawLumi("41.5 fb^{-1} (2017, 13 TeV)")
     elif "2018" in args.era:
         plot.DrawLumi("59.7 fb^{-1} (2018, 13 TeV)")
+    elif args.era in {"2024", "Run2024", "2024C", "Run2024C"}:
+        plot.DrawLumi("7.25 fb^{-1} (2024C, 13.6 TeV)")
     else:
         logger.critical(f"Era {args.era} is not implemented.")
         raise Exception

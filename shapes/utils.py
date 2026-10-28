@@ -1,4 +1,5 @@
 from ntuple_processor import dataset_from_crownoutput, Unit
+from ntuple_processor.utils import Dataset
 from ntuple_processor.variations import (
     get_quantities_from_expression,
     ReplaceCut,
@@ -199,7 +200,7 @@ def add_tauES_datasets(
             validate_samples=False,
             validation_tag=validation_tag,
             xrootd=xrootd,
-            validation_dataset_name="EMB",
+            #validation_dataset_name="EMB", nicht mehr in Benutzung, da es in dataset_from_crownoutput nicht mehr existiert, bzw.  In der verwendeten ntuple_processor-Version nicht unterstützt:
         )
         nominals[era]["datasets"][channel][processname] = dataset
         updated_unit = []
@@ -263,15 +264,45 @@ def book_tauES_histograms(
 ):  
     def replace_expression(exp, quants):
         quant_string = set(quants[shiftname])
+        # Korrektur eines durch einen KI-Scan (Codex, 19.10.2026) gefundenen
+        # Fehlers. Die Wirkung wurde mit dem echten AntiIso-Schnitt und einer
+        # isolierten Ausfuehrung dieser Funktion in Python nachvollzogen.
+        #
+        # Diese Hilfsfunktion passt neu eingesetzte Kontrollregionsschnitte
+        # und Gewichte an den jeweiligen Tau-Energieskalenpunkt an. Beim
+        # TauID_ES-Aufruf betrifft das die SS- und AntiIso-Variationen des
+        # energieverschobenen Embeddings. Die vorbereiteten OS-Auswahlen
+        # werden bereits vorher in add_tauES_datasets() angepasst.
+        #
+        # exp enthaelt den GESAMTEN Ausdruck, quant nur EINEN Variablennamen.
+        # Bisher stand im Regex rf"\b({exp})\b". Damit wurde der ganze Schnitt
+        # als Suchmuster verwendet, aber nur durch einen Branch-Namen ersetzt.
+        # Zudem interpretiert die Regex-Suche z.B. Klammern im Schnitt als
+        # Regex-Syntax. Beim AntiIso-Schnitt
+        #   (id_tau_vsJet_Tight_2<0.5 && id_tau_vsJet_VLoose_2>0.5)
+        # konnte dadurch nur eine einzelne verschobene ID-Variable uebrig
+        # bleiben, z.B. (id_tau_vsJet_VLoose_2__EMBtauESshift_0p2).
+        # Die Vergleiche und das && gingen verloren. Ein Kandidat, der Tight
+        # besteht, konnte dadurch faelschlich in die AntiIso-Region gelangen.
+        # Welche ID-Variable uebrig blieb, hing von der Set-Reihenfolge ab.
+        #
+        # Deshalb NUR quant suchen und durch quant__shiftname ersetzen.
+        # Die Wortgrenzen \b verhindern Treffer in laengeren Branch-Namen.
+        # Alle Grenzwerte und logischen Verknuepfungen bleiben so erhalten:
+        # Tight nicht bestanden UND VLoose bestanden bleibt dieselbe Auswahl,
+        # ausgewertet mit den zum ES-Punkt gehoerenden Branches. Damit bleiben
+        # Ereigniszahl und Form des Kontrollhistogramms durch die beabsichtigte
+        # Auswahl definiert. Die spaetere Nutzung dieser Hilfshistogramme wird
+        # separat in den Hintergrundschaetzern festgelegt.
         for quant in quant_string & get_quantities_from_expression(exp):
-                exp = re.sub(
-                rf"\b({exp})\b",
+            exp = re.sub(
+                rf"\b({quant})\b",
                 f"{quant}__{shiftname}",
-                exp
-                )
-                logger.debug(
-                    f"Replaced {quant} in {exp} ( quant: {quant}, var: {shiftname}"
-                )
+                exp,
+            )
+            logger.debug(
+                f"Replaced {quant} in {exp} ( quant: {quant}, var: {shiftname}"
+            )
         return exp
     
     for tau_es_shift in additional_emb_procS:

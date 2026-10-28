@@ -22,7 +22,7 @@ from ntuple_processor import (
 )
 from ntuple_processor.utils import Selection
 from config.shapes.channel_selection import channel_selection
-from config.shapes.file_names import files
+from config.shapes.file_names_2024C_revised import files
 from config.shapes.category_selection import categorization as default_categorization
 from config.shapes.control_binning import control_binning as default_control_binning
 from config.shapes.gof_binning import load_gof_binning
@@ -583,7 +583,7 @@ def main(args):
                     channel_selection(channel, args.era, args.special_analysis, args.vs_jet_wp, args.vs_ele_wp, args.vs_mu_wp),
                     selection.ZTT_embedded(channel, args.era, args.apply_tauid, args.vs_jet_wp, args.vs_ele_wp, args.vs_mu_wp),
                 ],
-                categorization,
+                categorizations[0],
                 additional_emb_procS,
                 xrootd=args.xrootd,
                 validation_tag=args.validation_tag,
@@ -725,7 +725,43 @@ def main(args):
             #     processes={"qqh"} & procS,
             #     variations=[signal_variations.qqh_acceptance],
             # )
-            
+            if (
+                args.era == "2024"
+                and channel == "mt"
+                and args.special_analysis == "TauID_ES"
+            ):
+                for process in sorted(simulatedProcsDS[channel] | embS):
+                    units = nominals[args.era]["units"][channel][process]
+
+                    if not units:
+                        raise ValueError(
+                            f"Keine Analyseeinheiten fuer {process}"
+                        )
+
+                    syst = variations.get_2024_mt_variations(
+                        units[0].dataset.quantities_per_vars
+                    )
+
+                    logger.info(
+                        f"2024: {process}: {len(syst)} native Variationen"
+                    )
+                    _book_histogram(
+                        processes={process},
+                        variations=syst,
+                    )
+
+                # Diese Gruppen entstehen aus Gewichtsformeln,
+                # nicht aus bereits gespeicherten Ntuple-Shifts.
+                _book_histogram(
+                    processes={"ttt", "ttl", "ttj"} & procS,
+                    variations=variations.top_pt,
+                )
+                _book_histogram(
+                    processes=jetFakesDS[channel],
+                    variations=variations.jet_to_tau_fake,
+                )
+
+                continue
             # Not for extension run!!!:
             _book_histogram(
                 processes=simulatedProcsDS[channel],

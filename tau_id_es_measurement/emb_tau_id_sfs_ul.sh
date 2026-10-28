@@ -128,33 +128,39 @@ echo "##########################################################################
 
 if [[ $MODE == "CONTROL" ]]; then
     source utils/setup_root.sh
-    all_categories=("DM0_PT20_40" "Inclusive")
+    #all_categories=("DM0_PT20_40" "Inclusive")
     CHANNELS=('mt')
     for CHANNEL in "${CHANNELS[@]}"
     do
         source utils/setup_shapes.sh ${CHANNEL} ${ERA} ${NTUPLETAG} ${TAG} ${MODE} ${WP} ${WP_VSe}
         #### Shape production:
-        # Use "shapes_rootfile_ctrl" for ctrl shapes or "shapes_rootfile" for full shape productio 
+        # Use "shapes_rootfile_ctrl" for ctrl shapes or "shapes_rootfile" for full shape production
         # Alsoremove --skip-systematic-variations in full shape production !!!
-        python shapes/produce_shapes_tauid_es.py --channels ${CHANNEL} \
-            --directory ${NTUPLES} \
-            --${CHANNEL}-friend-directory ${XSEC_FRIENDS} \
-            --era ${ERA} --num-processes 6 --num-threads 12 \
-            --vs-jet-wp ${WP} \
-            --vs-ele-wp ${WP_VSe} \
-            --vs-mu-wp ${WP_VSmu} \
+        python shapes/produce_shapes_tauid_es.py \
+            --channels "${CHANNEL}" \
+            --directory "${KINGMAKER_BASEDIR_PATH}" \
+            --${CHANNEL}-friend-directory "${XSEC_FRIENDS_PATH}" \
+            --era "${ERA}" \
+            --num-processes 6 --num-threads 12 \
+            --vs-jet-wp "${WP}" \
+            --vs-ele-wp "${WP_VSe}" \
+            --vs-mu-wp "${WP_VSmu}" \
             --optimization-level 2 \
-            --control-plot-set ${VARIABLES} \
-            --output-file ${shapes_rootfile_ctrl} --validation-tag ${TAG} --binning-tag ${BIN_TAG} \
-            --tes_precision ${TES_precision} --es-up ${ES_up} --es-down ${ES_down} --xrootd --skip-systematic-variations
-            # --special-analysis "TauID_ES" \ --apply-tauid --control-plot-set ${VARIABLES}
+            --control-plot-set "${VARIABLES}" \
+            --output-file "${shapes_rootfile_ctrl}" \
+            --validation-tag "${TAG}" --binning-tag "${BIN_TAG}" \
+            --special-analysis TauID_ES \
+            --tes_precision "${TES_precision}" \
+            --es-up "${ES_up}" --es-down "${ES_down}" \
+            --xrootd
+            # \ --apply-tauid --control-plot-set ${VARIABLES}
         # #### SSOS estimations:
         # if [[ $CHANNEL == "mm" ]]; then
         #     python shapes/do_estimations.py -e ${ERA} -i ${shapes_rootfile} --do-qcd -s TauID_ES
         # fi
         if [[ $CHANNEL != "mm" ]]; then
-            python shapes/do_estimations.py -e ${ERA} -i ${shapes_rootfile_ctrl} --do-qcd --do-emb-tt --tes_precision ${TES_precision} --es-up ${ES_up} --es-down ${ES_down}
-            # -s TauID_ES
+            python shapes/do_estimations.py -e ${ERA} -i ${shapes_rootfile_ctrl} --do-qcd --tes_precision ${TES_precision} --es-up ${ES_up} --es-down ${ES_down} --s TauID_ES #--do-emb-tt
+            
             for CATEGORY in "${all_categories[@]}"
             do
                 python3 plotting/plot_shapes_control_es_shifts.py -l --era Run${ERA} --input ${shapes_rootfile_ctrl} \

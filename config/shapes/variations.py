@@ -24,6 +24,41 @@ logger = setup_logging(logger=logging.getLogger(__name__))
 
 SHIFT_DIRECTIONS = ("Up", "Down")
 
+def get_2024_mt_variations(quantities_per_vars):
+    """Alle vorhandenen Systematik-Shifts; EMB-ES-Scanpunkte laufen separat."""
+    result = []
+    histogram_names = set()
+
+    for native_name in sorted(quantities_per_vars):
+        if native_name.startswith("EMBtauESshift_"):
+            continue
+
+        histogram_name = native_name
+
+        if native_name.startswith("singleMuonTriggerSF"):
+            histogram_name = native_name.replace(
+                "singleMuonTriggerSF", "CMS_eff_m_trigger_emb_2024", 1
+            )
+
+        # Nur das Histogrammetikett vereinheitlichen.
+        # Der zweite Name in ReplaceVariable bleibt der exakte Ntuple-Name.
+        for ending, replacement in (
+            ("UP", "Up"),
+            ("DOWN", "Down"),
+            ("Up_2024", "_2024Up"),
+            ("Down_2024", "_2024Down"),
+        ):
+            if histogram_name.endswith(ending):
+                histogram_name = histogram_name[:-len(ending)] + replacement
+                break
+
+        if histogram_name in histogram_names:
+            raise ValueError(f"Doppelter Systematikname: {histogram_name}")
+
+        histogram_names.add(histogram_name)
+        result.append(ReplaceVariable(histogram_name, native_name))
+
+    return result
 
 FF_OPTIONS = {
     "fake_factor": {
